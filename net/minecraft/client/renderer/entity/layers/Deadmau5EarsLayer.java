@@ -1,0 +1,50 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.renderer.entity.layers;
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.util.Mth;
+
+@Environment(value=EnvType.CLIENT)
+public class Deadmau5EarsLayer
+extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+    public Deadmau5EarsLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderLayerParent) {
+        super(renderLayerParent);
+    }
+
+    @Override
+    public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float i, float j, float k, float l) {
+        if (!"deadmau5".equals(abstractClientPlayer.getName().getString()) || !abstractClientPlayer.isSkinLoaded() || abstractClientPlayer.isInvisible()) {
+            return;
+        }
+        this.bindTexture(abstractClientPlayer.getSkinTextureLocation());
+        for (int m = 0; m < 2; ++m) {
+            float n = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
+            float o = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
+            GlStateManager.pushMatrix();
+            GlStateManager.rotatef(n, 0.0f, 1.0f, 0.0f);
+            GlStateManager.rotatef(o, 1.0f, 0.0f, 0.0f);
+            GlStateManager.translatef(0.375f * (float)(m * 2 - 1), 0.0f, 0.0f);
+            GlStateManager.translatef(0.0f, -0.375f, 0.0f);
+            GlStateManager.rotatef(-o, 1.0f, 0.0f, 0.0f);
+            GlStateManager.rotatef(-n, 0.0f, 1.0f, 0.0f);
+            float p = 1.3333334f;
+            GlStateManager.scalef(1.3333334f, 1.3333334f, 1.3333334f);
+            ((PlayerModel)this.getParentModel()).renderEars(0.0625f);
+            GlStateManager.popMatrix();
+        }
+    }
+
+    @Override
+    public boolean colorsOnDamage() {
+        return true;
+    }
+}
+

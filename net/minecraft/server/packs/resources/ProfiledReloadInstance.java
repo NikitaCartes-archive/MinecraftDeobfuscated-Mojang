@@ -1,0 +1,90 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.server.packs.resources;
+
+import com.google.common.base.Stopwatch;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import net.minecraft.Util;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimpleReloadInstance;
+import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.ActiveProfiler;
+import net.minecraft.util.profiling.ProfileResults;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class ProfiledReloadInstance
+extends SimpleReloadInstance<State> {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Stopwatch total = Stopwatch.createUnstarted();
+
+    public ProfiledReloadInstance(ResourceManager resourceManager2, List<PreparableReloadListener> list, Executor executor, Executor executor22, CompletableFuture<Unit> completableFuture) {
+        super(executor, executor22, resourceManager2, list, (preparationBarrier, resourceManager, preparableReloadListener, executor2, executor3) -> {
+            AtomicLong atomicLong = new AtomicLong();
+            AtomicLong atomicLong2 = new AtomicLong();
+            ActiveProfiler activeProfiler = new ActiveProfiler(Util.getNanos(), () -> 0);
+            ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.getNanos(), () -> 0);
+            CompletableFuture<Void> completableFuture = preparableReloadListener.reload(preparationBarrier, resourceManager, activeProfiler, activeProfiler2, runnable -> executor2.execute(() -> {
+                long l = Util.getNanos();
+                runnable.run();
+                atomicLong.addAndGet(Util.getNanos() - l);
+            }), runnable -> executor3.execute(() -> {
+                long l = Util.getNanos();
+                runnable.run();
+                atomicLong2.addAndGet(Util.getNanos() - l);
+            }));
+            return completableFuture.thenApplyAsync(void_ -> new State(preparableReloadListener.getClass().getSimpleName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2), executor22);
+        }, completableFuture);
+        this.total.start();
+        this.allDone.thenAcceptAsync(this::finish, executor22);
+    }
+
+    private void finish(List<State> list) {
+        this.total.stop();
+        int i = 0;
+        LOGGER.info("Resource reload finished after " + this.total.elapsed(TimeUnit.MILLISECONDS) + " ms");
+        for (State state : list) {
+            String string3;
+            ProfileResults profileResults = state.preparationResult;
+            ProfileResults profileResults2 = state.reloadResult;
+            int j = (int)((double)state.preparationNanos.get() / 1000000.0);
+            int k = (int)((double)state.reloadNanos.get() / 1000000.0);
+            int l = j + k;
+            String string = state.name;
+            LOGGER.info(string + " took approximately " + l + " ms (" + j + " ms preparing, " + k + " ms applying)");
+            String string2 = profileResults.getProfilerResults();
+            if (string2.length() > 0) {
+                LOGGER.debug(string + " preparations:\n" + string2);
+            }
+            if ((string3 = profileResults2.getProfilerResults()).length() > 0) {
+                LOGGER.debug(string + " reload:\n" + string3);
+            }
+            LOGGER.info("----------");
+            i += k;
+        }
+        LOGGER.info("Total blocking time: " + i + " ms");
+    }
+
+    public static class State {
+        private final String name;
+        private final ProfileResults preparationResult;
+        private final ProfileResults reloadResult;
+        private final AtomicLong preparationNanos;
+        private final AtomicLong reloadNanos;
+
+        private State(String string, ProfileResults profileResults, ProfileResults profileResults2, AtomicLong atomicLong, AtomicLong atomicLong2) {
+            this.name = string;
+            this.preparationResult = profileResults;
+            this.reloadResult = profileResults2;
+            this.preparationNanos = atomicLong;
+            this.reloadNanos = atomicLong2;
+        }
+    }
+}
+

@@ -1,0 +1,42 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.renderer.entity;
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.entity.DolphinModel;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.DolphinCarryingItemLayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Dolphin;
+
+@Environment(value=EnvType.CLIENT)
+public class DolphinRenderer
+extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
+    private static final ResourceLocation DOLPHIN_LOCATION = new ResourceLocation("textures/entity/dolphin.png");
+
+    public DolphinRenderer(EntityRenderDispatcher entityRenderDispatcher) {
+        super(entityRenderDispatcher, new DolphinModel(), 0.7f);
+        this.addLayer(new DolphinCarryingItemLayer(this));
+    }
+
+    @Override
+    protected ResourceLocation getTextureLocation(Dolphin dolphin) {
+        return DOLPHIN_LOCATION;
+    }
+
+    @Override
+    protected void scale(Dolphin dolphin, float f) {
+        float g = 1.0f;
+        GlStateManager.scalef(1.0f, 1.0f, 1.0f);
+    }
+
+    @Override
+    protected void setupRotations(Dolphin dolphin, float f, float g, float h) {
+        super.setupRotations(dolphin, f, g, h);
+    }
+}
+

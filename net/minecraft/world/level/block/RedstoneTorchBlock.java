@@ -1,0 +1,159 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.block;
+
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.WeakHashMap;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+
+public class RedstoneTorchBlock
+extends TorchBlock {
+    public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    private static final Map<BlockGetter, List<Toggle>> RECENT_TOGGLES = new WeakHashMap<BlockGetter, List<Toggle>>();
+
+    protected RedstoneTorchBlock(Block.Properties properties) {
+        super(properties);
+        this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LIT, true));
+    }
+
+    @Override
+    public int getTickDelay(LevelReader levelReader) {
+        return 2;
+    }
+
+    @Override
+    public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        for (Direction direction : Direction.values()) {
+            level.updateNeighborsAt(blockPos.relative(direction), this);
+        }
+    }
+
+    @Override
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        if (bl) {
+            return;
+        }
+        for (Direction direction : Direction.values()) {
+            level.updateNeighborsAt(blockPos.relative(direction), this);
+        }
+    }
+
+    @Override
+    public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        if (blockState.getValue(LIT).booleanValue() && Direction.UP != direction) {
+            return 15;
+        }
+        return 0;
+    }
+
+    protected boolean hasNeighborSignal(Level level, BlockPos blockPos, BlockState blockState) {
+        return level.hasSignal(blockPos.below(), Direction.DOWN);
+    }
+
+    @Override
+    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+        RedstoneTorchBlock.handleTick(blockState, level, blockPos, random, this.hasNeighborSignal(level, blockPos, blockState));
+    }
+
+    public static void handleTick(BlockState blockState, Level level, BlockPos blockPos, Random random, boolean bl) {
+        List<Toggle> list = RECENT_TOGGLES.get(level);
+        while (list != null && !list.isEmpty() && level.getGameTime() - list.get(0).when > 60L) {
+            list.remove(0);
+        }
+        if (blockState.getValue(LIT).booleanValue()) {
+            if (bl) {
+                level.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
+                if (RedstoneTorchBlock.isToggledTooFrequently(level, blockPos, true)) {
+                    level.levelEvent(1502, blockPos, 0);
+                    level.getBlockTicks().scheduleTick(blockPos, level.getBlockState(blockPos).getBlock(), 160);
+                }
+            }
+        } else if (!bl && !RedstoneTorchBlock.isToggledTooFrequently(level, blockPos, false)) {
+            level.setBlock(blockPos, (BlockState)blockState.setValue(LIT, true), 3);
+        }
+    }
+
+    @Override
+    public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+        if (blockState.getValue(LIT).booleanValue() == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
+            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+        }
+    }
+
+    @Override
+    public int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+        if (direction == Direction.DOWN) {
+            return blockState.getSignal(blockGetter, blockPos, direction);
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean isSignalSource(BlockState blockState) {
+        return true;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+        if (!blockState.getValue(LIT).booleanValue()) {
+            return;
+        }
+        double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
+        double e = (double)blockPos.getY() + 0.7 + (random.nextDouble() - 0.5) * 0.2;
+        double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
+        level.addParticle(DustParticleOptions.REDSTONE, d, e, f, 0.0, 0.0, 0.0);
+    }
+
+    @Override
+    public int getLightEmission(BlockState blockState) {
+        return blockState.getValue(LIT) != false ? super.getLightEmission(blockState) : 0;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(LIT);
+    }
+
+    private static boolean isToggledTooFrequently(Level level, BlockPos blockPos, boolean bl) {
+        List list = RECENT_TOGGLES.computeIfAbsent(level, blockGetter -> Lists.newArrayList());
+        if (bl) {
+            list.add(new Toggle(blockPos.immutable(), level.getGameTime()));
+        }
+        int i = 0;
+        for (int j = 0; j < list.size(); ++j) {
+            Toggle toggle = (Toggle)list.get(j);
+            if (!toggle.pos.equals(blockPos) || ++i < 8) continue;
+            return true;
+        }
+        return false;
+    }
+
+    public static class Toggle {
+        private final BlockPos pos;
+        private final long when;
+
+        public Toggle(BlockPos blockPos, long l) {
+            this.pos = blockPos;
+            this.when = l;
+        }
+    }
+}
+

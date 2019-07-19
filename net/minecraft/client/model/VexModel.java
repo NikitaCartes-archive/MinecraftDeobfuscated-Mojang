@@ -1,0 +1,90 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.model;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Vex;
+
+@Environment(value=EnvType.CLIENT)
+public class VexModel
+extends HumanoidModel<Vex> {
+    private final ModelPart leftWing;
+    private final ModelPart rightWing;
+
+    public VexModel() {
+        this(0.0f);
+    }
+
+    public VexModel(float f) {
+        super(f, 0.0f, 64, 64);
+        this.leftLeg.visible = false;
+        this.hat.visible = false;
+        this.rightLeg = new ModelPart(this, 32, 0);
+        this.rightLeg.addBox(-1.0f, -1.0f, -2.0f, 6, 10, 4, 0.0f);
+        this.rightLeg.setPos(-1.9f, 12.0f, 0.0f);
+        this.rightWing = new ModelPart(this, 0, 32);
+        this.rightWing.addBox(-20.0f, 0.0f, 0.0f, 20, 12, 1);
+        this.leftWing = new ModelPart(this, 0, 32);
+        this.leftWing.mirror = true;
+        this.leftWing.addBox(0.0f, 0.0f, 0.0f, 20, 12, 1);
+    }
+
+    @Override
+    public void render(Vex vex, float f, float g, float h, float i, float j, float k) {
+        super.render(vex, f, g, h, i, j, k);
+        this.rightWing.render(k);
+        this.leftWing.render(k);
+    }
+
+    @Override
+    public void setupAnim(Vex vex, float f, float g, float h, float i, float j, float k) {
+        super.setupAnim(vex, f, g, h, i, j, k);
+        if (vex.isCharging()) {
+            if (vex.getMainArm() == HumanoidArm.RIGHT) {
+                this.rightArm.xRot = 3.7699115f;
+            } else {
+                this.leftArm.xRot = 3.7699115f;
+            }
+        }
+        this.rightLeg.xRot += 0.62831855f;
+        this.rightWing.z = 2.0f;
+        this.leftWing.z = 2.0f;
+        this.rightWing.y = 1.0f;
+        this.leftWing.y = 1.0f;
+        this.rightWing.yRot = 0.47123894f + Mth.cos(h * 0.8f) * (float)Math.PI * 0.05f;
+        this.leftWing.yRot = -this.rightWing.yRot;
+        this.leftWing.zRot = -0.47123894f;
+        this.leftWing.xRot = 0.47123894f;
+        this.rightWing.xRot = 0.47123894f;
+        this.rightWing.zRot = 0.47123894f;
+    }
+
+    @Override
+    public /* synthetic */ void setupAnim(LivingEntity livingEntity, float f, float g, float h, float i, float j, float k) {
+        this.setupAnim((Vex)livingEntity, f, g, h, i, j, k);
+    }
+
+    @Override
+    public /* synthetic */ void render(LivingEntity livingEntity, float f, float g, float h, float i, float j, float k) {
+        this.render((Vex)livingEntity, f, g, h, i, j, k);
+    }
+
+    @Override
+    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
+        this.setupAnim((Vex)entity, f, g, h, i, j, k);
+    }
+
+    @Override
+    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
+        this.render((Vex)entity, f, g, h, i, j, k);
+    }
+}
+

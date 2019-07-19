@@ -1,0 +1,46 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.entity.ai.sensing;
+
+import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.sensing.DummySensor;
+import net.minecraft.world.entity.ai.sensing.GolemSensor;
+import net.minecraft.world.entity.ai.sensing.HurtBySensor;
+import net.minecraft.world.entity.ai.sensing.InteractableDoorsSensor;
+import net.minecraft.world.entity.ai.sensing.NearestBedSensor;
+import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
+import net.minecraft.world.entity.ai.sensing.PlayerSensor;
+import net.minecraft.world.entity.ai.sensing.SecondaryPoiSensor;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.VillagerBabiesSensor;
+import net.minecraft.world.entity.ai.sensing.VillagerHostilesSensor;
+
+public class SensorType<U extends Sensor<?>> {
+    public static final SensorType<DummySensor> DUMMY = SensorType.register("dummy", DummySensor::new);
+    public static final SensorType<NearestLivingEntitySensor> NEAREST_LIVING_ENTITIES = SensorType.register("nearest_living_entities", NearestLivingEntitySensor::new);
+    public static final SensorType<PlayerSensor> NEAREST_PLAYERS = SensorType.register("nearest_players", PlayerSensor::new);
+    public static final SensorType<InteractableDoorsSensor> INTERACTABLE_DOORS = SensorType.register("interactable_doors", InteractableDoorsSensor::new);
+    public static final SensorType<NearestBedSensor> NEAREST_BED = SensorType.register("nearest_bed", NearestBedSensor::new);
+    public static final SensorType<HurtBySensor> HURT_BY = SensorType.register("hurt_by", HurtBySensor::new);
+    public static final SensorType<VillagerHostilesSensor> VILLAGER_HOSTILES = SensorType.register("villager_hostiles", VillagerHostilesSensor::new);
+    public static final SensorType<VillagerBabiesSensor> VILLAGER_BABIES = SensorType.register("villager_babies", VillagerBabiesSensor::new);
+    public static final SensorType<SecondaryPoiSensor> SECONDARY_POIS = SensorType.register("secondary_pois", SecondaryPoiSensor::new);
+    public static final SensorType<GolemSensor> GOLEM_LAST_SEEN = SensorType.register("golem_last_seen", GolemSensor::new);
+    private final Supplier<U> factory;
+
+    private SensorType(Supplier<U> supplier) {
+        this.factory = supplier;
+    }
+
+    public U create() {
+        return (U)((Sensor)this.factory.get());
+    }
+
+    private static <U extends Sensor<?>> SensorType<U> register(String string, Supplier<U> supplier) {
+        return Registry.register(Registry.SENSOR_TYPE, new ResourceLocation(string), new SensorType<U>(supplier));
+    }
+}
+

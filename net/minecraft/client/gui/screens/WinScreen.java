@@ -1,0 +1,211 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.screens;
+
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Random;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+@Environment(value=EnvType.CLIENT)
+public class WinScreen
+extends Screen {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/minecraft.png");
+    private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
+    private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
+    private final boolean poem;
+    private final Runnable onFinished;
+    private float time;
+    private List<String> lines;
+    private int totalScrollLength;
+    private float scrollSpeed = 0.5f;
+
+    public WinScreen(boolean bl, Runnable runnable) {
+        super(NarratorChatListener.NO_TITLE);
+        this.poem = bl;
+        this.onFinished = runnable;
+        if (!bl) {
+            this.scrollSpeed = 0.75f;
+        }
+    }
+
+    @Override
+    public void tick() {
+        this.minecraft.getMusicManager().tick();
+        this.minecraft.getSoundManager().tick(false);
+        float f = (float)(this.totalScrollLength + this.height + this.height + 24) / this.scrollSpeed;
+        if (this.time > f) {
+            this.respawn();
+        }
+    }
+
+    @Override
+    public void onClose() {
+        this.respawn();
+    }
+
+    private void respawn() {
+        this.onFinished.run();
+        this.minecraft.setScreen(null);
+    }
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    @Override
+    protected void init() {
+        if (this.lines != null) {
+            return;
+        }
+        this.lines = Lists.newArrayList();
+        Resource resource = null;
+        try {
+            String string5;
+            BufferedReader bufferedReader;
+            InputStream inputStream;
+            String string = "" + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + (Object)((Object)ChatFormatting.GREEN) + (Object)((Object)ChatFormatting.AQUA);
+            int i = 274;
+            if (this.poem) {
+                int j;
+                String string2;
+                resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
+                inputStream = resource.getInputStream();
+                bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                Random random = new Random(8124371L);
+                while ((string2 = bufferedReader.readLine()) != null) {
+                    string2 = string2.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+                    while (string2.contains(string)) {
+                        j = string2.indexOf(string);
+                        String string3 = string2.substring(0, j);
+                        String string4 = string2.substring(j + string.length());
+                        string2 = string3 + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string4;
+                    }
+                    this.lines.addAll(this.minecraft.font.split(string2, 274));
+                    this.lines.add("");
+                }
+                inputStream.close();
+                for (j = 0; j < 8; ++j) {
+                    this.lines.add("");
+                }
+            }
+            inputStream = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.txt")).getInputStream();
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            while ((string5 = bufferedReader.readLine()) != null) {
+                string5 = string5.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+                string5 = string5.replaceAll("\t", "    ");
+                this.lines.addAll(this.minecraft.font.split(string5, 274));
+                this.lines.add("");
+            }
+            inputStream.close();
+            this.totalScrollLength = this.lines.size() * 12;
+            IOUtils.closeQuietly((Closeable)resource);
+        } catch (Exception exception) {
+            LOGGER.error("Couldn't load credits", (Throwable)exception);
+        } finally {
+            IOUtils.closeQuietly(resource);
+        }
+    }
+
+    private void renderBg(int i, int j, float f) {
+        this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+        int k = this.width;
+        float g = -this.time * 0.5f * this.scrollSpeed;
+        float h = (float)this.height - this.time * 0.5f * this.scrollSpeed;
+        float l = 0.015625f;
+        float m = this.time * 0.02f;
+        float n = (float)(this.totalScrollLength + this.height + this.height + 24) / this.scrollSpeed;
+        float o = (n - 20.0f - this.time) * 0.005f;
+        if (o < m) {
+            m = o;
+        }
+        if (m > 1.0f) {
+            m = 1.0f;
+        }
+        m *= m;
+        m = m * 96.0f / 255.0f;
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(0.0, this.height, this.blitOffset).uv(0.0, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(k, this.height, this.blitOffset).uv((float)k * 0.015625f, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(k, 0.0, this.blitOffset).uv((float)k * 0.015625f, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, this.blitOffset).uv(0.0, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        tesselator.end();
+    }
+
+    @Override
+    public void render(int i, int j, float f) {
+        int o;
+        this.renderBg(i, j, f);
+        int k = 274;
+        int l = this.width / 2 - 137;
+        int m = this.height + 50;
+        this.time += f;
+        float g = -this.time * this.scrollSpeed;
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(0.0f, g, 0.0f);
+        this.minecraft.getTextureManager().bind(LOGO_LOCATION);
+        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.enableAlphaTest();
+        this.blit(l, m, 0, 0, 155, 44);
+        this.blit(l + 155, m, 0, 45, 155, 44);
+        this.minecraft.getTextureManager().bind(EDITION_LOCATION);
+        WinScreen.blit(l + 88, m + 37, 0.0f, 0.0f, 98, 14, 128, 16);
+        GlStateManager.disableAlphaTest();
+        int n = m + 100;
+        for (o = 0; o < this.lines.size(); ++o) {
+            float h;
+            if (o == this.lines.size() - 1 && (h = (float)n + g - (float)(this.height / 2 - 6)) < 0.0f) {
+                GlStateManager.translatef(0.0f, -h, 0.0f);
+            }
+            if ((float)n + g + 12.0f + 8.0f > 0.0f && (float)n + g < (float)this.height) {
+                String string = this.lines.get(o);
+                if (string.startsWith("[C]")) {
+                    this.font.drawShadow(string.substring(3), l + (274 - this.font.width(string.substring(3))) / 2, n, 0xFFFFFF);
+                } else {
+                    this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0f));
+                    this.font.drawShadow(string, l, n, 0xFFFFFF);
+                }
+            }
+            n += 12;
+        }
+        GlStateManager.popMatrix();
+        this.minecraft.getTextureManager().bind(VIGNETTE_LOCATION);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
+        o = this.width;
+        int p = this.height;
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.vertex(0.0, p, this.blitOffset).uv(0.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(o, p, this.blitOffset).uv(1.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(o, 0.0, this.blitOffset).uv(1.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, this.blitOffset).uv(0.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        tesselator.end();
+        GlStateManager.disableBlend();
+        super.render(i, j, f);
+    }
+}
+

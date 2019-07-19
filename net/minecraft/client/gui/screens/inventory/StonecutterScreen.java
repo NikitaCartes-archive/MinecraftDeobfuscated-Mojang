@@ -1,0 +1,159 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.screens.inventory;
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
+import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+
+@Environment(value=EnvType.CLIENT)
+public class StonecutterScreen
+extends AbstractContainerScreen<StonecutterMenu> {
+    private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/stonecutter.png");
+    private float scrollOffs;
+    private boolean scrolling;
+    private int startIndex;
+    private boolean displayRecipes;
+
+    public StonecutterScreen(StonecutterMenu stonecutterMenu, Inventory inventory, Component component) {
+        super(stonecutterMenu, inventory, component);
+        stonecutterMenu.registerUpdateListener(this::containerChanged);
+    }
+
+    @Override
+    public void render(int i, int j, float f) {
+        super.render(i, j, f);
+        this.renderTooltip(i, j);
+    }
+
+    @Override
+    protected void renderLabels(int i, int j) {
+        this.font.draw(this.title.getColoredString(), 8.0f, 4.0f, 0x404040);
+        this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0f, this.imageHeight - 94, 0x404040);
+    }
+
+    @Override
+    protected void renderBg(float f, int i, int j) {
+        this.renderBackground();
+        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        this.minecraft.getTextureManager().bind(BG_LOCATION);
+        int k = this.leftPos;
+        int l = this.topPos;
+        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        int m = (int)(41.0f * this.scrollOffs);
+        this.blit(k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
+        int n = this.leftPos + 52;
+        int o = this.topPos + 14;
+        int p = this.startIndex + 12;
+        this.renderButtons(i, j, n, o, p);
+        this.renderRecipes(n, o, p);
+    }
+
+    private void renderButtons(int i, int j, int k, int l, int m) {
+        for (int n = this.startIndex; n < m && n < ((StonecutterMenu)this.menu).getNumRecipes(); ++n) {
+            int o = n - this.startIndex;
+            int p = k + o % 4 * 16;
+            int q = o / 4;
+            int r = l + q * 18 + 2;
+            int s = this.imageHeight;
+            if (n == ((StonecutterMenu)this.menu).getSelectedRecipeIndex()) {
+                s += 18;
+            } else if (i >= p && j >= r && i < p + 16 && j < r + 18) {
+                s += 36;
+            }
+            this.blit(p, r - 1, 0, s, 16, 18);
+        }
+    }
+
+    private void renderRecipes(int i, int j, int k) {
+        Lighting.turnOnGui();
+        List<StonecutterRecipe> list = ((StonecutterMenu)this.menu).getRecipes();
+        for (int l = this.startIndex; l < k && l < ((StonecutterMenu)this.menu).getNumRecipes(); ++l) {
+            int m = l - this.startIndex;
+            int n = i + m % 4 * 16;
+            int o = m / 4;
+            int p = j + o * 18 + 2;
+            this.minecraft.getItemRenderer().renderAndDecorateItem(list.get(l).getResultItem(), n, p);
+        }
+        Lighting.turnOff();
+    }
+
+    @Override
+    public boolean mouseClicked(double d, double e, int i) {
+        this.scrolling = false;
+        if (this.displayRecipes) {
+            int j = this.leftPos + 52;
+            int k = this.topPos + 14;
+            int l = this.startIndex + 12;
+            for (int m = this.startIndex; m < l; ++m) {
+                int n = m - this.startIndex;
+                double f = d - (double)(j + n % 4 * 16);
+                double g = e - (double)(k + n / 4 * 18);
+                if (!(f >= 0.0) || !(g >= 0.0) || !(f < 16.0) || !(g < 18.0) || !((StonecutterMenu)this.menu).clickMenuButton(this.minecraft.player, m)) continue;
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0f));
+                this.minecraft.gameMode.handleInventoryButtonClick(((StonecutterMenu)this.menu).containerId, m);
+                return true;
+            }
+            j = this.leftPos + 119;
+            k = this.topPos + 9;
+            if (d >= (double)j && d < (double)(j + 12) && e >= (double)k && e < (double)(k + 54)) {
+                this.scrolling = true;
+            }
+        }
+        return super.mouseClicked(d, e, i);
+    }
+
+    @Override
+    public boolean mouseDragged(double d, double e, int i, double f, double g) {
+        if (this.scrolling && this.isScrollBarActive()) {
+            int j = this.topPos + 14;
+            int k = j + 54;
+            this.scrollOffs = ((float)e - (float)j - 7.5f) / ((float)(k - j) - 15.0f);
+            this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0f, 1.0f);
+            this.startIndex = (int)((double)(this.scrollOffs * (float)this.getOffscreenRows()) + 0.5) * 4;
+            return true;
+        }
+        return super.mouseDragged(d, e, i, f, g);
+    }
+
+    @Override
+    public boolean mouseScrolled(double d, double e, double f) {
+        if (this.isScrollBarActive()) {
+            int i = this.getOffscreenRows();
+            this.scrollOffs = (float)((double)this.scrollOffs - f / (double)i);
+            this.scrollOffs = Mth.clamp(this.scrollOffs, 0.0f, 1.0f);
+            this.startIndex = (int)((double)(this.scrollOffs * (float)i) + 0.5) * 4;
+        }
+        return true;
+    }
+
+    private boolean isScrollBarActive() {
+        return this.displayRecipes && ((StonecutterMenu)this.menu).getNumRecipes() > 12;
+    }
+
+    protected int getOffscreenRows() {
+        return (((StonecutterMenu)this.menu).getNumRecipes() + 4 - 1) / 4 - 3;
+    }
+
+    private void containerChanged() {
+        this.displayRecipes = ((StonecutterMenu)this.menu).hasInputItem();
+        if (!this.displayRecipes) {
+            this.scrollOffs = 0.0f;
+            this.startIndex = 0;
+        }
+    }
+}
+

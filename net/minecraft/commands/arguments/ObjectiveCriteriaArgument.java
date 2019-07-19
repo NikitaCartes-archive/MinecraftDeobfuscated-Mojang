@@ -1,0 +1,81 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.commands.arguments;
+
+import com.google.common.collect.Lists;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatType;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+
+public class ObjectiveCriteriaArgument
+implements ArgumentType<ObjectiveCriteria> {
+    private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo.bar.baz", "minecraft:foo");
+    public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.criteria.invalid", object));
+
+    private ObjectiveCriteriaArgument() {
+    }
+
+    public static ObjectiveCriteriaArgument criteria() {
+        return new ObjectiveCriteriaArgument();
+    }
+
+    public static ObjectiveCriteria getCriteria(CommandContext<CommandSourceStack> commandContext, String string) {
+        return commandContext.getArgument(string, ObjectiveCriteria.class);
+    }
+
+    @Override
+    public ObjectiveCriteria parse(StringReader stringReader) throws CommandSyntaxException {
+        int i = stringReader.getCursor();
+        while (stringReader.canRead() && stringReader.peek() != ' ') {
+            stringReader.skip();
+        }
+        String string = stringReader.getString().substring(i, stringReader.getCursor());
+        return ObjectiveCriteria.byName(string).orElseThrow(() -> {
+            stringReader.setCursor(i);
+            return ERROR_INVALID_VALUE.create(string);
+        });
+    }
+
+    @Override
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
+        ArrayList<String> list = Lists.newArrayList(ObjectiveCriteria.CRITERIA_BY_NAME.keySet());
+        for (StatType statType : Registry.STAT_TYPE) {
+            for (Object object : statType.getRegistry()) {
+                String string = this.getName(statType, object);
+                list.add(string);
+            }
+        }
+        return SharedSuggestionProvider.suggest(list, suggestionsBuilder);
+    }
+
+    public <T> String getName(StatType<T> statType, Object object) {
+        return Stat.buildName(statType, object);
+    }
+
+    @Override
+    public Collection<String> getExamples() {
+        return EXAMPLES;
+    }
+
+    @Override
+    public /* synthetic */ Object parse(StringReader stringReader) throws CommandSyntaxException {
+        return this.parse(stringReader);
+    }
+}
+

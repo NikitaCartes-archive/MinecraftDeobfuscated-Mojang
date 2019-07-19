@@ -1,0 +1,72 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.network.protocol.game;
+
+import java.io.IOException;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+
+public class ClientboundLevelEventPacket
+implements Packet<ClientGamePacketListener> {
+    private int type;
+    private BlockPos pos;
+    private int data;
+    private boolean globalEvent;
+
+    public ClientboundLevelEventPacket() {
+    }
+
+    public ClientboundLevelEventPacket(int i, BlockPos blockPos, int j, boolean bl) {
+        this.type = i;
+        this.pos = blockPos.immutable();
+        this.data = j;
+        this.globalEvent = bl;
+    }
+
+    @Override
+    public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+        this.type = friendlyByteBuf.readInt();
+        this.pos = friendlyByteBuf.readBlockPos();
+        this.data = friendlyByteBuf.readInt();
+        this.globalEvent = friendlyByteBuf.readBoolean();
+    }
+
+    @Override
+    public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
+        friendlyByteBuf.writeInt(this.type);
+        friendlyByteBuf.writeBlockPos(this.pos);
+        friendlyByteBuf.writeInt(this.data);
+        friendlyByteBuf.writeBoolean(this.globalEvent);
+    }
+
+    @Override
+    public void handle(ClientGamePacketListener clientGamePacketListener) {
+        clientGamePacketListener.handleLevelEvent(this);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean isGlobalEvent() {
+        return this.globalEvent;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public int getType() {
+        return this.type;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public int getData() {
+        return this.data;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public BlockPos getPos() {
+        return this.pos;
+    }
+}
+

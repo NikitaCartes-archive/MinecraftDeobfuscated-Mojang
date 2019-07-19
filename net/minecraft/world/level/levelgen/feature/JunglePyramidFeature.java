@@ -1,0 +1,58 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.levelgen.feature;
+
+import com.mojang.datafixers.Dynamic;
+import java.util.function.Function;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.JunglePyramidPiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+
+public class JunglePyramidFeature
+extends RandomScatteredFeature<NoneFeatureConfiguration> {
+    public JunglePyramidFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
+        super(function);
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Jungle_Pyramid";
+    }
+
+    @Override
+    public int getLookupRange() {
+        return 3;
+    }
+
+    @Override
+    public StructureFeature.StructureStartFactory getStartFactory() {
+        return FeatureStart::new;
+    }
+
+    @Override
+    protected int getRandomSalt() {
+        return 14357619;
+    }
+
+    public static class FeatureStart
+    extends StructureStart {
+        public FeatureStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, biome, boundingBox, k, l);
+        }
+
+        @Override
+        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+            JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, i * 16, j * 16);
+            this.pieces.add(junglePyramidPiece);
+            this.calculateBoundingBox();
+        }
+    }
+}
+

@@ -1,0 +1,20 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.newbiome.layer.traits;
+
+import net.minecraft.world.level.newbiome.layer.traits.DimensionTransformer;
+
+public interface DimensionOffset0Transformer
+extends DimensionTransformer {
+    @Override
+    default public int getParentX(int i) {
+        return i;
+    }
+
+    @Override
+    default public int getParentY(int i) {
+        return i;
+    }
+}
+

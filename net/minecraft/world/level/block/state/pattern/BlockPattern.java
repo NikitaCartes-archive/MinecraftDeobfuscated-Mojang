@@ -1,0 +1,211 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.block.state.pattern;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+
+public class BlockPattern {
+    private final Predicate<BlockInWorld>[][][] pattern;
+    private final int depth;
+    private final int height;
+    private final int width;
+
+    public BlockPattern(Predicate<BlockInWorld>[][][] predicates) {
+        this.pattern = predicates;
+        this.depth = predicates.length;
+        if (this.depth > 0) {
+            this.height = predicates[0].length;
+            this.width = this.height > 0 ? predicates[0][0].length : 0;
+        } else {
+            this.height = 0;
+            this.width = 0;
+        }
+    }
+
+    public int getDepth() {
+        return this.depth;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public int getWidth() {
+        return this.width;
+    }
+
+    @Nullable
+    private BlockPatternMatch matches(BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache) {
+        for (int i = 0; i < this.width; ++i) {
+            for (int j = 0; j < this.height; ++j) {
+                for (int k = 0; k < this.depth; ++k) {
+                    if (this.pattern[k][j][i].test(loadingCache.getUnchecked(BlockPattern.translateAndRotate(blockPos, direction, direction2, i, j, k)))) continue;
+                    return null;
+                }
+            }
+        }
+        return new BlockPatternMatch(blockPos, direction, direction2, loadingCache, this.width, this.height, this.depth);
+    }
+
+    @Nullable
+    public BlockPatternMatch find(LevelReader levelReader, BlockPos blockPos) {
+        LoadingCache<BlockPos, BlockInWorld> loadingCache = BlockPattern.createLevelCache(levelReader, false);
+        int i = Math.max(Math.max(this.width, this.height), this.depth);
+        for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos, blockPos.offset(i - 1, i - 1, i - 1))) {
+            for (Direction direction : Direction.values()) {
+                for (Direction direction2 : Direction.values()) {
+                    BlockPatternMatch blockPatternMatch;
+                    if (direction2 == direction || direction2 == direction.getOpposite() || (blockPatternMatch = this.matches(blockPos2, direction, direction2, loadingCache)) == null) continue;
+                    return blockPatternMatch;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static LoadingCache<BlockPos, BlockInWorld> createLevelCache(LevelReader levelReader, boolean bl) {
+        return CacheBuilder.newBuilder().build(new BlockCacheLoader(levelReader, bl));
+    }
+
+    protected static BlockPos translateAndRotate(BlockPos blockPos, Direction direction, Direction direction2, int i, int j, int k) {
+        if (direction == direction2 || direction == direction2.getOpposite()) {
+            throw new IllegalArgumentException("Invalid forwards & up combination");
+        }
+        Vec3i vec3i = new Vec3i(direction.getStepX(), direction.getStepY(), direction.getStepZ());
+        Vec3i vec3i2 = new Vec3i(direction2.getStepX(), direction2.getStepY(), direction2.getStepZ());
+        Vec3i vec3i3 = vec3i.cross(vec3i2);
+        return blockPos.offset(vec3i2.getX() * -j + vec3i3.getX() * i + vec3i.getX() * k, vec3i2.getY() * -j + vec3i3.getY() * i + vec3i.getY() * k, vec3i2.getZ() * -j + vec3i3.getZ() * i + vec3i.getZ() * k);
+    }
+
+    public static class PortalInfo {
+        public final Vec3 pos;
+        public final Vec3 speed;
+        public final int angle;
+
+        public PortalInfo(Vec3 vec3, Vec3 vec32, int i) {
+            this.pos = vec3;
+            this.speed = vec32;
+            this.angle = i;
+        }
+    }
+
+    public static class BlockPatternMatch {
+        private final BlockPos frontTopLeft;
+        private final Direction forwards;
+        private final Direction up;
+        private final LoadingCache<BlockPos, BlockInWorld> cache;
+        private final int width;
+        private final int height;
+        private final int depth;
+
+        public BlockPatternMatch(BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache, int i, int j, int k) {
+            this.frontTopLeft = blockPos;
+            this.forwards = direction;
+            this.up = direction2;
+            this.cache = loadingCache;
+            this.width = i;
+            this.height = j;
+            this.depth = k;
+        }
+
+        public BlockPos getFrontTopLeft() {
+            return this.frontTopLeft;
+        }
+
+        public Direction getForwards() {
+            return this.forwards;
+        }
+
+        public Direction getUp() {
+            return this.up;
+        }
+
+        public int getWidth() {
+            return this.width;
+        }
+
+        public int getHeight() {
+            return this.height;
+        }
+
+        public BlockInWorld getBlock(int i, int j, int k) {
+            return this.cache.getUnchecked(BlockPattern.translateAndRotate(this.frontTopLeft, this.getForwards(), this.getUp(), i, j, k));
+        }
+
+        public String toString() {
+            return MoreObjects.toStringHelper(this).add("up", this.up).add("forwards", this.forwards).add("frontTopLeft", this.frontTopLeft).toString();
+        }
+
+        public PortalInfo getPortalOutput(Direction direction, BlockPos blockPos, double d, Vec3 vec3, double e) {
+            double j;
+            double i;
+            double h;
+            double g;
+            Direction direction2 = this.getForwards();
+            Direction direction3 = direction2.getClockWise();
+            double f = (double)(this.getFrontTopLeft().getY() + 1) - d * (double)this.getHeight();
+            if (direction3 == Direction.NORTH) {
+                g = (double)blockPos.getX() + 0.5;
+                h = (double)(this.getFrontTopLeft().getZ() + 1) - (1.0 - e) * (double)this.getWidth();
+            } else if (direction3 == Direction.SOUTH) {
+                g = (double)blockPos.getX() + 0.5;
+                h = (double)this.getFrontTopLeft().getZ() + (1.0 - e) * (double)this.getWidth();
+            } else if (direction3 == Direction.WEST) {
+                g = (double)(this.getFrontTopLeft().getX() + 1) - (1.0 - e) * (double)this.getWidth();
+                h = (double)blockPos.getZ() + 0.5;
+            } else {
+                g = (double)this.getFrontTopLeft().getX() + (1.0 - e) * (double)this.getWidth();
+                h = (double)blockPos.getZ() + 0.5;
+            }
+            if (direction2.getOpposite() == direction) {
+                i = vec3.x;
+                j = vec3.z;
+            } else if (direction2.getOpposite() == direction.getOpposite()) {
+                i = -vec3.x;
+                j = -vec3.z;
+            } else if (direction2.getOpposite() == direction.getClockWise()) {
+                i = -vec3.z;
+                j = vec3.x;
+            } else {
+                i = vec3.z;
+                j = -vec3.x;
+            }
+            int k = (direction2.get2DDataValue() - direction.getOpposite().get2DDataValue()) * 90;
+            return new PortalInfo(new Vec3(g, f, h), new Vec3(i, vec3.y, j), k);
+        }
+    }
+
+    static class BlockCacheLoader
+    extends CacheLoader<BlockPos, BlockInWorld> {
+        private final LevelReader level;
+        private final boolean loadChunks;
+
+        public BlockCacheLoader(LevelReader levelReader, boolean bl) {
+            this.level = levelReader;
+            this.loadChunks = bl;
+        }
+
+        @Override
+        public BlockInWorld load(BlockPos blockPos) throws Exception {
+            return new BlockInWorld(this.level, blockPos, this.loadChunks);
+        }
+
+        @Override
+        public /* synthetic */ Object load(Object object) throws Exception {
+            return this.load((BlockPos)object);
+        }
+    }
+}
+

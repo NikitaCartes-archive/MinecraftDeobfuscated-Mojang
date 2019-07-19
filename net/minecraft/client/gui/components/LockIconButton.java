@@ -1,0 +1,69 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.components;
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
+
+@Environment(value=EnvType.CLIENT)
+public class LockIconButton
+extends Button {
+    private boolean locked;
+
+    public LockIconButton(int i, int j, Button.OnPress onPress) {
+        super(i, j, 20, 20, I18n.get("narrator.button.difficulty_lock", new Object[0]), onPress);
+    }
+
+    @Override
+    protected String getNarrationMessage() {
+        return super.getNarrationMessage() + ". " + (this.isLocked() ? I18n.get("narrator.button.difficulty_lock.locked", new Object[0]) : I18n.get("narrator.button.difficulty_lock.unlocked", new Object[0]));
+    }
+
+    public boolean isLocked() {
+        return this.locked;
+    }
+
+    public void setLocked(boolean bl) {
+        this.locked = bl;
+    }
+
+    @Override
+    public void renderButton(int i, int j, float f) {
+        Minecraft.getInstance().getTextureManager().bind(Button.WIDGETS_LOCATION);
+        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        Icon icon = !this.active ? (this.locked ? Icon.LOCKED_DISABLED : Icon.UNLOCKED_DISABLED) : (this.isHovered() ? (this.locked ? Icon.LOCKED_HOVER : Icon.UNLOCKED_HOVER) : (this.locked ? Icon.LOCKED : Icon.UNLOCKED));
+        this.blit(this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum Icon {
+        LOCKED(0, 146),
+        LOCKED_HOVER(0, 166),
+        LOCKED_DISABLED(0, 186),
+        UNLOCKED(20, 146),
+        UNLOCKED_HOVER(20, 166),
+        UNLOCKED_DISABLED(20, 186);
+
+        private final int x;
+        private final int y;
+
+        private Icon(int j, int k) {
+            this.x = j;
+            this.y = k;
+        }
+
+        public int getX() {
+            return this.x;
+        }
+
+        public int getY() {
+            return this.y;
+        }
+    }
+}
+

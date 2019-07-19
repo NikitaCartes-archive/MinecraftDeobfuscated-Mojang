@@ -1,0 +1,244 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.particle;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+
+@Environment(value=EnvType.CLIENT)
+public class DripParticle
+extends TextureSheetParticle {
+    private final Fluid type;
+
+    private DripParticle(Level level, double d, double e, double f, Fluid fluid) {
+        super(level, d, e, f);
+        this.setSize(0.01f, 0.01f);
+        this.gravity = 0.06f;
+        this.type = fluid;
+    }
+
+    @Override
+    public ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+    }
+
+    @Override
+    public int getLightColor(float f) {
+        if (this.type.is(FluidTags.LAVA)) {
+            return 240;
+        }
+        return super.getLightColor(f);
+    }
+
+    @Override
+    public void tick() {
+        this.xo = this.x;
+        this.yo = this.y;
+        this.zo = this.z;
+        this.preMoveUpdate();
+        if (this.removed) {
+            return;
+        }
+        this.yd -= (double)this.gravity;
+        this.move(this.xd, this.yd, this.zd);
+        this.postMoveUpdate();
+        if (this.removed) {
+            return;
+        }
+        this.xd *= (double)0.98f;
+        this.yd *= (double)0.98f;
+        this.zd *= (double)0.98f;
+        BlockPos blockPos = new BlockPos(this.x, this.y, this.z);
+        FluidState fluidState = this.level.getFluidState(blockPos);
+        if (fluidState.getType() == this.type && this.y < (double)((float)blockPos.getY() + fluidState.getHeight(this.level, blockPos))) {
+            this.remove();
+        }
+    }
+
+    protected void preMoveUpdate() {
+        if (this.lifetime-- <= 0) {
+            this.remove();
+        }
+    }
+
+    protected void postMoveUpdate() {
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LavaLandProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public LavaLandProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripLandParticle dripParticle = new DripLandParticle(level, d, e, f, Fluids.LAVA);
+            dripParticle.setColor(1.0f, 0.2857143f, 0.083333336f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LavaFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public LavaFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripFallParticle dripParticle = new DripFallParticle(level, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+            dripParticle.setColor(1.0f, 0.2857143f, 0.083333336f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LavaHangProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public LavaHangProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            CoolingDripHangParticle coolingDripHangParticle = new CoolingDripHangParticle(level, d, e, f, Fluids.LAVA, ParticleTypes.FALLING_LAVA);
+            coolingDripHangParticle.pickSprite(this.sprite);
+            return coolingDripHangParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class WaterFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public WaterFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripFallParticle dripParticle = new DripFallParticle(level, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+            dripParticle.setColor(0.2f, 0.3f, 1.0f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class WaterHangProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public WaterHangProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripHangParticle dripParticle = new DripHangParticle(level, d, e, f, Fluids.WATER, ParticleTypes.FALLING_WATER);
+            dripParticle.setColor(0.2f, 0.3f, 1.0f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class DripLandParticle
+    extends DripParticle {
+        private DripLandParticle(Level level, double d, double e, double f, Fluid fluid) {
+            super(level, d, e, f, fluid);
+            this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class DripFallParticle
+    extends DripParticle {
+        private final ParticleOptions landParticle;
+
+        private DripFallParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+            super(level, d, e, f, fluid);
+            this.landParticle = particleOptions;
+            this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
+        }
+
+        @Override
+        protected void postMoveUpdate() {
+            if (this.onGround) {
+                this.remove();
+                this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
+            }
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class CoolingDripHangParticle
+    extends DripHangParticle {
+        private CoolingDripHangParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+            super(level, d, e, f, fluid, particleOptions);
+        }
+
+        @Override
+        protected void preMoveUpdate() {
+            this.rCol = 1.0f;
+            this.gCol = 16.0f / (float)(40 - this.lifetime + 16);
+            this.bCol = 4.0f / (float)(40 - this.lifetime + 8);
+            super.preMoveUpdate();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static class DripHangParticle
+    extends DripParticle {
+        private final ParticleOptions fallingParticle;
+
+        private DripHangParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+            super(level, d, e, f, fluid);
+            this.fallingParticle = particleOptions;
+            this.gravity *= 0.02f;
+            this.lifetime = 40;
+        }
+
+        @Override
+        protected void preMoveUpdate() {
+            if (this.lifetime-- <= 0) {
+                this.remove();
+                this.level.addParticle(this.fallingParticle, this.x, this.y, this.z, this.xd, this.yd, this.zd);
+            }
+        }
+
+        @Override
+        protected void postMoveUpdate() {
+            this.xd *= 0.02;
+            this.yd *= 0.02;
+            this.zd *= 0.02;
+        }
+    }
+}
+

@@ -1,0 +1,74 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.entity.ai.goal;
+
+import java.util.EnumSet;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.Vec3;
+
+public class BreathAirGoal
+extends Goal {
+    private final PathfinderMob mob;
+
+    public BreathAirGoal(PathfinderMob pathfinderMob) {
+        this.mob = pathfinderMob;
+        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+    }
+
+    @Override
+    public boolean canUse() {
+        return this.mob.getAirSupply() < 140;
+    }
+
+    @Override
+    public boolean canContinueToUse() {
+        return this.canUse();
+    }
+
+    @Override
+    public boolean isInterruptable() {
+        return false;
+    }
+
+    @Override
+    public void start() {
+        this.findAirPosition();
+    }
+
+    private void findAirPosition() {
+        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.x - 1.0), Mth.floor(this.mob.y), Mth.floor(this.mob.z - 1.0), Mth.floor(this.mob.x + 1.0), Mth.floor(this.mob.y + 8.0), Mth.floor(this.mob.z + 1.0));
+        Vec3i blockPos = null;
+        for (BlockPos blockPos2 : iterable) {
+            if (!this.givesAir(this.mob.level, blockPos2)) continue;
+            blockPos = blockPos2;
+            break;
+        }
+        if (blockPos == null) {
+            blockPos = new BlockPos(this.mob.x, this.mob.y + 8.0, this.mob.z);
+        }
+        this.mob.getNavigation().moveTo(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ(), 1.0);
+    }
+
+    @Override
+    public void tick() {
+        this.findAirPosition();
+        this.mob.moveRelative(0.02f, new Vec3(this.mob.xxa, this.mob.yya, this.mob.zza));
+        this.mob.move(MoverType.SELF, this.mob.getDeltaMovement());
+    }
+
+    private boolean givesAir(LevelReader levelReader, BlockPos blockPos) {
+        BlockState blockState = levelReader.getBlockState(blockPos);
+        return (levelReader.getFluidState(blockPos).isEmpty() || blockState.getBlock() == Blocks.BUBBLE_COLUMN) && blockState.isPathfindable(levelReader, blockPos, PathComputationType.LAND);
+    }
+}
+

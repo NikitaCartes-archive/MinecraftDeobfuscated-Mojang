@@ -1,0 +1,209 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.nbt;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import net.minecraft.nbt.CollectionTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import org.apache.commons.lang3.ArrayUtils;
+
+public class IntArrayTag
+extends CollectionTag<IntTag> {
+    private int[] data;
+
+    IntArrayTag() {
+    }
+
+    public IntArrayTag(int[] is) {
+        this.data = is;
+    }
+
+    public IntArrayTag(List<Integer> list) {
+        this(IntArrayTag.toArray(list));
+    }
+
+    private static int[] toArray(List<Integer> list) {
+        int[] is = new int[list.size()];
+        for (int i = 0; i < list.size(); ++i) {
+            Integer integer = list.get(i);
+            is[i] = integer == null ? 0 : integer;
+        }
+        return is;
+    }
+
+    @Override
+    public void write(DataOutput dataOutput) throws IOException {
+        dataOutput.writeInt(this.data.length);
+        for (int i : this.data) {
+            dataOutput.writeInt(i);
+        }
+    }
+
+    @Override
+    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+        nbtAccounter.accountBits(192L);
+        int j = dataInput.readInt();
+        nbtAccounter.accountBits(32 * j);
+        this.data = new int[j];
+        for (int k = 0; k < j; ++k) {
+            this.data[k] = dataInput.readInt();
+        }
+    }
+
+    @Override
+    public byte getId() {
+        return 11;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder("[I;");
+        for (int i = 0; i < this.data.length; ++i) {
+            if (i != 0) {
+                stringBuilder.append(',');
+            }
+            stringBuilder.append(this.data[i]);
+        }
+        return stringBuilder.append(']').toString();
+    }
+
+    @Override
+    public IntArrayTag copy() {
+        int[] is = new int[this.data.length];
+        System.arraycopy(this.data, 0, is, 0, this.data.length);
+        return new IntArrayTag(is);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        return object instanceof IntArrayTag && Arrays.equals(this.data, ((IntArrayTag)object).data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(this.data);
+    }
+
+    public int[] getAsIntArray() {
+        return this.data;
+    }
+
+    @Override
+    public Component getPrettyDisplay(String string, int i) {
+        Component component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+        Component component2 = new TextComponent("[").append(component).append(";");
+        for (int j = 0; j < this.data.length; ++j) {
+            component2.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+            if (j == this.data.length - 1) continue;
+            component2.append(",");
+        }
+        component2.append("]");
+        return component2;
+    }
+
+    @Override
+    public int size() {
+        return this.data.length;
+    }
+
+    @Override
+    public IntTag get(int i) {
+        return new IntTag(this.data[i]);
+    }
+
+    @Override
+    public IntTag set(int i, IntTag intTag) {
+        int j = this.data[i];
+        this.data[i] = intTag.getAsInt();
+        return new IntTag(j);
+    }
+
+    @Override
+    public void add(int i, IntTag intTag) {
+        this.data = ArrayUtils.add(this.data, i, intTag.getAsInt());
+    }
+
+    @Override
+    public boolean setTag(int i, Tag tag) {
+        if (tag instanceof NumericTag) {
+            this.data[i] = ((NumericTag)tag).getAsInt();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean addTag(int i, Tag tag) {
+        if (tag instanceof NumericTag) {
+            this.data = ArrayUtils.add(this.data, i, ((NumericTag)tag).getAsInt());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public IntTag remove(int i) {
+        int j = this.data[i];
+        this.data = ArrayUtils.remove(this.data, i);
+        return new IntTag(j);
+    }
+
+    @Override
+    public void clear() {
+        this.data = new int[0];
+    }
+
+    @Override
+    public /* synthetic */ Tag remove(int i) {
+        return this.remove(i);
+    }
+
+    @Override
+    public /* synthetic */ void add(int i, Tag tag) {
+        this.add(i, (IntTag)tag);
+    }
+
+    @Override
+    public /* synthetic */ Tag set(int i, Tag tag) {
+        return this.set(i, (IntTag)tag);
+    }
+
+    @Override
+    public /* synthetic */ Tag copy() {
+        return this.copy();
+    }
+
+    @Override
+    public /* synthetic */ Object remove(int i) {
+        return this.remove(i);
+    }
+
+    @Override
+    public /* synthetic */ void add(int i, Object object) {
+        this.add(i, (IntTag)object);
+    }
+
+    @Override
+    public /* synthetic */ Object set(int i, Object object) {
+        return this.set(i, (IntTag)object);
+    }
+
+    @Override
+    public /* synthetic */ Object get(int i) {
+        return this.get(i);
+    }
+}
+

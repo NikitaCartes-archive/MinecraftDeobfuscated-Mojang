@@ -1,0 +1,36 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.server.commands;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.HttpUtil;
+
+public class PublishCommand {
+    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.publish.failed", new Object[0]));
+    private static final DynamicCommandExceptionType ERROR_ALREADY_PUBLISHED = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.publish.alreadyPublished", object));
+
+    public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("publish").requires(commandSourceStack -> commandSourceStack.getServer().isSingleplayer() && commandSourceStack.hasPermission(4))).executes(commandContext -> PublishCommand.publish((CommandSourceStack)commandContext.getSource(), HttpUtil.getAvailablePort()))).then(Commands.argument("port", IntegerArgumentType.integer(0, 65535)).executes(commandContext -> PublishCommand.publish((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "port")))));
+    }
+
+    private static int publish(CommandSourceStack commandSourceStack, int i) throws CommandSyntaxException {
+        if (commandSourceStack.getServer().isPublished()) {
+            throw ERROR_ALREADY_PUBLISHED.create(commandSourceStack.getServer().getPort());
+        }
+        if (!commandSourceStack.getServer().publishServer(commandSourceStack.getServer().getDefaultGameType(), false, i)) {
+            throw ERROR_FAILED.create();
+        }
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.publish.success", i), true);
+        return i;
+    }
+}
+

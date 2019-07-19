@@ -1,0 +1,50 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.item;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+
+public class ElytraItem
+extends Item {
+    public ElytraItem(Item.Properties properties) {
+        super(properties);
+        this.addProperty(new ResourceLocation("broken"), (itemStack, level, livingEntity) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0f : 1.0f);
+        DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
+    }
+
+    public static boolean isFlyEnabled(ItemStack itemStack) {
+        return itemStack.getDamageValue() < itemStack.getMaxDamage() - 1;
+    }
+
+    @Override
+    public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
+        return itemStack2.getItem() == Items.PHANTOM_MEMBRANE;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+        ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
+        if (itemStack2.isEmpty()) {
+            player.setItemSlot(equipmentSlot, itemStack.copy());
+            itemStack.setCount(0);
+            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        }
+        return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+    }
+}
+

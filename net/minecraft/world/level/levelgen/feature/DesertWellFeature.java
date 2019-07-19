@@ -1,0 +1,88 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.levelgen.feature;
+
+import com.mojang.datafixers.Dynamic;
+import java.util.Random;
+import java.util.function.Function;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+
+public class DesertWellFeature
+extends Feature<NoneFeatureConfiguration> {
+    private static final BlockStatePredicate IS_SAND = BlockStatePredicate.forBlock(Blocks.SAND);
+    private final BlockState sandSlab = Blocks.SANDSTONE_SLAB.defaultBlockState();
+    private final BlockState sandstone = Blocks.SANDSTONE.defaultBlockState();
+    private final BlockState water = Blocks.WATER.defaultBlockState();
+
+    public DesertWellFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
+        super(function);
+    }
+
+    @Override
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+        int i;
+        int j;
+        int i2;
+        blockPos = blockPos.above();
+        while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
+            blockPos = blockPos.below();
+        }
+        if (!IS_SAND.test(levelAccessor.getBlockState(blockPos))) {
+            return false;
+        }
+        for (i2 = -2; i2 <= 2; ++i2) {
+            for (j = -2; j <= 2; ++j) {
+                if (!levelAccessor.isEmptyBlock(blockPos.offset(i2, -1, j)) || !levelAccessor.isEmptyBlock(blockPos.offset(i2, -2, j))) continue;
+                return false;
+            }
+        }
+        for (i2 = -1; i2 <= 0; ++i2) {
+            for (j = -2; j <= 2; ++j) {
+                for (int k = -2; k <= 2; ++k) {
+                    levelAccessor.setBlock(blockPos.offset(j, i2, k), this.sandstone, 2);
+                }
+            }
+        }
+        levelAccessor.setBlock(blockPos, this.water, 2);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            levelAccessor.setBlock(blockPos.relative(direction), this.water, 2);
+        }
+        for (i = -2; i <= 2; ++i) {
+            for (int j2 = -2; j2 <= 2; ++j2) {
+                if (i != -2 && i != 2 && j2 != -2 && j2 != 2) continue;
+                levelAccessor.setBlock(blockPos.offset(i, 1, j2), this.sandstone, 2);
+            }
+        }
+        levelAccessor.setBlock(blockPos.offset(2, 1, 0), this.sandSlab, 2);
+        levelAccessor.setBlock(blockPos.offset(-2, 1, 0), this.sandSlab, 2);
+        levelAccessor.setBlock(blockPos.offset(0, 1, 2), this.sandSlab, 2);
+        levelAccessor.setBlock(blockPos.offset(0, 1, -2), this.sandSlab, 2);
+        for (i = -1; i <= 1; ++i) {
+            for (int j3 = -1; j3 <= 1; ++j3) {
+                if (i == 0 && j3 == 0) {
+                    levelAccessor.setBlock(blockPos.offset(i, 4, j3), this.sandstone, 2);
+                    continue;
+                }
+                levelAccessor.setBlock(blockPos.offset(i, 4, j3), this.sandSlab, 2);
+            }
+        }
+        for (i = 1; i <= 3; ++i) {
+            levelAccessor.setBlock(blockPos.offset(-1, i, -1), this.sandstone, 2);
+            levelAccessor.setBlock(blockPos.offset(-1, i, 1), this.sandstone, 2);
+            levelAccessor.setBlock(blockPos.offset(1, i, -1), this.sandstone, 2);
+            levelAccessor.setBlock(blockPos.offset(1, i, 1), this.sandstone, 2);
+        }
+        return true;
+    }
+}
+

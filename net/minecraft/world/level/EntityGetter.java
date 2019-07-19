@@ -1,0 +1,180 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level;
+
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+public interface EntityGetter {
+    public List<Entity> getEntities(@Nullable Entity var1, AABB var2, @Nullable Predicate<? super Entity> var3);
+
+    public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> var1, AABB var2, @Nullable Predicate<? super T> var3);
+
+    default public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+        return this.getEntitiesOfClass(class_, aABB, predicate);
+    }
+
+    public List<? extends Player> players();
+
+    default public List<Entity> getEntities(@Nullable Entity entity, AABB aABB) {
+        return this.getEntities(entity, aABB, EntitySelector.NO_SPECTATORS);
+    }
+
+    default public boolean isUnobstructed(@Nullable Entity entity3, VoxelShape voxelShape) {
+        if (voxelShape.isEmpty()) {
+            return true;
+        }
+        return this.getEntities(entity3, voxelShape.bounds()).stream().filter(entity2 -> !entity2.removed && entity2.blocksBuilding && (entity3 == null || !entity2.isPassengerOfSameVehicle(entity3))).noneMatch(entity -> Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity.getBoundingBox()), BooleanOp.AND));
+    }
+
+    default public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
+        return this.getEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
+    }
+
+    default public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB) {
+        return this.getLoadedEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
+    }
+
+    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity3, AABB aABB, Set<Entity> set) {
+        if (aABB.getSize() < 1.0E-7) {
+            return Stream.empty();
+        }
+        AABB aABB2 = aABB.inflate(1.0E-7);
+        return this.getEntities(entity3, aABB2).stream().filter(entity -> !set.contains(entity)).filter(entity2 -> entity3 == null || !entity3.isPassengerOfSameVehicle((Entity)entity2)).flatMap(entity2 -> Stream.of(entity2.getCollideBox(), entity3 == null ? null : entity3.getCollideAgainstBox((Entity)entity2))).filter(Objects::nonNull).filter(aABB2::intersects).map(Shapes::create);
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(double d, double e, double f, double g, @Nullable Predicate<Entity> predicate) {
+        double h = -1.0;
+        Player player = null;
+        for (Player player2 : this.players()) {
+            if (predicate != null && !predicate.test(player2)) continue;
+            double i = player2.distanceToSqr(d, e, f);
+            if (!(g < 0.0) && !(i < g * g) || h != -1.0 && !(i < h)) continue;
+            h = i;
+            player = player2;
+        }
+        return player;
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(Entity entity, double d) {
+        return this.getNearestPlayer(entity.x, entity.y, entity.z, d, false);
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(double d, double e, double f, double g, boolean bl) {
+        Predicate<Entity> predicate = bl ? EntitySelector.NO_CREATIVE_OR_SPECTATOR : EntitySelector.NO_SPECTATORS;
+        return this.getNearestPlayer(d, e, f, g, predicate);
+    }
+
+    @Nullable
+    default public Player getNearestPlayerIgnoreY(double d, double e, double f) {
+        double g = -1.0;
+        Player player = null;
+        for (Player player2 : this.players()) {
+            if (!EntitySelector.NO_SPECTATORS.test(player2)) continue;
+            double h = player2.distanceToSqr(d, player2.y, e);
+            if (!(f < 0.0) && !(h < f * f) || g != -1.0 && !(h < g)) continue;
+            g = h;
+            player = player2;
+        }
+        return player;
+    }
+
+    default public boolean hasNearbyAlivePlayer(double d, double e, double f, double g) {
+        for (Player player : this.players()) {
+            if (!EntitySelector.NO_SPECTATORS.test(player) || !EntitySelector.LIVING_ENTITY_STILL_ALIVE.test(player)) continue;
+            double h = player.distanceToSqr(d, e, f);
+            if (!(g < 0.0) && !(h < g * g)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(TargetingConditions targetingConditions, LivingEntity livingEntity) {
+        return this.getNearestEntity(this.players(), targetingConditions, livingEntity, livingEntity.x, livingEntity.y, livingEntity.z);
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(TargetingConditions targetingConditions, LivingEntity livingEntity, double d, double e, double f) {
+        return this.getNearestEntity(this.players(), targetingConditions, livingEntity, d, e, f);
+    }
+
+    @Nullable
+    default public Player getNearestPlayer(TargetingConditions targetingConditions, double d, double e, double f) {
+        return this.getNearestEntity(this.players(), targetingConditions, null, d, e, f);
+    }
+
+    @Nullable
+    default public <T extends LivingEntity> T getNearestEntity(Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB) {
+        return this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
+    }
+
+    @Nullable
+    default public <T extends LivingEntity> T getNearestLoadedEntity(Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB) {
+        return this.getNearestEntity(this.getLoadedEntitiesOfClass(class_, aABB, null), targetingConditions, livingEntity, d, e, f);
+    }
+
+    @Nullable
+    default public <T extends LivingEntity> T getNearestEntity(List<? extends T> list, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f) {
+        double g = -1.0;
+        LivingEntity livingEntity2 = null;
+        for (LivingEntity livingEntity3 : list) {
+            if (!targetingConditions.test(livingEntity, livingEntity3)) continue;
+            double h = livingEntity3.distanceToSqr(d, e, f);
+            if (g != -1.0 && !(h < g)) continue;
+            g = h;
+            livingEntity2 = livingEntity3;
+        }
+        return (T)livingEntity2;
+    }
+
+    default public List<Player> getNearbyPlayers(TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
+        ArrayList<Player> list = Lists.newArrayList();
+        for (Player player : this.players()) {
+            if (!aABB.contains(player.x, player.y, player.z) || !targetingConditions.test(livingEntity, player)) continue;
+            list.add(player);
+        }
+        return list;
+    }
+
+    default public <T extends LivingEntity> List<T> getNearbyEntities(Class<? extends T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
+        List<T> list = this.getEntitiesOfClass(class_, aABB, null);
+        ArrayList<LivingEntity> list2 = Lists.newArrayList();
+        for (LivingEntity livingEntity2 : list) {
+            if (!targetingConditions.test(livingEntity, livingEntity2)) continue;
+            list2.add(livingEntity2);
+        }
+        return list2;
+    }
+
+    @Nullable
+    default public Player getPlayerByUUID(UUID uUID) {
+        for (int i = 0; i < this.players().size(); ++i) {
+            Player player = this.players().get(i);
+            if (!uUID.equals(player.getUUID())) continue;
+            return player;
+        }
+        return null;
+    }
+}
+

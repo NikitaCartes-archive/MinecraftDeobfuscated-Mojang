@@ -1,0 +1,48 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.resources.sounds;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+
+@Environment(value=EnvType.CLIENT)
+public class RidingMinecartSoundInstance
+extends AbstractTickableSoundInstance {
+    private final Player player;
+    private final AbstractMinecart minecart;
+
+    public RidingMinecartSoundInstance(Player player, AbstractMinecart abstractMinecart) {
+        super(SoundEvents.MINECART_INSIDE, SoundSource.NEUTRAL);
+        this.player = player;
+        this.minecart = abstractMinecart;
+        this.attenuation = SoundInstance.Attenuation.NONE;
+        this.looping = true;
+        this.delay = 0;
+        this.volume = 0.0f;
+    }
+
+    @Override
+    public boolean canStartSilent() {
+        return true;
+    }
+
+    @Override
+    public void tick() {
+        if (this.minecart.removed || !this.player.isPassenger() || this.player.getVehicle() != this.minecart) {
+            this.stopped = true;
+            return;
+        }
+        float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.minecart.getDeltaMovement()));
+        this.volume = (double)f >= 0.01 ? 0.0f + Mth.clamp(f, 0.0f, 1.0f) * 0.75f : 0.0f;
+    }
+}
+

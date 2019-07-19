@@ -1,0 +1,38 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.biome;
+
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
+import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
+
+public final class MushroomFieldsBiome
+extends Biome {
+    public MushroomFieldsBiome() {
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_MYCELIUM).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.MUSHROOM).depth(0.2f).scale(0.3f).temperature(0.9f).downfall(1.0f).waterColor(4159204).waterFogColor(329011).parent(null));
+        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
+        this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+        BiomeDefaultFeatures.addDefaultCarvers(this);
+        BiomeDefaultFeatures.addStructureFeaturePlacement(this);
+        BiomeDefaultFeatures.addDefaultLakes(this);
+        BiomeDefaultFeatures.addDefaultMonsterRoom(this);
+        BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
+        BiomeDefaultFeatures.addDefaultOres(this);
+        BiomeDefaultFeatures.addDefaultSoftDisks(this);
+        BiomeDefaultFeatures.addMushroomFieldVegetation(this);
+        BiomeDefaultFeatures.addDefaultMushrooms(this);
+        BiomeDefaultFeatures.addDefaultExtraVegetation(this);
+        BiomeDefaultFeatures.addDefaultSprings(this);
+        BiomeDefaultFeatures.addSurfaceFreezing(this);
+        this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.MOOSHROOM, 8, 4, 8));
+        this.addSpawn(MobCategory.AMBIENT, new Biome.SpawnerData(EntityType.BAT, 10, 8, 8));
+    }
+}
+

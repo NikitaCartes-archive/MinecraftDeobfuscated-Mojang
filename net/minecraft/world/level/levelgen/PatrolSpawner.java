@@ -1,0 +1,96 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.levelgen;
+
+import java.util.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.monster.PatrollingMonster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
+
+public class PatrolSpawner {
+    private int nextTick;
+
+    public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
+        if (!bl) {
+            return 0;
+        }
+        Random random = serverLevel.random;
+        --this.nextTick;
+        if (this.nextTick > 0) {
+            return 0;
+        }
+        this.nextTick += 12000 + random.nextInt(1200);
+        long l = serverLevel.getDayTime() / 24000L;
+        if (l < 5L || !serverLevel.isDay()) {
+            return 0;
+        }
+        if (random.nextInt(5) != 0) {
+            return 0;
+        }
+        int i = serverLevel.players().size();
+        if (i < 1) {
+            return 0;
+        }
+        Player player = serverLevel.players().get(random.nextInt(i));
+        if (player.isSpectator()) {
+            return 0;
+        }
+        if (serverLevel.isVillage(player.getCommandSenderBlockPosition())) {
+            return 0;
+        }
+        int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
+        int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        mutableBlockPos.set(player.x, player.y, player.z).move(j, 0, k);
+        if (!serverLevel.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getY() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getY() + 10, mutableBlockPos.getZ() + 10)) {
+            return 0;
+        }
+        Biome biome = serverLevel.getBiome(mutableBlockPos);
+        Biome.BiomeCategory biomeCategory = biome.getBiomeCategory();
+        if (biomeCategory == Biome.BiomeCategory.MUSHROOM) {
+            return 0;
+        }
+        int m = 0;
+        int n = (int)Math.ceil(serverLevel.getCurrentDifficultyAt(mutableBlockPos).getEffectiveDifficulty()) + 1;
+        for (int o = 0; o < n; ++o) {
+            ++m;
+            mutableBlockPos.setY(serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, mutableBlockPos).getY());
+            if (o == 0) {
+                if (!this.spawnPatrolMember(serverLevel, mutableBlockPos, random, true)) {
+                    break;
+                }
+            } else {
+                this.spawnPatrolMember(serverLevel, mutableBlockPos, random, false);
+            }
+            mutableBlockPos.setX(mutableBlockPos.getX() + random.nextInt(5) - random.nextInt(5));
+            mutableBlockPos.setZ(mutableBlockPos.getZ() + random.nextInt(5) - random.nextInt(5));
+        }
+        return m;
+    }
+
+    private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
+        if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
+            return false;
+        }
+        PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(level);
+        if (patrollingMonster != null) {
+            if (bl) {
+                patrollingMonster.setPatrolLeader(true);
+                patrollingMonster.findPatrolTarget();
+            }
+            patrollingMonster.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            patrollingMonster.finalizeSpawn(level, level.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
+            level.addFreshEntity(patrollingMonster);
+            return true;
+        }
+        return false;
+    }
+}
+

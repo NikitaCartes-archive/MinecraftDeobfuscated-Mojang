@@ -1,0 +1,407 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.screens.multiplayer;
+
+import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.NativeImage;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.ServerList;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureObject;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.server.LanServer;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+@Environment(value=EnvType.CLIENT)
+public class ServerSelectionList
+extends ObjectSelectionList<Entry> {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Server Pinger #%d").setDaemon(true).setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER)).build());
+    private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
+    private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+    private final JoinMultiplayerScreen screen;
+    private final List<OnlineServerEntry> onlineServers = Lists.newArrayList();
+    private final Entry lanHeader = new LANHeader();
+    private final List<NetworkServerEntry> networkServers = Lists.newArrayList();
+
+    public ServerSelectionList(JoinMultiplayerScreen joinMultiplayerScreen, Minecraft minecraft, int i, int j, int k, int l, int m) {
+        super(minecraft, i, j, k, l, m);
+        this.screen = joinMultiplayerScreen;
+    }
+
+    private void refreshEntries() {
+        this.clearEntries();
+        this.onlineServers.forEach(this::addEntry);
+        this.addEntry(this.lanHeader);
+        this.networkServers.forEach(this::addEntry);
+    }
+
+    @Override
+    public void setSelected(Entry entry) {
+        super.setSelected(entry);
+        if (this.getSelected() instanceof OnlineServerEntry) {
+            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((OnlineServerEntry)((OnlineServerEntry)this.getSelected())).serverData.name).getString());
+        }
+    }
+
+    @Override
+    protected void moveSelection(int i) {
+        int j = this.children().indexOf(this.getSelected());
+        int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
+        Entry entry = (Entry)this.children().get(k);
+        super.setSelected(entry);
+        if (entry instanceof LANHeader) {
+            if (i > 0 && k == this.getItemCount() - 1) {
+                return;
+            }
+            if (i < 0 && k == 0) {
+                return;
+            }
+            this.moveSelection(i);
+            return;
+        }
+        this.ensureVisible(entry);
+        this.screen.onSelectedChange();
+    }
+
+    public void updateOnlineServers(ServerList serverList) {
+        this.onlineServers.clear();
+        for (int i = 0; i < serverList.size(); ++i) {
+            this.onlineServers.add(new OnlineServerEntry(this.screen, serverList.get(i)));
+        }
+        this.refreshEntries();
+    }
+
+    public void updateNetworkServers(List<LanServer> list) {
+        this.networkServers.clear();
+        for (LanServer lanServer : list) {
+            this.networkServers.add(new NetworkServerEntry(this.screen, lanServer));
+        }
+        this.refreshEntries();
+    }
+
+    @Override
+    protected int getScrollbarPosition() {
+        return super.getScrollbarPosition() + 30;
+    }
+
+    @Override
+    public int getRowWidth() {
+        return super.getRowWidth() + 85;
+    }
+
+    @Override
+    protected boolean isFocused() {
+        return this.screen.getFocused() == this;
+    }
+
+    @Override
+    public /* synthetic */ void setSelected(AbstractSelectionList.Entry entry) {
+        this.setSelected((Entry)entry);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public class OnlineServerEntry
+    extends Entry {
+        private final JoinMultiplayerScreen screen;
+        private final Minecraft minecraft;
+        private final ServerData serverData;
+        private final ResourceLocation iconLocation;
+        private String lastIconB64;
+        private DynamicTexture icon;
+        private long lastClickTime;
+
+        protected OnlineServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, ServerData serverData) {
+            this.screen = joinMultiplayerScreen;
+            this.serverData = serverData;
+            this.minecraft = Minecraft.getInstance();
+            this.iconLocation = new ResourceLocation("servers/" + Hashing.sha1().hashUnencodedChars(serverData.ip) + "/icon");
+            this.icon = (DynamicTexture)this.minecraft.getTextureManager().getTexture(this.iconLocation);
+        }
+
+        @Override
+        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            String string3;
+            int s;
+            if (!this.serverData.pinged) {
+                this.serverData.pinged = true;
+                this.serverData.ping = -2L;
+                this.serverData.motd = "";
+                this.serverData.status = "";
+                THREAD_POOL.submit(() -> {
+                    try {
+                        this.screen.getPinger().pingServer(this.serverData);
+                    } catch (UnknownHostException unknownHostException) {
+                        this.serverData.ping = -1L;
+                        this.serverData.motd = (Object)((Object)ChatFormatting.DARK_RED) + I18n.get("multiplayer.status.cannot_resolve", new Object[0]);
+                    } catch (Exception exception) {
+                        this.serverData.ping = -1L;
+                        this.serverData.motd = (Object)((Object)ChatFormatting.DARK_RED) + I18n.get("multiplayer.status.cannot_connect", new Object[0]);
+                    }
+                });
+            }
+            boolean bl2 = this.serverData.protocol > SharedConstants.getCurrentVersion().getProtocolVersion();
+            boolean bl3 = this.serverData.protocol < SharedConstants.getCurrentVersion().getProtocolVersion();
+            boolean bl4 = bl2 || bl3;
+            this.minecraft.font.draw(this.serverData.name, k + 32 + 3, j + 1, 0xFFFFFF);
+            List<String> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
+            for (int p = 0; p < Math.min(list.size(), 2); ++p) {
+                this.minecraft.font.draw(list.get(p), k + 32 + 3, j + 12 + this.minecraft.font.lineHeight * p, 0x808080);
+            }
+            String string = bl4 ? (Object)((Object)ChatFormatting.DARK_RED) + this.serverData.version : this.serverData.status;
+            int q = this.minecraft.font.width(string);
+            this.minecraft.font.draw(string, k + l - q - 15 - 2, j + 1, 0x808080);
+            int r = 0;
+            String string2 = null;
+            if (bl4) {
+                s = 5;
+                string3 = I18n.get(bl2 ? "multiplayer.status.client_out_of_date" : "multiplayer.status.server_out_of_date", new Object[0]);
+                string2 = this.serverData.playerList;
+            } else if (this.serverData.pinged && this.serverData.ping != -2L) {
+                s = this.serverData.ping < 0L ? 5 : (this.serverData.ping < 150L ? 0 : (this.serverData.ping < 300L ? 1 : (this.serverData.ping < 600L ? 2 : (this.serverData.ping < 1000L ? 3 : 4))));
+                if (this.serverData.ping < 0L) {
+                    string3 = I18n.get("multiplayer.status.no_connection", new Object[0]);
+                } else {
+                    string3 = this.serverData.ping + "ms";
+                    string2 = this.serverData.playerList;
+                }
+            } else {
+                r = 1;
+                s = (int)(Util.getMillis() / 100L + (long)(i * 2) & 7L);
+                if (s > 4) {
+                    s = 8 - s;
+                }
+                string3 = I18n.get("multiplayer.status.pinging", new Object[0]);
+            }
+            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
+            GuiComponent.blit(k + l - 15, j, r * 10, 176 + s * 8, 10, 8, 256, 256);
+            if (this.serverData.getIconB64() != null && !this.serverData.getIconB64().equals(this.lastIconB64)) {
+                this.lastIconB64 = this.serverData.getIconB64();
+                this.loadServerIcon();
+                this.screen.getServers().save();
+            }
+            if (this.icon != null) {
+                this.drawIcon(k, j, this.iconLocation);
+            } else {
+                this.drawIcon(k, j, ICON_MISSING);
+            }
+            int t = n - k;
+            int u = o - j;
+            if (t >= l - 15 && t <= l - 5 && u >= 0 && u <= 8) {
+                this.screen.setToolTip(string3);
+            } else if (t >= l - q - 15 - 2 && t <= l - 15 - 2 && u >= 0 && u <= 8) {
+                this.screen.setToolTip(string2);
+            }
+            if (this.minecraft.options.touchscreen || bl) {
+                this.minecraft.getTextureManager().bind(ICON_OVERLAY_LOCATION);
+                GuiComponent.fill(k, j, k + 32, j + 32, -1601138544);
+                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                int v = n - k;
+                int w = o - j;
+                if (this.canJoin()) {
+                    if (v < 32 && v > 16) {
+                        GuiComponent.blit(k, j, 0.0f, 32.0f, 32, 32, 256, 256);
+                    } else {
+                        GuiComponent.blit(k, j, 0.0f, 0.0f, 32, 32, 256, 256);
+                    }
+                }
+                if (i > 0) {
+                    if (v < 16 && w < 16) {
+                        GuiComponent.blit(k, j, 96.0f, 32.0f, 32, 32, 256, 256);
+                    } else {
+                        GuiComponent.blit(k, j, 96.0f, 0.0f, 32, 32, 256, 256);
+                    }
+                }
+                if (i < this.screen.getServers().size() - 1) {
+                    if (v < 16 && w > 16) {
+                        GuiComponent.blit(k, j, 64.0f, 32.0f, 32, 32, 256, 256);
+                    } else {
+                        GuiComponent.blit(k, j, 64.0f, 0.0f, 32, 32, 256, 256);
+                    }
+                }
+            }
+        }
+
+        protected void drawIcon(int i, int j, ResourceLocation resourceLocation) {
+            this.minecraft.getTextureManager().bind(resourceLocation);
+            GlStateManager.enableBlend();
+            GuiComponent.blit(i, j, 0.0f, 0.0f, 32, 32, 32, 32);
+            GlStateManager.disableBlend();
+        }
+
+        private boolean canJoin() {
+            return true;
+        }
+
+        private void loadServerIcon() {
+            String string = this.serverData.getIconB64();
+            if (string == null) {
+                this.minecraft.getTextureManager().release(this.iconLocation);
+                if (this.icon != null && this.icon.getPixels() != null) {
+                    this.icon.getPixels().close();
+                }
+                this.icon = null;
+            } else {
+                try {
+                    NativeImage nativeImage = NativeImage.fromBase64(string);
+                    Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
+                    Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
+                    if (this.icon == null) {
+                        this.icon = new DynamicTexture(nativeImage);
+                    } else {
+                        this.icon.setPixels(nativeImage);
+                        this.icon.upload();
+                    }
+                    this.minecraft.getTextureManager().register(this.iconLocation, (TextureObject)this.icon);
+                } catch (Throwable throwable) {
+                    LOGGER.error("Invalid icon for server {} ({})", (Object)this.serverData.name, (Object)this.serverData.ip, (Object)throwable);
+                    this.serverData.setIconB64(null);
+                }
+            }
+        }
+
+        @Override
+        public boolean mouseClicked(double d, double e, int i) {
+            double f = d - (double)ServerSelectionList.this.getRowLeft();
+            double g = e - (double)ServerSelectionList.this.getRowTop(ServerSelectionList.this.children().indexOf(this));
+            if (f <= 32.0) {
+                if (f < 32.0 && f > 16.0 && this.canJoin()) {
+                    this.screen.setSelected(this);
+                    this.screen.joinSelectedServer();
+                    return true;
+                }
+                int j = this.screen.serverSelectionList.children().indexOf(this);
+                if (f < 16.0 && g < 16.0 && j > 0) {
+                    int k = Screen.hasShiftDown() ? 0 : j - 1;
+                    this.screen.getServers().swap(j, k);
+                    if (this.screen.serverSelectionList.getSelected() == this) {
+                        this.screen.setSelected(this);
+                    }
+                    this.screen.serverSelectionList.updateOnlineServers(this.screen.getServers());
+                    return true;
+                }
+                if (f < 16.0 && g > 16.0 && j < this.screen.getServers().size() - 1) {
+                    ServerList serverList = this.screen.getServers();
+                    int l = Screen.hasShiftDown() ? serverList.size() - 1 : j + 1;
+                    serverList.swap(j, l);
+                    if (this.screen.serverSelectionList.getSelected() == this) {
+                        this.screen.setSelected(this);
+                    }
+                    this.screen.serverSelectionList.updateOnlineServers(serverList);
+                    return true;
+                }
+            }
+            this.screen.setSelected(this);
+            if (Util.getMillis() - this.lastClickTime < 250L) {
+                this.screen.joinSelectedServer();
+            }
+            this.lastClickTime = Util.getMillis();
+            return false;
+        }
+
+        public ServerData getServerData() {
+            return this.serverData;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class NetworkServerEntry
+    extends Entry {
+        private final JoinMultiplayerScreen screen;
+        protected final Minecraft minecraft;
+        protected final LanServer serverData;
+        private long lastClickTime;
+
+        protected NetworkServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, LanServer lanServer) {
+            this.screen = joinMultiplayerScreen;
+            this.serverData = lanServer;
+            this.minecraft = Minecraft.getInstance();
+        }
+
+        @Override
+        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            this.minecraft.font.draw(I18n.get("lanServer.title", new Object[0]), k + 32 + 3, j + 1, 0xFFFFFF);
+            this.minecraft.font.draw(this.serverData.getMotd(), k + 32 + 3, j + 12, 0x808080);
+            if (this.minecraft.options.hideServerAddress) {
+                this.minecraft.font.draw(I18n.get("selectServer.hiddenAddress", new Object[0]), k + 32 + 3, j + 12 + 11, 0x303030);
+            } else {
+                this.minecraft.font.draw(this.serverData.getAddress(), k + 32 + 3, j + 12 + 11, 0x303030);
+            }
+        }
+
+        @Override
+        public boolean mouseClicked(double d, double e, int i) {
+            this.screen.setSelected(this);
+            if (Util.getMillis() - this.lastClickTime < 250L) {
+                this.screen.joinSelectedServer();
+            }
+            this.lastClickTime = Util.getMillis();
+            return false;
+        }
+
+        public LanServer getServerData() {
+            return this.serverData;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class LANHeader
+    extends Entry {
+        private final Minecraft minecraft = Minecraft.getInstance();
+
+        @Override
+        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            String string;
+            int p = j + m / 2 - this.minecraft.font.lineHeight / 2;
+            this.minecraft.font.draw(I18n.get("lanServer.scanning", new Object[0]), this.minecraft.screen.width / 2 - this.minecraft.font.width(I18n.get("lanServer.scanning", new Object[0])) / 2, p, 0xFFFFFF);
+            switch ((int)(Util.getMillis() / 300L % 4L)) {
+                default: {
+                    string = "O o o";
+                    break;
+                }
+                case 1: 
+                case 3: {
+                    string = "o O o";
+                    break;
+                }
+                case 2: {
+                    string = "o o O";
+                }
+            }
+            this.minecraft.font.draw(string, this.minecraft.screen.width / 2 - this.minecraft.font.width(string) / 2, p + this.minecraft.font.lineHeight, 0x808080);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static abstract class Entry
+    extends ObjectSelectionList.Entry<Entry> {
+    }
+}
+

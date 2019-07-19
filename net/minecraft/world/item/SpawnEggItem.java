@@ -1,0 +1,137 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.item;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Objects;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.level.BaseSpawner;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
+
+public class SpawnEggItem
+extends Item {
+    private static final Map<EntityType<?>, SpawnEggItem> BY_ID = Maps.newIdentityHashMap();
+    private final int color1;
+    private final int color2;
+    private final EntityType<?> defaultType;
+
+    public SpawnEggItem(EntityType<?> entityType, int i, int j, Item.Properties properties) {
+        super(properties);
+        this.defaultType = entityType;
+        this.color1 = i;
+        this.color2 = j;
+        BY_ID.put(entityType, this);
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext useOnContext) {
+        BlockEntity blockEntity;
+        Level level = useOnContext.getLevel();
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        ItemStack itemStack = useOnContext.getItemInHand();
+        BlockPos blockPos = useOnContext.getClickedPos();
+        Direction direction = useOnContext.getClickedFace();
+        BlockState blockState = level.getBlockState(blockPos);
+        Block block = blockState.getBlock();
+        if (block == Blocks.SPAWNER && (blockEntity = level.getBlockEntity(blockPos)) instanceof SpawnerBlockEntity) {
+            BaseSpawner baseSpawner = ((SpawnerBlockEntity)blockEntity).getSpawner();
+            EntityType<?> entityType = this.getType(itemStack.getTag());
+            baseSpawner.setEntityId(entityType);
+            blockEntity.setChanged();
+            level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+            itemStack.shrink(1);
+            return InteractionResult.SUCCESS;
+        }
+        BlockPos blockPos2 = blockState.getCollisionShape(level, blockPos).isEmpty() ? blockPos : blockPos.relative(direction);
+        EntityType<?> entityType2 = this.getType(itemStack.getTag());
+        if (entityType2.spawn(level, itemStack, useOnContext.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP) != null) {
+            itemStack.shrink(1);
+        }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        if (level.isClientSide) {
+            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        }
+        HitResult hitResult = SpawnEggItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (hitResult.getType() != HitResult.Type.BLOCK) {
+            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        }
+        BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+        BlockPos blockPos = blockHitResult.getBlockPos();
+        if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
+            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        }
+        if (!level.mayInteract(player, blockPos) || !player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
+            return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+        }
+        EntityType<?> entityType = this.getType(itemStack.getTag());
+        if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
+            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        }
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
+        player.awardStat(Stats.ITEM_USED.get(this));
+        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+    }
+
+    public boolean spawnsEntity(@Nullable CompoundTag compoundTag, EntityType<?> entityType) {
+        return Objects.equals(this.getType(compoundTag), entityType);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public int getColor(int i) {
+        return i == 0 ? this.color1 : this.color2;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static SpawnEggItem byId(@Nullable EntityType<?> entityType) {
+        return BY_ID.get(entityType);
+    }
+
+    public static Iterable<SpawnEggItem> eggs() {
+        return Iterables.unmodifiableIterable(BY_ID.values());
+    }
+
+    public EntityType<?> getType(@Nullable CompoundTag compoundTag) {
+        CompoundTag compoundTag2;
+        if (compoundTag != null && compoundTag.contains("EntityTag", 10) && (compoundTag2 = compoundTag.getCompound("EntityTag")).contains("id", 8)) {
+            return EntityType.byString(compoundTag2.getString("id")).orElse(this.defaultType);
+        }
+        return this.defaultType;
+    }
+}
+
