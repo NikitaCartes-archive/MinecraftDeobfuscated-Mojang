@@ -1,0 +1,13 @@
+package net.minecraft.client.gui.screens;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Widget;
+
+@Environment(EnvType.CLIENT)
+public abstract class Overlay extends GuiComponent implements Widget {
+	public boolean isPauseScreen() {
+		return true;
+	}
+}

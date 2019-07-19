@@ -1,0 +1,176 @@
+package net.minecraft.world.level.levelgen;
+
+import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectListIterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.BitStorage;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+public class Heightmap {
+	private static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
+	private static final Predicate<BlockState> MATERIAL_MOTION_BLOCKING = blockState -> blockState.getMaterial().blocksMotion();
+	private final BitStorage data = new BitStorage(9, 256);
+	private final Predicate<BlockState> isOpaque;
+	private final ChunkAccess chunk;
+
+	public Heightmap(ChunkAccess chunkAccess, Heightmap.Types types) {
+		this.isOpaque = types.isOpaque();
+		this.chunk = chunkAccess;
+	}
+
+	public static void primeHeightmaps(ChunkAccess chunkAccess, Set<Heightmap.Types> set) {
+		int i = set.size();
+		ObjectList<Heightmap> objectList = new ObjectArrayList<>(i);
+		ObjectListIterator<Heightmap> objectListIterator = objectList.iterator();
+		int j = chunkAccess.getHighestSectionPosition() + 16;
+
+		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
+			for (int k = 0; k < 16; k++) {
+				for (int l = 0; l < 16; l++) {
+					for (Heightmap.Types types : set) {
+						objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
+					}
+
+					for (int m = j - 1; m >= 0; m--) {
+						pooledMutableBlockPos.set(k, m, l);
+						BlockState blockState = chunkAccess.getBlockState(pooledMutableBlockPos);
+						if (blockState.getBlock() != Blocks.AIR) {
+							while (objectListIterator.hasNext()) {
+								Heightmap heightmap = (Heightmap)objectListIterator.next();
+								if (heightmap.isOpaque.test(blockState)) {
+									heightmap.setHeight(k, l, m + 1);
+									objectListIterator.remove();
+								}
+							}
+
+							if (objectList.isEmpty()) {
+								break;
+							}
+
+							objectListIterator.back(i);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public boolean update(int i, int j, int k, BlockState blockState) {
+		int l = this.getFirstAvailable(i, k);
+		if (j <= l - 2) {
+			return false;
+		} else {
+			if (this.isOpaque.test(blockState)) {
+				if (j >= l) {
+					this.setHeight(i, k, j + 1);
+					return true;
+				}
+			} else if (l - 1 == j) {
+				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+				for (int m = j - 1; m >= 0; m--) {
+					mutableBlockPos.set(i, m, k);
+					if (this.isOpaque.test(this.chunk.getBlockState(mutableBlockPos))) {
+						this.setHeight(i, k, m + 1);
+						return true;
+					}
+				}
+
+				this.setHeight(i, k, 0);
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+	public int getFirstAvailable(int i, int j) {
+		return this.getFirstAvailable(getIndex(i, j));
+	}
+
+	private int getFirstAvailable(int i) {
+		return this.data.get(i);
+	}
+
+	private void setHeight(int i, int j, int k) {
+		this.data.set(getIndex(i, j), k);
+	}
+
+	public void setRawData(long[] ls) {
+		System.arraycopy(ls, 0, this.data.getRaw(), 0, ls.length);
+	}
+
+	public long[] getRawData() {
+		return this.data.getRaw();
+	}
+
+	private static int getIndex(int i, int j) {
+		return i + j * 16;
+	}
+
+	public static enum Types {
+		WORLD_SURFACE_WG("WORLD_SURFACE_WG", Heightmap.Usage.WORLDGEN, Heightmap.NOT_AIR),
+		WORLD_SURFACE("WORLD_SURFACE", Heightmap.Usage.CLIENT, Heightmap.NOT_AIR),
+		OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", Heightmap.Usage.WORLDGEN, Heightmap.MATERIAL_MOTION_BLOCKING),
+		OCEAN_FLOOR("OCEAN_FLOOR", Heightmap.Usage.LIVE_WORLD, Heightmap.MATERIAL_MOTION_BLOCKING),
+		MOTION_BLOCKING("MOTION_BLOCKING", Heightmap.Usage.CLIENT, blockState -> blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()),
+		MOTION_BLOCKING_NO_LEAVES(
+			"MOTION_BLOCKING_NO_LEAVES",
+			Heightmap.Usage.LIVE_WORLD,
+			blockState -> (blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && !(blockState.getBlock() instanceof LeavesBlock)
+		);
+
+		private final String serializationKey;
+		private final Heightmap.Usage usage;
+		private final Predicate<BlockState> isOpaque;
+		private static final Map<String, Heightmap.Types> REVERSE_LOOKUP = Util.make(Maps.<String, Heightmap.Types>newHashMap(), hashMap -> {
+			for (Heightmap.Types types : values()) {
+				hashMap.put(types.serializationKey, types);
+			}
+		});
+
+		private Types(String string2, Heightmap.Usage usage, Predicate<BlockState> predicate) {
+			this.serializationKey = string2;
+			this.usage = usage;
+			this.isOpaque = predicate;
+		}
+
+		public String getSerializationKey() {
+			return this.serializationKey;
+		}
+
+		public boolean sendToClient() {
+			return this.usage == Heightmap.Usage.CLIENT;
+		}
+
+		@Environment(EnvType.CLIENT)
+		public boolean keepAfterWorldgen() {
+			return this.usage != Heightmap.Usage.WORLDGEN;
+		}
+
+		public static Heightmap.Types getFromKey(String string) {
+			return (Heightmap.Types)REVERSE_LOOKUP.get(string);
+		}
+
+		public Predicate<BlockState> isOpaque() {
+			return this.isOpaque;
+		}
+	}
+
+	public static enum Usage {
+		WORLDGEN,
+		LIVE_WORLD,
+		CLIENT;
+	}
+}

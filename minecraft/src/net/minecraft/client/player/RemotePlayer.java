@@ -1,0 +1,98 @@
+package net.minecraft.client.player;
+
+import com.mojang.authlib.GameProfile;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+
+@Environment(EnvType.CLIENT)
+public class RemotePlayer extends AbstractClientPlayer {
+	public RemotePlayer(MultiPlayerLevel multiPlayerLevel, GameProfile gameProfile) {
+		super(multiPlayerLevel, gameProfile);
+		this.maxUpStep = 1.0F;
+		this.noPhysics = true;
+	}
+
+	@Override
+	public boolean shouldRenderAtSqrDistance(double d) {
+		double e = this.getBoundingBox().getSize() * 10.0;
+		if (Double.isNaN(e)) {
+			e = 1.0;
+		}
+
+		e *= 64.0 * getViewScale();
+		return d < e * e;
+	}
+
+	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		return true;
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		this.animationSpeedOld = this.animationSpeed;
+		double d = this.x - this.xo;
+		double e = this.z - this.zo;
+		float f = Mth.sqrt(d * d + e * e) * 4.0F;
+		if (f > 1.0F) {
+			f = 1.0F;
+		}
+
+		this.animationSpeed = this.animationSpeed + (f - this.animationSpeed) * 0.4F;
+		this.animationPosition = this.animationPosition + this.animationSpeed;
+	}
+
+	@Override
+	public void aiStep() {
+		if (this.lerpSteps > 0) {
+			double d = this.x + (this.lerpX - this.x) / (double)this.lerpSteps;
+			double e = this.y + (this.lerpY - this.y) / (double)this.lerpSteps;
+			double f = this.z + (this.lerpZ - this.z) / (double)this.lerpSteps;
+			this.yRot = (float)((double)this.yRot + Mth.wrapDegrees(this.lerpYRot - (double)this.yRot) / (double)this.lerpSteps);
+			this.xRot = (float)((double)this.xRot + (this.lerpXRot - (double)this.xRot) / (double)this.lerpSteps);
+			this.lerpSteps--;
+			this.setPos(d, e, f);
+			this.setRot(this.yRot, this.xRot);
+		}
+
+		if (this.lerpHeadSteps > 0) {
+			this.yHeadRot = (float)((double)this.yHeadRot + Mth.wrapDegrees(this.lyHeadRot - (double)this.yHeadRot) / (double)this.lerpHeadSteps);
+			this.lerpHeadSteps--;
+		}
+
+		this.oBob = this.bob;
+		this.updateSwingTime();
+		float g;
+		if (this.onGround && !(this.getHealth() <= 0.0F)) {
+			g = Math.min(0.1F, Mth.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement())));
+		} else {
+			g = 0.0F;
+		}
+
+		if (!this.onGround && !(this.getHealth() <= 0.0F)) {
+			float h = (float)Math.atan(-this.getDeltaMovement().y * 0.2F) * 15.0F;
+		} else {
+			float h = 0.0F;
+		}
+
+		this.bob = this.bob + (g - this.bob) * 0.4F;
+		this.level.getProfiler().push("push");
+		this.pushEntities();
+		this.level.getProfiler().pop();
+	}
+
+	@Override
+	protected void updatePlayerPose() {
+	}
+
+	@Override
+	public void sendMessage(Component component) {
+		Minecraft.getInstance().gui.getChat().addMessage(component);
+	}
+}

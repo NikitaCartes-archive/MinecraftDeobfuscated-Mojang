@@ -1,0 +1,91 @@
+package net.minecraft.network.protocol.game;
+
+import net.minecraft.network.PacketListener;
+
+public interface ServerGamePacketListener extends PacketListener {
+	void handleAnimate(ServerboundSwingPacket serverboundSwingPacket);
+
+	void handleChat(ServerboundChatPacket serverboundChatPacket);
+
+	void handleClientCommand(ServerboundClientCommandPacket serverboundClientCommandPacket);
+
+	void handleClientInformation(ServerboundClientInformationPacket serverboundClientInformationPacket);
+
+	void handleContainerAck(ServerboundContainerAckPacket serverboundContainerAckPacket);
+
+	void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket);
+
+	void handleContainerClick(ServerboundContainerClickPacket serverboundContainerClickPacket);
+
+	void handlePlaceRecipe(ServerboundPlaceRecipePacket serverboundPlaceRecipePacket);
+
+	void handleContainerClose(ServerboundContainerClosePacket serverboundContainerClosePacket);
+
+	void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket);
+
+	void handleInteract(ServerboundInteractPacket serverboundInteractPacket);
+
+	void handleKeepAlive(ServerboundKeepAlivePacket serverboundKeepAlivePacket);
+
+	void handleMovePlayer(ServerboundMovePlayerPacket serverboundMovePlayerPacket);
+
+	void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket);
+
+	void handlePlayerAction(ServerboundPlayerActionPacket serverboundPlayerActionPacket);
+
+	void handlePlayerCommand(ServerboundPlayerCommandPacket serverboundPlayerCommandPacket);
+
+	void handlePlayerInput(ServerboundPlayerInputPacket serverboundPlayerInputPacket);
+
+	void handleSetCarriedItem(ServerboundSetCarriedItemPacket serverboundSetCarriedItemPacket);
+
+	void handleSetCreativeModeSlot(ServerboundSetCreativeModeSlotPacket serverboundSetCreativeModeSlotPacket);
+
+	void handleSignUpdate(ServerboundSignUpdatePacket serverboundSignUpdatePacket);
+
+	void handleUseItemOn(ServerboundUseItemOnPacket serverboundUseItemOnPacket);
+
+	void handleUseItem(ServerboundUseItemPacket serverboundUseItemPacket);
+
+	void handleTeleportToEntityPacket(ServerboundTeleportToEntityPacket serverboundTeleportToEntityPacket);
+
+	void handleResourcePackResponse(ServerboundResourcePackPacket serverboundResourcePackPacket);
+
+	void handlePaddleBoat(ServerboundPaddleBoatPacket serverboundPaddleBoatPacket);
+
+	void handleMoveVehicle(ServerboundMoveVehiclePacket serverboundMoveVehiclePacket);
+
+	void handleAcceptTeleportPacket(ServerboundAcceptTeleportationPacket serverboundAcceptTeleportationPacket);
+
+	void handleRecipeBookUpdatePacket(ServerboundRecipeBookUpdatePacket serverboundRecipeBookUpdatePacket);
+
+	void handleSeenAdvancements(ServerboundSeenAdvancementsPacket serverboundSeenAdvancementsPacket);
+
+	void handleCustomCommandSuggestions(ServerboundCommandSuggestionPacket serverboundCommandSuggestionPacket);
+
+	void handleSetCommandBlock(ServerboundSetCommandBlockPacket serverboundSetCommandBlockPacket);
+
+	void handleSetCommandMinecart(ServerboundSetCommandMinecartPacket serverboundSetCommandMinecartPacket);
+
+	void handlePickItem(ServerboundPickItemPacket serverboundPickItemPacket);
+
+	void handleRenameItem(ServerboundRenameItemPacket serverboundRenameItemPacket);
+
+	void handleSetBeaconPacket(ServerboundSetBeaconPacket serverboundSetBeaconPacket);
+
+	void handleSetStructureBlock(ServerboundSetStructureBlockPacket serverboundSetStructureBlockPacket);
+
+	void handleSelectTrade(ServerboundSelectTradePacket serverboundSelectTradePacket);
+
+	void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket);
+
+	void handleEntityTagQuery(ServerboundEntityTagQuery serverboundEntityTagQuery);
+
+	void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery);
+
+	void handleSetJigsawBlock(ServerboundSetJigsawBlockPacket serverboundSetJigsawBlockPacket);
+
+	void handleChangeDifficulty(ServerboundChangeDifficultyPacket serverboundChangeDifficultyPacket);
+
+	void handleLockDifficulty(ServerboundLockDifficultyPacket serverboundLockDifficultyPacket);
+}

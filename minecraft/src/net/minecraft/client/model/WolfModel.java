@@ -1,0 +1,135 @@
+package net.minecraft.client.model;
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.animal.Wolf;
+
+@Environment(EnvType.CLIENT)
+public class WolfModel<T extends Wolf> extends EntityModel<T> {
+	private final ModelPart head;
+	private final ModelPart body;
+	private final ModelPart leg0;
+	private final ModelPart leg1;
+	private final ModelPart leg2;
+	private final ModelPart leg3;
+	private final ModelPart tail;
+	private final ModelPart upperBody;
+
+	public WolfModel() {
+		float f = 0.0F;
+		float g = 13.5F;
+		this.head = new ModelPart(this, 0, 0);
+		this.head.addBox(-2.0F, -3.0F, -2.0F, 6, 6, 4, 0.0F);
+		this.head.setPos(-1.0F, 13.5F, -7.0F);
+		this.body = new ModelPart(this, 18, 14);
+		this.body.addBox(-3.0F, -2.0F, -3.0F, 6, 9, 6, 0.0F);
+		this.body.setPos(0.0F, 14.0F, 2.0F);
+		this.upperBody = new ModelPart(this, 21, 0);
+		this.upperBody.addBox(-3.0F, -3.0F, -3.0F, 8, 6, 7, 0.0F);
+		this.upperBody.setPos(-1.0F, 14.0F, 2.0F);
+		this.leg0 = new ModelPart(this, 0, 18);
+		this.leg0.addBox(0.0F, 0.0F, -1.0F, 2, 8, 2, 0.0F);
+		this.leg0.setPos(-2.5F, 16.0F, 7.0F);
+		this.leg1 = new ModelPart(this, 0, 18);
+		this.leg1.addBox(0.0F, 0.0F, -1.0F, 2, 8, 2, 0.0F);
+		this.leg1.setPos(0.5F, 16.0F, 7.0F);
+		this.leg2 = new ModelPart(this, 0, 18);
+		this.leg2.addBox(0.0F, 0.0F, -1.0F, 2, 8, 2, 0.0F);
+		this.leg2.setPos(-2.5F, 16.0F, -4.0F);
+		this.leg3 = new ModelPart(this, 0, 18);
+		this.leg3.addBox(0.0F, 0.0F, -1.0F, 2, 8, 2, 0.0F);
+		this.leg3.setPos(0.5F, 16.0F, -4.0F);
+		this.tail = new ModelPart(this, 9, 18);
+		this.tail.addBox(0.0F, 0.0F, -1.0F, 2, 8, 2, 0.0F);
+		this.tail.setPos(-1.0F, 12.0F, 8.0F);
+		this.head.texOffs(16, 14).addBox(-2.0F, -5.0F, 0.0F, 2, 2, 1, 0.0F);
+		this.head.texOffs(16, 14).addBox(2.0F, -5.0F, 0.0F, 2, 2, 1, 0.0F);
+		this.head.texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3, 3, 4, 0.0F);
+	}
+
+	public void render(T wolf, float f, float g, float h, float i, float j, float k) {
+		super.render(wolf, f, g, h, i, j, k);
+		this.setupAnim(wolf, f, g, h, i, j, k);
+		if (this.young) {
+			float l = 2.0F;
+			GlStateManager.pushMatrix();
+			GlStateManager.translatef(0.0F, 5.0F * k, 2.0F * k);
+			this.head.renderRollable(k);
+			GlStateManager.popMatrix();
+			GlStateManager.pushMatrix();
+			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+			GlStateManager.translatef(0.0F, 24.0F * k, 0.0F);
+			this.body.render(k);
+			this.leg0.render(k);
+			this.leg1.render(k);
+			this.leg2.render(k);
+			this.leg3.render(k);
+			this.tail.renderRollable(k);
+			this.upperBody.render(k);
+			GlStateManager.popMatrix();
+		} else {
+			this.head.renderRollable(k);
+			this.body.render(k);
+			this.leg0.render(k);
+			this.leg1.render(k);
+			this.leg2.render(k);
+			this.leg3.render(k);
+			this.tail.renderRollable(k);
+			this.upperBody.render(k);
+		}
+	}
+
+	public void prepareMobModel(T wolf, float f, float g, float h) {
+		if (wolf.isAngry()) {
+			this.tail.yRot = 0.0F;
+		} else {
+			this.tail.yRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		}
+
+		if (wolf.isSitting()) {
+			this.upperBody.setPos(-1.0F, 16.0F, -3.0F);
+			this.upperBody.xRot = (float) (Math.PI * 2.0 / 5.0);
+			this.upperBody.yRot = 0.0F;
+			this.body.setPos(0.0F, 18.0F, 0.0F);
+			this.body.xRot = (float) (Math.PI / 4);
+			this.tail.setPos(-1.0F, 21.0F, 6.0F);
+			this.leg0.setPos(-2.5F, 22.0F, 2.0F);
+			this.leg0.xRot = (float) (Math.PI * 3.0 / 2.0);
+			this.leg1.setPos(0.5F, 22.0F, 2.0F);
+			this.leg1.xRot = (float) (Math.PI * 3.0 / 2.0);
+			this.leg2.xRot = 5.811947F;
+			this.leg2.setPos(-2.49F, 17.0F, -4.0F);
+			this.leg3.xRot = 5.811947F;
+			this.leg3.setPos(0.51F, 17.0F, -4.0F);
+		} else {
+			this.body.setPos(0.0F, 14.0F, 2.0F);
+			this.body.xRot = (float) (Math.PI / 2);
+			this.upperBody.setPos(-1.0F, 14.0F, -3.0F);
+			this.upperBody.xRot = this.body.xRot;
+			this.tail.setPos(-1.0F, 12.0F, 8.0F);
+			this.leg0.setPos(-2.5F, 16.0F, 7.0F);
+			this.leg1.setPos(0.5F, 16.0F, 7.0F);
+			this.leg2.setPos(-2.5F, 16.0F, -4.0F);
+			this.leg3.setPos(0.5F, 16.0F, -4.0F);
+			this.leg0.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+			this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+			this.leg2.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+			this.leg3.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		}
+
+		this.head.zRot = wolf.getHeadRollAngle(h) + wolf.getBodyRollAngle(h, 0.0F);
+		this.upperBody.zRot = wolf.getBodyRollAngle(h, -0.08F);
+		this.body.zRot = wolf.getBodyRollAngle(h, -0.16F);
+		this.tail.zRot = wolf.getBodyRollAngle(h, -0.2F);
+	}
+
+	public void setupAnim(T wolf, float f, float g, float h, float i, float j, float k) {
+		super.setupAnim(wolf, f, g, h, i, j, k);
+		this.head.xRot = j * (float) (Math.PI / 180.0);
+		this.head.yRot = i * (float) (Math.PI / 180.0);
+		this.tail.xRot = h;
+	}
+}

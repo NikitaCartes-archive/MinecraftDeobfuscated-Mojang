@@ -1,0 +1,53 @@
+package net.minecraft.world.level.storage.loot.predicates;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import java.util.Set;
+import net.minecraft.advancements.critereon.DamageSourcePredicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
+
+public class DamageSourceCondition implements LootItemCondition {
+	private final DamageSourcePredicate predicate;
+
+	private DamageSourceCondition(DamageSourcePredicate damageSourcePredicate) {
+		this.predicate = damageSourcePredicate;
+	}
+
+	@Override
+	public Set<LootContextParam<?>> getReferencedContextParams() {
+		return ImmutableSet.of(LootContextParams.BLOCK_POS, LootContextParams.DAMAGE_SOURCE);
+	}
+
+	public boolean test(LootContext lootContext) {
+		DamageSource damageSource = lootContext.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
+		BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
+		return blockPos != null && damageSource != null && this.predicate.matches(lootContext.getLevel(), new Vec3(blockPos), damageSource);
+	}
+
+	public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder builder) {
+		return () -> new DamageSourceCondition(builder.build());
+	}
+
+	public static class Serializer extends LootItemCondition.Serializer<DamageSourceCondition> {
+		protected Serializer() {
+			super(new ResourceLocation("damage_source_properties"), DamageSourceCondition.class);
+		}
+
+		public void serialize(JsonObject jsonObject, DamageSourceCondition damageSourceCondition, JsonSerializationContext jsonSerializationContext) {
+			jsonObject.add("predicate", damageSourceCondition.predicate.serializeToJson());
+		}
+
+		public DamageSourceCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+			DamageSourcePredicate damageSourcePredicate = DamageSourcePredicate.fromJson(jsonObject.get("predicate"));
+			return new DamageSourceCondition(damageSourcePredicate);
+		}
+	}
+}

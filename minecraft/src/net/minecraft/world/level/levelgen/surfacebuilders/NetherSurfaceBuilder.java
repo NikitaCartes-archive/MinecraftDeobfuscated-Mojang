@@ -1,0 +1,104 @@
+package net.minecraft.world.level.levelgen.surfacebuilders;
+
+import com.mojang.datafixers.Dynamic;
+import java.util.Random;
+import java.util.function.Function;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.synth.PerlinNoise;
+
+public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
+	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
+	private static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
+	private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
+	private static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
+	protected long seed;
+	protected PerlinNoise decorationNoise;
+
+	public NetherSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
+		super(function);
+	}
+
+	public void apply(
+		Random random,
+		ChunkAccess chunkAccess,
+		Biome biome,
+		int i,
+		int j,
+		int k,
+		double d,
+		BlockState blockState,
+		BlockState blockState2,
+		int l,
+		long m,
+		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
+	) {
+		int n = l + 1;
+		int o = i & 15;
+		int p = j & 15;
+		double e = 0.03125;
+		boolean bl = this.decorationNoise.getValue((double)i * 0.03125, (double)j * 0.03125, 0.0) + random.nextDouble() * 0.2 > 0.0;
+		boolean bl2 = this.decorationNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) + random.nextDouble() * 0.2 > 0.0;
+		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		int r = -1;
+		BlockState blockState3 = NETHERRACK;
+		BlockState blockState4 = NETHERRACK;
+
+		for (int s = 127; s >= 0; s--) {
+			mutableBlockPos.set(o, s, p);
+			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
+			if (blockState5.getBlock() != null && !blockState5.isAir()) {
+				if (blockState5.getBlock() == blockState.getBlock()) {
+					if (r == -1) {
+						if (q <= 0) {
+							blockState3 = AIR;
+							blockState4 = NETHERRACK;
+						} else if (s >= n - 4 && s <= n + 1) {
+							blockState3 = NETHERRACK;
+							blockState4 = NETHERRACK;
+							if (bl2) {
+								blockState3 = GRAVEL;
+								blockState4 = NETHERRACK;
+							}
+
+							if (bl) {
+								blockState3 = SOUL_SAND;
+								blockState4 = SOUL_SAND;
+							}
+						}
+
+						if (s < n && (blockState3 == null || blockState3.isAir())) {
+							blockState3 = blockState2;
+						}
+
+						r = q;
+						if (s >= n - 1) {
+							chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+						} else {
+							chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+						}
+					} else if (r > 0) {
+						r--;
+						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+					}
+				}
+			} else {
+				r = -1;
+			}
+		}
+	}
+
+	@Override
+	public void initNoise(long l) {
+		if (this.seed != l || this.decorationNoise == null) {
+			this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), 4);
+		}
+
+		this.seed = l;
+	}
+}

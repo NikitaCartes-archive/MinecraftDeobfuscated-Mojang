@@ -1,0 +1,94 @@
+package com.mojang.blaze3d.shaders;
+
+import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.TextureUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import org.apache.commons.lang3.StringUtils;
+
+@Environment(EnvType.CLIENT)
+public class Program {
+	private final Program.Type type;
+	private final String name;
+	private final int id;
+	private int references;
+
+	private Program(Program.Type type, int i, String string) {
+		this.type = type;
+		this.id = i;
+		this.name = string;
+	}
+
+	public void attachToEffect(Effect effect) {
+		this.references++;
+		GLX.glAttachShader(effect.getId(), this.id);
+	}
+
+	public void close() {
+		this.references--;
+		if (this.references <= 0) {
+			GLX.glDeleteShader(this.id);
+			this.type.getPrograms().remove(this.name);
+		}
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public static Program compileShader(Program.Type type, String string, InputStream inputStream) throws IOException {
+		String string2 = TextureUtil.readResourceAsString(inputStream);
+		if (string2 == null) {
+			throw new IOException("Could not load program " + type.getName());
+		} else {
+			int i = GLX.glCreateShader(type.getGlType());
+			GLX.glShaderSource(i, string2);
+			GLX.glCompileShader(i);
+			if (GLX.glGetShaderi(i, GLX.GL_COMPILE_STATUS) == 0) {
+				String string3 = StringUtils.trim(GLX.glGetShaderInfoLog(i, 32768));
+				throw new IOException("Couldn't compile " + type.getName() + " program: " + string3);
+			} else {
+				Program program = new Program(type, i, string);
+				type.getPrograms().put(string, program);
+				return program;
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum Type {
+		VERTEX("vertex", ".vsh", GLX.GL_VERTEX_SHADER),
+		FRAGMENT("fragment", ".fsh", GLX.GL_FRAGMENT_SHADER);
+
+		private final String name;
+		private final String extension;
+		private final int glType;
+		private final Map<String, Program> programs = Maps.<String, Program>newHashMap();
+
+		private Type(String string2, String string3, int j) {
+			this.name = string2;
+			this.extension = string3;
+			this.glType = j;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public String getExtension() {
+			return this.extension;
+		}
+
+		private int getGlType() {
+			return this.glType;
+		}
+
+		public Map<String, Program> getPrograms() {
+			return this.programs;
+		}
+	}
+}

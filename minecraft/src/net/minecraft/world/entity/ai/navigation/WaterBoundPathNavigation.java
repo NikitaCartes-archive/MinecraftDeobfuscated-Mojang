@@ -1,0 +1,142 @@
+package net.minecraft.world.entity.ai.navigation;
+
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Dolphin;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.SwimNodeEvaluator;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
+public class WaterBoundPathNavigation extends PathNavigation {
+	private boolean allowBreaching;
+
+	public WaterBoundPathNavigation(Mob mob, Level level) {
+		super(mob, level);
+	}
+
+	@Override
+	protected PathFinder createPathFinder(int i) {
+		this.allowBreaching = this.mob instanceof Dolphin;
+		this.nodeEvaluator = new SwimNodeEvaluator(this.allowBreaching);
+		return new PathFinder(this.nodeEvaluator, i);
+	}
+
+	@Override
+	protected boolean canUpdatePath() {
+		return this.allowBreaching || this.isInLiquid();
+	}
+
+	@Override
+	protected Vec3 getTempMobPos() {
+		return new Vec3(this.mob.x, this.mob.y + (double)this.mob.getBbHeight() * 0.5, this.mob.z);
+	}
+
+	@Override
+	public void tick() {
+		this.tick++;
+		if (this.hasDelayedRecomputation) {
+			this.recomputePath();
+		}
+
+		if (!this.isDone()) {
+			if (this.canUpdatePath()) {
+				this.updatePath();
+			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
+				Vec3 vec3 = this.path.getPos(this.mob, this.path.getIndex());
+				if (Mth.floor(this.mob.x) == Mth.floor(vec3.x) && Mth.floor(this.mob.y) == Mth.floor(vec3.y) && Mth.floor(this.mob.z) == Mth.floor(vec3.z)) {
+					this.path.setIndex(this.path.getIndex() + 1);
+				}
+			}
+
+			DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
+			if (!this.isDone()) {
+				Vec3 vec3 = this.path.currentPos(this.mob);
+				this.mob.getMoveControl().setWantedPosition(vec3.x, vec3.y, vec3.z, this.speedModifier);
+			}
+		}
+	}
+
+	@Override
+	protected void updatePath() {
+		if (this.path != null) {
+			Vec3 vec3 = this.getTempMobPos();
+			float f = this.mob.getBbWidth();
+			float g = f > 0.75F ? f / 2.0F : 0.75F - f / 2.0F;
+			Vec3 vec32 = this.mob.getDeltaMovement();
+			if (Math.abs(vec32.x) > 0.2 || Math.abs(vec32.z) > 0.2) {
+				g = (float)((double)g * vec32.length() * 6.0);
+			}
+
+			int i = 6;
+			Vec3 vec33 = this.path.currentPos();
+			if (Math.abs(this.mob.x - (vec33.x + 0.5)) < (double)g
+				&& Math.abs(this.mob.z - (vec33.z + 0.5)) < (double)g
+				&& Math.abs(this.mob.y - vec33.y) < (double)(g * 2.0F)) {
+				this.path.next();
+			}
+
+			for (int j = Math.min(this.path.getIndex() + 6, this.path.getSize() - 1); j > this.path.getIndex(); j--) {
+				vec33 = this.path.getPos(this.mob, j);
+				if (!(vec33.distanceToSqr(vec3) > 36.0) && this.canMoveDirectly(vec3, vec33, 0, 0, 0)) {
+					this.path.setIndex(j);
+					break;
+				}
+			}
+
+			this.doStuckDetection(vec3);
+		}
+	}
+
+	@Override
+	protected void doStuckDetection(Vec3 vec3) {
+		if (this.tick - this.lastStuckCheck > 100) {
+			if (vec3.distanceToSqr(this.lastStuckCheckPos) < 2.25) {
+				this.stop();
+			}
+
+			this.lastStuckCheck = this.tick;
+			this.lastStuckCheckPos = vec3;
+		}
+
+		if (this.path != null && !this.path.isDone()) {
+			Vec3 vec32 = this.path.currentPos();
+			if (vec32.equals(this.timeoutCachedNode)) {
+				this.timeoutTimer = this.timeoutTimer + (Util.getMillis() - this.lastTimeoutCheck);
+			} else {
+				this.timeoutCachedNode = vec32;
+				double d = vec3.distanceTo(this.timeoutCachedNode);
+				this.timeoutLimit = this.mob.getSpeed() > 0.0F ? d / (double)this.mob.getSpeed() * 100.0 : 0.0;
+			}
+
+			if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 2.0) {
+				this.timeoutCachedNode = Vec3.ZERO;
+				this.timeoutTimer = 0L;
+				this.timeoutLimit = 0.0;
+				this.stop();
+			}
+
+			this.lastTimeoutCheck = Util.getMillis();
+		}
+	}
+
+	@Override
+	protected boolean canMoveDirectly(Vec3 vec3, Vec3 vec32, int i, int j, int k) {
+		Vec3 vec33 = new Vec3(vec32.x, vec32.y + (double)this.mob.getBbHeight() * 0.5, vec32.z);
+		return this.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.mob)).getType() == HitResult.Type.MISS;
+	}
+
+	@Override
+	public boolean isStableDestination(BlockPos blockPos) {
+		return !this.level.getBlockState(blockPos).isSolidRender(this.level, blockPos);
+	}
+
+	@Override
+	public void setCanFloat(boolean bl) {
+	}
+}
