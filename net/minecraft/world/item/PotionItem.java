@@ -46,9 +46,6 @@ extends Item {
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
         Player player;
         Player player2 = player = livingEntity instanceof Player ? (Player)livingEntity : null;
-        if (player == null || !player.abilities.instabuild) {
-            itemStack.shrink(1);
-        }
         if (player instanceof ServerPlayer) {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)player, itemStack);
         }
@@ -64,6 +61,9 @@ extends Item {
         }
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));
+            if (!player.abilities.instabuild) {
+                itemStack.shrink(1);
+            }
         }
         if (player == null || !player.abilities.instabuild) {
             if (itemStack.isEmpty()) {

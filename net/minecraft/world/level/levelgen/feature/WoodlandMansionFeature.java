@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -51,12 +52,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
         if (i == chunkPos.x && j == chunkPos.z) {
-            Set<Biome> set = chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, j * 16 + 9, 32);
-            for (Biome biome : set) {
-                if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.WOODLAND_MANSION)) continue;
+            Set<Biome> set = chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32);
+            for (Biome biome2 : set) {
+                if (chunkGenerator.isBiomeValidStartForStructure(biome2, Feature.WOODLAND_MANSION)) continue;
                 return false;
             }
             return true;
@@ -81,8 +82,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class WoodlandMansionStart
     extends StructureStart {
-        public WoodlandMansionStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, biome, boundingBox, k, l);
+        public WoodlandMansionStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
@@ -116,8 +117,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-            super.postProcess(levelAccessor, random, boundingBox, chunkPos);
+        public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+            super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
             int i = this.boundingBox.y0;
             for (int j = boundingBox.x0; j <= boundingBox.x1; ++j) {
                 for (int k = boundingBox.z0; k <= boundingBox.z1; ++k) {

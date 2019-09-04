@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,14 +87,14 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     @Override
     public void render(long l) {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         this.doRender();
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
         if (!this.minecraft.player.isSpectator()) {
             this.updateLastLookedAtUuid();
         }

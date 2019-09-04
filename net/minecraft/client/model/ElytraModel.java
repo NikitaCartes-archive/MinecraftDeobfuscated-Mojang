@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -28,15 +28,15 @@ extends EntityModel<T> {
 
     @Override
     public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.disableCull();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.disableCull();
         if (((LivingEntity)livingEntity).isBaby()) {
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 1.5f, -0.1f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 1.5f, -0.1f);
             this.leftWing.render(k);
             this.rightWing.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.leftWing.render(k);
             this.rightWing.render(k);
@@ -59,7 +59,7 @@ extends EntityModel<T> {
             }
             l = p * 0.34906584f + (1.0f - p) * l;
             m = p * -1.5707964f + (1.0f - p) * m;
-        } else if (((Entity)livingEntity).isVisuallySneaking()) {
+        } else if (((Entity)livingEntity).isCrouching()) {
             l = 0.6981317f;
             m = -0.7853982f;
             n = 3.0f;

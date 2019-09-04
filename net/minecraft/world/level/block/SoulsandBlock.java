@@ -5,6 +5,7 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
@@ -36,8 +37,8 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        BubbleColumnBlock.growColumn(level, blockPos.above(), false);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), false);
     }
 
     @Override

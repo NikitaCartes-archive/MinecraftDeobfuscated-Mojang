@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -50,14 +50,14 @@ extends StateSwitchingButton {
     public void renderButton(int i, int j, float f) {
         if (this.animationTime > 0.0f) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(this.x + 8, this.y + 12, 0.0f);
-            GlStateManager.scalef(1.0f, g, 1.0f);
-            GlStateManager.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(this.x + 8, this.y + 12, 0.0f);
+            RenderSystem.scalef(1.0f, g, 1.0f);
+            RenderSystem.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
         }
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(this.resourceLocation);
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableDepthTest();
         int k = this.xTexStart;
         int l = this.yTexStart;
         if (this.isStateTriggered) {
@@ -70,16 +70,16 @@ extends StateSwitchingButton {
         if (this.isStateTriggered) {
             m -= 2;
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.blit(m, this.y, k, l, this.width, this.height);
-        GlStateManager.enableDepthTest();
+        RenderSystem.enableDepthTest();
         Lighting.turnOnGui();
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         this.renderIcon(minecraft.getItemRenderer());
-        GlStateManager.enableLighting();
+        RenderSystem.enableLighting();
         Lighting.turnOff();
         if (this.animationTime > 0.0f) {
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             this.animationTime -= f;
         }
     }

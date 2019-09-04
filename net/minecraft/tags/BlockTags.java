@@ -46,6 +46,8 @@ public class BlockTags {
     public static final Tag<Block> SMALL_FLOWERS;
     public static final Tag<Block> BEDS;
     public static final Tag<Block> FENCES;
+    public static final Tag<Block> TALL_FLOWERS;
+    public static final Tag<Block> FLOWERS;
     public static final Tag<Block> FLOWER_POTS;
     public static final Tag<Block> ENDERMAN_HOLDABLE;
     public static final Tag<Block> ICE;
@@ -63,6 +65,9 @@ public class BlockTags {
     public static final Tag<Block> SIGNS;
     public static final Tag<Block> DRAGON_IMMUNE;
     public static final Tag<Block> WITHER_IMMUNE;
+    public static final Tag<Block> BEEHIVES;
+    public static final Tag<Block> CROPS;
+    public static final Tag<Block> BEE_GROWABLES;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -111,6 +116,8 @@ public class BlockTags {
         SMALL_FLOWERS = BlockTags.bind("small_flowers");
         BEDS = BlockTags.bind("beds");
         FENCES = BlockTags.bind("fences");
+        TALL_FLOWERS = BlockTags.bind("tall_flowers");
+        FLOWERS = BlockTags.bind("flowers");
         FLOWER_POTS = BlockTags.bind("flower_pots");
         ENDERMAN_HOLDABLE = BlockTags.bind("enderman_holdable");
         ICE = BlockTags.bind("ice");
@@ -128,6 +135,9 @@ public class BlockTags {
         SIGNS = BlockTags.bind("signs");
         DRAGON_IMMUNE = BlockTags.bind("dragon_immune");
         WITHER_IMMUNE = BlockTags.bind("wither_immune");
+        BEEHIVES = BlockTags.bind("beehives");
+        CROPS = BlockTags.bind("crops");
+        BEE_GROWABLES = BlockTags.bind("bee_growables");
     }
 
     static class Wrapper

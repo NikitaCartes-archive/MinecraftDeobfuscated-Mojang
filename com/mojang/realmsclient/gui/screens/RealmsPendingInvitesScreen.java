@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PendingInvite;
@@ -220,7 +220,7 @@ extends RealmsScreen {
             RealmsPendingInvitesScreen.this.drawString(RealmsPendingInvitesScreen.getAge(pendingInvite), i + 38, j + 24, 0x6C6C6C);
             RowButton.drawButtonsInRow(this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
             RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 RealmsScreen.blit(i, j, 8.0f, 8.0f, 8, 8, 32, 32, 64, 64);
                 RealmsScreen.blit(i, j, 40.0f, 8.0f, 8, 8, 32, 32, 64, 64);
             });
@@ -236,10 +236,10 @@ extends RealmsScreen {
             @Override
             protected void draw(int i, int j, boolean bl) {
                 RealmsScreen.bind("realms:textures/gui/realms/reject_icon.png");
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GlStateManager.pushMatrix();
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.pushMatrix();
                 RealmsScreen.blit(i, j, bl ? 19.0f : 0.0f, 0.0f, 18, 18, 37, 18);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
                 if (bl) {
                     RealmsPendingInvitesScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.invites.button.reject");
                 }
@@ -261,10 +261,10 @@ extends RealmsScreen {
             @Override
             protected void draw(int i, int j, boolean bl) {
                 RealmsScreen.bind("realms:textures/gui/realms/accept_icon.png");
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GlStateManager.pushMatrix();
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.pushMatrix();
                 RealmsScreen.blit(i, j, bl ? 19.0f : 0.0f, 0.0f, 18, 18, 37, 18);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
                 if (bl) {
                     RealmsPendingInvitesScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.invites.button.accept");
                 }

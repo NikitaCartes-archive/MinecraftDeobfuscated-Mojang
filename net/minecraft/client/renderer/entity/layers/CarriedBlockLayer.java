@@ -3,8 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,23 +27,23 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
         if (blockState == null) {
             return;
         }
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 0.6875f, -0.75f);
-        GlStateManager.rotatef(20.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(45.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.translatef(0.25f, 0.1875f, 0.25f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.6875f, -0.75f);
+        RenderSystem.rotatef(20.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(45.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.translatef(0.25f, 0.1875f, 0.25f);
         float m = 0.5f;
-        GlStateManager.scalef(-0.5f, -0.5f, 0.5f);
+        RenderSystem.scalef(-0.5f, -0.5f, 0.5f);
         int n = enderMan.getLightColor();
         int o = n % 65536;
         int p = n / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, o, p);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, o, p);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, 1.0f);
-        GlStateManager.popMatrix();
-        GlStateManager.disableRescaleNormal();
+        RenderSystem.popMatrix();
+        RenderSystem.disableRescaleNormal();
     }
 
     @Override

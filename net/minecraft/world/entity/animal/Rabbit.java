@@ -463,7 +463,7 @@ extends Animal {
                     Integer integer = blockState.getValue(CarrotBlock.AGE);
                     if (integer == 0) {
                         level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
-                        level.destroyBlock(blockPos, true);
+                        level.destroyBlock(blockPos, true, this.rabbit);
                     } else {
                         level.setBlock(blockPos, (BlockState)blockState.setValue(CarrotBlock.AGE, integer - 1), 2);
                         level.levelEvent(2001, blockPos, Block.getId(blockState));

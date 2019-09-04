@@ -34,7 +34,7 @@ extends BlockItem {
         BlockState blockState = level.getBlockState(blockPos);
         Block block = this.getBlock();
         if (blockState.getBlock() == block) {
-            Direction direction = blockPlaceContext.isSneaking() ? (blockPlaceContext.isInside() ? blockPlaceContext.getClickedFace().getOpposite() : blockPlaceContext.getClickedFace()) : (blockPlaceContext.getClickedFace() == Direction.UP ? blockPlaceContext.getHorizontalDirection() : Direction.UP);
+            Direction direction = blockPlaceContext.isSecondaryUseActive() ? (blockPlaceContext.isInside() ? blockPlaceContext.getClickedFace().getOpposite() : blockPlaceContext.getClickedFace()) : (blockPlaceContext.getClickedFace() == Direction.UP ? blockPlaceContext.getHorizontalDirection() : Direction.UP);
             int i = 0;
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(direction);
             while (i < 7) {

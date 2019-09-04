@@ -3,9 +3,9 @@
  */
 package net.minecraft.client.renderer;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.FloatBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -112,7 +112,7 @@ public class FogRenderer {
             this.fogGreen = this.fogGreen * (1.0f - g) + this.fogGreen * h * g;
             this.fogBlue = this.fogBlue * (1.0f - g) + this.fogBlue * h * g;
         }
-        GlStateManager.clearColor(this.fogRed, this.fogGreen, this.fogBlue, 0.0f);
+        RenderSystem.clearColor(this.fogRed, this.fogGreen, this.fogBlue, 0.0f);
     }
 
     private void setLandFogColor(Camera camera, Level level, float f) {
@@ -190,8 +190,8 @@ public class FogRenderer {
 
     public void setupFog(Camera camera, int i) {
         this.resetFogColor(false);
-        GlStateManager.normal3f(0.0f, -1.0f, 0.0f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.normal3f(0.0f, -1.0f, 0.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         FluidState fluidState = camera.getFluidInCamera();
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
             float f = 5.0f;
@@ -199,17 +199,17 @@ public class FogRenderer {
             if (j < 20) {
                 f = Mth.lerp(1.0f - (float)j / 20.0f, 5.0f, this.renderer.getRenderDistance());
             }
-            GlStateManager.fogMode(GlStateManager.FogMode.LINEAR);
+            RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
             if (i == -1) {
-                GlStateManager.fogStart(0.0f);
-                GlStateManager.fogEnd(f * 0.8f);
+                RenderSystem.fogStart(0.0f);
+                RenderSystem.fogEnd(f * 0.8f);
             } else {
-                GlStateManager.fogStart(f * 0.25f);
-                GlStateManager.fogEnd(f);
+                RenderSystem.fogStart(f * 0.25f);
+                RenderSystem.fogEnd(f);
             }
-            GLX.setupNvFogDistance();
+            RenderSystem.setupNvFogDistance();
         } else if (fluidState.is(FluidTags.WATER)) {
-            GlStateManager.fogMode(GlStateManager.FogMode.EXP2);
+            RenderSystem.fogMode(GlStateManager.FogMode.EXP2);
             if (camera.getEntity() instanceof LivingEntity) {
                 if (camera.getEntity() instanceof LocalPlayer) {
                     LocalPlayer localPlayer = (LocalPlayer)camera.getEntity();
@@ -218,42 +218,42 @@ public class FogRenderer {
                     if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
                         g += 0.005f;
                     }
-                    GlStateManager.fogDensity(g);
+                    RenderSystem.fogDensity(g);
                 } else {
-                    GlStateManager.fogDensity(0.05f);
+                    RenderSystem.fogDensity(0.05f);
                 }
             } else {
-                GlStateManager.fogDensity(0.1f);
+                RenderSystem.fogDensity(0.1f);
             }
         } else if (fluidState.is(FluidTags.LAVA)) {
-            GlStateManager.fogMode(GlStateManager.FogMode.EXP);
-            GlStateManager.fogDensity(2.0f);
+            RenderSystem.fogMode(GlStateManager.FogMode.EXP);
+            RenderSystem.fogDensity(2.0f);
         } else {
             float f = this.renderer.getRenderDistance();
-            GlStateManager.fogMode(GlStateManager.FogMode.LINEAR);
+            RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
             if (i == -1) {
-                GlStateManager.fogStart(0.0f);
-                GlStateManager.fogEnd(f);
+                RenderSystem.fogStart(0.0f);
+                RenderSystem.fogEnd(f);
             } else {
-                GlStateManager.fogStart(f * 0.75f);
-                GlStateManager.fogEnd(f);
+                RenderSystem.fogStart(f * 0.75f);
+                RenderSystem.fogEnd(f);
             }
-            GLX.setupNvFogDistance();
+            RenderSystem.setupNvFogDistance();
             if (this.minecraft.level.dimension.isFoggyAt(Mth.floor(camera.getPosition().x), Mth.floor(camera.getPosition().z)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog()) {
-                GlStateManager.fogStart(f * 0.05f);
-                GlStateManager.fogEnd(Math.min(f, 192.0f) * 0.5f);
+                RenderSystem.fogStart(f * 0.05f);
+                RenderSystem.fogEnd(Math.min(f, 192.0f) * 0.5f);
             }
         }
-        GlStateManager.enableColorMaterial();
-        GlStateManager.enableFog();
-        GlStateManager.colorMaterial(1028, 4608);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.enableFog();
+        RenderSystem.colorMaterial(1028, 4608);
     }
 
     public void resetFogColor(boolean bl) {
         if (bl) {
-            GlStateManager.fog(2918, this.blackBuffer);
+            RenderSystem.fog(2918, this.blackBuffer);
         } else {
-            GlStateManager.fog(2918, this.updateColorBuffer());
+            RenderSystem.fog(2918, this.updateColorBuffer());
         }
     }
 

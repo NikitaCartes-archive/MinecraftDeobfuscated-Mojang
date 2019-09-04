@@ -3,12 +3,18 @@
  */
 package net.minecraft.network.protocol.game;
 
+import io.netty.buffer.Unpooled;
 import java.util.Collection;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -21,6 +27,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class DebugPackets {
     private static final Logger LOGGER = LogManager.getLogger();
+
+    public static void sendGameTestAddMarker(ServerLevel serverLevel, BlockPos blockPos, String string, int i, int j) {
+        FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer());
+        friendlyByteBuf.writeBlockPos(blockPos);
+        friendlyByteBuf.writeInt(i);
+        friendlyByteBuf.writeUtf(string);
+        friendlyByteBuf.writeInt(j);
+        DebugPackets.sendPacketToAllPlayers(serverLevel, friendlyByteBuf, ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_ADD_MARKER);
+    }
+
+    public static void sendGameTestClearPacket(ServerLevel serverLevel) {
+        FriendlyByteBuf friendlyByteBuf = new FriendlyByteBuf(Unpooled.buffer());
+        DebugPackets.sendPacketToAllPlayers(serverLevel, friendlyByteBuf, ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR);
+    }
 
     public static void sendPoiPacketsForChunk(ServerLevel serverLevel, ChunkPos chunkPos) {
     }
@@ -50,6 +70,13 @@ public class DebugPackets {
     }
 
     public static void sendEntityBrain(LivingEntity livingEntity) {
+    }
+
+    private static void sendPacketToAllPlayers(ServerLevel serverLevel, FriendlyByteBuf friendlyByteBuf, ResourceLocation resourceLocation) {
+        ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(resourceLocation, friendlyByteBuf);
+        for (Player player : serverLevel.getLevel().players()) {
+            ((ServerPlayer)player).connection.send(packet);
+        }
     }
 }
 

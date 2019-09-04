@@ -136,6 +136,10 @@ extends Monster {
         return this.patrolling;
     }
 
+    protected void setPatrolling(boolean bl) {
+        this.patrolling = bl;
+    }
+
     public static class LongDistancePatrolGoal<T extends PatrollingMonster>
     extends Goal {
         private final T mob;
@@ -167,7 +171,10 @@ extends Monster {
             boolean bl = ((PatrollingMonster)this.mob).isPatrolLeader();
             PathNavigation pathNavigation = ((Mob)this.mob).getNavigation();
             if (pathNavigation.isDone()) {
-                if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerThan(((Entity)this.mob).position(), 10.0)) {
+                List<PatrollingMonster> list = this.findPatrolCompanions();
+                if (((PatrollingMonster)this.mob).isPatrolling() && list.isEmpty()) {
+                    ((PatrollingMonster)this.mob).setPatrolling(false);
+                } else if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerThan(((Entity)this.mob).position(), 10.0)) {
                     Vec3 vec3 = new Vec3(((PatrollingMonster)this.mob).getPatrolTarget());
                     Vec3 vec32 = new Vec3(((PatrollingMonster)this.mob).x, ((PatrollingMonster)this.mob).y, ((PatrollingMonster)this.mob).z);
                     Vec3 vec33 = vec32.subtract(vec3);
@@ -177,15 +184,18 @@ extends Monster {
                     if (!pathNavigation.moveTo((blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos)).getX(), blockPos.getY(), blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
                         this.moveRandomly();
                     } else if (bl) {
-                        List<PatrollingMonster> list = ((PatrollingMonster)this.mob).level.getEntitiesOfClass(PatrollingMonster.class, ((Entity)this.mob).getBoundingBox().inflate(16.0), patrollingMonster -> !patrollingMonster.isPatrolLeader() && patrollingMonster.canJoinPatrol());
-                        for (PatrollingMonster patrollingMonster2 : list) {
-                            patrollingMonster2.setPatrolTarget(blockPos);
+                        for (PatrollingMonster patrollingMonster : list) {
+                            patrollingMonster.setPatrolTarget(blockPos);
                         }
                     }
                 } else {
                     ((PatrollingMonster)this.mob).findPatrolTarget();
                 }
             }
+        }
+
+        private List<PatrollingMonster> findPatrolCompanions() {
+            return ((PatrollingMonster)this.mob).level.getEntitiesOfClass(PatrollingMonster.class, ((Entity)this.mob).getBoundingBox().inflate(16.0), patrollingMonster -> patrollingMonster.canJoinPatrol() && !patrollingMonster.is((Entity)this.mob));
         }
 
         private void moveRandomly() {

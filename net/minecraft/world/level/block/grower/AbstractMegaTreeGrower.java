@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
 import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
@@ -19,20 +20,20 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractMegaTreeGrower
 extends AbstractTreeGrower {
     @Override
-    public boolean growTree(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random) {
+    public boolean growTree(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
         for (int i = 0; i >= -1; --i) {
             for (int j = 0; j >= -1; --j) {
                 if (!AbstractMegaTreeGrower.isTwoByTwoSapling(blockState, levelAccessor, blockPos, i, j)) continue;
-                return this.placeMega(levelAccessor, blockPos, blockState, random, i, j);
+                return this.placeMega(levelAccessor, chunkGenerator, blockPos, blockState, random, i, j);
             }
         }
-        return super.growTree(levelAccessor, blockPos, blockState, random);
+        return super.growTree(levelAccessor, chunkGenerator, blockPos, blockState, random);
     }
 
     @Nullable
     protected abstract AbstractTreeFeature<NoneFeatureConfiguration> getMegaFeature(Random var1);
 
-    public boolean placeMega(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
+    public boolean placeMega(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
         AbstractTreeFeature<NoneFeatureConfiguration> abstractTreeFeature = this.getMegaFeature(random);
         if (abstractTreeFeature == null) {
             return false;
@@ -42,7 +43,7 @@ extends AbstractTreeGrower {
         levelAccessor.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);
         levelAccessor.setBlock(blockPos.offset(i, 0, j + 1), blockState2, 4);
         levelAccessor.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState2, 4);
-        if (abstractTreeFeature.place(levelAccessor, levelAccessor.getChunkSource().getGenerator(), random, blockPos.offset(i, 0, j), FeatureConfiguration.NONE)) {
+        if (abstractTreeFeature.place(levelAccessor, chunkGenerator, random, blockPos.offset(i, 0, j), FeatureConfiguration.NONE, false)) {
             return true;
         }
         levelAccessor.setBlock(blockPos.offset(i, 0, j), blockState, 4);

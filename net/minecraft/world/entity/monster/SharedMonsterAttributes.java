@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.entity.monster;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -43,7 +43,7 @@ public class SharedMonsterAttributes {
         Attribute attribute = attributeInstance.getAttribute();
         compoundTag.putString("Name", attribute.getName());
         compoundTag.putDouble("Base", attributeInstance.getBaseValue());
-        Collection<AttributeModifier> collection = attributeInstance.getModifiers();
+        Set<AttributeModifier> collection = attributeInstance.getModifiers();
         if (collection != null && !collection.isEmpty()) {
             ListTag listTag = new ListTag();
             for (AttributeModifier attributeModifier : collection) {

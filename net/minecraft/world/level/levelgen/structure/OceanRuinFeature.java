@@ -84,8 +84,8 @@ extends RandomScatteredFeature<OceanRuinConfiguration> {
 
     public static class OceanRuinStart
     extends StructureStart {
-        public OceanRuinStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, biome, boundingBox, k, l);
+        public OceanRuinStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override

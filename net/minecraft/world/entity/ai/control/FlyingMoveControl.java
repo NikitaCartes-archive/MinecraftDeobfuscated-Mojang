@@ -10,8 +10,13 @@ import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 
 public class FlyingMoveControl
 extends MoveControl {
-    public FlyingMoveControl(Mob mob) {
+    private final int maxTurn;
+    private final boolean hoversInPlace;
+
+    public FlyingMoveControl(Mob mob, int i, boolean bl) {
         super(mob);
+        this.maxTurn = i;
+        this.hoversInPlace = bl;
     }
 
     @Override
@@ -29,15 +34,17 @@ extends MoveControl {
                 return;
             }
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
-            this.mob.yRot = this.rotlerp(this.mob.yRot, h, 10.0f);
+            this.mob.yRot = this.rotlerp(this.mob.yRot, h, 90.0f);
             float i = this.mob.onGround ? (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()) : (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.FLYING_SPEED).getValue());
             this.mob.setSpeed(i);
             double j = Mth.sqrt(d * d + f * f);
             float k = (float)(-(Mth.atan2(e, j) * 57.2957763671875));
-            this.mob.xRot = this.rotlerp(this.mob.xRot, k, 10.0f);
+            this.mob.xRot = this.rotlerp(this.mob.xRot, k, this.maxTurn);
             this.mob.setYya(e > 0.0 ? i : -i);
         } else {
-            this.mob.setNoGravity(false);
+            if (!this.hoversInPlace) {
+                this.mob.setNoGravity(false);
+            }
             this.mob.setYya(0.0f);
             this.mob.setZza(0.0f);
         }

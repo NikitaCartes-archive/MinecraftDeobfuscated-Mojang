@@ -13,6 +13,7 @@ import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -320,7 +321,7 @@ public class ChunkHolder {
         boolean bl8 = fullChunkStatus2.isOrAfter(FullChunkStatus.ENTITY_TICKING);
         if (!bl7 && bl8) {
             if (this.entityTickingChunkFuture != UNLOADED_LEVEL_CHUNK_FUTURE) {
-                throw new IllegalStateException();
+                throw Util.pauseInIde(new IllegalStateException());
             }
             this.entityTickingChunkFuture = chunkMap.getEntityTickingRangeFuture(this.pos);
             this.updateChunkToSave(this.entityTickingChunkFuture);

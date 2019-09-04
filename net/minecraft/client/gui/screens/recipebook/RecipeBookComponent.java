@@ -4,8 +4,8 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -217,11 +217,11 @@ PlaceRecipe<Ingredient> {
             return;
         }
         Lighting.turnOnGui();
-        GlStateManager.disableLighting();
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 0.0f, 100.0f);
+        RenderSystem.disableLighting();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.0f, 100.0f);
         this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         int k = (this.width - 147) / 2 - this.xOffset;
         int l = (this.height - 166) / 2;
         this.blit(k, l, 1, 1, 147, 166);
@@ -232,7 +232,7 @@ PlaceRecipe<Ingredient> {
         }
         this.filterButton.render(i, j, f);
         this.recipeBookPage.render(k, l, i, j, f);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     public void renderTooltip(int i, int j, int k, int l) {

@@ -4,16 +4,13 @@
 package net.minecraft.network.protocol.game;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 public class ClientboundAddPlayerPacket
 implements Packet<ClientGamePacketListener> {
@@ -24,8 +21,6 @@ implements Packet<ClientGamePacketListener> {
     private double z;
     private byte yRot;
     private byte xRot;
-    private SynchedEntityData entityData;
-    private List<SynchedEntityData.DataItem<?>> unpack;
 
     public ClientboundAddPlayerPacket() {
     }
@@ -38,7 +33,6 @@ implements Packet<ClientGamePacketListener> {
         this.z = player.z;
         this.yRot = (byte)(player.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(player.xRot * 256.0f / 360.0f);
-        this.entityData = player.getEntityData();
     }
 
     @Override
@@ -50,7 +44,6 @@ implements Packet<ClientGamePacketListener> {
         this.z = friendlyByteBuf.readDouble();
         this.yRot = friendlyByteBuf.readByte();
         this.xRot = friendlyByteBuf.readByte();
-        this.unpack = SynchedEntityData.unpack(friendlyByteBuf);
     }
 
     @Override
@@ -62,18 +55,11 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeDouble(this.z);
         friendlyByteBuf.writeByte(this.yRot);
         friendlyByteBuf.writeByte(this.xRot);
-        this.entityData.packAll(friendlyByteBuf);
     }
 
     @Override
     public void handle(ClientGamePacketListener clientGamePacketListener) {
         clientGamePacketListener.handleAddPlayer(this);
-    }
-
-    @Nullable
-    @Environment(value=EnvType.CLIENT)
-    public List<SynchedEntityData.DataItem<?>> getUnpackedData() {
-        return this.unpack;
     }
 
     @Environment(value=EnvType.CLIENT)

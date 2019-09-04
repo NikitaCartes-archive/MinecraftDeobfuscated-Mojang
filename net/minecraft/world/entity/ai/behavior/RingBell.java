@@ -31,14 +31,14 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        BlockState blockState;
-        Brain<?> brain = livingEntity.getBrain();
-        BlockPos blockPos = brain.getMemory(MemoryModuleType.MEETING_POINT).get().pos();
-        if (blockPos.closerThan(new BlockPos(livingEntity), 3.0) && (blockState = serverLevel.getBlockState(blockPos)).getBlock() == Blocks.BELL) {
+        block1: {
+            BlockState blockState;
+            Brain<?> brain = livingEntity.getBrain();
+            BlockPos blockPos = brain.getMemory(MemoryModuleType.MEETING_POINT).get().pos();
+            if (!blockPos.closerThan(new BlockPos(livingEntity), 3.0) || (blockState = serverLevel.getBlockState(blockPos)).getBlock() != Blocks.BELL) break block1;
             BellBlock bellBlock = (BellBlock)blockState.getBlock();
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                if (!bellBlock.onHit(serverLevel, blockState, serverLevel.getBlockEntity(blockPos), new BlockHitResult(new Vec3(0.5, 0.5, 0.5), direction, blockPos, false), null, false)) continue;
-                break;
+                if (bellBlock.onHit(serverLevel, blockState, new BlockHitResult(new Vec3(0.5, 0.5, 0.5), direction, blockPos, false), null, false)) break;
             }
         }
     }

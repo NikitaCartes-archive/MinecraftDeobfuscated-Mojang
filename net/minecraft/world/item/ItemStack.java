@@ -39,6 +39,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
@@ -712,13 +713,14 @@ public final class ItemStack {
             ListTag listTag = this.tag.getList("AttributeModifiers", 10);
             for (int i = 0; i < listTag.size(); ++i) {
                 CompoundTag compoundTag = listTag.getCompound(i);
-                AttributeModifier attributeModifier = SharedMonsterAttributes.loadAttributeModifier(compoundTag);
-                if (attributeModifier == null || compoundTag.contains("Slot", 8) && !compoundTag.getString("Slot").equals(equipmentSlot.getName()) || attributeModifier.getId().getLeastSignificantBits() == 0L || attributeModifier.getId().getMostSignificantBits() == 0L) continue;
-                multimap.put(compoundTag.getString("AttributeName"), attributeModifier);
+                AttributeModifier attributeModifier2 = SharedMonsterAttributes.loadAttributeModifier(compoundTag);
+                if (attributeModifier2 == null || compoundTag.contains("Slot", 8) && !compoundTag.getString("Slot").equals(equipmentSlot.getName()) || attributeModifier2.getId().getLeastSignificantBits() == 0L || attributeModifier2.getId().getMostSignificantBits() == 0L) continue;
+                multimap.put(compoundTag.getString("AttributeName"), attributeModifier2);
             }
         } else {
             multimap = this.getItem().getDefaultAttributeModifiers(equipmentSlot);
         }
+        multimap.values().forEach(attributeModifier -> attributeModifier.setSerialize(false));
         return multimap;
     }
 
@@ -843,6 +845,14 @@ public final class ItemStack {
 
     public boolean isEdible() {
         return this.getItem().isEdible();
+    }
+
+    public SoundEvent getDrinkingSound() {
+        return this.getItem().getDrinkingSound();
+    }
+
+    public SoundEvent getEatingSound() {
+        return this.getItem().getEatingSound();
     }
 }
 

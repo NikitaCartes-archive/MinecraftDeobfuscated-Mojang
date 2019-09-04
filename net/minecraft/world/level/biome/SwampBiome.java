@@ -59,7 +59,7 @@ extends Biome {
     @Override
     @Environment(value=EnvType.CLIENT)
     public int getGrassColor(BlockPos blockPos) {
-        double d = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.0225, (double)blockPos.getZ() * 0.0225);
+        double d = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.0225, (double)blockPos.getZ() * 0.0225, false);
         if (d < -0.1) {
             return 5011004;
         }

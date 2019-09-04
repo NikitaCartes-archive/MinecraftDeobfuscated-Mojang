@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
@@ -20,12 +21,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -38,11 +40,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -63,11 +65,12 @@ implements LevelAccessor {
     private final ChunkGeneratorSettings settings;
     private final TickList<Block> blockTicks = new WorldGenTickList<Block>(blockPos -> this.getChunk((BlockPos)blockPos).getBlockTicks());
     private final TickList<Fluid> liquidTicks = new WorldGenTickList<Fluid>(blockPos -> this.getChunk((BlockPos)blockPos).getLiquidTicks());
+    private final BiomeManager biomeManager;
 
     public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list) {
         int i = Mth.floor(Math.sqrt(list.size()));
         if (i * i != list.size()) {
-            throw new IllegalStateException("Cache size is not a square.");
+            throw Util.pauseInIde(new IllegalStateException("Cache size is not a square."));
         }
         ChunkPos chunkPos = list.get(list.size() / 2).getPos();
         this.cache = list;
@@ -81,6 +84,7 @@ implements LevelAccessor {
         this.levelData = serverLevel.getLevelData();
         this.random = serverLevel.getRandom();
         this.dimension = serverLevel.getDimension();
+        this.biomeManager = new BiomeManager(this, LevelData.obfuscateSeed(this.seed), this.dimension.getType().getBiomeZoomer());
     }
 
     public int getCenterX() {
@@ -119,9 +123,9 @@ implements LevelAccessor {
         LOGGER.error("Requested chunk : {} {}", (Object)i, (Object)j);
         LOGGER.error("Region bounds : {} {} | {} {}", (Object)chunkAccess2.getPos().x, (Object)chunkAccess2.getPos().z, (Object)chunkAccess3.getPos().x, (Object)chunkAccess3.getPos().z);
         if (chunkAccess != null) {
-            throw new RuntimeException(String.format("Chunk is not of correct status. Expecting %s, got %s | %s %s", chunkStatus, chunkAccess.getStatus(), i, j));
+            throw Util.pauseInIde(new RuntimeException(String.format("Chunk is not of correct status. Expecting %s, got %s | %s %s", chunkStatus, chunkAccess.getStatus(), i, j)));
         }
-        throw new RuntimeException(String.format("We are asking a region for a chunk out of bound | %s %s", i, j));
+        throw Util.pauseInIde(new RuntimeException(String.format("We are asking a region for a chunk out of bound | %s %s", i, j)));
     }
 
     @Override
@@ -153,33 +157,29 @@ implements LevelAccessor {
     }
 
     @Override
-    public Biome getBiome(BlockPos blockPos) {
-        Biome biome = this.getChunk(blockPos).getBiomes()[blockPos.getX() & 0xF | (blockPos.getZ() & 0xF) << 4];
-        if (biome == null) {
-            throw new RuntimeException(String.format("Biome is null @ %s", blockPos));
-        }
-        return biome;
+    public BiomeManager getBiomeManager() {
+        return this.biomeManager;
     }
 
     @Override
-    public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-        return this.getChunkSource().getLightEngine().getLayerListener(lightLayer).getLightValue(blockPos);
+    public Biome getUncachedNoiseBiome(int i, int j, int k) {
+        return this.level.getUncachedNoiseBiome(i, j, k);
     }
 
     @Override
-    public int getRawBrightness(BlockPos blockPos, int i) {
-        return this.getChunk(blockPos).getRawBrightness(blockPos, i, this.getDimension().isHasSkyLight());
+    public LevelLightEngine getLightEngine() {
+        return this.level.getLightEngine();
     }
 
     @Override
-    public boolean destroyBlock(BlockPos blockPos, boolean bl) {
+    public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
         BlockState blockState = this.getBlockState(blockPos);
         if (blockState.isAir()) {
             return false;
         }
         if (bl) {
             BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
-            Block.dropResources(blockState, this.level, blockPos, blockEntity);
+            Block.dropResources(blockState, this.level, blockPos, blockEntity, entity, ItemStack.EMPTY);
         }
         return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
     }
@@ -262,11 +262,6 @@ implements LevelAccessor {
     @Override
     public WorldBorder getWorldBorder() {
         return this.level.getWorldBorder();
-    }
-
-    @Override
-    public boolean isUnobstructed(@Nullable Entity entity, VoxelShape voxelShape) {
-        return true;
     }
 
     @Override
@@ -372,11 +367,6 @@ implements LevelAccessor {
 
     public List<Player> players() {
         return Collections.emptyList();
-    }
-
-    @Override
-    public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
-        return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());
     }
 
     @Override

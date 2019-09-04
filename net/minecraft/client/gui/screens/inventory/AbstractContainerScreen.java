@@ -4,10 +4,9 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -83,21 +82,21 @@ implements MenuAccess<T> {
         int k = this.leftPos;
         int l = this.topPos;
         this.renderBg(f, i, j);
-        GlStateManager.disableRescaleNormal();
+        RenderSystem.disableRescaleNormal();
         Lighting.turnOff();
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableLighting();
+        RenderSystem.disableDepthTest();
         super.render(i, j, f);
         Lighting.turnOnGui();
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(k, l, 0.0f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableRescaleNormal();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(k, l, 0.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableRescaleNormal();
         this.hoveredSlot = null;
         int m = 240;
         int n = 240;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, 240.0f, 240.0f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, 240.0f, 240.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         for (int o = 0; o < ((AbstractContainerMenu)this.menu).slots.size(); ++o) {
             Slot slot = ((AbstractContainerMenu)this.menu).slots.get(o);
             if (slot.isActive()) {
@@ -105,15 +104,15 @@ implements MenuAccess<T> {
             }
             if (!this.isHovering(slot, i, j) || !slot.isActive()) continue;
             this.hoveredSlot = slot;
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepthTest();
+            RenderSystem.disableLighting();
+            RenderSystem.disableDepthTest();
             p = slot.x;
             q = slot.y;
-            GlStateManager.colorMask(true, true, true, false);
+            RenderSystem.colorMask(true, true, true, false);
             this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
-            GlStateManager.colorMask(true, true, true, true);
-            GlStateManager.enableLighting();
-            GlStateManager.enableDepthTest();
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.enableLighting();
+            RenderSystem.enableDepthTest();
         }
         Lighting.turnOff();
         this.renderLabels(i, j);
@@ -148,9 +147,9 @@ implements MenuAccess<T> {
             int t = this.snapbackStartY + (int)((float)r * g);
             this.renderFloatingItem(this.snapbackItem, s, t, null);
         }
-        GlStateManager.popMatrix();
-        GlStateManager.enableLighting();
-        GlStateManager.enableDepthTest();
+        RenderSystem.popMatrix();
+        RenderSystem.enableLighting();
+        RenderSystem.enableDepthTest();
         Lighting.turnOn();
     }
 
@@ -161,7 +160,7 @@ implements MenuAccess<T> {
     }
 
     private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
-        GlStateManager.translatef(0.0f, 0.0f, 32.0f);
+        RenderSystem.translatef(0.0f, 0.0f, 32.0f);
         this.blitOffset = 200;
         this.itemRenderer.blitOffset = 200.0f;
         this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
@@ -209,17 +208,17 @@ implements MenuAccess<T> {
         this.itemRenderer.blitOffset = 100.0f;
         if (itemStack.isEmpty() && slot.isActive() && (string2 = slot.getNoItemIcon()) != null) {
             TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-            GlStateManager.disableLighting();
+            RenderSystem.disableLighting();
             this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
             AbstractContainerScreen.blit(i, j, this.blitOffset, 16, 16, textureAtlasSprite);
-            GlStateManager.enableLighting();
+            RenderSystem.enableLighting();
             bl2 = true;
         }
         if (!bl2) {
             if (bl) {
                 AbstractContainerScreen.fill(i, j, i + 16, j + 16, -2130706433);
             }
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableDepthTest();
             this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j);
             this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
         }

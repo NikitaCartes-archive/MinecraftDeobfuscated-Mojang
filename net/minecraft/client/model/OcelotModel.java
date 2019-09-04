@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -59,14 +59,14 @@ extends EntityModel<T> {
         this.setupAnim(entity, f, g, h, i, j, k);
         if (this.young) {
             float l = 2.0f;
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.75f, 0.75f, 0.75f);
-            GlStateManager.translatef(0.0f, 10.0f * k, 4.0f * k);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
+            RenderSystem.translatef(0.0f, 10.0f * k, 4.0f * k);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.body.render(k);
             this.backLegL.render(k);
             this.backLegR.render(k);
@@ -74,7 +74,7 @@ extends EntityModel<T> {
             this.frontLegR.render(k);
             this.tail1.render(k);
             this.tail2.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.head.render(k);
             this.body.render(k);
@@ -128,7 +128,7 @@ extends EntityModel<T> {
         this.backLegR.y = 18.0f;
         this.backLegR.z = 5.0f;
         this.tail1.xRot = 0.9f;
-        if (((Entity)entity).isSneaking()) {
+        if (((Entity)entity).isCrouching()) {
             this.body.y += 1.0f;
             this.head.y += 2.0f;
             this.tail1.y += 1.0f;

@@ -133,7 +133,7 @@ public class Options {
     public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
     public final KeyMapping keyRight = new KeyMapping("key.right", 68, "key.categories.movement");
     public final KeyMapping keyJump = new KeyMapping("key.jump", 32, "key.categories.movement");
-    public final KeyMapping keySneak = new KeyMapping("key.sneak", 340, "key.categories.movement");
+    public final KeyMapping keyShift = new KeyMapping("key.sneak", 340, "key.categories.movement");
     public final KeyMapping keySprint = new KeyMapping("key.sprint", 341, "key.categories.movement");
     public final KeyMapping keyInventory = new KeyMapping("key.inventory", 69, "key.categories.inventory");
     public final KeyMapping keySwapHands = new KeyMapping("key.swapHands", 70, "key.categories.inventory");
@@ -153,7 +153,7 @@ public class Options {
     public final KeyMapping[] keyHotbarSlots = new KeyMapping[]{new KeyMapping("key.hotbar.1", 49, "key.categories.inventory"), new KeyMapping("key.hotbar.2", 50, "key.categories.inventory"), new KeyMapping("key.hotbar.3", 51, "key.categories.inventory"), new KeyMapping("key.hotbar.4", 52, "key.categories.inventory"), new KeyMapping("key.hotbar.5", 53, "key.categories.inventory"), new KeyMapping("key.hotbar.6", 54, "key.categories.inventory"), new KeyMapping("key.hotbar.7", 55, "key.categories.inventory"), new KeyMapping("key.hotbar.8", 56, "key.categories.inventory"), new KeyMapping("key.hotbar.9", 57, "key.categories.inventory")};
     public final KeyMapping keySaveHotbarActivator = new KeyMapping("key.saveToolbarActivator", 67, "key.categories.creative");
     public final KeyMapping keyLoadHotbarActivator = new KeyMapping("key.loadToolbarActivator", 88, "key.categories.creative");
-    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keySneak, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapHands, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
+    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keyShift, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapHands, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
     protected Minecraft minecraft;
     private final File optionsFile;
     public Difficulty difficulty = Difficulty.NORMAL;

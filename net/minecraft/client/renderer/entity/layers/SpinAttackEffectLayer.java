@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
@@ -29,16 +29,16 @@ extends RenderLayer<T, PlayerModel<T>> {
         if (!((LivingEntity)livingEntity).isAutoSpinAttack()) {
             return;
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindTexture(TEXTURE);
         for (int m = 0; m < 3; ++m) {
-            GlStateManager.pushMatrix();
-            GlStateManager.rotatef(i * (float)(-(45 + m * 5)), 0.0f, 1.0f, 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.rotatef(i * (float)(-(45 + m * 5)), 0.0f, 1.0f, 0.0f);
             float n = 0.75f * (float)m;
-            GlStateManager.scalef(n, n, n);
-            GlStateManager.translatef(0.0f, -0.2f + 0.6f * (float)m, 0.0f);
+            RenderSystem.scalef(n, n, n);
+            RenderSystem.translatef(0.0f, -0.2f + 0.6f * (float)m, 0.0f);
             this.model.render(f, g, i, j, k, l);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

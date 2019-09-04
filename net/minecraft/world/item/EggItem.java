@@ -24,9 +24,6 @@ extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (!player.abilities.instabuild) {
-            itemStack.shrink(1);
-        }
         level.playSound(null, player.x, player.y, player.z, SoundEvents.EGG_THROW, SoundSource.PLAYERS, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
         if (!level.isClientSide) {
             ThrownEgg thrownEgg = new ThrownEgg(level, player);
@@ -35,6 +32,9 @@ extends Item {
             level.addFreshEntity(thrownEgg);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
         return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
     }
 }

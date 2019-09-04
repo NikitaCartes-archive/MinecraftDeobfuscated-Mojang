@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
@@ -29,9 +30,9 @@ extends BaseCoralWallFanBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (!CoralWallFanBlock.scanForWater(blockState, level, blockPos)) {
-            level.setBlock(blockPos, (BlockState)((BlockState)this.deadBlock.defaultBlockState().setValue(WATERLOGGED, false)).setValue(FACING, blockState.getValue(FACING)), 2);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!CoralWallFanBlock.scanForWater(blockState, serverLevel, blockPos)) {
+            serverLevel.setBlock(blockPos, (BlockState)((BlockState)this.deadBlock.defaultBlockState().setValue(WATERLOGGED, false)).setValue(FACING, blockState.getValue(FACING)), 2);
         }
     }
 

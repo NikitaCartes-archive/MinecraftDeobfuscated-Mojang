@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LeashKnotModel;
@@ -24,24 +24,24 @@ extends EntityRenderer<LeashFenceKnotEntity> {
 
     @Override
     public void render(LeashFenceKnotEntity leashFenceKnotEntity, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
+        RenderSystem.pushMatrix();
+        RenderSystem.disableCull();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
         float i = 0.0625f;
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
-        GlStateManager.enableAlphaTest();
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
+        RenderSystem.enableAlphaTest();
         this.bindTexture(leashFenceKnotEntity);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(leashFenceKnotEntity));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(leashFenceKnotEntity));
         }
         this.model.render(leashFenceKnotEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         super.render(leashFenceKnotEntity, d, e, f, g, h);
     }
 

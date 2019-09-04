@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.block;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -84,7 +84,7 @@ public class ModelBlockRenderer {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
             if (list.isEmpty() || bl && !Block.shouldRenderFace(blockState, blockAndBiomeGetter, blockPos, direction)) continue;
-            int i = blockState.getLightColor(blockAndBiomeGetter, blockPos.relative(direction));
+            int i = blockAndBiomeGetter.getLightColor(blockState, blockPos.relative(direction));
             this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, i, false, bufferBuilder, list, bitSet);
             bl2 = true;
         }
@@ -209,7 +209,7 @@ public class ModelBlockRenderer {
             if (bl) {
                 this.calculateShape(blockAndBiomeGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), null, bitSet);
                 BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(bakedQuad.getDirection()) : blockPos;
-                i = blockState.getLightColor(blockAndBiomeGetter, blockPos2);
+                i = blockAndBiomeGetter.getLightColor(blockState, blockPos2);
             }
             bufferBuilder.putBulkData(bakedQuad.getVertices());
             bufferBuilder.faceTex2(i, i, i, i);
@@ -243,13 +243,13 @@ public class ModelBlockRenderer {
     }
 
     public void renderSingleBlock(BakedModel bakedModel, BlockState blockState, float f, boolean bl) {
-        GlStateManager.rotatef(90.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(90.0f, 0.0f, 1.0f, 0.0f);
         int i = this.blockColors.getColor(blockState, null, null, 0);
         float g = (float)(i >> 16 & 0xFF) / 255.0f;
         float h = (float)(i >> 8 & 0xFF) / 255.0f;
         float j = (float)(i & 0xFF) / 255.0f;
         if (!bl) {
-            GlStateManager.color4f(f, f, f, 1.0f);
+            RenderSystem.color4f(f, f, f, 1.0f);
         }
         this.renderModel(blockState, bakedModel, f, g, h, j);
     }
@@ -545,7 +545,7 @@ public class ModelBlockRenderer {
             if (this.enabled && (i = this.colorCache.get(l)) != Integer.MAX_VALUE) {
                 return i;
             }
-            i = blockState.getLightColor(blockAndBiomeGetter, blockPos);
+            i = blockAndBiomeGetter.getLightColor(blockState, blockPos);
             if (this.enabled) {
                 if (this.colorCache.size() == 100) {
                     this.colorCache.removeFirstInt();

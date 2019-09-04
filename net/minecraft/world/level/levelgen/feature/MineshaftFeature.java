@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -29,9 +29,8 @@ extends StructureFeature<MineshaftConfiguration> {
     }
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ((WorldgenRandom)random).setLargeFeatureSeed(chunkGenerator.getSeed(), i, j);
-        Biome biome = chunkGenerator.getBiomeSource().getBiome(new BlockPos((i << 4) + 9, 0, (j << 4) + 9));
         if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.MINESHAFT)) {
             MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.MINESHAFT);
             double d = mineshaftConfiguration.probability;
@@ -57,8 +56,8 @@ extends StructureFeature<MineshaftConfiguration> {
 
     public static class MineShaftStart
     extends StructureStart {
-        public MineShaftStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, biome, boundingBox, k, l);
+        public MineShaftStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override

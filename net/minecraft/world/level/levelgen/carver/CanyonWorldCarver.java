@@ -7,7 +7,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
@@ -26,7 +28,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
     }
 
     @Override
-    public boolean carve(ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
+    public boolean carve(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
         int n = (this.getRange() * 2 - 1) * 16;
         double d = j * 16 + random.nextInt(16);
         double e = random.nextInt(random.nextInt(40) + 8) + 20;
@@ -37,11 +39,11 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
         float p = (random.nextFloat() * 2.0f + random.nextFloat()) * 2.0f;
         int q = n - random.nextInt(n / 4);
         boolean r = false;
-        this.genCanyon(chunkAccess, random.nextLong(), i, l, m, d, e, f, p, g, h, 0, q, 3.0, bitSet);
+        this.genCanyon(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, p, g, h, 0, q, 3.0, bitSet);
         return true;
     }
 
-    private void genCanyon(ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet) {
+    private void genCanyon(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet) {
         Random random = new Random(l);
         float q = 1.0f;
         for (int r = 0; r < 256; ++r) {
@@ -73,7 +75,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
             if (!this.canReach(j, k, d, f, u, o, g)) {
                 return;
             }
-            this.carveSphere(chunkAccess, l, i, j, k, d, e, f, v, w, bitSet);
+            this.carveSphere(chunkAccess, function, l, i, j, k, d, e, f, v, w, bitSet);
         }
     }
 

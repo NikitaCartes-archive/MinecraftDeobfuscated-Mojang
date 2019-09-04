@@ -56,7 +56,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Raid {
@@ -485,7 +484,7 @@ public class Raid {
         return this.groupRaiderMap.values().stream().mapToInt(Set::size).sum();
     }
 
-    public void removeFromRaid(@NotNull Raider raider, boolean bl) {
+    public void removeFromRaid(Raider raider, boolean bl) {
         boolean bl2;
         Set<Raider> set = this.groupRaiderMap.get(raider.getWave());
         if (set != null && (bl2 = set.remove(raider))) {

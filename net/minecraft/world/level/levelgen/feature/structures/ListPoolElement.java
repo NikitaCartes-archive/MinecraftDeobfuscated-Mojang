@@ -14,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
@@ -65,9 +66,9 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
         for (StructurePoolElement structurePoolElement : this.elements) {
-            if (structurePoolElement.place(structureManager, levelAccessor, blockPos, rotation, boundingBox, random)) continue;
+            if (structurePoolElement.place(structureManager, levelAccessor, chunkGenerator, blockPos, rotation, boundingBox, random)) continue;
             return false;
         }
         return true;

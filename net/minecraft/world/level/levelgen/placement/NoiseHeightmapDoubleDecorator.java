@@ -26,7 +26,7 @@ extends FeatureDecorator<DecoratorNoiseDependant> {
 
     @Override
     public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorNoiseDependant decoratorNoiseDependant, BlockPos blockPos) {
-        double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0);
+        double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0, false);
         int i2 = d < decoratorNoiseDependant.noiseLevel ? decoratorNoiseDependant.belowNoise : decoratorNoiseDependant.aboveNoise;
         return IntStream.range(0, i2).mapToObj(i -> {
             int k;

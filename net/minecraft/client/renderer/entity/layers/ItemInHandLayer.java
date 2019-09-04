@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -32,32 +32,32 @@ extends RenderLayer<T, M> {
         if (itemStack.isEmpty() && itemStack2.isEmpty()) {
             return;
         }
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         if (((EntityModel)this.getParentModel()).young) {
             float m = 0.5f;
-            GlStateManager.translatef(0.0f, 0.75f, 0.0f);
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 0.75f, 0.0f);
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
         }
         this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT);
         this.renderArmWithItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm) {
         if (itemStack.isEmpty()) {
             return;
         }
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.translateToHand(humanoidArm);
-        if (livingEntity.isVisuallySneaking()) {
-            GlStateManager.translatef(0.0f, 0.2f, 0.0f);
+        if (livingEntity.isCrouching()) {
+            RenderSystem.translatef(0.0f, 0.2f, 0.0f);
         }
-        GlStateManager.rotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
         boolean bl = humanoidArm == HumanoidArm.LEFT;
-        GlStateManager.translatef((float)(bl ? -1 : 1) / 16.0f, 0.125f, -0.625f);
+        RenderSystem.translatef((float)(bl ? -1 : 1) / 16.0f, 0.125f, -0.625f);
         Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     protected void translateToHand(HumanoidArm humanoidArm) {

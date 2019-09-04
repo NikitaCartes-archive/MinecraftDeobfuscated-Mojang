@@ -6,7 +6,9 @@ package net.minecraft.client.main;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DisplayData;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.net.Authenticator;
@@ -22,6 +24,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -38,7 +41,11 @@ import org.jetbrains.annotations.Nullable;
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public static void main(String[] strings) {
+        Thread thread2;
         OptionParser optionParser = new OptionParser();
         optionParser.allowsUnrecognizedOptions();
         optionParser.accepts("demo");
@@ -128,8 +135,52 @@ public class Main {
         };
         thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
         Runtime.getRuntime().addShutdownHook(thread);
-        Thread.currentThread().setName("Client thread");
-        new Minecraft(gameConfig).run();
+        RenderPipeline renderPipeline = new RenderPipeline();
+        final Minecraft minecraft = new Minecraft(gameConfig);
+        Thread.currentThread().setName("Render thread");
+        RenderSystem.initRenderThread();
+        try {
+            minecraft.init();
+        } catch (Throwable throwable) {
+            CrashReport crashReport = CrashReport.forThrowable(throwable, "Initializing game");
+            crashReport.addCategory("Initialization");
+            minecraft.crash(minecraft.fillReport(crashReport));
+            return;
+        }
+        if (minecraft.renderOnThread()) {
+            thread2 = new Thread("Client thread"){
+
+                @Override
+                public void run() {
+                    try {
+                        RenderSystem.initClientThread();
+                        minecraft.run();
+                    } catch (Throwable throwable) {
+                        LOGGER.error("Exception in client thread", throwable);
+                    }
+                }
+            };
+            thread2.start();
+            while (minecraft.isRunning()) {
+            }
+        } else {
+            thread2 = null;
+            try {
+                minecraft.run();
+            } catch (Throwable throwable2) {
+                LOGGER.error("Unhandled game exception", throwable2);
+            }
+        }
+        try {
+            minecraft.stop();
+            if (thread2 != null) {
+                thread2.join();
+            }
+        } catch (InterruptedException interruptedException) {
+            LOGGER.error("Exception during client thread shutdown", (Throwable)interruptedException);
+        } finally {
+            minecraft.destroy();
+        }
     }
 
     private static OptionalInt ofNullable(@Nullable Integer integer) {

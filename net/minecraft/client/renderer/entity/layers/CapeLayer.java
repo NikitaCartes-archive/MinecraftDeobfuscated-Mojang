@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -32,10 +32,10 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         if (itemStack.getItem() == Items.ELYTRA) {
             return;
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindTexture(abstractClientPlayer.getCloakTextureLocation());
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 0.0f, 0.125f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.0f, 0.125f);
         double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak) - Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.x);
         double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak) - Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.y);
         double m = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.z);
@@ -53,15 +53,15 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         }
         float t = Mth.lerp(h, abstractClientPlayer.oBob, abstractClientPlayer.bob);
         q += Mth.sin(Mth.lerp(h, abstractClientPlayer.walkDistO, abstractClientPlayer.walkDist) * 6.0f) * 32.0f * t;
-        if (abstractClientPlayer.isVisuallySneaking()) {
+        if (abstractClientPlayer.isCrouching()) {
             q += 25.0f;
         }
-        GlStateManager.rotatef(6.0f + r / 2.0f + q, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(s / 2.0f, 0.0f, 0.0f, 1.0f);
-        GlStateManager.rotatef(-s / 2.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(6.0f + r / 2.0f + q, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(s / 2.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.rotatef(-s / 2.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
         ((PlayerModel)this.getParentModel()).renderCloak(0.0625f);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CreeperModel;
@@ -33,7 +33,7 @@ extends MobRenderer<Creeper, CreeperModel<Creeper>> {
         g *= g;
         float i = (1.0f + g * 0.4f) * h;
         float j = (1.0f + g * 0.1f) / h;
-        GlStateManager.scalef(i, j, i);
+        RenderSystem.scalef(i, j, i);
     }
 
     @Override

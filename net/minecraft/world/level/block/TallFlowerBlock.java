@@ -5,6 +5,7 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -37,8 +38,8 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        TallFlowerBlock.popResource(level, blockPos, new ItemStack(this));
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+        TallFlowerBlock.popResource(serverLevel, blockPos, new ItemStack(this));
     }
 }
 

@@ -71,6 +71,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -780,6 +781,9 @@ Runnable {
         this.getConnection().tick();
         this.profiler.popPush("players");
         this.playerList.tick();
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            GameTestTicker.singleton.tick();
+        }
         this.profiler.popPush("server gui refresh");
         for (int i = 0; i < this.tickables.size(); ++i) {
             this.tickables.get(i).run();

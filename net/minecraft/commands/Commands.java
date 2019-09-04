@@ -17,10 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.ChatFormatting;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -156,6 +159,9 @@ public class Commands {
         TriggerCommand.register(this.dispatcher);
         WeatherCommand.register(this.dispatcher);
         WorldBorderCommand.register(this.dispatcher);
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            TestCommand.register(this.dispatcher);
+        }
         if (bl2) {
             BanIpCommands.register(this.dispatcher);
             BanListCommands.register(this.dispatcher);
@@ -213,12 +219,17 @@ public class Commands {
         } catch (Exception exception) {
             TextComponent component3 = new TextComponent(exception.getMessage() == null ? exception.getClass().getName() : exception.getMessage());
             if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("Command exception: {}", (Object)string, (Object)exception);
                 StackTraceElement[] stackTraceElements = exception.getStackTrace();
                 for (int j = 0; j < Math.min(stackTraceElements.length, 3); ++j) {
                     component3.append("\n\n").append(stackTraceElements[j].getMethodName()).append("\n ").append(stackTraceElements[j].getFileName()).append(":").append(String.valueOf(stackTraceElements[j].getLineNumber()));
                 }
             }
             commandSourceStack.sendFailure(new TranslatableComponent("command.failed", new Object[0]).withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component3))));
+            if (SharedConstants.IS_RUNNING_IN_IDE) {
+                commandSourceStack.sendFailure(new TextComponent(Util.describeError(exception)));
+                LOGGER.error("'" + string + "' threw an exception", (Throwable)exception);
+            }
             int n = 0;
             return n;
         } finally {

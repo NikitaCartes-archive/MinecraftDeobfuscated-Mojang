@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.advancements;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -117,18 +118,18 @@ implements ClientAdvancements.Listener {
             this.font.draw(":(", k + 9 + 117 - this.font.width(":(") / 2, l + 18 + 113 - this.font.lineHeight, -1);
             return;
         }
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(k + 9, l + 18, -400.0f);
-        GlStateManager.enableDepthTest();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(k + 9, l + 18, -400.0f);
+        RenderSystem.enableDepthTest();
         advancementTab.drawContents();
-        GlStateManager.popMatrix();
-        GlStateManager.depthFunc(515);
-        GlStateManager.disableDepthTest();
+        RenderSystem.popMatrix();
+        RenderSystem.depthFunc(515);
+        RenderSystem.disableDepthTest();
     }
 
     public void renderWindow(int i, int j) {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableBlend();
         Lighting.turnOff();
         this.minecraft.getTextureManager().bind(WINDOW_LOCATION);
         this.blit(i, j, 0, 0, 252, 140);
@@ -137,26 +138,26 @@ implements ClientAdvancements.Listener {
             for (AdvancementTab advancementTab : this.tabs.values()) {
                 advancementTab.drawTab(i, j, advancementTab == this.selectedTab);
             }
-            GlStateManager.enableRescaleNormal();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.enableRescaleNormal();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             Lighting.turnOnGui();
             for (AdvancementTab advancementTab : this.tabs.values()) {
                 advancementTab.drawIcon(i, j, this.itemRenderer);
             }
-            GlStateManager.disableBlend();
+            RenderSystem.disableBlend();
         }
         this.font.draw(I18n.get("gui.advancements", new Object[0]), i + 8, j + 6, 0x404040);
     }
 
     private void renderTooltips(int i, int j, int k, int l) {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.selectedTab != null) {
-            GlStateManager.pushMatrix();
-            GlStateManager.enableDepthTest();
-            GlStateManager.translatef(k + 9, l + 18, 400.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.enableDepthTest();
+            RenderSystem.translatef(k + 9, l + 18, 400.0f);
             this.selectedTab.drawTooltips(i - k - 9, j - l - 18, k, l);
-            GlStateManager.disableDepthTest();
-            GlStateManager.popMatrix();
+            RenderSystem.disableDepthTest();
+            RenderSystem.popMatrix();
         }
         if (this.tabs.size() > 1) {
             for (AdvancementTab advancementTab : this.tabs.values()) {

@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -73,20 +74,20 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (!blockState.canSurvive(level, blockPos)) {
-            FarmBlock.turnToDirt(blockState, level, blockPos);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!blockState.canSurvive(serverLevel, blockPos)) {
+            FarmBlock.turnToDirt(blockState, serverLevel, blockPos);
             return;
         }
         int i = blockState.getValue(MOISTURE);
-        if (FarmBlock.isNearWater(level, blockPos) || level.isRainingAt(blockPos.above())) {
+        if (FarmBlock.isNearWater(serverLevel, blockPos) || serverLevel.isRainingAt(blockPos.above())) {
             if (i < 7) {
-                level.setBlock(blockPos, (BlockState)blockState.setValue(MOISTURE, 7), 2);
+                serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(MOISTURE, 7), 2);
             }
         } else if (i > 0) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(MOISTURE, i - 1), 2);
-        } else if (!FarmBlock.isUnderCrops(level, blockPos)) {
-            FarmBlock.turnToDirt(blockState, level, blockPos);
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(MOISTURE, i - 1), 2);
+        } else if (!FarmBlock.isUnderCrops(serverLevel, blockPos)) {
+            FarmBlock.turnToDirt(blockState, serverLevel, blockPos);
         }
     }
 

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
@@ -26,42 +26,42 @@ extends EntityRenderer<Boat> {
 
     @Override
     public void render(Boat boat, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.setupTranslation(d, e, f);
         this.setupRotation(boat, g, h);
         this.bindTexture(boat);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(boat));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(boat));
         }
         this.model.render(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         super.render(boat, d, e, f, g, h);
     }
 
     public void setupRotation(Boat boat, float f, float g) {
         float j;
-        GlStateManager.rotatef(180.0f - f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(180.0f - f, 0.0f, 1.0f, 0.0f);
         float h = (float)boat.getHurtTime() - g;
         float i = boat.getDamage() - g;
         if (i < 0.0f) {
             i = 0.0f;
         }
         if (h > 0.0f) {
-            GlStateManager.rotatef(Mth.sin(h) * h * i / 10.0f * (float)boat.getHurtDir(), 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(Mth.sin(h) * h * i / 10.0f * (float)boat.getHurtDir(), 1.0f, 0.0f, 0.0f);
         }
         if (!Mth.equal(j = boat.getBubbleAngle(g), 0.0f)) {
-            GlStateManager.rotatef(boat.getBubbleAngle(g), 1.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(boat.getBubbleAngle(g), 1.0f, 0.0f, 1.0f);
         }
-        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
+        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
     }
 
     public void setupTranslation(double d, double e, double f) {
-        GlStateManager.translatef((float)d, (float)e + 0.375f, (float)f);
+        RenderSystem.translatef((float)d, (float)e + 0.375f, (float)f);
     }
 
     @Override
@@ -76,12 +76,12 @@ extends EntityRenderer<Boat> {
 
     @Override
     public void renderSecondPass(Boat boat, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.setupTranslation(d, e, f);
         this.setupRotation(boat, g, h);
         this.bindTexture(boat);
         this.model.renderSecondPass(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 }
 

@@ -167,7 +167,7 @@ extends Raider {
                 BlockState blockState = this.level.getBlockState(blockPos);
                 Block block = blockState.getBlock();
                 if (!(block instanceof LeavesBlock)) continue;
-                bl = this.level.destroyBlock(blockPos, true) || bl;
+                bl = this.level.destroyBlock(blockPos, true, this) || bl;
             }
             if (!bl && this.onGround) {
                 this.jumpFromGround();

@@ -20,6 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -75,7 +76,7 @@ extends RegionFileStorage {
         this.readColumn(sectionPos.chunk());
         optional = this.get(l);
         if (optional == null) {
-            throw new IllegalStateException();
+            throw Util.pauseInIde(new IllegalStateException());
         }
         return optional;
     }

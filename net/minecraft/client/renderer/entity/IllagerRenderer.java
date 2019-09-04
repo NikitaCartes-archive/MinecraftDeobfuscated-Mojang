@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
@@ -28,7 +28,7 @@ extends MobRenderer<T, IllagerModel<T>> {
     @Override
     protected void scale(T abstractIllager, float f) {
         float g = 0.9375f;
-        GlStateManager.scalef(0.9375f, 0.9375f, 0.9375f);
+        RenderSystem.scalef(0.9375f, 0.9375f, 0.9375f);
     }
 }
 

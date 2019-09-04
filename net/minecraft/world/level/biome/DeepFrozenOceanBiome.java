@@ -3,12 +3,12 @@
  */
 package net.minecraft.world.level.biome;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 
 public class DeepFrozenOceanBiome
 extends Biome {
-    protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new Random(3456L), 3);
+    protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), 2, 0);
 
     public DeepFrozenOceanBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.FROZEN_OCEAN, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.OCEAN).depth(-1.8f).scale(0.1f).temperature(0.5f).downfall(0.5f).waterColor(3750089).waterFogColor(329011).parent(null));
@@ -65,13 +65,13 @@ extends Biome {
         double h;
         double e;
         float f = this.getTemperature();
-        double d = FROZEN_TEMPERATURE_NOISE.getValue((double)blockPos.getX() * 0.05, (double)blockPos.getZ() * 0.05);
-        double g = d + (e = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.2, (double)blockPos.getZ() * 0.2));
-        if (g < 0.3 && (h = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.09, (double)blockPos.getZ() * 0.09)) < 0.8) {
+        double d = FROZEN_TEMPERATURE_NOISE.getValue((double)blockPos.getX() * 0.05, (double)blockPos.getZ() * 0.05, false) * 7.0;
+        double g = d + (e = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.2, (double)blockPos.getZ() * 0.2, false));
+        if (g < 0.3 && (h = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.09, (double)blockPos.getZ() * 0.09, false)) < 0.8) {
             f = 0.2f;
         }
         if (blockPos.getY() > 64) {
-            float i = (float)(TEMPERATURE_NOISE.getValue((float)blockPos.getX() / 8.0f, (float)blockPos.getZ() / 8.0f) * 4.0);
+            float i = (float)(TEMPERATURE_NOISE.getValue((float)blockPos.getX() / 8.0f, (float)blockPos.getZ() / 8.0f, false) * 4.0);
             return f - (i + (float)blockPos.getY() - 64.0f) * 0.05f / 30.0f;
         }
         return f;

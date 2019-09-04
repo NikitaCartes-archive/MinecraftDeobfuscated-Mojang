@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -56,8 +57,8 @@ implements BucketPickup {
     }
 
     @Override
-    public void randomTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        level.getFluidState(blockPos).randomTick(level, blockPos, random);
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        serverLevel.getFluidState(blockPos).randomTick(serverLevel, blockPos, random);
     }
 
     @Override

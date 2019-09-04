@@ -140,7 +140,7 @@ implements TickableTextureObject {
     }
 
     private Collection<TextureAtlasSprite> getBasicSpriteInfos(ResourceManager resourceManager, Set<ResourceLocation> set) {
-        ArrayList<CompletableFuture<Void>> list = new ArrayList<CompletableFuture<Void>>();
+        ArrayList<CompletableFuture<Void>> list = Lists.newArrayList();
         ConcurrentLinkedQueue<TextureAtlasSprite> concurrentLinkedQueue = new ConcurrentLinkedQueue<TextureAtlasSprite>();
         for (ResourceLocation resourceLocation : set) {
             if (this.missingTextureSprite.getName().equals(resourceLocation)) continue;
@@ -167,7 +167,7 @@ implements TickableTextureObject {
 
     private List<TextureAtlasSprite> getLoadedSprites(ResourceManager resourceManager, Stitcher stitcher) {
         ConcurrentLinkedQueue<TextureAtlasSprite> concurrentLinkedQueue = new ConcurrentLinkedQueue<TextureAtlasSprite>();
-        ArrayList<CompletableFuture<Void>> list = new ArrayList<CompletableFuture<Void>>();
+        ArrayList<CompletableFuture<Void>> list = Lists.newArrayList();
         for (TextureAtlasSprite textureAtlasSprite : stitcher.gatherSprites()) {
             if (textureAtlasSprite == this.missingTextureSprite) {
                 concurrentLinkedQueue.add(textureAtlasSprite);
@@ -180,7 +180,7 @@ implements TickableTextureObject {
             }, Util.backgroundExecutor()));
         }
         CompletableFuture.allOf(list.toArray(new CompletableFuture[0])).join();
-        return new ArrayList<TextureAtlasSprite>(concurrentLinkedQueue);
+        return Lists.newArrayList(concurrentLinkedQueue);
     }
 
     /*

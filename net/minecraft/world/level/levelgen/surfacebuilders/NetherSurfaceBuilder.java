@@ -35,8 +35,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         int o = i & 0xF;
         int p = j & 0xF;
         double e = 0.03125;
-        boolean bl = this.decorationNoise.getValue((double)i * 0.03125, (double)j * 0.03125, 0.0) + random.nextDouble() * 0.2 > 0.0;
-        boolean bl2 = this.decorationNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) + random.nextDouble() * 0.2 > 0.0;
+        boolean bl = this.decorationNoise.getValue((double)i * 0.03125, (double)j * 0.03125, 0.0) * 75.0 + random.nextDouble() > 0.0;
+        boolean bl2 = this.decorationNoise.getValue((double)i * 0.03125, 109.0, (double)j * 0.03125) * 75.0 + random.nextDouble() > 0.0;
         int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int r = -1;
@@ -86,7 +86,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     @Override
     public void initNoise(long l) {
         if (this.seed != l || this.decorationNoise == null) {
-            this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), 4);
+            this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), 3, 0);
         }
         this.seed = l;
     }

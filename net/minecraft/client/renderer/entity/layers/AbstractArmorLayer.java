@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
@@ -76,11 +77,11 @@ extends RenderLayer<T, M> {
             float n = (float)(m >> 16 & 0xFF) / 255.0f;
             float o = (float)(m >> 8 & 0xFF) / 255.0f;
             float p = (float)(m & 0xFF) / 255.0f;
-            GlStateManager.color4f(this.red * n, this.green * o, this.blue * p, this.alpha);
+            RenderSystem.color4f(this.red * n, this.green * o, this.blue * p, this.alpha);
             ((HumanoidModel)humanoidModel).render(livingEntity, f, g, i, j, k, l);
             this.bindTexture(this.getArmorLocation(armorItem, bl, "overlay"));
         }
-        GlStateManager.color4f(this.red, this.green, this.blue, this.alpha);
+        RenderSystem.color4f(this.red, this.green, this.blue, this.alpha);
         ((HumanoidModel)humanoidModel).render(livingEntity, f, g, i, j, k, l);
         if (!this.colorized && itemStack.isEnchanted()) {
             AbstractArmorLayer.renderFoil(this::bindTexture, livingEntity, humanoidModel, f, g, h, i, j, k, l);
@@ -100,33 +101,33 @@ extends RenderLayer<T, M> {
         consumer.accept(ENCHANT_GLINT_LOCATION);
         GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         gameRenderer.resetFogColor(true);
-        GlStateManager.enableBlend();
-        GlStateManager.depthFunc(514);
-        GlStateManager.depthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.depthFunc(514);
+        RenderSystem.depthMask(false);
         float n = 0.5f;
-        GlStateManager.color4f(0.5f, 0.5f, 0.5f, 1.0f);
+        RenderSystem.color4f(0.5f, 0.5f, 0.5f, 1.0f);
         for (int o = 0; o < 2; ++o) {
-            GlStateManager.disableLighting();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
+            RenderSystem.disableLighting();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
             float p = 0.76f;
-            GlStateManager.color4f(0.38f, 0.19f, 0.608f, 1.0f);
-            GlStateManager.matrixMode(5890);
-            GlStateManager.loadIdentity();
+            RenderSystem.color4f(0.38f, 0.19f, 0.608f, 1.0f);
+            RenderSystem.matrixMode(5890);
+            RenderSystem.loadIdentity();
             float q = 0.33333334f;
-            GlStateManager.scalef(0.33333334f, 0.33333334f, 0.33333334f);
-            GlStateManager.rotatef(30.0f - (float)o * 60.0f, 0.0f, 0.0f, 1.0f);
-            GlStateManager.translatef(0.0f, m * (0.001f + (float)o * 0.003f) * 20.0f, 0.0f);
-            GlStateManager.matrixMode(5888);
+            RenderSystem.scalef(0.33333334f, 0.33333334f, 0.33333334f);
+            RenderSystem.rotatef(30.0f - (float)o * 60.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.translatef(0.0f, m * (0.001f + (float)o * 0.003f) * 20.0f, 0.0f);
+            RenderSystem.matrixMode(5888);
             entityModel.render(entity, f, g, i, j, k, l);
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         }
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableLighting();
-        GlStateManager.depthMask(true);
-        GlStateManager.depthFunc(515);
-        GlStateManager.disableBlend();
+        RenderSystem.matrixMode(5890);
+        RenderSystem.loadIdentity();
+        RenderSystem.matrixMode(5888);
+        RenderSystem.enableLighting();
+        RenderSystem.depthMask(true);
+        RenderSystem.depthFunc(515);
+        RenderSystem.disableBlend();
         gameRenderer.resetFogColor(false);
     }
 

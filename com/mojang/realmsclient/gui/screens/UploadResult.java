@@ -19,7 +19,7 @@ public class UploadResult {
     @Environment(value=EnvType.CLIENT)
     public static class Builder {
         private int statusCode = -1;
-        private String errorMessage = null;
+        private String errorMessage;
 
         public Builder withStatusCode(int i) {
             this.statusCode = i;

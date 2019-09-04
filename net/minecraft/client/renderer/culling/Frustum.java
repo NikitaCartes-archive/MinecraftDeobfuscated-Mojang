@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.renderer.culling;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.FloatBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,8 +36,8 @@ extends FrustumData {
         this._proj.clear();
         this._modl.clear();
         this._clip.clear();
-        GlStateManager.getMatrix(2983, this._proj);
-        GlStateManager.getMatrix(2982, this._modl);
+        RenderSystem.getMatrix(2983, this._proj);
+        RenderSystem.getMatrix(2982, this._modl);
         float[] fs = this.projectionMatrix;
         float[] gs = this.modelViewMatrix;
         this._proj.flip().limit(16);

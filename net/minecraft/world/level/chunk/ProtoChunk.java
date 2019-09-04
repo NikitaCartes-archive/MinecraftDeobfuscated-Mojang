@@ -24,12 +24,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -51,7 +51,8 @@ implements ChunkAccess {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ChunkPos chunkPos;
     private volatile boolean isDirty;
-    private Biome[] biomes;
+    @Nullable
+    private ChunkBiomeContainer biomes;
     @Nullable
     private volatile LevelLightEngine lightEngine;
     private final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
@@ -221,13 +222,13 @@ implements ChunkAccess {
         return this.entities;
     }
 
-    @Override
-    public void setBiomes(Biome[] biomes) {
-        this.biomes = biomes;
+    public void setBiomes(ChunkBiomeContainer chunkBiomeContainer) {
+        this.biomes = chunkBiomeContainer;
     }
 
     @Override
-    public Biome[] getBiomes() {
+    @Nullable
+    public ChunkBiomeContainer getBiomes() {
         return this.biomes;
     }
 
@@ -256,7 +257,6 @@ implements ChunkAccess {
         return this.sections;
     }
 
-    @Override
     @Nullable
     public LevelLightEngine getLightEngine() {
         return this.lightEngine;
@@ -439,7 +439,6 @@ implements ChunkAccess {
         this.carvingMasks.put(carving, bitSet);
     }
 
-    @Override
     public void setLightEngine(LevelLightEngine levelLightEngine) {
         this.lightEngine = levelLightEngine;
     }

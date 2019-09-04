@@ -130,7 +130,7 @@ implements FlyingAnimal {
 
     public Parrot(EntityType<? extends Parrot> entityType, Level level) {
         super((EntityType<? extends ShoulderRidingEntity>)entityType, level);
-        this.moveControl = new FlyingMoveControl(this);
+        this.moveControl = new FlyingMoveControl(this, 10, false);
     }
 
     @Override

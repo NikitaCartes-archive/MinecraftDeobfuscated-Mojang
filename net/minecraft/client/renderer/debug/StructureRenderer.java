@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -41,16 +42,16 @@ implements DebugRenderer.SimpleDebugRenderer {
         double d = camera.getPosition().x;
         double e = camera.getPosition().y;
         double f = camera.getPosition().z;
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
-        GlStateManager.disableDepthTest();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
+        RenderSystem.disableDepthTest();
         BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
-        GlStateManager.lineWidth(1.0f);
+        RenderSystem.lineWidth(1.0f);
         if (this.postMainBoxes.containsKey(dimensionType)) {
             for (BoundingBox boundingBox : this.postMainBoxes.get(dimensionType).values()) {
                 if (!blockPos.closerThan(boundingBox.getCenter(), 500.0)) continue;
@@ -71,9 +72,9 @@ implements DebugRenderer.SimpleDebugRenderer {
             }
         }
         tesselator.end();
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableTexture();
-        GlStateManager.popMatrix();
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 
     public void addBoundingBox(BoundingBox boundingBox, List<BoundingBox> list, List<Boolean> list2, DimensionType dimensionType) {

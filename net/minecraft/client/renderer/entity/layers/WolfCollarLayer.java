@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
@@ -28,7 +28,7 @@ extends RenderLayer<Wolf, WolfModel<Wolf>> {
         }
         this.bindTexture(WOLF_COLLAR_LOCATION);
         float[] fs = wolf.getCollarColor().getTextureDiffuseColors();
-        GlStateManager.color3f(fs[0], fs[1], fs[2]);
+        RenderSystem.color3f(fs[0], fs[1], fs[2]);
         ((WolfModel)this.getParentModel()).render(wolf, f, g, i, j, k, l);
     }
 

@@ -7,7 +7,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
@@ -24,7 +26,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
     }
 
     @Override
-    public boolean carve(ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
+    public boolean carve(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
         int n = (this.getRange() * 2 - 1) * 16;
         int o = random.nextInt(random.nextInt(random.nextInt(this.getCaveBound()) + 1) + 1);
         for (int p = 0; p < o; ++p) {
@@ -36,7 +38,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
             if (random.nextInt(4) == 0) {
                 double g = 0.5;
                 h = 1.0f + random.nextFloat() * 6.0f;
-                this.genRoom(chunkAccess, random.nextLong(), i, l, m, d, e, f, h, 0.5, bitSet);
+                this.genRoom(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, h, 0.5, bitSet);
                 q += random.nextInt(4);
             }
             for (int r = 0; r < q; ++r) {
@@ -45,7 +47,7 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
                 float t = this.getThickness(random);
                 int u = n - random.nextInt(n / 4);
                 boolean v = false;
-                this.genTunnel(chunkAccess, random.nextLong(), i, l, m, d, e, f, t, s, h, 0, u, this.getYScale(), bitSet);
+                this.genTunnel(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, t, s, h, 0, u, this.getYScale(), bitSet);
             }
         }
         return true;
@@ -71,13 +73,13 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
         return random.nextInt(random.nextInt(120) + 8);
     }
 
-    protected void genRoom(ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, double h, BitSet bitSet) {
+    protected void genRoom(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, float g, double h, BitSet bitSet) {
         double m = 1.5 + (double)(Mth.sin(1.5707964f) * g);
         double n = m * h;
-        this.carveSphere(chunkAccess, l, i, j, k, d + 1.0, e, f, m, n, bitSet);
+        this.carveSphere(chunkAccess, function, l, i, j, k, d + 1.0, e, f, m, n, bitSet);
     }
 
-    protected void genTunnel(ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet) {
+    protected void genTunnel(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet) {
         Random random = new Random(l);
         int q = random.nextInt(o / 2) + o / 4;
         boolean bl = random.nextInt(6) == 0;
@@ -98,15 +100,15 @@ extends WorldCarver<ProbabilityFeatureConfiguration> {
             s += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0f;
             r += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0f;
             if (t == q && g > 1.0f) {
-                this.genTunnel(chunkAccess, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5f + 0.5f, h - 1.5707964f, m / 3.0f, t, o, 1.0, bitSet);
-                this.genTunnel(chunkAccess, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5f + 0.5f, h + 1.5707964f, m / 3.0f, t, o, 1.0, bitSet);
+                this.genTunnel(chunkAccess, function, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5f + 0.5f, h - 1.5707964f, m / 3.0f, t, o, 1.0, bitSet);
+                this.genTunnel(chunkAccess, function, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5f + 0.5f, h + 1.5707964f, m / 3.0f, t, o, 1.0, bitSet);
                 return;
             }
             if (random.nextInt(4) == 0) continue;
             if (!this.canReach(j, k, d, f, t, o, g)) {
                 return;
             }
-            this.carveSphere(chunkAccess, l, i, j, k, d, e, f, u, v, bitSet);
+            this.carveSphere(chunkAccess, function, l, i, j, k, d, e, f, u, v, bitSet);
         }
     }
 

@@ -80,19 +80,24 @@ extends FaceAttachedHorizontalDirectionalBlock {
 
     @Override
     public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        blockState = (BlockState)blockState.cycle(POWERED);
-        boolean bl = blockState.getValue(POWERED);
         if (level.isClientSide) {
-            if (bl) {
-                LeverBlock.makeParticle(blockState, level, blockPos, 1.0f);
+            BlockState blockState2 = (BlockState)blockState.cycle(POWERED);
+            if (blockState2.getValue(POWERED).booleanValue()) {
+                LeverBlock.makeParticle(blockState2, level, blockPos, 1.0f);
             }
             return true;
         }
-        level.setBlock(blockPos, blockState, 3);
-        float f = bl ? 0.6f : 0.5f;
+        BlockState blockState2 = this.pull(blockState, level, blockPos);
+        float f = blockState2.getValue(POWERED) != false ? 0.6f : 0.5f;
         level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3f, f);
-        this.updateNeighbours(blockState, level, blockPos);
         return true;
+    }
+
+    public BlockState pull(BlockState blockState, Level level, BlockPos blockPos) {
+        blockState = (BlockState)blockState.cycle(POWERED);
+        level.setBlock(blockPos, blockState, 3);
+        this.updateNeighbours(blockState, level, blockPos);
+        return blockState;
     }
 
     private static void makeParticle(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, float f) {

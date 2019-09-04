@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SheepFurModel;
@@ -39,10 +39,10 @@ extends RenderLayer<Sheep, SheepModel<Sheep>> {
             float r = ((float)(sheep.tickCount % 25) + h) / 25.0f;
             float[] fs = Sheep.getColorArray(DyeColor.byId(p));
             float[] gs = Sheep.getColorArray(DyeColor.byId(q));
-            GlStateManager.color3f(fs[0] * (1.0f - r) + gs[0] * r, fs[1] * (1.0f - r) + gs[1] * r, fs[2] * (1.0f - r) + gs[2] * r);
+            RenderSystem.color3f(fs[0] * (1.0f - r) + gs[0] * r, fs[1] * (1.0f - r) + gs[1] * r, fs[2] * (1.0f - r) + gs[2] * r);
         } else {
             float[] hs = Sheep.getColorArray(sheep.getColor());
-            GlStateManager.color3f(hs[0], hs[1], hs[2]);
+            RenderSystem.color3f(hs[0], hs[1], hs[2]);
         }
         ((SheepModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.prepareMobModel(sheep, f, g, h);

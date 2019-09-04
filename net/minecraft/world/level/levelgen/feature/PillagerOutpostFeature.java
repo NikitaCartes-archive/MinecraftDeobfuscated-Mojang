@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.PillagerOutpostConfiguration;
@@ -46,7 +47,7 @@ extends RandomScatteredFeature<PillagerOutpostConfiguration> {
     }
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
         if (i == chunkPos.x && j == chunkPos.z) {
             int k = i >> 4;
@@ -56,11 +57,10 @@ extends RandomScatteredFeature<PillagerOutpostConfiguration> {
             if (random.nextInt(5) != 0) {
                 return false;
             }
-            Biome biome = chunkGenerator.getBiomeSource().getBiome(new BlockPos((i << 4) + 9, 0, (j << 4) + 9));
             if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.PILLAGER_OUTPOST)) {
                 for (int m = i - 10; m <= i + 10; ++m) {
                     for (int n = j - 10; n <= j + 10; ++n) {
-                        if (!Feature.VILLAGE.isFeatureChunk(chunkGenerator, random, m, n)) continue;
+                        if (!Feature.VILLAGE.isFeatureChunk(biomeManager, chunkGenerator, random, m, n, biomeManager.getBiome(new BlockPos((m << 4) + 9, 0, (n << 4) + 9)))) continue;
                         return false;
                     }
                 }
@@ -82,8 +82,8 @@ extends RandomScatteredFeature<PillagerOutpostConfiguration> {
 
     public static class FeatureStart
     extends BeardedStructureStart {
-        public FeatureStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, biome, boundingBox, k, l);
+        public FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override

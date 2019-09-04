@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -33,25 +33,25 @@ extends EntityRenderer<T> {
 
     @Override
     public void render(T entity, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef(this.scale, this.scale, this.scale);
-        GlStateManager.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef(this.scale, this.scale, this.scale);
+        RenderSystem.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
         this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(entity));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(entity));
         }
         this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND);
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
         super.render(entity, d, e, f, g, h);
     }
 

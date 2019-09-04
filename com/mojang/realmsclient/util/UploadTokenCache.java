@@ -3,14 +3,14 @@
  */
 package com.mojang.realmsclient.util;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
 public class UploadTokenCache {
-    private static final Map<Long, String> tokenCache = new HashMap<Long, String>();
+    private static final Map<Long, String> tokenCache = Maps.newHashMap();
 
     public static String get(long l) {
         return tokenCache.get(l);

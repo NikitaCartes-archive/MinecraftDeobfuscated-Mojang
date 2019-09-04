@@ -3,8 +3,7 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -35,13 +34,13 @@ public abstract class BlockEntityRenderer<T extends BlockEntity> {
     }
 
     protected void setOverlayRenderState(boolean bl) {
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
+        RenderSystem.activeTexture(33985);
         if (bl) {
-            GlStateManager.disableTexture();
+            RenderSystem.disableTexture();
         } else {
-            GlStateManager.enableTexture();
+            RenderSystem.enableTexture();
         }
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.activeTexture(33984);
     }
 
     protected void bindTexture(ResourceLocation resourceLocation) {

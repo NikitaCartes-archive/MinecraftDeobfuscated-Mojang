@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PlayerInfo;
@@ -209,11 +209,11 @@ extends RealmsScreen {
             this.invitedObjectSelectionList.render(i, j, f);
         }
         int k = RealmsConstants.row(12) + 20;
-        GlStateManager.disableLighting();
-        GlStateManager.disableFog();
+        RenderSystem.disableLighting();
+        RenderSystem.disableFog();
         Tezzelator tezzelator = Tezzelator.instance;
         RealmsPlayerScreen.bind("textures/gui/options_background.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float g = 32.0f;
         tezzelator.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
         tezzelator.vertex(0.0, this.height(), 0.0).tex(0.0, (float)(this.height() - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
@@ -250,10 +250,10 @@ extends RealmsScreen {
     private void drawRemoveIcon(int i, int j, int k, int l) {
         boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
         RealmsPlayerScreen.bind("realms:textures/gui/realms/cross_player_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, bl ? 7.0f : 0.0f, 8, 7, 8, 14);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (bl) {
             this.toolTip = RealmsPlayerScreen.getLocalizedString("mco.configure.world.invites.remove.tooltip");
         }
@@ -262,10 +262,10 @@ extends RealmsScreen {
     private void drawOpped(int i, int j, int k, int l) {
         boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
         RealmsPlayerScreen.bind("realms:textures/gui/realms/op_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, bl ? 8.0f : 0.0f, 8, 8, 8, 16);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (bl) {
             this.toolTip = RealmsPlayerScreen.getLocalizedString("mco.configure.world.invites.ops.tooltip");
         }
@@ -274,10 +274,10 @@ extends RealmsScreen {
     private void drawNormal(int i, int j, int k, int l) {
         boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
         RealmsPlayerScreen.bind("realms:textures/gui/realms/user_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, bl ? 8.0f : 0.0f, 8, 8, 8, 16);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (bl) {
             this.toolTip = RealmsPlayerScreen.getLocalizedString("mco.configure.world.invites.normal.tooltip");
         }
@@ -308,7 +308,7 @@ extends RealmsScreen {
             RealmsPlayerScreen.this.drawRemoveIcon(RealmsPlayerScreen.this.column1_x + RealmsPlayerScreen.this.column_width - 22, j + 2, k, l);
             RealmsPlayerScreen.this.drawString(RealmsScreen.getLocalizedString("mco.configure.world.activityfeed.disabled"), RealmsPlayerScreen.this.column2_x, RealmsConstants.row(5), 0xA0A0A0);
             RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, j + 1, 8.0f, 8.0f, 8, 8, 8, 8, 64, 64);
                 RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, j + 1, 40.0f, 8.0f, 8, 8, 8, 8, 64, 64);
             });

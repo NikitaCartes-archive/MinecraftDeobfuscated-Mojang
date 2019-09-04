@@ -10,8 +10,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -31,7 +29,6 @@ import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.chunk.ChunkCompileTask;
 import net.minecraft.client.renderer.chunk.ChunkRenderWorker;
 import net.minecraft.client.renderer.chunk.CompiledChunk;
-import net.minecraft.client.renderer.chunk.ListedRenderChunk;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.phys.Vec3;
@@ -223,11 +220,7 @@ public class ChunkRenderDispatcher {
      */
     public ListenableFuture<Void> uploadChunkLayer(BlockLayer blockLayer, BufferBuilder bufferBuilder, RenderChunk renderChunk, CompiledChunk compiledChunk, double d) {
         if (Minecraft.getInstance().isSameThread()) {
-            if (GLX.useVbo()) {
-                this.uploadChunkLayer(bufferBuilder, renderChunk.getBuffer(blockLayer.ordinal()));
-            } else {
-                this.compileChunkLayerIntoGlList(bufferBuilder, ((ListedRenderChunk)renderChunk).getGlListId(blockLayer, compiledChunk));
-            }
+            this.uploadChunkLayer(bufferBuilder, renderChunk.getBuffer(blockLayer.ordinal()));
             bufferBuilder.offset(0.0, 0.0, 0.0);
             return Futures.immediateFuture(null);
         }
@@ -237,12 +230,6 @@ public class ChunkRenderDispatcher {
             this.pendingUploads.add(new PendingUpload(listenableFutureTask, d));
         }
         return listenableFutureTask;
-    }
-
-    private void compileChunkLayerIntoGlList(BufferBuilder bufferBuilder, int i) {
-        GlStateManager.newList(i, 4864);
-        this.uploader.end(bufferBuilder);
-        GlStateManager.endList();
     }
 
     private void uploadChunkLayer(BufferBuilder bufferBuilder, VertexBuffer vertexBuffer) {

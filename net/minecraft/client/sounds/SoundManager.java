@@ -25,6 +25,7 @@ import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundEventRegistration;
 import net.minecraft.client.resources.sounds.SoundEventRegistrationSerializer;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.WeighedSoundEvents;
@@ -150,6 +151,10 @@ extends SimplePreparableReloadListener<Preparations> {
 
     public Collection<ResourceLocation> getAvailableSounds() {
         return this.registry.keySet();
+    }
+
+    public void queueTickingSound(TickableSoundInstance tickableSoundInstance) {
+        this.soundEngine.queueTickingSound(tickableSoundInstance);
     }
 
     public void play(SoundInstance soundInstance) {

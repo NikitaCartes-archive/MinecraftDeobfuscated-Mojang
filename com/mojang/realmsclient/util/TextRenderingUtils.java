@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,20 +28,20 @@ public class TextRenderingUtils {
 
     private static List<Line> insertLinks(List<String> list, List<LineSegment> list2) {
         int i = 0;
-        ArrayList<Line> arrayList = new ArrayList<Line>();
+        ArrayList<Line> list3 = Lists.newArrayList();
         for (String string : list) {
-            ArrayList<LineSegment> list3 = new ArrayList<LineSegment>();
-            List<String> list4 = TextRenderingUtils.split(string, "%link");
-            for (String string2 : list4) {
+            ArrayList<LineSegment> list4 = Lists.newArrayList();
+            List<String> list5 = TextRenderingUtils.split(string, "%link");
+            for (String string2 : list5) {
                 if (string2.equals("%link")) {
-                    list3.add(list2.get(i++));
+                    list4.add(list2.get(i++));
                     continue;
                 }
-                list3.add(LineSegment.text(string2));
+                list4.add(LineSegment.text(string2));
             }
-            arrayList.add(new Line(list3));
+            list3.add(new Line(list4));
         }
-        return arrayList;
+        return list3;
     }
 
     public static List<String> split(String string, String string2) {
@@ -48,7 +49,7 @@ public class TextRenderingUtils {
         if (string2.isEmpty()) {
             throw new IllegalArgumentException("Delimiter cannot be the empty string");
         }
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = Lists.newArrayList();
         int i = 0;
         while ((j = string.indexOf(string2, i)) != -1) {
             if (j > i) {

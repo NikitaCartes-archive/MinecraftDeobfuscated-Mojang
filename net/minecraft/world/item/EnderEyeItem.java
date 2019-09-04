@@ -5,6 +5,7 @@ package net.minecraft.world.item;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -72,7 +73,7 @@ extends Item {
             return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
         }
         player.startUsingItem(interactionHand);
-        if (!level.isClientSide && (blockPos = level.getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false)) != null) {
+        if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false)) != null) {
             EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.x, player.y + (double)(player.getBbHeight() / 2.0f), player.z);
             eyeOfEnder.setItem(itemStack);
             eyeOfEnder.signalTo(blockPos);

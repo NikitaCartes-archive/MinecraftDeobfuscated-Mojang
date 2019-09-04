@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
@@ -69,8 +70,8 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        BlockEntity blockEntity = level.getBlockEntity(blockPos);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
         if (blockEntity instanceof BarrelBlockEntity) {
             ((BarrelBlockEntity)blockEntity).recheckOpen();
         }

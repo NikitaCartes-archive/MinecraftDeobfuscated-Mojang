@@ -8,10 +8,10 @@ import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -140,35 +140,32 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BlockState blockState6;
         BlockState blockState5;
         BlockPos blockPos3;
         BlockState blockState3;
-        if (level.isClientSide) {
-            return;
-        }
-        BlockState blockState2 = this.getUpdatedState(blockState, level, blockPos);
+        BlockState blockState2 = this.getUpdatedState(blockState, serverLevel, blockPos);
         if (blockState2 != blockState) {
             if (this.hasFaces(blockState2)) {
-                level.setBlock(blockPos, blockState2, 2);
+                serverLevel.setBlock(blockPos, blockState2, 2);
             } else {
-                VineBlock.dropResources(blockState, level, blockPos);
-                level.removeBlock(blockPos, false);
+                VineBlock.dropResources(blockState, serverLevel, blockPos);
+                serverLevel.removeBlock(blockPos, false);
             }
             return;
         }
-        if (level.random.nextInt(4) != 0) {
+        if (serverLevel.random.nextInt(4) != 0) {
             return;
         }
         Direction direction = Direction.getRandomFace(random);
         BlockPos blockPos2 = blockPos.above();
         if (direction.getAxis().isHorizontal() && !blockState.getValue(VineBlock.getPropertyForFace(direction)).booleanValue()) {
-            if (!this.canSpread(level, blockPos)) {
+            if (!this.canSpread(serverLevel, blockPos)) {
                 return;
             }
             BlockPos blockPos32 = blockPos.relative(direction);
-            BlockState blockState32 = level.getBlockState(blockPos32);
+            BlockState blockState32 = serverLevel.getBlockState(blockPos32);
             if (blockState32.isAir()) {
                 Direction direction2 = direction.getClockWise();
                 Direction direction3 = direction.getCounterClockWise();
@@ -176,47 +173,47 @@ extends Block {
                 boolean bl2 = blockState.getValue(VineBlock.getPropertyForFace(direction3));
                 BlockPos blockPos4 = blockPos32.relative(direction2);
                 BlockPos blockPos5 = blockPos32.relative(direction3);
-                if (bl && VineBlock.isAcceptableNeighbour(level, blockPos4, direction2)) {
-                    level.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction2), true), 2);
-                } else if (bl2 && VineBlock.isAcceptableNeighbour(level, blockPos5, direction3)) {
-                    level.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction3), true), 2);
+                if (bl && VineBlock.isAcceptableNeighbour(serverLevel, blockPos4, direction2)) {
+                    serverLevel.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction2), true), 2);
+                } else if (bl2 && VineBlock.isAcceptableNeighbour(serverLevel, blockPos5, direction3)) {
+                    serverLevel.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction3), true), 2);
                 } else {
                     Direction direction4 = direction.getOpposite();
-                    if (bl && level.isEmptyBlock(blockPos4) && VineBlock.isAcceptableNeighbour(level, blockPos.relative(direction2), direction4)) {
-                        level.setBlock(blockPos4, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
-                    } else if (bl2 && level.isEmptyBlock(blockPos5) && VineBlock.isAcceptableNeighbour(level, blockPos.relative(direction3), direction4)) {
-                        level.setBlock(blockPos5, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
-                    } else if ((double)level.random.nextFloat() < 0.05 && VineBlock.isAcceptableNeighbour(level, blockPos32.above(), Direction.UP)) {
-                        level.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(UP, true), 2);
+                    if (bl && serverLevel.isEmptyBlock(blockPos4) && VineBlock.isAcceptableNeighbour(serverLevel, blockPos.relative(direction2), direction4)) {
+                        serverLevel.setBlock(blockPos4, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
+                    } else if (bl2 && serverLevel.isEmptyBlock(blockPos5) && VineBlock.isAcceptableNeighbour(serverLevel, blockPos.relative(direction3), direction4)) {
+                        serverLevel.setBlock(blockPos5, (BlockState)this.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction4), true), 2);
+                    } else if ((double)serverLevel.random.nextFloat() < 0.05 && VineBlock.isAcceptableNeighbour(serverLevel, blockPos32.above(), Direction.UP)) {
+                        serverLevel.setBlock(blockPos32, (BlockState)this.defaultBlockState().setValue(UP, true), 2);
                     }
                 }
-            } else if (VineBlock.isAcceptableNeighbour(level, blockPos32, direction)) {
-                level.setBlock(blockPos, (BlockState)blockState.setValue(VineBlock.getPropertyForFace(direction), true), 2);
+            } else if (VineBlock.isAcceptableNeighbour(serverLevel, blockPos32, direction)) {
+                serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(VineBlock.getPropertyForFace(direction), true), 2);
             }
             return;
         }
         if (direction == Direction.UP && blockPos.getY() < 255) {
-            if (this.canSupportAtFace(level, blockPos, direction)) {
-                level.setBlock(blockPos, (BlockState)blockState.setValue(UP, true), 2);
+            if (this.canSupportAtFace(serverLevel, blockPos, direction)) {
+                serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(UP, true), 2);
                 return;
             }
-            if (level.isEmptyBlock(blockPos2)) {
-                if (!this.canSpread(level, blockPos)) {
+            if (serverLevel.isEmptyBlock(blockPos2)) {
+                if (!this.canSpread(serverLevel, blockPos)) {
                     return;
                 }
                 BlockState blockState4 = blockState;
                 for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                    if (!random.nextBoolean() && VineBlock.isAcceptableNeighbour(level, blockPos2.relative(direction2), Direction.UP)) continue;
+                    if (!random.nextBoolean() && VineBlock.isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), Direction.UP)) continue;
                     blockState4 = (BlockState)blockState4.setValue(VineBlock.getPropertyForFace(direction2), false);
                 }
                 if (this.hasHorizontalConnection(blockState4)) {
-                    level.setBlock(blockPos2, blockState4, 2);
+                    serverLevel.setBlock(blockPos2, blockState4, 2);
                 }
                 return;
             }
         }
-        if (blockPos.getY() > 0 && ((blockState3 = level.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState3.getBlock() == this) && (blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3) != (blockState6 = this.copyRandomFaces(blockState, blockState5, random)) && this.hasHorizontalConnection(blockState6)) {
-            level.setBlock(blockPos3, blockState6, 2);
+        if (blockPos.getY() > 0 && ((blockState3 = serverLevel.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState3.getBlock() == this) && (blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3) != (blockState6 = this.copyRandomFaces(blockState, blockState5, random)) && this.hasHorizontalConnection(blockState6)) {
+            serverLevel.setBlock(blockPos3, blockState6, 2);
         }
     }
 

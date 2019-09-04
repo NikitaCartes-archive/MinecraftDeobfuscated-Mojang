@@ -6,9 +6,9 @@ package net.minecraft.client.gui.screens;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -137,10 +137,10 @@ implements Widget {
         if (list.isEmpty()) {
             return;
         }
-        GlStateManager.disableRescaleNormal();
+        RenderSystem.disableRescaleNormal();
         Lighting.turnOff();
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableLighting();
+        RenderSystem.disableDepthTest();
         int k = 0;
         for (String string : list) {
             l = this.font.width(string);
@@ -184,10 +184,10 @@ implements Widget {
         }
         this.blitOffset = 0;
         this.itemRenderer.blitOffset = 0.0f;
-        GlStateManager.enableLighting();
-        GlStateManager.enableDepthTest();
+        RenderSystem.enableLighting();
+        RenderSystem.enableDepthTest();
         Lighting.turnOn();
-        GlStateManager.enableRescaleNormal();
+        RenderSystem.enableRescaleNormal();
     }
 
     protected void renderComponentHoverEffect(Component component, int i, int j) {
@@ -232,7 +232,7 @@ implements Widget {
         } else if (hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
             this.renderTooltip(this.minecraft.font.split(hoverEvent.getValue().getColoredString(), Math.max(this.width / 2, 200)), i, j);
         }
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
     }
 
     protected void insertText(String string, boolean bl) {
@@ -342,12 +342,12 @@ implements Widget {
     }
 
     public void renderDirtBackground(int i) {
-        GlStateManager.disableLighting();
-        GlStateManager.disableFog();
+        RenderSystem.disableLighting();
+        RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         this.minecraft.getTextureManager().bind(BACKGROUND_LOCATION);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float f = 32.0f;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferBuilder.vertex(0.0, this.height, 0.0).uv(0.0, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();

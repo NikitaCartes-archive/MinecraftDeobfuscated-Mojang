@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -398,14 +399,17 @@ extends WaterAnimal {
          */
         @Override
         public void start() {
+            if (!(this.dolphin.level instanceof ServerLevel)) {
+                return;
+            }
+            ServerLevel serverLevel = (ServerLevel)this.dolphin.level;
             this.stuck = false;
             this.dolphin.getNavigation().stop();
-            Level level = this.dolphin.level;
             BlockPos blockPos = new BlockPos(this.dolphin);
-            String string = (double)level.random.nextFloat() >= 0.5 ? "Ocean_Ruin" : "Shipwreck";
-            BlockPos blockPos2 = level.findNearestMapFeature(string, blockPos, 50, false);
+            String string = (double)serverLevel.random.nextFloat() >= 0.5 ? "Ocean_Ruin" : "Shipwreck";
+            BlockPos blockPos2 = serverLevel.findNearestMapFeature(string, blockPos, 50, false);
             if (blockPos2 == null) {
-                BlockPos blockPos3 = level.findNearestMapFeature(string.equals("Ocean_Ruin") ? "Shipwreck" : "Ocean_Ruin", blockPos, 50, false);
+                BlockPos blockPos3 = serverLevel.findNearestMapFeature(string.equals("Ocean_Ruin") ? "Shipwreck" : "Ocean_Ruin", blockPos, 50, false);
                 if (blockPos3 == null) {
                     this.stuck = true;
                     return;
@@ -414,7 +418,7 @@ extends WaterAnimal {
             } else {
                 this.dolphin.setTreasurePos(blockPos2);
             }
-            level.broadcastEntityEvent(this.dolphin, (byte)38);
+            serverLevel.broadcastEntityEvent(this.dolphin, (byte)38);
         }
 
         @Override

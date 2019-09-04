@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -27,19 +27,19 @@ extends RenderLayer<T, M> {
     @Override
     public void render(T entity, float f, float g, float h, float i, float j, float k, float l) {
         this.bindTexture(SPIDER_EYES_LOCATION);
-        GlStateManager.enableBlend();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        RenderSystem.enableBlend();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         if (((Entity)entity).isInvisible()) {
-            GlStateManager.depthMask(false);
+            RenderSystem.depthMask(false);
         } else {
-            GlStateManager.depthMask(true);
+            RenderSystem.depthMask(true);
         }
         int m = 61680;
         int n = m % 65536;
         int o = m / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, n, o);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, n, o);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         gameRenderer.resetFogColor(true);
         ((SpiderModel)this.getParentModel()).render(entity, f, g, i, j, k, l);
@@ -47,11 +47,11 @@ extends RenderLayer<T, M> {
         m = ((Entity)entity).getLightColor();
         n = m % 65536;
         o = m / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, n, o);
+        RenderSystem.glMultiTexCoord2f(33985, n, o);
         this.setLightColor(entity);
-        GlStateManager.depthMask(true);
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
     }
 
     @Override

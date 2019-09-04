@@ -17,6 +17,8 @@ import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Sheep;
@@ -41,7 +43,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
@@ -190,10 +195,15 @@ public interface DispenseItemBehavior {
             @Override
             public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
                 Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-                double d = blockSource.x() + (double)direction.getStepX();
-                double e = (float)blockSource.getPos().getY() + 0.2f;
-                double f = blockSource.z() + (double)direction.getStepZ();
-                blockSource.getLevel().addFreshEntity(new FireworkRocketEntity(blockSource.getLevel(), d, e, f, itemStack));
+                double d = direction.getStepX();
+                double e = direction.getStepY();
+                double f = direction.getStepZ();
+                double g = blockSource.x() + d;
+                double h = (float)blockSource.getPos().getY() + 0.2f;
+                double i = blockSource.z() + f;
+                FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.getLevel(), itemStack, g, h, i, true);
+                fireworkRocketEntity.shoot(d, e, f, 0.5f, 1.0f);
+                blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
                 itemStack.shrink(1);
                 return itemStack;
             }
@@ -397,12 +407,44 @@ public interface DispenseItemBehavior {
         for (DyeColor dyeColor : DyeColor.values()) {
             DispenserBlock.registerBehavior(ShulkerBoxBlock.getBlockByColor(dyeColor).asItem(), new ShulkerBoxDispenseBehavior());
         }
+        DispenserBlock.registerBehavior(Items.GLASS_BOTTLE.asItem(), new DefaultDispenseItemBehavior(){
+            private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
+
+            private ItemStack takeLiquid(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
+                itemStack.shrink(1);
+                if (itemStack.isEmpty()) {
+                    return itemStack2.copy();
+                }
+                if (((DispenserBlockEntity)blockSource.getEntity()).addItem(itemStack2.copy()) < 0) {
+                    this.defaultDispenseItemBehavior.dispense(blockSource, itemStack2.copy());
+                }
+                return itemStack;
+            }
+
+            @Override
+            public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+                BlockPos blockPos;
+                Level levelAccessor = blockSource.getLevel();
+                BlockState blockState = levelAccessor.getBlockState(blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING)));
+                Block block = blockState.getBlock();
+                if (block.is(BlockTags.BEEHIVES) && blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
+                    ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null);
+                    return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
+                }
+                if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
+                    return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
+                }
+                return itemStack;
+            }
+        });
         DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new OptionalDispenseItemBehavior(){
 
             @Override
             protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
                 Level level = blockSource.getLevel();
                 if (!level.isClientSide()) {
+                    int i;
+                    BlockState blockState;
                     this.success = false;
                     BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                     List<Sheep> list = level.getEntitiesOfClass(Sheep.class, new AABB(blockPos));
@@ -414,6 +456,14 @@ public interface DispenseItemBehavior {
                         }
                         this.success = true;
                         break;
+                    }
+                    if (!this.success && (blockState = level.getBlockState(blockPos)).is(BlockTags.BEEHIVES) && (i = blockState.getValue(BeehiveBlock.HONEY_LEVEL).intValue()) >= 5) {
+                        if (itemStack.hurt(1, level.random, null)) {
+                            itemStack.setCount(0);
+                        }
+                        BeehiveBlock.dropHoneycomb(level, blockPos);
+                        ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(level, blockState, blockPos, null);
+                        this.success = true;
                     }
                 }
                 return itemStack;

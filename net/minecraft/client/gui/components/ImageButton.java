@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -47,13 +47,13 @@ extends Button {
     public void renderButton(int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(this.resourceLocation);
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableDepthTest();
         int k = this.yTexStart;
         if (this.isHovered()) {
             k += this.yDiffTex;
         }
         ImageButton.blit(this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
-        GlStateManager.enableDepthTest();
+        RenderSystem.enableDepthTest();
     }
 }
 

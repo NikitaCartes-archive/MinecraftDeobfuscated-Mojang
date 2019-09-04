@@ -157,6 +157,10 @@ extends BlockEntity {
         return this.structureName == null ? "" : this.structureName.toString();
     }
 
+    public String getStructurePath() {
+        return this.structureName == null ? "" : this.structureName.getPath();
+    }
+
     public boolean hasStructureName() {
         return this.structureName != null;
     }
@@ -173,7 +177,6 @@ extends BlockEntity {
         this.author = livingEntity.getName().getString();
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos getStructurePos() {
         return this.structurePos;
     }
@@ -182,7 +185,6 @@ extends BlockEntity {
         this.structurePos = blockPos;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos getStructureSize() {
         return this.structureSize;
     }
@@ -390,14 +392,10 @@ extends BlockEntity {
     }
 
     public boolean loadStructure(boolean bl) {
-        BlockPos blockPos3;
-        boolean bl2;
         StructureTemplate structureTemplate;
         if (this.mode != StructureMode.LOAD || this.level.isClientSide || this.structureName == null) {
             return false;
         }
-        BlockPos blockPos = this.getBlockPos();
-        BlockPos blockPos2 = blockPos.offset(this.structurePos);
         ServerLevel serverLevel = (ServerLevel)this.level;
         StructureManager structureManager = serverLevel.getStructureManager();
         try {
@@ -408,11 +406,18 @@ extends BlockEntity {
         if (structureTemplate == null) {
             return false;
         }
+        return this.loadStructure(bl, structureTemplate);
+    }
+
+    public boolean loadStructure(boolean bl, StructureTemplate structureTemplate) {
+        BlockPos blockPos2;
+        boolean bl2;
+        BlockPos blockPos = this.getBlockPos();
         if (!StringUtil.isNullOrEmpty(structureTemplate.getAuthor())) {
             this.author = structureTemplate.getAuthor();
         }
-        if (!(bl2 = this.structureSize.equals(blockPos3 = structureTemplate.getSize()))) {
-            this.structureSize = blockPos3;
+        if (!(bl2 = this.structureSize.equals(blockPos2 = structureTemplate.getSize()))) {
+            this.structureSize = blockPos2;
             this.setChanged();
             BlockState blockState = this.level.getBlockState(blockPos);
             this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
@@ -422,7 +427,8 @@ extends BlockEntity {
             if (this.integrity < 1.0f) {
                 structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0f, 1.0f))).setRandom(StructureBlockEntity.createRandom(this.seed));
             }
-            structureTemplate.placeInWorldChunk(this.level, blockPos2, structurePlaceSettings);
+            BlockPos blockPos3 = blockPos.offset(this.structurePos);
+            structureTemplate.placeInWorldChunk(this.level, blockPos3, structurePlaceSettings);
             return true;
         }
         return false;

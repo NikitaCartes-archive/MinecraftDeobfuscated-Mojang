@@ -4,11 +4,10 @@
 package net.minecraft.client.renderer;
 
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -152,7 +151,7 @@ ResourceManagerReloadListener {
     }
 
     public boolean postEffectActive() {
-        return GLX.usePostProcess && this.postEffect != null;
+        return this.postEffect != null;
     }
 
     public void shutdownEffect() {
@@ -168,9 +167,6 @@ ResourceManagerReloadListener {
     }
 
     public void checkEntityPostEffect(@Nullable Entity entity) {
-        if (!GLX.usePostProcess) {
-            return;
-        }
         if (this.postEffect != null) {
             this.postEffect.close();
         }
@@ -217,9 +213,6 @@ ResourceManagerReloadListener {
     }
 
     public void tick() {
-        if (GLX.usePostProcess && ProgramManager.getInstance() == null) {
-            ProgramManager.createInstance();
-        }
         this.tickFov();
         this.lightTexture.tick();
         if (this.minecraft.getCameraEntity() == null) {
@@ -251,9 +244,6 @@ ResourceManagerReloadListener {
     }
 
     public void resize(int i, int j) {
-        if (!GLX.usePostProcess) {
-            return;
-        }
         if (this.postEffect != null) {
             this.postEffect.resize(i, j);
         }
@@ -336,7 +326,7 @@ ResourceManagerReloadListener {
             d *= (double)Mth.lerp(f, this.oldFov, this.fov);
         }
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).getHealth() <= 0.0f) {
-            float g = (float)((LivingEntity)camera.getEntity()).deathTime + f;
+            float g = Math.min((float)((LivingEntity)camera.getEntity()).deathTime + f, 20.0f);
             d /= (double)((1.0f - 500.0f / (g + 500.0f)) * 2.0f + 1.0f);
         }
         if (!(fluidState = camera.getFluidInCamera()).isEmpty()) {
@@ -351,8 +341,8 @@ ResourceManagerReloadListener {
             LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
             float g = (float)livingEntity.hurtTime - f;
             if (livingEntity.getHealth() <= 0.0f) {
-                h = (float)livingEntity.deathTime + f;
-                GlStateManager.rotatef(40.0f - 8000.0f / (h + 200.0f), 0.0f, 0.0f, 1.0f);
+                h = Math.min((float)livingEntity.deathTime + f, 20.0f);
+                RenderSystem.rotatef(40.0f - 8000.0f / (h + 200.0f), 0.0f, 0.0f, 1.0f);
             }
             if (g < 0.0f) {
                 return;
@@ -360,9 +350,9 @@ ResourceManagerReloadListener {
             g /= (float)livingEntity.hurtDuration;
             g = Mth.sin(g * g * g * g * (float)Math.PI);
             h = livingEntity.hurtDir;
-            GlStateManager.rotatef(-h, 0.0f, 1.0f, 0.0f);
-            GlStateManager.rotatef(-g * 14.0f, 0.0f, 0.0f, 1.0f);
-            GlStateManager.rotatef(h, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(-h, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(-g * 14.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(h, 0.0f, 1.0f, 0.0f);
         }
     }
 
@@ -374,23 +364,23 @@ ResourceManagerReloadListener {
         float g = player.walkDist - player.walkDistO;
         float h = -(player.walkDist + g * f);
         float i = Mth.lerp(f, player.oBob, player.bob);
-        GlStateManager.translatef(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0f);
-        GlStateManager.rotatef(Mth.sin(h * (float)Math.PI) * i * 3.0f, 0.0f, 0.0f, 1.0f);
-        GlStateManager.rotatef(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.translatef(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0f);
+        RenderSystem.rotatef(Mth.sin(h * (float)Math.PI) * i * 3.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.rotatef(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f, 1.0f, 0.0f, 0.0f);
     }
 
     private void setupCamera(float f) {
         float g;
         this.renderDistance = this.minecraft.options.renderDistance * 16;
-        GlStateManager.matrixMode(5889);
-        GlStateManager.loadIdentity();
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
         if (this.zoom != 1.0) {
-            GlStateManager.translatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0f);
-            GlStateManager.scaled(this.zoom, this.zoom, 1.0);
+            RenderSystem.translatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0f);
+            RenderSystem.scaled(this.zoom, this.zoom, 1.0);
         }
-        GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(this.mainCamera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
-        GlStateManager.matrixMode(5888);
-        GlStateManager.loadIdentity();
+        RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(this.mainCamera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
         this.bobHurt(f);
         if (this.minecraft.options.bobView) {
             this.bobView(f);
@@ -402,9 +392,9 @@ ResourceManagerReloadListener {
             }
             float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
             h *= h;
-            GlStateManager.rotatef(((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
-            GlStateManager.scalef(1.0f / h, 1.0f, 1.0f);
-            GlStateManager.rotatef(-((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
+            RenderSystem.rotatef(((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
+            RenderSystem.scalef(1.0f / h, 1.0f, 1.0f);
+            RenderSystem.rotatef(-((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
         }
     }
 
@@ -413,12 +403,12 @@ ResourceManagerReloadListener {
         if (this.panoramicMode) {
             return;
         }
-        GlStateManager.matrixMode(5889);
-        GlStateManager.loadIdentity();
-        GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(camera, f, false), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 2.0f));
-        GlStateManager.matrixMode(5888);
-        GlStateManager.loadIdentity();
-        GlStateManager.pushMatrix();
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, false), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 2.0f));
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.pushMatrix();
         this.bobHurt(f);
         if (this.minecraft.options.bobView) {
             this.bobView(f);
@@ -429,7 +419,7 @@ ResourceManagerReloadListener {
             this.itemInHandRenderer.render(f);
             this.turnOffLightLayer();
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (this.minecraft.options.thirdPersonView == 0 && !bl) {
             this.itemInHandRenderer.renderScreenEffect(f);
             this.bobHurt(f);
@@ -480,35 +470,33 @@ ResourceManagerReloadListener {
                     this.takeAutoScreenshot();
                 }
             }
-            if (GLX.usePostProcess) {
-                this.minecraft.levelRenderer.doEntityOutline();
-                if (this.postEffect != null && this.effectActive) {
-                    GlStateManager.matrixMode(5890);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.loadIdentity();
-                    this.postEffect.process(f);
-                    GlStateManager.popMatrix();
-                }
-                this.minecraft.getMainRenderTarget().bindWrite(true);
+            this.minecraft.levelRenderer.doEntityOutline();
+            if (this.postEffect != null && this.effectActive) {
+                RenderSystem.matrixMode(5890);
+                RenderSystem.pushMatrix();
+                RenderSystem.loadIdentity();
+                this.postEffect.process(f);
+                RenderSystem.popMatrix();
             }
+            this.minecraft.getMainRenderTarget().bindWrite(true);
             this.minecraft.getProfiler().popPush("gui");
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
-                GlStateManager.alphaFunc(516, 0.1f);
+                RenderSystem.alphaFunc(516, 0.1f);
                 this.minecraft.window.setupGuiState(Minecraft.ON_OSX);
                 this.renderItemActivationAnimation(this.minecraft.window.getGuiScaledWidth(), this.minecraft.window.getGuiScaledHeight(), f);
                 this.minecraft.gui.render(f);
             }
             this.minecraft.getProfiler().pop();
         } else {
-            GlStateManager.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.matrixMode(5888);
-            GlStateManager.loadIdentity();
+            RenderSystem.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+            RenderSystem.matrixMode(5889);
+            RenderSystem.loadIdentity();
+            RenderSystem.matrixMode(5888);
+            RenderSystem.loadIdentity();
             this.minecraft.window.setupGuiState(Minecraft.ON_OSX);
         }
         if (this.minecraft.overlay != null) {
-            GlStateManager.clear(256, Minecraft.ON_OSX);
+            RenderSystem.clear(256, Minecraft.ON_OSX);
             try {
                 this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
@@ -519,7 +507,7 @@ ResourceManagerReloadListener {
             }
         }
         if (this.minecraft.screen != null) {
-            GlStateManager.clear(256, Minecraft.ON_OSX);
+            RenderSystem.clear(256, Minecraft.ON_OSX);
             try {
                 this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
@@ -590,9 +578,9 @@ ResourceManagerReloadListener {
             this.minecraft.setCameraEntity(this.minecraft.player);
         }
         this.pick(f);
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.alphaFunc(516, 0.5f);
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.alphaFunc(516, 0.5f);
         this.minecraft.getProfiler().push("center");
         this.render(f, l);
         this.minecraft.getProfiler().pop();
@@ -602,7 +590,7 @@ ResourceManagerReloadListener {
         LevelRenderer levelRenderer = this.minecraft.levelRenderer;
         ParticleEngine particleEngine = this.minecraft.particleEngine;
         boolean bl = this.shouldRenderBlockOutline();
-        GlStateManager.enableCull();
+        RenderSystem.enableCull();
         this.minecraft.getProfiler().popPush("camera");
         this.setupCamera(f);
         Camera camera = this.mainCamera;
@@ -610,9 +598,9 @@ ResourceManagerReloadListener {
         FrustumData frustumData = Frustum.getFrustum();
         levelRenderer.prepare(camera);
         this.minecraft.getProfiler().popPush("clear");
-        GlStateManager.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+        RenderSystem.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
         this.fog.setupClearColor(camera, f);
-        GlStateManager.clear(16640, Minecraft.ON_OSX);
+        RenderSystem.clear(16640, Minecraft.ON_OSX);
         this.minecraft.getProfiler().popPush("culling");
         FrustumCuller culler = new FrustumCuller(frustumData);
         double d = camera.getPosition().x;
@@ -622,18 +610,18 @@ ResourceManagerReloadListener {
         if (this.minecraft.options.renderDistance >= 4) {
             this.fog.setupFog(camera, -1);
             this.minecraft.getProfiler().popPush("sky");
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 2.0f));
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5889);
+            RenderSystem.loadIdentity();
+            RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 2.0f));
+            RenderSystem.matrixMode(5888);
             levelRenderer.renderSky(f);
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5889);
+            RenderSystem.loadIdentity();
+            RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
+            RenderSystem.matrixMode(5888);
         }
         this.fog.setupFog(camera, 0);
-        GlStateManager.shadeModel(7425);
+        RenderSystem.shadeModel(7425);
         if (camera.getPosition().y < 128.0) {
             this.prepareAndRenderClouds(camera, levelRenderer, f, d, e, g);
         }
@@ -647,77 +635,75 @@ ResourceManagerReloadListener {
         this.minecraft.getProfiler().popPush("updatechunks");
         this.minecraft.levelRenderer.compileChunksUntil(l);
         this.minecraft.getProfiler().popPush("terrain");
-        GlStateManager.matrixMode(5888);
-        GlStateManager.pushMatrix();
-        GlStateManager.disableAlphaTest();
+        RenderSystem.matrixMode(5888);
+        RenderSystem.pushMatrix();
+        RenderSystem.disableAlphaTest();
         levelRenderer.render(BlockLayer.SOLID, camera);
-        GlStateManager.enableAlphaTest();
+        RenderSystem.enableAlphaTest();
         levelRenderer.render(BlockLayer.CUTOUT_MIPPED, camera);
         this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
         levelRenderer.render(BlockLayer.CUTOUT, camera);
         this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
-        GlStateManager.shadeModel(7424);
-        GlStateManager.alphaFunc(516, 0.1f);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
+        RenderSystem.shadeModel(7424);
+        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.popMatrix();
+        RenderSystem.pushMatrix();
         Lighting.turnOn();
         this.minecraft.getProfiler().popPush("entities");
         levelRenderer.renderEntities(camera, culler, f);
         Lighting.turnOff();
         this.turnOffLightLayer();
-        GlStateManager.matrixMode(5888);
-        GlStateManager.popMatrix();
+        RenderSystem.matrixMode(5888);
+        RenderSystem.popMatrix();
         if (bl && this.minecraft.hitResult != null) {
-            GlStateManager.disableAlphaTest();
+            RenderSystem.disableAlphaTest();
             this.minecraft.getProfiler().popPush("outline");
             levelRenderer.renderHitOutline(camera, this.minecraft.hitResult, 0);
-            GlStateManager.enableAlphaTest();
+            RenderSystem.enableAlphaTest();
         }
-        if (this.minecraft.debugRenderer.shouldRender()) {
-            this.minecraft.debugRenderer.render(l);
-        }
+        this.minecraft.debugRenderer.render(l);
         this.minecraft.getProfiler().popPush("destroyProgress");
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
         levelRenderer.renderDestroyAnimation(Tesselator.getInstance(), Tesselator.getInstance().getBuilder(), camera);
         this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
         this.turnOnLightLayer();
         this.fog.setupFog(camera, 0);
         this.minecraft.getProfiler().popPush("particles");
         particleEngine.render(camera, f);
         this.turnOffLightLayer();
-        GlStateManager.depthMask(false);
-        GlStateManager.enableCull();
+        RenderSystem.depthMask(false);
+        RenderSystem.enableCull();
         this.minecraft.getProfiler().popPush("weather");
         this.renderSnowAndRain(f);
-        GlStateManager.depthMask(true);
+        RenderSystem.depthMask(true);
         levelRenderer.renderWorldBounds(camera, f);
-        GlStateManager.disableBlend();
-        GlStateManager.enableCull();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.alphaFunc(516, 0.1f);
+        RenderSystem.disableBlend();
+        RenderSystem.enableCull();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.alphaFunc(516, 0.1f);
         this.fog.setupFog(camera, 0);
-        GlStateManager.enableBlend();
-        GlStateManager.depthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.depthMask(false);
         this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-        GlStateManager.shadeModel(7425);
+        RenderSystem.shadeModel(7425);
         this.minecraft.getProfiler().popPush("translucent");
         levelRenderer.render(BlockLayer.TRANSLUCENT, camera);
-        GlStateManager.shadeModel(7424);
-        GlStateManager.depthMask(true);
-        GlStateManager.enableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.disableFog();
+        RenderSystem.shadeModel(7424);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.disableFog();
         if (camera.getPosition().y >= 128.0) {
             this.minecraft.getProfiler().popPush("aboveClouds");
             this.prepareAndRenderClouds(camera, levelRenderer, f, d, e, g);
         }
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {
-            GlStateManager.clear(256, Minecraft.ON_OSX);
+            RenderSystem.clear(256, Minecraft.ON_OSX);
             this.renderItemInHand(camera, f);
         }
     }
@@ -725,19 +711,19 @@ ResourceManagerReloadListener {
     private void prepareAndRenderClouds(Camera camera, LevelRenderer levelRenderer, float f, double d, double e, double g) {
         if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
             this.minecraft.getProfiler().popPush("clouds");
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 4.0f));
-            GlStateManager.matrixMode(5888);
-            GlStateManager.pushMatrix();
+            RenderSystem.matrixMode(5889);
+            RenderSystem.loadIdentity();
+            RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * 4.0f));
+            RenderSystem.matrixMode(5888);
+            RenderSystem.pushMatrix();
             this.fog.setupFog(camera, 0);
             levelRenderer.renderClouds(f, d, e, g);
-            GlStateManager.disableFog();
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5889);
-            GlStateManager.loadIdentity();
-            GlStateManager.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
-            GlStateManager.matrixMode(5888);
+            RenderSystem.disableFog();
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5889);
+            RenderSystem.loadIdentity();
+            RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05f, this.renderDistance * Mth.SQRT_OF_TWO));
+            RenderSystem.matrixMode(5888);
         }
     }
 
@@ -818,11 +804,11 @@ ResourceManagerReloadListener {
         int k = Mth.floor(this.mainCamera.getPosition().z);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GlStateManager.disableCull();
-        GlStateManager.normal3f(0.0f, 1.0f, 0.0f);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.alphaFunc(516, 0.1f);
+        RenderSystem.disableCull();
+        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.alphaFunc(516, 0.1f);
         double d = this.mainCamera.getPosition().x;
         double e = this.mainCamera.getPosition().y;
         double h = this.mainCamera.getPosition().z;
@@ -834,7 +820,7 @@ ResourceManagerReloadListener {
         int n = -1;
         float o = (float)this.tick + f;
         bufferBuilder.offset(-d, -e, -h);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int p = k - m; p <= k + m; ++p) {
             for (int q = i - m; q <= i + m; ++q) {
@@ -879,7 +865,7 @@ ResourceManagerReloadListener {
                     float ac = Mth.sqrt(aa * aa + ab * ab) / (float)m;
                     float ad = ((1.0f - ac * ac) * 0.5f + 0.5f) * g;
                     mutableBlockPos.set(q, x, p);
-                    int ae = level.getLightColor(mutableBlockPos, 0);
+                    int ae = level.getLightColor(mutableBlockPos);
                     int af = ae >> 16 & 0xFFFF;
                     int ag = ae & 0xFFFF;
                     bufferBuilder.vertex((double)q - s + 0.5, w, (double)p - t + 0.5).uv(0.0, (double)v * 0.25 + z).color(1.0f, 1.0f, 1.0f, ad).uv2(af, ag).endVertex();
@@ -904,7 +890,7 @@ ResourceManagerReloadListener {
                 float aj = Mth.sqrt(ah * ah + ai * ai) / (float)m;
                 float ak = ((1.0f - aj * aj) * 0.3f + 0.5f) * g;
                 mutableBlockPos.set(q, x, p);
-                int al = (level.getLightColor(mutableBlockPos, 0) * 3 + 0xF000F0) / 4;
+                int al = (level.getLightColor(mutableBlockPos) * 3 + 0xF000F0) / 4;
                 int am = al >> 16 & 0xFFFF;
                 int an = al & 0xFFFF;
                 bufferBuilder.vertex((double)q - s + 0.5, w, (double)p - t + 0.5).uv(0.0 + aa, (double)v * 0.25 + z + ab).color(1.0f, 1.0f, 1.0f, ak).uv2(am, an).endVertex();
@@ -917,9 +903,9 @@ ResourceManagerReloadListener {
             tesselator.end();
         }
         bufferBuilder.offset(0.0, 0.0, 0.0);
-        GlStateManager.enableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.alphaFunc(516, 0.1f);
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.alphaFunc(516, 0.1f);
         this.turnOffLightLayer();
     }
 
@@ -938,21 +924,21 @@ ResourceManagerReloadListener {
     }
 
     public static void renderNameTagInWorld(Font font, String string, float f, float g, float h, int i, float j, float k, boolean bl) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(f, g, h);
-        GlStateManager.normal3f(0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(-j, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(k, 1.0f, 0.0f, 0.0f);
-        GlStateManager.scalef(-0.025f, -0.025f, 0.025f);
-        GlStateManager.disableLighting();
-        GlStateManager.depthMask(false);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(f, g, h);
+        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-j, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(k, 1.0f, 0.0f, 0.0f);
+        RenderSystem.scalef(-0.025f, -0.025f, 0.025f);
+        RenderSystem.disableLighting();
+        RenderSystem.depthMask(false);
         if (!bl) {
-            GlStateManager.disableDepthTest();
+            RenderSystem.disableDepthTest();
         }
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         int l = font.width(string) / 2;
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
@@ -962,17 +948,17 @@ ResourceManagerReloadListener {
         bufferBuilder.vertex(l + 1, 8 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
         bufferBuilder.vertex(l + 1, -1 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
         tesselator.end();
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         if (!bl) {
             font.draw(string, -font.width(string) / 2, i, 0x20FFFFFF);
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableDepthTest();
         }
-        GlStateManager.depthMask(true);
+        RenderSystem.depthMask(true);
         font.draw(string, -font.width(string) / 2, i, bl ? 0x20FFFFFF : -1);
-        GlStateManager.enableLighting();
-        GlStateManager.disableBlend();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.popMatrix();
+        RenderSystem.enableLighting();
+        RenderSystem.disableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.popMatrix();
     }
 
     public void displayItemActivation(ItemStack itemStack) {
@@ -994,24 +980,24 @@ ResourceManagerReloadListener {
         float n = m * (float)Math.PI;
         float o = this.itemActivationOffX * (float)(i / 4);
         float p = this.itemActivationOffY * (float)(j / 4);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.pushMatrix();
-        GlStateManager.pushLightingAttributes();
-        GlStateManager.enableDepthTest();
-        GlStateManager.disableCull();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.pushMatrix();
+        RenderSystem.pushLightingAttributes();
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableCull();
         Lighting.turnOn();
-        GlStateManager.translatef((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0f)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0f)), -50.0f);
+        RenderSystem.translatef((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0f)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0f)), -50.0f);
         float q = 50.0f + 175.0f * Mth.sin(n);
-        GlStateManager.scalef(q, -q, q);
-        GlStateManager.rotatef(900.0f * Mth.abs(Mth.sin(n)), 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(6.0f * Mth.cos(g * 8.0f), 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(6.0f * Mth.cos(g * 8.0f), 0.0f, 0.0f, 1.0f);
+        RenderSystem.scalef(q, -q, q);
+        RenderSystem.rotatef(900.0f * Mth.abs(Mth.sin(n)), 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(6.0f * Mth.cos(g * 8.0f), 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(6.0f * Mth.cos(g * 8.0f), 0.0f, 0.0f, 1.0f);
         this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED);
-        GlStateManager.popAttributes();
-        GlStateManager.popMatrix();
+        RenderSystem.popAttributes();
+        RenderSystem.popMatrix();
         Lighting.turnOff();
-        GlStateManager.enableCull();
-        GlStateManager.disableDepthTest();
+        RenderSystem.enableCull();
+        RenderSystem.disableDepthTest();
     }
 
     public Minecraft getMinecraft() {

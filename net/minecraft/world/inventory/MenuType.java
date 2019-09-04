@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.BrewingStandMenu;
-import net.minecraft.world.inventory.CartographyMenu;
+import net.minecraft.world.inventory.CartographyTableMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.DispenserMenu;
@@ -49,7 +49,7 @@ public class MenuType<T extends AbstractContainerMenu> {
     public static final MenuType<MerchantMenu> MERCHANT = MenuType.register("merchant", MerchantMenu::new);
     public static final MenuType<ShulkerBoxMenu> SHULKER_BOX = MenuType.register("shulker_box", ShulkerBoxMenu::new);
     public static final MenuType<SmokerMenu> SMOKER = MenuType.register("smoker", SmokerMenu::new);
-    public static final MenuType<CartographyMenu> CARTOGRAPHY = MenuType.register("cartography", CartographyMenu::new);
+    public static final MenuType<CartographyTableMenu> CARTOGRAPHY_TABLE = MenuType.register("cartography_table", CartographyTableMenu::new);
     public static final MenuType<StonecutterMenu> STONECUTTER = MenuType.register("stonecutter", StonecutterMenu::new);
     private final MenuSupplier<T> constructor;
 

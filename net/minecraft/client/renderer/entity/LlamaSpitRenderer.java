@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LlamaSpitModel;
@@ -25,21 +25,21 @@ extends EntityRenderer<LlamaSpit> {
 
     @Override
     public void render(LlamaSpit llamaSpit, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d, (float)e + 0.15f, (float)f);
-        GlStateManager.rotatef(Mth.lerp(h, llamaSpit.yRotO, llamaSpit.yRot) - 90.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(Mth.lerp(h, llamaSpit.xRotO, llamaSpit.xRot), 0.0f, 0.0f, 1.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d, (float)e + 0.15f, (float)f);
+        RenderSystem.rotatef(Mth.lerp(h, llamaSpit.yRotO, llamaSpit.yRot) - 90.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(Mth.lerp(h, llamaSpit.xRotO, llamaSpit.xRot), 0.0f, 0.0f, 1.0f);
         this.bindTexture(llamaSpit);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(llamaSpit));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(llamaSpit));
         }
         this.model.render(llamaSpit, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         super.render(llamaSpit, d, e, f, g, h);
     }
 

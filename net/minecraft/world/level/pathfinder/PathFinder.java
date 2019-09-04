@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.pathfinder.BinaryHeap;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
@@ -36,9 +36,9 @@ public class PathFinder {
     }
 
     @Nullable
-    public Path findPath(LevelReader levelReader, Mob mob, Set<BlockPos> set, float f, int i) {
+    public Path findPath(PathNavigationRegion pathNavigationRegion, Mob mob, Set<BlockPos> set, float f, int i) {
         this.openSet.clear();
-        this.nodeEvaluator.prepare(levelReader, mob);
+        this.nodeEvaluator.prepare(pathNavigationRegion, mob);
         Node node = this.nodeEvaluator.getStart();
         Map<Target, BlockPos> map = set.stream().collect(Collectors.toMap(blockPos -> this.nodeEvaluator.getGoal(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
         Path path = this.findPath(node, map, f, i);

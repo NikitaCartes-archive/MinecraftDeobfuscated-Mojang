@@ -3,8 +3,8 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.collect.Lists;
 import com.mojang.realmsclient.dto.Backup;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,7 +22,7 @@ extends RealmsScreen {
     private final RealmsScreen lastScreen;
     private final int BUTTON_BACK_ID = 0;
     private final Backup backup;
-    private final List<String> keys = new ArrayList<String>();
+    private final List<String> keys = Lists.newArrayList();
     private BackupInfoList backupInfoList;
     String[] difficulties = new String[]{RealmsBackupInfoScreen.getLocalizedString("options.difficulty.peaceful"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.easy"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.normal"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.hard")};
     String[] gameModes = new String[]{RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.survival"), RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.creative"), RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.adventure")};

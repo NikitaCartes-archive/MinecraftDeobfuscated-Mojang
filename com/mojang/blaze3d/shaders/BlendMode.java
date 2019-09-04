@@ -3,7 +3,7 @@
  */
 package com.mojang.blaze3d.shaders;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,16 +48,16 @@ public class BlendMode {
         if (lastApplied == null || this.opaque != lastApplied.isOpaque()) {
             lastApplied = this;
             if (this.opaque) {
-                GlStateManager.disableBlend();
+                RenderSystem.disableBlend();
                 return;
             }
-            GlStateManager.enableBlend();
+            RenderSystem.enableBlend();
         }
-        GlStateManager.blendEquation(this.blendFunc);
+        RenderSystem.blendEquation(this.blendFunc);
         if (this.separateBlend) {
-            GlStateManager.blendFuncSeparate(this.srcColorFactor, this.dstColorFactor, this.srcAlphaFactor, this.dstAlphaFactor);
+            RenderSystem.blendFuncSeparate(this.srcColorFactor, this.dstColorFactor, this.srcAlphaFactor, this.dstAlphaFactor);
         } else {
-            GlStateManager.blendFunc(this.srcColorFactor, this.dstColorFactor);
+            RenderSystem.blendFunc(this.srcColorFactor, this.dstColorFactor);
         }
     }
 

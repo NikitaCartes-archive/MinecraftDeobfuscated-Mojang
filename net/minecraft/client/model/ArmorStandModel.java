@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
@@ -86,25 +86,25 @@ extends ArmorStandArmorModel {
     @Override
     public void render(ArmorStand armorStand, float f, float g, float h, float i, float j, float k) {
         super.render(armorStand, f, g, h, i, j, k);
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         if (this.young) {
             float l = 2.0f;
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.bodyStick1.render(k);
             this.bodyStick2.render(k);
             this.shoulderStick.render(k);
             this.basePlate.render(k);
         } else {
-            if (armorStand.isSneaking()) {
-                GlStateManager.translatef(0.0f, 0.2f, 0.0f);
+            if (armorStand.isCrouching()) {
+                RenderSystem.translatef(0.0f, 0.2f, 0.0f);
             }
             this.bodyStick1.render(k);
             this.bodyStick2.render(k);
             this.shoulderStick.render(k);
             this.basePlate.render(k);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

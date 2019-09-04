@@ -62,7 +62,7 @@ extends Feature<SpikeConfiguration> {
     private void placeSpike(LevelAccessor levelAccessor, Random random, SpikeConfiguration spikeConfiguration, EndSpike endSpike) {
         int i = endSpike.getRadius();
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(endSpike.getCenterX() - i, 0, endSpike.getCenterZ() - i), new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i))) {
-            if (blockPos.closerThan(new BlockPos(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ()), (double)i) && blockPos.getY() < endSpike.getHeight()) {
+            if (blockPos.distSqr(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ(), false) <= (double)(i * i + 1) && blockPos.getY() < endSpike.getHeight()) {
                 this.setBlock(levelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
                 continue;
             }

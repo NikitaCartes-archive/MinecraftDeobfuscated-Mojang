@@ -119,7 +119,7 @@ ChunkHolder.LevelChangeListener {
     private <T> ChunkTaskPriorityQueue<Function<ProcessorHandle<Unit>, T>> getQueue(ProcessorHandle<T> processorHandle) {
         ChunkTaskPriorityQueue<Function<ProcessorHandle<Unit>, T>> chunkTaskPriorityQueue = this.queues.get(processorHandle);
         if (chunkTaskPriorityQueue == null) {
-            throw new IllegalArgumentException("No queue for: " + processorHandle);
+            throw Util.pauseInIde(new IllegalArgumentException("No queue for: " + processorHandle));
         }
         return chunkTaskPriorityQueue;
     }

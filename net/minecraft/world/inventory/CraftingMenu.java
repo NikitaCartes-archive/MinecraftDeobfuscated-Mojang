@@ -119,7 +119,7 @@ extends RecipeBookMenu<CraftingContainer> {
                     return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(itemStack2, itemStack);
-            } else if (i >= 10 && i < 37 ? !this.moveItemStackTo(itemStack2, 37, 46, false) : (i >= 37 && i < 46 ? !this.moveItemStackTo(itemStack2, 10, 37, false) : !this.moveItemStackTo(itemStack2, 10, 46, false))) {
+            } else if (i >= 10 && i < 46 ? !this.moveItemStackTo(itemStack2, 1, 10, false) && (i < 37 ? !this.moveItemStackTo(itemStack2, 37, 46, false) : !this.moveItemStackTo(itemStack2, 10, 37, false)) : !this.moveItemStackTo(itemStack2, 10, 46, false)) {
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {

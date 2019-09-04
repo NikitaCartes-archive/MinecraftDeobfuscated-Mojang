@@ -177,7 +177,7 @@ extends AbstractHorse {
         if (this.isBaby()) {
             return super.mobInteract(player, interactionHand);
         }
-        if (player.isSneaking()) {
+        if (player.isSecondaryUseActive()) {
             this.openInventory(player);
             return true;
         }

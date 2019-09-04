@@ -3,13 +3,13 @@
  */
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.realmsclient.dto.RealmsServerPlayerList;
 import com.mojang.realmsclient.dto.ValueObject;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -25,7 +25,7 @@ extends ValueObject {
 
     public static RealmsServerPlayerLists parse(String string) {
         RealmsServerPlayerLists realmsServerPlayerLists = new RealmsServerPlayerLists();
-        realmsServerPlayerLists.servers = new ArrayList<RealmsServerPlayerList>();
+        realmsServerPlayerLists.servers = Lists.newArrayList();
         try {
             JsonParser jsonParser = new JsonParser();
             JsonObject jsonObject = jsonParser.parse(string).getAsJsonObject();

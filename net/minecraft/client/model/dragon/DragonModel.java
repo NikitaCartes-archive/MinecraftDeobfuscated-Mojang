@@ -4,6 +4,7 @@
 package net.minecraft.client.model.dragon;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -96,13 +97,13 @@ extends EntityModel<EnderDragon> {
     @Override
     public void render(EnderDragon enderDragon, float f, float g, float h, float i, float j, float k) {
         float v;
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         float l = Mth.lerp(this.a, enderDragon.oFlapTime, enderDragon.flapTime);
         this.jaw.xRot = (float)(Math.sin(l * ((float)Math.PI * 2)) + 1.0) * 0.2f;
         float m = (float)(Math.sin(l * ((float)Math.PI * 2) - 1.0f) + 1.0);
         m = (m * m + m * 2.0f) * 0.05f;
-        GlStateManager.translatef(0.0f, m - 2.0f, -3.0f);
-        GlStateManager.rotatef(m * 2.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.translatef(0.0f, m - 2.0f, -3.0f);
+        RenderSystem.rotatef(m * 2.0f, 1.0f, 0.0f, 0.0f);
         float n = 0.0f;
         float o = 20.0f;
         float p = -12.0f;
@@ -133,14 +134,14 @@ extends EntityModel<EnderDragon> {
         this.head.xRot = this.rotWrap(enderDragon.getHeadPartYOffset(6, ds, fs)) * ((float)Math.PI / 180) * 1.5f * 5.0f;
         this.head.zRot = -this.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180);
         this.head.render(k);
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(-r * 1.5f, 0.0f, 0.0f, 1.0f);
-        GlStateManager.translatef(0.0f, -1.0f, 0.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-r * 1.5f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.translatef(0.0f, -1.0f, 0.0f);
         this.body.zRot = 0.0f;
         this.body.render(k);
         for (int w = 0; w < 2; ++w) {
-            GlStateManager.enableCull();
+            RenderSystem.enableCull();
             v = l * ((float)Math.PI * 2);
             this.wing.xRot = 0.125f - (float)Math.cos(v) * 0.2f;
             this.wing.yRot = 0.25f;
@@ -155,13 +156,13 @@ extends EntityModel<EnderDragon> {
             this.wing.render(k);
             this.frontLeg.render(k);
             this.rearLeg.render(k);
-            GlStateManager.scalef(-1.0f, 1.0f, 1.0f);
+            RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
             if (w != 0) continue;
-            GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
+            RenderSystem.cullFace(GlStateManager.CullFace.FRONT);
         }
-        GlStateManager.popMatrix();
-        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-        GlStateManager.disableCull();
+        RenderSystem.popMatrix();
+        RenderSystem.cullFace(GlStateManager.CullFace.BACK);
+        RenderSystem.disableCull();
         float x = -((float)Math.sin(l * ((float)Math.PI * 2))) * 0.0f;
         t = l * ((float)Math.PI * 2);
         o = 10.0f;
@@ -182,7 +183,7 @@ extends EntityModel<EnderDragon> {
             n = (float)((double)n - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
             this.neck.render(k);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     private float rotWrap(double d) {

@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -30,7 +31,7 @@ extends CanyonWorldCarver {
     }
 
     @Override
-    protected boolean carveBlock(ChunkAccess chunkAccess, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, AtomicBoolean atomicBoolean) {
+    protected boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, AtomicBoolean atomicBoolean) {
         return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, bitSet, random, mutableBlockPos, i, j, k, l, m, n, o, p);
     }
 }

@@ -4,7 +4,7 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -79,16 +79,16 @@ extends GuiComponent {
             this.scrollY = 56 - (this.maxY + this.minY) / 2;
             this.centered = true;
         }
-        GlStateManager.depthFunc(518);
+        RenderSystem.depthFunc(518);
         AdvancementTab.fill(0, 0, 234, 113, -16777216);
-        GlStateManager.depthFunc(515);
+        RenderSystem.depthFunc(515);
         ResourceLocation resourceLocation = this.display.getBackground();
         if (resourceLocation != null) {
             this.minecraft.getTextureManager().bind(resourceLocation);
         } else {
             this.minecraft.getTextureManager().bind(TextureManager.INTENTIONAL_MISSING_TEXTURE);
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         int i = Mth.floor(this.scrollX);
         int j = Mth.floor(this.scrollY);
         int k = i % 16;
@@ -104,8 +104,8 @@ extends GuiComponent {
     }
 
     public void drawTooltips(int i, int j, int k, int l) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 0.0f, 200.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.0f, 200.0f);
         AdvancementTab.fill(0, 0, 234, 113, Mth.floor(this.fade * 255.0f) << 24);
         boolean bl = false;
         int m = Mth.floor(this.scrollX);
@@ -118,7 +118,7 @@ extends GuiComponent {
                 break;
             }
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         this.fade = bl ? Mth.clamp(this.fade + 0.02f, 0.0f, 0.3f) : Mth.clamp(this.fade - 0.04f, 0.0f, 1.0f);
     }
 

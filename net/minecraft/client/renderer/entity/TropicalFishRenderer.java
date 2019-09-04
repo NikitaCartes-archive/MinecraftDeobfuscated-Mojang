@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -38,7 +38,7 @@ extends MobRenderer<TropicalFish, EntityModel<TropicalFish>> {
     public void render(TropicalFish tropicalFish, double d, double e, double f, float g, float h) {
         this.model = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
         float[] fs = tropicalFish.getBaseColor();
-        GlStateManager.color3f(fs[0], fs[1], fs[2]);
+        RenderSystem.color3f(fs[0], fs[1], fs[2]);
         super.render(tropicalFish, d, e, f, g, h);
     }
 
@@ -46,10 +46,10 @@ extends MobRenderer<TropicalFish, EntityModel<TropicalFish>> {
     protected void setupRotations(TropicalFish tropicalFish, float f, float g, float h) {
         super.setupRotations(tropicalFish, f, g, h);
         float i = 4.3f * Mth.sin(0.6f * f);
-        GlStateManager.rotatef(i, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(i, 0.0f, 1.0f, 0.0f);
         if (!tropicalFish.isInWater()) {
-            GlStateManager.translatef(0.2f, 0.1f, 0.0f);
-            GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.translatef(0.2f, 0.1f, 0.0f);
+            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
         }
     }
 }

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -56,8 +56,8 @@ public class Camera {
             this.setRotation(direction != null ? direction.toYRot() - 180.0f : 0.0f, 0.0f);
             this.move(0.0, 0.3, 0.0);
         }
-        GlStateManager.rotatef(this.xRot, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(this.yRot + 180.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(this.xRot, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(this.yRot + 180.0f, 0.0f, 1.0f, 0.0f);
     }
 
     public void tick() {

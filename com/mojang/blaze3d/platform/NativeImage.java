@@ -4,8 +4,8 @@
 package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.platform.DebugMemoryUntracker;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +13,6 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -117,21 +116,21 @@ implements AutoCloseable {
 
     private static void setClamp(boolean bl) {
         if (bl) {
-            GlStateManager.texParameter(3553, 10242, 10496);
-            GlStateManager.texParameter(3553, 10243, 10496);
+            RenderSystem.texParameter(3553, 10242, 10496);
+            RenderSystem.texParameter(3553, 10243, 10496);
         } else {
-            GlStateManager.texParameter(3553, 10242, 10497);
-            GlStateManager.texParameter(3553, 10243, 10497);
+            RenderSystem.texParameter(3553, 10242, 10497);
+            RenderSystem.texParameter(3553, 10243, 10497);
         }
     }
 
     private static void setFilter(boolean bl, boolean bl2) {
         if (bl) {
-            GlStateManager.texParameter(3553, 10241, bl2 ? 9987 : 9729);
-            GlStateManager.texParameter(3553, 10240, 9729);
+            RenderSystem.texParameter(3553, 10241, bl2 ? 9987 : 9729);
+            RenderSystem.texParameter(3553, 10240, 9729);
         } else {
-            GlStateManager.texParameter(3553, 10241, bl2 ? 9986 : 9728);
-            GlStateManager.texParameter(3553, 10240, 9728);
+            RenderSystem.texParameter(3553, 10241, bl2 ? 9986 : 9728);
+            RenderSystem.texParameter(3553, 10240, 9728);
         }
     }
 
@@ -269,20 +268,20 @@ implements AutoCloseable {
         NativeImage.setFilter(bl, bl3);
         NativeImage.setClamp(bl2);
         if (n == this.getWidth()) {
-            GlStateManager.pixelStore(3314, 0);
+            RenderSystem.pixelStore(3314, 0);
         } else {
-            GlStateManager.pixelStore(3314, this.getWidth());
+            RenderSystem.pixelStore(3314, this.getWidth());
         }
-        GlStateManager.pixelStore(3316, l);
-        GlStateManager.pixelStore(3315, m);
+        RenderSystem.pixelStore(3316, l);
+        RenderSystem.pixelStore(3315, m);
         this.format.setUnpackPixelStoreState();
-        GlStateManager.texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
+        RenderSystem.texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
     }
 
     public void downloadTexture(int i, boolean bl) {
         this.checkAllocated();
         this.format.setPackPixelStoreState();
-        GlStateManager.getTexImage(3553, i, this.format.glFormat(), 5121, this.pixels);
+        RenderSystem.getTexImage(3553, i, this.format.glFormat(), 5121, this.pixels);
         if (bl && this.format.hasAlpha()) {
             for (int j = 0; j < this.getHeight(); ++j) {
                 for (int k = 0; k < this.getWidth(); ++k) {
@@ -290,22 +289,6 @@ implements AutoCloseable {
                 }
             }
         }
-    }
-
-    public void downloadFrameBuffer(boolean bl) {
-        this.checkAllocated();
-        this.format.setPackPixelStoreState();
-        if (bl) {
-            GlStateManager.pixelTransfer(3357, Float.MAX_VALUE);
-        }
-        GlStateManager.readPixels(0, 0, this.width, this.height, this.format.glFormat(), 5121, this.pixels);
-        if (bl) {
-            GlStateManager.pixelTransfer(3357, 0.0f);
-        }
-    }
-
-    public void writeToFile(String string) throws IOException {
-        this.writeToFile(FileSystems.getDefault().getPath(string, new String[0]));
     }
 
     public void writeToFile(File file) throws IOException {
@@ -465,11 +448,11 @@ implements AutoCloseable {
         }
 
         public void setPackPixelStoreState() {
-            GlStateManager.pixelStore(3333, this.components());
+            RenderSystem.pixelStore(3333, this.components());
         }
 
         public void setUnpackPixelStoreState() {
-            GlStateManager.pixelStore(3317, this.components());
+            RenderSystem.pixelStore(3317, this.components());
         }
 
         public int glFormat() {
@@ -526,7 +509,7 @@ implements AutoCloseable {
             this.glFormat = j;
         }
 
-        public int glFormat() {
+        int glFormat() {
             return this.glFormat;
         }
     }

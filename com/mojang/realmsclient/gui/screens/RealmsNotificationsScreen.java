@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
@@ -107,31 +107,31 @@ extends RealmsScreen {
         int p = 0;
         if (hasUnreadNews) {
             RealmsScreen.bind("realms:textures/gui/realms/news_notification_mainscreen.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.4f, 0.4f, 0.4f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.4f, 0.4f, 0.4f);
             RealmsScreen.blit((int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0f, 0.0f, 40, 40, 40, 40);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             p += 14;
         }
         if (k != 0) {
             RealmsScreen.bind("realms:textures/gui/realms/invite_icon.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.pushMatrix();
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.pushMatrix();
             RealmsScreen.blit(n - p, o - 6, 0.0f, 0.0f, 15, 25, 31, 25);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             p += 16;
         }
         if (trialAvailable) {
             RealmsScreen.bind("realms:textures/gui/realms/trial_icon.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.pushMatrix();
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.pushMatrix();
             int q = 0;
             if ((System.currentTimeMillis() / 800L & 1L) == 1L) {
                 q = 8;
             }
             RealmsScreen.blit(n + 4 - p, o + 4, 0.0f, q, 8, 8, 8, 16);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

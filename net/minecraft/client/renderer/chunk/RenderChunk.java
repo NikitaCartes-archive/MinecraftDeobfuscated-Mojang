@@ -4,7 +4,6 @@
 package net.minecraft.client.renderer.chunk;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -64,10 +63,8 @@ public class RenderChunk {
     public RenderChunk(Level level, LevelRenderer levelRenderer) {
         this.level = level;
         this.renderer = levelRenderer;
-        if (GLX.useVbo()) {
-            for (int i = 0; i < BlockLayer.values().length; ++i) {
-                this.buffers[i] = new VertexBuffer(DefaultVertexFormat.BLOCK);
-            }
+        for (int i = 0; i < BlockLayer.values().length; ++i) {
+            this.buffers[i] = new VertexBuffer(DefaultVertexFormat.BLOCK);
         }
     }
 

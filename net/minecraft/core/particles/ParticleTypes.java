@@ -70,6 +70,10 @@ public class ParticleTypes {
     public static final SimpleParticleType DOLPHIN = ParticleTypes.register("dolphin", false);
     public static final SimpleParticleType CAMPFIRE_COSY_SMOKE = ParticleTypes.register("campfire_cosy_smoke", true);
     public static final SimpleParticleType CAMPFIRE_SIGNAL_SMOKE = ParticleTypes.register("campfire_signal_smoke", true);
+    public static final SimpleParticleType DRIPPING_HONEY = ParticleTypes.register("dripping_honey", false);
+    public static final SimpleParticleType FALLING_HONEY = ParticleTypes.register("falling_honey", false);
+    public static final SimpleParticleType LANDING_HONEY = ParticleTypes.register("landing_honey", false);
+    public static final SimpleParticleType FALLING_NECTAR = ParticleTypes.register("falling_nectar", false);
 
     private static SimpleParticleType register(String string, boolean bl) {
         return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));

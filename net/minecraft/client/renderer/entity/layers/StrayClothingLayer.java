@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -27,7 +27,7 @@ extends RenderLayer<T, M> {
     public void render(T mob, float f, float g, float h, float i, float j, float k, float l) {
         ((EntityModel)this.getParentModel()).copyPropertiesTo(this.layerModel);
         this.layerModel.prepareMobModel(mob, f, g, h);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindTexture(STRAY_CLOTHES_LOCATION);
         this.layerModel.render(mob, f, g, i, j, k, l);
     }

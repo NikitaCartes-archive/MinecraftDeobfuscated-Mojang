@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -39,7 +39,7 @@ extends Screen {
     @Override
     public void renderBackground() {
         super.renderBackground();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(DEMO_BACKGROUND_LOCATION);
         int i = (this.width - 248) / 2;
         int j = (this.height - 166) / 2;

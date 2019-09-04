@@ -4,8 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -25,6 +24,7 @@ import net.minecraft.client.renderer.culling.Culler;
 import net.minecraft.client.renderer.entity.AreaEffectCloudRenderer;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.client.renderer.entity.BatRenderer;
+import net.minecraft.client.renderer.entity.BeeRenderer;
 import net.minecraft.client.renderer.entity.BlazeRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.CatRenderer;
@@ -121,6 +121,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Cod;
@@ -302,6 +303,7 @@ public class EntityRenderDispatcher {
         this.register(Panda.class, new PandaRenderer(this));
         this.register(Cat.class, new CatRenderer(this));
         this.register(Fox.class, new FoxRenderer(this));
+        this.register(Bee.class, new BeeRenderer(this));
         this.register(EnderDragon.class, new EnderDragonRenderer(this));
         this.register(EndCrystal.class, new EndCrystalRenderer(this));
         this.register(WitherBoss.class, new WitherBossRenderer(this));
@@ -441,8 +443,8 @@ public class EntityRenderDispatcher {
         }
         int j = i % 65536;
         int k = i / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, j, k);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, j, k);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.render(entity, d - this.xOff, e - this.yOff, g - this.zOff, h, f, bl);
     }
 
@@ -501,8 +503,8 @@ public class EntityRenderDispatcher {
         }
         int j = i % 65536;
         int k = i / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, j, k);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, j, k);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         Object entityRenderer = this.getRenderer(entity);
         if (entityRenderer != null && this.textureManager != null) {
             ((EntityRenderer)entityRenderer).renderSecondPass((Entity)entity, d - this.xOff, e - this.yOff, g - this.zOff, h, f);
@@ -510,11 +512,11 @@ public class EntityRenderDispatcher {
     }
 
     private void renderHitbox(Entity entity, double d, double e, double f, float g, float h) {
-        GlStateManager.depthMask(false);
-        GlStateManager.disableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.disableCull();
-        GlStateManager.disableBlend();
+        RenderSystem.depthMask(false);
+        RenderSystem.disableTexture();
+        RenderSystem.disableLighting();
+        RenderSystem.disableCull();
+        RenderSystem.disableBlend();
         float i = entity.getBbWidth() / 2.0f;
         AABB aABB = entity.getBoundingBox();
         LevelRenderer.renderLineBox(aABB.minX - entity.x + d, aABB.minY - entity.y + e, aABB.minZ - entity.z + f, aABB.maxX - entity.x + d, aABB.maxY - entity.y + e, aABB.maxZ - entity.z + f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -538,11 +540,11 @@ public class EntityRenderDispatcher {
         bufferBuilder.vertex(d, e + (double)entity.getEyeHeight(), f).color(0, 0, 255, 255).endVertex();
         bufferBuilder.vertex(d + vec3.x * 2.0, e + (double)entity.getEyeHeight() + vec3.y * 2.0, f + vec3.z * 2.0).color(0, 0, 255, 255).endVertex();
         tesselator.end();
-        GlStateManager.enableTexture();
-        GlStateManager.enableLighting();
-        GlStateManager.enableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
+        RenderSystem.enableTexture();
+        RenderSystem.enableLighting();
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     public void setLevel(@Nullable Level level) {

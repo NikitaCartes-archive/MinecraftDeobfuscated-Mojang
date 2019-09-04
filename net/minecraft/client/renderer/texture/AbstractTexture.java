@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.renderer.texture;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureObject;
@@ -30,8 +30,8 @@ implements TextureObject {
             i = bl2 ? 9986 : 9728;
             j = 9728;
         }
-        GlStateManager.texParameter(3553, 10241, i);
-        GlStateManager.texParameter(3553, 10240, j);
+        RenderSystem.texParameter(3553, 10241, i);
+        RenderSystem.texParameter(3553, 10240, j);
     }
 
     @Override

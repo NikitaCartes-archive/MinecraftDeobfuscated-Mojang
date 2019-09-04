@@ -197,7 +197,7 @@ implements SimpleWaterloggedBlock {
         ChestType chestType = ChestType.SINGLE;
         Direction direction = blockPlaceContext.getHorizontalDirection().getOpposite();
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-        boolean bl = blockPlaceContext.isSneaking();
+        boolean bl = blockPlaceContext.isSecondaryUseActive();
         Direction direction2 = blockPlaceContext.getClickedFace();
         if (direction2.getAxis().isHorizontal() && bl && (direction3 = this.candidatePartnerFacing(blockPlaceContext, direction2.getOpposite())) != null && direction3.getAxis() != direction2.getAxis()) {
             direction = direction3;

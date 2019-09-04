@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
+import net.minecraft.world.level.storage.loot.functions.CopyBlockState;
 import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
 import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
 import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
@@ -118,6 +119,7 @@ public class LootItemFunctions {
         LootItemFunctions.register(new SetLoreFunction.Serializer());
         LootItemFunctions.register(new FillPlayerHead.Serializer());
         LootItemFunctions.register(new CopyNbtFunction.Serializer());
+        LootItemFunctions.register(new CopyBlockState.Serializer());
     }
 
     public static class Serializer

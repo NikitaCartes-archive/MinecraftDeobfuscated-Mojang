@@ -20,6 +20,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -86,7 +87,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
         StructurePlaceSettings structurePlaceSettings;
         StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
         if (structureTemplate.placeInWorld(levelAccessor, blockPos, structurePlaceSettings = this.getSettings(rotation, boundingBox), 18)) {

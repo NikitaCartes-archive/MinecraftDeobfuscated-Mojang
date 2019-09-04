@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -131,7 +132,7 @@ extends ChunkSource {
         this.mainThreadProcessor.managedBlock(completableFuture::isDone);
         chunkAccess2 = completableFuture.join().map(chunkAccess -> chunkAccess, chunkLoadingFailure -> {
             if (bl) {
-                throw new IllegalStateException("Chunk not there when requested: " + chunkLoadingFailure);
+                throw Util.pauseInIde(new IllegalStateException("Chunk not there when requested: " + chunkLoadingFailure));
             }
             return null;
         });
@@ -203,7 +204,7 @@ extends ChunkSource {
                 chunkHolder = this.getVisibleChunkIfPresent(l);
                 profilerFiller.pop();
                 if (this.chunkAbsent(chunkHolder, k)) {
-                    throw new IllegalStateException("No chunk holder after ticket has been added");
+                    throw Util.pauseInIde(new IllegalStateException("No chunk holder after ticket has been added"));
                 }
             }
         }
@@ -382,7 +383,6 @@ extends ChunkSource {
         return this.mainThreadProcessor.getPendingTasksCount();
     }
 
-    @Override
     public ChunkGenerator<?> getGenerator() {
         return this.generator;
     }

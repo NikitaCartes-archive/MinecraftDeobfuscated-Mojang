@@ -63,6 +63,7 @@ public class SoundEngine {
     private final Map<SoundInstance, Integer> queuedSounds = Maps.newHashMap();
     private final Map<SoundInstance, Integer> soundDeleteTime = Maps.newHashMap();
     private final List<SoundEventListener> listeners = Lists.newArrayList();
+    private final List<TickableSoundInstance> queuedTickableSounds = Lists.newArrayList();
     private final List<Sound> preloadQueue = Lists.newArrayList();
 
     public SoundEngine(SoundManager soundManager, Options options, ResourceManager resourceManager) {
@@ -152,6 +153,7 @@ public class SoundEngine {
             this.tickingSounds.clear();
             this.instanceBySource.clear();
             this.soundDeleteTime.clear();
+            this.queuedTickableSounds.clear();
         }
     }
 
@@ -172,6 +174,8 @@ public class SoundEngine {
 
     private void tickNonPaused() {
         ++this.tickCount;
+        this.queuedTickableSounds.forEach(this::play);
+        this.queuedTickableSounds.clear();
         for (TickableSoundInstance tickableSoundInstance : this.tickingSounds) {
             tickableSoundInstance.tick();
             if (tickableSoundInstance.isStopped()) {
@@ -312,6 +316,10 @@ public class SoundEngine {
         if (soundInstance instanceof TickableSoundInstance) {
             this.tickingSounds.add((TickableSoundInstance)soundInstance);
         }
+    }
+
+    public void queueTickingSound(TickableSoundInstance tickableSoundInstance) {
+        this.queuedTickableSounds.add(tickableSoundInstance);
     }
 
     public void requestPreload(Sound sound) {

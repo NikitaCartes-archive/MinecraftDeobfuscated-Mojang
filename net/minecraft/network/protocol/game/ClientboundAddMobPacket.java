@@ -4,7 +4,6 @@
 package net.minecraft.network.protocol.game;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,11 +11,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class ClientboundAddMobPacket
 implements Packet<ClientGamePacketListener> {
@@ -32,8 +29,6 @@ implements Packet<ClientGamePacketListener> {
     private byte yRot;
     private byte xRot;
     private byte yHeadRot;
-    private SynchedEntityData entityData;
-    private List<SynchedEntityData.DataItem<?>> unpack;
 
     public ClientboundAddMobPacket() {
     }
@@ -56,7 +51,6 @@ implements Packet<ClientGamePacketListener> {
         this.xd = (int)(e * 8000.0);
         this.yd = (int)(f * 8000.0);
         this.zd = (int)(g * 8000.0);
-        this.entityData = livingEntity.getEntityData();
     }
 
     @Override
@@ -73,7 +67,6 @@ implements Packet<ClientGamePacketListener> {
         this.xd = friendlyByteBuf.readShort();
         this.yd = friendlyByteBuf.readShort();
         this.zd = friendlyByteBuf.readShort();
-        this.unpack = SynchedEntityData.unpack(friendlyByteBuf);
     }
 
     @Override
@@ -90,18 +83,11 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeShort(this.xd);
         friendlyByteBuf.writeShort(this.yd);
         friendlyByteBuf.writeShort(this.zd);
-        this.entityData.packAll(friendlyByteBuf);
     }
 
     @Override
     public void handle(ClientGamePacketListener clientGamePacketListener) {
         clientGamePacketListener.handleAddMob(this);
-    }
-
-    @Nullable
-    @Environment(value=EnvType.CLIENT)
-    public List<SynchedEntityData.DataItem<?>> getUnpackedData() {
-        return this.unpack;
     }
 
     @Environment(value=EnvType.CLIENT)

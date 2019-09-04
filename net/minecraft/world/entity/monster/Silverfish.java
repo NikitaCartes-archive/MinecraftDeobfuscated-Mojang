@@ -72,7 +72,7 @@ extends Monster {
     }
 
     @Override
-    protected boolean makeStepSound() {
+    protected boolean isMovementNoisy() {
         return false;
     }
 
@@ -235,7 +235,7 @@ extends Monster {
                             Block block = blockState.getBlock();
                             if (block instanceof InfestedBlock) {
                                 if (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-                                    level.destroyBlock(blockPos2, true);
+                                    level.destroyBlock(blockPos2, true, this.silverfish);
                                 } else {
                                     level.setBlock(blockPos2, ((InfestedBlock)block).getHostBlock().defaultBlockState(), 3);
                                 }

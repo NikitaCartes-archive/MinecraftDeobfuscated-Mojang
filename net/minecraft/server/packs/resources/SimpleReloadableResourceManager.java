@@ -127,7 +127,7 @@ implements ReloadableResourceManager {
     }
 
     protected ReloadInstance createReload(Executor executor, Executor executor2, List<PreparableReloadListener> list, CompletableFuture<Unit> completableFuture) {
-        ProfiledReloadInstance reloadInstance = LOGGER.isDebugEnabled() ? new ProfiledReloadInstance(this, new ArrayList<PreparableReloadListener>(list), executor, executor2, completableFuture) : SimpleReloadInstance.of(this, new ArrayList<PreparableReloadListener>(list), executor, executor2, completableFuture);
+        ProfiledReloadInstance reloadInstance = LOGGER.isDebugEnabled() ? new ProfiledReloadInstance(this, Lists.newArrayList(list), executor, executor2, completableFuture) : SimpleReloadInstance.of(this, Lists.newArrayList(list), executor, executor2, completableFuture);
         this.recentlyRegistered.clear();
         return reloadInstance;
     }

@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -33,7 +33,6 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsConfigureWorldScreen
@@ -236,28 +235,24 @@ implements RealmsWorldSlotButton.Listener {
         Realms.setScreen(this.lastScreen);
     }
 
-    private void fetchServerData(final long l) {
-        new Thread(){
-
-            @Override
-            public void run() {
-                RealmsClient realmsClient = RealmsClient.createRealmsClient();
-                try {
-                    RealmsConfigureWorldScreen.this.serverData = realmsClient.getOwnWorld(l);
-                    RealmsConfigureWorldScreen.this.disableButtons();
-                    if (RealmsConfigureWorldScreen.this.isMinigame()) {
-                        RealmsConfigureWorldScreen.this.showMinigameButtons();
-                    } else {
-                        RealmsConfigureWorldScreen.this.showRegularButtons();
-                    }
-                } catch (RealmsServiceException realmsServiceException) {
-                    LOGGER.error("Couldn't get own world");
-                    Realms.setScreen(new RealmsGenericErrorScreen(realmsServiceException.getMessage(), (RealmsScreen)RealmsConfigureWorldScreen.this.lastScreen));
-                } catch (IOException iOException) {
-                    LOGGER.error("Couldn't parse response getting own world");
+    private void fetchServerData(long l) {
+        new Thread(() -> {
+            RealmsClient realmsClient = RealmsClient.createRealmsClient();
+            try {
+                this.serverData = realmsClient.getOwnWorld(l);
+                this.disableButtons();
+                if (this.isMinigame()) {
+                    this.showMinigameButtons();
+                } else {
+                    this.showRegularButtons();
                 }
+            } catch (RealmsServiceException realmsServiceException) {
+                LOGGER.error("Couldn't get own world");
+                Realms.setScreen(new RealmsGenericErrorScreen(realmsServiceException.getMessage(), (RealmsScreen)this.lastScreen));
+            } catch (IOException iOException) {
+                LOGGER.error("Couldn't parse response getting own world");
             }
-        }.start();
+        }).start();
     }
 
     private void disableButtons() {
@@ -283,7 +278,7 @@ implements RealmsWorldSlotButton.Listener {
     }
 
     @Override
-    public void onSlotClick(int i, @NotNull RealmsWorldSlotButton.Action action, boolean bl, boolean bl2) {
+    public void onSlotClick(int i, RealmsWorldSlotButton.Action action, boolean bl, boolean bl2) {
         switch (action) {
             case NOTHING: {
                 break;
@@ -374,10 +369,10 @@ implements RealmsWorldSlotButton.Listener {
 
     private void drawExpired(int i, int j, int k, int l) {
         RealmsScreen.bind("realms:textures/gui/realms/expired_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.expired");
         }
@@ -385,14 +380,14 @@ implements RealmsWorldSlotButton.Listener {
 
     private void drawExpiring(int i, int j, int k, int l, int m) {
         RealmsScreen.bind("realms:textures/gui/realms/expires_soon_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         if (this.animTick % 20 < 10) {
             RealmsScreen.blit(i, j, 0.0f, 0.0f, 10, 28, 20, 28);
         } else {
             RealmsScreen.blit(i, j, 10.0f, 0.0f, 10, 28, 20, 28);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = m <= 0 ? RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.expires.soon") : (m == 1 ? RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.expires.day") : RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.expires.days", m));
         }
@@ -400,10 +395,10 @@ implements RealmsWorldSlotButton.Listener {
 
     private void drawOpen(int i, int j, int k, int l) {
         RealmsScreen.bind("realms:textures/gui/realms/on_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.open");
         }
@@ -411,10 +406,10 @@ implements RealmsWorldSlotButton.Listener {
 
     private void drawClose(int i, int j, int k, int l) {
         RealmsScreen.bind("realms:textures/gui/realms/off_icon.png");
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
         RealmsScreen.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
             this.toolTip = RealmsConfigureWorldScreen.getLocalizedString("mco.selectServer.closed");
         }

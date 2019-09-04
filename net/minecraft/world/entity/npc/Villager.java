@@ -110,7 +110,7 @@ VillagerDataHolder {
     private long lastRestockGameTime;
     private int numberOfRestocksToday;
     private long lastRestockCheckDayTime;
-    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, new MemoryModuleType[]{MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_LAST_SEEN_TIME});
+    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, new MemoryModuleType[]{MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_LAST_SEEN_TIME});
     private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.INTERACTABLE_DOORS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_LAST_SEEN);
     public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(MemoryModuleType.HOME, (villager, poiType) -> poiType == PoiType.HOME, MemoryModuleType.JOB_SITE, (villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType, MemoryModuleType.MEETING_POINT, (villager, poiType) -> poiType == PoiType.MEETING);
 
@@ -308,27 +308,29 @@ VillagerDataHolder {
 
     private boolean needsToRestock() {
         for (MerchantOffer merchantOffer : this.getOffers()) {
-            if (!merchantOffer.isOutOfStock()) continue;
+            if (!merchantOffer.needsRestock()) continue;
             return true;
         }
         return false;
     }
 
     private boolean allowedToRestock() {
-        return this.numberOfRestocksToday < 2 && this.level.getGameTime() > this.lastRestockGameTime + 2400L;
+        return this.numberOfRestocksToday == 0 || this.numberOfRestocksToday < 2 && this.level.getGameTime() > this.lastRestockGameTime + 2400L;
     }
 
     public boolean shouldRestock() {
         long l = this.lastRestockGameTime + 12000L;
-        boolean bl = this.level.getGameTime() > l;
-        long m = this.level.getDayTime();
+        long m = this.level.getGameTime();
+        boolean bl = m > l;
+        long n = this.level.getDayTime();
         if (this.lastRestockCheckDayTime > 0L) {
-            long o = m / 24000L;
-            long n = this.lastRestockCheckDayTime / 24000L;
-            bl |= o > n;
+            long p = n / 24000L;
+            long o = this.lastRestockCheckDayTime / 24000L;
+            bl |= p > o;
         }
-        this.lastRestockCheckDayTime = m;
+        this.lastRestockCheckDayTime = n;
         if (bl) {
+            this.lastRestockGameTime = m;
             this.resetNumberOfRestocks();
         }
         return this.allowedToRestock() && this.needsToRestock();
@@ -440,7 +442,7 @@ VillagerDataHolder {
     }
 
     public void playWorkSound() {
-        SoundEvent soundEvent = this.getVillagerData().getProfession().getJobPoiType().getUseSound();
+        SoundEvent soundEvent = this.getVillagerData().getProfession().getWorkSound();
         if (soundEvent != null) {
             this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
         }
@@ -868,6 +870,12 @@ VillagerDataHolder {
     public void startSleeping(BlockPos blockPos) {
         super.startSleeping(blockPos);
         this.brain.setMemory(MemoryModuleType.LAST_SLEPT, SerializableLong.of(this.level.getGameTime()));
+    }
+
+    @Override
+    public void stopSleeping() {
+        super.stopSleeping();
+        this.brain.setMemory(MemoryModuleType.LAST_WOKEN, SerializableLong.of(this.level.getGameTime()));
     }
 
     private boolean golemSpawnConditionsMet(long l) {

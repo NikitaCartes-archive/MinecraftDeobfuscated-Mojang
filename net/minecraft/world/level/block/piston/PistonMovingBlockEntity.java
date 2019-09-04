@@ -37,18 +37,7 @@ implements TickableBlockEntity {
     private Direction direction;
     private boolean extending;
     private boolean isSourcePiston;
-    private static final ThreadLocal<Direction> NOCLIP = new ThreadLocal<Direction>(){
-
-        @Override
-        protected Direction initialValue() {
-            return null;
-        }
-
-        @Override
-        protected /* synthetic */ Object initialValue() {
-            return this.initialValue();
-        }
-    };
+    private static final ThreadLocal<Direction> NOCLIP = ThreadLocal.withInitial(() -> null);
     private float progress;
     private float progressO;
     private long lastTicked;

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -25,21 +25,21 @@ extends EntityRenderer<DragonFireball> {
 
     @Override
     public void render(DragonFireball dragonFireball, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.bindTexture(dragonFireball);
-        GlStateManager.translatef((float)d, (float)e, (float)f);
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef(2.0f, 2.0f, 2.0f);
+        RenderSystem.translatef((float)d, (float)e, (float)f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef(2.0f, 2.0f, 2.0f);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         float i = 1.0f;
         float j = 0.5f;
         float k = 0.25f;
-        GlStateManager.rotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(dragonFireball));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(dragonFireball));
         }
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_NORMAL);
         bufferBuilder.vertex(-0.5, -0.25, 0.0).uv(0.0, 1.0).normal(0.0f, 1.0f, 0.0f).endVertex();
@@ -48,11 +48,11 @@ extends EntityRenderer<DragonFireball> {
         bufferBuilder.vertex(-0.5, 0.75, 0.0).uv(0.0, 0.0).normal(0.0f, 1.0f, 0.0f).endVertex();
         tesselator.end();
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
         super.render(dragonFireball, d, e, f, g, h);
     }
 

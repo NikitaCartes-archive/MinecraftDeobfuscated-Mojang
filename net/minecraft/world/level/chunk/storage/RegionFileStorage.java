@@ -36,7 +36,7 @@ implements AutoCloseable {
             this.folder.mkdirs();
         }
         File file = new File(this.folder, "r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
-        RegionFile regionFile2 = new RegionFile(file);
+        RegionFile regionFile2 = new RegionFile(file, this.folder);
         this.regionCache.putAndMoveToFirst(l, regionFile2);
         return regionFile2;
     }

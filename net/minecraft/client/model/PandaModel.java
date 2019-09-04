@@ -3,9 +3,10 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.ModelUtils;
 import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
@@ -81,8 +82,8 @@ extends QuadrupedModel<T> {
             }
         }
         if (this.sitAmount > 0.0f) {
-            this.body.xRot = this.rotlerpRad(this.body.xRot, 1.7407963f, this.sitAmount);
-            this.head.xRot = this.rotlerpRad(this.head.xRot, 1.5707964f, this.sitAmount);
+            this.body.xRot = ModelUtils.rotlerpRad(this.body.xRot, 1.7407963f, this.sitAmount);
+            this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, 1.5707964f, this.sitAmount);
             this.leg2.zRot = -0.27079642f;
             this.leg3.zRot = 0.27079642f;
             this.leg0.zRot = 0.5707964f;
@@ -108,10 +109,10 @@ extends QuadrupedModel<T> {
             this.leg1.xRot = 0.6f * Mth.sin(h * 0.15f);
             this.leg2.xRot = 0.3f * Mth.sin(h * 0.25f);
             this.leg3.xRot = -0.3f * Mth.sin(h * 0.25f);
-            this.head.xRot = this.rotlerpRad(this.head.xRot, 1.5707964f, this.lieOnBackAmount);
+            this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, 1.5707964f, this.lieOnBackAmount);
         }
         if (this.rollAmount > 0.0f) {
-            this.head.xRot = this.rotlerpRad(this.head.xRot, 2.0561945f, this.rollAmount);
+            this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, 2.0561945f, this.rollAmount);
             this.leg0.xRot = -0.5f * Mth.sin(h * 0.5f);
             this.leg1.xRot = 0.5f * Mth.sin(h * 0.5f);
             this.leg2.xRot = 0.5f * Mth.sin(h * 0.5f);
@@ -119,39 +120,29 @@ extends QuadrupedModel<T> {
         }
     }
 
-    protected float rotlerpRad(float f, float g, float h) {
-        float i;
-        for (i = g - f; i < (float)(-Math.PI); i += (float)Math.PI * 2) {
-        }
-        while (i >= (float)Math.PI) {
-            i -= (float)Math.PI * 2;
-        }
-        return f + h * i;
-    }
-
     @Override
     public void render(T panda, float f, float g, float h, float i, float j, float k) {
         this.setupAnim(panda, f, g, h, i, j, k);
         if (this.young) {
             float l = 3.0f;
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
             float m = 0.6f;
-            GlStateManager.scalef(0.5555555f, 0.5555555f, 0.5555555f);
-            GlStateManager.translatef(0.0f, 23.0f * k, 0.3f);
+            RenderSystem.scalef(0.5555555f, 0.5555555f, 0.5555555f);
+            RenderSystem.translatef(0.0f, 23.0f * k, 0.3f);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.33333334f, 0.33333334f, 0.33333334f);
-            GlStateManager.translatef(0.0f, 49.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.33333334f, 0.33333334f, 0.33333334f);
+            RenderSystem.translatef(0.0f, 49.0f * k, 0.0f);
             this.body.render(k);
             this.leg0.render(k);
             this.leg1.render(k);
             this.leg2.render(k);
             this.leg3.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.head.render(k);
             this.body.render(k);

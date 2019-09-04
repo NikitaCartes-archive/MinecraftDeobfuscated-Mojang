@@ -3,8 +3,7 @@
  */
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -61,9 +60,9 @@ extends Particle {
         int t = this.getLightColor(f);
         int u = t % 65536;
         int v = t / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, u, v);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableLighting();
+        RenderSystem.glMultiTexCoord2f(33985, u, v);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableLighting();
         this.entityRenderDispatcher.render(this.itemEntity, q -= xOff, r -= yOff, s -= zOff, this.itemEntity.yRot, f, false);
     }
 

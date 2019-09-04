@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.BeaconBlock;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.BedrockBlock;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.BeetrootBlock;
 import net.minecraft.world.level.block.BellBlock;
 import net.minecraft.world.level.block.BlastFurnaceBlock;
@@ -865,6 +866,8 @@ public class Blocks {
     public static final Block STRUCTURE_BLOCK = Blocks.register("structure_block", new StructureBlock(Block.Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).strength(-1.0f, 3600000.0f).noDrops()));
     public static final Block JIGSAW_BLOCK = Blocks.register("jigsaw", new JigsawBlock(Block.Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).strength(-1.0f, 3600000.0f).noDrops()));
     public static final Block COMPOSTER = Blocks.register("composter", new ComposterBlock(Block.Properties.of(Material.WOOD).strength(0.6f).sound(SoundType.WOOD)));
+    public static final Block BEE_NEST = Blocks.register("bee_nest", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.3f).sound(SoundType.WOOD)));
+    public static final Block BEE_HIVE = Blocks.register("bee_hive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6f).sound(SoundType.WOOD)));
 
     private static Block register(String string, Block block) {
         return Registry.register(Registry.BLOCK, string, block);

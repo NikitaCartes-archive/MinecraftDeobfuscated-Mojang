@@ -3,7 +3,9 @@
  */
 package net.minecraft.world.entity.ai.attributes;
 
-import java.util.Collection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,9 +20,9 @@ public interface AttributeInstance {
 
     public void setBaseValue(double var1);
 
-    public Collection<AttributeModifier> getModifiers(AttributeModifier.Operation var1);
+    public Set<AttributeModifier> getModifiers(AttributeModifier.Operation var1);
 
-    public Collection<AttributeModifier> getModifiers();
+    public Set<AttributeModifier> getModifiers();
 
     public boolean hasModifier(AttributeModifier var1);
 
@@ -37,5 +39,16 @@ public interface AttributeInstance {
     public void removeModifiers();
 
     public double getValue();
+
+    @Environment(value=EnvType.CLIENT)
+    default public void copyFrom(AttributeInstance attributeInstance) {
+        this.setBaseValue(attributeInstance.getBaseValue());
+        Set<AttributeModifier> set = attributeInstance.getModifiers();
+        Set<AttributeModifier> set2 = this.getModifiers();
+        ImmutableSet<AttributeModifier> immutableSet = ImmutableSet.copyOf(Sets.difference(set, set2));
+        ImmutableSet<AttributeModifier> immutableSet2 = ImmutableSet.copyOf(Sets.difference(set2, set));
+        immutableSet.forEach(this::addModifier);
+        immutableSet2.forEach(this::removeModifier);
+    }
 }
 

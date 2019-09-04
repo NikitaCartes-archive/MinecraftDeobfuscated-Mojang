@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -125,14 +126,11 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (level.isClientSide) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!serverLevel.getBlockState(blockPos).getValue(POWERED).booleanValue()) {
             return;
         }
-        if (!level.getBlockState(blockPos).getValue(POWERED).booleanValue()) {
-            return;
-        }
-        this.checkPressed(level, blockPos);
+        this.checkPressed(serverLevel, blockPos);
     }
 
     private void checkPressed(Level level, BlockPos blockPos) {

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
@@ -37,7 +37,7 @@ extends MobRenderer<Witch, WitchModel<Witch>> {
     @Override
     protected void scale(Witch witch, float f) {
         float g = 0.9375f;
-        GlStateManager.scalef(0.9375f, 0.9375f, 0.9375f);
+        RenderSystem.scalef(0.9375f, 0.9375f, 0.9375f);
     }
 }
 

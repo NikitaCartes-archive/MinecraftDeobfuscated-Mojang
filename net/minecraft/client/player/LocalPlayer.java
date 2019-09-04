@@ -97,7 +97,7 @@ extends AbstractClientPlayer {
     private float yRotLast;
     private float xRotLast;
     private boolean lastOnGround;
-    private boolean wasTryingToSneak;
+    private boolean wasShiftKeyDown;
     private boolean wasSprinting;
     private int positionReminder;
     private boolean flashOnSetHealth;
@@ -121,6 +121,7 @@ extends AbstractClientPlayer {
     private int autoJumpTime;
     private boolean wasFallFlying;
     private int waterVisionTime;
+    private boolean showDeathScreen = true;
 
     public LocalPlayer(Minecraft minecraft, MultiPlayerLevel multiPlayerLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
         super(multiPlayerLevel, clientPacketListener.getLocalGameProfile());
@@ -185,7 +186,7 @@ extends AbstractClientPlayer {
         super.tick();
         if (this.isPassenger()) {
             this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
-            this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.sneakKeyDown));
+            this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
             Entity entity = this.getRootVehicle();
             if (entity != this && entity.isControlledByLocalInstance()) {
                 this.connection.send(new ServerboundMoveVehiclePacket(entity));
@@ -206,10 +207,10 @@ extends AbstractClientPlayer {
             this.connection.send(new ServerboundPlayerCommandPacket(this, action));
             this.wasSprinting = bl;
         }
-        if ((bl2 = this.isTryingToSneak()) != this.wasTryingToSneak) {
-            ServerboundPlayerCommandPacket.Action action2 = bl2 ? ServerboundPlayerCommandPacket.Action.START_SNEAKING : ServerboundPlayerCommandPacket.Action.STOP_SNEAKING;
+        if ((bl2 = this.isShiftKeyDown()) != this.wasShiftKeyDown) {
+            ServerboundPlayerCommandPacket.Action action2 = bl2 ? ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY : ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY;
             this.connection.send(new ServerboundPlayerCommandPacket(this, action2));
-            this.wasTryingToSneak = bl2;
+            this.wasShiftKeyDown = bl2;
         }
         if (this.isControlledCamera()) {
             boolean bl4;
@@ -458,6 +459,14 @@ extends AbstractClientPlayer {
         }
     }
 
+    public void setShowDeathScreen(boolean bl) {
+        this.showDeathScreen = bl;
+    }
+
+    public boolean shouldShowDeathScreen() {
+        return this.showDeathScreen;
+    }
+
     @Override
     public void playSound(SoundEvent soundEvent, float f, float g) {
         this.level.playLocalSound(this.x, this.y, this.z, soundEvent, this.getSoundSource(), f, g, false);
@@ -571,20 +580,20 @@ extends AbstractClientPlayer {
     }
 
     @Override
-    public boolean isSneaking() {
-        return this.isTryingToSneak();
-    }
-
-    public boolean isTryingToSneak() {
-        return this.input != null && this.input.sneakKeyDown;
+    public boolean isShiftKeyDown() {
+        return this.input != null && this.input.shiftKeyDown;
     }
 
     @Override
-    public boolean isVisuallySneaking() {
-        if (this.abilities.flying || this.isSwimming() || !this.canEnterPose(Pose.SNEAKING)) {
+    public boolean isCrouching() {
+        if (this.abilities.flying || this.isSwimming() || !this.canEnterPose(Pose.CROUCHING)) {
             return false;
         }
-        return this.isTryingToSneak() || !this.canEnterPose(Pose.STANDING);
+        return this.isShiftKeyDown() || !this.canEnterPose(Pose.STANDING);
+    }
+
+    public boolean isMovingSlowly() {
+        return this.isCrouching() || this.isVisuallyCrawling();
     }
 
     @Override
@@ -609,27 +618,26 @@ extends AbstractClientPlayer {
     public void aiStep() {
         int i;
         ItemStack itemStack;
-        boolean bl6;
+        boolean bl5;
         ++this.sprintTime;
         if (this.sprintTriggerTime > 0) {
             --this.sprintTriggerTime;
         }
         this.handleNetherPortalClient();
         boolean bl = this.input.jumping;
-        boolean bl2 = this.input.sneakKeyDown;
+        boolean bl2 = this.input.shiftKeyDown;
         boolean bl3 = this.hasEnoughImpulseToStartSprinting();
-        boolean bl4 = this.isVisuallySneaking() || this.isVisuallyCrawling();
-        this.input.tick(bl4, this.isSpectator());
+        this.input.tick(this.isMovingSlowly());
         this.minecraft.getTutorial().onInput(this.input);
         if (this.isUsingItem() && !this.isPassenger()) {
             this.input.leftImpulse *= 0.2f;
             this.input.forwardImpulse *= 0.2f;
             this.sprintTriggerTime = 0;
         }
-        boolean bl5 = false;
+        boolean bl4 = false;
         if (this.autoJumpTime > 0) {
             --this.autoJumpTime;
-            bl5 = true;
+            bl4 = true;
             this.input.jumping = true;
         }
         if (!this.noPhysics) {
@@ -639,26 +647,26 @@ extends AbstractClientPlayer {
             this.checkInBlock(this.x + (double)this.getBbWidth() * 0.35, aABB.minY + 0.5, this.z - (double)this.getBbWidth() * 0.35);
             this.checkInBlock(this.x + (double)this.getBbWidth() * 0.35, aABB.minY + 0.5, this.z + (double)this.getBbWidth() * 0.35);
         }
-        boolean bl7 = bl6 = (float)this.getFoodData().getFoodLevel() > 6.0f || this.abilities.mayfly;
-        if (!(!this.onGround && !this.isUnderWater() || bl2 || bl3 || !this.hasEnoughImpulseToStartSprinting() || this.isSprinting() || !bl6 || this.isUsingItem() || this.hasEffect(MobEffects.BLINDNESS))) {
+        boolean bl6 = bl5 = (float)this.getFoodData().getFoodLevel() > 6.0f || this.abilities.mayfly;
+        if (!(!this.onGround && !this.isUnderWater() || bl2 || bl3 || !this.hasEnoughImpulseToStartSprinting() || this.isSprinting() || !bl5 || this.isUsingItem() || this.hasEffect(MobEffects.BLINDNESS))) {
             if (this.sprintTriggerTime > 0 || this.minecraft.options.keySprint.isDown()) {
                 this.setSprinting(true);
             } else {
                 this.sprintTriggerTime = 7;
             }
         }
-        if (!this.isSprinting() && (!this.isInWater() || this.isUnderWater()) && this.hasEnoughImpulseToStartSprinting() && bl6 && !this.isUsingItem() && !this.hasEffect(MobEffects.BLINDNESS) && this.minecraft.options.keySprint.isDown()) {
+        if (!this.isSprinting() && (!this.isInWater() || this.isUnderWater()) && this.hasEnoughImpulseToStartSprinting() && bl5 && !this.isUsingItem() && !this.hasEffect(MobEffects.BLINDNESS) && this.minecraft.options.keySprint.isDown()) {
             this.setSprinting(true);
         }
         if (this.isSprinting()) {
-            boolean bl8;
-            boolean bl72 = !this.input.hasForwardImpulse() || !bl6;
-            boolean bl9 = bl8 = bl72 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
+            boolean bl7;
+            boolean bl62 = !this.input.hasForwardImpulse() || !bl5;
+            boolean bl8 = bl7 = bl62 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
             if (this.isSwimming()) {
-                if (!this.onGround && !this.input.sneakKeyDown && bl72 || !this.isInWater()) {
+                if (!this.onGround && !this.input.shiftKeyDown && bl62 || !this.isInWater()) {
                     this.setSprinting(false);
                 }
-            } else if (bl8) {
+            } else if (bl7) {
                 this.setSprinting(false);
             }
         }
@@ -668,7 +676,7 @@ extends AbstractClientPlayer {
                     this.abilities.flying = true;
                     this.onUpdateAbilities();
                 }
-            } else if (!bl && this.input.jumping && !bl5) {
+            } else if (!bl && this.input.jumping && !bl4) {
                 if (this.jumpTriggerTime == 0) {
                     this.jumpTriggerTime = 7;
                 } else if (!this.isSwimming()) {
@@ -682,7 +690,7 @@ extends AbstractClientPlayer {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();
-        if (this.isInWater() && this.input.sneakKeyDown) {
+        if (this.isInWater() && this.input.shiftKeyDown) {
             this.goDownInWater();
         }
         if (this.isUnderLiquid(FluidTags.WATER)) {
@@ -694,9 +702,7 @@ extends AbstractClientPlayer {
         }
         if (this.abilities.flying && this.isControlledCamera()) {
             i = 0;
-            if (this.input.sneakKeyDown) {
-                this.input.leftImpulse = (float)((double)this.input.leftImpulse / 0.3);
-                this.input.forwardImpulse = (float)((double)this.input.forwardImpulse / 0.3);
+            if (this.input.shiftKeyDown) {
                 --i;
             }
             if (this.input.jumping) {
@@ -806,16 +812,8 @@ extends AbstractClientPlayer {
     }
 
     protected void updateAutoJump(float f, float g) {
-        float m;
-        float j;
-        if (!this.isAutoJumpEnabled()) {
-            return;
-        }
-        if (this.autoJumpTime > 0 || !this.onGround || this.isSneaking() || this.isPassenger()) {
-            return;
-        }
-        Vec2 vec2 = this.input.getMoveVector();
-        if (vec2.x == 0.0f && vec2.y == 0.0f) {
+        float l;
+        if (!this.canAutoJump()) {
             return;
         }
         Vec3 vec3 = new Vec3(this.x, this.getBoundingBox().minY, this.z);
@@ -824,21 +822,22 @@ extends AbstractClientPlayer {
         float h = this.getSpeed();
         float i = (float)vec33.lengthSqr();
         if (i <= 0.001f) {
-            j = h * vec2.x;
+            Vec2 vec2 = this.input.getMoveVector();
+            float j = h * vec2.x;
             float k = h * vec2.y;
-            float l = Mth.sin(this.yRot * ((float)Math.PI / 180));
-            m = Mth.cos(this.yRot * ((float)Math.PI / 180));
+            l = Mth.sin(this.yRot * ((float)Math.PI / 180));
+            float m = Mth.cos(this.yRot * ((float)Math.PI / 180));
             vec33 = new Vec3(j * m - k * l, vec33.y, k * m + j * l);
             i = (float)vec33.lengthSqr();
             if (i <= 0.001f) {
                 return;
             }
         }
-        j = (float)Mth.fastInvSqrt(i);
-        Vec3 vec34 = vec33.scale(j);
+        float n = (float)Mth.fastInvSqrt(i);
+        Vec3 vec34 = vec33.scale(n);
         Vec3 vec35 = this.getForward();
-        m = (float)(vec35.x * vec34.x + vec35.z * vec34.z);
-        if (m < -0.15f) {
+        l = (float)(vec35.x * vec34.x + vec35.z * vec34.z);
+        if (l < -0.15f) {
             return;
         }
         CollisionContext collisionContext = CollisionContext.of(this);
@@ -851,57 +850,66 @@ extends AbstractClientPlayer {
         if (!blockState2.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
             return;
         }
-        float n = 7.0f;
-        float o = 1.2f;
+        float o = 7.0f;
+        float p = 1.2f;
         if (this.hasEffect(MobEffects.JUMP)) {
-            o += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75f;
+            p += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75f;
         }
-        float p = Math.max(h * 7.0f, 1.0f / j);
+        float q = Math.max(h * 7.0f, 1.0f / n);
         Vec3 vec36 = vec3;
-        Vec3 vec37 = vec32.add(vec34.scale(p));
-        float q = this.getBbWidth();
-        float r = this.getBbHeight();
-        AABB aABB = new AABB(vec36, vec37.add(0.0, r, 0.0)).inflate(q, 0.0, q);
+        Vec3 vec37 = vec32.add(vec34.scale(q));
+        float r = this.getBbWidth();
+        float s = this.getBbHeight();
+        AABB aABB = new AABB(vec36, vec37.add(0.0, s, 0.0)).inflate(r, 0.0, r);
         vec36 = vec36.add(0.0, 0.51f, 0.0);
         vec37 = vec37.add(0.0, 0.51f, 0.0);
         Vec3 vec38 = vec34.cross(new Vec3(0.0, 1.0, 0.0));
-        Vec3 vec39 = vec38.scale(q * 0.5f);
+        Vec3 vec39 = vec38.scale(r * 0.5f);
         Vec3 vec310 = vec36.subtract(vec39);
         Vec3 vec311 = vec37.subtract(vec39);
         Vec3 vec312 = vec36.add(vec39);
         Vec3 vec313 = vec37.add(vec39);
         Iterator iterator = this.level.getCollisions(this, aABB, Collections.emptySet()).flatMap(voxelShape -> voxelShape.toAabbs().stream()).iterator();
-        float s = Float.MIN_VALUE;
+        float t = Float.MIN_VALUE;
         while (iterator.hasNext()) {
             AABB aABB2 = (AABB)iterator.next();
             if (!aABB2.intersects(vec310, vec311) && !aABB2.intersects(vec312, vec313)) continue;
-            s = (float)aABB2.maxY;
+            t = (float)aABB2.maxY;
             Vec3 vec314 = aABB2.getCenter();
             BlockPos blockPos2 = new BlockPos(vec314);
-            int t = 1;
-            while ((float)t < o) {
+            int u = 1;
+            while ((float)u < p) {
                 BlockState blockState4;
-                BlockPos blockPos3 = blockPos2.above(t);
+                BlockPos blockPos3 = blockPos2.above(u);
                 BlockState blockState3 = this.level.getBlockState(blockPos3);
                 VoxelShape voxelShape2 = blockState3.getCollisionShape(this.level, blockPos3, collisionContext);
-                if (!voxelShape2.isEmpty() && (double)(s = (float)voxelShape2.max(Direction.Axis.Y) + (float)blockPos3.getY()) - this.getBoundingBox().minY > (double)o) {
+                if (!voxelShape2.isEmpty() && (double)(t = (float)voxelShape2.max(Direction.Axis.Y) + (float)blockPos3.getY()) - this.getBoundingBox().minY > (double)p) {
                     return;
                 }
-                if (t > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
+                if (u > 1 && !(blockState4 = this.level.getBlockState(blockPos = blockPos.above())).getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
                     return;
                 }
-                ++t;
+                ++u;
             }
             break block0;
         }
-        if (s == Float.MIN_VALUE) {
+        if (t == Float.MIN_VALUE) {
             return;
         }
-        float u = (float)((double)s - this.getBoundingBox().minY);
-        if (u <= 0.5f || u > o) {
+        float v = (float)((double)t - this.getBoundingBox().minY);
+        if (v <= 0.5f || v > p) {
             return;
         }
         this.autoJumpTime = 1;
+    }
+
+    private boolean canAutoJump() {
+        return this.isAutoJumpEnabled() && this.autoJumpTime <= 0 && this.onGround && !this.isStayingOnGroundSurface() && !this.isPassenger() && this.isMoving();
+    }
+
+    private boolean isMoving() {
+        Vec2 vec2 = this.input.getMoveVector();
+        return vec2.x != 0.0f || vec2.y != 0.0f;
     }
 
     private boolean hasEnoughImpulseToStartSprinting() {

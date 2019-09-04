@@ -3,8 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -32,26 +31,26 @@ extends EntityRenderer<Painting> {
 
     @Override
     public void render(Painting painting, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translated(d, e, f);
-        GlStateManager.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
-        GlStateManager.enableRescaleNormal();
+        RenderSystem.pushMatrix();
+        RenderSystem.translated(d, e, f);
+        RenderSystem.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
+        RenderSystem.enableRescaleNormal();
         this.bindTexture(painting);
         Motive motive = painting.motive;
         float i = 0.0625f;
-        GlStateManager.scalef(0.0625f, 0.0625f, 0.0625f);
+        RenderSystem.scalef(0.0625f, 0.0625f, 0.0625f);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(painting));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(painting));
         }
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
         this.renderPainting(painting, motive.getWidth(), motive.getHeight(), paintingTextureManager.get(motive), paintingTextureManager.getBackSprite());
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
         super.render(painting, d, e, f, g, h);
     }
 
@@ -140,11 +139,11 @@ extends EntityRenderer<Painting> {
         if (direction == Direction.EAST) {
             k = Mth.floor(painting.z + (double)(f / 16.0f));
         }
-        int l = this.entityRenderDispatcher.level.getLightColor(new BlockPos(i, j, k), 0);
+        int l = this.entityRenderDispatcher.level.getLightColor(new BlockPos(i, j, k));
         int m = l % 65536;
         int n = l / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, m, n);
-        GlStateManager.color3f(1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, m, n);
+        RenderSystem.color3f(1.0f, 1.0f, 1.0f);
     }
 }
 

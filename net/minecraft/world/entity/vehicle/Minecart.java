@@ -21,7 +21,7 @@ extends AbstractMinecart {
 
     @Override
     public boolean interact(Player player, InteractionHand interactionHand) {
-        if (player.isSneaking()) {
+        if (player.isSecondaryUseActive()) {
             return false;
         }
         if (this.isVehicle()) {

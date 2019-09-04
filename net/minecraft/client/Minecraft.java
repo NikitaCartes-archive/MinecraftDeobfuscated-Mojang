@@ -11,11 +11,11 @@ import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.DisplayData;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlDebug;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.platform.WindowEventHandler;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -358,15 +358,6 @@ AutoCloseable {
     }
 
     public void run() {
-        this.running = true;
-        try {
-            this.init();
-        } catch (Throwable throwable) {
-            CrashReport crashReport = CrashReport.forThrowable(throwable, "Initializing game");
-            crashReport.addCategory("Initialization");
-            this.crash(this.fillReport(crashReport));
-            return;
-        }
         try {
             boolean bl = false;
             while (this.running) {
@@ -397,22 +388,20 @@ AutoCloseable {
             LOGGER.fatal("Unreported exception thrown!", throwable);
             this.emergencySave();
             this.crash(crashReport);
-        } finally {
-            this.destroy();
         }
     }
 
-    private void init() {
+    public void init() {
         LongSupplier longSupplier;
         this.options = new Options(this, this.gameDirectory);
         this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);
         this.startTimerHackThread();
-        LOGGER.info("LWJGL Version: {}", (Object)GLX.getLWJGLVersion());
+        LOGGER.info("Backend library: {}", (Object)RenderSystem.getBackendDescription());
         DisplayData displayData = this.displayData;
         if (this.options.overrideHeight > 0 && this.options.overrideWidth > 0) {
             displayData = new DisplayData(this.options.overrideWidth, this.options.overrideHeight, displayData.fullscreenWidth, displayData.fullscreenHeight, displayData.isFullscreen);
         }
-        if ((longSupplier = GLX.initGlfw()) != null) {
+        if ((longSupplier = RenderSystem.initBackendSystem()) != null) {
             Util.timeSource = longSupplier;
         }
         this.virtualScreen = new VirtualScreen(this);
@@ -430,8 +419,7 @@ AutoCloseable {
         this.mouseHandler.setup(this.window.getWindow());
         this.keyboardHandler = new KeyboardHandler(this);
         this.keyboardHandler.setup(this.window.getWindow());
-        GLX.init();
-        GlDebug.enableDebugCallback(this.options.glDebugVerbosity, false);
+        RenderSystem.initRenderer(this.options.glDebugVerbosity, false);
         this.mainRenderTarget = new RenderTarget(this.window.getWidth(), this.window.getHeight(), true, ON_OSX);
         this.mainRenderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES, this.gameThread);
@@ -462,19 +450,19 @@ AutoCloseable {
         }
         this.resourceManager.registerReloadListener(new GrassColorReloadListener());
         this.resourceManager.registerReloadListener(new FoliageColorReloadListener());
-        this.window.setGlErrorSection("Startup");
-        GlStateManager.enableTexture();
-        GlStateManager.shadeModel(7425);
-        GlStateManager.clearDepth(1.0);
-        GlStateManager.enableDepthTest();
-        GlStateManager.depthFunc(515);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.alphaFunc(516, 0.1f);
-        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-        GlStateManager.matrixMode(5889);
-        GlStateManager.loadIdentity();
-        GlStateManager.matrixMode(5888);
-        this.window.setGlErrorSection("Post startup");
+        this.window.setErrorSection("Startup");
+        RenderSystem.enableTexture();
+        RenderSystem.shadeModel(7425);
+        RenderSystem.clearDepth(1.0);
+        RenderSystem.enableDepthTest();
+        RenderSystem.depthFunc(515);
+        RenderSystem.enableAlphaTest();
+        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.cullFace(GlStateManager.CullFace.BACK);
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.matrixMode(5888);
+        this.window.setErrorSection("Post startup");
         this.textureAtlas = new TextureAtlas("textures");
         this.textureAtlas.setMaxMipLevel(this.options.mipmapLevels);
         this.textureManager.register(TextureAtlas.LOCATION_BLOCKS, this.textureAtlas);
@@ -496,7 +484,7 @@ AutoCloseable {
         this.resourceManager.registerReloadListener(this.levelRenderer);
         this.createSearchTrees();
         this.resourceManager.registerReloadListener(this.searchRegistry);
-        GlStateManager.viewport(0, 0, this.window.getWidth(), this.window.getHeight());
+        RenderSystem.viewport(0, 0, this.window.getWidth(), this.window.getHeight());
         this.particleEngine = new ParticleEngine(this.level, this.textureManager);
         this.resourceManager.registerReloadListener(this.particleEngine);
         this.paintingTextures = new PaintingTextureManager(this.textureManager);
@@ -505,14 +493,14 @@ AutoCloseable {
         this.resourceManager.registerReloadListener(this.mobEffectTextures);
         this.gui = new Gui(this);
         this.debugRenderer = new DebugRenderer(this);
-        GLX.setGlfwErrorCallback(this::onFullscreenError);
+        RenderSystem.setErrorCallback(this::onFullscreenError);
         if (this.options.fullscreen && !this.window.isFullscreen()) {
             this.window.toggleFullScreen();
             this.options.fullscreen = this.window.isFullscreen();
         }
         this.window.updateVsync(this.options.enableVsync);
         this.window.updateRawMouseInput(this.options.rawMouseInput);
-        this.window.setDefaultGlErrorCallback();
+        this.window.setDefaultErrorCallback();
         if (this.connectToIp != null) {
             this.setScreen(new ConnectScreen(new TitleScreen(), this, this.connectToIp, this.connectToPort));
         } else {
@@ -681,7 +669,11 @@ AutoCloseable {
         if (screen == null && this.level == null) {
             screen = new TitleScreen();
         } else if (screen == null && this.player.getHealth() <= 0.0f) {
-            screen = new DeathScreen(null, this.level.getLevelData().isHardcore());
+            if (this.player.shouldShowDeathScreen()) {
+                screen = new DeathScreen(null, this.level.getLevelData().isHardcore());
+            } else {
+                this.player.respawn();
+            }
         }
         if (screen instanceof TitleScreen || screen instanceof JoinMultiplayerScreen) {
             this.options.renderDebug = false;
@@ -751,10 +743,10 @@ AutoCloseable {
     private void runTick(boolean bl) {
         boolean bl2;
         Runnable runnable;
-        this.window.setGlErrorSection("Pre render");
+        this.window.setErrorSection("Pre render");
         long l = Util.getNanos();
         this.profiler.startTick();
-        if (GLX.shouldClose(this.window)) {
+        if (this.window.shouldClose()) {
             this.stop();
         }
         if (this.pendingReload != null && !(this.overlay instanceof LoadingOverlay)) {
@@ -779,18 +771,18 @@ AutoCloseable {
             }
         }
         this.mouseHandler.turnPlayer();
-        this.window.setGlErrorSection("Render");
-        GLX.pollEvents();
+        this.window.setErrorSection("Render");
+        RenderSystem.pollEvents();
         long n = Util.getNanos() - m;
         this.profiler.popPush("sound");
         this.soundManager.updateSource(this.gameRenderer.getMainCamera());
         this.profiler.pop();
         this.profiler.push("render");
-        GlStateManager.pushMatrix();
-        GlStateManager.clear(16640, ON_OSX);
+        RenderSystem.pushMatrix();
+        RenderSystem.clear(16640, ON_OSX);
         this.mainRenderTarget.bindWrite(true);
         this.profiler.push("display");
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         this.profiler.pop();
         if (!this.noRender) {
             this.profiler.popPush("gameRenderer");
@@ -807,14 +799,14 @@ AutoCloseable {
             this.profiler.continuous().disable();
         }
         this.mainRenderTarget.unbindWrite();
-        GlStateManager.popMatrix();
-        GlStateManager.pushMatrix();
+        RenderSystem.popMatrix();
+        RenderSystem.pushMatrix();
         this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         this.profiler.startTick();
         this.updateDisplay(true);
         Thread.yield();
-        this.window.setGlErrorSection("Post render");
+        this.window.setErrorSection("Post render");
         ++this.frames;
         boolean bl3 = bl2 = this.hasSingleplayerServer() && (this.screen != null && this.screen.isPauseScreen() || this.overlay != null && this.overlay.isPauseScreen()) && !this.singleplayerServer.isPublished();
         if (this.pause != bl2) {
@@ -830,7 +822,7 @@ AutoCloseable {
         this.lastNanoTime = o;
         while (Util.getMillis() >= this.lastTime + 1000L) {
             fps = this.frames;
-            Object[] objectArray = new Object[8];
+            Object[] objectArray = new Object[7];
             objectArray[0] = fps;
             objectArray[1] = RenderChunk.updateCounter;
             objectArray[2] = RenderChunk.updateCounter == 1 ? "" : "s";
@@ -838,8 +830,7 @@ AutoCloseable {
             objectArray[4] = this.options.enableVsync ? " vsync" : "";
             Object object = objectArray[5] = this.options.fancyGraphics ? "" : " fast";
             objectArray[6] = this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds");
-            objectArray[7] = GLX.useVbo() ? " vbo" : "";
-            this.fpsString = String.format("%d fps (%d chunk update%s) T: %s%s%s%s%s", objectArray);
+            this.fpsString = String.format("%d fps (%d chunk update%s) T: %s%s%s%s", objectArray);
             RenderChunk.updateCounter = 0;
             this.lastTime += 1000L;
             this.frames = 0;
@@ -939,29 +930,29 @@ AutoCloseable {
         ProfileResults profileResults = this.profiler.continuous().getResults();
         List<ResultField> list = profileResults.getTimes(this.debugPath);
         ResultField resultField = list.remove(0);
-        GlStateManager.clear(256, ON_OSX);
-        GlStateManager.matrixMode(5889);
-        GlStateManager.enableColorMaterial();
-        GlStateManager.loadIdentity();
-        GlStateManager.ortho(0.0, this.window.getWidth(), this.window.getHeight(), 0.0, 1000.0, 3000.0);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.loadIdentity();
-        GlStateManager.translatef(0.0f, 0.0f, -2000.0f);
-        GlStateManager.lineWidth(1.0f);
-        GlStateManager.disableTexture();
+        RenderSystem.clear(256, ON_OSX);
+        RenderSystem.matrixMode(5889);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0, this.window.getWidth(), this.window.getHeight(), 0.0, 1000.0, 3000.0);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
+        RenderSystem.lineWidth(1.0f);
+        RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         int i = 160;
         int j = this.window.getWidth() - 160 - 10;
         int k = this.window.getHeight() - 320;
-        GlStateManager.enableBlend();
+        RenderSystem.enableBlend();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex((float)j - 176.0f, (float)k - 96.0f - 16.0f, 0.0).color(200, 0, 0, 0).endVertex();
         bufferBuilder.vertex((float)j - 176.0f, k + 320, 0.0).color(200, 0, 0, 0).endVertex();
         bufferBuilder.vertex((float)j + 176.0f, k + 320, 0.0).color(200, 0, 0, 0).endVertex();
         bufferBuilder.vertex((float)j + 176.0f, (float)k - 96.0f - 16.0f, 0.0).color(200, 0, 0, 0).endVertex();
         tesselator.end();
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
         double d = 0.0;
         for (int l = 0; l < list.size(); ++l) {
             float h;
@@ -996,7 +987,7 @@ AutoCloseable {
         }
         DecimalFormat decimalFormat = new DecimalFormat("##0.00");
         decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         String string = "";
         if (!"unspecified".equals(resultField.name)) {
             string = string + "[0] ";
@@ -1025,6 +1016,10 @@ AutoCloseable {
 
     public void stop() {
         this.running = false;
+    }
+
+    public boolean isRunning() {
+        return this.running;
     }
 
     public void pauseGame(boolean bl) {
@@ -1187,7 +1182,7 @@ AutoCloseable {
         }
         if (this.overlay == null && (this.screen == null || this.screen.passEvents)) {
             this.profiler.popPush("GLFW events");
-            GLX.pollEvents();
+            RenderSystem.pollEvents();
             this.handleKeybinds();
             if (this.missTime > 0) {
                 --this.missTime;
@@ -1609,9 +1604,9 @@ AutoCloseable {
     public CrashReport fillReport(CrashReport crashReport) {
         CrashReportCategory crashReportCategory = crashReport.getSystemDetails();
         crashReportCategory.setDetail("Launched Version", () -> this.launchedVersion);
-        crashReportCategory.setDetail("LWJGL", GLX::getLWJGLVersion);
-        crashReportCategory.setDetail("OpenGL", GLX::getOpenGLVersionString);
-        crashReportCategory.setDetail("GL Caps", GLX::getCapsString);
+        crashReportCategory.setDetail("Backend library", RenderSystem::getBackendDescription);
+        crashReportCategory.setDetail("Backend API", RenderSystem::getApiDescription);
+        crashReportCategory.setDetail("GL Caps", RenderSystem::getCapsString);
         crashReportCategory.setDetail("Using VBOs", () -> "Yes");
         crashReportCategory.setDetail("Is Modded", () -> {
             String string = ClientBrandRetriever.getClientModName();
@@ -1637,7 +1632,7 @@ AutoCloseable {
             return stringBuilder.toString();
         });
         crashReportCategory.setDetail("Current Language", () -> this.languageManager.getSelected().toString());
-        crashReportCategory.setDetail("CPU", GLX::getCpuInfo);
+        crashReportCategory.setDetail("CPU", GlUtil::getCpuInfo);
         if (this.level != null) {
             this.level.fillReportDetails(crashReport);
         }
@@ -1656,8 +1651,7 @@ AutoCloseable {
     public void populateSnooper(Snooper snooper) {
         snooper.setDynamicData("fps", fps);
         snooper.setDynamicData("vsync_enabled", this.options.enableVsync);
-        int i = GLX.getRefreshRate(this.window);
-        snooper.setDynamicData("display_frequency", i);
+        snooper.setDynamicData("display_frequency", this.window.getRefreshRate());
         snooper.setDynamicData("display_type", this.window.isFullscreen() ? "fullscreen" : "windowed");
         snooper.setDynamicData("run_time", (Util.getMillis() - snooper.getStartupTime()) / 60L * 1000L);
         snooper.setDynamicData("current_action", this.getCurrentSnooperAction());
@@ -1666,12 +1660,12 @@ AutoCloseable {
         snooper.setDynamicData("endianness", string);
         snooper.setDynamicData("subtitles", this.options.showSubtitles);
         snooper.setDynamicData("touch", this.options.touchscreen ? "touch" : "mouse");
-        int j = 0;
+        int i = 0;
         for (UnopenedResourcePack unopenedResourcePack : this.resourcePackRepository.getSelected()) {
             if (unopenedResourcePack.isRequired() || unopenedResourcePack.isFixedPosition()) continue;
-            snooper.setDynamicData("resource_pack[" + j++ + "]", unopenedResourcePack.getId());
+            snooper.setDynamicData("resource_pack[" + i++ + "]", unopenedResourcePack.getId());
         }
-        snooper.setDynamicData("resource_packs", j);
+        snooper.setDynamicData("resource_packs", i);
         if (this.singleplayerServer != null && this.singleplayerServer.getSnooper() != null) {
             snooper.setDynamicData("snooper_partner", this.singleplayerServer.getSnooper().getToken());
         }
@@ -1696,13 +1690,13 @@ AutoCloseable {
     public static int maxSupportedTextureSize() {
         if (MAX_SUPPORTED_TEXTURE_SIZE == -1) {
             for (int i = 16384; i > 0; i >>= 1) {
-                GlStateManager.texImage2D(32868, 0, 6408, i, i, 0, 6408, 5121, null);
-                int j = GlStateManager.getTexLevelParameter(32868, 0, 4096);
+                RenderSystem.texImage2D(32868, 0, 6408, i, i, 0, 6408, 5121, null);
+                int j = RenderSystem.getTexLevelParameter(32868, 0, 4096);
                 if (j == 0) continue;
                 MAX_SUPPORTED_TEXTURE_SIZE = i;
                 return i;
             }
-            MAX_SUPPORTED_TEXTURE_SIZE = Mth.clamp(GlStateManager.getInteger(3379), 1024, 16384);
+            MAX_SUPPORTED_TEXTURE_SIZE = Mth.clamp(RenderSystem.getInteger(3379), 1024, 16384);
             LOGGER.info("Failed to determine maximum texture size by probing, trying GL_MAX_TEXTURE_SIZE = {}", (Object)MAX_SUPPORTED_TEXTURE_SIZE);
         }
         return MAX_SUPPORTED_TEXTURE_SIZE;
@@ -1957,6 +1951,10 @@ AutoCloseable {
     @Nullable
     public Overlay getOverlay() {
         return this.overlay;
+    }
+
+    public boolean renderOnThread() {
+        return false;
     }
 
     private static /* synthetic */ Pack method_1528(Supplier supplier) {

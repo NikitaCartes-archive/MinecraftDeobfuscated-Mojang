@@ -18,6 +18,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class NbtToSnbt
 implements DataProvider {
@@ -32,7 +33,7 @@ implements DataProvider {
     public void run(HashCache hashCache) throws IOException {
         Path path2 = this.generator.getOutputFolder();
         for (Path path22 : this.generator.getInputFolders()) {
-            Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".nbt")).forEach(path3 -> this.convertStructure((Path)path3, this.getName(path22, (Path)path3), path2));
+            Files.walk(path22, new FileVisitOption[0]).filter(path -> path.toString().endsWith(".nbt")).forEach(path3 -> NbtToSnbt.convertStructure(path3, this.getName(path22, (Path)path3), path2));
         }
     }
 
@@ -46,7 +47,8 @@ implements DataProvider {
         return string.substring(0, string.length() - ".nbt".length());
     }
 
-    private void convertStructure(Path path, String string, Path path2) {
+    @Nullable
+    public static Path convertStructure(Path path, String string, Path path2) {
         try {
             CompoundTag compoundTag = NbtIo.readCompressed(Files.newInputStream(path, new OpenOption[0]));
             Component component = compoundTag.getPrettyDisplay("    ", 0);
@@ -57,8 +59,10 @@ implements DataProvider {
                 bufferedWriter.write(string2);
             }
             LOGGER.info("Converted {} from NBT to SNBT", (Object)string);
+            return path3;
         } catch (IOException iOException) {
             LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", (Object)string, (Object)path, (Object)iOException);
+            return null;
         }
     }
 }

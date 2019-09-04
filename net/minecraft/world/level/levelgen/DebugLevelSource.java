@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,11 +34,11 @@ extends ChunkGenerator<DebugGeneratorSettings> {
     }
 
     @Override
-    public void buildSurfaceAndBedrock(ChunkAccess chunkAccess) {
+    public void buildSurfaceAndBedrock(WorldGenRegion worldGenRegion, ChunkAccess chunkAccess) {
     }
 
     @Override
-    public void applyCarvers(ChunkAccess chunkAccess, GenerationStep.Carving carving) {
+    public void applyCarvers(BiomeManager biomeManager, ChunkAccess chunkAccess, GenerationStep.Carving carving) {
     }
 
     @Override

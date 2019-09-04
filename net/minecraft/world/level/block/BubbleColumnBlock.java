@@ -66,8 +66,8 @@ implements BucketPickup {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        BubbleColumnBlock.growColumn(level, blockPos.above(), BubbleColumnBlock.getDrag(level, blockPos));
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), BubbleColumnBlock.getDrag(serverLevel, blockPos));
     }
 
     @Override

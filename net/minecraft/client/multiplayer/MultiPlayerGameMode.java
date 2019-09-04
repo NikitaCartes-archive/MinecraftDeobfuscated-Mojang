@@ -192,7 +192,7 @@ public class MultiPlayerGameMode {
             this.destroyProgress += blockState.getDestroyProgress(this.minecraft.player, this.minecraft.player.level, blockPos);
             if (this.destroyTicks % 4.0f == 0.0f) {
                 SoundType soundType = blockState.getSoundType();
-                this.minecraft.getSoundManager().play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.NEUTRAL, (soundType.getVolume() + 1.0f) / 8.0f, soundType.getPitch() * 0.5f, blockPos));
+                this.minecraft.getSoundManager().play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0f) / 8.0f, soundType.getPitch() * 0.5f, blockPos));
             }
             this.destroyTicks += 1.0f;
             this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, Mth.clamp(this.destroyProgress, 0.0f, 1.0f));
@@ -260,7 +260,7 @@ public class MultiPlayerGameMode {
             return InteractionResult.SUCCESS;
         }
         boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
-        boolean bl3 = bl2 = localPlayer.isSneaking() && bl;
+        boolean bl3 = bl2 = localPlayer.isSecondaryUseActive() && bl;
         if (!bl2 && multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult)) {
             this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
             return InteractionResult.SUCCESS;

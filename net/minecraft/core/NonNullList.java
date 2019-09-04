@@ -3,8 +3,8 @@
  */
 package net.minecraft.core;
 
+import com.google.common.collect.Lists;
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.Validate;
@@ -33,7 +33,7 @@ extends AbstractList<E> {
     }
 
     protected NonNullList() {
-        this(new ArrayList(), null);
+        this(Lists.newArrayList(), null);
     }
 
     protected NonNullList(List<E> list, @Nullable E object) {

@@ -814,7 +814,7 @@ implements ChunkHolder.PlayerProvider {
         int i = entityType.chunkRange() * 16;
         int j = entityType.updateInterval();
         if (this.entityMap.containsKey(entity.getId())) {
-            throw new IllegalStateException("Entity is already tracked!");
+            throw Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
         }
         TrackedEntity trackedEntity = new TrackedEntity(entity, i, j, entityType.trackDeltas());
         this.entityMap.put(entity.getId(), trackedEntity);

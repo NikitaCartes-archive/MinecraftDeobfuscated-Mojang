@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.QuadrupedModel;
@@ -70,29 +70,29 @@ extends QuadrupedModel<T> {
         this.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
         if (this.young) {
             float l = 2.0f;
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
             float m = 0.7f;
-            GlStateManager.scalef(0.71428573f, 0.64935064f, 0.7936508f);
-            GlStateManager.translatef(0.0f, 21.0f * k, 0.22f);
+            RenderSystem.scalef(0.71428573f, 0.64935064f, 0.7936508f);
+            RenderSystem.translatef(0.0f, 21.0f * k, 0.22f);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
             float n = 1.1f;
-            GlStateManager.scalef(0.625f, 0.45454544f, 0.45454544f);
-            GlStateManager.translatef(0.0f, 33.0f * k, 0.0f);
+            RenderSystem.scalef(0.625f, 0.45454544f, 0.45454544f);
+            RenderSystem.translatef(0.0f, 33.0f * k, 0.0f);
             this.body.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.45454544f, 0.41322312f, 0.45454544f);
-            GlStateManager.translatef(0.0f, 33.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.45454544f, 0.41322312f, 0.45454544f);
+            RenderSystem.translatef(0.0f, 33.0f * k, 0.0f);
             this.leg0.render(k);
             this.leg1.render(k);
             this.leg2.render(k);
             this.leg3.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.head.render(k);
             this.body.render(k);

@@ -19,6 +19,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.LogManager;
@@ -57,6 +58,15 @@ public class GameRules {
     public static final Key<IntegerValue> RULE_MAX_COMMAND_CHAIN_LENGTH = GameRules.register("maxCommandChainLength", IntegerValue.method_20764(65536));
     public static final Key<BooleanValue> RULE_ANNOUNCE_ADVANCEMENTS = GameRules.register("announceAdvancements", BooleanValue.method_20755(true));
     public static final Key<BooleanValue> RULE_DISABLE_RAIDS = GameRules.register("disableRaids", BooleanValue.method_20755(false));
+    public static final Key<BooleanValue> RULE_DOINSOMNIA = GameRules.register("doInsomnia", BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_IMMEDIATE_RESPAWN = GameRules.register("doImmediateRespawn", BooleanValue.method_20757(false, (minecraftServer, booleanValue) -> {
+        for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
+            serverPlayer.connection.send(new ClientboundGameEventPacket(11, booleanValue.get() ? 1.0f : 0.0f));
+        }
+    }));
+    public static final Key<BooleanValue> RULE_DROWNING_DAMAGE = GameRules.register("drowningDamage", BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_FALL_DAMAGE = GameRules.register("fallDamage", BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_FIRE_DAMAGE = GameRules.register("fireDamage", BooleanValue.method_20755(true));
     private final Map<Key<?>, Value<?>> rules = GAME_RULE_TYPES.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Type)entry.getValue()).createRule()));
 
     private static <T extends Value<T>> Key<T> register(String string, Type<T> type) {

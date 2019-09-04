@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.debug.CaveDebugRenderer;
 import net.minecraft.client.renderer.debug.ChunkBorderRenderer;
 import net.minecraft.client.renderer.debug.ChunkDebugRenderer;
 import net.minecraft.client.renderer.debug.CollisionBoxRenderer;
+import net.minecraft.client.renderer.debug.GameTestDebugRenderer;
 import net.minecraft.client.renderer.debug.GoalSelectorDebugRenderer;
 import net.minecraft.client.renderer.debug.HeightMapRenderer;
 import net.minecraft.client.renderer.debug.LightDebugRenderer;
@@ -56,6 +57,7 @@ public class DebugRenderer {
     public final VillageDebugRenderer villageDebugRenderer;
     public final RaidDebugRenderer raidDebugRenderer;
     public final GoalSelectorDebugRenderer goalSelectorRenderer;
+    public final GameTestDebugRenderer gameTestDebugRenderer;
     private boolean renderChunkborder;
 
     public DebugRenderer(Minecraft minecraft) {
@@ -74,6 +76,7 @@ public class DebugRenderer {
         this.villageDebugRenderer = new VillageDebugRenderer(minecraft);
         this.raidDebugRenderer = new RaidDebugRenderer(minecraft);
         this.goalSelectorRenderer = new GoalSelectorDebugRenderer(minecraft);
+        this.gameTestDebugRenderer = new GameTestDebugRenderer();
     }
 
     public void clear() {
@@ -92,10 +95,7 @@ public class DebugRenderer {
         this.villageDebugRenderer.clear();
         this.raidDebugRenderer.clear();
         this.goalSelectorRenderer.clear();
-    }
-
-    public boolean shouldRender() {
-        return this.renderChunkborder;
+        this.gameTestDebugRenderer.clear();
     }
 
     public boolean switchRenderChunkborder() {
@@ -107,6 +107,7 @@ public class DebugRenderer {
         if (this.renderChunkborder && !Minecraft.getInstance().showOnlyReducedInfo()) {
             this.chunkBorderRenderer.render(l);
         }
+        this.gameTestDebugRenderer.render(l);
     }
 
     public static Optional<Entity> getTargetedEntity(@Nullable Entity entity2, int i) {
@@ -183,26 +184,26 @@ public class DebugRenderer {
         double j = camera.getPosition().x;
         double k = camera.getPosition().y;
         double l = camera.getPosition().z;
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
-        GlStateManager.normal3f(0.0f, 1.0f, 0.0f);
-        GlStateManager.scalef(g, -g, g);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
+        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
+        RenderSystem.scalef(g, -g, g);
         EntityRenderDispatcher entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
-        GlStateManager.rotatef(-entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(-entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
-        GlStateManager.enableTexture();
+        RenderSystem.rotatef(-entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.enableTexture();
         if (bl2) {
-            GlStateManager.disableDepthTest();
+            RenderSystem.disableDepthTest();
         } else {
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableDepthTest();
         }
-        GlStateManager.depthMask(true);
-        GlStateManager.scalef(-1.0f, 1.0f, 1.0f);
+        RenderSystem.depthMask(true);
+        RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
         float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
         font.draw(string, m -= h / g, 0.0f, i);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableDepthTest();
-        GlStateManager.popMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableDepthTest();
+        RenderSystem.popMatrix();
     }
 
     @Environment(value=EnvType.CLIENT)

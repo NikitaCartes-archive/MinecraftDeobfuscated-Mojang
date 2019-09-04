@@ -6,9 +6,9 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -38,10 +38,9 @@ extends StructureFeature<C> {
     }
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
-        Biome biome;
+    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
-        return i == chunkPos.x && j == chunkPos.z && chunkGenerator.isBiomeValidStartForStructure(biome = chunkGenerator.getBiomeSource().getBiome(new BlockPos(i * 16 + 9, 0, j * 16 + 9)), this);
+        return i == chunkPos.x && j == chunkPos.z && chunkGenerator.isBiomeValidStartForStructure(biome, this);
     }
 
     protected int getSpacing(ChunkGenerator<?> chunkGenerator) {

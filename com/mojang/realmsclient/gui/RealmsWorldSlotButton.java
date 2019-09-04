@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.util.RealmsTextureManager;
@@ -16,7 +16,6 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsButtonProxy;
 import net.minecraft.realms.RealmsMth;
 import net.minecraft.realms.RealmsScreen;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -127,19 +126,19 @@ extends RealmsButton {
         }
         if (bl) {
             float f = 0.85f + 0.15f * RealmsMth.cos((float)this.animTick * 0.2f);
-            GlStateManager.color4f(f, f, f, 1.0f);
+            RenderSystem.color4f(f, f, f, 1.0f);
         } else {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsScreen.blit(i + 3, j + 3, 0.0f, 0.0f, 74, 74, 74, 74);
         Realms.bind("realms:textures/gui/realms/slot_frame.png");
         boolean bl6 = bl5 = bl4 && action != Action.NOTHING;
         if (bl5) {
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         } else if (bl) {
-            GlStateManager.color4f(0.8f, 0.8f, 0.8f, 1.0f);
+            RenderSystem.color4f(0.8f, 0.8f, 0.8f, 1.0f);
         } else {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsScreen.blit(i, j, 0.0f, 0.0f, 80, 80, 80, 80);
         this.drawCenteredString(string, i + 40, j + 66, 0xFFFFFF);
@@ -161,7 +160,7 @@ extends RealmsButton {
         public final Action action;
         final String actionPrompt;
 
-        State(boolean bl, String string, long l, @Nullable String string2, boolean bl2, boolean bl3, @NotNull Action action, @Nullable String string3) {
+        State(boolean bl, String string, long l, @Nullable String string2, boolean bl2, boolean bl3, Action action, @Nullable String string3) {
             this.isCurrentlyActiveSlot = bl;
             this.slotName = string;
             this.imageId = l;
@@ -183,7 +182,7 @@ extends RealmsButton {
 
     @Environment(value=EnvType.CLIENT)
     public static interface Listener {
-        public void onSlotClick(int var1, @NotNull Action var2, boolean var3, boolean var4);
+        public void onSlotClick(int var1, Action var2, boolean var3, boolean var4);
     }
 }
 

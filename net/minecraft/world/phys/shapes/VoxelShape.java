@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -52,7 +53,7 @@ public abstract class VoxelShape {
 
     public AABB bounds() {
         if (this.isEmpty()) {
-            throw new UnsupportedOperationException("No bounds for empty shape.");
+            throw Util.pauseInIde(new UnsupportedOperationException("No bounds for empty shape."));
         }
         return new AABB(this.min(Direction.Axis.X), this.min(Direction.Axis.Y), this.min(Direction.Axis.Z), this.max(Direction.Axis.X), this.max(Direction.Axis.Y), this.max(Direction.Axis.Z));
     }

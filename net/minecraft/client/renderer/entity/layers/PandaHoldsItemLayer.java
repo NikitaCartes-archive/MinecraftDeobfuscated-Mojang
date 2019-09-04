@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -35,10 +35,10 @@ extends RenderLayer<Panda, PandaModel<Panda>> {
             m -= 0.2f * Mth.sin(i * 0.6f) + 0.2f;
             n -= 0.09f * Mth.sin(i * 0.6f);
         }
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.1f, n, m);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.1f, n, m);
         Minecraft.getInstance().getItemRenderer().renderWithMobState(itemStack, panda, ItemTransforms.TransformType.GROUND, false);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

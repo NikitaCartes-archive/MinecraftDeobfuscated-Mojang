@@ -3,9 +3,8 @@
  */
 package com.mojang.blaze3d.platform;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
-import java.io.File;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,15 +23,13 @@ import org.lwjgl.system.MemoryUtil;
 @Environment(value=EnvType.CLIENT)
 public class TextureUtil {
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final int MIN_MIPMAP_LEVEL = 0;
-    private static final int DEFAULT_IMAGE_BUFFER_SIZE = 8192;
 
     public static int generateTextureId() {
-        return GlStateManager.genTexture();
+        return RenderSystem.genTexture();
     }
 
     public static void releaseTextureId(int i) {
-        GlStateManager.deleteTexture(i);
+        RenderSystem.deleteTexture(i);
     }
 
     public static void prepareImage(int i, int j, int k) {
@@ -50,18 +47,18 @@ public class TextureUtil {
     public static void prepareImage(NativeImage.InternalGlFormat internalGlFormat, int i, int j, int k, int l) {
         TextureUtil.bind(i);
         if (j >= 0) {
-            GlStateManager.texParameter(3553, 33085, j);
-            GlStateManager.texParameter(3553, 33082, 0);
-            GlStateManager.texParameter(3553, 33083, j);
-            GlStateManager.texParameter(3553, 34049, 0.0f);
+            RenderSystem.texParameter(3553, 33085, j);
+            RenderSystem.texParameter(3553, 33082, 0);
+            RenderSystem.texParameter(3553, 33083, j);
+            RenderSystem.texParameter(3553, 34049, 0.0f);
         }
         for (int m = 0; m <= j; ++m) {
-            GlStateManager.texImage2D(3553, m, internalGlFormat.glFormat(), k >> m, l >> m, 0, 6408, 5121, null);
+            RenderSystem.texImage2D(3553, m, internalGlFormat.glFormat(), k >> m, l >> m, 0, 6408, 5121, null);
         }
     }
 
     private static void bind(int i) {
-        GlStateManager.bindTexture(i);
+        RenderSystem.bindTexture(i);
     }
 
     public static ByteBuffer readResource(InputStream inputStream) throws IOException {
@@ -101,23 +98,6 @@ public class TextureUtil {
             }
         }
         return null;
-    }
-
-    public static void writeAsPNG(String string, int i, int j, int k, int l) {
-        TextureUtil.bind(i);
-        for (int m = 0; m <= j; ++m) {
-            String string2 = string + "_" + m + ".png";
-            int n = k >> m;
-            int o = l >> m;
-            try (NativeImage nativeImage = new NativeImage(n, o, false);){
-                nativeImage.downloadTexture(m, false);
-                nativeImage.writeToFile(string2);
-                LOGGER.debug("Exported png to: {}", (Object)new File(string2).getAbsolutePath());
-                continue;
-            } catch (IOException iOException) {
-                LOGGER.debug("Unable to write: ", (Throwable)iOException);
-            }
-        }
     }
 
     public static void initTexture(IntBuffer intBuffer, int i, int j) {

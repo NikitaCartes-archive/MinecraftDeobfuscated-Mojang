@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerBulletModel;
@@ -35,25 +35,25 @@ extends EntityRenderer<ShulkerBullet> {
 
     @Override
     public void render(ShulkerBullet shulkerBullet, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         float i = this.rotlerp(shulkerBullet.yRotO, shulkerBullet.yRot, h);
         float j = Mth.lerp(h, shulkerBullet.xRotO, shulkerBullet.xRot);
         float k = (float)shulkerBullet.tickCount + h;
-        GlStateManager.translatef((float)d, (float)e + 0.15f, (float)f);
-        GlStateManager.rotatef(Mth.sin(k * 0.1f) * 180.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(Mth.cos(k * 0.1f) * 180.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(Mth.sin(k * 0.15f) * 360.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.translatef((float)d, (float)e + 0.15f, (float)f);
+        RenderSystem.rotatef(Mth.sin(k * 0.1f) * 180.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(Mth.cos(k * 0.1f) * 180.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(Mth.sin(k * 0.15f) * 360.0f, 0.0f, 0.0f, 1.0f);
         float l = 0.03125f;
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
         this.bindTexture(shulkerBullet);
         this.model.render(shulkerBullet, 0.0f, 0.0f, 0.0f, i, j, 0.03125f);
-        GlStateManager.enableBlend();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 0.5f);
-        GlStateManager.scalef(1.5f, 1.5f, 1.5f);
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 0.5f);
+        RenderSystem.scalef(1.5f, 1.5f, 1.5f);
         this.model.render(shulkerBullet, 0.0f, 0.0f, 0.0f, i, j, 0.03125f);
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
         super.render(shulkerBullet, d, e, f, g, h);
     }
 

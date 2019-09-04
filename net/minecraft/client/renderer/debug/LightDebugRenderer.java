@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,10 +31,10 @@ implements DebugRenderer.SimpleDebugRenderer {
     public void render(long l) {
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
         MultiPlayerLevel level = this.minecraft.level;
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         BlockPos blockPos = new BlockPos(camera.getPosition());
         LongOpenHashSet longSet = new LongOpenHashSet();
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-10, -10, -10), blockPos.offset(10, 10, 10))) {
@@ -47,8 +48,8 @@ implements DebugRenderer.SimpleDebugRenderer {
             if (i == 15) continue;
             DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);
         }
-        GlStateManager.enableTexture();
-        GlStateManager.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 }
 

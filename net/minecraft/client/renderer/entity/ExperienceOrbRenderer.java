@@ -3,9 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -34,8 +33,8 @@ extends EntityRenderer<ExperienceOrb> {
         if (this.solidRender || Minecraft.getInstance().getEntityRenderDispatcher().options == null) {
             return;
         }
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
         this.bindTexture(experienceOrb);
         Lighting.turnOn();
         int i = experienceOrb.getIcon();
@@ -49,18 +48,18 @@ extends EntityRenderer<ExperienceOrb> {
         int q = experienceOrb.getLightColor();
         int r = q % 65536;
         int s = q / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, r, s);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.glMultiTexCoord2f(33985, r, s);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float t = 255.0f;
         float u = ((float)experienceOrb.tickCount + h) / 2.0f;
         int v = (int)((Mth.sin(u + 0.0f) + 1.0f) * 0.5f * 255.0f);
         int w = 255;
         int x = (int)((Mth.sin(u + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
-        GlStateManager.translatef(0.0f, 0.1f, 0.0f);
-        GlStateManager.rotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.translatef(0.0f, 0.1f, 0.0f);
+        RenderSystem.rotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
         float y = 0.3f;
-        GlStateManager.scalef(0.3f, 0.3f, 0.3f);
+        RenderSystem.scalef(0.3f, 0.3f, 0.3f);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
@@ -69,9 +68,9 @@ extends EntityRenderer<ExperienceOrb> {
         bufferBuilder.vertex(0.5, 0.75, 0.0).uv(k, l).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
         bufferBuilder.vertex(-0.5, 0.75, 0.0).uv(j, l).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
         tesselator.end();
-        GlStateManager.disableBlend();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableBlend();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
         super.render(experienceOrb, d, e, f, g, h);
     }
 

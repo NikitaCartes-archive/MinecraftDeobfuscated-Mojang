@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -130,31 +130,31 @@ extends EntityModel<T> {
         super.render(fox, f, g, h, i, j, k);
         this.setupAnim(fox, f, g, h, i, j, k);
         if (this.young) {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             float l = 0.75f;
-            GlStateManager.scalef(0.75f, 0.75f, 0.75f);
-            GlStateManager.translatef(0.0f, 8.0f * k, 3.35f * k);
+            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
+            RenderSystem.translatef(0.0f, 8.0f * k, 3.35f * k);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
             float m = 0.5f;
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.body.render(k);
             this.leg0.render(k);
             this.leg1.render(k);
             this.leg2.render(k);
             this.leg3.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             this.head.render(k);
             this.body.render(k);
             this.leg0.render(k);
             this.leg1.render(k);
             this.leg2.render(k);
             this.leg3.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunkGetter;
@@ -49,8 +48,6 @@ AutoCloseable {
     public abstract void tick(BooleanSupplier var1);
 
     public abstract String gatherStats();
-
-    public abstract ChunkGenerator<?> getGenerator();
 
     @Override
     public void close() throws IOException {

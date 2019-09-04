@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -98,11 +99,15 @@ extends FaceAttachedHorizontalDirectionalBlock {
         if (blockState.getValue(POWERED).booleanValue()) {
             return true;
         }
-        level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 3);
+        this.press(blockState, level, blockPos);
         this.playSound(player, level, blockPos, true);
+        return true;
+    }
+
+    public void press(BlockState blockState, Level level, BlockPos blockPos) {
+        level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 3);
         this.updateNeighbours(blockState, level, blockPos);
         level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
-        return true;
     }
 
     protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
@@ -141,16 +146,16 @@ extends FaceAttachedHorizontalDirectionalBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (level.isClientSide || !blockState.getValue(POWERED).booleanValue()) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!blockState.getValue(POWERED).booleanValue()) {
             return;
         }
         if (this.sensitive) {
-            this.checkPressed(blockState, level, blockPos);
+            this.checkPressed(blockState, serverLevel, blockPos);
         } else {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 3);
-            this.updateNeighbours(blockState, level, blockPos);
-            this.playSound(null, level, blockPos, false);
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 3);
+            this.updateNeighbours(blockState, serverLevel, blockPos);
+            this.playSound(null, serverLevel, blockPos, false);
         }
     }
 

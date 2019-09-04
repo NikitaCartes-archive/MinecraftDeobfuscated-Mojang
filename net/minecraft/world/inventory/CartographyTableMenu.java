@@ -22,15 +22,16 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-public class CartographyMenu
+public class CartographyTableMenu
 extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private boolean quickMoved;
+    private long lastSoundTime;
     public final Container container = new SimpleContainer(2){
 
         @Override
         public void setChanged() {
-            CartographyMenu.this.slotsChanged(this);
+            CartographyTableMenu.this.slotsChanged(this);
             super.setChanged();
         }
     };
@@ -38,17 +39,17 @@ extends AbstractContainerMenu {
 
         @Override
         public void setChanged() {
-            CartographyMenu.this.slotsChanged(this);
+            CartographyTableMenu.this.slotsChanged(this);
             super.setChanged();
         }
     };
 
-    public CartographyMenu(int i, Inventory inventory) {
+    public CartographyTableMenu(int i, Inventory inventory) {
         this(i, inventory, ContainerLevelAccess.NULL);
     }
 
-    public CartographyMenu(int i, Inventory inventory, final ContainerLevelAccess containerLevelAccess) {
-        super(MenuType.CARTOGRAPHY, i);
+    public CartographyTableMenu(int i, Inventory inventory, final ContainerLevelAccess containerLevelAccess) {
+        super(MenuType.CARTOGRAPHY_TABLE, i);
         int j;
         this.access = containerLevelAccess;
         this.addSlot(new Slot(this.container, 0, 15, 15){
@@ -78,14 +79,14 @@ extends AbstractContainerMenu {
                 ItemStack itemStack = super.remove(i);
                 ItemStack itemStack2 = containerLevelAccess.evaluate((level, blockPos) -> {
                     ItemStack itemStack2;
-                    if (!CartographyMenu.this.quickMoved && CartographyMenu.this.container.getItem(1).getItem() == Items.GLASS_PANE && (itemStack2 = MapItem.lockMap(level, CartographyMenu.this.container.getItem(0))) != null) {
+                    if (!CartographyTableMenu.this.quickMoved && CartographyTableMenu.this.container.getItem(1).getItem() == Items.GLASS_PANE && (itemStack2 = MapItem.lockMap(level, CartographyTableMenu.this.container.getItem(0))) != null) {
                         itemStack2.setCount(1);
                         return itemStack2;
                     }
                     return itemStack;
                 }).orElse(itemStack);
-                CartographyMenu.this.container.removeItem(0, 1);
-                CartographyMenu.this.container.removeItem(1, 1);
+                CartographyTableMenu.this.container.removeItem(0, 1);
+                CartographyTableMenu.this.container.removeItem(1, 1);
                 return itemStack2;
             }
 
@@ -98,7 +99,13 @@ extends AbstractContainerMenu {
             @Override
             public ItemStack onTake(Player player, ItemStack itemStack) {
                 itemStack.getItem().onCraftedBy(itemStack, player.level, player);
-                containerLevelAccess.execute((level, blockPos) -> level.playSound(null, (BlockPos)blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1.0f, 1.0f));
+                containerLevelAccess.execute((level, blockPos) -> {
+                    long l = level.getGameTime();
+                    if (CartographyTableMenu.this.lastSoundTime != l) {
+                        level.playSound(null, (BlockPos)blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1.0f, 1.0f);
+                        CartographyTableMenu.this.lastSoundTime = l;
+                    }
+                });
                 return super.onTake(player, itemStack);
             }
         });
@@ -114,7 +121,7 @@ extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return CartographyMenu.stillValid(this.access, player, Blocks.CARTOGRAPHY_TABLE);
+        return CartographyTableMenu.stillValid(this.access, player, Blocks.CARTOGRAPHY_TABLE);
     }
 
     @Override
@@ -164,7 +171,7 @@ extends AbstractContainerMenu {
 
     @Override
     public boolean canTakeItemForPickAll(ItemStack itemStack, Slot slot) {
-        return false;
+        return slot.container != this.resultContainer && super.canTakeItemForPickAll(itemStack, slot);
     }
 
     @Override

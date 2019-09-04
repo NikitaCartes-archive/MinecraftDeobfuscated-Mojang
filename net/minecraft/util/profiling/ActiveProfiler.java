@@ -34,11 +34,13 @@ implements ProfileCollector {
     private final int startTimeTicks;
     private String path = "";
     private boolean started;
+    private final boolean warn;
 
-    public ActiveProfiler(long l, IntSupplier intSupplier) {
+    public ActiveProfiler(long l, IntSupplier intSupplier, boolean bl) {
         this.startTimeNano = l;
         this.startTimeTicks = intSupplier.getAsInt();
         this.getTickTime = intSupplier;
+        this.warn = bl;
     }
 
     @Override
@@ -101,7 +103,7 @@ implements ProfileCollector {
         long n = l - m;
         this.times.put(this.path, this.times.getLong(this.path) + n);
         this.counts.put(this.path, this.counts.getLong(this.path) + 1L);
-        if (n > WARNING_TIME_NANOS) {
+        if (this.warn && n > WARNING_TIME_NANOS) {
             LOGGER.warn("Something's taking too long! '{}' took aprox {} ms", () -> ProfileResults.demanglePath(this.path), () -> (double)n / 1000000.0);
         }
         this.path = this.paths.isEmpty() ? "" : this.paths.get(this.paths.size() - 1);

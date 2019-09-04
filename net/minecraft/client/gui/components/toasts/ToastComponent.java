@@ -4,8 +4,8 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Arrays;
 import java.util.Deque;
 import net.fabricmc.api.EnvType;
@@ -104,10 +104,10 @@ extends GuiComponent {
             if (this.visibility == Toast.Visibility.SHOW && l - this.animationTime <= 600L) {
                 this.visibleTime = l;
             }
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef((float)i - 160.0f * this.getVisibility(l), j * 32, 500 + j);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef((float)i - 160.0f * this.getVisibility(l), j * 32, 500 + j);
             Toast.Visibility visibility = this.toast.render(this.field_2245, l - this.visibleTime);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             if (visibility != this.visibility) {
                 this.animationTime = l - (long)((int)((1.0f - this.getVisibility(l)) * 600.0f));
                 this.visibility = visibility;

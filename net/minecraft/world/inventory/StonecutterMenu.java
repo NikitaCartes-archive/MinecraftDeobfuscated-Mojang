@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.inventory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -23,7 +22,6 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
@@ -31,7 +29,6 @@ import net.minecraft.world.level.block.Blocks;
 
 public class StonecutterMenu
 extends AbstractContainerMenu {
-    static final ImmutableList<Item> validItems = ImmutableList.of(Items.STONE, Items.SANDSTONE, Items.RED_SANDSTONE, Items.QUARTZ_BLOCK, Items.COBBLESTONE, Items.STONE_BRICKS, Items.BRICKS, Items.NETHER_BRICKS, Items.RED_NETHER_BRICKS, Items.PURPUR_BLOCK, Items.PRISMARINE, Items.PRISMARINE_BRICKS, new Item[]{Items.DARK_PRISMARINE, Items.ANDESITE, Items.POLISHED_ANDESITE, Items.GRANITE, Items.POLISHED_GRANITE, Items.DIORITE, Items.POLISHED_DIORITE, Items.MOSSY_STONE_BRICKS, Items.MOSSY_COBBLESTONE, Items.SMOOTH_SANDSTONE, Items.SMOOTH_RED_SANDSTONE, Items.SMOOTH_QUARTZ, Items.END_STONE, Items.END_STONE_BRICKS, Items.SMOOTH_STONE, Items.CUT_SANDSTONE, Items.CUT_RED_SANDSTONE});
     private final ContainerLevelAccess access;
     private final DataSlot selectedRecipeIndex = DataSlot.standalone();
     private final Level level;
@@ -171,7 +168,7 @@ extends AbstractContainerMenu {
 
     @Override
     public boolean canTakeItemForPickAll(ItemStack itemStack, Slot slot) {
-        return false;
+        return slot.container != this.resultContainer && super.canTakeItemForPickAll(itemStack, slot);
     }
 
     @Override
@@ -188,7 +185,7 @@ extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(itemStack2, itemStack);
-            } else if (i == 0 ? !this.moveItemStackTo(itemStack2, 2, 38, false) : (validItems.contains(item) ? !this.moveItemStackTo(itemStack2, 0, 1, false) : (i >= 2 && i < 29 ? !this.moveItemStackTo(itemStack2, 29, 38, false) : i >= 29 && i < 38 && !this.moveItemStackTo(itemStack2, 2, 29, false)))) {
+            } else if (i == 0 ? !this.moveItemStackTo(itemStack2, 2, 38, false) : (this.level.getRecipeManager().getRecipeFor(RecipeType.STONECUTTING, new SimpleContainer(itemStack2), this.level).isPresent() ? !this.moveItemStackTo(itemStack2, 0, 1, false) : (i >= 2 && i < 29 ? !this.moveItemStackTo(itemStack2, 29, 38, false) : i >= 29 && i < 38 && !this.moveItemStackTo(itemStack2, 2, 29, false)))) {
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {

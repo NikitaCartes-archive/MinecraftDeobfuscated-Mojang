@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -30,29 +31,29 @@ extends RenderLayer<Creeper, CreeperModel<Creeper>> {
             return;
         }
         boolean bl = creeper.isInvisible();
-        GlStateManager.depthMask(!bl);
+        RenderSystem.depthMask(!bl);
         this.bindTexture(POWER_LOCATION);
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
+        RenderSystem.matrixMode(5890);
+        RenderSystem.loadIdentity();
         float m = (float)creeper.tickCount + h;
-        GlStateManager.translatef(m * 0.01f, m * 0.01f, 0.0f);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableBlend();
+        RenderSystem.translatef(m * 0.01f, m * 0.01f, 0.0f);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.enableBlend();
         float n = 0.5f;
-        GlStateManager.color4f(0.5f, 0.5f, 0.5f, 1.0f);
-        GlStateManager.disableLighting();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        RenderSystem.color4f(0.5f, 0.5f, 0.5f, 1.0f);
+        RenderSystem.disableLighting();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         ((CreeperModel)this.getParentModel()).copyPropertiesTo(this.model);
         GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         gameRenderer.resetFogColor(true);
         this.model.render(creeper, f, g, i, j, k, l);
         gameRenderer.resetFogColor(false);
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableLighting();
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
+        RenderSystem.matrixMode(5890);
+        RenderSystem.loadIdentity();
+        RenderSystem.matrixMode(5888);
+        RenderSystem.enableLighting();
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     @Override

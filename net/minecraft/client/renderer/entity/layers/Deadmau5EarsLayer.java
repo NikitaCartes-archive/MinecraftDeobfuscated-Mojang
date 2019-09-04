@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -28,17 +28,17 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         for (int m = 0; m < 2; ++m) {
             float n = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
             float o = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
-            GlStateManager.pushMatrix();
-            GlStateManager.rotatef(n, 0.0f, 1.0f, 0.0f);
-            GlStateManager.rotatef(o, 1.0f, 0.0f, 0.0f);
-            GlStateManager.translatef(0.375f * (float)(m * 2 - 1), 0.0f, 0.0f);
-            GlStateManager.translatef(0.0f, -0.375f, 0.0f);
-            GlStateManager.rotatef(-o, 1.0f, 0.0f, 0.0f);
-            GlStateManager.rotatef(-n, 0.0f, 1.0f, 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.rotatef(n, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(o, 1.0f, 0.0f, 0.0f);
+            RenderSystem.translatef(0.375f * (float)(m * 2 - 1), 0.0f, 0.0f);
+            RenderSystem.translatef(0.0f, -0.375f, 0.0f);
+            RenderSystem.rotatef(-o, 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(-n, 0.0f, 1.0f, 0.0f);
             float p = 1.3333334f;
-            GlStateManager.scalef(1.3333334f, 1.3333334f, 1.3333334f);
+            RenderSystem.scalef(1.3333334f, 1.3333334f, 1.3333334f);
             ((PlayerModel)this.getParentModel()).renderEars(0.0625f);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

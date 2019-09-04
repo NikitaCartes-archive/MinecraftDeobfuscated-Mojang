@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
@@ -36,11 +36,11 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
                 float n = (float)(m >> 16 & 0xFF) / 255.0f;
                 float o = (float)(m >> 8 & 0xFF) / 255.0f;
                 float p = (float)(m & 0xFF) / 255.0f;
-                GlStateManager.color4f(n, o, p, 1.0f);
+                RenderSystem.color4f(n, o, p, 1.0f);
                 this.model.render(horse, f, g, i, j, k, l);
                 return;
             }
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             this.model.render(horse, f, g, i, j, k, l);
         }
     }

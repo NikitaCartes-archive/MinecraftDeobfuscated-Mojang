@@ -51,9 +51,13 @@ extends SectionStorage<PoiSection> {
         return this.getInRange(predicate, blockPos, i, occupancy).count();
     }
 
+    public Stream<PoiRecord> getInSquare(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
+        return ChunkPos.rangeClosed(new ChunkPos(blockPos), Math.floorDiv(i, 16)).flatMap(chunkPos -> this.getInChunk(predicate, (ChunkPos)chunkPos, occupancy));
+    }
+
     public Stream<PoiRecord> getInRange(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
         int j = i * i;
-        return ChunkPos.rangeClosed(new ChunkPos(blockPos), Math.floorDiv(i, 16)).flatMap(chunkPos -> this.getInChunk(predicate, (ChunkPos)chunkPos, occupancy).filter(poiRecord -> poiRecord.getPos().distSqr(blockPos) <= (double)j));
+        return this.getInSquare(predicate, blockPos, i, occupancy).filter(poiRecord -> poiRecord.getPos().distSqr(blockPos) <= (double)j);
     }
 
     public Stream<PoiRecord> getInChunk(Predicate<PoiType> predicate, ChunkPos chunkPos, Occupancy occupancy) {

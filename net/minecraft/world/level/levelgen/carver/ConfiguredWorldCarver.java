@@ -5,6 +5,9 @@ package net.minecraft.world.level.levelgen.carver;
 
 import java.util.BitSet;
 import java.util.Random;
+import java.util.function.Function;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
@@ -22,8 +25,8 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
         return this.worldCarver.isStartChunk(random, i, j, this.config);
     }
 
-    public boolean carve(ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet) {
-        return this.worldCarver.carve(chunkAccess, random, i, j, k, l, m, bitSet, this.config);
+    public boolean carve(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, int j, int k, int l, int m, BitSet bitSet) {
+        return this.worldCarver.carve(chunkAccess, function, random, i, j, k, l, m, bitSet, this.config);
     }
 }
 

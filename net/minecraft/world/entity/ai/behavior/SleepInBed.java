@@ -9,9 +9,11 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.SerializableLong;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -25,7 +27,7 @@ extends Behavior<LivingEntity> {
     private long nextOkStartTime;
 
     public SleepInBed() {
-        super(ImmutableMap.of(MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.HOME, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LAST_WOKEN, MemoryStatus.REGISTERED));
     }
 
     @Override
@@ -33,8 +35,13 @@ extends Behavior<LivingEntity> {
         if (livingEntity.isPassenger()) {
             return false;
         }
-        GlobalPos globalPos = livingEntity.getBrain().getMemory(MemoryModuleType.HOME).get();
+        Brain<?> brain = livingEntity.getBrain();
+        GlobalPos globalPos = brain.getMemory(MemoryModuleType.HOME).get();
         if (!Objects.equals(serverLevel.getDimension().getType(), globalPos.dimension())) {
+            return false;
+        }
+        Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
+        if (optional.isPresent() && serverLevel.getGameTime() - optional.get().value() < 100L) {
             return false;
         }
         BlockState blockState = serverLevel.getBlockState(globalPos.pos());

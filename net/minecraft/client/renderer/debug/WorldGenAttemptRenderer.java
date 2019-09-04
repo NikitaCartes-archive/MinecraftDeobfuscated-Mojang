@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -47,10 +48,10 @@ implements DebugRenderer.SimpleDebugRenderer {
         double d = camera.getPosition().x;
         double e = camera.getPosition().y;
         double f = camera.getPosition().z;
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
@@ -61,8 +62,8 @@ implements DebugRenderer.SimpleDebugRenderer {
             LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, (double)((float)blockPos.getX() + 0.5f - g) - d, (double)((float)blockPos.getY() + 0.5f - g) - e, (double)((float)blockPos.getZ() + 0.5f - g) - f, (double)((float)blockPos.getX() + 0.5f + g) - d, (double)((float)blockPos.getY() + 0.5f + g) - e, (double)((float)blockPos.getZ() + 0.5f + g) - f, this.reds.get(i).floatValue(), this.greens.get(i).floatValue(), this.blues.get(i).floatValue(), this.alphas.get(i).floatValue());
         }
         tesselator.end();
-        GlStateManager.enableTexture();
-        GlStateManager.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 }
 

@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -44,14 +45,14 @@ extends DirectionalBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (blockState.getValue(POWERED).booleanValue()) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 2);
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, false), 2);
         } else {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 2);
-            level.getBlockTicks().scheduleTick(blockPos, this, 2);
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 2);
+            serverLevel.getBlockTicks().scheduleTick(blockPos, this, 2);
         }
-        this.updateNeighborsInFront(level, blockPos, blockState);
+        this.updateNeighborsInFront(serverLevel, blockPos, blockState);
     }
 
     @Override

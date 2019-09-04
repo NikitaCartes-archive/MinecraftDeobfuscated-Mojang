@@ -73,7 +73,7 @@ extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
                 slot.onQuickCraft(itemStack2, itemStack);
-            } else if (this.ingredientSlot.mayPlace(itemStack2) ? !this.moveItemStackTo(itemStack2, 3, 4, false) : (PotionSlot.mayPlaceItem(itemStack) && itemStack.getCount() == 1 ? !this.moveItemStackTo(itemStack2, 0, 3, false) : (FuelSlot.mayPlaceItem(itemStack) ? !this.moveItemStackTo(itemStack2, 4, 5, false) : (i >= 5 && i < 32 ? !this.moveItemStackTo(itemStack2, 32, 41, false) : (i >= 32 && i < 41 ? !this.moveItemStackTo(itemStack2, 5, 32, false) : !this.moveItemStackTo(itemStack2, 5, 41, false)))))) {
+            } else if (FuelSlot.mayPlaceItem(itemStack) ? this.moveItemStackTo(itemStack2, 4, 5, false) || this.ingredientSlot.mayPlace(itemStack2) && !this.moveItemStackTo(itemStack2, 3, 4, false) : (this.ingredientSlot.mayPlace(itemStack2) ? !this.moveItemStackTo(itemStack2, 3, 4, false) : (PotionSlot.mayPlaceItem(itemStack) && itemStack.getCount() == 1 ? !this.moveItemStackTo(itemStack2, 0, 3, false) : (i >= 5 && i < 32 ? !this.moveItemStackTo(itemStack2, 32, 41, false) : (i >= 32 && i < 41 ? !this.moveItemStackTo(itemStack2, 5, 32, false) : !this.moveItemStackTo(itemStack2, 5, 41, false)))))) {
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {

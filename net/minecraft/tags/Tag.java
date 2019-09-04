@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -99,7 +100,7 @@ public class Tag<T> {
         @Override
         public void build(Collection<T> collection) {
             if (this.tag == null) {
-                throw new IllegalStateException("Cannot build unresolved tag entry");
+                throw Util.pauseInIde(new IllegalStateException("Cannot build unresolved tag entry"));
             }
             collection.addAll(this.tag.getValues());
         }

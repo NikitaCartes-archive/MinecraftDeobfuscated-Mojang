@@ -30,6 +30,7 @@ public class Foods {
     public static final FoodProperties ENCHANTED_GOLDEN_APPLE = new FoodProperties.Builder().nutrition(4).saturationMod(1.2f).effect(new MobEffectInstance(MobEffects.REGENERATION, 400, 1), 1.0f).effect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 6000, 0), 1.0f).effect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 6000, 0), 1.0f).effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 3), 1.0f).alwaysEat().build();
     public static final FoodProperties GOLDEN_APPLE = new FoodProperties.Builder().nutrition(4).saturationMod(1.2f).effect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1), 1.0f).effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0), 1.0f).alwaysEat().build();
     public static final FoodProperties GOLDEN_CARROT = new FoodProperties.Builder().nutrition(6).saturationMod(1.2f).build();
+    public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationMod(0.1f).build();
     public static final FoodProperties MELON_SLICE = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).build();
     public static final FoodProperties MUSHROOM_STEW = Foods.stew(6);
     public static final FoodProperties MUTTON = new FoodProperties.Builder().nutrition(2).saturationMod(0.3f).meat().build();

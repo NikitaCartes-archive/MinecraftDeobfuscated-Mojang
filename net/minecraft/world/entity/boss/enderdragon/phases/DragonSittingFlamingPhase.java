@@ -55,17 +55,22 @@ extends AbstractDragonSittingPhase {
                 this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_SCANNING);
             }
         } else if (this.flameTicks == 10) {
+            double g;
             Vec3 vec3 = new Vec3(this.dragon.head.x - this.dragon.x, 0.0, this.dragon.head.z - this.dragon.z).normalize();
             float f = 5.0f;
             double d = this.dragon.head.x + vec3.x * 5.0 / 2.0;
             double e = this.dragon.head.z + vec3.z * 5.0 / 2.0;
-            double g = this.dragon.head.y + (double)(this.dragon.head.getBbHeight() / 2.0f);
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, g, e);
+            double h = g = this.dragon.head.y + (double)(this.dragon.head.getBbHeight() / 2.0f);
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, h, e);
             while (this.dragon.level.isEmptyBlock(mutableBlockPos)) {
-                mutableBlockPos.set(d, g -= 1.0, e);
+                if ((h -= 1.0) < 0.0) {
+                    h = g;
+                    break;
+                }
+                mutableBlockPos.set(d, h, e);
             }
-            g = Mth.floor(g) + 1;
-            this.flame = new AreaEffectCloud(this.dragon.level, d, g, e);
+            h = Mth.floor(h) + 1;
+            this.flame = new AreaEffectCloud(this.dragon.level, d, h, e);
             this.flame.setOwner(this.dragon);
             this.flame.setRadius(5.0f);
             this.flame.setDuration(200);

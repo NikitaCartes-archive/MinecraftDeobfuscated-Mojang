@@ -13,6 +13,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
@@ -145,12 +146,12 @@ implements TickableBlockEntity {
     }
 
     public void teleportEntity(Entity entity) {
-        if (this.level.isClientSide || this.isCoolingDown()) {
+        if (!(this.level instanceof ServerLevel) || this.isCoolingDown()) {
             return;
         }
         this.teleportCooldown = 100;
         if (this.exitPortal == null && this.level.dimension instanceof TheEndDimension) {
-            this.findExitPortal();
+            this.findExitPortal((ServerLevel)this.level);
         }
         if (this.exitPortal != null) {
             BlockPos blockPos = this.exactTeleport ? this.exitPortal : this.findExitPosition();
@@ -165,33 +166,33 @@ implements TickableBlockEntity {
         return blockPos.above();
     }
 
-    private void findExitPortal() {
+    private void findExitPortal(ServerLevel serverLevel) {
         Vec3 vec3 = new Vec3(this.getBlockPos().getX(), 0.0, this.getBlockPos().getZ()).normalize();
         Vec3 vec32 = vec3.scale(1024.0);
         int i = 16;
-        while (TheEndGatewayBlockEntity.getChunk(this.level, vec32).getHighestSectionPosition() > 0 && i-- > 0) {
+        while (TheEndGatewayBlockEntity.getChunk(serverLevel, vec32).getHighestSectionPosition() > 0 && i-- > 0) {
             LOGGER.debug("Skipping backwards past nonempty chunk at {}", (Object)vec32);
             vec32 = vec32.add(vec3.scale(-16.0));
         }
         i = 16;
-        while (TheEndGatewayBlockEntity.getChunk(this.level, vec32).getHighestSectionPosition() == 0 && i-- > 0) {
+        while (TheEndGatewayBlockEntity.getChunk(serverLevel, vec32).getHighestSectionPosition() == 0 && i-- > 0) {
             LOGGER.debug("Skipping forward past empty chunk at {}", (Object)vec32);
             vec32 = vec32.add(vec3.scale(16.0));
         }
         LOGGER.debug("Found chunk at {}", (Object)vec32);
-        LevelChunk levelChunk = TheEndGatewayBlockEntity.getChunk(this.level, vec32);
+        LevelChunk levelChunk = TheEndGatewayBlockEntity.getChunk(serverLevel, vec32);
         this.exitPortal = TheEndGatewayBlockEntity.findValidSpawnInChunk(levelChunk);
         if (this.exitPortal == null) {
             this.exitPortal = new BlockPos(vec32.x + 0.5, 75.0, vec32.z + 0.5);
             LOGGER.debug("Failed to find suitable block, settling on {}", (Object)this.exitPortal);
-            Feature.END_ISLAND.place(this.level, this.level.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal, FeatureConfiguration.NONE);
+            Feature.END_ISLAND.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal, FeatureConfiguration.NONE);
         } else {
             LOGGER.debug("Found block at {}", (Object)this.exitPortal);
         }
-        this.exitPortal = TheEndGatewayBlockEntity.findTallestBlock(this.level, this.exitPortal, 16, true);
+        this.exitPortal = TheEndGatewayBlockEntity.findTallestBlock(serverLevel, this.exitPortal, 16, true);
         LOGGER.debug("Creating portal at {}", (Object)this.exitPortal);
         this.exitPortal = this.exitPortal.above(10);
-        this.createExitPortal(this.exitPortal);
+        this.createExitPortal(serverLevel, this.exitPortal);
         this.setChanged();
     }
 
@@ -237,8 +238,8 @@ implements TickableBlockEntity {
         return blockPos3;
     }
 
-    private void createExitPortal(BlockPos blockPos) {
-        Feature.END_GATEWAY.place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos, EndGatewayConfiguration.knownExit(this.getBlockPos(), false));
+    private void createExitPortal(ServerLevel serverLevel, BlockPos blockPos) {
+        Feature.END_GATEWAY.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos, EndGatewayConfiguration.knownExit(this.getBlockPos(), false));
     }
 
     @Override

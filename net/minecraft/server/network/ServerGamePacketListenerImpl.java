@@ -273,7 +273,7 @@ implements ServerGamePacketListener {
     @Override
     public void handlePlayerInput(ServerboundPlayerInputPacket serverboundPlayerInputPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundPlayerInputPacket, this, this.player.getLevel());
-        this.player.setPlayerInput(serverboundPlayerInputPacket.getXxa(), serverboundPlayerInputPacket.getZza(), serverboundPlayerInputPacket.isJumping(), serverboundPlayerInputPacket.isSneaking());
+        this.player.setPlayerInput(serverboundPlayerInputPacket.getXxa(), serverboundPlayerInputPacket.getZza(), serverboundPlayerInputPacket.isJumping(), serverboundPlayerInputPacket.isShiftKeyDown());
     }
 
     private static boolean containsInvalidValues(ServerboundMovePlayerPacket serverboundMovePlayerPacket) {
@@ -972,12 +972,12 @@ implements ServerGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(serverboundPlayerCommandPacket, this, this.player.getLevel());
         this.player.resetLastActionTime();
         switch (serverboundPlayerCommandPacket.getAction()) {
-            case START_SNEAKING: {
-                this.player.setSneaking(true);
+            case PRESS_SHIFT_KEY: {
+                this.player.setShiftKeyDown(true);
                 break;
             }
-            case STOP_SNEAKING: {
-                this.player.setSneaking(false);
+            case RELEASE_SHIFT_KEY: {
+                this.player.setShiftKeyDown(false);
                 break;
             }
             case START_SPRINTING: {
@@ -990,7 +990,7 @@ implements ServerGamePacketListener {
             }
             case STOP_SLEEPING: {
                 if (!this.player.isSleeping()) break;
-                this.player.stopSleepInBed(false, true, true);
+                this.player.stopSleepInBed(false, true);
                 this.awaitingPositionFromClient = new Vec3(this.player.x, this.player.y, this.player.z);
                 break;
             }

@@ -17,6 +17,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -26,10 +27,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class EmptyLevelChunk
 extends LevelChunk {
-    private static final Biome[] BIOMES = Util.make(new Biome[256], biomes -> Arrays.fill(biomes, Biomes.PLAINS));
+    private static final Biome[] BIOMES = Util.make(new Biome[ChunkBiomeContainer.BIOMES_SIZE], biomes -> Arrays.fill(biomes, Biomes.PLAINS));
 
     public EmptyLevelChunk(Level level, ChunkPos chunkPos) {
-        super(level, chunkPos, BIOMES);
+        super(level, chunkPos, new ChunkBiomeContainer(BIOMES));
     }
 
     @Override

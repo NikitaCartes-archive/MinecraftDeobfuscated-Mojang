@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -301,11 +301,11 @@ extends RealmsScreen {
         private void drawRestore(int i, int j, int k, int l) {
             boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height() - 15 && l > 32;
             RealmsScreen.bind("realms:textures/gui/realms/restore_icon.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
             RealmsScreen.blit(i * 2, j * 2, 0.0f, bl ? 28.0f : 0.0f, 23, 28, 23, 56);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             if (bl) {
                 RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
             }
@@ -314,11 +314,11 @@ extends RealmsScreen {
         private void drawInfo(int i, int j, int k, int l) {
             boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height() - 15 && l > 32;
             RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
             RealmsScreen.blit(i * 2, j * 2, 0.0f, bl ? 15.0f : 0.0f, 15, 15, 15, 30);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             if (bl) {
                 RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
             }

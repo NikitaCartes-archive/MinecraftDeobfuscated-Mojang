@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ReportedException;
+import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
@@ -90,10 +91,22 @@ public class Util {
     private static ExecutorService makeBackgroundExecutor() {
         int i = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, 7);
         ExecutorService executorService = i <= 0 ? MoreExecutors.newDirectExecutorService() : new ForkJoinPool(i, forkJoinPool -> {
-            ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool){};
+            ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool){
+
+                @Override
+                protected void onTermination(Throwable throwable) {
+                    if (throwable != null) {
+                        LOGGER.warn("{} died", (Object)this.getName(), (Object)throwable);
+                    } else {
+                        LOGGER.debug("{} shutdown", (Object)this.getName());
+                    }
+                    super.onTermination(throwable);
+                }
+            };
             forkJoinWorkerThread.setName("Server-Worker-" + WORKER_COUNT.getAndIncrement());
             return forkJoinWorkerThread;
         }, (thread, throwable) -> {
+            Util.pauseInIde(throwable);
             if (throwable instanceof CompletionException) {
                 throwable = throwable.getCause();
             }
@@ -248,6 +261,31 @@ public class Util {
 
     public static <T> Dynamic<T> writeUUID(String string, UUID uUID, Dynamic<T> dynamic) {
         return dynamic.set(string + "Most", dynamic.createLong(uUID.getMostSignificantBits())).set(string + "Least", dynamic.createLong(uUID.getLeastSignificantBits()));
+    }
+
+    public static <T extends Throwable> T pauseInIde(T throwable) {
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            LOGGER.error("Trying to throw a fatal exception, pausing in IDE", throwable);
+            try {
+                while (true) {
+                    Thread.sleep(1000L);
+                    LOGGER.error("paused");
+                }
+            } catch (InterruptedException interruptedException) {
+                return throwable;
+            }
+        }
+        return throwable;
+    }
+
+    public static String describeError(Throwable throwable) {
+        if (throwable.getCause() != null) {
+            return Util.describeError(throwable.getCause());
+        }
+        if (throwable.getMessage() != null) {
+            return throwable.getMessage();
+        }
+        return throwable.toString();
     }
 
     static enum IdentityStrategy implements Hash.Strategy<Object>

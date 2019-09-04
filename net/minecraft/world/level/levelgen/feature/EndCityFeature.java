@@ -9,6 +9,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -45,10 +46,9 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
         if (i == chunkPos.x && j == chunkPos.z) {
-            Biome biome = chunkGenerator.getBiomeSource().getBiome(new BlockPos((i << 4) + 9, 0, (j << 4) + 9));
             if (!chunkGenerator.isBiomeValidStartForStructure(biome, Feature.END_CITY)) {
                 return false;
             }
@@ -97,8 +97,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class EndCityStart
     extends StructureStart {
-        public EndCityStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-            super(structureFeature, i, j, biome, boundingBox, k, l);
+        public EndCityStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+            super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override

@@ -4,8 +4,8 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -127,11 +127,11 @@ GuiEventListener {
         }
         this.time += f;
         Lighting.turnOnGui();
-        GlStateManager.enableBlend();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, 0.0f, 170.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.0f, 170.0f);
         int k = this.recipeButtons.size() <= 16 ? 4 : 5;
         int l = Math.min(this.recipeButtons.size(), k);
         int m = Mth.ceil((float)this.recipeButtons.size() / (float)k);
@@ -140,12 +140,12 @@ GuiEventListener {
         int p = 82;
         int q = 208;
         this.nineInchSprite(l, m, 24, 4, 82, 208);
-        GlStateManager.disableBlend();
+        RenderSystem.disableBlend();
         Lighting.turnOff();
         for (OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
             overlayRecipeButton.render(i, j, f);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     private void nineInchSprite(int i, int j, int k, int l, int m, int n) {
@@ -216,7 +216,7 @@ GuiEventListener {
         public void renderButton(int i, int j, float f) {
             int l;
             Lighting.turnOnGui();
-            GlStateManager.enableAlphaTest();
+            RenderSystem.enableAlphaTest();
             OverlayRecipeComponent.this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
             int k = 152;
             if (!this.isCraftable) {
@@ -228,17 +228,17 @@ GuiEventListener {
             }
             this.blit(this.x, this.y, k, l, this.width, this.height);
             for (Pos pos : this.ingredientPos) {
-                GlStateManager.pushMatrix();
+                RenderSystem.pushMatrix();
                 float g = 0.42f;
                 int m = (int)((float)(this.x + pos.x) / 0.42f - 3.0f);
                 int n2 = (int)((float)(this.y + pos.y) / 0.42f - 3.0f);
-                GlStateManager.scalef(0.42f, 0.42f, 1.0f);
-                GlStateManager.enableLighting();
+                RenderSystem.scalef(0.42f, 0.42f, 1.0f);
+                RenderSystem.enableLighting();
                 OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], m, n2);
-                GlStateManager.disableLighting();
-                GlStateManager.popMatrix();
+                RenderSystem.disableLighting();
+                RenderSystem.popMatrix();
             }
-            GlStateManager.disableAlphaTest();
+            RenderSystem.disableAlphaTest();
             Lighting.turnOff();
         }
 

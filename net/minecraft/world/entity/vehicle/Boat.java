@@ -96,7 +96,7 @@ extends Entity {
     }
 
     @Override
-    protected boolean makeStepSound() {
+    protected boolean isMovementNoisy() {
         return false;
     }
 
@@ -631,7 +631,7 @@ extends Entity {
 
     @Override
     public boolean interact(Player player, InteractionHand interactionHand) {
-        if (player.isSneaking()) {
+        if (player.isSecondaryUseActive()) {
             return false;
         }
         if (!this.level.isClientSide && this.outOfControlTicks < 60.0f) {

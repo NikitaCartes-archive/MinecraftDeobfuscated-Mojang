@@ -3,12 +3,12 @@
  */
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.dto.ValueObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -24,8 +24,8 @@ extends ValueObject {
     public Date lastModifiedDate;
     public long size;
     private boolean uploadedVersion;
-    public Map<String, String> metadata = new HashMap<String, String>();
-    public Map<String, String> changeList = new HashMap<String, String>();
+    public Map<String, String> metadata = Maps.newHashMap();
+    public Map<String, String> changeList = Maps.newHashMap();
 
     public static Backup parse(JsonElement jsonElement) {
         JsonObject jsonObject = jsonElement.getAsJsonObject();

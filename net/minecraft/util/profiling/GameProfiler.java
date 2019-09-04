@@ -104,7 +104,7 @@ implements ProfilerFiller {
         @Override
         public void enable() {
             if (this.collector == InactiveProfiler.INACTIVE) {
-                this.collector = new ActiveProfiler(Util.getNanos(), GameProfiler.this.getTickTime);
+                this.collector = new ActiveProfiler(Util.getNanos(), GameProfiler.this.getTickTime, true);
             }
         }
     }

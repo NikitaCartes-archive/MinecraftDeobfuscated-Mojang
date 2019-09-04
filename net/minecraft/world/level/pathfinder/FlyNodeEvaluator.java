@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -22,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
 public class FlyNodeEvaluator
 extends WalkNodeEvaluator {
     @Override
-    public void prepare(LevelReader levelReader, Mob mob) {
-        super.prepare(levelReader, mob);
+    public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
+        super.prepare(pathNavigationRegion, mob);
         this.oldWaterCost = mob.getPathfindingMalus(BlockPathTypes.WATER);
     }
 
@@ -71,74 +71,78 @@ extends WalkNodeEvaluator {
 
     @Override
     public int getNeighbors(Node[] nodes, Node node) {
+        Node node19;
+        Node node18;
+        Node node17;
+        Node node16;
+        Node node15;
+        Node node14;
+        Node node13;
+        Node node12;
+        Node node11;
+        Node node10;
+        Node node9;
         Node node8;
-        boolean bl6;
+        Node node7;
+        Node node6;
+        Node node5;
+        Node node4;
+        Node node3;
         int i = 0;
         Node node2 = this.getNode(node.x, node.y, node.z + 1);
-        Node node3 = this.getNode(node.x - 1, node.y, node.z);
-        Node node4 = this.getNode(node.x + 1, node.y, node.z);
-        Node node5 = this.getNode(node.x, node.y, node.z - 1);
-        Node node6 = this.getNode(node.x, node.y + 1, node.z);
-        Node node7 = this.getNode(node.x, node.y - 1, node.z);
         if (node2 != null && !node2.closed) {
             nodes[i++] = node2;
         }
-        if (node3 != null && !node3.closed) {
+        if ((node3 = this.getNode(node.x - 1, node.y, node.z)) != null && !node3.closed) {
             nodes[i++] = node3;
         }
-        if (node4 != null && !node4.closed) {
+        if ((node4 = this.getNode(node.x + 1, node.y, node.z)) != null && !node4.closed) {
             nodes[i++] = node4;
         }
-        if (node5 != null && !node5.closed) {
+        if ((node5 = this.getNode(node.x, node.y, node.z - 1)) != null && !node5.closed) {
             nodes[i++] = node5;
         }
-        if (node6 != null && !node6.closed) {
+        if ((node6 = this.getNode(node.x, node.y + 1, node.z)) != null && !node6.closed) {
             nodes[i++] = node6;
         }
-        if (node7 != null && !node7.closed) {
+        if ((node7 = this.getNode(node.x, node.y - 1, node.z)) != null && !node7.closed) {
             nodes[i++] = node7;
         }
-        boolean bl = node5 == null || node5.costMalus != 0.0f;
-        boolean bl2 = node2 == null || node2.costMalus != 0.0f;
-        boolean bl3 = node4 == null || node4.costMalus != 0.0f;
-        boolean bl4 = node3 == null || node3.costMalus != 0.0f;
-        boolean bl5 = node6 == null || node6.costMalus != 0.0f;
-        boolean bl7 = bl6 = node7 == null || node7.costMalus != 0.0f;
-        if (bl && bl4 && (node8 = this.getNode(node.x - 1, node.y, node.z - 1)) != null && !node8.closed) {
+        if ((node8 = this.getNode(node.x + 1, node.y, node.z - 1)) != null && !node8.closed && node5 != null && node5.costMalus >= 0.0f && node4 != null && node4.costMalus >= 0.0f) {
             nodes[i++] = node8;
         }
-        if (bl && bl3 && (node8 = this.getNode(node.x + 1, node.y, node.z - 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node9 = this.getNode(node.x + 1, node.y, node.z + 1)) != null && !node9.closed && node2 != null && node2.costMalus >= 0.0f && node4 != null && node4.costMalus >= 0.0f) {
+            nodes[i++] = node9;
         }
-        if (bl2 && bl4 && (node8 = this.getNode(node.x - 1, node.y, node.z + 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node10 = this.getNode(node.x - 1, node.y, node.z - 1)) != null && !node10.closed && node5 != null && node5.costMalus >= 0.0f && node3 != null && node3.costMalus >= 0.0f) {
+            nodes[i++] = node10;
         }
-        if (bl2 && bl3 && (node8 = this.getNode(node.x + 1, node.y, node.z + 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node11 = this.getNode(node.x - 1, node.y, node.z + 1)) != null && !node11.closed && node2 != null && node2.costMalus >= 0.0f && node3 != null && node3.costMalus >= 0.0f) {
+            nodes[i++] = node11;
         }
-        if (bl && bl5 && (node8 = this.getNode(node.x, node.y + 1, node.z - 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node12 = this.getNode(node.x + 1, node.y + 1, node.z - 1)) != null && !node12.closed && node8 != null && node8.costMalus >= 0.0f && node6 != null && node6.costMalus >= 0.0f) {
+            nodes[i++] = node12;
         }
-        if (bl2 && bl5 && (node8 = this.getNode(node.x, node.y + 1, node.z + 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node13 = this.getNode(node.x + 1, node.y + 1, node.z + 1)) != null && !node13.closed && node9 != null && node9.costMalus >= 0.0f && node6 != null && node6.costMalus >= 0.0f) {
+            nodes[i++] = node13;
         }
-        if (bl3 && bl5 && (node8 = this.getNode(node.x + 1, node.y + 1, node.z)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node14 = this.getNode(node.x - 1, node.y + 1, node.z - 1)) != null && !node14.closed && node10 != null && node10.costMalus >= 0.0f && node6 != null && node6.costMalus >= 0.0f) {
+            nodes[i++] = node14;
         }
-        if (bl4 && bl5 && (node8 = this.getNode(node.x - 1, node.y + 1, node.z)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node15 = this.getNode(node.x - 1, node.y + 1, node.z + 1)) != null && !node15.closed && node11 != null && node11.costMalus >= 0.0f && node6 != null && node6.costMalus >= 0.0f) {
+            nodes[i++] = node15;
         }
-        if (bl && bl6 && (node8 = this.getNode(node.x, node.y - 1, node.z - 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node16 = this.getNode(node.x + 1, node.y - 1, node.z - 1)) != null && !node16.closed && node8 != null && node8.costMalus >= 0.0f && node7 != null && node7.costMalus >= 0.0f) {
+            nodes[i++] = node16;
         }
-        if (bl2 && bl6 && (node8 = this.getNode(node.x, node.y - 1, node.z + 1)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node17 = this.getNode(node.x + 1, node.y - 1, node.z + 1)) != null && !node17.closed && node9 != null && node9.costMalus >= 0.0f && node7 != null && node7.costMalus >= 0.0f) {
+            nodes[i++] = node17;
         }
-        if (bl3 && bl6 && (node8 = this.getNode(node.x + 1, node.y - 1, node.z)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node18 = this.getNode(node.x - 1, node.y - 1, node.z - 1)) != null && !node18.closed && node10 != null && node10.costMalus >= 0.0f && node7 != null && node7.costMalus >= 0.0f) {
+            nodes[i++] = node18;
         }
-        if (bl4 && bl6 && (node8 = this.getNode(node.x - 1, node.y - 1, node.z)) != null && !node8.closed) {
-            nodes[i++] = node8;
+        if ((node19 = this.getNode(node.x - 1, node.y - 1, node.z + 1)) != null && !node19.closed && node11 != null && node11.costMalus >= 0.0f && node7 != null && node7.costMalus >= 0.0f) {
+            nodes[i++] = node19;
         }
         return i;
     }

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
@@ -39,10 +39,10 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
 
     @Override
     protected void setupRotations(ArmorStand armorStand, float f, float g, float h) {
-        GlStateManager.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
         float i = (float)(armorStand.level.getGameTime() - armorStand.lastHit) + h;
         if (i < 5.0f) {
-            GlStateManager.rotatef(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f, 0.0f, 1.0f, 0.0f);
         }
     }
 

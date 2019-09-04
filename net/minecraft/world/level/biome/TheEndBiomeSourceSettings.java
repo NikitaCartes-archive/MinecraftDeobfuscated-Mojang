@@ -4,14 +4,14 @@
 package net.minecraft.world.level.biome;
 
 import net.minecraft.world.level.biome.BiomeSourceSettings;
+import net.minecraft.world.level.storage.LevelData;
 
 public class TheEndBiomeSourceSettings
 implements BiomeSourceSettings {
-    private long seed;
+    private final long seed;
 
-    public TheEndBiomeSourceSettings setSeed(long l) {
-        this.seed = l;
-        return this;
+    public TheEndBiomeSourceSettings(LevelData levelData) {
+        this.seed = levelData.getSeed();
     }
 
     public long getSeed() {

@@ -10,16 +10,17 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -27,13 +28,13 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 
 public interface ChunkAccess
-extends FeatureAccess {
+extends BlockGetter,
+FeatureAccess {
     @Nullable
     public BlockState setBlockState(BlockPos var1, BlockState var2, boolean var3);
 
@@ -61,19 +62,6 @@ extends FeatureAccess {
 
     public LevelChunkSection[] getSections();
 
-    @Nullable
-    public LevelLightEngine getLightEngine();
-
-    default public int getRawBrightness(BlockPos blockPos, int i, boolean bl) {
-        LevelLightEngine levelLightEngine = this.getLightEngine();
-        if (levelLightEngine == null || !this.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
-            return 0;
-        }
-        int j = bl ? levelLightEngine.getLayerListener(LightLayer.SKY).getLightValue(blockPos) - i : 0;
-        int k = levelLightEngine.getLayerListener(LightLayer.BLOCK).getLightValue(blockPos);
-        return Math.max(k, j);
-    }
-
     public Collection<Map.Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 
     public void setHeightmap(Heightmap.Types var1, long[] var2);
@@ -90,12 +78,6 @@ extends FeatureAccess {
 
     public void setAllStarts(Map<String, StructureStart> var1);
 
-    default public Biome getBiome(BlockPos blockPos) {
-        int i = blockPos.getX() & 0xF;
-        int j = blockPos.getZ() & 0xF;
-        return this.getBiomes()[j << 4 | i];
-    }
-
     default public boolean isYSpaceEmpty(int i, int j) {
         if (i < 0) {
             i = 0;
@@ -110,7 +92,8 @@ extends FeatureAccess {
         return true;
     }
 
-    public Biome[] getBiomes();
+    @Nullable
+    public ChunkBiomeContainer getBiomes();
 
     public void setUnsaved(boolean var1);
 
@@ -119,8 +102,6 @@ extends FeatureAccess {
     public ChunkStatus getStatus();
 
     public void removeBlockEntity(BlockPos var1);
-
-    public void setLightEngine(LevelLightEngine var1);
 
     default public void markPosForPostprocessing(BlockPos blockPos) {
         LogManager.getLogger().warn("Trying to mark a block for PostProcessing @ {}, but this operation is not supported.", (Object)blockPos);
@@ -142,10 +123,6 @@ extends FeatureAccess {
     @Nullable
     public CompoundTag getBlockEntityNbtForSaving(BlockPos var1);
 
-    default public void setBiomes(Biome[] biomes) {
-        throw new UnsupportedOperationException();
-    }
-
     public Stream<BlockPos> getLights();
 
     public TickList<Block> getBlockTicks();
@@ -153,7 +130,7 @@ extends FeatureAccess {
     public TickList<Fluid> getLiquidTicks();
 
     default public BitSet getCarvingMask(GenerationStep.Carving carving) {
-        throw new RuntimeException("Meaningless in this context");
+        throw Util.pauseInIde(new RuntimeException("Meaningless in this context"));
     }
 
     public UpgradeData getUpgradeData();

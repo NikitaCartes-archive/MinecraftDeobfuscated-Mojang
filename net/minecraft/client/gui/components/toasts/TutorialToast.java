@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.components.toasts;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
@@ -35,7 +35,7 @@ implements Toast {
     @Override
     public Toast.Visibility render(ToastComponent toastComponent, long l) {
         toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
-        GlStateManager.color3f(1.0f, 1.0f, 1.0f);
+        RenderSystem.color3f(1.0f, 1.0f, 1.0f);
         toastComponent.blit(0, 0, 0, 96, 160, 32);
         this.icon.render(toastComponent, 6, 6);
         if (this.message == null) {
@@ -80,9 +80,9 @@ implements Toast {
         }
 
         public void render(GuiComponent guiComponent, int i, int j) {
-            GlStateManager.enableBlend();
+            RenderSystem.enableBlend();
             guiComponent.blit(i, j, 176 + this.x * 20, this.y * 20, 20, 20);
-            GlStateManager.enableBlend();
+            RenderSystem.enableBlend();
         }
     }
 }

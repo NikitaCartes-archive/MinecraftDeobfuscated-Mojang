@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,7 +31,7 @@ extends ValueObject {
             JsonElement jsonElement;
             realmsServerPlayerList.serverId = JsonUtils.getLongOr("serverId", jsonObject, -1L);
             String string = JsonUtils.getStringOr("playerList", jsonObject, null);
-            realmsServerPlayerList.players = string != null ? ((jsonElement = jsonParser.parse(string)).isJsonArray() ? RealmsServerPlayerList.parsePlayers(jsonElement.getAsJsonArray()) : new ArrayList<String>()) : new ArrayList<String>();
+            realmsServerPlayerList.players = string != null ? ((jsonElement = jsonParser.parse(string)).isJsonArray() ? RealmsServerPlayerList.parsePlayers(jsonElement.getAsJsonArray()) : Lists.newArrayList()) : Lists.newArrayList();
         } catch (Exception exception) {
             LOGGER.error("Could not parse RealmsServerPlayerList: " + exception.getMessage());
         }
@@ -38,13 +39,13 @@ extends ValueObject {
     }
 
     private static List<String> parsePlayers(JsonArray jsonArray) {
-        ArrayList<String> arrayList = new ArrayList<String>();
+        ArrayList<String> list = Lists.newArrayList();
         for (JsonElement jsonElement : jsonArray) {
             try {
-                arrayList.add(jsonElement.getAsString());
+                list.add(jsonElement.getAsString());
             } catch (Exception exception) {}
         }
-        return arrayList;
+        return list;
     }
 }
 

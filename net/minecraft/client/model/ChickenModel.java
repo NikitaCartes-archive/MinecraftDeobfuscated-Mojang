@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -56,21 +56,21 @@ extends EntityModel<T> {
         this.setupAnim(entity, f, g, h, i, j, k);
         if (this.young) {
             float l = 2.0f;
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, 5.0f * k, 2.0f * k);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, 5.0f * k, 2.0f * k);
             this.head.render(k);
             this.beak.render(k);
             this.redThing.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.body.render(k);
             this.leg0.render(k);
             this.leg1.render(k);
             this.wing0.render(k);
             this.wing1.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.head.render(k);
             this.beak.render(k);

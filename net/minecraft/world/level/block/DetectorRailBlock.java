@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -64,11 +65,11 @@ extends BaseRailBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (level.isClientSide || !blockState.getValue(POWERED).booleanValue()) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!blockState.getValue(POWERED).booleanValue()) {
             return;
         }
-        this.checkPressed(level, blockPos, blockState);
+        this.checkPressed(serverLevel, blockPos, blockState);
     }
 
     @Override

@@ -26,6 +26,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -185,13 +186,13 @@ public class OceanRuinPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
             this.placeSettings.clearProcessors().addProcessor(new BlockRotProcessor(this.integrity)).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
             int i = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
             this.templatePosition = new BlockPos(this.templatePosition.getX(), i, this.templatePosition.getZ());
             BlockPos blockPos = StructureTemplate.transform(new BlockPos(this.template.getSize().getX() - 1, 0, this.template.getSize().getZ() - 1), Mirror.NONE, this.rotation, BlockPos.ZERO).offset(this.templatePosition);
             this.templatePosition = new BlockPos(this.templatePosition.getX(), this.getHeight(this.templatePosition, levelAccessor, blockPos), this.templatePosition.getZ());
-            return super.postProcess(levelAccessor, random, boundingBox, chunkPos);
+            return super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
         }
 
         private int getHeight(BlockPos blockPos, BlockGetter blockGetter, BlockPos blockPos2) {

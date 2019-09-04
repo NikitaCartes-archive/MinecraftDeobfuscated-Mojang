@@ -28,11 +28,11 @@ extends BadlandsSurfaceBuilder {
     @Override
     public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
         double e = 0.0;
-        double f = Math.min(Math.abs(d), this.pillarNoise.getValue((double)i * 0.25, (double)j * 0.25));
+        double f = Math.min(Math.abs(d), this.pillarNoise.getValue((double)i * 0.25, (double)j * 0.25, false) * 15.0);
         if (f > 0.0) {
             double g = 0.001953125;
             e = f * f * 2.5;
-            double h = Math.abs(this.pillarRoofNoise.getValue((double)i * 0.001953125, (double)j * 0.001953125));
+            double h = Math.abs(this.pillarRoofNoise.getValue((double)i * 0.001953125, (double)j * 0.001953125, false));
             double n = Math.ceil(h * 50.0) + 14.0;
             if (e > n) {
                 e = n;

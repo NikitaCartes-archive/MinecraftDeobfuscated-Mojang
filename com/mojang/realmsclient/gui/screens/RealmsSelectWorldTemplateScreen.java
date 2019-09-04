@@ -3,7 +3,8 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Either;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -15,7 +16,6 @@ import com.mojang.realmsclient.gui.screens.RealmsScreenWithCallback;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import com.mojang.realmsclient.util.TextRenderingUtils;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +65,7 @@ extends RealmsScreen {
             this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList();
             this.fetchTemplatesAsync(new WorldTemplatePaginatedList(10));
         } else {
-            this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList(new ArrayList<WorldTemplate>(worldTemplatePaginatedList.templates));
+            this.worldTemplateObjectSelectionList = new WorldTemplateObjectSelectionList(Lists.newArrayList(worldTemplatePaginatedList.templates));
             this.fetchTemplatesAsync(worldTemplatePaginatedList);
         }
         this.title = RealmsSelectWorldTemplateScreen.getLocalizedString("mco.template.title");
@@ -347,10 +347,10 @@ extends RealmsScreen {
 
         private void drawImage(int i, int j, int k, int l, WorldTemplate worldTemplate) {
             RealmsTextureManager.bindWorldTemplate(worldTemplate.id, worldTemplate.image);
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             RealmsScreen.blit(i + 1, j + 1, 0.0f, 0.0f, 38, 38, 38, 38);
             RealmsScreen.bind("realms:textures/gui/realms/slot_frame.png");
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             RealmsScreen.blit(i, j, 0.0f, 0.0f, 40, 40, 40, 40);
         }
 
@@ -374,19 +374,19 @@ extends RealmsScreen {
             }
             if (!"".equals(string)) {
                 RealmsScreen.bind("realms:textures/gui/realms/link_icons.png");
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GlStateManager.pushMatrix();
-                GlStateManager.scalef(1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.pushMatrix();
+                RenderSystem.scalef(1.0f, 1.0f, 1.0f);
                 RealmsScreen.blit(i + m, j, bl ? 15.0f : 0.0f, 0.0f, 15, 15, 30, 15);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
             }
             if (!"".equals(string2)) {
                 RealmsScreen.bind("realms:textures/gui/realms/trailer_icons.png");
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                GlStateManager.pushMatrix();
-                GlStateManager.scalef(1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.pushMatrix();
+                RenderSystem.scalef(1.0f, 1.0f, 1.0f);
                 RealmsScreen.blit(i + m + ("".equals(string) ? 0 : 17), j, bl2 ? 15.0f : 0.0f, 0.0f, 15, 15, 30, 15);
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
             }
             if (bl && !"".equals(string)) {
                 RealmsSelectWorldTemplateScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.template.info.tooltip");

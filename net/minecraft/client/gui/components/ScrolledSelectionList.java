@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -165,12 +166,12 @@ implements Widget {
         int k = this.getScrollbarPosition();
         int l = k + 6;
         this.capYPosition();
-        GlStateManager.disableLighting();
-        GlStateManager.disableFog();
+        RenderSystem.disableLighting();
+        RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float g = 32.0f;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferBuilder.vertex(this.x0, this.y1, 0.0).uv((float)this.x0 / 32.0f, (float)(this.y1 + (int)this.yo) / 32.0f).color(32, 32, 32, 255).endVertex();
@@ -184,14 +185,14 @@ implements Widget {
             this.renderHeader(m, n, tesselator);
         }
         this.renderList(m, n, i, j, f);
-        GlStateManager.disableDepthTest();
+        RenderSystem.disableDepthTest();
         this.renderHoleBackground(0, this.y0, 255, 255);
         this.renderHoleBackground(this.y1, this.height, 255, 255);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-        GlStateManager.disableAlphaTest();
-        GlStateManager.shadeModel(7425);
-        GlStateManager.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        RenderSystem.disableAlphaTest();
+        RenderSystem.shadeModel(7425);
+        RenderSystem.disableTexture();
         int o = 4;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).uv(0.0, 1.0).color(0, 0, 0, 0).endVertex();
@@ -232,10 +233,10 @@ implements Widget {
             tesselator.end();
         }
         this.renderDecorations(i, j);
-        GlStateManager.enableTexture();
-        GlStateManager.shadeModel(7424);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.disableBlend();
+        RenderSystem.enableTexture();
+        RenderSystem.shadeModel(7424);
+        RenderSystem.enableAlphaTest();
+        RenderSystem.disableBlend();
     }
 
     protected void updateScrollingState(double d, double e, int i) {
@@ -360,23 +361,23 @@ implements Widget {
             if (this.renderSelection && this.isSelectedItem(n)) {
                 int q = this.x0 + this.width / 2 - this.getRowWidth() / 2;
                 int r = this.x0 + this.width / 2 + this.getRowWidth() / 2;
-                GlStateManager.disableTexture();
+                RenderSystem.disableTexture();
                 float g = this.isFocused() ? 1.0f : 0.5f;
-                GlStateManager.color4f(g, g, g, 1.0f);
+                RenderSystem.color4f(g, g, g, 1.0f);
                 bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
                 bufferBuilder.vertex(q, o + p + 2, 0.0).endVertex();
                 bufferBuilder.vertex(r, o + p + 2, 0.0).endVertex();
                 bufferBuilder.vertex(r, o - 2, 0.0).endVertex();
                 bufferBuilder.vertex(q, o - 2, 0.0).endVertex();
                 tesselator.end();
-                GlStateManager.color4f(0.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.color4f(0.0f, 0.0f, 0.0f, 1.0f);
                 bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
                 bufferBuilder.vertex(q + 1, o + p + 1, 0.0).endVertex();
                 bufferBuilder.vertex(r - 1, o + p + 1, 0.0).endVertex();
                 bufferBuilder.vertex(r - 1, o - 1, 0.0).endVertex();
                 bufferBuilder.vertex(q + 1, o - 1, 0.0).endVertex();
                 tesselator.end();
-                GlStateManager.enableTexture();
+                RenderSystem.enableTexture();
             }
             this.renderItem(n, i, o, p, k, l, f);
         }
@@ -394,7 +395,7 @@ implements Widget {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float f = 32.0f;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         bufferBuilder.vertex(this.x0, j, 0.0).uv(0.0, (float)j / 32.0f).color(64, 64, 64, l).endVertex();

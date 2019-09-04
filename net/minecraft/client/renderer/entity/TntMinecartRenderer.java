@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -31,23 +32,23 @@ extends MinecartRenderer<MinecartTNT> {
             g *= g;
             g *= g;
             float h = 1.0f + g * 0.3f;
-            GlStateManager.scalef(h, h, h);
+            RenderSystem.scalef(h, h, h);
         }
         super.renderMinecartContents(minecartTNT, f, blockState);
         if (i > -1 && i / 5 % 2 == 0) {
             BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
-            GlStateManager.disableTexture();
-            GlStateManager.disableLighting();
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.DST_ALPHA);
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, (1.0f - ((float)i - f + 1.0f) / 100.0f) * 0.8f);
-            GlStateManager.pushMatrix();
+            RenderSystem.disableTexture();
+            RenderSystem.disableLighting();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.DST_ALPHA);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, (1.0f - ((float)i - f + 1.0f) / 100.0f) * 0.8f);
+            RenderSystem.pushMatrix();
             blockRenderDispatcher.renderSingleBlock(Blocks.TNT.defaultBlockState(), 1.0f);
-            GlStateManager.popMatrix();
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.disableBlend();
-            GlStateManager.enableLighting();
-            GlStateManager.enableTexture();
+            RenderSystem.popMatrix();
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.disableBlend();
+            RenderSystem.enableLighting();
+            RenderSystem.enableTexture();
         }
     }
 }

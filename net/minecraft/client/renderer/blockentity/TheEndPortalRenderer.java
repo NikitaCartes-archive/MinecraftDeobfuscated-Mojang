@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -32,23 +33,23 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
 
     @Override
     public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         RANDOM.setSeed(31100L);
-        GlStateManager.getMatrix(2982, MODELVIEW);
-        GlStateManager.getMatrix(2983, PROJECTION);
+        RenderSystem.getMatrix(2982, MODELVIEW);
+        RenderSystem.getMatrix(2983, PROJECTION);
         double h = d * d + e * e + f * f;
         int j = this.getPasses(h);
         float k = this.getOffset();
         boolean bl = false;
         GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         for (int l = 0; l < j; ++l) {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             float m = 2.0f / (float)(18 - l);
             if (l == 0) {
                 this.bindTexture(END_SKY_LOCATION);
                 m = 0.15f;
-                GlStateManager.enableBlend();
-                GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+                RenderSystem.enableBlend();
+                RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             }
             if (l >= 1) {
                 this.bindTexture(END_PORTAL_LOCATION);
@@ -56,30 +57,30 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
                 gameRenderer.resetFogColor(true);
             }
             if (l == 1) {
-                GlStateManager.enableBlend();
-                GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+                RenderSystem.enableBlend();
+                RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
             }
-            GlStateManager.texGenMode(GlStateManager.TexGen.S, 9216);
-            GlStateManager.texGenMode(GlStateManager.TexGen.T, 9216);
-            GlStateManager.texGenMode(GlStateManager.TexGen.R, 9216);
-            GlStateManager.texGenParam(GlStateManager.TexGen.S, 9474, this.getBuffer(1.0f, 0.0f, 0.0f, 0.0f));
-            GlStateManager.texGenParam(GlStateManager.TexGen.T, 9474, this.getBuffer(0.0f, 1.0f, 0.0f, 0.0f));
-            GlStateManager.texGenParam(GlStateManager.TexGen.R, 9474, this.getBuffer(0.0f, 0.0f, 1.0f, 0.0f));
-            GlStateManager.enableTexGen(GlStateManager.TexGen.S);
-            GlStateManager.enableTexGen(GlStateManager.TexGen.T);
-            GlStateManager.enableTexGen(GlStateManager.TexGen.R);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5890);
-            GlStateManager.pushMatrix();
-            GlStateManager.loadIdentity();
-            GlStateManager.translatef(0.5f, 0.5f, 0.0f);
-            GlStateManager.scalef(0.5f, 0.5f, 1.0f);
+            RenderSystem.texGenMode(GlStateManager.TexGen.S, 9216);
+            RenderSystem.texGenMode(GlStateManager.TexGen.T, 9216);
+            RenderSystem.texGenMode(GlStateManager.TexGen.R, 9216);
+            RenderSystem.texGenParam(GlStateManager.TexGen.S, 9474, this.getBuffer(1.0f, 0.0f, 0.0f, 0.0f));
+            RenderSystem.texGenParam(GlStateManager.TexGen.T, 9474, this.getBuffer(0.0f, 1.0f, 0.0f, 0.0f));
+            RenderSystem.texGenParam(GlStateManager.TexGen.R, 9474, this.getBuffer(0.0f, 0.0f, 1.0f, 0.0f));
+            RenderSystem.enableTexGen(GlStateManager.TexGen.S);
+            RenderSystem.enableTexGen(GlStateManager.TexGen.T);
+            RenderSystem.enableTexGen(GlStateManager.TexGen.R);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5890);
+            RenderSystem.pushMatrix();
+            RenderSystem.loadIdentity();
+            RenderSystem.translatef(0.5f, 0.5f, 0.0f);
+            RenderSystem.scalef(0.5f, 0.5f, 1.0f);
             float n = l + 1;
-            GlStateManager.translatef(17.0f / n, (2.0f + n / 1.5f) * ((float)(Util.getMillis() % 800000L) / 800000.0f), 0.0f);
-            GlStateManager.rotatef((n * n * 4321.0f + n * 9.0f) * 2.0f, 0.0f, 0.0f, 1.0f);
-            GlStateManager.scalef(4.5f - n / 4.0f, 4.5f - n / 4.0f, 1.0f);
-            GlStateManager.multMatrix(PROJECTION);
-            GlStateManager.multMatrix(MODELVIEW);
+            RenderSystem.translatef(17.0f / n, (2.0f + n / 1.5f) * ((float)(Util.getMillis() % 800000L) / 800000.0f), 0.0f);
+            RenderSystem.rotatef((n * n * 4321.0f + n * 9.0f) * 2.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.scalef(4.5f - n / 4.0f, 4.5f - n / 4.0f, 1.0f);
+            RenderSystem.multMatrix(PROJECTION);
+            RenderSystem.multMatrix(MODELVIEW);
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
@@ -123,15 +124,15 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
                 bufferBuilder.vertex(d, e + (double)k, f).color(o, p, q, 1.0f).endVertex();
             }
             tesselator.end();
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5888);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5888);
             this.bindTexture(END_SKY_LOCATION);
         }
-        GlStateManager.disableBlend();
-        GlStateManager.disableTexGen(GlStateManager.TexGen.S);
-        GlStateManager.disableTexGen(GlStateManager.TexGen.T);
-        GlStateManager.disableTexGen(GlStateManager.TexGen.R);
-        GlStateManager.enableLighting();
+        RenderSystem.disableBlend();
+        RenderSystem.disableTexGen(GlStateManager.TexGen.S);
+        RenderSystem.disableTexGen(GlStateManager.TexGen.T);
+        RenderSystem.disableTexGen(GlStateManager.TexGen.R);
+        RenderSystem.enableLighting();
         if (bl) {
             gameRenderer.resetFogColor(false);
         }

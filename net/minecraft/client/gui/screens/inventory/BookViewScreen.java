@@ -4,7 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -152,7 +152,7 @@ extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderBackground();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(BOOK_LOCATION);
         int k = (this.width - 192) / 2;
         int l = 2;

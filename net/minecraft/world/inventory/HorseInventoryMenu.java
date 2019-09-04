@@ -89,7 +89,27 @@ extends AbstractContainerMenu {
         if (slot != null && slot.hasItem()) {
             ItemStack itemStack2 = slot.getItem();
             itemStack = itemStack2.copy();
-            if (i < this.horseContainer.getContainerSize() ? !this.moveItemStackTo(itemStack2, this.horseContainer.getContainerSize(), this.slots.size(), true) : (this.getSlot(1).mayPlace(itemStack2) && !this.getSlot(1).hasItem() ? !this.moveItemStackTo(itemStack2, 1, 2, false) : (this.getSlot(0).mayPlace(itemStack2) ? !this.moveItemStackTo(itemStack2, 0, 1, false) : this.horseContainer.getContainerSize() <= 2 || !this.moveItemStackTo(itemStack2, 2, this.horseContainer.getContainerSize(), false)))) {
+            int j = this.horseContainer.getContainerSize();
+            if (i < j) {
+                if (!this.moveItemStackTo(itemStack2, j, this.slots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (this.getSlot(1).mayPlace(itemStack2) && !this.getSlot(1).hasItem()) {
+                if (!this.moveItemStackTo(itemStack2, 1, 2, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (this.getSlot(0).mayPlace(itemStack2)) {
+                if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (j <= 2 || !this.moveItemStackTo(itemStack2, 2, j, false)) {
+                int l;
+                int k = j;
+                int m = l = k + 27;
+                int n = m + 9;
+                if (i >= m && i < n ? !this.moveItemStackTo(itemStack2, k, l, false) : (i >= k && i < l ? !this.moveItemStackTo(itemStack2, m, n, false) : !this.moveItemStackTo(itemStack2, m, l, false))) {
+                    return ItemStack.EMPTY;
+                }
                 return ItemStack.EMPTY;
             }
             if (itemStack2.isEmpty()) {

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -34,14 +34,14 @@ extends EntityRenderer<T> {
     @Override
     public void render(T abstractMinecart, double d, double e, double f, float g, float h) {
         BlockState blockState;
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         this.bindTexture(abstractMinecart);
         long l = (long)((Entity)abstractMinecart).getId() * 493286711L;
         l = l * l * 4392167121L + l * 98761L;
         float i = (((float)(l >> 16 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         float j = (((float)(l >> 20 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         float k = (((float)(l >> 24 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
-        GlStateManager.translatef(i, j, k);
+        RenderSystem.translatef(i, j, k);
         double m = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).xOld, ((AbstractMinecart)abstractMinecart).x);
         double n = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).yOld, ((AbstractMinecart)abstractMinecart).y);
         double o = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).zOld, ((AbstractMinecart)abstractMinecart).z);
@@ -67,39 +67,39 @@ extends EntityRenderer<T> {
                 q = (float)(Math.atan(vec34.y) * 73.0);
             }
         }
-        GlStateManager.translatef((float)d, (float)e + 0.375f, (float)f);
-        GlStateManager.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(-q, 0.0f, 0.0f, 1.0f);
+        RenderSystem.translatef((float)d, (float)e + 0.375f, (float)f);
+        RenderSystem.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-q, 0.0f, 0.0f, 1.0f);
         float r = (float)((AbstractMinecart)abstractMinecart).getHurtTime() - h;
         float s = ((AbstractMinecart)abstractMinecart).getDamage() - h;
         if (s < 0.0f) {
             s = 0.0f;
         }
         if (r > 0.0f) {
-            GlStateManager.rotatef(Mth.sin(r) * r * s / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir(), 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(Mth.sin(r) * r * s / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir(), 1.0f, 0.0f, 0.0f);
         }
         int t = ((AbstractMinecart)abstractMinecart).getDisplayOffset();
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(abstractMinecart));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(abstractMinecart));
         }
         if ((blockState = ((AbstractMinecart)abstractMinecart).getDisplayBlockState()).getRenderShape() != RenderShape.INVISIBLE) {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
             float u = 0.75f;
-            GlStateManager.scalef(0.75f, 0.75f, 0.75f);
-            GlStateManager.translatef(-0.5f, (float)(t - 8) / 16.0f, 0.5f);
+            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
+            RenderSystem.translatef(-0.5f, (float)(t - 8) / 16.0f, 0.5f);
             this.renderMinecartContents(abstractMinecart, h, blockState);
-            GlStateManager.popMatrix();
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             this.bindTexture(abstractMinecart);
         }
-        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
+        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
         this.model.render(abstractMinecart, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
         super.render(abstractMinecart, d, e, f, g, h);
     }
@@ -110,9 +110,9 @@ extends EntityRenderer<T> {
     }
 
     protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, ((Entity)abstractMinecart).getBrightness());
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 }
 

@@ -197,17 +197,17 @@ extends TamableAnimal {
         if (this.getMoveControl().hasWanted()) {
             double d = this.getMoveControl().getSpeedModifier();
             if (d == 0.6) {
-                this.setSneaking(true);
+                this.setPose(Pose.CROUCHING);
                 this.setSprinting(false);
             } else if (d == 1.33) {
-                this.setSneaking(false);
+                this.setPose(Pose.STANDING);
                 this.setSprinting(true);
             } else {
-                this.setSneaking(false);
+                this.setPose(Pose.STANDING);
                 this.setSprinting(false);
             }
         } else {
-            this.setSneaking(false);
+            this.setPose(Pose.STANDING);
             this.setSprinting(false);
         }
     }
@@ -251,6 +251,7 @@ extends TamableAnimal {
         super.registerAttributes();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
         this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3f);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0);
     }
 
     @Override
@@ -265,9 +266,13 @@ extends TamableAnimal {
         super.usePlayerItem(player, itemStack);
     }
 
+    private float getAttackDamage() {
+        return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+    }
+
     @Override
     public boolean doHurtTarget(Entity entity) {
-        return entity.hurt(DamageSource.mobAttack(this), 3.0f);
+        return entity.hurt(DamageSource.mobAttack(this), this.getAttackDamage());
     }
 
     @Override

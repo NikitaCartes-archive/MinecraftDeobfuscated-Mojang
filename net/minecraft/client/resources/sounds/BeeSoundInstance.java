@@ -1,0 +1,80 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.resources.sounds;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.Bee;
+
+@Environment(value=EnvType.CLIENT)
+public abstract class BeeSoundInstance
+extends AbstractTickableSoundInstance {
+    protected final Bee bee;
+    private boolean hasSwitched;
+
+    public BeeSoundInstance(Bee bee, SoundEvent soundEvent, SoundSource soundSource) {
+        super(soundEvent, soundSource);
+        this.bee = bee;
+        this.x = (float)bee.x;
+        this.y = (float)bee.y;
+        this.z = (float)bee.z;
+        this.looping = true;
+        this.delay = 0;
+        this.volume = 0.0f;
+    }
+
+    @Override
+    public void tick() {
+        boolean bl = this.shouldSwitchSounds();
+        if (bl && !this.stopped) {
+            Minecraft.getInstance().getSoundManager().queueTickingSound(this.getAlternativeSoundInstance());
+            this.hasSwitched = true;
+        }
+        if (this.bee.removed || this.hasSwitched) {
+            this.stopped = true;
+            return;
+        }
+        this.x = (float)this.bee.x;
+        this.y = (float)this.bee.y;
+        this.z = (float)this.bee.z;
+        float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.bee.getDeltaMovement()));
+        if ((double)f >= 0.01) {
+            this.pitch = Mth.lerp(Mth.clamp(f, this.getMinPitch(), this.getMaxPitch()), this.getMinPitch(), this.getMaxPitch());
+            this.volume = Mth.lerp(Mth.clamp(f, 0.0f, 0.5f), 0.0f, 1.2f);
+        } else {
+            this.pitch = 0.0f;
+            this.volume = 0.0f;
+        }
+    }
+
+    private float getMinPitch() {
+        if (this.bee.isBaby()) {
+            return 1.1f;
+        }
+        return 0.7f;
+    }
+
+    private float getMaxPitch() {
+        if (this.bee.isBaby()) {
+            return 1.5f;
+        }
+        return 1.1f;
+    }
+
+    @Override
+    public boolean canStartSilent() {
+        return true;
+    }
+
+    protected abstract AbstractTickableSoundInstance getAlternativeSoundInstance();
+
+    protected abstract boolean shouldSwitchSounds();
+}
+

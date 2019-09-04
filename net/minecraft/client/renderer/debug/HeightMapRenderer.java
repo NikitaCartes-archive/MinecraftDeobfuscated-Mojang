@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -33,10 +34,10 @@ implements DebugRenderer.SimpleDebugRenderer {
         double d = camera.getPosition().x;
         double e = camera.getPosition().y;
         double f = camera.getPosition().z;
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -50,8 +51,8 @@ implements DebugRenderer.SimpleDebugRenderer {
             LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, (double)((float)blockPos2.getX() + 0.25f) - d, (double)i - e, (double)((float)blockPos2.getZ() + 0.25f) - f, (double)((float)blockPos2.getX() + 0.75f) - d, (double)i + 0.09375 - e, (double)((float)blockPos2.getZ() + 0.75f) - f, 0.0f, 1.0f, 0.0f, 0.5f);
         }
         tesselator.end();
-        GlStateManager.enableTexture();
-        GlStateManager.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 }
 

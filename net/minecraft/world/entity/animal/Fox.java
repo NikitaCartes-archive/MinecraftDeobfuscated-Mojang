@@ -109,7 +109,7 @@ extends Animal {
         return false;
     };
     private static final Predicate<Entity> STALKABLE_PREY = entity -> entity instanceof Chicken || entity instanceof Rabbit;
-    private static final Predicate<Entity> AVOID_PLAYERS = entity -> !entity.isSneaking() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test((Entity)entity);
+    private static final Predicate<Entity> AVOID_PLAYERS = entity -> !entity.isDiscrete() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test((Entity)entity);
     private Goal landTargetGoal;
     private Goal turtleEggTargetGoal;
     private Goal fishTargetGoal;
@@ -145,22 +145,22 @@ extends Animal {
         this.goalSelector.addGoal(0, new FoxFloatGoal());
         this.goalSelector.addGoal(1, new FaceplantGoal());
         this.goalSelector.addGoal(2, new FoxPanicGoal(2.2));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<Player>(this, Player.class, 16.0f, 1.6, 1.4, livingEntity -> AVOID_PLAYERS.test((Entity)livingEntity) && !this.trusts(livingEntity.getUUID()) && !this.isDefending()));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<Wolf>(this, Wolf.class, 8.0f, 1.6, 1.4, livingEntity -> !((Wolf)livingEntity).isTame() && !this.isDefending()));
-        this.goalSelector.addGoal(4, new StalkPreyGoal());
-        this.goalSelector.addGoal(5, new FoxPounceGoal());
-        this.goalSelector.addGoal(5, new FoxBreedGoal(1.0));
-        this.goalSelector.addGoal(5, new SeekShelterGoal(1.25));
-        this.goalSelector.addGoal(6, new FoxMeleeAttackGoal((double)1.2f, true));
-        this.goalSelector.addGoal(6, new SleepGoal());
-        this.goalSelector.addGoal(7, new FoxFollowParentGoal(this, 1.25));
-        this.goalSelector.addGoal(8, new FoxStrollThroughVillageGoal(32, 200));
-        this.goalSelector.addGoal(9, new FoxEatBerriesGoal((double)1.2f, 12, 2));
-        this.goalSelector.addGoal(9, new LeapAtTargetGoal(this, 0.4f));
-        this.goalSelector.addGoal(10, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.addGoal(10, new FoxSearchForItemsGoal());
-        this.goalSelector.addGoal(11, new FoxLookAtPlayerGoal(this, Player.class, 24.0f));
-        this.goalSelector.addGoal(12, new PerchAndSearchGoal());
+        this.goalSelector.addGoal(3, new FoxBreedGoal(1.0));
+        this.goalSelector.addGoal(4, new AvoidEntityGoal<Player>(this, Player.class, 16.0f, 1.6, 1.4, livingEntity -> AVOID_PLAYERS.test((Entity)livingEntity) && !this.trusts(livingEntity.getUUID()) && !this.isDefending()));
+        this.goalSelector.addGoal(4, new AvoidEntityGoal<Wolf>(this, Wolf.class, 8.0f, 1.6, 1.4, livingEntity -> !((Wolf)livingEntity).isTame() && !this.isDefending()));
+        this.goalSelector.addGoal(5, new StalkPreyGoal());
+        this.goalSelector.addGoal(6, new FoxPounceGoal());
+        this.goalSelector.addGoal(6, new SeekShelterGoal(1.25));
+        this.goalSelector.addGoal(7, new FoxMeleeAttackGoal((double)1.2f, true));
+        this.goalSelector.addGoal(7, new SleepGoal());
+        this.goalSelector.addGoal(8, new FoxFollowParentGoal(this, 1.25));
+        this.goalSelector.addGoal(9, new FoxStrollThroughVillageGoal(32, 200));
+        this.goalSelector.addGoal(10, new FoxEatBerriesGoal((double)1.2f, 12, 2));
+        this.goalSelector.addGoal(10, new LeapAtTargetGoal(this, 0.4f));
+        this.goalSelector.addGoal(11, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(11, new FoxSearchForItemsGoal());
+        this.goalSelector.addGoal(12, new FoxLookAtPlayerGoal(this, Player.class, 24.0f));
+        this.goalSelector.addGoal(13, new PerchAndSearchGoal());
         this.targetSelector.addGoal(3, new DefendTrustedTargetGoal(LivingEntity.class, false, false, livingEntity -> TRUSTED_TARGET_SELECTOR.test((Entity)livingEntity) && !this.trusts(livingEntity.getUUID())));
     }
 
@@ -511,6 +511,7 @@ extends Animal {
         this.setFlag(4, bl);
     }
 
+    @Override
     public boolean isCrouching() {
         return this.getFlag(4);
     }
@@ -1106,7 +1107,7 @@ extends Animal {
             if (Fox.this.trusts(livingEntity.getUUID())) {
                 return false;
             }
-            return !livingEntity.isSleeping() && !livingEntity.isSneaking();
+            return !livingEntity.isSleeping() && !livingEntity.isDiscrete();
         }
 
         @Override

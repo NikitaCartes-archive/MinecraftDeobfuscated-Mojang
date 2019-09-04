@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -40,7 +40,7 @@ extends EntityModel<T> {
     @Override
     public void render(T entity, float f, float g, float h, float i, float j, float k) {
         this.setupAnim(entity, f, g, h, i, j, k);
-        GlStateManager.translatef(0.0f, 0.001f, 0.0f);
+        RenderSystem.translatef(0.0f, 0.001f, 0.0f);
         this.cube.render(k);
         if (this.eye0 != null) {
             this.eye0.render(k);

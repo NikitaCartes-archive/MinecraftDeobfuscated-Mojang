@@ -43,13 +43,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -72,7 +72,7 @@ implements ChunkAccess {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final LevelChunkSection EMPTY_SECTION = null;
     private final LevelChunkSection[] sections = new LevelChunkSection[16];
-    private final Biome[] biomes;
+    private ChunkBiomeContainer biomes;
     private final Map<BlockPos, CompoundTag> pendingBlockEntities = Maps.newHashMap();
     private boolean loaded;
     private final Level level;
@@ -96,11 +96,11 @@ implements ChunkAccess {
     private final ChunkPos chunkPos;
     private volatile boolean isLightCorrect;
 
-    public LevelChunk(Level level, ChunkPos chunkPos, Biome[] biomes) {
-        this(level, chunkPos, biomes, UpgradeData.EMPTY, EmptyTickList.empty(), EmptyTickList.empty(), 0L, null, null);
+    public LevelChunk(Level level, ChunkPos chunkPos, ChunkBiomeContainer chunkBiomeContainer) {
+        this(level, chunkPos, chunkBiomeContainer, UpgradeData.EMPTY, EmptyTickList.empty(), EmptyTickList.empty(), 0L, null, null);
     }
 
-    public LevelChunk(Level level, ChunkPos chunkPos, Biome[] biomes, UpgradeData upgradeData, TickList<Block> tickList, TickList<Fluid> tickList2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable Consumer<LevelChunk> consumer) {
+    public LevelChunk(Level level, ChunkPos chunkPos, ChunkBiomeContainer chunkBiomeContainer, UpgradeData upgradeData, TickList<Block> tickList, TickList<Fluid> tickList2, long l, @Nullable LevelChunkSection[] levelChunkSections, @Nullable Consumer<LevelChunk> consumer) {
         this.entitySections = new ClassInstanceMultiMap[16];
         this.level = level;
         this.chunkPos = chunkPos;
@@ -112,7 +112,7 @@ implements ChunkAccess {
         for (int i = 0; i < this.entitySections.length; ++i) {
             this.entitySections[i] = new ClassInstanceMultiMap<Entity>(Entity.class);
         }
-        this.biomes = biomes;
+        this.biomes = chunkBiomeContainer;
         this.blockTicks = tickList;
         this.liquidTicks = tickList2;
         this.inhabitedTime = l;
@@ -273,14 +273,9 @@ implements ChunkAccess {
         return blockState2;
     }
 
-    @Override
     @Nullable
     public LevelLightEngine getLightEngine() {
         return this.level.getChunkSource().getLightEngine();
-    }
-
-    public int getRawBrightness(BlockPos blockPos, int i) {
-        return this.getRawBrightness(blockPos, i, this.level.getDimension().isHasSkyLight());
     }
 
     @Override
@@ -485,11 +480,11 @@ implements ChunkAccess {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public void replaceWithPacketData(FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int i, boolean bl) {
-        int j;
+    public void replaceWithPacketData(@Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int i) {
+        boolean bl = chunkBiomeContainer != null;
         Predicate<BlockPos> predicate = bl ? blockPos -> true : blockPos -> (i & 1 << (blockPos.getY() >> 4)) != 0;
         Sets.newHashSet(this.blockEntities.keySet()).stream().filter(predicate).forEach(this.level::removeBlockEntity);
-        for (j = 0; j < this.sections.length; ++j) {
+        for (int j = 0; j < this.sections.length; ++j) {
             LevelChunkSection levelChunkSection = this.sections[j];
             if ((i & 1 << j) == 0) {
                 if (!bl || levelChunkSection == EMPTY_SECTION) continue;
@@ -501,10 +496,8 @@ implements ChunkAccess {
             }
             levelChunkSection.read(friendlyByteBuf);
         }
-        if (bl) {
-            for (j = 0; j < this.biomes.length; ++j) {
-                this.biomes[j] = (Biome)Registry.BIOME.byId(friendlyByteBuf.readInt());
-            }
+        if (chunkBiomeContainer != null) {
+            this.biomes = chunkBiomeContainer;
         }
         for (Heightmap.Types types : Heightmap.Types.values()) {
             String string = types.getSerializationKey();
@@ -517,7 +510,7 @@ implements ChunkAccess {
     }
 
     @Override
-    public Biome[] getBiomes() {
+    public ChunkBiomeContainer getBiomes() {
         return this.biomes;
     }
 
@@ -729,10 +722,6 @@ implements ChunkAccess {
 
     public void setFullStatus(Supplier<ChunkHolder.FullChunkStatus> supplier) {
         this.fullStatus = supplier;
-    }
-
-    @Override
-    public void setLightEngine(LevelLightEngine levelLightEngine) {
     }
 
     @Override

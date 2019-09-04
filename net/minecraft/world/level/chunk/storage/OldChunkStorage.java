@@ -3,11 +3,11 @@
  */
 package net.minecraft.world.level.chunk.storage;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.OldDataLayer;
 
@@ -34,7 +34,6 @@ public class OldChunkStorage {
     }
 
     public static void convertToAnvilFormat(OldLevelChunk oldLevelChunk, CompoundTag compoundTag, BiomeSource biomeSource) {
-        int k;
         compoundTag.putInt("xPos", oldLevelChunk.x);
         compoundTag.putInt("zPos", oldLevelChunk.z);
         compoundTag.putLong("LastUpdate", oldLevelChunk.lastUpdated);
@@ -48,7 +47,7 @@ public class OldChunkStorage {
         for (int j = 0; j < 8; ++j) {
             int o;
             boolean bl = true;
-            for (k = 0; k < 16 && bl; ++k) {
+            for (int k = 0; k < 16 && bl; ++k) {
                 block3: for (int l = 0; l < 16 && bl; ++l) {
                     for (int m = 0; m < 16; ++m) {
                         int n = k << 11 | m << 7 | l + (j << 4);
@@ -85,15 +84,7 @@ public class OldChunkStorage {
             listTag.add(compoundTag2);
         }
         compoundTag.put("Sections", listTag);
-        byte[] cs = new byte[256];
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        for (k = 0; k < 16; ++k) {
-            for (int l = 0; l < 16; ++l) {
-                mutableBlockPos.set(oldLevelChunk.x << 4 | k, 0, oldLevelChunk.z << 4 | l);
-                cs[l << 4 | k] = (byte)(Registry.BIOME.getId(biomeSource.getBiome(mutableBlockPos)) & 0xFF);
-            }
-        }
-        compoundTag.putByteArray("Biomes", cs);
+        compoundTag.putIntArray("Biomes", new ChunkBiomeContainer(new ChunkPos(oldLevelChunk.x, oldLevelChunk.z), biomeSource).writeBiomes());
         compoundTag.put("Entities", oldLevelChunk.entities);
         compoundTag.put("TileEntities", oldLevelChunk.blockEntities);
         if (oldLevelChunk.blockTicks != null) {

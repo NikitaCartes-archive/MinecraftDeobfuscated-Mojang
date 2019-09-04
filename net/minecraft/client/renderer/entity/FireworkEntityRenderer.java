@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -26,28 +26,28 @@ extends EntityRenderer<FireworkRocketEntity> {
 
     @Override
     public void render(FireworkRocketEntity fireworkRocketEntity, double d, double e, double f, float g, float h) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
         if (fireworkRocketEntity.isShotAtAngle()) {
-            GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
         } else {
-            GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
         }
         this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(fireworkRocketEntity));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(fireworkRocketEntity));
         }
         this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND);
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.popMatrix();
         super.render(fireworkRocketEntity, d, e, f, g, h);
     }
 

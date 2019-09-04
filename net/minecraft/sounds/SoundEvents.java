@@ -58,6 +58,17 @@ public class SoundEvents {
     public static final SoundEvent BEACON_AMBIENT = SoundEvents.register("block.beacon.ambient");
     public static final SoundEvent BEACON_DEACTIVATE = SoundEvents.register("block.beacon.deactivate");
     public static final SoundEvent BEACON_POWER_SELECT = SoundEvents.register("block.beacon.power_select");
+    public static final SoundEvent BEE_DEATH = SoundEvents.register("entity.bee.death");
+    public static final SoundEvent BEE_HURT = SoundEvents.register("entity.bee.hurt");
+    public static final SoundEvent BEE_LOOP_AGGRESSIVE = SoundEvents.register("entity.bee.loop_aggressive");
+    public static final SoundEvent BEE_LOOP = SoundEvents.register("entity.bee.loop");
+    public static final SoundEvent BEE_STING = SoundEvents.register("entity.bee.sting");
+    public static final SoundEvent BEE_POLLINATE = SoundEvents.register("entity.bee.pollinate");
+    public static final SoundEvent BEEHIVE_DRIP = SoundEvents.register("block.beehive.drip");
+    public static final SoundEvent BEEHIVE_ENTER = SoundEvents.register("block.beehive.enter");
+    public static final SoundEvent BEEHIVE_EXIT = SoundEvents.register("block.beehive.exit");
+    public static final SoundEvent BEEHIVE_SHEAR = SoundEvents.register("block.beehive.shear");
+    public static final SoundEvent BEEHIVE_WORK = SoundEvents.register("block.beehive.work");
     public static final SoundEvent BELL_BLOCK = SoundEvents.register("block.bell.use");
     public static final SoundEvent BELL_RESONATE = SoundEvents.register("block.bell.resonate");
     public static final SoundEvent BLAZE_AMBIENT = SoundEvents.register("entity.blaze.ambient");
@@ -298,6 +309,7 @@ public class SoundEvents {
     public static final SoundEvent GUARDIAN_HURT = SoundEvents.register("entity.guardian.hurt");
     public static final SoundEvent GUARDIAN_HURT_LAND = SoundEvents.register("entity.guardian.hurt_land");
     public static final SoundEvent HOE_TILL = SoundEvents.register("item.hoe.till");
+    public static final SoundEvent HONEY_DRINK = SoundEvents.register("item.honey_bottle.drink");
     public static final SoundEvent HORSE_AMBIENT = SoundEvents.register("entity.horse.ambient");
     public static final SoundEvent HORSE_ANGRY = SoundEvents.register("entity.horse.angry");
     public static final SoundEvent HORSE_ARMOR = SoundEvents.register("entity.horse.armor");

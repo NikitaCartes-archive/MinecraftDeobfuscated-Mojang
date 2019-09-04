@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -67,7 +67,7 @@ extends AbstractWidget {
         Lighting.turnOnGui();
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         int k = 29;
         if (!this.collection.hasCraftable()) {
             k += 25;
@@ -79,10 +79,10 @@ extends AbstractWidget {
         boolean bl2 = bl = this.animationTime > 0.0f;
         if (bl) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(this.x + 8, this.y + 12, 0.0f);
-            GlStateManager.scalef(g, g, 1.0f);
-            GlStateManager.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(this.x + 8, this.y + 12, 0.0f);
+            RenderSystem.scalef(g, g, 1.0f);
+            RenderSystem.translatef(-(this.x + 8), -(this.y + 12), 0.0f);
             this.animationTime -= f;
         }
         this.blit(this.x, this.y, k, l, this.width, this.height);
@@ -96,9 +96,9 @@ extends AbstractWidget {
         }
         minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m, this.y + m);
         if (bl) {
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
-        GlStateManager.enableLighting();
+        RenderSystem.enableLighting();
         Lighting.turnOff();
     }
 

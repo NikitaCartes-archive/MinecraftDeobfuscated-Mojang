@@ -25,13 +25,7 @@ public class TimerQueue<T> {
     private final Map<String, Event<T>> events = Maps.newHashMap();
 
     private static <T> Comparator<Event<T>> createComparator() {
-        return (event, event2) -> {
-            int i = Long.compare(event.triggerTime, event2.triggerTime);
-            if (i != 0) {
-                return i;
-            }
-            return event.sequentialId.compareTo(event2.sequentialId);
-        };
+        return Comparator.comparingLong(event -> event.triggerTime).thenComparing(event -> event.sequentialId);
     }
 
     public TimerQueue(TimerCallbacks<T> timerCallbacks) {

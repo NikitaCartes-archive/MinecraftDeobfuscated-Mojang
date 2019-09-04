@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
@@ -36,29 +37,29 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = Blocks.GRASS.defaultBlockState();
         block0: for (int i = 0; i < 128; ++i) {
             BlockState blockState4;
             BlockPos blockPos3 = blockPos2;
             for (int j = 0; j < i / 16; ++j) {
-                if (level.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).getBlock() != this || level.getBlockState(blockPos3).isCollisionShapeFullBlock(level, blockPos3)) continue block0;
+                if (serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).getBlock() != this || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
             }
-            BlockState blockState3 = level.getBlockState(blockPos3);
+            BlockState blockState3 = serverLevel.getBlockState(blockPos3);
             if (blockState3.getBlock() == blockState2.getBlock() && random.nextInt(10) == 0) {
-                ((BonemealableBlock)((Object)blockState2.getBlock())).performBonemeal(level, random, blockPos3, blockState3);
+                ((BonemealableBlock)((Object)blockState2.getBlock())).performBonemeal(serverLevel, random, blockPos3, blockState3);
             }
             if (!blockState3.isAir()) continue;
             if (random.nextInt(8) == 0) {
-                List<ConfiguredFeature<?>> list = level.getBiome(blockPos3).getFlowerFeatures();
+                List<ConfiguredFeature<?>> list = serverLevel.getBiome(blockPos3).getFlowerFeatures();
                 if (list.isEmpty()) continue;
                 blockState4 = ((FlowerFeature)((DecoratedFeatureConfiguration)list.get((int)0).config).feature.feature).getRandomFlower(random, blockPos3);
             } else {
                 blockState4 = blockState2;
             }
-            if (!blockState4.canSurvive(level, blockPos3)) continue;
-            level.setBlock(blockPos3, blockState4, 3);
+            if (!blockState4.canSurvive(serverLevel, blockPos3)) continue;
+            serverLevel.setBlock(blockPos3, blockState4, 3);
         }
     }
 

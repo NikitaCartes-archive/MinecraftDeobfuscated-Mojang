@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -89,9 +89,9 @@ extends LivingEntityRenderer<T, M> {
         double v = (float)(o - s);
         double w = (float)(p - t);
         double x = (float)(q - u);
-        GlStateManager.disableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.disableCull();
+        RenderSystem.disableTexture();
+        RenderSystem.disableLighting();
+        RenderSystem.disableCull();
         int y = 24;
         double z = 0.025;
         bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
@@ -124,9 +124,9 @@ extends LivingEntityRenderer<T, M> {
             bufferBuilder.vertex(d + v * (double)ae + 0.025, e + w * (double)(ae * ae + ae) * 0.5 + (double)((24.0f - (float)aa) / 18.0f + 0.125f), f + x * (double)ae + 0.025).color(ab, ac, ad, 1.0f).endVertex();
         }
         tesselator.end();
-        GlStateManager.enableLighting();
-        GlStateManager.enableTexture();
-        GlStateManager.enableCull();
+        RenderSystem.enableLighting();
+        RenderSystem.enableTexture();
+        RenderSystem.enableCull();
     }
 
     @Override

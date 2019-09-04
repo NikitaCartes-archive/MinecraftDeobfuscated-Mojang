@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitherBossModel;
@@ -40,7 +40,7 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
         if (i > 0) {
             g -= ((float)i - f) / 220.0f * 0.5f;
         }
-        GlStateManager.scalef(g, g, g);
+        RenderSystem.scalef(g, g, g);
     }
 }
 

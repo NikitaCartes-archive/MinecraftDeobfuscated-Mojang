@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -38,39 +39,39 @@ extends BlockEntityRenderer<SignBlockEntity> {
     @Override
     public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i) {
         BlockState blockState = signBlockEntity.getBlockState();
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         float h = 0.6666667f;
         if (blockState.getBlock() instanceof StandingSignBlock) {
-            GlStateManager.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
-            GlStateManager.rotatef(-((float)(blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0f), 0.0f, 1.0f, 0.0f);
+            RenderSystem.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
+            RenderSystem.rotatef(-((float)(blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0f), 0.0f, 1.0f, 0.0f);
             this.signModel.getStick().visible = true;
         } else {
-            GlStateManager.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
-            GlStateManager.rotatef(-blockState.getValue(WallSignBlock.FACING).toYRot(), 0.0f, 1.0f, 0.0f);
-            GlStateManager.translatef(0.0f, -0.3125f, -0.4375f);
+            RenderSystem.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
+            RenderSystem.rotatef(-blockState.getValue(WallSignBlock.FACING).toYRot(), 0.0f, 1.0f, 0.0f);
+            RenderSystem.translatef(0.0f, -0.3125f, -0.4375f);
             this.signModel.getStick().visible = false;
         }
         if (i >= 0) {
             this.bindTexture(BREAKING_LOCATIONS[i]);
-            GlStateManager.matrixMode(5890);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(4.0f, 2.0f, 1.0f);
-            GlStateManager.translatef(0.0625f, 0.0625f, 0.0625f);
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5890);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(4.0f, 2.0f, 1.0f);
+            RenderSystem.translatef(0.0625f, 0.0625f, 0.0625f);
+            RenderSystem.matrixMode(5888);
         } else {
             this.bindTexture(this.getTexture(blockState.getBlock()));
         }
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.pushMatrix();
-        GlStateManager.scalef(0.6666667f, -0.6666667f, -0.6666667f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.pushMatrix();
+        RenderSystem.scalef(0.6666667f, -0.6666667f, -0.6666667f);
         this.signModel.render();
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         Font font = this.getFont();
         float j = 0.010416667f;
-        GlStateManager.translatef(0.0f, 0.33333334f, 0.046666667f);
-        GlStateManager.scalef(0.010416667f, -0.010416667f, 0.010416667f);
-        GlStateManager.normal3f(0.0f, 0.0f, -0.010416667f);
-        GlStateManager.depthMask(false);
+        RenderSystem.translatef(0.0f, 0.33333334f, 0.046666667f);
+        RenderSystem.scalef(0.010416667f, -0.010416667f, 0.010416667f);
+        RenderSystem.normal3f(0.0f, 0.0f, -0.010416667f);
+        RenderSystem.depthMask(false);
         int k = signBlockEntity.getColor().getTextColor();
         if (i < 0) {
             for (int l = 0; l < 4; ++l) {
@@ -100,13 +101,13 @@ extends BlockEntityRenderer<SignBlockEntity> {
                 this.renderHighlight(Math.min(s, t), p, Math.max(s, t), p + font.lineHeight);
             }
         }
-        GlStateManager.depthMask(true);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.popMatrix();
+        RenderSystem.depthMask(true);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.popMatrix();
         if (i >= 0) {
-            GlStateManager.matrixMode(5890);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5890);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5888);
         }
     }
 
@@ -135,18 +136,18 @@ extends BlockEntityRenderer<SignBlockEntity> {
     private void renderHighlight(int i, int j, int k, int l) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GlStateManager.color4f(0.0f, 0.0f, 255.0f, 255.0f);
-        GlStateManager.disableTexture();
-        GlStateManager.enableColorLogicOp();
-        GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+        RenderSystem.color4f(0.0f, 0.0f, 255.0f, 255.0f);
+        RenderSystem.disableTexture();
+        RenderSystem.enableColorLogicOp();
+        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
         bufferBuilder.vertex(i, l, 0.0).endVertex();
         bufferBuilder.vertex(k, l, 0.0).endVertex();
         bufferBuilder.vertex(k, j, 0.0).endVertex();
         bufferBuilder.vertex(i, j, 0.0).endVertex();
         tesselator.end();
-        GlStateManager.disableColorLogicOp();
-        GlStateManager.enableTexture();
+        RenderSystem.disableColorLogicOp();
+        RenderSystem.enableTexture();
     }
 }
 

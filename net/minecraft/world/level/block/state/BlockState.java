@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
@@ -26,7 +27,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.AbstractStateHolder;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
@@ -145,8 +146,8 @@ implements StateHolder<BlockState> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public int getLightColor(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {
-        return this.getBlock().getLightColor(this, blockAndBiomeGetter, blockPos);
+    public boolean emissiveRendering() {
+        return this.getBlock().emissiveRendering(this);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -268,12 +269,12 @@ implements StateHolder<BlockState> {
         this.getBlock().onRemove(this, level, blockPos, blockState, bl);
     }
 
-    public void tick(Level level, BlockPos blockPos, Random random) {
-        this.getBlock().tick(this, level, blockPos, random);
+    public void tick(ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        this.getBlock().tick(this, serverLevel, blockPos, random);
     }
 
-    public void randomTick(Level level, BlockPos blockPos, Random random) {
-        this.getBlock().randomTick(this, level, blockPos, random);
+    public void randomTick(ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        this.getBlock().randomTick(this, serverLevel, blockPos, random);
     }
 
     public void entityInside(Level level, BlockPos blockPos, Entity entity) {
@@ -310,6 +311,10 @@ implements StateHolder<BlockState> {
 
     public boolean canBeReplaced(BlockPlaceContext blockPlaceContext) {
         return this.getBlock().canBeReplaced(this, blockPlaceContext);
+    }
+
+    public boolean canBeReplaced(Fluid fluid) {
+        return this.getBlock().canBeReplaced(this, fluid);
     }
 
     public boolean canSurvive(LevelReader levelReader, BlockPos blockPos) {

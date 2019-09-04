@@ -4,8 +4,8 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -127,8 +127,8 @@ extends GuiComponent {
             float f = this.progress == null ? 0.0f : this.progress.getPercent();
             AdvancementWidgetType advancementWidgetType = f >= 1.0f ? AdvancementWidgetType.OBTAINED : AdvancementWidgetType.UNOBTAINED;
             this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            GlStateManager.enableBlend();
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.enableBlend();
             this.blit(i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
             Lighting.turnOnGui();
             this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
@@ -178,8 +178,8 @@ extends GuiComponent {
         }
         int o = this.width - n;
         this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableBlend();
         int p = j + this.y;
         int q = bl ? i + this.x - this.width + 26 + 6 : i + this.x;
         int r = 32 + this.description.size() * this.minecraft.font.lineHeight;

@@ -78,11 +78,11 @@ extends Item {
             if (property == null) {
                 property = collection.iterator().next();
             }
-            BlockState blockState2 = DebugStickItem.cycleState(blockState, property, player.isSneaking());
+            BlockState blockState2 = DebugStickItem.cycleState(blockState, property, player.isSecondaryUseActive());
             levelAccessor.setBlock(blockPos, blockState2, 18);
             DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".update", property.getName(), DebugStickItem.getNameHelper(blockState2, property)));
         } else {
-            property = DebugStickItem.getRelative(collection, property, player.isSneaking());
+            property = DebugStickItem.getRelative(collection, property, player.isSecondaryUseActive());
             String string3 = property.getName();
             compoundTag.putString(string, string3);
             DebugStickItem.message(player, new TranslatableComponent(this.getDescriptionId() + ".select", string3, DebugStickItem.getNameHelper(blockState, property)));

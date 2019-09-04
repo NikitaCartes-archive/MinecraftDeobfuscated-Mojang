@@ -5,6 +5,7 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -111,40 +112,40 @@ implements AutoCloseable {
             BufferBuilder bufferBuilder = tesselator.getBuilder();
             float f = 0.0f;
             MapRenderer.this.textureManager.bind(this.location);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-            GlStateManager.disableAlphaTest();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            RenderSystem.disableAlphaTest();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
             bufferBuilder.vertex(0.0, 128.0, -0.01f).uv(0.0, 1.0).endVertex();
             bufferBuilder.vertex(128.0, 128.0, -0.01f).uv(1.0, 1.0).endVertex();
             bufferBuilder.vertex(128.0, 0.0, -0.01f).uv(1.0, 0.0).endVertex();
             bufferBuilder.vertex(0.0, 0.0, -0.01f).uv(0.0, 0.0).endVertex();
             tesselator.end();
-            GlStateManager.enableAlphaTest();
-            GlStateManager.disableBlend();
+            RenderSystem.enableAlphaTest();
+            RenderSystem.disableBlend();
             int k = 0;
             for (MapDecoration mapDecoration : this.data.decorations.values()) {
                 if (bl && !mapDecoration.renderOnFrame()) continue;
                 MapRenderer.this.textureManager.bind(MAP_ICONS_LOCATION);
-                GlStateManager.pushMatrix();
-                GlStateManager.translatef(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f, -0.02f);
-                GlStateManager.rotatef((float)(mapDecoration.getRot() * 360) / 16.0f, 0.0f, 0.0f, 1.0f);
-                GlStateManager.scalef(4.0f, 4.0f, 3.0f);
-                GlStateManager.translatef(-0.125f, 0.125f, 0.0f);
+                RenderSystem.pushMatrix();
+                RenderSystem.translatef(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f, -0.02f);
+                RenderSystem.rotatef((float)(mapDecoration.getRot() * 360) / 16.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.scalef(4.0f, 4.0f, 3.0f);
+                RenderSystem.translatef(-0.125f, 0.125f, 0.0f);
                 byte b = mapDecoration.getImage();
                 float g = (float)(b % 16 + 0) / 16.0f;
                 float h = (float)(b / 16 + 0) / 16.0f;
                 float l = (float)(b % 16 + 1) / 16.0f;
                 float m = (float)(b / 16 + 1) / 16.0f;
                 bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 float n = -0.001f;
                 bufferBuilder.vertex(-1.0, 1.0, (float)k * -0.001f).uv(g, h).endVertex();
                 bufferBuilder.vertex(1.0, 1.0, (float)k * -0.001f).uv(l, h).endVertex();
                 bufferBuilder.vertex(1.0, -1.0, (float)k * -0.001f).uv(l, m).endVertex();
                 bufferBuilder.vertex(-1.0, -1.0, (float)k * -0.001f).uv(g, m).endVertex();
                 tesselator.end();
-                GlStateManager.popMatrix();
+                RenderSystem.popMatrix();
                 if (mapDecoration.getName() != null) {
                     Font font = Minecraft.getInstance().font;
                     String string = mapDecoration.getName().getColoredString();
@@ -152,20 +153,20 @@ implements AutoCloseable {
                     float f2 = 25.0f / o;
                     font.getClass();
                     float p = Mth.clamp(f2, 0.0f, 6.0f / 9.0f);
-                    GlStateManager.pushMatrix();
-                    GlStateManager.translatef(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - o * p / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);
-                    GlStateManager.scalef(p, p, 1.0f);
+                    RenderSystem.pushMatrix();
+                    RenderSystem.translatef(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - o * p / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);
+                    RenderSystem.scalef(p, p, 1.0f);
                     GuiComponent.fill(-1, -1, (int)o, font.lineHeight - 1, Integer.MIN_VALUE);
-                    GlStateManager.translatef(0.0f, 0.0f, -0.1f);
+                    RenderSystem.translatef(0.0f, 0.0f, -0.1f);
                     font.draw(string, 0.0f, 0.0f, -1);
-                    GlStateManager.popMatrix();
+                    RenderSystem.popMatrix();
                 }
                 ++k;
             }
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, 0.0f, -0.04f);
-            GlStateManager.scalef(1.0f, 1.0f, 1.0f);
-            GlStateManager.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, 0.0f, -0.04f);
+            RenderSystem.scalef(1.0f, 1.0f, 1.0f);
+            RenderSystem.popMatrix();
         }
 
         @Override

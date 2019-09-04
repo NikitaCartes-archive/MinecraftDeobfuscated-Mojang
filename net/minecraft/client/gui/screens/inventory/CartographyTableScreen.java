@@ -3,14 +3,14 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.CartographyMenu;
+import net.minecraft.world.inventory.CartographyTableMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,12 +19,12 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class CartographyScreen
-extends AbstractContainerScreen<CartographyMenu> {
+public class CartographyTableScreen
+extends AbstractContainerScreen<CartographyTableMenu> {
     private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/cartography_table.png");
 
-    public CartographyScreen(CartographyMenu cartographyMenu, Inventory inventory, Component component) {
-        super(cartographyMenu, inventory, component);
+    public CartographyTableScreen(CartographyTableMenu cartographyTableMenu, Inventory inventory, Component component) {
+        super(cartographyTableMenu, inventory, component);
     }
 
     @Override
@@ -43,16 +43,16 @@ extends AbstractContainerScreen<CartographyMenu> {
     protected void renderBg(float f, int i, int j) {
         MapItemSavedData mapItemSavedData;
         this.renderBackground();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-        Item item = ((CartographyMenu)this.menu).getSlot(1).getItem().getItem();
+        Item item = ((CartographyTableMenu)this.menu).getSlot(1).getItem().getItem();
         boolean bl = item == Items.MAP;
         boolean bl2 = item == Items.PAPER;
         boolean bl3 = item == Items.GLASS_PANE;
-        ItemStack itemStack = ((CartographyMenu)this.menu).getSlot(0).getItem();
+        ItemStack itemStack = ((CartographyTableMenu)this.menu).getSlot(0).getItem();
         boolean bl4 = false;
         if (itemStack.getItem() == Items.FILLED_MAP) {
             mapItemSavedData = MapItem.getSavedData(itemStack, this.minecraft.level);
@@ -84,19 +84,19 @@ extends AbstractContainerScreen<CartographyMenu> {
             this.blit(i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
             this.renderMap(mapItemSavedData, i + 86, j + 16, 0.34f);
             this.minecraft.getTextureManager().bind(BG_LOCATION);
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, 0.0f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, 0.0f, 1.0f);
             this.blit(i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
             this.renderMap(mapItemSavedData, i + 70, j + 32, 0.34f);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else if (bl3) {
             this.blit(i + 67, j + 13, this.imageWidth, 0, 66, 66);
             this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45f);
             this.minecraft.getTextureManager().bind(BG_LOCATION);
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, 0.0f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, 0.0f, 1.0f);
             this.blit(i + 66, j + 12, 0, this.imageHeight, 66, 66);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.blit(i + 67, j + 13, this.imageWidth, 0, 66, 66);
             this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45f);
@@ -105,11 +105,11 @@ extends AbstractContainerScreen<CartographyMenu> {
 
     private void renderMap(@Nullable MapItemSavedData mapItemSavedData, int i, int j, float f) {
         if (mapItemSavedData != null) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(i, j, 1.0f);
-            GlStateManager.scalef(f, f, 1.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(i, j, 1.0f);
+            RenderSystem.scalef(f, f, 1.0f);
             this.minecraft.gameRenderer.getMapRenderer().render(mapItemSavedData, true);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 }

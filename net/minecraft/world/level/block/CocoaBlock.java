@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -40,10 +41,10 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         int i;
-        if (level.random.nextInt(5) == 0 && (i = blockState.getValue(AGE).intValue()) < 2) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(AGE, i + 1), 2);
+        if (serverLevel.random.nextInt(5) == 0 && (i = blockState.getValue(AGE).intValue()) < 2) {
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(AGE, i + 1), 2);
         }
     }
 
@@ -103,8 +104,8 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        level.setBlock(blockPos, (BlockState)blockState.setValue(AGE, blockState.getValue(AGE) + 1), 2);
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+        serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(AGE, blockState.getValue(AGE) + 1), 2);
     }
 
     @Override

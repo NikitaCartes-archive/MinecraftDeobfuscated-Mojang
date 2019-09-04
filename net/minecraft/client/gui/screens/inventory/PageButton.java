@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -27,7 +27,7 @@ extends Button {
 
     @Override
     public void renderButton(int i, int j, float f) {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         Minecraft.getInstance().getTextureManager().bind(BookViewScreen.BOOK_LOCATION);
         int k = 0;
         int l = 192;

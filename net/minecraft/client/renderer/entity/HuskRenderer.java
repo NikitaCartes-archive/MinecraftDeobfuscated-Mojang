@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -23,7 +23,7 @@ extends ZombieRenderer {
     @Override
     protected void scale(Zombie zombie, float f) {
         float g = 1.0625f;
-        GlStateManager.scalef(1.0625f, 1.0625f, 1.0625f);
+        RenderSystem.scalef(1.0625f, 1.0625f, 1.0625f);
         super.scale(zombie, f);
     }
 

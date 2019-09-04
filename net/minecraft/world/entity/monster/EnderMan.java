@@ -19,6 +19,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
@@ -64,8 +65,9 @@ extends Monster {
     private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", (double)0.15f, AttributeModifier.Operation.ADDITION).setSerialize(false);
     private static final EntityDataAccessor<Optional<BlockState>> DATA_CARRY_STATE = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BLOCK_STATE);
     private static final EntityDataAccessor<Boolean> DATA_CREEPY = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_STARED_AT = SynchedEntityData.defineId(EnderMan.class, EntityDataSerializers.BOOLEAN);
     private static final Predicate<LivingEntity> ENDERMITE_SELECTOR = livingEntity -> livingEntity instanceof Endermite && ((Endermite)livingEntity).isPlayerSpawned();
-    private int lastCreepySound;
+    private int lastStareSound = Integer.MIN_VALUE;
     private int targetChangeTime;
 
     public EnderMan(EntityType<? extends EnderMan> entityType, Level level) {
@@ -105,6 +107,7 @@ extends Monster {
         if (livingEntity == null) {
             this.targetChangeTime = 0;
             this.entityData.set(DATA_CREEPY, false);
+            this.entityData.set(DATA_STARED_AT, false);
             attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING);
         } else {
             this.targetChangeTime = this.tickCount;
@@ -120,11 +123,12 @@ extends Monster {
         super.defineSynchedData();
         this.entityData.define(DATA_CARRY_STATE, Optional.empty());
         this.entityData.define(DATA_CREEPY, false);
+        this.entityData.define(DATA_STARED_AT, false);
     }
 
-    public void playCreepySound() {
-        if (this.tickCount >= this.lastCreepySound + 400) {
-            this.lastCreepySound = this.tickCount;
+    public void playStareSound() {
+        if (this.tickCount >= this.lastStareSound + 400) {
+            this.lastStareSound = this.tickCount;
             if (!this.isSilent()) {
                 this.level.playLocalSound(this.x, this.y + (double)this.getEyeHeight(), this.z, SoundEvents.ENDERMAN_STARE, this.getSoundSource(), 2.5f, 1.0f, false);
             }
@@ -133,8 +137,8 @@ extends Monster {
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
-        if (DATA_CREEPY.equals(entityDataAccessor) && this.isCreepy() && this.level.isClientSide) {
-            this.playCreepySound();
+        if (DATA_CREEPY.equals(entityDataAccessor) && this.hasBeenStaredAt() && this.level.isClientSide) {
+            this.playStareSound();
         }
         super.onSyncedDataUpdated(entityDataAccessor);
     }
@@ -203,6 +207,9 @@ extends Monster {
     }
 
     protected boolean teleport() {
+        if (this.level.isClientSide() || !this.isAlive()) {
+            return false;
+        }
         double d = this.x + (this.random.nextDouble() - 0.5) * 64.0;
         double e = this.y + (double)(this.random.nextInt(64) - 32);
         double f = this.z + (this.random.nextDouble() - 0.5) * 64.0;
@@ -224,15 +231,18 @@ extends Monster {
         while (mutableBlockPos.getY() > 0 && !this.level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
             mutableBlockPos.move(Direction.DOWN);
         }
-        if (!this.level.getBlockState(mutableBlockPos).getMaterial().blocksMotion()) {
+        BlockState blockState = this.level.getBlockState(mutableBlockPos);
+        boolean bl = blockState.getMaterial().blocksMotion();
+        boolean bl2 = blockState.getFluidState().is(FluidTags.WATER);
+        if (!bl || bl2) {
             return false;
         }
-        boolean bl = this.randomTeleport(d, e, f, true);
-        if (bl) {
+        boolean bl3 = this.randomTeleport(d, e, f, true);
+        if (bl3) {
             this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0f, 1.0f);
             this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0f, 1.0f);
         }
-        return bl;
+        return bl3;
     }
 
     @Override
@@ -281,7 +291,7 @@ extends Monster {
             return false;
         }
         boolean bl = super.hurt(damageSource, f);
-        if (damageSource.isBypassArmor() && this.random.nextInt(10) != 0) {
+        if (!this.level.isClientSide() && damageSource.isBypassArmor() && this.random.nextInt(10) != 0) {
             this.teleport();
         }
         return bl;
@@ -289,6 +299,14 @@ extends Monster {
 
     public boolean isCreepy() {
         return this.entityData.get(DATA_CREEPY);
+    }
+
+    public boolean hasBeenStaredAt() {
+        return this.entityData.get(DATA_STARED_AT);
+    }
+
+    public void setBeingStaredAt() {
+        this.entityData.set(DATA_STARED_AT, true);
     }
 
     static class EndermanTakeBlockGoal
@@ -427,6 +445,7 @@ extends Monster {
         public void start() {
             this.aggroTime = 5;
             this.teleportTime = 0;
+            this.enderman.setBeingStaredAt();
         }
 
         @Override

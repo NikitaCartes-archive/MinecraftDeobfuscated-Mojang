@@ -4,7 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Ordering;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -59,8 +59,8 @@ extends AbstractContainerScreen<T> {
         if (collection.isEmpty()) {
             return;
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.disableLighting();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableLighting();
         int j = 33;
         if (collection.size() > 5) {
             j = 132 / (collection.size() - 1);
@@ -75,7 +75,7 @@ extends AbstractContainerScreen<T> {
         this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
         int k = this.topPos;
         for (MobEffectInstance mobEffectInstance : iterable) {
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             this.blit(i, k, 0, 166, 140, 32);
             k += j;
         }

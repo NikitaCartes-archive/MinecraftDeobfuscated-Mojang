@@ -3,9 +3,8 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -98,7 +97,7 @@ implements RecipeUpdateListener {
 
     @Override
     protected void renderBg(float f, int i, int j) {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
@@ -107,26 +106,26 @@ implements RecipeUpdateListener {
     }
 
     public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
-        GlStateManager.enableColorMaterial();
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(i, j, 50.0f);
-        GlStateManager.scalef(-k, k, k);
-        GlStateManager.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.enableColorMaterial();
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(i, j, 50.0f);
+        RenderSystem.scalef(-k, k, k);
+        RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
         float h = livingEntity.yBodyRot;
         float l = livingEntity.yRot;
         float m = livingEntity.xRot;
         float n = livingEntity.yHeadRotO;
         float o = livingEntity.yHeadRot;
-        GlStateManager.rotatef(135.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(135.0f, 0.0f, 1.0f, 0.0f);
         Lighting.turnOn();
-        GlStateManager.rotatef(-135.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(-((float)Math.atan(g / 40.0f)) * 20.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(-135.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-((float)Math.atan(g / 40.0f)) * 20.0f, 1.0f, 0.0f, 0.0f);
         livingEntity.yBodyRot = (float)Math.atan(f / 40.0f) * 20.0f;
         livingEntity.yRot = (float)Math.atan(f / 40.0f) * 40.0f;
         livingEntity.xRot = -((float)Math.atan(g / 40.0f)) * 20.0f;
         livingEntity.yHeadRot = livingEntity.yRot;
         livingEntity.yHeadRotO = livingEntity.yRot;
-        GlStateManager.translatef(0.0f, 0.0f, 0.0f);
+        RenderSystem.translatef(0.0f, 0.0f, 0.0f);
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         entityRenderDispatcher.setPlayerRotY(180.0f);
         entityRenderDispatcher.setRenderShadow(false);
@@ -137,12 +136,12 @@ implements RecipeUpdateListener {
         livingEntity.xRot = m;
         livingEntity.yHeadRotO = n;
         livingEntity.yHeadRot = o;
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         Lighting.turnOff();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-        GlStateManager.disableTexture();
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.activeTexture(33985);
+        RenderSystem.disableTexture();
+        RenderSystem.activeTexture(33984);
     }
 
     @Override

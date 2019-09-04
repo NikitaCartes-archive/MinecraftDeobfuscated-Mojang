@@ -21,19 +21,19 @@ implements CollisionContext {
             return bl;
         }
     };
-    private final boolean sneaking;
+    private final boolean descending;
     private final double entityBottom;
     private final Item heldItem;
 
     protected EntityCollisionContext(boolean bl, double d, Item item) {
-        this.sneaking = bl;
+        this.descending = bl;
         this.entityBottom = d;
         this.heldItem = item;
     }
 
     @Deprecated
     protected EntityCollisionContext(Entity entity) {
-        this(entity.isSneaking(), entity.getBoundingBox().minY, entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem().getItem() : Items.AIR);
+        this(entity.isDescending(), entity.getBoundingBox().minY, entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem().getItem() : Items.AIR);
     }
 
     @Override
@@ -42,8 +42,8 @@ implements CollisionContext {
     }
 
     @Override
-    public boolean isSneaking() {
-        return this.sneaking;
+    public boolean isDescending() {
+        return this.descending;
     }
 
     @Override

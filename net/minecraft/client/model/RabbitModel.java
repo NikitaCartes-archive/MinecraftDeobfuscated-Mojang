@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -102,17 +102,17 @@ extends EntityModel<T> {
         this.setupAnim(rabbit, f, g, h, i, j, k);
         if (this.young) {
             float l = 1.5f;
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.56666666f, 0.56666666f, 0.56666666f);
-            GlStateManager.translatef(0.0f, 22.0f * k, 2.0f * k);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.56666666f, 0.56666666f, 0.56666666f);
+            RenderSystem.translatef(0.0f, 22.0f * k, 2.0f * k);
             this.head.render(k);
             this.earLeft.render(k);
             this.earRight.render(k);
             this.nose.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.4f, 0.4f, 0.4f);
-            GlStateManager.translatef(0.0f, 36.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.4f, 0.4f, 0.4f);
+            RenderSystem.translatef(0.0f, 36.0f * k, 0.0f);
             this.rearFootLeft.render(k);
             this.rearFootRight.render(k);
             this.haunchLeft.render(k);
@@ -121,11 +121,11 @@ extends EntityModel<T> {
             this.frontLegLeft.render(k);
             this.frontLegRight.render(k);
             this.tail.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.6f, 0.6f, 0.6f);
-            GlStateManager.translatef(0.0f, 16.0f * k, 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.6f, 0.6f, 0.6f);
+            RenderSystem.translatef(0.0f, 16.0f * k, 0.0f);
             this.rearFootLeft.render(k);
             this.rearFootRight.render(k);
             this.haunchLeft.render(k);
@@ -138,7 +138,7 @@ extends EntityModel<T> {
             this.earLeft.render(k);
             this.tail.render(k);
             this.nose.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
     }
 

@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,24 +54,24 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        super.tick(blockState, level, blockPos, random);
-        if (level.getRawBrightness(blockPos, 0) < 9) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        super.tick(blockState, serverLevel, blockPos, random);
+        if (serverLevel.getRawBrightness(blockPos, 0) < 9) {
             return;
         }
-        float f = CropBlock.getGrowthSpeed(this, level, blockPos);
+        float f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos);
         if (random.nextInt((int)(25.0f / f) + 1) == 0) {
             int i = blockState.getValue(AGE);
             if (i < 7) {
                 blockState = (BlockState)blockState.setValue(AGE, i + 1);
-                level.setBlock(blockPos, blockState, 2);
+                serverLevel.setBlock(blockPos, blockState, 2);
             } else {
                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
                 BlockPos blockPos2 = blockPos.relative(direction);
-                Block block = level.getBlockState(blockPos2.below()).getBlock();
-                if (level.getBlockState(blockPos2).isAir() && (block == Blocks.FARMLAND || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.GRASS_BLOCK)) {
-                    level.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
-                    level.setBlockAndUpdate(blockPos, (BlockState)this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
+                Block block = serverLevel.getBlockState(blockPos2.below()).getBlock();
+                if (serverLevel.getBlockState(blockPos2).isAir() && (block == Blocks.FARMLAND || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.GRASS_BLOCK)) {
+                    serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
+                    serverLevel.setBlockAndUpdate(blockPos, (BlockState)this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
                 }
             }
         }
@@ -106,12 +107,12 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        int i = Math.min(7, blockState.getValue(AGE) + Mth.nextInt(level.random, 2, 5));
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+        int i = Math.min(7, blockState.getValue(AGE) + Mth.nextInt(serverLevel.random, 2, 5));
         BlockState blockState2 = (BlockState)blockState.setValue(AGE, i);
-        level.setBlock(blockPos, blockState2, 2);
+        serverLevel.setBlock(blockPos, blockState2, 2);
         if (i == 7) {
-            blockState2.tick(level, blockPos, level.random);
+            blockState2.tick(serverLevel, blockPos, serverLevel.random);
         }
     }
 

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -31,7 +31,7 @@ HeadedModel {
     public ModelPart leftLeg;
     public ArmPose leftArmPose = ArmPose.EMPTY;
     public ArmPose rightArmPose = ArmPose.EMPTY;
-    public boolean sneaking;
+    public boolean crouching;
     public float swimAmount;
     private float itemUseTicks;
 
@@ -74,16 +74,16 @@ HeadedModel {
     @Override
     public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
         this.setupAnim(livingEntity, f, g, h, i, j, k);
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         if (this.young) {
             float l = 2.0f;
-            GlStateManager.scalef(0.75f, 0.75f, 0.75f);
-            GlStateManager.translatef(0.0f, 16.0f * k, 0.0f);
+            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
+            RenderSystem.translatef(0.0f, 16.0f * k, 0.0f);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.body.render(k);
             this.rightArm.render(k);
             this.leftArm.render(k);
@@ -91,8 +91,8 @@ HeadedModel {
             this.leftLeg.render(k);
             this.hat.render(k);
         } else {
-            if (((Entity)livingEntity).isVisuallySneaking()) {
-                GlStateManager.translatef(0.0f, 0.2f, 0.0f);
+            if (((Entity)livingEntity).isCrouching()) {
+                RenderSystem.translatef(0.0f, 0.2f, 0.0f);
             }
             this.head.render(k);
             this.body.render(k);
@@ -102,7 +102,7 @@ HeadedModel {
             this.leftLeg.render(k);
             this.hat.render(k);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override
@@ -221,7 +221,7 @@ HeadedModel {
             modelPart.yRot += this.body.yRot * 2.0f;
             modelPart.zRot += Mth.sin(this.attackTime * (float)Math.PI) * -0.4f;
         }
-        if (this.sneaking) {
+        if (this.crouching) {
             this.body.xRot = 0.5f;
             this.rightArm.xRot += 0.4f;
             this.leftArm.xRot += 0.4f;
@@ -335,7 +335,7 @@ HeadedModel {
         super.copyPropertiesTo(humanoidModel);
         humanoidModel.leftArmPose = this.leftArmPose;
         humanoidModel.rightArmPose = this.rightArmPose;
-        humanoidModel.sneaking = this.sneaking;
+        humanoidModel.crouching = this.crouching;
     }
 
     public void setAllVisible(boolean bl) {

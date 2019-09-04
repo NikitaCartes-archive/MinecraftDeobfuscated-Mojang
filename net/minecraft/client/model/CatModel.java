@@ -5,6 +5,7 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.ModelUtils;
 import net.minecraft.client.model.OcelotModel;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Cat;
@@ -72,8 +73,8 @@ extends OcelotModel<T> {
     public void setupAnim(T cat, float f, float g, float h, float i, float j, float k) {
         super.setupAnim(cat, f, g, h, i, j, k);
         if (this.lieDownAmount > 0.0f) {
-            this.head.zRot = this.rotlerpRad(this.head.zRot, -1.2707963f, this.lieDownAmount);
-            this.head.yRot = this.rotlerpRad(this.head.yRot, 1.2707963f, this.lieDownAmount);
+            this.head.zRot = ModelUtils.rotlerpRad(this.head.zRot, -1.2707963f, this.lieDownAmount);
+            this.head.yRot = ModelUtils.rotlerpRad(this.head.yRot, 1.2707963f, this.lieDownAmount);
             this.frontLegL.xRot = -1.2707963f;
             this.frontLegR.xRot = -0.47079635f;
             this.frontLegR.zRot = -0.2f;
@@ -83,22 +84,12 @@ extends OcelotModel<T> {
             this.backLegR.zRot = -0.5f;
             this.backLegR.x = -0.3f;
             this.backLegR.y = 20.0f;
-            this.tail1.xRot = this.rotlerpRad(this.tail1.xRot, 0.8f, this.lieDownAmountTail);
-            this.tail2.xRot = this.rotlerpRad(this.tail2.xRot, -0.4f, this.lieDownAmountTail);
+            this.tail1.xRot = ModelUtils.rotlerpRad(this.tail1.xRot, 0.8f, this.lieDownAmountTail);
+            this.tail2.xRot = ModelUtils.rotlerpRad(this.tail2.xRot, -0.4f, this.lieDownAmountTail);
         }
         if (this.relaxStateOneAmount > 0.0f) {
-            this.head.xRot = this.rotlerpRad(this.head.xRot, -0.58177644f, this.relaxStateOneAmount);
+            this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, -0.58177644f, this.relaxStateOneAmount);
         }
-    }
-
-    protected float rotlerpRad(float f, float g, float h) {
-        float i;
-        for (i = g - f; i < (float)(-Math.PI); i += (float)Math.PI * 2) {
-        }
-        while (i >= (float)Math.PI) {
-            i -= (float)Math.PI * 2;
-        }
-        return f + h * i;
     }
 }
 

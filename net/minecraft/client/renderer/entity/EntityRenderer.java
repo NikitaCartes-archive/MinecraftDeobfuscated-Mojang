@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -107,23 +107,23 @@ public abstract class EntityRenderer<T extends Entity> {
     }
 
     private void renderFlame(Entity entity, double d, double e, double f, float g) {
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
         TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(ModelBakery.FIRE_0);
         TextureAtlasSprite textureAtlasSprite2 = textureAtlas.getSprite(ModelBakery.FIRE_1);
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
         float h = entity.getBbWidth() * 1.4f;
-        GlStateManager.scalef(h, h, h);
+        RenderSystem.scalef(h, h, h);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         float i = 0.5f;
         float j = 0.0f;
         float k = entity.getBbHeight() / h;
         float l = (float)(entity.y - entity.getBoundingBox().minY);
-        GlStateManager.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        GlStateManager.translatef(0.0f, 0.0f, -0.3f + (float)((int)k) * 0.02f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.translatef(0.0f, 0.0f, -0.3f + (float)((int)k) * 0.02f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float m = 0.0f;
         int n = 0;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
@@ -150,17 +150,17 @@ public abstract class EntityRenderer<T extends Entity> {
             ++n;
         }
         tesselator.end();
-        GlStateManager.popMatrix();
-        GlStateManager.enableLighting();
+        RenderSystem.popMatrix();
+        RenderSystem.enableLighting();
     }
 
     private void renderShadow(Entity entity, double d, double e, double f, float g, float h) {
         Mob mob;
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         this.entityRenderDispatcher.textureManager.bind(SHADOW_LOCATION);
         LevelReader levelReader = this.getLevel();
-        GlStateManager.depthMask(false);
+        RenderSystem.depthMask(false);
         float i = this.shadowRadius;
         if (entity instanceof Mob && (mob = (Mob)entity).isBaby()) {
             i *= 0.5f;
@@ -187,9 +187,9 @@ public abstract class EntityRenderer<T extends Entity> {
             this.renderBlockShadow(blockState, levelReader, blockPos2, d, e, f, blockPos, g, i, s, t, u);
         }
         tesselator.end();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     private LevelReader getLevel() {
@@ -230,10 +230,10 @@ public abstract class EntityRenderer<T extends Entity> {
     }
 
     public static void render(AABB aABB, double d, double e, double f) {
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         bufferBuilder.offset(d, e, f);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_NORMAL);
         bufferBuilder.vertex(aABB.minX, aABB.maxY, aABB.minZ).normal(0.0f, 0.0f, -1.0f).endVertex();
@@ -262,7 +262,7 @@ public abstract class EntityRenderer<T extends Entity> {
         bufferBuilder.vertex(aABB.maxX, aABB.minY, aABB.maxZ).normal(1.0f, 0.0f, 0.0f).endVertex();
         tesselator.end();
         bufferBuilder.offset(0.0, 0.0, 0.0);
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
     }
 
     public void postRender(Entity entity, double d, double e, double f, float g, float h) {
@@ -288,12 +288,11 @@ public abstract class EntityRenderer<T extends Entity> {
         if (g > (double)(i * i)) {
             return;
         }
-        boolean bl = ((Entity)entity).isVisuallySneaking();
         float h = this.entityRenderDispatcher.playerRotY;
         float j = this.entityRenderDispatcher.playerRotX;
-        float k = ((Entity)entity).getBbHeight() + 0.5f - (bl ? 0.25f : 0.0f);
+        float k = ((Entity)entity).getBbHeight() + 0.5f - (((Entity)entity).isCrouching() ? 0.25f : 0.0f);
         int l = "deadmau5".equals(string) ? -10 : 0;
-        GameRenderer.renderNameTagInWorld(this.getFont(), string, (float)d, (float)e + k, (float)f, l, h, j, bl);
+        GameRenderer.renderNameTagInWorld(this.getFont(), string, (float)d, (float)e + k, (float)f, l, h, j, ((Entity)entity).isDiscrete());
     }
 
     public EntityRenderDispatcher getDispatcher() {
@@ -311,7 +310,7 @@ public abstract class EntityRenderer<T extends Entity> {
         int i = ((Entity)entity).getLightColor();
         int j = i % 65536;
         int k = i / 65536;
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, j, k);
+        RenderSystem.glMultiTexCoord2f(33985, j, k);
     }
 }
 

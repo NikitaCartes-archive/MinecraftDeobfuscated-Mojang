@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.DolphinModel;
@@ -31,7 +31,7 @@ extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
     @Override
     protected void scale(Dolphin dolphin, float f) {
         float g = 1.0f;
-        GlStateManager.scalef(1.0f, 1.0f, 1.0f);
+        RenderSystem.scalef(1.0f, 1.0f, 1.0f);
     }
 
     @Override

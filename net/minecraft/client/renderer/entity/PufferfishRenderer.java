@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -49,7 +49,7 @@ extends MobRenderer<Pufferfish, EntityModel<Pufferfish>> {
 
     @Override
     protected void setupRotations(Pufferfish pufferfish, float f, float g, float h) {
-        GlStateManager.translatef(0.0f, Mth.cos(f * 0.05f) * 0.08f, 0.0f);
+        RenderSystem.translatef(0.0f, Mth.cos(f * 0.05f) * 0.08f, 0.0f);
         super.setupRotations(pufferfish, f, g, h);
     }
 }

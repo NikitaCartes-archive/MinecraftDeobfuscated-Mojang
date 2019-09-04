@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
@@ -21,10 +21,10 @@ extends TheEndPortalRenderer {
 
     @Override
     public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
-        GlStateManager.disableFog();
+        RenderSystem.disableFog();
         TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)theEndPortalBlockEntity;
         if (theEndGatewayBlockEntity.isSpawning() || theEndGatewayBlockEntity.isCoolingDown()) {
-            GlStateManager.alphaFunc(516, 0.1f);
+            RenderSystem.alphaFunc(516, 0.1f);
             this.bindTexture(BEAM_LOCATION);
             float h = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(g) : theEndGatewayBlockEntity.getCooldownPercent(g);
             double j = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
@@ -35,7 +35,7 @@ extends TheEndPortalRenderer {
             BeaconRenderer.renderBeaconBeam(d, e, f, g, h, theEndGatewayBlockEntity.getLevel().getGameTime(), 0, -k, fs, 0.15, 0.175);
         }
         super.render(theEndPortalBlockEntity, d, e, f, g, i);
-        GlStateManager.enableFog();
+        RenderSystem.enableFog();
     }
 
     @Override

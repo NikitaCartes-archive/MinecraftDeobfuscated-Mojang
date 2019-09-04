@@ -6,12 +6,12 @@ package com.mojang.realmsclient.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.util.UUIDTypeAdapter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +50,7 @@ public class RealmsUtil {
             GameProfile gameProfile = gameProfileCache.get(string);
             return sessionService.getTextures(gameProfile, false);
         } catch (Exception exception) {
-            return new HashMap<MinecraftProfileTexture.Type, MinecraftProfileTexture>();
+            return Maps.newHashMap();
         }
     }
 

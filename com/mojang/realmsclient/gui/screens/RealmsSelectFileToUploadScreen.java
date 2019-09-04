@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.collect.Lists;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import com.mojang.realmsclient.gui.RealmsConstants;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
@@ -10,7 +11,6 @@ import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsUploadScreen;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -38,7 +38,7 @@ extends RealmsScreen {
     private final int slotId;
     private RealmsButton uploadButton;
     private final DateFormat DATE_FORMAT = new SimpleDateFormat();
-    private List<RealmsLevelSummary> levelList = new ArrayList<RealmsLevelSummary>();
+    private List<RealmsLevelSummary> levelList = Lists.newArrayList();
     private int selectedWorld = -1;
     private WorldSelectionList worldSelectionList;
     private String worldLang;

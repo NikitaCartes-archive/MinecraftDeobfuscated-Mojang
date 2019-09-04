@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -20,8 +21,8 @@ public interface ParticleRenderType {
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
             Lighting.turnOff();
-            GlStateManager.disableBlend();
-            GlStateManager.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
         }
@@ -40,8 +41,8 @@ public interface ParticleRenderType {
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
             Lighting.turnOff();
-            GlStateManager.disableBlend();
-            GlStateManager.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
         }
@@ -60,11 +61,11 @@ public interface ParticleRenderType {
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
             Lighting.turnOff();
-            GlStateManager.depthMask(false);
+            RenderSystem.depthMask(false);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.alphaFunc(516, 0.003921569f);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.alphaFunc(516, 0.003921569f);
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
         }
 
@@ -81,8 +82,8 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            GlStateManager.disableBlend();
-            GlStateManager.depthMask(true);
+            RenderSystem.disableBlend();
+            RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
             Lighting.turnOff();
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
@@ -101,8 +102,8 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            GlStateManager.depthMask(true);
-            GlStateManager.disableBlend();
+            RenderSystem.depthMask(true);
+            RenderSystem.disableBlend();
         }
 
         @Override

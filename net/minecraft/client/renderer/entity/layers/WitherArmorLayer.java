@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -30,32 +31,32 @@ extends RenderLayer<WitherBoss, WitherBossModel<WitherBoss>> {
         if (!witherBoss.isPowered()) {
             return;
         }
-        GlStateManager.depthMask(!witherBoss.isInvisible());
+        RenderSystem.depthMask(!witherBoss.isInvisible());
         this.bindTexture(WITHER_ARMOR_LOCATION);
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
+        RenderSystem.matrixMode(5890);
+        RenderSystem.loadIdentity();
         float m = (float)witherBoss.tickCount + h;
         float n = Mth.cos(m * 0.02f) * 3.0f;
         float o = m * 0.01f;
-        GlStateManager.translatef(n, o, 0.0f);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableBlend();
+        RenderSystem.translatef(n, o, 0.0f);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.enableBlend();
         float p = 0.5f;
-        GlStateManager.color4f(0.5f, 0.5f, 0.5f, 1.0f);
-        GlStateManager.disableLighting();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        RenderSystem.color4f(0.5f, 0.5f, 0.5f, 1.0f);
+        RenderSystem.disableLighting();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
         this.model.prepareMobModel(witherBoss, f, g, h);
         ((WitherBossModel)this.getParentModel()).copyPropertiesTo(this.model);
         GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         gameRenderer.resetFogColor(true);
         this.model.render(witherBoss, f, g, i, j, k, l);
         gameRenderer.resetFogColor(false);
-        GlStateManager.matrixMode(5890);
-        GlStateManager.loadIdentity();
-        GlStateManager.matrixMode(5888);
-        GlStateManager.enableLighting();
-        GlStateManager.disableBlend();
-        GlStateManager.depthMask(true);
+        RenderSystem.matrixMode(5890);
+        RenderSystem.loadIdentity();
+        RenderSystem.matrixMode(5888);
+        RenderSystem.enableLighting();
+        RenderSystem.disableBlend();
+        RenderSystem.depthMask(true);
     }
 
     @Override

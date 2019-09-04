@@ -37,7 +37,7 @@ public class RealmsPersistence {
     @Environment(value=EnvType.CLIENT)
     public static class RealmsPersistenceData {
         public String newsLink;
-        public boolean hasUnreadNews = false;
+        public boolean hasUnreadNews;
 
         private RealmsPersistenceData() {
         }

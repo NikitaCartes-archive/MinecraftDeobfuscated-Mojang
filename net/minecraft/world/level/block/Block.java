@@ -44,7 +44,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Explosion;
@@ -63,6 +62,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
@@ -313,6 +313,11 @@ implements ItemLike {
     }
 
     @Deprecated
+    public boolean canBeReplaced(BlockState blockState, Fluid fluid) {
+        return this.material.isReplaceable() || !this.material.isSolid();
+    }
+
+    @Deprecated
     public float getDestroySpeed(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return this.destroySpeed;
     }
@@ -332,8 +337,8 @@ implements ItemLike {
 
     @Deprecated
     @Environment(value=EnvType.CLIENT)
-    public int getLightColor(BlockState blockState, BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {
-        return blockAndBiomeGetter.getLightColor(blockPos, blockState.getLightEmission());
+    public boolean emissiveRendering(BlockState blockState) {
+        return false;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -442,12 +447,12 @@ implements ItemLike {
     }
 
     @Deprecated
-    public void randomTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        this.tick(blockState, level, blockPos, random);
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        this.tick(blockState, serverLevel, blockPos, random);
     }
 
     @Deprecated
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -522,8 +527,8 @@ implements ItemLike {
         return blockState.getDrops(builder);
     }
 
-    public static List<ItemStack> getDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack itemStack) {
-        LootContext.Builder builder = new LootContext.Builder(serverLevel).withRandom(serverLevel.random).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.TOOL, itemStack).withParameter(LootContextParams.THIS_ENTITY, entity).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity);
+    public static List<ItemStack> getDrops(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, @Nullable BlockEntity blockEntity, @Nullable Entity entity, ItemStack itemStack) {
+        LootContext.Builder builder = new LootContext.Builder(serverLevel).withRandom(serverLevel.random).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.TOOL, itemStack).withOptionalParameter(LootContextParams.THIS_ENTITY, entity).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity);
         return blockState.getDrops(builder);
     }
 

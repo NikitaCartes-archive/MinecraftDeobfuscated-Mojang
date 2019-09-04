@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -37,23 +38,23 @@ extends RenderLayer<EnderDragon, DragonModel> {
             n = (m - 0.8f) / 0.2f;
         }
         Random random = new Random(432L);
-        GlStateManager.disableTexture();
-        GlStateManager.shadeModel(7425);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-        GlStateManager.disableAlphaTest();
-        GlStateManager.enableCull();
-        GlStateManager.depthMask(false);
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, -1.0f, -2.0f);
+        RenderSystem.disableTexture();
+        RenderSystem.shadeModel(7425);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+        RenderSystem.disableAlphaTest();
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(false);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, -1.0f, -2.0f);
         int o = 0;
         while ((float)o < (m + m * m) / 2.0f * 60.0f) {
-            GlStateManager.rotatef(random.nextFloat() * 360.0f, 1.0f, 0.0f, 0.0f);
-            GlStateManager.rotatef(random.nextFloat() * 360.0f, 0.0f, 1.0f, 0.0f);
-            GlStateManager.rotatef(random.nextFloat() * 360.0f, 0.0f, 0.0f, 1.0f);
-            GlStateManager.rotatef(random.nextFloat() * 360.0f, 1.0f, 0.0f, 0.0f);
-            GlStateManager.rotatef(random.nextFloat() * 360.0f, 0.0f, 1.0f, 0.0f);
-            GlStateManager.rotatef(random.nextFloat() * 360.0f + m * 90.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f, 0.0f, 1.0f, 0.0f);
+            RenderSystem.rotatef(random.nextFloat() * 360.0f + m * 90.0f, 0.0f, 0.0f, 1.0f);
             float p = random.nextFloat() * 20.0f + 5.0f + n * 10.0f;
             float q = random.nextFloat() * 2.0f + 1.0f + n * 2.0f;
             bufferBuilder.begin(6, DefaultVertexFormat.POSITION_COLOR);
@@ -65,14 +66,14 @@ extends RenderLayer<EnderDragon, DragonModel> {
             tesselator.end();
             ++o;
         }
-        GlStateManager.popMatrix();
-        GlStateManager.depthMask(true);
-        GlStateManager.disableCull();
-        GlStateManager.disableBlend();
-        GlStateManager.shadeModel(7424);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.enableTexture();
-        GlStateManager.enableAlphaTest();
+        RenderSystem.popMatrix();
+        RenderSystem.depthMask(true);
+        RenderSystem.disableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.shadeModel(7424);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableTexture();
+        RenderSystem.enableAlphaTest();
         Lighting.turnOn();
     }
 

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -78,31 +78,31 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
                 break;
             }
             case EAST: {
-                GlStateManager.translatef(0.5f, 0.5f, 0.0f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.translatef(0.5f, 0.5f, 0.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
                 break;
             }
             case WEST: {
-                GlStateManager.translatef(-0.5f, 0.5f, 0.0f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.translatef(-0.5f, 0.5f, 0.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
                 break;
             }
             case NORTH: {
-                GlStateManager.translatef(0.0f, 0.5f, -0.5f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(0.0f, 0.5f, -0.5f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
                 break;
             }
             case SOUTH: {
-                GlStateManager.translatef(0.0f, 0.5f, 0.5f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.translatef(0.0f, 0.5f, 0.5f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
                 break;
             }
             case UP: {
-                GlStateManager.translatef(0.0f, 1.0f, 0.0f);
-                GlStateManager.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(0.0f, 1.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
             }
         }
     }
@@ -110,7 +110,7 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     @Override
     protected void scale(Shulker shulker, float f) {
         float g = 0.999f;
-        GlStateManager.scalef(0.999f, 0.999f, 0.999f);
+        RenderSystem.scalef(0.999f, 0.999f, 0.999f);
     }
 }
 

@@ -48,10 +48,5 @@ implements ProfileResults {
     public int getEndTimeTicks() {
         return 0;
     }
-
-    @Override
-    public String getProfilerResults() {
-        return "";
-    }
 }
 

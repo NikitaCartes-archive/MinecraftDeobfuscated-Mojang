@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.QuadrupedModel;
@@ -61,20 +61,20 @@ extends QuadrupedModel<T> {
             float l = 2.0f;
             this.yHeadOffs = 16.0f;
             this.zHeadOffs = 4.0f;
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.6666667f, 0.6666667f, 0.6666667f);
-            GlStateManager.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.6666667f, 0.6666667f, 0.6666667f);
+            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
             this.head.render(k);
-            GlStateManager.popMatrix();
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.5f, 0.5f, 0.5f);
-            GlStateManager.translatef(0.0f, 24.0f * k, 0.0f);
+            RenderSystem.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
             this.body.render(k);
             this.leg0.render(k);
             this.leg1.render(k);
             this.leg2.render(k);
             this.leg3.render(k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         } else {
             this.head.render(k);
             this.body.render(k);

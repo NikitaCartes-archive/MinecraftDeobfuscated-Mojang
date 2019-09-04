@@ -5,6 +5,7 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -78,24 +79,22 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (this.shouldUpdateHatchLevel(level) && this.onSand(level, blockPos)) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (this.shouldUpdateHatchLevel(serverLevel) && this.onSand(serverLevel, blockPos)) {
             int i = blockState.getValue(HATCH);
             if (i < 2) {
-                level.playSound(null, blockPos, SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
-                level.setBlock(blockPos, (BlockState)blockState.setValue(HATCH, i + 1), 2);
+                serverLevel.playSound(null, blockPos, SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
+                serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(HATCH, i + 1), 2);
             } else {
-                level.playSound(null, blockPos, SoundEvents.TURTLE_EGG_HATCH, SoundSource.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
-                level.removeBlock(blockPos, false);
-                if (!level.isClientSide) {
-                    for (int j = 0; j < blockState.getValue(EGGS); ++j) {
-                        level.levelEvent(2001, blockPos, Block.getId(blockState));
-                        Turtle turtle = EntityType.TURTLE.create(level);
-                        turtle.setAge(-24000);
-                        turtle.setHomePos(blockPos);
-                        turtle.moveTo((double)blockPos.getX() + 0.3 + (double)j * 0.2, blockPos.getY(), (double)blockPos.getZ() + 0.3, 0.0f, 0.0f);
-                        level.addFreshEntity(turtle);
-                    }
+                serverLevel.playSound(null, blockPos, SoundEvents.TURTLE_EGG_HATCH, SoundSource.BLOCKS, 0.7f, 0.9f + random.nextFloat() * 0.2f);
+                serverLevel.removeBlock(blockPos, false);
+                for (int j = 0; j < blockState.getValue(EGGS); ++j) {
+                    serverLevel.levelEvent(2001, blockPos, Block.getId(blockState));
+                    Turtle turtle = EntityType.TURTLE.create(serverLevel);
+                    turtle.setAge(-24000);
+                    turtle.setHomePos(blockPos);
+                    turtle.moveTo((double)blockPos.getX() + 0.3 + (double)j * 0.2, blockPos.getY(), (double)blockPos.getZ() + 0.3, 0.0f, 0.0f);
+                    serverLevel.addFreshEntity(turtle);
                 }
             }
         }

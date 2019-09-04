@@ -13,6 +13,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -102,47 +103,47 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         boolean bl2;
-        if (!level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
+        if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             return;
         }
-        if (!blockState.canSurvive(level, blockPos)) {
-            level.removeBlock(blockPos, false);
+        if (!blockState.canSurvive(serverLevel, blockPos)) {
+            serverLevel.removeBlock(blockPos, false);
         }
-        Block block = level.getBlockState(blockPos.below()).getBlock();
-        boolean bl = level.dimension instanceof TheEndDimension && block == Blocks.BEDROCK || block == Blocks.NETHERRACK || block == Blocks.MAGMA_BLOCK;
+        Block block = serverLevel.getBlockState(blockPos.below()).getBlock();
+        boolean bl = serverLevel.dimension instanceof TheEndDimension && block == Blocks.BEDROCK || block == Blocks.NETHERRACK || block == Blocks.MAGMA_BLOCK;
         int i = blockState.getValue(AGE);
-        if (!bl && level.isRaining() && this.isNearRain(level, blockPos) && random.nextFloat() < 0.2f + (float)i * 0.03f) {
-            level.removeBlock(blockPos, false);
+        if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && random.nextFloat() < 0.2f + (float)i * 0.03f) {
+            serverLevel.removeBlock(blockPos, false);
             return;
         }
         int j = Math.min(15, i + random.nextInt(3) / 2);
         if (i != j) {
             blockState = (BlockState)blockState.setValue(AGE, j);
-            level.setBlock(blockPos, blockState, 4);
+            serverLevel.setBlock(blockPos, blockState, 4);
         }
         if (!bl) {
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + random.nextInt(10));
-            if (!this.isValidFireLocation(level, blockPos)) {
+            serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel) + random.nextInt(10));
+            if (!this.isValidFireLocation(serverLevel, blockPos)) {
                 BlockPos blockPos2 = blockPos.below();
-                if (!level.getBlockState(blockPos2).isFaceSturdy(level, blockPos2, Direction.UP) || i > 3) {
-                    level.removeBlock(blockPos, false);
+                if (!serverLevel.getBlockState(blockPos2).isFaceSturdy(serverLevel, blockPos2, Direction.UP) || i > 3) {
+                    serverLevel.removeBlock(blockPos, false);
                 }
                 return;
             }
-            if (i == 15 && random.nextInt(4) == 0 && !this.canBurn(level.getBlockState(blockPos.below()))) {
-                level.removeBlock(blockPos, false);
+            if (i == 15 && random.nextInt(4) == 0 && !this.canBurn(serverLevel.getBlockState(blockPos.below()))) {
+                serverLevel.removeBlock(blockPos, false);
                 return;
             }
         }
-        int k = (bl2 = level.isHumidAt(blockPos)) ? -50 : 0;
-        this.checkBurnOut(level, blockPos.east(), 300 + k, random, i);
-        this.checkBurnOut(level, blockPos.west(), 300 + k, random, i);
-        this.checkBurnOut(level, blockPos.below(), 250 + k, random, i);
-        this.checkBurnOut(level, blockPos.above(), 250 + k, random, i);
-        this.checkBurnOut(level, blockPos.north(), 300 + k, random, i);
-        this.checkBurnOut(level, blockPos.south(), 300 + k, random, i);
+        int k = (bl2 = serverLevel.isHumidAt(blockPos)) ? -50 : 0;
+        this.checkBurnOut(serverLevel, blockPos.east(), 300 + k, random, i);
+        this.checkBurnOut(serverLevel, blockPos.west(), 300 + k, random, i);
+        this.checkBurnOut(serverLevel, blockPos.below(), 250 + k, random, i);
+        this.checkBurnOut(serverLevel, blockPos.above(), 250 + k, random, i);
+        this.checkBurnOut(serverLevel, blockPos.north(), 300 + k, random, i);
+        this.checkBurnOut(serverLevel, blockPos.south(), 300 + k, random, i);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int l = -1; l <= 1; ++l) {
             for (int m = -1; m <= 1; ++m) {
@@ -153,15 +154,15 @@ extends Block {
                         o += (n - 1) * 100;
                     }
                     mutableBlockPos.set(blockPos).move(l, n, m);
-                    int p = this.getFireOdds(level, mutableBlockPos);
+                    int p = this.getFireOdds(serverLevel, mutableBlockPos);
                     if (p <= 0) continue;
-                    int q = (p + 40 + level.getDifficulty().getId() * 7) / (i + 30);
+                    int q = (p + 40 + serverLevel.getDifficulty().getId() * 7) / (i + 30);
                     if (bl2) {
                         q /= 2;
                     }
-                    if (q <= 0 || random.nextInt(o) > q || level.isRaining() && this.isNearRain(level, mutableBlockPos)) continue;
+                    if (q <= 0 || random.nextInt(o) > q || serverLevel.isRaining() && this.isNearRain(serverLevel, mutableBlockPos)) continue;
                     int r = Math.min(15, i + random.nextInt(5) / 4);
-                    level.setBlock(mutableBlockPos, (BlockState)this.getStateForPlacement(level, mutableBlockPos).setValue(AGE, r), 3);
+                    serverLevel.setBlock(mutableBlockPos, (BlockState)this.getStateForPlacement(serverLevel, mutableBlockPos).setValue(AGE, r), 3);
                 }
             }
         }
@@ -449,6 +450,8 @@ extends Block {
         fireBlock.setFlammable(Blocks.LECTERN, 30, 20);
         fireBlock.setFlammable(Blocks.COMPOSTER, 5, 20);
         fireBlock.setFlammable(Blocks.SWEET_BERRY_BUSH, 60, 100);
+        fireBlock.setFlammable(Blocks.BEE_HIVE, 5, 20);
+        fireBlock.setFlammable(Blocks.BEE_NEST, 30, 20);
     }
 }
 

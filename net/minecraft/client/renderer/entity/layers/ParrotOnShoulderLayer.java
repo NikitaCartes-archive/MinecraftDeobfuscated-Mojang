@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ParrotModel;
@@ -26,21 +26,21 @@ extends RenderLayer<T, PlayerModel<T>> {
 
     @Override
     public void render(T player, float f, float g, float h, float i, float j, float k, float l) {
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.render(player, f, g, h, j, k, l, true);
         this.render(player, f, g, h, j, k, l, false);
-        GlStateManager.disableRescaleNormal();
+        RenderSystem.disableRescaleNormal();
     }
 
     private void render(T player, float f, float g, float h, float i, float j, float k, boolean bl) {
         CompoundTag compoundTag = bl ? ((Player)player).getShoulderEntityLeft() : ((Player)player).getShoulderEntityRight();
         EntityType.byString(compoundTag.getString("id")).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> {
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(bl ? 0.4f : -0.4f, player.isVisuallySneaking() ? -1.3f : -1.5f, 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(bl ? 0.4f : -0.4f, player.isCrouching() ? -1.3f : -1.5f, 0.0f);
             this.bindTexture(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]);
             this.model.renderOnShoulder(f, g, i, j, k, player.tickCount);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         });
     }
 

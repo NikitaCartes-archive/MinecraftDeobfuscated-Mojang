@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 import net.minecraft.world.level.block.entity.BlastFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -86,6 +87,7 @@ public class BlockEntityType<T extends BlockEntity> {
     public static final BlockEntityType<BellBlockEntity> BELL = BlockEntityType.register("bell", Builder.of(BellBlockEntity::new, Blocks.BELL));
     public static final BlockEntityType<JigsawBlockEntity> JIGSAW = BlockEntityType.register("jigsaw", Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW_BLOCK));
     public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = BlockEntityType.register("campfire", Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE));
+    public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = BlockEntityType.register("beehive", Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEE_HIVE));
     private final Supplier<? extends T> factory;
     private final Set<Block> validBlocks;
     private final Type<?> dataType;
@@ -96,14 +98,16 @@ public class BlockEntityType<T extends BlockEntity> {
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String string, Builder<T> builder) {
-        Type<?> type = null;
-        try {
-            type = DataFixers.getDataFixer().getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion())).getChoiceType(References.BLOCK_ENTITY, string);
-        } catch (IllegalStateException illegalStateException) {
-            if (SharedConstants.IS_RUNNING_IN_IDE) {
-                throw illegalStateException;
+        Type<?> type;
+        block3: {
+            type = null;
+            try {
+                type = DataFixers.getDataFixer().getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion())).getChoiceType(References.BLOCK_ENTITY, string);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                LOGGER.error("No data fixer registered for block entity {}", (Object)string);
+                if (!SharedConstants.IS_RUNNING_IN_IDE) break block3;
+                throw illegalArgumentException;
             }
-            LOGGER.warn("No data fixer registered for block entity {}", (Object)string);
         }
         if (((Builder)builder).validBlocks.isEmpty()) {
             LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", (Object)string);

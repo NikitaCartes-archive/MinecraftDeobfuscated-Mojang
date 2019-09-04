@@ -24,6 +24,7 @@ import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.dimension.Dimension;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
@@ -95,6 +96,11 @@ LevelSimulatedRW {
     @Override
     default public boolean isUnobstructed(@Nullable Entity entity, VoxelShape voxelShape) {
         return EntityGetter.super.isUnobstructed(entity, voxelShape);
+    }
+
+    @Override
+    default public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
+        return LevelReader.super.getHeightmapPos(types, blockPos);
     }
 }
 

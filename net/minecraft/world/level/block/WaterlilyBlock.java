@@ -29,7 +29,7 @@ extends BushBlock {
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         super.entityInside(blockState, level, blockPos, entity);
         if (entity instanceof Boat) {
-            level.destroyBlock(new BlockPos(blockPos), true);
+            level.destroyBlock(new BlockPos(blockPos), true, entity);
         }
     }
 

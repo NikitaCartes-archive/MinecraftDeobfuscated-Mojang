@@ -18,6 +18,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
@@ -43,7 +44,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
@@ -124,11 +124,14 @@ public class VillagerTrades {
         @Override
         @Nullable
         public MerchantOffer getOffer(Entity entity, Random random) {
-            Level level = entity.level;
-            BlockPos blockPos = level.findNearestMapFeature(this.destination, new BlockPos(entity), 100, true);
+            if (!(entity.level instanceof ServerLevel)) {
+                return null;
+            }
+            ServerLevel serverLevel = (ServerLevel)entity.level;
+            BlockPos blockPos = serverLevel.findNearestMapFeature(this.destination, new BlockPos(entity), 100, true);
             if (blockPos != null) {
-                ItemStack itemStack = MapItem.create(level, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
-                MapItem.renderBiomePreviewMap(level, itemStack);
+                ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
+                MapItem.renderBiomePreviewMap(serverLevel, itemStack);
                 MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
                 itemStack.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT), new Object[0]));
                 return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemStack, this.maxUses, this.villagerXp, 0.2f);

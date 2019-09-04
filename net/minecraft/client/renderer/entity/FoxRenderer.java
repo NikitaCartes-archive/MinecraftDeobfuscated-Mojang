@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
@@ -32,7 +32,7 @@ extends MobRenderer<Fox, FoxModel<Fox>> {
     protected void setupRotations(Fox fox, float f, float g, float h) {
         super.setupRotations(fox, f, g, h);
         if (fox.isPouncing() || fox.isFaceplanted()) {
-            GlStateManager.rotatef(-Mth.lerp(h, fox.xRotO, fox.xRot), 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(-Mth.lerp(h, fox.xRotO, fox.xRot), 1.0f, 0.0f, 0.0f);
         }
     }
 

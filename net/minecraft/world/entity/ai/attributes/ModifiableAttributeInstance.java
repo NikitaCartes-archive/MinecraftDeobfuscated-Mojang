@@ -59,12 +59,12 @@ implements AttributeInstance {
     }
 
     @Override
-    public Collection<AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
+    public Set<AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
         return this.modifiers.get((Object)operation);
     }
 
     @Override
-    public Collection<AttributeModifier> getModifiers() {
+    public Set<AttributeModifier> getModifiers() {
         HashSet<AttributeModifier> set = Sets.newHashSet();
         for (AttributeModifier.Operation operation : AttributeModifier.Operation.values()) {
             set.addAll(this.getModifiers(operation));

@@ -118,9 +118,13 @@ public class WorldUpgrader {
                             boolean bl3;
                             int i = ChunkStorage.getVersion(compoundTag);
                             CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(dimensionType3, () -> this.overworldDataStorage, compoundTag);
+                            CompoundTag compoundTag3 = compoundTag2.getCompound("Level");
+                            ChunkPos chunkPos2 = new ChunkPos(compoundTag3.getInt("xPos"), compoundTag3.getInt("zPos"));
+                            if (!chunkPos2.equals(chunkPos)) {
+                                LOGGER.warn("Chunk {} has invalid position {}", (Object)chunkPos, (Object)chunkPos2);
+                            }
                             boolean bl4 = bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
                             if (this.eraseCache) {
-                                CompoundTag compoundTag3 = compoundTag2.getCompound("Level");
                                 bl3 = bl3 || compoundTag3.contains("Heightmaps");
                                 compoundTag3.remove("Heightmaps");
                                 bl3 = bl3 || compoundTag3.contains("isLightOn");
@@ -182,7 +186,7 @@ public class WorldUpgrader {
             if (!matcher.matches()) continue;
             int i = Integer.parseInt(matcher.group(1)) << 5;
             int j = Integer.parseInt(matcher.group(2)) << 5;
-            try (RegionFile regionFile = new RegionFile(file3);){
+            try (RegionFile regionFile = new RegionFile(file3, file22);){
                 for (int k = 0; k < 32; ++k) {
                     for (int l = 0; l < 32; ++l) {
                         ChunkPos chunkPos = new ChunkPos(k + i, l + j);

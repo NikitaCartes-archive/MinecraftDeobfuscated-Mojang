@@ -82,6 +82,7 @@ implements Enemy {
         this.refreshDimensions();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(i * i);
         this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(i);
         if (bl) {
             this.setHealth(this.getMaxHealth());
         }
@@ -150,6 +151,15 @@ implements Enemy {
 
     protected int getJumpDelay() {
         return this.random.nextInt(20) + 10;
+    }
+
+    @Override
+    public void refreshDimensions() {
+        double d = this.x;
+        double e = this.y;
+        double f = this.z;
+        super.refreshDimensions();
+        this.setPos(d, e, f);
     }
 
     @Override
@@ -226,8 +236,8 @@ implements Enemy {
         return !this.isTiny() && this.isEffectiveAi();
     }
 
-    protected int getAttackDamage() {
-        return this.getSize();
+    protected float getAttackDamage() {
+        return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
     }
 
     @Override

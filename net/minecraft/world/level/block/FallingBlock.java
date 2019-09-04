@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -37,21 +38,13 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (!level.isClientSide) {
-            this.checkSlide(level, blockPos);
-        }
-    }
-
-    private void checkSlide(Level level, BlockPos blockPos) {
-        if (!FallingBlock.isFree(level.getBlockState(blockPos.below())) || blockPos.getY() < 0) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!FallingBlock.isFree(serverLevel.getBlockState(blockPos.below())) || blockPos.getY() < 0) {
             return;
         }
-        if (!level.isClientSide) {
-            FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, level.getBlockState(blockPos));
-            this.falling(fallingBlockEntity);
-            level.addFreshEntity(fallingBlockEntity);
-        }
+        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(serverLevel, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, serverLevel.getBlockState(blockPos));
+        this.falling(fallingBlockEntity);
+        serverLevel.addFreshEntity(fallingBlockEntity);
     }
 
     protected void falling(FallingBlockEntity fallingBlockEntity) {

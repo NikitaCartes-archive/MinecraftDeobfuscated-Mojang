@@ -5,12 +5,10 @@ package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Map;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.jetbrains.annotations.Nullable;
 
-public interface FeatureAccess
-extends BlockGetter {
+public interface FeatureAccess {
     @Nullable
     public StructureStart getStartForFeature(String var1);
 

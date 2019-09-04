@@ -82,6 +82,7 @@ import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
@@ -123,6 +124,7 @@ extends Entity {
     private static final EntityDataAccessor<Integer> DATA_EFFECT_COLOR_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_EFFECT_AMBIENCE_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_ARROW_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_STINGER_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
     protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2f, 0.2f);
     private BaseAttributeMap attributes;
@@ -134,6 +136,7 @@ extends Entity {
     public InteractionHand swingingArm;
     public int swingTime;
     public int removeArrowTime;
+    public int removeStingerTime;
     public int hurtTime;
     public int hurtDuration;
     public float hurtDir;
@@ -232,6 +235,7 @@ extends Entity {
         this.entityData.define(DATA_EFFECT_COLOR_ID, 0);
         this.entityData.define(DATA_EFFECT_AMBIENCE_ID, false);
         this.entityData.define(DATA_ARROW_COUNT_ID, 0);
+        this.entityData.define(DATA_STINGER_COUNT_ID, 0);
         this.entityData.define(DATA_HEALTH_ID, Float.valueOf(1.0f));
         this.entityData.define(SLEEPING_POS_ID, Optional.empty());
     }
@@ -477,23 +481,12 @@ extends Entity {
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
-        ItemStack itemStack;
         compoundTag.putFloat("Health", this.getHealth());
         compoundTag.putShort("HurtTime", (short)this.hurtTime);
         compoundTag.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
         compoundTag.putShort("DeathTime", (short)this.deathTime);
         compoundTag.putFloat("AbsorptionAmount", this.getAbsorptionAmount());
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            itemStack = this.getItemBySlot(equipmentSlot);
-            if (itemStack.isEmpty()) continue;
-            this.getAttributes().removeAttributeModifiers(itemStack.getAttributeModifiers(equipmentSlot));
-        }
         compoundTag.put("Attributes", SharedMonsterAttributes.saveAttributes(this.getAttributes()));
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            itemStack = this.getItemBySlot(equipmentSlot);
-            if (itemStack.isEmpty()) continue;
-            this.getAttributes().addAttributeModifiers(itemStack.getAttributeModifiers(equipmentSlot));
-        }
         if (!this.activeEffects.isEmpty()) {
             ListTag listTag = new ListTag();
             for (MobEffectInstance mobEffectInstance : this.activeEffects.values()) {
@@ -610,7 +603,7 @@ extends Entity {
 
     public double getVisibilityPercent(@Nullable Entity entity) {
         double d = 1.0;
-        if (this.isSneaking()) {
+        if (this.isDiscrete()) {
             d *= 0.8;
         }
         if (this.isInvisible()) {
@@ -1064,11 +1057,11 @@ extends Entity {
     }
 
     protected SoundEvent getDrinkingSound(ItemStack itemStack) {
-        return SoundEvents.GENERIC_DRINK;
+        return itemStack.getDrinkingSound();
     }
 
     public SoundEvent getEatingSound(ItemStack itemStack) {
-        return SoundEvents.GENERIC_EAT;
+        return itemStack.getEatingSound();
     }
 
     public boolean onLadder() {
@@ -1218,6 +1211,14 @@ extends Entity {
 
     public final void setArrowCount(int i) {
         this.entityData.set(DATA_ARROW_COUNT_ID, i);
+    }
+
+    public final int getStingerCount() {
+        return this.entityData.get(DATA_STINGER_COUNT_ID);
+    }
+
+    public final void setStingerCount(int i) {
+        this.entityData.set(DATA_STINGER_COUNT_ID, i);
     }
 
     private int getCurrentSwingDuration() {
@@ -1684,7 +1685,7 @@ extends Entity {
             double d = Mth.clamp(vec3.x, (double)-0.15f, (double)0.15f);
             double e = Mth.clamp(vec3.z, (double)-0.15f, (double)0.15f);
             double g = Math.max(vec3.y, (double)-0.15f);
-            if (g < 0.0 && this.getFeetBlockState().getBlock() != Blocks.SCAFFOLDING && this.isSneaking() && this instanceof Player) {
+            if (g < 0.0 && this.getFeetBlockState().getBlock() != Blocks.SCAFFOLDING && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
                 g = 0.0;
             }
             vec3 = new Vec3(d, g, e);
@@ -1718,6 +1719,7 @@ extends Entity {
         this.updatingUsingItem();
         this.updateSwimAmount();
         if (!this.level.isClientSide) {
+            int j;
             int i = this.getArrowCount();
             if (i > 0) {
                 if (this.removeArrowTime <= 0) {
@@ -1726,6 +1728,15 @@ extends Entity {
                 --this.removeArrowTime;
                 if (this.removeArrowTime <= 0) {
                     this.setArrowCount(i - 1);
+                }
+            }
+            if ((j = this.getStingerCount()) > 0) {
+                if (this.removeStingerTime <= 0) {
+                    this.removeStingerTime = 20 * (30 - j);
+                }
+                --this.removeStingerTime;
+                if (this.removeStingerTime <= 0) {
+                    this.setStingerCount(j - 1);
                 }
             }
             block8: for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
@@ -1782,21 +1793,21 @@ extends Entity {
         float g = this.yBodyRot;
         float h = 0.0f;
         this.oRun = this.run;
-        float j = 0.0f;
+        float k = 0.0f;
         if (f > 0.0025000002f) {
-            j = 1.0f;
+            k = 1.0f;
             h = (float)Math.sqrt(f) * 3.0f;
-            float k = (float)Mth.atan2(e, d) * 57.295776f - 90.0f;
-            float l = Mth.abs(Mth.wrapDegrees(this.yRot) - k);
-            g = 95.0f < l && l < 265.0f ? k - 180.0f : k;
+            float l = (float)Mth.atan2(e, d) * 57.295776f - 90.0f;
+            float m = Mth.abs(Mth.wrapDegrees(this.yRot) - l);
+            g = 95.0f < m && m < 265.0f ? l - 180.0f : l;
         }
         if (this.attackAnim > 0.0f) {
             g = this.yRot;
         }
         if (!this.onGround) {
-            j = 0.0f;
+            k = 0.0f;
         }
-        this.run += (j - this.run) * 0.3f;
+        this.run += (k - this.run) * 0.3f;
         this.level.getProfiler().push("headTurn");
         h = this.tickHeadTurn(g, h);
         this.level.getProfiler().pop();
@@ -2153,8 +2164,8 @@ extends Entity {
         if (this.isUsingItem()) {
             if (ItemStack.isSameIgnoreDurability(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
                 this.useItem.onUseTick(this.level, this, this.getUseItemRemainingTicks());
-                if (this.getUseItemRemainingTicks() <= 25 && this.getUseItemRemainingTicks() % 4 == 0) {
-                    this.spawnItemUseParticles(this.useItem, 5);
+                if (this.shouldTriggerItemUseEffects()) {
+                    this.triggerItemUseEffects(this.useItem, 5);
                 }
                 if (--this.useItemRemaining == 0 && !this.level.isClientSide && !this.useItem.useOnRelease()) {
                     this.completeUsingItem();
@@ -2163,6 +2174,13 @@ extends Entity {
                 this.stopUsingItem();
             }
         }
+    }
+
+    private boolean shouldTriggerItemUseEffects() {
+        int i = this.getUseItemRemainingTicks();
+        FoodProperties foodProperties = this.useItem.getItem().getFoodProperties();
+        boolean bl = foodProperties != null && foodProperties.isFastFood();
+        return (bl |= i <= this.useItem.getUseDuration() - 7) && i % 4 == 0;
     }
 
     private void updateSwimAmount() {
@@ -2216,7 +2234,7 @@ extends Entity {
         this.yBodyRotO = this.yBodyRot = this.yHeadRot;
     }
 
-    protected void spawnItemUseParticles(ItemStack itemStack, int i) {
+    protected void triggerItemUseEffects(ItemStack itemStack, int i) {
         if (itemStack.isEmpty() || !this.isUsingItem()) {
             return;
         }
@@ -2244,8 +2262,12 @@ extends Entity {
     }
 
     protected void completeUsingItem() {
+        if (!this.useItem.equals(this.getItemInHand(this.getUsedItemHand()))) {
+            this.releaseUsingItem();
+            return;
+        }
         if (!this.useItem.isEmpty() && this.isUsingItem()) {
-            this.spawnItemUseParticles(this.useItem, 16);
+            this.triggerItemUseEffects(this.useItem, 16);
             this.setItemInHand(this.getUsedItemHand(), this.useItem.finishUsingItem(this.level, this));
             this.stopUsingItem();
         }
@@ -2293,6 +2315,10 @@ extends Entity {
             return false;
         }
         return item.getUseDuration(this.useItem) - this.useItemRemaining >= 5;
+    }
+
+    public boolean isSuppressingSlidingDownLadder() {
+        return this.isShiftKeyDown();
     }
 
     public boolean isFallFlying() {
@@ -2461,7 +2487,9 @@ extends Entity {
         if (itemStack.isEdible()) {
             level.playSound(null, this.x, this.y, this.z, this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0f, 1.0f + (level.random.nextFloat() - level.random.nextFloat()) * 0.4f);
             this.addEatEffect(itemStack, level, this);
-            itemStack.shrink(1);
+            if (this instanceof Player && !((Player)this).abilities.instabuild) {
+                itemStack.shrink(1);
+            }
         }
         return itemStack;
     }

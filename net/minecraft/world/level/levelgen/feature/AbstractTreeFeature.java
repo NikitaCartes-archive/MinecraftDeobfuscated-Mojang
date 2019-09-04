@@ -8,18 +8,26 @@ import com.google.common.collect.Sets;
 import com.mojang.datafixers.Dynamic;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -113,22 +121,22 @@ extends Feature<T> {
         }
     }
 
-    @Override
-    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration) {
+    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration, boolean bl) {
+        Biome biome;
         HashSet<BlockPos> set = Sets.newHashSet();
         BoundingBox boundingBox = BoundingBox.getUnknownBox();
-        boolean bl = this.doPlace(set, levelAccessor, random, blockPos, boundingBox);
+        boolean bl2 = this.doPlace(set, levelAccessor, random, blockPos, boundingBox);
         if (boundingBox.x0 > boundingBox.x1) {
             return false;
         }
-        ArrayList list = Lists.newArrayList();
+        ArrayList<Set<BlockPos>> list = Lists.newArrayList();
         int i = 6;
         for (int j = 0; j < 6; ++j) {
             list.add(Sets.newHashSet());
         }
         BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
         try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            if (bl && !set.isEmpty()) {
+            if (bl2 && !set.isEmpty()) {
                 for (BlockPos blockPos2 : Lists.newArrayList(set)) {
                     if (boundingBox.isInside(blockPos2)) {
                         ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
@@ -166,8 +174,46 @@ extends Feature<T> {
                 }
             }
         }
+        if (bl && ((biome = levelAccessor.getBiome(blockPos)) == Biomes.FLOWER_FOREST || biome == Biomes.SUNFLOWER_PLAINS || biome == Biomes.PLAINS)) {
+            this.spawnBeehive(levelAccessor, random, blockPos, boundingBox, list, biome);
+        }
         StructureTemplate.updateShapeAtEdge(levelAccessor, 3, discreteVoxelShape, boundingBox.x0, boundingBox.y0, boundingBox.z0);
-        return bl;
+        return bl2;
+    }
+
+    @Override
+    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration) {
+        return this.place(levelAccessor, chunkGenerator, random, blockPos, featureConfiguration, true);
+    }
+
+    private void spawnBeehive(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BoundingBox boundingBox, List<Set<BlockPos>> list, Biome biome) {
+        float f;
+        float f2 = f = biome == Biomes.FLOWER_FOREST ? 0.01f : 0.05f;
+        if (random.nextFloat() < f) {
+            BlockPos blockPos22;
+            Direction direction = BeehiveBlock.SPAWN_DIRECTIONS[random.nextInt(BeehiveBlock.SPAWN_DIRECTIONS.length)];
+            int i = boundingBox.y1;
+            if (!list.isEmpty()) {
+                for (BlockPos blockPos22 : list.get(0)) {
+                    if (blockPos22.getY() >= i) continue;
+                    i = blockPos22.getY();
+                }
+            }
+            BlockState blockState = (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
+            blockPos22 = blockPos.offset(direction.getStepX(), i - 1 - blockPos.getY(), direction.getStepZ());
+            if (levelAccessor.isEmptyBlock(blockPos22) && levelAccessor.isEmptyBlock(blockPos22.relative(Direction.SOUTH))) {
+                this.setBlock(levelAccessor, blockPos22, blockState);
+                BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos22);
+                if (blockEntity instanceof BeehiveBlockEntity) {
+                    BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+                    int j = 2 + random.nextInt(2);
+                    for (int k = 0; k < j; ++k) {
+                        Bee bee = new Bee((EntityType<? extends Bee>)EntityType.BEE, levelAccessor.getLevel());
+                        beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
+                    }
+                }
+            }
+        }
     }
 
     protected abstract boolean doPlace(Set<BlockPos> var1, LevelSimulatedRW var2, Random var3, BlockPos var4, BoundingBox var5);

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -75,6 +76,7 @@ extends Behavior<Villager> {
                 this.giveBedToChild(serverLevel, optional2.get(), optional.get());
             } else {
                 serverLevel.getPoiManager().release(optional.get());
+                DebugPackets.sendPoiTicketCountPacket(serverLevel, optional.get());
             }
         }
     }

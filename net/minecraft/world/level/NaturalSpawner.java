@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -40,10 +41,10 @@ import org.jetbrains.annotations.Nullable;
 public final class NaturalSpawner {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void spawnCategoryForChunk(MobCategory mobCategory, Level level, LevelChunk levelChunk, BlockPos blockPos) {
-        ChunkGenerator<?> chunkGenerator = level.getChunkSource().getGenerator();
+    public static void spawnCategoryForChunk(MobCategory mobCategory, ServerLevel serverLevel, LevelChunk levelChunk, BlockPos blockPos) {
+        ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
         int i = 0;
-        BlockPos blockPos2 = NaturalSpawner.getRandomPosWithin(level, levelChunk);
+        BlockPos blockPos2 = NaturalSpawner.getRandomPosWithin(serverLevel, levelChunk);
         int j = blockPos2.getX();
         int k = blockPos2.getY();
         int l = blockPos2.getZ();
@@ -69,19 +70,19 @@ public final class NaturalSpawner {
                 EntityType<?> entityType;
                 ChunkPos chunkPos;
                 double d;
-                mutableBlockPos.set(n += level.random.nextInt(6) - level.random.nextInt(6), k, o += level.random.nextInt(6) - level.random.nextInt(6));
+                mutableBlockPos.set(n += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6), k, o += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6));
                 float f = (float)n + 0.5f;
                 float g = (float)o + 0.5f;
-                Player player = level.getNearestPlayerIgnoreY(f, g, -1.0);
-                if (player == null || (d = player.distanceToSqr(f, k, g)) <= 576.0 || blockPos.closerThan(new Vec3(f, k, g), 24.0) || !Objects.equals(chunkPos = new ChunkPos(mutableBlockPos), levelChunk.getPos()) && !level.getChunkSource().isEntityTickingChunk(chunkPos)) continue;
+                Player player = serverLevel.getNearestPlayerIgnoreY(f, g, -1.0);
+                if (player == null || (d = player.distanceToSqr(f, k, g)) <= 576.0 || blockPos.closerThan(new Vec3(f, k, g), 24.0) || !Objects.equals(chunkPos = new ChunkPos(mutableBlockPos), levelChunk.getPos()) && !serverLevel.getChunkSource().isEntityTickingChunk(chunkPos)) continue;
                 if (spawnerData == null) {
-                    spawnerData = NaturalSpawner.getRandomSpawnMobAt(chunkGenerator, mobCategory, level.random, mutableBlockPos);
+                    spawnerData = NaturalSpawner.getRandomSpawnMobAt(chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
                     if (spawnerData == null) continue block2;
-                    q = spawnerData.minCount + level.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
+                    q = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
-                if (spawnerData.type.getCategory() == MobCategory.MISC || !spawnerData.type.canSpawnFarFromPlayer() && d > 16384.0 || !(entityType = spawnerData.type).canSummon() || !NaturalSpawner.canSpawnMobAt(chunkGenerator, mobCategory, spawnerData, mutableBlockPos) || !NaturalSpawner.isSpawnPositionOk(type = SpawnPlacements.getPlacementType(entityType), level, mutableBlockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, level, MobSpawnType.NATURAL, mutableBlockPos, level.random) || !level.noCollision(entityType.getAABB(f, k, g))) continue;
+                if (spawnerData.type.getCategory() == MobCategory.MISC || !spawnerData.type.canSpawnFarFromPlayer() && d > 16384.0 || !(entityType = spawnerData.type).canSummon() || !NaturalSpawner.canSpawnMobAt(chunkGenerator, mobCategory, spawnerData, mutableBlockPos) || !NaturalSpawner.isSpawnPositionOk(type = SpawnPlacements.getPlacementType(entityType), serverLevel, mutableBlockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random) || !serverLevel.noCollision(entityType.getAABB(f, k, g))) continue;
                 try {
-                    Object entity = entityType.create(level);
+                    Object entity = entityType.create(serverLevel);
                     if (!(entity instanceof Mob)) {
                         throw new IllegalStateException("Trying to spawn a non-mob: " + Registry.ENTITY_TYPE.getKey(entityType));
                     }
@@ -90,11 +91,11 @@ public final class NaturalSpawner {
                     LOGGER.warn("Failed to create mob", (Throwable)exception);
                     return;
                 }
-                mob.moveTo(f, k, g, level.random.nextFloat() * 360.0f, 0.0f);
-                if (d > 16384.0 && mob.removeWhenFarAway(d) || !mob.checkSpawnRules(level, MobSpawnType.NATURAL) || !mob.checkSpawnObstruction(level)) continue;
-                spawnGroupData = mob.finalizeSpawn(level, level.getCurrentDifficultyAt(new BlockPos(mob)), MobSpawnType.NATURAL, spawnGroupData, null);
+                mob.moveTo(f, k, g, serverLevel.random.nextFloat() * 360.0f, 0.0f);
+                if (d > 16384.0 && mob.removeWhenFarAway(d) || !mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) || !mob.checkSpawnObstruction(serverLevel)) continue;
+                spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(new BlockPos(mob)), MobSpawnType.NATURAL, spawnGroupData, null);
                 ++r;
-                level.addFreshEntity(mob);
+                serverLevel.addFreshEntity(mob);
                 if (++i >= mob.getMaxSpawnClusterSize()) {
                     return;
                 }

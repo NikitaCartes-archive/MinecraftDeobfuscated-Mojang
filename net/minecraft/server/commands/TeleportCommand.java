@@ -98,7 +98,7 @@ public class TeleportCommand {
             serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, entity.getId());
             entity.stopRiding();
             if (((ServerPlayer)entity).isSleeping()) {
-                ((ServerPlayer)entity).stopSleepInBed(true, true, false);
+                ((ServerPlayer)entity).stopSleepInBed(true, true);
             }
             if (serverLevel == entity.level) {
                 ((ServerPlayer)entity).connection.teleport(d, e, f, g, h, set);

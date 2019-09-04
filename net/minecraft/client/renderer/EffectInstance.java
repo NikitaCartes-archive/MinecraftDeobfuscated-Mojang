@@ -9,14 +9,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Effect;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -120,12 +119,12 @@ AutoCloseable {
             this.cull = GsonHelper.getAsBoolean(jsonObject, "cull", true);
             this.vertexProgram = EffectInstance.getOrCreate(resourceManager, Program.Type.VERTEX, string2);
             this.fragmentProgram = EffectInstance.getOrCreate(resourceManager, Program.Type.FRAGMENT, string3);
-            this.programId = ProgramManager.getInstance().createProgram();
-            ProgramManager.getInstance().linkProgram(this);
+            this.programId = ProgramManager.createProgram();
+            ProgramManager.linkProgram(this);
             this.updateLocations();
             if (this.attributeNames != null) {
                 for (String string4 : this.attributeNames) {
-                    int l = GLX.glGetAttribLocation(this.programId, string4);
+                    int l = Uniform.glGetAttribLocation(this.programId, string4);
                     this.attributes.add(l);
                 }
             }
@@ -204,17 +203,17 @@ AutoCloseable {
         for (Uniform uniform : this.uniforms) {
             uniform.close();
         }
-        ProgramManager.getInstance().releaseProgram(this);
+        ProgramManager.releaseProgram(this);
     }
 
     public void clear() {
-        GLX.glUseProgram(0);
+        ProgramManager.glUseProgram(0);
         lastProgramId = -1;
         lastAppliedEffect = null;
         for (int i = 0; i < this.samplerLocations.size(); ++i) {
             if (this.samplerMap.get(this.samplerNames.get(i)) == null) continue;
-            GlStateManager.activeTexture(GLX.GL_TEXTURE0 + i);
-            GlStateManager.bindTexture(0);
+            RenderSystem.activeTexture(33984 + i);
+            RenderSystem.bindTexture(0);
         }
     }
 
@@ -223,18 +222,18 @@ AutoCloseable {
         lastAppliedEffect = this;
         this.blend.apply();
         if (this.programId != lastProgramId) {
-            GLX.glUseProgram(this.programId);
+            ProgramManager.glUseProgram(this.programId);
             lastProgramId = this.programId;
         }
         if (this.cull) {
-            GlStateManager.enableCull();
+            RenderSystem.enableCull();
         } else {
-            GlStateManager.disableCull();
+            RenderSystem.disableCull();
         }
         for (int i = 0; i < this.samplerLocations.size(); ++i) {
             if (this.samplerMap.get(this.samplerNames.get(i)) == null) continue;
-            GlStateManager.activeTexture(GLX.GL_TEXTURE0 + i);
-            GlStateManager.enableTexture();
+            RenderSystem.activeTexture(33984 + i);
+            RenderSystem.enableTexture();
             Object object = this.samplerMap.get(this.samplerNames.get(i));
             int j = -1;
             if (object instanceof RenderTarget) {
@@ -245,8 +244,8 @@ AutoCloseable {
                 j = (Integer)object;
             }
             if (j == -1) continue;
-            GlStateManager.bindTexture(j);
-            GLX.glUniform1i(GLX.glGetUniformLocation(this.programId, this.samplerNames.get(i)), i);
+            RenderSystem.bindTexture(j);
+            Uniform.uploadInteger(Uniform.glGetUniformLocation(this.programId, this.samplerNames.get(i)), i);
         }
         for (Uniform uniform : this.uniforms) {
             uniform.upload();
@@ -275,7 +274,7 @@ AutoCloseable {
         int j = 0;
         while (i < this.samplerNames.size()) {
             string = this.samplerNames.get(i);
-            k = GLX.glGetUniformLocation(this.programId, string);
+            k = Uniform.glGetUniformLocation(this.programId, string);
             if (k == -1) {
                 LOGGER.warn("Shader {}could not find sampler named {} in the specified shader program.", (Object)this.name, (Object)string);
                 this.samplerMap.remove(string);
@@ -289,7 +288,7 @@ AutoCloseable {
         }
         for (Uniform uniform : this.uniforms) {
             string = uniform.getName();
-            k = GLX.glGetUniformLocation(this.programId, string);
+            k = Uniform.glGetUniformLocation(this.programId, string);
             if (k == -1) {
                 LOGGER.warn("Could not find uniform named {} in the specified shader program.", (Object)string);
                 continue;

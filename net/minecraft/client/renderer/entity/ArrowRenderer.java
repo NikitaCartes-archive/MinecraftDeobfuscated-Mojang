@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -24,12 +24,12 @@ extends EntityRenderer<T> {
     @Override
     public void render(T abstractArrow, double d, double e, double f, float g, float h) {
         this.bindTexture(abstractArrow);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.pushMatrix();
-        GlStateManager.disableLighting();
-        GlStateManager.translatef((float)d, (float)e, (float)f);
-        GlStateManager.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot), 0.0f, 0.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.disableLighting();
+        RenderSystem.translatef((float)d, (float)e, (float)f);
+        RenderSystem.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot), 0.0f, 0.0f, 1.0f);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         boolean i = false;
@@ -42,27 +42,27 @@ extends EntityRenderer<T> {
         float p = 0.15625f;
         float q = 0.3125f;
         float r = 0.05625f;
-        GlStateManager.enableRescaleNormal();
+        RenderSystem.enableRescaleNormal();
         float s = (float)((AbstractArrow)abstractArrow).shakeTime - h;
         if (s > 0.0f) {
             float t = -Mth.sin(s * 3.0f) * s;
-            GlStateManager.rotatef(t, 0.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(t, 0.0f, 0.0f, 1.0f);
         }
-        GlStateManager.rotatef(45.0f, 1.0f, 0.0f, 0.0f);
-        GlStateManager.scalef(0.05625f, 0.05625f, 0.05625f);
-        GlStateManager.translatef(-4.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(45.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.scalef(0.05625f, 0.05625f, 0.05625f);
+        RenderSystem.translatef(-4.0f, 0.0f, 0.0f);
         if (this.solidRender) {
-            GlStateManager.enableColorMaterial();
-            GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(abstractArrow));
+            RenderSystem.enableColorMaterial();
+            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(abstractArrow));
         }
-        GlStateManager.normal3f(0.05625f, 0.0f, 0.0f);
+        RenderSystem.normal3f(0.05625f, 0.0f, 0.0f);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(-7.0, -2.0, -2.0).uv(0.0, 0.15625).endVertex();
         bufferBuilder.vertex(-7.0, -2.0, 2.0).uv(0.15625, 0.15625).endVertex();
         bufferBuilder.vertex(-7.0, 2.0, 2.0).uv(0.15625, 0.3125).endVertex();
         bufferBuilder.vertex(-7.0, 2.0, -2.0).uv(0.0, 0.3125).endVertex();
         tesselator.end();
-        GlStateManager.normal3f(-0.05625f, 0.0f, 0.0f);
+        RenderSystem.normal3f(-0.05625f, 0.0f, 0.0f);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(-7.0, 2.0, -2.0).uv(0.0, 0.15625).endVertex();
         bufferBuilder.vertex(-7.0, 2.0, 2.0).uv(0.15625, 0.15625).endVertex();
@@ -70,8 +70,8 @@ extends EntityRenderer<T> {
         bufferBuilder.vertex(-7.0, -2.0, -2.0).uv(0.0, 0.3125).endVertex();
         tesselator.end();
         for (int u = 0; u < 4; ++u) {
-            GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            GlStateManager.normal3f(0.0f, 0.0f, 0.05625f);
+            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.normal3f(0.0f, 0.0f, 0.05625f);
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
             bufferBuilder.vertex(-8.0, -2.0, 0.0).uv(0.0, 0.0).endVertex();
             bufferBuilder.vertex(8.0, -2.0, 0.0).uv(0.5, 0.0).endVertex();
@@ -80,12 +80,12 @@ extends EntityRenderer<T> {
             tesselator.end();
         }
         if (this.solidRender) {
-            GlStateManager.tearDownSolidRenderingTextureCombine();
-            GlStateManager.disableColorMaterial();
+            RenderSystem.tearDownSolidRenderingTextureCombine();
+            RenderSystem.disableColorMaterial();
         }
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.enableLighting();
-        GlStateManager.popMatrix();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.enableLighting();
+        RenderSystem.popMatrix();
         super.render(abstractArrow, d, e, f, g, h);
     }
 }

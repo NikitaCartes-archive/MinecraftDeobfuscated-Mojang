@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -49,24 +49,24 @@ extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
         }
         Item item = itemStack.getItem();
         Block block = Block.byItem(item);
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         boolean bl2 = bl = this.itemRenderer.isGui3d(itemStack) && block.getRenderLayer() == BlockLayer.TRANSLUCENT;
         if (bl) {
-            GlStateManager.depthMask(false);
+            RenderSystem.depthMask(false);
         }
         float f = 1.0f;
         float g = -1.0f;
         float h = Mth.abs(livingEntity.xRot) / 60.0f;
         if (livingEntity.xRot < 0.0f) {
-            GlStateManager.translatef(0.0f, 1.0f - h * 0.5f, -1.0f + h * 0.5f);
+            RenderSystem.translatef(0.0f, 1.0f - h * 0.5f, -1.0f + h * 0.5f);
         } else {
-            GlStateManager.translatef(0.0f, 1.0f + h * 0.8f, -1.0f + h * 0.2f);
+            RenderSystem.translatef(0.0f, 1.0f + h * 0.8f, -1.0f + h * 0.2f);
         }
         this.itemRenderer.renderWithMobState(itemStack, livingEntity, ItemTransforms.TransformType.GROUND, false);
         if (bl) {
-            GlStateManager.depthMask(true);
+            RenderSystem.depthMask(true);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

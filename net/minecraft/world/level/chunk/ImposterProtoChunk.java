@@ -12,10 +12,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -157,7 +157,7 @@ extends ProtoChunk {
     }
 
     @Override
-    public Biome[] getBiomes() {
+    public ChunkBiomeContainer getBiomes() {
         return this.wrapped.getBiomes();
     }
 
@@ -200,7 +200,7 @@ extends ProtoChunk {
     }
 
     @Override
-    public void setBiomes(Biome[] biomes) {
+    public void setBiomes(ChunkBiomeContainer chunkBiomeContainer) {
     }
 
     @Override

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BannerModel;
@@ -29,40 +29,40 @@ extends BlockEntityRenderer<BannerBlockEntity> {
         long l;
         float h = 0.6666667f;
         boolean bl = bannerBlockEntity.getLevel() == null;
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         ModelPart modelPart = this.bannerModel.getPole();
         if (bl) {
             l = 0L;
-            GlStateManager.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
+            RenderSystem.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
             modelPart.visible = true;
         } else {
             l = bannerBlockEntity.getLevel().getGameTime();
             BlockState blockState = bannerBlockEntity.getBlockState();
             if (blockState.getBlock() instanceof BannerBlock) {
-                GlStateManager.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
-                GlStateManager.rotatef((float)(-blockState.getValue(BannerBlock.ROTATION).intValue() * 360) / 16.0f, 0.0f, 1.0f, 0.0f);
+                RenderSystem.translatef((float)d + 0.5f, (float)e + 0.5f, (float)f + 0.5f);
+                RenderSystem.rotatef((float)(-blockState.getValue(BannerBlock.ROTATION).intValue() * 360) / 16.0f, 0.0f, 1.0f, 0.0f);
                 modelPart.visible = true;
             } else {
-                GlStateManager.translatef((float)d + 0.5f, (float)e - 0.16666667f, (float)f + 0.5f);
-                GlStateManager.rotatef(-blockState.getValue(WallBannerBlock.FACING).toYRot(), 0.0f, 1.0f, 0.0f);
-                GlStateManager.translatef(0.0f, -0.3125f, -0.4375f);
+                RenderSystem.translatef((float)d + 0.5f, (float)e - 0.16666667f, (float)f + 0.5f);
+                RenderSystem.rotatef(-blockState.getValue(WallBannerBlock.FACING).toYRot(), 0.0f, 1.0f, 0.0f);
+                RenderSystem.translatef(0.0f, -0.3125f, -0.4375f);
                 modelPart.visible = false;
             }
         }
         BlockPos blockPos = bannerBlockEntity.getBlockPos();
-        float j = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + g;
-        this.bannerModel.getFlag().xRot = (-0.0125f + 0.01f * Mth.cos(j * (float)Math.PI * 0.02f)) * (float)Math.PI;
-        GlStateManager.enableRescaleNormal();
+        float j = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + g) / 100.0f;
+        this.bannerModel.getFlag().xRot = (-0.0125f + 0.01f * Mth.cos((float)Math.PI * 2 * j)) * (float)Math.PI;
+        RenderSystem.enableRescaleNormal();
         ResourceLocation resourceLocation = this.getTextureLocation(bannerBlockEntity);
         if (resourceLocation != null) {
             this.bindTexture(resourceLocation);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(0.6666667f, -0.6666667f, -0.6666667f);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(0.6666667f, -0.6666667f, -0.6666667f);
             this.bannerModel.render();
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.popMatrix();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.popMatrix();
     }
 
     @Nullable

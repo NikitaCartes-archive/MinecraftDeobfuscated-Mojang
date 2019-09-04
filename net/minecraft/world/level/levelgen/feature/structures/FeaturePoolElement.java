@@ -76,8 +76,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
-        ChunkGenerator<?> chunkGenerator = levelAccessor.getChunkSource().getGenerator();
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
         return this.feature.place(levelAccessor, chunkGenerator, random, blockPos);
     }
 

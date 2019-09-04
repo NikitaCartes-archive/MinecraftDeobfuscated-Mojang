@@ -3,7 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
@@ -41,15 +41,15 @@ extends RealmsScreenWithCallback<WorldTemplate> {
     private int subtitleColor = 0xFF0000;
     private final int BUTTON_CANCEL_ID = 0;
     private final int BUTTON_FRAME_START = 100;
-    private WorldTemplatePaginatedList templates = null;
-    private WorldTemplatePaginatedList adventuremaps = null;
-    private WorldTemplatePaginatedList experiences = null;
-    private WorldTemplatePaginatedList inspirations = null;
+    private WorldTemplatePaginatedList templates;
+    private WorldTemplatePaginatedList adventuremaps;
+    private WorldTemplatePaginatedList experiences;
+    private WorldTemplatePaginatedList inspirations;
     public int slot = -1;
     private ResetType typeToReset = ResetType.NONE;
-    private ResetWorldInfo worldInfoToReset = null;
-    private WorldTemplate worldTemplateToReset = null;
-    private String resetTitle = null;
+    private ResetWorldInfo worldInfoToReset;
+    private WorldTemplate worldTemplateToReset;
+    private String resetTitle;
     private int confirmationId = -1;
 
     public RealmsResetWorldScreen(RealmsScreen realmsScreen, RealmsServer realmsServer, RealmsScreen realmsScreen2) {
@@ -203,16 +203,16 @@ extends RealmsScreenWithCallback<WorldTemplate> {
             RealmsTextureManager.bindWorldTemplate(String.valueOf(l), string2);
         }
         if (bl) {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         } else {
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         RealmsScreen.blit(i + 2, j + 14, 0.0f, 0.0f, 56, 56, 56, 56);
         RealmsResetWorldScreen.bind("realms:textures/gui/realms/slot_frame.png");
         if (bl) {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         } else {
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
         RealmsScreen.blit(i, j + 12, 0.0f, 0.0f, 60, 60, 60, 60);
         this.drawCenteredString(string, i + 30, j, bl ? 0xA0A0A0 : 0xFFFFFF);

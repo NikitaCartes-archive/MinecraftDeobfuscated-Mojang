@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CodModel;
@@ -33,10 +33,10 @@ extends MobRenderer<Cod, CodModel<Cod>> {
     protected void setupRotations(Cod cod, float f, float g, float h) {
         super.setupRotations(cod, f, g, h);
         float i = 4.3f * Mth.sin(0.6f * f);
-        GlStateManager.rotatef(i, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(i, 0.0f, 1.0f, 0.0f);
         if (!cod.isInWater()) {
-            GlStateManager.translatef(0.1f, 0.1f, -0.1f);
-            GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.translatef(0.1f, 0.1f, -0.1f);
+            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
         }
     }
 }

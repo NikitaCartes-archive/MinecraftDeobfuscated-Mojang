@@ -105,7 +105,7 @@ implements DataProvider {
     }
 
     /*
-     * Opcode count of 15344 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
+     * Opcode count of 15385 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
      */
     private void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(Blocks.ACACIA_WOOD, 3).define(Character.valueOf('#'), Blocks.ACACIA_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.ACACIA_LOG)).save(consumer);
@@ -126,6 +126,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Items.ARROW, 4).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.FLINT).define(Character.valueOf('Y'), Items.FEATHER).pattern("X").pattern("#").pattern("Y").unlocks("has_feather", this.has(Items.FEATHER)).unlocks("has_flint", this.has(Items.FLINT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BARREL, 1).define(Character.valueOf('P'), ItemTags.PLANKS).define(Character.valueOf('S'), ItemTags.WOODEN_SLABS).pattern("PSP").pattern("P P").pattern("PSP").unlocks("has_planks", this.has(ItemTags.PLANKS)).unlocks("has_wood_slab", this.has(ItemTags.WOODEN_SLABS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BEACON).define(Character.valueOf('S'), Items.NETHER_STAR).define(Character.valueOf('G'), Blocks.GLASS).define(Character.valueOf('O'), Blocks.OBSIDIAN).pattern("GGG").pattern("GSG").pattern("OOO").unlocks("has_nether_star", this.has(Items.NETHER_STAR)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.BEE_HIVE).define(Character.valueOf('P'), ItemTags.PLANKS).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("PPP").pattern("HHH").pattern("PPP").unlocks("has_honeycomb", this.has(Items.HONEYCOMB)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.BEETROOT_SOUP).requires(Items.BOWL).requires(Items.BEETROOT, 6).unlocks("has_beetroot", this.has(Items.BEETROOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BIRCH_WOOD, 3).define(Character.valueOf('#'), Blocks.BIRCH_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.BIRCH_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.BIRCH_BOAT).define(Character.valueOf('#'), Blocks.BIRCH_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
@@ -587,7 +588,8 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.COBBLESTONE_STAIRS, 4).define(Character.valueOf('#'), Blocks.COBBLESTONE).pattern("#  ").pattern("## ").pattern("###").unlocks("has_cobblestone", this.has(Blocks.COBBLESTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.STONE_SWORD).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Blocks.COBBLESTONE).pattern("X").pattern("X").pattern("#").unlocks("has_cobblestone", this.has(Blocks.COBBLESTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.WHITE_WOOL).define(Character.valueOf('#'), Items.STRING).pattern("##").pattern("##").unlocks("has_string", this.has(Items.STRING)).save(consumer, "white_wool_from_string");
-        ShapelessRecipeBuilder.shapeless(Items.SUGAR).requires(Blocks.SUGAR_CANE).unlocks("has_reeds", this.has(Blocks.SUGAR_CANE)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.SUGAR).requires(Blocks.SUGAR_CANE).group("sugar").unlocks("has_reeds", this.has(Blocks.SUGAR_CANE)).save(consumer, "sugar_from_sugar_cane");
+        ShapelessRecipeBuilder.shapeless(Items.SUGAR, 3).requires(Items.HONEY_BOTTLE).group("sugar").unlocks("has_honey_bottle", this.has(Items.HONEY_BOTTLE)).save(consumer, "sugar_from_honey_bottle");
         ShapedRecipeBuilder.shaped(Blocks.TNT).define(Character.valueOf('#'), Ingredient.of(Blocks.SAND, Blocks.RED_SAND)).define(Character.valueOf('X'), Items.GUNPOWDER).pattern("X#X").pattern("#X#").pattern("X#X").unlocks("has_gunpowder", this.has(Items.GUNPOWDER)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.TNT_MINECART).define(Character.valueOf('A'), Blocks.TNT).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlocks("has_minecart", this.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.TORCH, 4).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Ingredient.of(Items.COAL, Items.CHARCOAL)).pattern("X").pattern("#").unlocks("has_stone_pickaxe", this.has(Items.STONE_PICKAXE)).save(consumer);

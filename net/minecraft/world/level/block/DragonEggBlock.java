@@ -75,5 +75,10 @@ extends FallingBlock {
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
     }
+
+    @Override
+    public boolean canOcclude(BlockState blockState) {
+        return false;
+    }
 }
 

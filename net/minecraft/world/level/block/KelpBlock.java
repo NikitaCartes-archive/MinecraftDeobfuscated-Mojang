@@ -6,11 +6,11 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -68,15 +68,15 @@ implements LiquidBlockContainer {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (!blockState.canSurvive(level, blockPos)) {
-            level.destroyBlock(blockPos, true);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!blockState.canSurvive(serverLevel, blockPos)) {
+            serverLevel.destroyBlock(blockPos, true);
             return;
         }
         BlockPos blockPos2 = blockPos.above();
-        BlockState blockState2 = level.getBlockState(blockPos2);
+        BlockState blockState2 = serverLevel.getBlockState(blockPos2);
         if (blockState2.getBlock() == Blocks.WATER && blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14) {
-            level.setBlockAndUpdate(blockPos2, (BlockState)blockState.cycle(AGE));
+            serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState.cycle(AGE));
         }
     }
 

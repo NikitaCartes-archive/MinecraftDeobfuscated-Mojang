@@ -3,9 +3,10 @@
  */
 package com.mojang.blaze3d.pipeline;
 
-import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -39,27 +40,19 @@ public class RenderTarget {
     }
 
     public void resize(int i, int j, boolean bl) {
-        if (!GLX.isUsingFBOs()) {
-            this.viewWidth = i;
-            this.viewHeight = j;
-            return;
-        }
-        GlStateManager.enableDepthTest();
+        RenderSystem.enableDepthTest();
         if (this.frameBufferId >= 0) {
             this.destroyBuffers();
         }
         this.createBuffers(i, j, bl);
-        GLX.glBindFramebuffer(GLX.GL_FRAMEBUFFER, 0);
+        GlStateManager.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
     }
 
     public void destroyBuffers() {
-        if (!GLX.isUsingFBOs()) {
-            return;
-        }
         this.unbindRead();
         this.unbindWrite();
         if (this.depthBufferId > -1) {
-            GLX.glDeleteRenderbuffers(this.depthBufferId);
+            GlStateManager.glDeleteRenderbuffers(this.depthBufferId);
             this.depthBufferId = -1;
         }
         if (this.colorTextureId > -1) {
@@ -67,8 +60,8 @@ public class RenderTarget {
             this.colorTextureId = -1;
         }
         if (this.frameBufferId > -1) {
-            GLX.glBindFramebuffer(GLX.GL_FRAMEBUFFER, 0);
-            GLX.glDeleteFramebuffers(this.frameBufferId);
+            GlStateManager.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+            GlStateManager.glDeleteFramebuffers(this.frameBufferId);
             this.frameBufferId = -1;
         }
     }
@@ -78,24 +71,20 @@ public class RenderTarget {
         this.viewHeight = j;
         this.width = i;
         this.height = j;
-        if (!GLX.isUsingFBOs()) {
-            this.clear(bl);
-            return;
-        }
-        this.frameBufferId = GLX.glGenFramebuffers();
+        this.frameBufferId = GlStateManager.glGenFramebuffers();
         this.colorTextureId = TextureUtil.generateTextureId();
         if (this.useDepth) {
-            this.depthBufferId = GLX.glGenRenderbuffers();
+            this.depthBufferId = GlStateManager.glGenRenderbuffers();
         }
         this.setFilterMode(9728);
-        GlStateManager.bindTexture(this.colorTextureId);
-        GlStateManager.texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
-        GLX.glBindFramebuffer(GLX.GL_FRAMEBUFFER, this.frameBufferId);
-        GLX.glFramebufferTexture2D(GLX.GL_FRAMEBUFFER, GLX.GL_COLOR_ATTACHMENT0, 3553, this.colorTextureId, 0);
+        RenderSystem.bindTexture(this.colorTextureId);
+        RenderSystem.texImage2D(3553, 0, 32856, this.width, this.height, 0, 6408, 5121, null);
+        GlStateManager.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
+        GlStateManager.glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, 3553, this.colorTextureId, 0);
         if (this.useDepth) {
-            GLX.glBindRenderbuffer(GLX.GL_RENDERBUFFER, this.depthBufferId);
-            GLX.glRenderbufferStorage(GLX.GL_RENDERBUFFER, 33190, this.width, this.height);
-            GLX.glFramebufferRenderbuffer(GLX.GL_FRAMEBUFFER, GLX.GL_DEPTH_ATTACHMENT, GLX.GL_RENDERBUFFER, this.depthBufferId);
+            GlStateManager.glBindRenderbuffer(GlConst.GL_RENDERBUFFER, this.depthBufferId);
+            GlStateManager.glRenderbufferStorage(GlConst.GL_RENDERBUFFER, 33190, this.width, this.height);
+            GlStateManager.glFramebufferRenderbuffer(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, GlConst.GL_RENDERBUFFER, this.depthBufferId);
         }
         this.checkStatus();
         this.clear(bl);
@@ -103,62 +92,52 @@ public class RenderTarget {
     }
 
     public void setFilterMode(int i) {
-        if (GLX.isUsingFBOs()) {
-            this.filterMode = i;
-            GlStateManager.bindTexture(this.colorTextureId);
-            GlStateManager.texParameter(3553, 10241, i);
-            GlStateManager.texParameter(3553, 10240, i);
-            GlStateManager.texParameter(3553, 10242, 10496);
-            GlStateManager.texParameter(3553, 10243, 10496);
-            GlStateManager.bindTexture(0);
-        }
+        this.filterMode = i;
+        RenderSystem.bindTexture(this.colorTextureId);
+        RenderSystem.texParameter(3553, 10241, i);
+        RenderSystem.texParameter(3553, 10240, i);
+        RenderSystem.texParameter(3553, 10242, 10496);
+        RenderSystem.texParameter(3553, 10243, 10496);
+        RenderSystem.bindTexture(0);
     }
 
     public void checkStatus() {
-        int i = GLX.glCheckFramebufferStatus(GLX.GL_FRAMEBUFFER);
-        if (i == GLX.GL_FRAMEBUFFER_COMPLETE) {
+        int i = GlStateManager.glCheckFramebufferStatus(GlConst.GL_FRAMEBUFFER);
+        if (i == GlConst.GL_FRAMEBUFFER_COMPLETE) {
             return;
         }
-        if (i == GLX.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+        if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
             throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
         }
-        if (i == GLX.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+        if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
             throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
         }
-        if (i == GLX.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
+        if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
             throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
         }
-        if (i == GLX.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER) {
+        if (i == GlConst.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER) {
             throw new RuntimeException("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
         }
         throw new RuntimeException("glCheckFramebufferStatus returned unknown status:" + i);
     }
 
     public void bindRead() {
-        if (GLX.isUsingFBOs()) {
-            GlStateManager.bindTexture(this.colorTextureId);
-        }
+        RenderSystem.bindTexture(this.colorTextureId);
     }
 
     public void unbindRead() {
-        if (GLX.isUsingFBOs()) {
-            GlStateManager.bindTexture(0);
-        }
+        RenderSystem.bindTexture(0);
     }
 
     public void bindWrite(boolean bl) {
-        if (GLX.isUsingFBOs()) {
-            GLX.glBindFramebuffer(GLX.GL_FRAMEBUFFER, this.frameBufferId);
-            if (bl) {
-                GlStateManager.viewport(0, 0, this.viewWidth, this.viewHeight);
-            }
+        GlStateManager.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
+        if (bl) {
+            RenderSystem.viewport(0, 0, this.viewWidth, this.viewHeight);
         }
     }
 
     public void unbindWrite() {
-        if (GLX.isUsingFBOs()) {
-            GLX.glBindFramebuffer(GLX.GL_FRAMEBUFFER, 0);
-        }
+        GlStateManager.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
     }
 
     public void setClearColor(float f, float g, float h, float i) {
@@ -173,27 +152,24 @@ public class RenderTarget {
     }
 
     public void blitToScreen(int i, int j, boolean bl) {
-        if (!GLX.isUsingFBOs()) {
-            return;
-        }
-        GlStateManager.colorMask(true, true, true, false);
-        GlStateManager.disableDepthTest();
-        GlStateManager.depthMask(false);
-        GlStateManager.matrixMode(5889);
-        GlStateManager.loadIdentity();
-        GlStateManager.ortho(0.0, i, j, 0.0, 1000.0, 3000.0);
-        GlStateManager.matrixMode(5888);
-        GlStateManager.loadIdentity();
-        GlStateManager.translatef(0.0f, 0.0f, -2000.0f);
-        GlStateManager.viewport(0, 0, i, j);
-        GlStateManager.enableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.disableAlphaTest();
+        RenderSystem.colorMask(true, true, true, false);
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0, i, j, 0.0, 1000.0, 3000.0);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
+        RenderSystem.viewport(0, 0, i, j);
+        RenderSystem.enableTexture();
+        RenderSystem.disableLighting();
+        RenderSystem.disableAlphaTest();
         if (bl) {
-            GlStateManager.disableBlend();
-            GlStateManager.enableColorMaterial();
+            RenderSystem.disableBlend();
+            RenderSystem.enableColorMaterial();
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindRead();
         float f = i;
         float g = j;
@@ -208,19 +184,19 @@ public class RenderTarget {
         bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0, k).color(255, 255, 255, 255).endVertex();
         tesselator.end();
         this.unbindRead();
-        GlStateManager.depthMask(true);
-        GlStateManager.colorMask(true, true, true, true);
+        RenderSystem.depthMask(true);
+        RenderSystem.colorMask(true, true, true, true);
     }
 
     public void clear(boolean bl) {
         this.bindWrite(true);
-        GlStateManager.clearColor(this.clearChannels[0], this.clearChannels[1], this.clearChannels[2], this.clearChannels[3]);
+        RenderSystem.clearColor(this.clearChannels[0], this.clearChannels[1], this.clearChannels[2], this.clearChannels[3]);
         int i = 16384;
         if (this.useDepth) {
-            GlStateManager.clearDepth(1.0);
+            RenderSystem.clearDepth(1.0);
             i |= 0x100;
         }
-        GlStateManager.clear(i, bl);
+        RenderSystem.clear(i, bl);
         this.unbindWrite();
     }
 }

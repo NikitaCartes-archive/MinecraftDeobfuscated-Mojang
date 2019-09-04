@@ -5,8 +5,8 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -218,15 +218,15 @@ extends Screen {
 
             private void blitSlot(int i, int j, Item item) {
                 this.blitSlotBg(i + 1, j + 1);
-                GlStateManager.enableRescaleNormal();
+                RenderSystem.enableRescaleNormal();
                 Lighting.turnOnGui();
                 PresetFlatWorldScreen.this.itemRenderer.renderGuiItem(new ItemStack(item), i + 2, j + 2);
                 Lighting.turnOff();
-                GlStateManager.disableRescaleNormal();
+                RenderSystem.disableRescaleNormal();
             }
 
             private void blitSlotBg(int i, int j) {
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 PresetsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
                 GuiComponent.blit(i, j, PresetFlatWorldScreen.this.blitOffset, 0.0f, 0.0f, 18, 18, 128, 128);
             }

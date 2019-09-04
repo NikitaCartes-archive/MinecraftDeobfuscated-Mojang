@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
@@ -32,7 +32,7 @@ extends HumanoidMobRenderer<Vex, VexModel> {
 
     @Override
     protected void scale(Vex vex, float f) {
-        GlStateManager.scalef(0.4f, 0.4f, 0.4f);
+        RenderSystem.scalef(0.4f, 0.4f, 0.4f);
     }
 }
 

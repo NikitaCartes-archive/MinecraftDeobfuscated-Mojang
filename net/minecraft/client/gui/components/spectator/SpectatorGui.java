@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components.spectator;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -64,10 +65,10 @@ implements SpectatorMenuListener {
     }
 
     protected void renderPage(float f, int i, int j, SpectatorPage spectatorPage) {
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, f);
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, f);
         this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
         this.blit(i - 91, j, 0, 0, 182, 22);
         if (spectatorPage.getSelectedSlot() >= 0) {
@@ -78,20 +79,20 @@ implements SpectatorMenuListener {
             this.renderSlot(k, this.minecraft.window.getGuiScaledWidth() / 2 - 90 + k * 20 + 2, j + 3, f, spectatorPage.getItem(k));
         }
         Lighting.turnOff();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.disableBlend();
+        RenderSystem.disableRescaleNormal();
+        RenderSystem.disableBlend();
     }
 
     private void renderSlot(int i, int j, float f, float g, SpectatorMenuItem spectatorMenuItem) {
         this.minecraft.getTextureManager().bind(SPECTATOR_LOCATION);
         if (spectatorMenuItem != SpectatorMenu.EMPTY_SLOT) {
             int k = (int)(g * 255.0f);
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(j, f, 0.0f);
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(j, f, 0.0f);
             float h = spectatorMenuItem.isEnabled() ? 1.0f : 0.25f;
-            GlStateManager.color4f(h, h, h, g);
+            RenderSystem.color4f(h, h, h, g);
             spectatorMenuItem.renderIcon(h, k);
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
             String string = String.valueOf(this.minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage());
             if (k > 3 && spectatorMenuItem.isEnabled()) {
                 this.minecraft.font.drawShadow(string, j + 19 - 2 - this.minecraft.font.width(string), f + 6.0f + 3.0f, 0xFFFFFF + (k << 24));
@@ -108,12 +109,12 @@ implements SpectatorMenuListener {
             if (string != null) {
                 int j = (this.minecraft.window.getGuiScaledWidth() - this.minecraft.font.width(string)) / 2;
                 int k = this.minecraft.window.getGuiScaledHeight() - 35;
-                GlStateManager.pushMatrix();
-                GlStateManager.enableBlend();
-                GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+                RenderSystem.pushMatrix();
+                RenderSystem.enableBlend();
+                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
                 this.minecraft.font.drawShadow(string, j, k, 0xFFFFFF + (i << 24));
-                GlStateManager.disableBlend();
-                GlStateManager.popMatrix();
+                RenderSystem.disableBlend();
+                RenderSystem.popMatrix();
             }
         }
     }

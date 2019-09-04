@@ -94,7 +94,7 @@ public class Scoreboard {
             if (score == null) continue;
             list.add(score);
         }
-        Collections.sort(list, Score.SCORE_COMPARATOR);
+        list.sort(Score.SCORE_COMPARATOR);
         return list;
     }
 

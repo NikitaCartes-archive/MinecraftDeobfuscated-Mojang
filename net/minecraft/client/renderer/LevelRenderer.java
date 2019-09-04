@@ -9,11 +9,10 @@ import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -44,15 +43,12 @@ import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ChunkRenderList;
-import net.minecraft.client.renderer.OffsettedRenderList;
 import net.minecraft.client.renderer.PostChain;
-import net.minecraft.client.renderer.VboRenderList;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.CompiledChunk;
-import net.minecraft.client.renderer.chunk.ListedRenderChunk;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.chunk.RenderChunkFactory;
 import net.minecraft.client.renderer.chunk.VisGraph;
@@ -171,7 +167,7 @@ ResourceManagerReloadListener {
     private Vec3 prevCloudColor = Vec3.ZERO;
     private CloudStatus prevCloudsType;
     private ChunkRenderDispatcher chunkRenderDispatcher;
-    private ChunkRenderList renderList;
+    private final ChunkRenderList renderList;
     private int lastViewDistance = -1;
     private int noEntityRenderFrames = 2;
     private int renderedEntities;
@@ -180,8 +176,7 @@ ResourceManagerReloadListener {
     private FrustumData capturedFrustum;
     private final Vector4f[] frustumPoints = new Vector4f[8];
     private final Vector3d frustumPos = new Vector3d(0.0, 0.0, 0.0);
-    private boolean usingVbo;
-    private RenderChunkFactory renderChunkFactory;
+    private final RenderChunkFactory renderChunkFactory;
     private double xTransparentOld;
     private double yTransparentOld;
     private double zTransparentOld;
@@ -192,14 +187,8 @@ ResourceManagerReloadListener {
         this.minecraft = minecraft;
         this.entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
         this.textureManager = minecraft.getTextureManager();
-        this.usingVbo = GLX.useVbo();
-        if (this.usingVbo) {
-            this.renderList = new VboRenderList();
-            this.renderChunkFactory = RenderChunk::new;
-        } else {
-            this.renderList = new OffsettedRenderList();
-            this.renderChunkFactory = ListedRenderChunk::new;
-        }
+        this.renderList = new ChunkRenderList();
+        this.renderChunkFactory = RenderChunk::new;
         this.skyFormat = new VertexFormat();
         this.skyFormat.addElement(new VertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.POSITION, 3));
         this.createStars();
@@ -217,9 +206,9 @@ ResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         this.textureManager.bind(FORCEFIELD_LOCATION);
-        GlStateManager.texParameter(3553, 10242, 10497);
-        GlStateManager.texParameter(3553, 10243, 10497);
-        GlStateManager.bindTexture(0);
+        RenderSystem.texParameter(3553, 10242, 10497);
+        RenderSystem.texParameter(3553, 10243, 10497);
+        RenderSystem.bindTexture(0);
         this.setupBreakingTextureSprites();
         this.initOutline();
     }
@@ -239,28 +228,20 @@ ResourceManagerReloadListener {
     }
 
     public void initOutline() {
-        if (GLX.usePostProcess) {
-            if (ProgramManager.getInstance() == null) {
-                ProgramManager.createInstance();
-            }
-            if (this.entityEffect != null) {
-                this.entityEffect.close();
-            }
-            ResourceLocation resourceLocation = new ResourceLocation("shaders/post/entity_outline.json");
-            try {
-                this.entityEffect = new PostChain(this.minecraft.getTextureManager(), this.minecraft.getResourceManager(), this.minecraft.getMainRenderTarget(), resourceLocation);
-                this.entityEffect.resize(this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
-                this.entityTarget = this.entityEffect.getTempTarget("final");
-            } catch (IOException iOException) {
-                LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)iOException);
-                this.entityEffect = null;
-                this.entityTarget = null;
-            } catch (JsonSyntaxException jsonSyntaxException) {
-                LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
-                this.entityEffect = null;
-                this.entityTarget = null;
-            }
-        } else {
+        if (this.entityEffect != null) {
+            this.entityEffect.close();
+        }
+        ResourceLocation resourceLocation = new ResourceLocation("shaders/post/entity_outline.json");
+        try {
+            this.entityEffect = new PostChain(this.minecraft.getTextureManager(), this.minecraft.getResourceManager(), this.minecraft.getMainRenderTarget(), resourceLocation);
+            this.entityEffect.resize(this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+            this.entityTarget = this.entityEffect.getTempTarget("final");
+        } catch (IOException iOException) {
+            LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)iOException);
+            this.entityEffect = null;
+            this.entityTarget = null;
+        } catch (JsonSyntaxException jsonSyntaxException) {
+            LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
             this.entityEffect = null;
             this.entityTarget = null;
         }
@@ -268,10 +249,10 @@ ResourceManagerReloadListener {
 
     public void doEntityOutline() {
         if (this.shouldShowEntityOutlines()) {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
             this.entityTarget.blitToScreen(this.minecraft.window.getWidth(), this.minecraft.window.getHeight(), false);
-            GlStateManager.disableBlend();
+            RenderSystem.disableBlend();
         }
     }
 
@@ -289,19 +270,11 @@ ResourceManagerReloadListener {
             MemoryTracker.releaseList(this.darkList);
             this.darkList = -1;
         }
-        if (this.usingVbo) {
-            this.darkBuffer = new VertexBuffer(this.skyFormat);
-            this.drawSkyHemisphere(bufferBuilder, -16.0f, true);
-            bufferBuilder.end();
-            bufferBuilder.clear();
-            this.darkBuffer.upload(bufferBuilder.getBuffer());
-        } else {
-            this.darkList = MemoryTracker.genLists(1);
-            GlStateManager.newList(this.darkList, 4864);
-            this.drawSkyHemisphere(bufferBuilder, -16.0f, true);
-            tesselator.end();
-            GlStateManager.endList();
-        }
+        this.darkBuffer = new VertexBuffer(this.skyFormat);
+        this.drawSkyHemisphere(bufferBuilder, -16.0f, true);
+        bufferBuilder.end();
+        bufferBuilder.clear();
+        this.darkBuffer.upload(bufferBuilder.getBuffer());
     }
 
     private void createLightSky() {
@@ -314,19 +287,11 @@ ResourceManagerReloadListener {
             MemoryTracker.releaseList(this.skyList);
             this.skyList = -1;
         }
-        if (this.usingVbo) {
-            this.skyBuffer = new VertexBuffer(this.skyFormat);
-            this.drawSkyHemisphere(bufferBuilder, 16.0f, false);
-            bufferBuilder.end();
-            bufferBuilder.clear();
-            this.skyBuffer.upload(bufferBuilder.getBuffer());
-        } else {
-            this.skyList = MemoryTracker.genLists(1);
-            GlStateManager.newList(this.skyList, 4864);
-            this.drawSkyHemisphere(bufferBuilder, 16.0f, false);
-            tesselator.end();
-            GlStateManager.endList();
-        }
+        this.skyBuffer = new VertexBuffer(this.skyFormat);
+        this.drawSkyHemisphere(bufferBuilder, 16.0f, false);
+        bufferBuilder.end();
+        bufferBuilder.clear();
+        this.skyBuffer.upload(bufferBuilder.getBuffer());
     }
 
     private void drawSkyHemisphere(BufferBuilder bufferBuilder, float f, boolean bl) {
@@ -359,21 +324,11 @@ ResourceManagerReloadListener {
             MemoryTracker.releaseList(this.starList);
             this.starList = -1;
         }
-        if (this.usingVbo) {
-            this.starBuffer = new VertexBuffer(this.skyFormat);
-            this.drawStars(bufferBuilder);
-            bufferBuilder.end();
-            bufferBuilder.clear();
-            this.starBuffer.upload(bufferBuilder.getBuffer());
-        } else {
-            this.starList = MemoryTracker.genLists(1);
-            GlStateManager.pushMatrix();
-            GlStateManager.newList(this.starList, 4864);
-            this.drawStars(bufferBuilder);
-            tesselator.end();
-            GlStateManager.endList();
-            GlStateManager.popMatrix();
-        }
+        this.starBuffer = new VertexBuffer(this.skyFormat);
+        this.drawStars(bufferBuilder);
+        bufferBuilder.end();
+        bufferBuilder.clear();
+        this.starBuffer.upload(bufferBuilder.getBuffer());
     }
 
     private void drawStars(BufferBuilder bufferBuilder) {
@@ -458,20 +413,6 @@ ResourceManagerReloadListener {
         this.generateClouds = true;
         LeavesBlock.setFancy(this.minecraft.options.fancyGraphics);
         this.lastViewDistance = this.minecraft.options.renderDistance;
-        boolean bl = this.usingVbo;
-        this.usingVbo = GLX.useVbo();
-        if (bl && !this.usingVbo) {
-            this.renderList = new OffsettedRenderList();
-            this.renderChunkFactory = ListedRenderChunk::new;
-        } else if (!bl && this.usingVbo) {
-            this.renderList = new VboRenderList();
-            this.renderChunkFactory = RenderChunk::new;
-        }
-        if (bl != this.usingVbo) {
-            this.createStars();
-            this.createLightSky();
-            this.createDarkSky();
-        }
         if (this.viewArea != null) {
             this.viewArea.releaseAllBuffers();
         }
@@ -494,9 +435,6 @@ ResourceManagerReloadListener {
 
     public void resize(int i, int j) {
         this.needsUpdate();
-        if (!GLX.usePostProcess) {
-            return;
-        }
         if (this.entityEffect != null) {
             this.entityEffect.resize(i, j);
         }
@@ -552,8 +490,8 @@ ResourceManagerReloadListener {
             this.entityTarget.clear(Minecraft.ON_OSX);
             boolean bl = this.hadRenderedEntityOutlines = !list.isEmpty();
             if (!list.isEmpty()) {
-                GlStateManager.depthFunc(519);
-                GlStateManager.disableFog();
+                RenderSystem.depthFunc(519);
+                RenderSystem.disableFog();
                 this.entityTarget.bindWrite(false);
                 Lighting.turnOff();
                 this.entityRenderDispatcher.setSolidRendering(true);
@@ -562,16 +500,16 @@ ResourceManagerReloadListener {
                 }
                 this.entityRenderDispatcher.setSolidRendering(false);
                 Lighting.turnOn();
-                GlStateManager.depthMask(false);
+                RenderSystem.depthMask(false);
                 this.entityEffect.process(f);
-                GlStateManager.enableLighting();
-                GlStateManager.depthMask(true);
-                GlStateManager.enableFog();
-                GlStateManager.enableBlend();
-                GlStateManager.enableColorMaterial();
-                GlStateManager.depthFunc(515);
-                GlStateManager.enableDepthTest();
-                GlStateManager.enableAlphaTest();
+                RenderSystem.enableLighting();
+                RenderSystem.depthMask(true);
+                RenderSystem.enableFog();
+                RenderSystem.enableBlend();
+                RenderSystem.enableColorMaterial();
+                RenderSystem.depthFunc(515);
+                RenderSystem.enableDepthTest();
+                RenderSystem.enableAlphaTest();
             }
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
@@ -819,36 +757,32 @@ ResourceManagerReloadListener {
 
     private void renderSameAsLast(BlockLayer blockLayer) {
         this.minecraft.gameRenderer.turnOnLightLayer();
-        if (GLX.useVbo()) {
-            GlStateManager.enableClientState(32884);
-            GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
-            GlStateManager.enableClientState(32888);
-            GLX.glClientActiveTexture(GLX.GL_TEXTURE1);
-            GlStateManager.enableClientState(32888);
-            GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
-            GlStateManager.enableClientState(32886);
-        }
+        RenderSystem.enableClientState(32884);
+        RenderSystem.glClientActiveTexture(33984);
+        RenderSystem.enableClientState(32888);
+        RenderSystem.glClientActiveTexture(33985);
+        RenderSystem.enableClientState(32888);
+        RenderSystem.glClientActiveTexture(33984);
+        RenderSystem.enableClientState(32886);
         this.renderList.render(blockLayer);
-        if (GLX.useVbo()) {
-            List<VertexFormatElement> list = DefaultVertexFormat.BLOCK.getElements();
-            for (VertexFormatElement vertexFormatElement : list) {
-                VertexFormatElement.Usage usage = vertexFormatElement.getUsage();
-                int i = vertexFormatElement.getIndex();
-                switch (usage) {
-                    case POSITION: {
-                        GlStateManager.disableClientState(32884);
-                        break;
-                    }
-                    case UV: {
-                        GLX.glClientActiveTexture(GLX.GL_TEXTURE0 + i);
-                        GlStateManager.disableClientState(32888);
-                        GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
-                        break;
-                    }
-                    case COLOR: {
-                        GlStateManager.disableClientState(32886);
-                        GlStateManager.clearCurrentColor();
-                    }
+        List<VertexFormatElement> list = DefaultVertexFormat.BLOCK.getElements();
+        for (VertexFormatElement vertexFormatElement : list) {
+            VertexFormatElement.Usage usage = vertexFormatElement.getUsage();
+            int i = vertexFormatElement.getIndex();
+            switch (usage) {
+                case POSITION: {
+                    RenderSystem.disableClientState(32884);
+                    break;
+                }
+                case UV: {
+                    RenderSystem.glClientActiveTexture(33984 + i);
+                    RenderSystem.disableClientState(32888);
+                    RenderSystem.glClientActiveTexture(33984);
+                    break;
+                }
+                case COLOR: {
+                    RenderSystem.disableClientState(32886);
+                    RenderSystem.clearCurrentColor();
                 }
             }
         }
@@ -872,31 +806,31 @@ ResourceManagerReloadListener {
     }
 
     private void renderEndSky() {
-        GlStateManager.disableFog();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableFog();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Lighting.turnOff();
-        GlStateManager.depthMask(false);
+        RenderSystem.depthMask(false);
         this.textureManager.bind(END_SKY_LOCATION);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         for (int i = 0; i < 6; ++i) {
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             if (i == 1) {
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
             }
             if (i == 2) {
-                GlStateManager.rotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(-90.0f, 1.0f, 0.0f, 0.0f);
             }
             if (i == 3) {
-                GlStateManager.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
             }
             if (i == 4) {
-                GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
             }
             if (i == 5) {
-                GlStateManager.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
             }
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
             bufferBuilder.vertex(-100.0, -100.0, -100.0).uv(0.0, 0.0).color(40, 40, 40, 255).endVertex();
@@ -904,12 +838,12 @@ ResourceManagerReloadListener {
             bufferBuilder.vertex(100.0, -100.0, 100.0).uv(16.0, 16.0).color(40, 40, 40, 255).endVertex();
             bufferBuilder.vertex(100.0, -100.0, -100.0).uv(16.0, 0.0).color(40, 40, 40, 255).endVertex();
             tesselator.end();
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
         }
-        GlStateManager.depthMask(true);
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
     }
 
     public void renderSky(float f) {
@@ -927,40 +861,36 @@ ResourceManagerReloadListener {
         if (!this.minecraft.level.dimension.isNaturalDimension()) {
             return;
         }
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         Vec3 vec3 = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getBlockPosition(), f);
         float g = (float)vec3.x;
         float h = (float)vec3.y;
         float i = (float)vec3.z;
-        GlStateManager.color3f(g, h, i);
+        RenderSystem.color3f(g, h, i);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GlStateManager.depthMask(false);
-        GlStateManager.enableFog();
-        GlStateManager.color3f(g, h, i);
-        if (this.usingVbo) {
-            this.skyBuffer.bind();
-            GlStateManager.enableClientState(32884);
-            GlStateManager.vertexPointer(3, 5126, 12, 0);
-            this.skyBuffer.draw(7);
-            VertexBuffer.unbind();
-            GlStateManager.disableClientState(32884);
-        } else {
-            GlStateManager.callList(this.skyList);
-        }
-        GlStateManager.disableFog();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.depthMask(false);
+        RenderSystem.enableFog();
+        RenderSystem.color3f(g, h, i);
+        this.skyBuffer.bind();
+        RenderSystem.enableClientState(32884);
+        RenderSystem.vertexPointer(3, 5126, 12, 0);
+        this.skyBuffer.draw(7);
+        VertexBuffer.unbind();
+        RenderSystem.disableClientState(32884);
+        RenderSystem.disableFog();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         Lighting.turnOff();
         float[] fs = this.level.dimension.getSunriseColor(this.level.getTimeOfDay(f), f);
         if (fs != null) {
-            GlStateManager.disableTexture();
-            GlStateManager.shadeModel(7425);
-            GlStateManager.pushMatrix();
-            GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            GlStateManager.rotatef(Mth.sin(this.level.getSunAngle(f)) < 0.0f ? 180.0f : 0.0f, 0.0f, 0.0f, 1.0f);
-            GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.disableTexture();
+            RenderSystem.shadeModel(7425);
+            RenderSystem.pushMatrix();
+            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.rotatef(Mth.sin(this.level.getSunAngle(f)) < 0.0f ? 180.0f : 0.0f, 0.0f, 0.0f, 1.0f);
+            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
             j = fs[0];
             k = fs[1];
             float l = fs[2];
@@ -974,16 +904,16 @@ ResourceManagerReloadListener {
                 bufferBuilder.vertex(p * 120.0f, q * 120.0f, -q * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).endVertex();
             }
             tesselator.end();
-            GlStateManager.popMatrix();
-            GlStateManager.shadeModel(7424);
+            RenderSystem.popMatrix();
+            RenderSystem.shadeModel(7424);
         }
-        GlStateManager.enableTexture();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.pushMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.pushMatrix();
         j = 1.0f - this.level.getRainLevel(f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, j);
-        GlStateManager.rotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef(this.level.getTimeOfDay(f) * 360.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, j);
+        RenderSystem.rotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(this.level.getTimeOfDay(f) * 360.0f, 1.0f, 0.0f, 0.0f);
         k = 30.0f;
         this.textureManager.bind(SUN_LOCATION);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
@@ -1007,55 +937,47 @@ ResourceManagerReloadListener {
         bufferBuilder.vertex(k, -100.0, -k).uv(o, p).endVertex();
         bufferBuilder.vertex(-k, -100.0, -k).uv(q, p).endVertex();
         tesselator.end();
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         float t = this.level.getStarBrightness(f) * j;
         if (t > 0.0f) {
-            GlStateManager.color4f(t, t, t, t);
-            if (this.usingVbo) {
-                this.starBuffer.bind();
-                GlStateManager.enableClientState(32884);
-                GlStateManager.vertexPointer(3, 5126, 12, 0);
-                this.starBuffer.draw(7);
-                VertexBuffer.unbind();
-                GlStateManager.disableClientState(32884);
-            } else {
-                GlStateManager.callList(this.starList);
-            }
+            RenderSystem.color4f(t, t, t, t);
+            this.starBuffer.bind();
+            RenderSystem.enableClientState(32884);
+            RenderSystem.vertexPointer(3, 5126, 12, 0);
+            this.starBuffer.draw(7);
+            VertexBuffer.unbind();
+            RenderSystem.disableClientState(32884);
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.disableBlend();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.enableFog();
-        GlStateManager.popMatrix();
-        GlStateManager.disableTexture();
-        GlStateManager.color3f(0.0f, 0.0f, 0.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.enableFog();
+        RenderSystem.popMatrix();
+        RenderSystem.disableTexture();
+        RenderSystem.color3f(0.0f, 0.0f, 0.0f);
         double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getHorizonHeight();
         if (d < 0.0) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(0.0f, 12.0f, 0.0f);
-            if (this.usingVbo) {
-                this.darkBuffer.bind();
-                GlStateManager.enableClientState(32884);
-                GlStateManager.vertexPointer(3, 5126, 12, 0);
-                this.darkBuffer.draw(7);
-                VertexBuffer.unbind();
-                GlStateManager.disableClientState(32884);
-            } else {
-                GlStateManager.callList(this.darkList);
-            }
-            GlStateManager.popMatrix();
+            RenderSystem.pushMatrix();
+            RenderSystem.translatef(0.0f, 12.0f, 0.0f);
+            this.darkBuffer.bind();
+            RenderSystem.enableClientState(32884);
+            RenderSystem.vertexPointer(3, 5126, 12, 0);
+            this.darkBuffer.draw(7);
+            VertexBuffer.unbind();
+            RenderSystem.disableClientState(32884);
+            RenderSystem.popMatrix();
         }
         if (this.level.dimension.hasGround()) {
-            GlStateManager.color3f(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f);
+            RenderSystem.color3f(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f);
         } else {
-            GlStateManager.color3f(g, h, i);
+            RenderSystem.color3f(g, h, i);
         }
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(0.0f, -((float)(d - 16.0)), 0.0f);
-        GlStateManager.callList(this.darkList);
-        GlStateManager.popMatrix();
-        GlStateManager.enableTexture();
-        GlStateManager.depthMask(true);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, -((float)(d - 16.0)), 0.0f);
+        RenderSystem.callList(this.darkList);
+        RenderSystem.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.depthMask(true);
     }
 
     public void renderClouds(float f, double d, double e, double g) {
@@ -1097,68 +1019,60 @@ ResourceManagerReloadListener {
                 MemoryTracker.releaseList(this.cloudList);
                 this.cloudList = -1;
             }
-            if (this.usingVbo) {
-                this.cloudBuffer = new VertexBuffer(DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-                this.buildClouds(bufferBuilder, l, m, n, vec3);
-                bufferBuilder.end();
-                bufferBuilder.clear();
-                this.cloudBuffer.upload(bufferBuilder.getBuffer());
-            } else {
-                this.cloudList = MemoryTracker.genLists(1);
-                GlStateManager.newList(this.cloudList, 4864);
-                this.buildClouds(bufferBuilder, l, m, n, vec3);
-                tesselator.end();
-                GlStateManager.endList();
-            }
+            this.cloudBuffer = new VertexBuffer(DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
+            this.buildClouds(bufferBuilder, l, m, n, vec3);
+            bufferBuilder.end();
+            bufferBuilder.clear();
+            this.cloudBuffer.upload(bufferBuilder.getBuffer());
         }
-        GlStateManager.disableCull();
+        RenderSystem.disableCull();
         this.textureManager.bind(CLOUDS_LOCATION);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.pushMatrix();
-        GlStateManager.scalef(12.0f, 1.0f, 12.0f);
-        GlStateManager.translatef(-o, p, -q);
-        if (this.usingVbo && this.cloudBuffer != null) {
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.pushMatrix();
+        RenderSystem.scalef(12.0f, 1.0f, 12.0f);
+        RenderSystem.translatef(-o, p, -q);
+        if (this.cloudBuffer != null) {
             int u;
             this.cloudBuffer.bind();
-            GlStateManager.enableClientState(32884);
-            GlStateManager.enableClientState(32888);
-            GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
-            GlStateManager.enableClientState(32886);
-            GlStateManager.enableClientState(32885);
-            GlStateManager.vertexPointer(3, 5126, 28, 0);
-            GlStateManager.texCoordPointer(2, 5126, 28, 12);
-            GlStateManager.colorPointer(4, 5121, 28, 20);
-            GlStateManager.normalPointer(5120, 28, 24);
+            RenderSystem.enableClientState(32884);
+            RenderSystem.enableClientState(32888);
+            RenderSystem.glClientActiveTexture(33984);
+            RenderSystem.enableClientState(32886);
+            RenderSystem.enableClientState(32885);
+            RenderSystem.vertexPointer(3, 5126, 28, 0);
+            RenderSystem.texCoordPointer(2, 5126, 28, 12);
+            RenderSystem.colorPointer(4, 5121, 28, 20);
+            RenderSystem.normalPointer(5120, 28, 24);
             for (int v = u = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; v < 2; ++v) {
                 if (v == 0) {
-                    GlStateManager.colorMask(false, false, false, false);
+                    RenderSystem.colorMask(false, false, false, false);
                 } else {
-                    GlStateManager.colorMask(true, true, true, true);
+                    RenderSystem.colorMask(true, true, true, true);
                 }
                 this.cloudBuffer.draw(7);
             }
             VertexBuffer.unbind();
-            GlStateManager.disableClientState(32884);
-            GlStateManager.disableClientState(32888);
-            GlStateManager.disableClientState(32886);
-            GlStateManager.disableClientState(32885);
+            RenderSystem.disableClientState(32884);
+            RenderSystem.disableClientState(32888);
+            RenderSystem.disableClientState(32886);
+            RenderSystem.disableClientState(32885);
         } else if (this.cloudList >= 0) {
             int u;
             for (int v = u = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; v < 2; ++v) {
                 if (v == 0) {
-                    GlStateManager.colorMask(false, false, false, false);
+                    RenderSystem.colorMask(false, false, false, false);
                 } else {
-                    GlStateManager.colorMask(true, true, true, true);
+                    RenderSystem.colorMask(true, true, true, true);
                 }
-                GlStateManager.callList(this.cloudList);
+                RenderSystem.callList(this.cloudList);
             }
         }
-        GlStateManager.popMatrix();
-        GlStateManager.clearCurrentColor();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.disableBlend();
-        GlStateManager.enableCull();
+        RenderSystem.popMatrix();
+        RenderSystem.clearCurrentColor();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
+        RenderSystem.enableCull();
     }
 
     private void buildClouds(BufferBuilder bufferBuilder, double d, double e, double f, Vec3 vec3) {
@@ -1281,21 +1195,21 @@ ResourceManagerReloadListener {
         double g = camera.getPosition().x;
         double h = camera.getPosition().y;
         double i = camera.getPosition().z;
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         this.textureManager.bind(FORCEFIELD_LOCATION);
-        GlStateManager.depthMask(false);
-        GlStateManager.pushMatrix();
+        RenderSystem.depthMask(false);
+        RenderSystem.pushMatrix();
         int j = worldBorder.getStatus().getColor();
         float k = (float)(j >> 16 & 0xFF) / 255.0f;
         float l = (float)(j >> 8 & 0xFF) / 255.0f;
         float m = (float)(j & 0xFF) / 255.0f;
-        GlStateManager.color4f(k, l, m, (float)e);
-        GlStateManager.polygonOffset(-3.0f, -3.0f);
-        GlStateManager.enablePolygonOffset();
-        GlStateManager.alphaFunc(516, 0.1f);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.disableCull();
+        RenderSystem.color4f(k, l, m, (float)e);
+        RenderSystem.polygonOffset(-3.0f, -3.0f);
+        RenderSystem.enablePolygonOffset();
+        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.enableAlphaTest();
+        RenderSystem.disableCull();
         float n = (float)(Util.getMillis() % 3000L) / 3000.0f;
         float o = 0.0f;
         float p = 0.0f;
@@ -1364,34 +1278,34 @@ ResourceManagerReloadListener {
         }
         tesselator.end();
         bufferBuilder.offset(0.0, 0.0, 0.0);
-        GlStateManager.enableCull();
-        GlStateManager.disableAlphaTest();
-        GlStateManager.polygonOffset(0.0f, 0.0f);
-        GlStateManager.disablePolygonOffset();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
-        GlStateManager.depthMask(true);
+        RenderSystem.enableCull();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.polygonOffset(0.0f, 0.0f);
+        RenderSystem.disablePolygonOffset();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
+        RenderSystem.depthMask(true);
     }
 
     private void setupDestroyState() {
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.enableBlend();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 0.5f);
-        GlStateManager.polygonOffset(-1.0f, -10.0f);
-        GlStateManager.enablePolygonOffset();
-        GlStateManager.alphaFunc(516, 0.1f);
-        GlStateManager.enableAlphaTest();
-        GlStateManager.pushMatrix();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 0.5f);
+        RenderSystem.polygonOffset(-1.0f, -10.0f);
+        RenderSystem.enablePolygonOffset();
+        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.enableAlphaTest();
+        RenderSystem.pushMatrix();
     }
 
     private void restoreDestroyState() {
-        GlStateManager.disableAlphaTest();
-        GlStateManager.polygonOffset(0.0f, 0.0f);
-        GlStateManager.disablePolygonOffset();
-        GlStateManager.enableAlphaTest();
-        GlStateManager.depthMask(true);
-        GlStateManager.popMatrix();
+        RenderSystem.disableAlphaTest();
+        RenderSystem.polygonOffset(0.0f, 0.0f);
+        RenderSystem.disablePolygonOffset();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.depthMask(true);
+        RenderSystem.popMatrix();
     }
 
     public void renderDestroyAnimation(Tesselator tesselator, BufferBuilder bufferBuilder, Camera camera) {
@@ -1434,23 +1348,23 @@ ResourceManagerReloadListener {
         BlockPos blockPos;
         BlockState blockState;
         if (i == 0 && hitResult.getType() == HitResult.Type.BLOCK && !(blockState = this.level.getBlockState(blockPos = ((BlockHitResult)hitResult).getBlockPos())).isAir() && this.level.getWorldBorder().isWithinBounds(blockPos)) {
-            GlStateManager.enableBlend();
-            GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-            GlStateManager.lineWidth(Math.max(2.5f, (float)this.minecraft.window.getWidth() / 1920.0f * 2.5f));
-            GlStateManager.disableTexture();
-            GlStateManager.depthMask(false);
-            GlStateManager.matrixMode(5889);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(1.0f, 1.0f, 0.999f);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.lineWidth(Math.max(2.5f, (float)this.minecraft.window.getWidth() / 1920.0f * 2.5f));
+            RenderSystem.disableTexture();
+            RenderSystem.depthMask(false);
+            RenderSystem.matrixMode(5889);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(1.0f, 1.0f, 0.999f);
             double d = camera.getPosition().x;
             double e = camera.getPosition().y;
             double f = camera.getPosition().z;
             LevelRenderer.renderShape(blockState.getShape(this.level, blockPos, CollisionContext.of(camera.getEntity())), (double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f, 0.0f, 0.0f, 0.0f, 0.4f);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5888);
-            GlStateManager.depthMask(true);
-            GlStateManager.enableTexture();
-            GlStateManager.disableBlend();
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5888);
+            RenderSystem.depthMask(true);
+            RenderSystem.enableTexture();
+            RenderSystem.disableBlend();
         }
     }
 
@@ -1881,6 +1795,12 @@ ResourceManagerReloadListener {
                     particle2.setPower(ac);
                 }
                 this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                break;
+            }
+            case 2009: {
+                for (int k = 0; k < 8; ++k) {
+                    this.level.addParticle(ParticleTypes.CLOUD, (double)blockPos.getX() + Math.random(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + Math.random(), 0.0, 0.0, 0.0);
+                }
                 break;
             }
             case 1012: {

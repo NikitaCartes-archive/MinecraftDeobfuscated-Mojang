@@ -80,6 +80,7 @@ extends AbstractGolem {
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0);
         this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
         this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(15.0);
     }
 
     @Override
@@ -136,11 +137,15 @@ extends AbstractGolem {
         this.setPlayerCreated(compoundTag.getBoolean("PlayerCreated"));
     }
 
+    private float getAttackDamage() {
+        return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+    }
+
     @Override
     public boolean doHurtTarget(Entity entity) {
         this.attackAnimationTick = 10;
         this.level.broadcastEntityEvent(this, (byte)4);
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), 7 + this.random.nextInt(15));
+        boolean bl = entity.hurt(DamageSource.mobAttack(this), this.getAttackDamage() / 2.0f + (float)this.random.nextInt((int)this.getAttackDamage()));
         if (bl) {
             entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4f, 0.0));
             this.doEnchantDamageEffects(this, entity);

@@ -137,7 +137,10 @@ public abstract class PlayerList {
         LevelData levelData = serverLevel.getLevelData();
         this.updatePlayerGameMode(serverPlayer, null, serverLevel);
         ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), levelData.isHardcore(), serverLevel.dimension.getType(), this.getMaxPlayers(), levelData.getGeneratorType(), this.viewDistance, serverLevel.getGameRules().getBoolean(GameRules.RULE_REDUCEDDEBUGINFO)));
+        GameRules gameRules = serverLevel.getGameRules();
+        boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
+        boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), LevelData.obfuscateSeed(levelData.getSeed()), levelData.isHardcore(), serverLevel.dimension.getType(), this.getMaxPlayers(), levelData.getGeneratorType(), this.viewDistance, bl2, !bl));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.abilities));
@@ -381,7 +384,7 @@ public abstract class PlayerList {
             serverPlayer2.setPos(serverPlayer2.x, serverPlayer2.y + 1.0, serverPlayer2.z);
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
-        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.dimension, levelData.getGeneratorType(), serverPlayer2.gameMode.getGameModeForPlayer()));
+        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.dimension, LevelData.obfuscateSeed(levelData.getSeed()), levelData.getGeneratorType(), serverPlayer2.gameMode.getGameModeForPlayer()));
         BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
         serverPlayer2.connection.teleport(serverPlayer2.x, serverPlayer2.y, serverPlayer2.z, serverPlayer2.yRot, serverPlayer2.xRot);
         serverPlayer2.connection.send(new ClientboundSetSpawnPositionPacket(blockPos2));

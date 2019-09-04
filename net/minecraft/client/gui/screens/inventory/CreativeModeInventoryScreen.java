@@ -6,8 +6,8 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -362,7 +362,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     protected void renderLabels(int i, int j) {
         CreativeModeTab creativeModeTab = CreativeModeTab.TABS[selectedTab];
         if (creativeModeTab.showTitle()) {
-            GlStateManager.disableBlend();
+            RenderSystem.disableBlend();
             this.font.draw(I18n.get(creativeModeTab.getName(), new Object[0]), 8.0f, 6.0f, 0x404040);
         }
     }
@@ -549,8 +549,8 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         if (this.destroyItemSlot != null && selectedTab == CreativeModeTab.TAB_INVENTORY.getId() && this.isHovering(this.destroyItemSlot.x, this.destroyItemSlot.y, 16, 16, i, j)) {
             this.renderTooltip(I18n.get("inventory.binSlot", new Object[0]), i, j);
         }
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GlStateManager.disableLighting();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableLighting();
         this.renderTooltip(i, j);
     }
 
@@ -596,7 +596,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
 
     @Override
     protected void renderBg(float f, int i, int j) {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         Lighting.turnOnGui();
         CreativeModeTab creativeModeTab = CreativeModeTab.TABS[selectedTab];
         for (CreativeModeTab creativeModeTab2 : CreativeModeTab.TABS) {
@@ -607,7 +607,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         this.minecraft.getTextureManager().bind(new ResourceLocation("textures/gui/container/creative_inventory/tab_" + creativeModeTab.getBackgroundSuffix()));
         this.blit(this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         this.searchBox.render(i, j, f);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         int k = this.leftPos + 175;
         int l = this.topPos + 18;
         int m = l + 112;
@@ -674,17 +674,17 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             k += 64;
             m += this.imageHeight - 4;
         }
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         this.blit(l, m, j, k, 28, 32);
         this.blitOffset = 100;
         this.itemRenderer.blitOffset = 100.0f;
         int n2 = bl2 ? 1 : -1;
-        GlStateManager.enableLighting();
-        GlStateManager.enableRescaleNormal();
+        RenderSystem.enableLighting();
+        RenderSystem.enableRescaleNormal();
         ItemStack itemStack = creativeModeTab.getIconItem();
         this.itemRenderer.renderAndDecorateItem(itemStack, l += 6, m += 8 + n2);
         this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, l, m);
-        GlStateManager.disableLighting();
+        RenderSystem.disableLighting();
         this.itemRenderer.blitOffset = 0.0f;
         this.blitOffset = 0;
     }

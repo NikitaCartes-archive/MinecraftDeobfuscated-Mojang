@@ -52,12 +52,12 @@ implements AutoCloseable {
 
     @Override
     public int runUpdates(int i, boolean bl, boolean bl2) {
-        throw new UnsupportedOperationException("Ran authomatically on a different thread!");
+        throw Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
     }
 
     @Override
     public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
-        throw new UnsupportedOperationException("Ran authomatically on a different thread!");
+        throw Util.pauseInIde(new UnsupportedOperationException("Ran authomatically on a different thread!"));
     }
 
     @Override

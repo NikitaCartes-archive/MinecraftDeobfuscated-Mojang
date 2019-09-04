@@ -23,6 +23,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.BeetrootBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -62,6 +63,7 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
+import net.minecraft.world.level.storage.loot.functions.CopyBlockState;
 import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
 import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
@@ -162,6 +164,14 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 
     private static LootTable.Builder createBannerDrop(Block block) {
         return LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Patterns", "BlockEntityTag.Patterns")))));
+    }
+
+    private static LootTable.Builder createBeeNestDrop(Block block) {
+        return LootTable.lootTable().withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Bees", "BlockEntityTag.Bees"))).apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))));
+    }
+
+    private static LootTable.Builder createBeeHiveDrop(Block block) {
+        return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add(((LootPoolEntryContainer.Builder)((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(block).when(HAS_SILK_TOUCH)).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Bees", "BlockEntityTag.Bees"))).apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))).otherwise(LootItem.lootTableItem(block))));
     }
 
     private static LootTable.Builder createOreDrop(Block block, Item item) {
@@ -709,6 +719,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.WHITE_BANNER, BlockLoot::createBannerDrop);
         this.add(Blocks.YELLOW_BANNER, BlockLoot::createBannerDrop);
         this.add(Blocks.PLAYER_HEAD, (Block block) -> LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Owner", "SkullOwner"))))));
+        this.add(Blocks.BEE_NEST, BlockLoot::createBeeNestDrop);
+        this.add(Blocks.BEE_HIVE, BlockLoot::createBeeHiveDrop);
         this.add(Blocks.BIRCH_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.BIRCH_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.ACACIA_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.ACACIA_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.JUNGLE_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.JUNGLE_SAPLING, JUNGLE_LEAVES_SAPLING_CHANGES));

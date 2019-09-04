@@ -3,8 +3,8 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,7 +48,7 @@ extends AbstractContainerScreen<StonecutterMenu> {
     @Override
     protected void renderBg(float f, int i, int j) {
         this.renderBackground();
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;

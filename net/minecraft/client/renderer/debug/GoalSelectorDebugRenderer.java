@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -36,10 +37,10 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(long l) {
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.disableTexture();
         BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
         this.goalSelectors.forEach((integer, list) -> {
             for (int i = 0; i < list.size(); ++i) {
@@ -52,9 +53,9 @@ implements DebugRenderer.SimpleDebugRenderer {
                 DebugRenderer.renderFloatingText(debugGoal.name, d, e, f, j);
             }
         });
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableTexture();
-        GlStateManager.popMatrix();
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 
     @Environment(value=EnvType.CLIENT)

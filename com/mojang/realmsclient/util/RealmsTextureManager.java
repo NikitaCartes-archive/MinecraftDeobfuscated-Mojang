@@ -3,10 +3,10 @@
  */
 package com.mojang.realmsclient.util;
 
+import com.google.common.collect.Maps;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.util.RealmsUtil;
 import com.mojang.realmsclient.util.SkinProcessor;
 import com.mojang.util.UUIDTypeAdapter;
@@ -20,7 +20,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.imageio.ImageIO;
@@ -36,9 +35,9 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsTextureManager {
-    private static final Map<String, RealmsTexture> textures = new HashMap<String, RealmsTexture>();
-    private static final Map<String, Boolean> skinFetchStatus = new HashMap<String, Boolean>();
-    private static final Map<String, String> fetchedSkins = new HashMap<String, String>();
+    private static final Map<String, RealmsTexture> textures = Maps.newHashMap();
+    private static final Map<String, Boolean> skinFetchStatus = Maps.newHashMap();
+    private static final Map<String, String> fetchedSkins = Maps.newHashMap();
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void bindWorldTemplate(String string, String string2) {
@@ -47,14 +46,17 @@ public class RealmsTextureManager {
             return;
         }
         int i = RealmsTextureManager.getTextureId(string, string2);
-        GlStateManager.bindTexture(i);
+        RenderSystem.bindTexture(i);
     }
 
     public static void withBoundFace(String string, Runnable runnable) {
-        GLX.withTextureRestore(() -> {
+        RenderSystem.pushTextureAttributes();
+        try {
             RealmsTextureManager.bindFace(string);
             runnable.run();
-        });
+        } finally {
+            RenderSystem.popAttributes();
+        }
     }
 
     private static void bindDefaultFace(UUID uUID) {
@@ -64,7 +66,7 @@ public class RealmsTextureManager {
     private static void bindFace(final String string) {
         UUID uUID = UUIDTypeAdapter.fromString(string);
         if (textures.containsKey(string)) {
-            GlStateManager.bindTexture(RealmsTextureManager.textures.get((Object)string).textureId);
+            RenderSystem.bindTexture(RealmsTextureManager.textures.get((Object)string).textureId);
             return;
         }
         if (skinFetchStatus.containsKey(string)) {
@@ -72,7 +74,7 @@ public class RealmsTextureManager {
                 RealmsTextureManager.bindDefaultFace(uUID);
             } else if (fetchedSkins.containsKey(string)) {
                 int i = RealmsTextureManager.getTextureId(string, fetchedSkins.get(string));
-                GlStateManager.bindTexture(i);
+                RenderSystem.bindTexture(i);
             } else {
                 RealmsTextureManager.bindDefaultFace(uUID);
             }
@@ -151,10 +153,10 @@ public class RealmsTextureManager {
             if (realmsTexture.image.equals(string2)) {
                 return realmsTexture.textureId;
             }
-            GlStateManager.deleteTexture(realmsTexture.textureId);
+            RenderSystem.deleteTexture(realmsTexture.textureId);
             i = realmsTexture.textureId;
         } else {
-            i = GlStateManager.genTexture();
+            i = RenderSystem.genTexture();
         }
         IntBuffer intBuffer = null;
         int j = 0;
@@ -177,8 +179,8 @@ public class RealmsTextureManager {
         } catch (IOException iOException) {
             iOException.printStackTrace();
         }
-        GlStateManager.activeTexture(GLX.GL_TEXTURE0);
-        GlStateManager.bindTexture(i);
+        RenderSystem.activeTexture(33984);
+        RenderSystem.bindTexture(i);
         TextureUtil.initTexture(intBuffer, j, k);
         textures.put(string, new RealmsTexture(string2, i));
         return i;

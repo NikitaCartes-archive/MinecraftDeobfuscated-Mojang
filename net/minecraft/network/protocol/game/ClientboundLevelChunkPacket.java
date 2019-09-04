@@ -12,18 +12,18 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientboundLevelChunkPacket
 implements Packet<ClientGamePacketListener> {
@@ -31,6 +31,8 @@ implements Packet<ClientGamePacketListener> {
     private int z;
     private int availableSections;
     private CompoundTag heightmaps;
+    @Nullable
+    private ChunkBiomeContainer biomes;
     private byte[] buffer;
     private List<CompoundTag> blockEntitiesTags;
     private boolean fullChunk;
@@ -48,6 +50,9 @@ implements Packet<ClientGamePacketListener> {
             if (!entry.getKey().sendToClient()) continue;
             this.heightmaps.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
         }
+        if (this.fullChunk) {
+            this.biomes = levelChunk.getBiomes().copy();
+        }
         this.buffer = new byte[this.calculateChunkSize(levelChunk, i)];
         this.availableSections = this.extractChunkData(new FriendlyByteBuf(this.getWriteBuffer()), levelChunk, i);
         this.blockEntitiesTags = Lists.newArrayList();
@@ -63,13 +68,16 @@ implements Packet<ClientGamePacketListener> {
 
     @Override
     public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
+        int i;
         this.x = friendlyByteBuf.readInt();
         this.z = friendlyByteBuf.readInt();
         this.fullChunk = friendlyByteBuf.readBoolean();
         this.availableSections = friendlyByteBuf.readVarInt();
         this.heightmaps = friendlyByteBuf.readNbt();
-        int i = friendlyByteBuf.readVarInt();
-        if (i > 0x200000) {
+        if (this.fullChunk) {
+            this.biomes = new ChunkBiomeContainer(friendlyByteBuf);
+        }
+        if ((i = friendlyByteBuf.readVarInt()) > 0x200000) {
             throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
         }
         this.buffer = new byte[i];
@@ -88,6 +96,9 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeBoolean(this.fullChunk);
         friendlyByteBuf.writeVarInt(this.availableSections);
         friendlyByteBuf.writeNbt(this.heightmaps);
+        if (this.biomes != null) {
+            this.biomes.write(friendlyByteBuf);
+        }
         friendlyByteBuf.writeVarInt(this.buffer.length);
         friendlyByteBuf.writeBytes(this.buffer);
         friendlyByteBuf.writeVarInt(this.blockEntitiesTags.size());
@@ -122,12 +133,6 @@ implements Packet<ClientGamePacketListener> {
             j |= 1 << k;
             levelChunkSection.write(friendlyByteBuf);
         }
-        if (this.isFullChunk()) {
-            Biome[] biomes = levelChunk.getBiomes();
-            for (l = 0; l < biomes.length; ++l) {
-                friendlyByteBuf.writeInt(Registry.BIOME.getId(biomes[l]));
-            }
-        }
         return j;
     }
 
@@ -139,9 +144,6 @@ implements Packet<ClientGamePacketListener> {
             LevelChunkSection levelChunkSection = levelChunkSections[k];
             if (levelChunkSection == LevelChunk.EMPTY_SECTION || this.isFullChunk() && levelChunkSection.isEmpty() || (i & 1 << k) == 0) continue;
             j += levelChunkSection.getSerializedSize();
-        }
-        if (this.isFullChunk()) {
-            j += levelChunk.getBiomes().length * 4;
         }
         return j;
     }
@@ -173,6 +175,12 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public List<CompoundTag> getBlockEntitiesTags() {
         return this.blockEntitiesTags;
+    }
+
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    public ChunkBiomeContainer getBiomes() {
+        return this.biomes == null ? null : this.biomes.copy();
     }
 }
 

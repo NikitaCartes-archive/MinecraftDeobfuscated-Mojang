@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GiantZombieModel;
@@ -30,7 +30,7 @@ extends MobRenderer<Giant, HumanoidModel<Giant>> {
 
     @Override
     protected void scale(Giant giant, float f) {
-        GlStateManager.scalef(this.scale, this.scale, this.scale);
+        RenderSystem.scalef(this.scale, this.scale, this.scale);
     }
 
     @Override

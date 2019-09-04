@@ -61,6 +61,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -117,7 +118,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Player
 extends LivingEntity {
     public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6f, 1.8f);
-    private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.builder().put(Pose.STANDING, STANDING_DIMENSIONS).put(Pose.SLEEPING, SLEEPING_DIMENSIONS).put(Pose.FALL_FLYING, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.SWIMMING, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.SPIN_ATTACK, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.SNEAKING, EntityDimensions.scalable(0.6f, 1.5f)).put(Pose.DYING, EntityDimensions.fixed(0.2f, 0.2f)).build();
+    private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.builder().put(Pose.STANDING, STANDING_DIMENSIONS).put(Pose.SLEEPING, SLEEPING_DIMENSIONS).put(Pose.FALL_FLYING, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.SWIMMING, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.SPIN_ATTACK, EntityDimensions.scalable(0.6f, 0.6f)).put(Pose.CROUCHING, EntityDimensions.scalable(0.6f, 1.5f)).put(Pose.DYING, EntityDimensions.fixed(0.2f, 0.2f)).build();
     private static final EntityDataAccessor<Float> DATA_PLAYER_ABSORPTION_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
@@ -219,7 +220,7 @@ extends LivingEntity {
                 this.sleepCounter = 100;
             }
             if (!this.level.isClientSide && this.level.isDay()) {
-                this.stopSleepInBed(false, true, true);
+                this.stopSleepInBed(false, true);
             }
         } else if (this.sleepCounter > 0) {
             ++this.sleepCounter;
@@ -243,8 +244,8 @@ extends LivingEntity {
             if (this.isAlive()) {
                 this.awardStat(Stats.TIME_SINCE_DEATH);
             }
-            if (this.isSneaking()) {
-                this.awardStat(Stats.SNEAK_TIME);
+            if (this.isDiscrete()) {
+                this.awardStat(Stats.CROUCH_TIME);
             }
             if (!this.isSleeping()) {
                 this.awardStat(Stats.TIME_SINCE_REST);
@@ -267,6 +268,18 @@ extends LivingEntity {
         this.turtleHelmetTick();
         this.cooldowns.tick();
         this.updatePlayerPose();
+    }
+
+    public boolean isSecondaryUseActive() {
+        return this.isShiftKeyDown();
+    }
+
+    protected boolean wantsToStopRiding() {
+        return this.isShiftKeyDown();
+    }
+
+    protected boolean isStayingOnGroundSurface() {
+        return this.isShiftKeyDown();
     }
 
     protected boolean updateIsUnderwater() {
@@ -320,8 +333,8 @@ extends LivingEntity {
         if (!this.canEnterPose(Pose.SWIMMING)) {
             return;
         }
-        Pose pose = this.isFallFlying() ? Pose.FALL_FLYING : (this.isSleeping() ? Pose.SLEEPING : (this.isSwimming() ? Pose.SWIMMING : (this.isAutoSpinAttack() ? Pose.SPIN_ATTACK : (this.isSneaking() && !this.abilities.flying ? Pose.SNEAKING : Pose.STANDING))));
-        Pose pose2 = this.isSpectator() || this.isPassenger() || this.canEnterPose(pose) ? pose : (this.canEnterPose(Pose.SNEAKING) ? Pose.SNEAKING : Pose.SWIMMING);
+        Pose pose = this.isFallFlying() ? Pose.FALL_FLYING : (this.isSleeping() ? Pose.SLEEPING : (this.isSwimming() ? Pose.SWIMMING : (this.isAutoSpinAttack() ? Pose.SPIN_ATTACK : (this.isShiftKeyDown() && !this.abilities.flying ? Pose.CROUCHING : Pose.STANDING))));
+        Pose pose2 = this.isSpectator() || this.isPassenger() || this.canEnterPose(pose) ? pose : (this.canEnterPose(Pose.CROUCHING) ? Pose.CROUCHING : Pose.SWIMMING);
         this.setPose(pose2);
     }
 
@@ -400,9 +413,9 @@ extends LivingEntity {
 
     @Override
     public void rideTick() {
-        if (!this.level.isClientSide && this.isSneaking() && this.isPassenger()) {
+        if (!this.level.isClientSide && this.wantsToStopRiding() && this.isPassenger()) {
             this.stopRiding();
-            this.setSneaking(false);
+            this.setShiftKeyDown(false);
             return;
         }
         double d = this.x;
@@ -706,6 +719,23 @@ extends LivingEntity {
     }
 
     @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+        if (super.isInvulnerableTo(damageSource)) {
+            return true;
+        }
+        if (damageSource == DamageSource.DROWN) {
+            return !this.level.getGameRules().getBoolean(GameRules.RULE_DROWNING_DAMAGE);
+        }
+        if (damageSource == DamageSource.FALL) {
+            return !this.level.getGameRules().getBoolean(GameRules.RULE_FALL_DAMAGE);
+        }
+        if (damageSource == DamageSource.ON_FIRE || damageSource == DamageSource.IN_FIRE) {
+            return !this.level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE);
+        }
+        return false;
+    }
+
+    @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
@@ -875,6 +905,51 @@ extends LivingEntity {
     @Override
     protected boolean isImmobile() {
         return super.isImmobile() || this.isSleeping();
+    }
+
+    @Override
+    protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
+        if ((moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.onGround && this.isStayingOnGroundSurface()) {
+            double d = vec3.x;
+            double e = vec3.z;
+            double f = 0.05;
+            while (d != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep, 0.0))) {
+                if (d < 0.05 && d >= -0.05) {
+                    d = 0.0;
+                    continue;
+                }
+                if (d > 0.0) {
+                    d -= 0.05;
+                    continue;
+                }
+                d += 0.05;
+            }
+            while (e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(0.0, -this.maxUpStep, e))) {
+                if (e < 0.05 && e >= -0.05) {
+                    e = 0.0;
+                    continue;
+                }
+                if (e > 0.0) {
+                    e -= 0.05;
+                    continue;
+                }
+                e += 0.05;
+            }
+            while (d != 0.0 && e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, -this.maxUpStep, e))) {
+                d = d < 0.05 && d >= -0.05 ? 0.0 : (d > 0.0 ? (d -= 0.05) : (d += 0.05));
+                if (e < 0.05 && e >= -0.05) {
+                    e = 0.0;
+                    continue;
+                }
+                if (e > 0.0) {
+                    e -= 0.05;
+                    continue;
+                }
+                e += 0.05;
+            }
+            vec3 = new Vec3(d, vec3.y, e);
+        }
+        return vec3;
     }
 
     public void attack(Entity entity) {
@@ -1062,6 +1137,7 @@ extends LivingEntity {
                 return Either.left(BedSleepingProblem.NOT_POSSIBLE_HERE);
             }
             if (this.level.isDay()) {
+                this.setRespawnPosition(blockPos, false);
                 return Either.left(BedSleepingProblem.NOT_POSSIBLE_NOW);
             }
             if (!this.bedInRange(blockPos, direction)) {
@@ -1090,6 +1166,7 @@ extends LivingEntity {
     @Override
     public void startSleeping(BlockPos blockPos) {
         this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
+        this.setRespawnPosition(blockPos, false);
         super.startSleeping(blockPos);
     }
 
@@ -1106,21 +1183,17 @@ extends LivingEntity {
         return !this.freeAt(blockPos2) || !this.freeAt(blockPos2.relative(direction.getOpposite()));
     }
 
-    public void stopSleepInBed(boolean bl, boolean bl2, boolean bl3) {
-        Optional<BlockPos> optional = this.getSleepingPos();
+    public void stopSleepInBed(boolean bl, boolean bl2) {
         super.stopSleeping();
         if (this.level instanceof ServerLevel && bl2) {
             ((ServerLevel)this.level).updateSleepingPlayerList();
         }
-        int n = this.sleepCounter = bl ? 0 : 100;
-        if (bl3) {
-            optional.ifPresent(blockPos -> this.setRespawnPosition((BlockPos)blockPos, false));
-        }
+        this.sleepCounter = bl ? 0 : 100;
     }
 
     @Override
     public void stopSleeping() {
-        this.stopSleepInBed(true, true, false);
+        this.stopSleepInBed(true, true);
     }
 
     public static Optional<Vec3> checkBedValidRespawnPosition(LevelReader levelReader, BlockPos blockPos, boolean bl) {
@@ -1289,7 +1362,7 @@ extends LivingEntity {
                 if (this.isSprinting()) {
                     this.awardStat(Stats.SPRINT_ONE_CM, i);
                     this.causeFoodExhaustion(0.1f * (float)i * 0.01f);
-                } else if (this.isSneaking()) {
+                } else if (this.isCrouching()) {
                     this.awardStat(Stats.CROUCH_ONE_CM, i);
                     this.causeFoodExhaustion(0.0f * (float)i * 0.01f);
                 } else {
@@ -1478,8 +1551,8 @@ extends LivingEntity {
     }
 
     @Override
-    protected boolean makeStepSound() {
-        return !this.abilities.flying;
+    protected boolean isMovementNoisy() {
+        return !this.abilities.flying && (!this.onGround || !this.isDiscrete());
     }
 
     public void onUpdateAbilities() {
@@ -1638,7 +1711,7 @@ extends LivingEntity {
             case SPIN_ATTACK: {
                 return 0.4f;
             }
-            case SNEAKING: {
+            case CROUCHING: {
                 return 1.27f;
             }
         }

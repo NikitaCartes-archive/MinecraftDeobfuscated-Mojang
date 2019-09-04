@@ -10,7 +10,6 @@ import com.mojang.realmsclient.dto.RealmsNews;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import com.mojang.realmsclient.util.RealmsPersistence;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -188,7 +187,7 @@ public class RealmsDataFetcher {
     }
 
     private void sort(List<RealmsServer> list) {
-        Collections.sort(list, new RealmsServer.McoServerComparator(Realms.getName()));
+        list.sort(new RealmsServer.McoServerComparator(Realms.getName()));
     }
 
     private boolean isActive() {

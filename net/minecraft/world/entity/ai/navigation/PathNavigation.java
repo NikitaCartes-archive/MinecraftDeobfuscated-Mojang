@@ -126,8 +126,8 @@ public abstract class PathNavigation {
         float f = this.getMaxDist();
         BlockPos blockPos = bl ? new BlockPos(this.mob).above() : new BlockPos(this.mob);
         int k = (int)(f + (float)i);
-        PathNavigationRegion levelReader = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
-        Path path = this.pathFinder.findPath(levelReader, this.mob, set, f, j);
+        PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
+        Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j);
         this.level.getProfiler().pop();
         if (path != null && path.getTarget() != null) {
             this.targetPos = path.getTarget();

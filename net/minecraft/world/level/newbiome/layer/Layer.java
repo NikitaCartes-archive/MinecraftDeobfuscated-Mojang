@@ -4,6 +4,7 @@
 package net.minecraft.world.level.newbiome.layer;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -20,23 +21,11 @@ public class Layer {
         this.area = areaFactory.make();
     }
 
-    public Biome[] getArea(int i, int j, int k, int l) {
-        Biome[] biomes = new Biome[k * l];
-        for (int m = 0; m < l; ++m) {
-            for (int n = 0; n < k; ++n) {
-                Biome biome;
-                int o = this.area.get(i + n, j + m);
-                biomes[n + m * k] = biome = this.getBiome(o);
-            }
-        }
-        return biomes;
-    }
-
     private Biome getBiome(int i) {
         Biome biome = (Biome)Registry.BIOME.byId(i);
         if (biome == null) {
             if (SharedConstants.IS_RUNNING_IN_IDE) {
-                throw new IllegalStateException("Unknown biome id: " + i);
+                throw Util.pauseInIde(new IllegalStateException("Unknown biome id: " + i));
             }
             LOGGER.warn("Unknown biome id: ", (Object)i);
             return Biomes.DEFAULT;

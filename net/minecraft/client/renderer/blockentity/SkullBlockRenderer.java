@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -55,49 +56,49 @@ extends BlockEntityRenderer<SkullBlockEntity> {
         SkullModel skullModel = MODEL_BY_TYPE.get(type);
         if (j >= 0) {
             this.bindTexture(BREAKING_LOCATIONS[j]);
-            GlStateManager.matrixMode(5890);
-            GlStateManager.pushMatrix();
-            GlStateManager.scalef(4.0f, 2.0f, 1.0f);
-            GlStateManager.translatef(0.0625f, 0.0625f, 0.0625f);
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5890);
+            RenderSystem.pushMatrix();
+            RenderSystem.scalef(4.0f, 2.0f, 1.0f);
+            RenderSystem.translatef(0.0625f, 0.0625f, 0.0625f);
+            RenderSystem.matrixMode(5888);
         } else {
             this.bindTexture(this.getLocation(type, gameProfile));
         }
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
+        RenderSystem.pushMatrix();
+        RenderSystem.disableCull();
         if (direction == null) {
-            GlStateManager.translatef(f + 0.5f, g, h + 0.5f);
+            RenderSystem.translatef(f + 0.5f, g, h + 0.5f);
         } else {
             switch (direction) {
                 case NORTH: {
-                    GlStateManager.translatef(f + 0.5f, g + 0.25f, h + 0.74f);
+                    RenderSystem.translatef(f + 0.5f, g + 0.25f, h + 0.74f);
                     break;
                 }
                 case SOUTH: {
-                    GlStateManager.translatef(f + 0.5f, g + 0.25f, h + 0.26f);
+                    RenderSystem.translatef(f + 0.5f, g + 0.25f, h + 0.26f);
                     break;
                 }
                 case WEST: {
-                    GlStateManager.translatef(f + 0.74f, g + 0.25f, h + 0.5f);
+                    RenderSystem.translatef(f + 0.74f, g + 0.25f, h + 0.5f);
                     break;
                 }
                 default: {
-                    GlStateManager.translatef(f + 0.26f, g + 0.25f, h + 0.5f);
+                    RenderSystem.translatef(f + 0.26f, g + 0.25f, h + 0.5f);
                 }
             }
         }
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
-        GlStateManager.enableAlphaTest();
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
+        RenderSystem.enableAlphaTest();
         if (type == SkullBlock.Types.PLAYER) {
             GlStateManager.setProfile(GlStateManager.Profile.PLAYER_SKIN);
         }
         skullModel.render(k, 0.0f, 0.0f, i, 0.0f, 0.0625f);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (j >= 0) {
-            GlStateManager.matrixMode(5890);
-            GlStateManager.popMatrix();
-            GlStateManager.matrixMode(5888);
+            RenderSystem.matrixMode(5890);
+            RenderSystem.popMatrix();
+            RenderSystem.matrixMode(5888);
         }
     }
 

@@ -48,7 +48,7 @@ extends Dimension {
         NetherGeneratorSettings netherGeneratorSettings = ChunkGeneratorType.CAVES.createSettings();
         netherGeneratorSettings.setDefaultBlock(Blocks.NETHERRACK.defaultBlockState());
         netherGeneratorSettings.setDefaultFluid(Blocks.LAVA.defaultBlockState());
-        return ChunkGeneratorType.CAVES.create(this.level, BiomeSourceType.FIXED.create(BiomeSourceType.FIXED.createSettings().setBiome(Biomes.NETHER)), netherGeneratorSettings);
+        return ChunkGeneratorType.CAVES.create(this.level, BiomeSourceType.FIXED.create(BiomeSourceType.FIXED.createSettings(this.level.getLevelData()).setBiome(Biomes.NETHER)), netherGeneratorSettings);
     }
 
     @Override

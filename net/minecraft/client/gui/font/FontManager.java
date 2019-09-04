@@ -127,6 +127,11 @@ implements AutoCloseable {
         }
 
         @Override
+        public String getName() {
+            return "FontManager";
+        }
+
+        @Override
         protected /* synthetic */ Object prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
             return this.prepare(resourceManager, profilerFiller);
         }

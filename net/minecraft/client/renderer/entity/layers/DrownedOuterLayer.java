@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DrownedModel;
@@ -30,7 +30,7 @@ extends RenderLayer<T, DrownedModel<T>> {
         }
         ((DrownedModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.prepareMobModel(zombie, f, g, h);
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.bindTexture(DROWNED_OUTER_LAYER_LOCATION);
         this.model.render(zombie, f, g, i, j, k, l);
     }

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -18,10 +18,10 @@ public class SpawnerRenderer
 extends BlockEntityRenderer<SpawnerBlockEntity> {
     @Override
     public void render(SpawnerBlockEntity spawnerBlockEntity, double d, double e, double f, float g, int i) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float)d + 0.5f, (float)e, (float)f + 0.5f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)d + 0.5f, (float)e, (float)f + 0.5f);
         SpawnerRenderer.render(spawnerBlockEntity.getSpawner(), d, e, f, g);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     public static void render(BaseSpawner baseSpawner, double d, double e, double f, float g) {
@@ -32,11 +32,11 @@ extends BlockEntityRenderer<SpawnerBlockEntity> {
             if ((double)i > 1.0) {
                 h /= i;
             }
-            GlStateManager.translatef(0.0f, 0.4f, 0.0f);
-            GlStateManager.rotatef((float)Mth.lerp((double)g, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0f, 0.0f, 1.0f, 0.0f);
-            GlStateManager.translatef(0.0f, -0.2f, 0.0f);
-            GlStateManager.rotatef(-30.0f, 1.0f, 0.0f, 0.0f);
-            GlStateManager.scalef(h, h, h);
+            RenderSystem.translatef(0.0f, 0.4f, 0.0f);
+            RenderSystem.rotatef((float)Mth.lerp((double)g, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0f, 0.0f, 1.0f, 0.0f);
+            RenderSystem.translatef(0.0f, -0.2f, 0.0f);
+            RenderSystem.rotatef(-30.0f, 1.0f, 0.0f, 0.0f);
+            RenderSystem.scalef(h, h, h);
             entity.moveTo(d, e, f, 0.0f, 0.0f);
             Minecraft.getInstance().getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, 0.0f, g, false);
         }

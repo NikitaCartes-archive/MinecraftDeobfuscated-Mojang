@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -36,23 +36,14 @@ extends Screen {
 
     @Override
     protected void init() {
-        String string2;
-        String string;
         this.delayTicker = 0;
-        if (this.hardcore) {
-            string = I18n.get("deathScreen.spectate", new Object[0]);
-            string2 = I18n.get("deathScreen." + (this.minecraft.isLocalServer() ? "deleteWorld" : "leaveServer"), new Object[0]);
-        } else {
-            string = I18n.get("deathScreen.respawn", new Object[0]);
-            string2 = I18n.get("deathScreen.titleScreen", new Object[0]);
-        }
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, string, button -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? I18n.get("deathScreen.spectate", new Object[0]) : I18n.get("deathScreen.respawn", new Object[0]), button -> {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
         }));
-        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, string2, button -> {
+        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, I18n.get("deathScreen.titleScreen", new Object[0]), button -> {
             if (this.hardcore) {
-                this.minecraft.setScreen(new TitleScreen());
+                this.exitToTitleScreen();
                 return;
             }
             ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, new TranslatableComponent("deathScreen.quit.confirm", new Object[0]), new TextComponent(""), I18n.get("deathScreen.titleScreen", new Object[0]), I18n.get("deathScreen.respawn", new Object[0]));
@@ -74,25 +65,29 @@ extends Screen {
 
     private void confirmResult(boolean bl) {
         if (bl) {
-            if (this.minecraft.level != null) {
-                this.minecraft.level.disconnect();
-            }
-            this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel", new Object[0])));
-            this.minecraft.setScreen(new TitleScreen());
+            this.exitToTitleScreen();
         } else {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
         }
     }
 
+    private void exitToTitleScreen() {
+        if (this.minecraft.level != null) {
+            this.minecraft.level.disconnect();
+        }
+        this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel", new Object[0])));
+        this.minecraft.setScreen(new TitleScreen());
+    }
+
     @Override
     public void render(int i, int j, float f) {
         Component component;
         this.fillGradient(0, 0, this.width, this.height, 0x60500000, -1602211792);
-        GlStateManager.pushMatrix();
-        GlStateManager.scalef(2.0f, 2.0f, 2.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.scalef(2.0f, 2.0f, 2.0f);
         this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2 / 2, 30, 0xFFFFFF);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
         if (this.causeOfDeath != null) {
             this.drawCenteredString(this.font, this.causeOfDeath.getColoredString(), this.width / 2, 85, 0xFFFFFF);
         }

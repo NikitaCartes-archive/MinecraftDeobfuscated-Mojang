@@ -3,7 +3,8 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -19,7 +20,6 @@ import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ extends RealmsScreen {
     private static final List<Integer> resetButtonIds = Arrays.asList(4, 5, 6);
     private static final List<Integer> downloadButtonIds = Arrays.asList(7, 8, 9);
     private static final List<Integer> downloadConfirmationIds = Arrays.asList(10, 11, 12);
-    private final List<Integer> slotsThatHasBeenDownloaded = new ArrayList<Integer>();
+    private final List<Integer> slotsThatHasBeenDownloaded = Lists.newArrayList();
     private int animTick;
 
     public RealmsBrokenWorldScreen(RealmsScreen realmsScreen, RealmsMainScreen realmsMainScreen, long l) {
@@ -156,23 +156,19 @@ extends RealmsScreen {
         Realms.setScreen(this.lastScreen);
     }
 
-    private void fetchServerData(final long l) {
-        new Thread(){
-
-            @Override
-            public void run() {
-                RealmsClient realmsClient = RealmsClient.createRealmsClient();
-                try {
-                    RealmsBrokenWorldScreen.this.serverData = realmsClient.getOwnWorld(l);
-                    RealmsBrokenWorldScreen.this.addButtons();
-                } catch (RealmsServiceException realmsServiceException) {
-                    LOGGER.error("Couldn't get own world");
-                    Realms.setScreen(new RealmsGenericErrorScreen(realmsServiceException.getMessage(), RealmsBrokenWorldScreen.this.lastScreen));
-                } catch (IOException iOException) {
-                    LOGGER.error("Couldn't parse response getting own world");
-                }
+    private void fetchServerData(long l) {
+        new Thread(() -> {
+            RealmsClient realmsClient = RealmsClient.createRealmsClient();
+            try {
+                this.serverData = realmsClient.getOwnWorld(l);
+                this.addButtons();
+            } catch (RealmsServiceException realmsServiceException) {
+                LOGGER.error("Couldn't get own world");
+                Realms.setScreen(new RealmsGenericErrorScreen(realmsServiceException.getMessage(), this.lastScreen));
+            } catch (IOException iOException) {
+                LOGGER.error("Couldn't parse response getting own world");
             }
-        }.start();
+        }).start();
     }
 
     @Override
@@ -182,29 +178,25 @@ extends RealmsScreen {
             return;
         }
         if (i == 13 || i == 14) {
-            new Thread(){
-
-                @Override
-                public void run() {
-                    RealmsClient realmsClient = RealmsClient.createRealmsClient();
-                    if (((RealmsBrokenWorldScreen)RealmsBrokenWorldScreen.this).serverData.state.equals((Object)RealmsServer.State.CLOSED)) {
-                        RealmsTasks.OpenServerTask openServerTask = new RealmsTasks.OpenServerTask(RealmsBrokenWorldScreen.this.serverData, RealmsBrokenWorldScreen.this, RealmsBrokenWorldScreen.this.lastScreen, true);
-                        RealmsLongRunningMcoTaskScreen realmsLongRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(RealmsBrokenWorldScreen.this, openServerTask);
-                        realmsLongRunningMcoTaskScreen.start();
-                        Realms.setScreen(realmsLongRunningMcoTaskScreen);
-                    } else {
-                        try {
-                            RealmsBrokenWorldScreen.this.mainScreen.newScreen().play(realmsClient.getOwnWorld(RealmsBrokenWorldScreen.this.serverId), RealmsBrokenWorldScreen.this);
-                        } catch (RealmsServiceException realmsServiceException) {
-                            LOGGER.error("Couldn't get own world");
-                            Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
-                        } catch (IOException iOException) {
-                            LOGGER.error("Couldn't parse response getting own world");
-                            Realms.setScreen(RealmsBrokenWorldScreen.this.lastScreen);
-                        }
+            new Thread(() -> {
+                RealmsClient realmsClient = RealmsClient.createRealmsClient();
+                if (this.serverData.state.equals((Object)RealmsServer.State.CLOSED)) {
+                    RealmsTasks.OpenServerTask openServerTask = new RealmsTasks.OpenServerTask(this.serverData, this, this.lastScreen, true);
+                    RealmsLongRunningMcoTaskScreen realmsLongRunningMcoTaskScreen = new RealmsLongRunningMcoTaskScreen(this, openServerTask);
+                    realmsLongRunningMcoTaskScreen.start();
+                    Realms.setScreen(realmsLongRunningMcoTaskScreen);
+                } else {
+                    try {
+                        this.mainScreen.newScreen().play(realmsClient.getOwnWorld(this.serverId), this);
+                    } catch (RealmsServiceException realmsServiceException) {
+                        LOGGER.error("Couldn't get own world");
+                        Realms.setScreen(this.lastScreen);
+                    } catch (IOException iOException) {
+                        LOGGER.error("Couldn't parse response getting own world");
+                        Realms.setScreen(this.lastScreen);
                     }
                 }
-            }.start();
+            }).start();
         } else if (downloadButtonIds.contains(i)) {
             this.downloadWorld(downloadButtonIds.indexOf(i) + 1);
         } else if (downloadConfirmationIds.contains(i)) {
@@ -246,17 +238,17 @@ extends RealmsScreen {
             RealmsTextureManager.bindWorldTemplate(String.valueOf(this.serverData.minigameId), this.serverData.minigameImage);
         }
         if (!bl) {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         } else if (bl) {
             float f = 0.9f + 0.1f * RealmsMth.cos((float)this.animTick * 0.2f);
-            GlStateManager.color4f(f, f, f, 1.0f);
+            RenderSystem.color4f(f, f, f, 1.0f);
         }
         RealmsScreen.blit(i + 3, j + 3, 0.0f, 0.0f, 74, 74, 74, 74);
         RealmsBrokenWorldScreen.bind("realms:textures/gui/realms/slot_frame.png");
         if (bl) {
-            GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         } else {
-            GlStateManager.color4f(0.56f, 0.56f, 0.56f, 1.0f);
+            RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsScreen.blit(i, j, 0.0f, 0.0f, 80, 80, 80, 80);
         this.drawCenteredString(string, i + 40, j + 66, 0xFFFFFF);

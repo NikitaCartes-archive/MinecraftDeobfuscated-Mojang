@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -436,18 +437,18 @@ GuiEventListener {
         }
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        GlStateManager.color4f(0.0f, 0.0f, 255.0f, 255.0f);
-        GlStateManager.disableTexture();
-        GlStateManager.enableColorLogicOp();
-        GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+        RenderSystem.color4f(0.0f, 0.0f, 255.0f, 255.0f);
+        RenderSystem.disableTexture();
+        RenderSystem.enableColorLogicOp();
+        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
         bufferBuilder.vertex(i, l, 0.0).endVertex();
         bufferBuilder.vertex(k, l, 0.0).endVertex();
         bufferBuilder.vertex(k, j, 0.0).endVertex();
         bufferBuilder.vertex(i, j, 0.0).endVertex();
         tesselator.end();
-        GlStateManager.disableColorLogicOp();
-        GlStateManager.enableTexture();
+        RenderSystem.disableColorLogicOp();
+        RenderSystem.enableTexture();
     }
 
     public void setMaxLength(int i) {

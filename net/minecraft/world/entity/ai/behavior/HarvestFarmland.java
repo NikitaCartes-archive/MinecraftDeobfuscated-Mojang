@@ -115,7 +115,7 @@ extends Behavior<Villager> {
             Block block = blockState.getBlock();
             Block block2 = serverLevel.getBlockState(this.aboveFarmlandPos.below()).getBlock();
             if (block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) && this.wantsToReapStuff) {
-                serverLevel.destroyBlock(this.aboveFarmlandPos, true);
+                serverLevel.destroyBlock(this.aboveFarmlandPos, true, villager);
             }
             if (blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff) {
                 SimpleContainer simpleContainer = villager.getInventory();

@@ -5,6 +5,7 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -55,12 +56,9 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (level.isClientSide) {
-            return;
-        }
-        if (blockState.getValue(LIT).booleanValue() && !level.hasNeighborSignal(blockPos)) {
-            level.setBlock(blockPos, (BlockState)blockState.cycle(LIT), 2);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (blockState.getValue(LIT).booleanValue() && !serverLevel.hasNeighborSignal(blockPos)) {
+            serverLevel.setBlock(blockPos, (BlockState)blockState.cycle(LIT), 2);
         }
     }
 

@@ -158,15 +158,6 @@ public class SynchedEntityData {
         return list;
     }
 
-    public void packAll(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.lock.readLock().lock();
-        for (DataItem<?> dataItem : this.itemsById.values()) {
-            SynchedEntityData.writeDataItem(friendlyByteBuf, dataItem);
-        }
-        this.lock.readLock().unlock();
-        friendlyByteBuf.writeByte(255);
-    }
-
     @Nullable
     public List<DataItem<?>> getAll() {
         ArrayList<DataItem<?>> list = null;

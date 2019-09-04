@@ -27,7 +27,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundBlockBreakAckPacket() {
     }
 
-    public ClientboundBlockBreakAckPacket(BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
+    public ClientboundBlockBreakAckPacket(BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl, String string) {
         this.pos = blockPos.immutable();
         this.state = blockState;
         this.action = action;

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -37,18 +37,18 @@ extends RenderLayer<T, VillagerModel<T>> {
         }
         Item item = itemStack.getItem();
         Block block = Block.byItem(item);
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         boolean bl2 = bl = this.itemRenderer.isGui3d(itemStack) && block.getRenderLayer() == BlockLayer.TRANSLUCENT;
         if (bl) {
-            GlStateManager.depthMask(false);
+            RenderSystem.depthMask(false);
         }
-        GlStateManager.translatef(0.0f, 0.4f, -0.4f);
-        GlStateManager.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
+        RenderSystem.translatef(0.0f, 0.4f, -0.4f);
+        RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
         this.itemRenderer.renderWithMobState(itemStack, (LivingEntity)livingEntity, ItemTransforms.TransformType.GROUND, false);
         if (bl) {
-            GlStateManager.depthMask(true);
+            RenderSystem.depthMask(true);
         }
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

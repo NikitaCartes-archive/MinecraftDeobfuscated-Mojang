@@ -123,7 +123,7 @@ public final class Shapes {
 
     public static VoxelShape joinUnoptimized(VoxelShape voxelShape, VoxelShape voxelShape2, BooleanOp booleanOp) {
         if (booleanOp.apply(false, false)) {
-            throw new IllegalArgumentException();
+            throw Util.pauseInIde(new IllegalArgumentException());
         }
         if (voxelShape == voxelShape2) {
             return booleanOp.apply(true, true) ? voxelShape : Shapes.empty();
@@ -148,7 +148,7 @@ public final class Shapes {
 
     public static boolean joinIsNotEmpty(VoxelShape voxelShape, VoxelShape voxelShape2, BooleanOp booleanOp) {
         if (booleanOp.apply(false, false)) {
-            throw new IllegalArgumentException();
+            throw Util.pauseInIde(new IllegalArgumentException());
         }
         if (voxelShape == voxelShape2) {
             return booleanOp.apply(true, true);

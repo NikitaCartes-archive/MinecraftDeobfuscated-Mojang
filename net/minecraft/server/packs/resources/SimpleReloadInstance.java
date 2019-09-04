@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.packs.resources;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,7 @@ implements ReloadInstance {
         this.listenerCount = list.size();
         this.startedTaskCounter.incrementAndGet();
         completableFuture.thenRun(this.doneTaskCounter::incrementAndGet);
-        ArrayList<CompletableFuture<S>> list2 = new ArrayList<CompletableFuture<S>>();
+        ArrayList<CompletableFuture<S>> list2 = Lists.newArrayList();
         CompletableFuture<Unit> completableFuture2 = completableFuture;
         this.preparingListeners = Sets.newHashSet(list);
         for (final PreparableReloadListener preparableReloadListener : list) {

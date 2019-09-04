@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -59,16 +60,16 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     public static void renderPath(Camera camera, Path path, float f, boolean bl, boolean bl2) {
-        GlStateManager.pushMatrix();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.color4f(0.0f, 1.0f, 0.0f, 0.75f);
-        GlStateManager.disableTexture();
-        GlStateManager.lineWidth(6.0f);
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.color4f(0.0f, 1.0f, 0.0f, 0.75f);
+        RenderSystem.disableTexture();
+        RenderSystem.lineWidth(6.0f);
         PathfindingRenderer.doRenderPath(camera, path, f, bl, bl2);
-        GlStateManager.enableTexture();
-        GlStateManager.disableBlend();
-        GlStateManager.popMatrix();
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
     }
 
     private static void doRenderPath(Camera camera, Path path, float f, boolean bl, boolean bl2) {

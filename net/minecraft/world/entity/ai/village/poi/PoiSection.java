@@ -17,6 +17,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Serializable;
@@ -72,7 +73,7 @@ implements Serializable {
             if (poiType2.equals(poiRecord2.getPoiType())) {
                 return false;
             }
-            throw new IllegalStateException("POI data mismatch: already registered at " + blockPos);
+            throw Util.pauseInIde(new IllegalStateException("POI data mismatch: already registered at " + blockPos));
         }
         this.records.put(s, poiRecord);
         this.byType.computeIfAbsent(poiType2, poiType -> Sets.newHashSet()).add(poiRecord);
@@ -96,7 +97,7 @@ implements Serializable {
     public boolean release(BlockPos blockPos) {
         PoiRecord poiRecord = (PoiRecord)this.records.get(SectionPos.sectionRelativePos(blockPos));
         if (poiRecord == null) {
-            throw new IllegalStateException("POI never registered at " + blockPos);
+            throw Util.pauseInIde(new IllegalStateException("POI never registered at " + blockPos));
         }
         boolean bl = poiRecord.releaseTicket();
         this.setDirty.run();

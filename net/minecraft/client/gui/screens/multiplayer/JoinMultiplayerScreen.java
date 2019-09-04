@@ -178,9 +178,12 @@ extends Screen {
             this.refreshServerList();
             return true;
         }
-        if (this.serverSelectionList.getSelected() != null && (i == 257 || i == 335)) {
-            this.joinSelectedServer();
-            return true;
+        if (this.serverSelectionList.getSelected() != null) {
+            if (i == 257 || i == 335) {
+                this.joinSelectedServer();
+                return true;
+            }
+            return this.serverSelectionList.keyPressed(i, j, k);
         }
         return false;
     }

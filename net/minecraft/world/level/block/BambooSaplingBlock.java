@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -49,9 +50,9 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        if (random.nextInt(3) == 0 && level.isEmptyBlock(blockPos.above()) && level.getRawBrightness(blockPos.above(), 0) >= 9) {
-            this.growBamboo(level, blockPos);
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (random.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
+            this.growBamboo(serverLevel, blockPos);
         }
     }
 
@@ -88,8 +89,8 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-        this.growBamboo(level, blockPos);
+    public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+        this.growBamboo(serverLevel, blockPos);
     }
 
     @Override

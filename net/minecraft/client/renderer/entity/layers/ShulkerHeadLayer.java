@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -23,39 +23,39 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
 
     @Override
     public void render(Shulker shulker, float f, float g, float h, float i, float j, float k, float l) {
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         switch (shulker.getAttachFace()) {
             case DOWN: {
                 break;
             }
             case EAST: {
-                GlStateManager.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.translatef(1.0f, -1.0f, 0.0f);
-                GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+                RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(1.0f, -1.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
                 break;
             }
             case WEST: {
-                GlStateManager.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.translatef(-1.0f, -1.0f, 0.0f);
-                GlStateManager.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+                RenderSystem.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(-1.0f, -1.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
                 break;
             }
             case NORTH: {
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.translatef(0.0f, -1.0f, -1.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(0.0f, -1.0f, -1.0f);
                 break;
             }
             case SOUTH: {
-                GlStateManager.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
-                GlStateManager.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.translatef(0.0f, -1.0f, 1.0f);
+                RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
+                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(0.0f, -1.0f, 1.0f);
                 break;
             }
             case UP: {
-                GlStateManager.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
-                GlStateManager.translatef(0.0f, -2.0f, 0.0f);
+                RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
+                RenderSystem.translatef(0.0f, -2.0f, 0.0f);
             }
         }
         ModelPart modelPart = ((ShulkerModel)this.getParentModel()).getHead();
@@ -68,7 +68,7 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
             this.bindTexture(ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()]);
         }
         modelPart.render(l);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
     }
 
     @Override

@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -63,9 +64,9 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (blockState.getValue(LIT).booleanValue()) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
         }
     }
 
