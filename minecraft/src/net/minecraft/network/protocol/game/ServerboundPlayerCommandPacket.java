@@ -54,8 +54,8 @@ public class ServerboundPlayerCommandPacket implements Packet<ServerGamePacketLi
 	}
 
 	public static enum Action {
-		START_SNEAKING,
-		STOP_SNEAKING,
+		PRESS_SHIFT_KEY,
+		RELEASE_SHIFT_KEY,
 		STOP_SLEEPING,
 		START_SPRINTING,
 		STOP_SPRINTING,

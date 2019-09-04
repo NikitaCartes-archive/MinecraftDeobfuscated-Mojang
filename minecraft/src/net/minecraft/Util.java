@@ -89,10 +89,20 @@ public class Util {
 		} else {
 			executorService = new ForkJoinPool(i, forkJoinPool -> {
 				ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
+					protected void onTermination(Throwable throwable) {
+						if (throwable != null) {
+							Util.LOGGER.warn("{} died", this.getName(), throwable);
+						} else {
+							Util.LOGGER.debug("{} shutdown", this.getName());
+						}
+
+						super.onTermination(throwable);
+					}
 				};
 				forkJoinWorkerThread.setName("Server-Worker-" + WORKER_COUNT.getAndIncrement());
 				return forkJoinWorkerThread;
 			}, (thread, throwable) -> {
+				pauseInIde(throwable);
 				if (throwable instanceof CompletionException) {
 					throwable = throwable.getCause();
 				}
@@ -258,6 +268,31 @@ public class Util {
 	public static <T> Dynamic<T> writeUUID(String string, UUID uUID, Dynamic<T> dynamic) {
 		return dynamic.set(string + "Most", dynamic.createLong(uUID.getMostSignificantBits()))
 			.set(string + "Least", dynamic.createLong(uUID.getLeastSignificantBits()));
+	}
+
+	public static <T extends Throwable> T pauseInIde(T throwable) {
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			LOGGER.error("Trying to throw a fatal exception, pausing in IDE", throwable);
+
+			while (true) {
+				try {
+					Thread.sleep(1000L);
+					LOGGER.error("paused");
+				} catch (InterruptedException var2) {
+					return throwable;
+				}
+			}
+		} else {
+			return throwable;
+		}
+	}
+
+	public static String describeError(Throwable throwable) {
+		if (throwable.getCause() != null) {
+			return describeError(throwable.getCause());
+		} else {
+			return throwable.getMessage() != null ? throwable.getMessage() : throwable.toString();
+		}
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

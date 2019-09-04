@@ -91,7 +91,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private float yRotLast;
 	private float xRotLast;
 	private boolean lastOnGround;
-	private boolean wasTryingToSneak;
+	private boolean wasShiftKeyDown;
 	private boolean wasSprinting;
 	private int positionReminder;
 	private boolean flashOnSetHealth;
@@ -115,6 +115,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private int autoJumpTime;
 	private boolean wasFallFlying;
 	private int waterVisionTime;
+	private boolean showDeathScreen = true;
 
 	public LocalPlayer(
 		Minecraft minecraft,
@@ -183,7 +184,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			super.tick();
 			if (this.isPassenger()) {
 				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.yRot, this.xRot, this.onGround));
-				this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.sneakKeyDown));
+				this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
 				Entity entity = this.getRootVehicle();
 				if (entity != this && entity.isControlledByLocalInstance()) {
 					this.connection.send(new ServerboundMoveVehiclePacket(entity));
@@ -208,13 +209,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.wasSprinting = bl;
 		}
 
-		boolean bl2 = this.isTryingToSneak();
-		if (bl2 != this.wasTryingToSneak) {
+		boolean bl2 = this.isShiftKeyDown();
+		if (bl2 != this.wasShiftKeyDown) {
 			ServerboundPlayerCommandPacket.Action action2 = bl2
-				? ServerboundPlayerCommandPacket.Action.START_SNEAKING
-				: ServerboundPlayerCommandPacket.Action.STOP_SNEAKING;
+				? ServerboundPlayerCommandPacket.Action.PRESS_SHIFT_KEY
+				: ServerboundPlayerCommandPacket.Action.RELEASE_SHIFT_KEY;
 			this.connection.send(new ServerboundPlayerCommandPacket(this, action2));
-			this.wasTryingToSneak = bl2;
+			this.wasShiftKeyDown = bl2;
 		}
 
 		if (this.isControlledCamera()) {
@@ -470,6 +471,14 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 	}
 
+	public void setShowDeathScreen(boolean bl) {
+		this.showDeathScreen = bl;
+	}
+
+	public boolean shouldShowDeathScreen() {
+		return this.showDeathScreen;
+	}
+
 	@Override
 	public void playSound(SoundEvent soundEvent, float f, float g) {
 		this.level.playLocalSound(this.x, this.y, this.z, soundEvent, this.getSoundSource(), f, g, false);
@@ -582,17 +591,17 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public boolean isSneaking() {
-		return this.isTryingToSneak();
-	}
-
-	public boolean isTryingToSneak() {
-		return this.input != null && this.input.sneakKeyDown;
+	public boolean isShiftKeyDown() {
+		return this.input != null && this.input.shiftKeyDown;
 	}
 
 	@Override
-	public boolean isVisuallySneaking() {
-		return !this.abilities.flying && !this.isSwimming() && this.canEnterPose(Pose.SNEAKING) ? this.isTryingToSneak() || !this.canEnterPose(Pose.STANDING) : false;
+	public boolean isCrouching() {
+		return !this.abilities.flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) ? this.isShiftKeyDown() || !this.canEnterPose(Pose.STANDING) : false;
+	}
+
+	public boolean isMovingSlowly() {
+		return this.isCrouching() || this.isVisuallyCrawling();
 	}
 
 	@Override
@@ -622,10 +631,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 		this.handleNetherPortalClient();
 		boolean bl = this.input.jumping;
-		boolean bl2 = this.input.sneakKeyDown;
+		boolean bl2 = this.input.shiftKeyDown;
 		boolean bl3 = this.hasEnoughImpulseToStartSprinting();
-		boolean bl4 = this.isVisuallySneaking() || this.isVisuallyCrawling();
-		this.input.tick(bl4, this.isSpectator());
+		this.input.tick(this.isMovingSlowly());
 		this.minecraft.getTutorial().onInput(this.input);
 		if (this.isUsingItem() && !this.isPassenger()) {
 			this.input.leftImpulse *= 0.2F;
@@ -633,10 +641,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.sprintTriggerTime = 0;
 		}
 
-		boolean bl5 = false;
+		boolean bl4 = false;
 		if (this.autoJumpTime > 0) {
 			this.autoJumpTime--;
-			bl5 = true;
+			bl4 = true;
 			this.input.jumping = true;
 		}
 
@@ -648,13 +656,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.checkInBlock(this.x + (double)this.getBbWidth() * 0.35, aABB.minY + 0.5, this.z + (double)this.getBbWidth() * 0.35);
 		}
 
-		boolean bl6 = (float)this.getFoodData().getFoodLevel() > 6.0F || this.abilities.mayfly;
+		boolean bl5 = (float)this.getFoodData().getFoodLevel() > 6.0F || this.abilities.mayfly;
 		if ((this.onGround || this.isUnderWater())
 			&& !bl2
 			&& !bl3
 			&& this.hasEnoughImpulseToStartSprinting()
 			&& !this.isSprinting()
-			&& bl6
+			&& bl5
 			&& !this.isUsingItem()
 			&& !this.hasEffect(MobEffects.BLINDNESS)) {
 			if (this.sprintTriggerTime <= 0 && !this.minecraft.options.keySprint.isDown()) {
@@ -667,7 +675,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (!this.isSprinting()
 			&& (!this.isInWater() || this.isUnderWater())
 			&& this.hasEnoughImpulseToStartSprinting()
-			&& bl6
+			&& bl5
 			&& !this.isUsingItem()
 			&& !this.hasEffect(MobEffects.BLINDNESS)
 			&& this.minecraft.options.keySprint.isDown()) {
@@ -675,13 +683,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		if (this.isSprinting()) {
-			boolean bl7 = !this.input.hasForwardImpulse() || !bl6;
-			boolean bl8 = bl7 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
+			boolean bl6 = !this.input.hasForwardImpulse() || !bl5;
+			boolean bl7 = bl6 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
 			if (this.isSwimming()) {
-				if (!this.onGround && !this.input.sneakKeyDown && bl7 || !this.isInWater()) {
+				if (!this.onGround && !this.input.shiftKeyDown && bl6 || !this.isInWater()) {
 					this.setSprinting(false);
 				}
-			} else if (bl8) {
+			} else if (bl7) {
 				this.setSprinting(false);
 			}
 		}
@@ -692,7 +700,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 					this.abilities.flying = true;
 					this.onUpdateAbilities();
 				}
-			} else if (!bl && this.input.jumping && !bl5) {
+			} else if (!bl && this.input.jumping && !bl4) {
 				if (this.jumpTriggerTime == 0) {
 					this.jumpTriggerTime = 7;
 				} else if (!this.isSwimming()) {
@@ -711,7 +719,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		this.wasFallFlying = this.isFallFlying();
-		if (this.isInWater() && this.input.sneakKeyDown) {
+		if (this.isInWater() && this.input.shiftKeyDown) {
 			this.goDownInWater();
 		}
 
@@ -725,9 +733,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 		if (this.abilities.flying && this.isControlledCamera()) {
 			int i = 0;
-			if (this.input.sneakKeyDown) {
-				this.input.leftImpulse = (float)((double)this.input.leftImpulse / 0.3);
-				this.input.forwardImpulse = (float)((double)this.input.forwardImpulse / 0.3);
+			if (this.input.shiftKeyDown) {
 				i--;
 			}
 
@@ -853,106 +859,108 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	protected void updateAutoJump(float f, float g) {
-		if (this.isAutoJumpEnabled()) {
-			if (this.autoJumpTime <= 0 && this.onGround && !this.isSneaking() && !this.isPassenger()) {
+		if (this.canAutoJump()) {
+			Vec3 vec3 = new Vec3(this.x, this.getBoundingBox().minY, this.z);
+			Vec3 vec32 = new Vec3(this.x + (double)f, this.getBoundingBox().minY, this.z + (double)g);
+			Vec3 vec33 = new Vec3((double)f, 0.0, (double)g);
+			float h = this.getSpeed();
+			float i = (float)vec33.lengthSqr();
+			if (i <= 0.001F) {
 				Vec2 vec2 = this.input.getMoveVector();
-				if (vec2.x != 0.0F || vec2.y != 0.0F) {
-					Vec3 vec3 = new Vec3(this.x, this.getBoundingBox().minY, this.z);
-					Vec3 vec32 = new Vec3(this.x + (double)f, this.getBoundingBox().minY, this.z + (double)g);
-					Vec3 vec33 = new Vec3((double)f, 0.0, (double)g);
-					float h = this.getSpeed();
-					float i = (float)vec33.lengthSqr();
-					if (i <= 0.001F) {
-						float j = h * vec2.x;
-						float k = h * vec2.y;
-						float l = Mth.sin(this.yRot * (float) (Math.PI / 180.0));
-						float m = Mth.cos(this.yRot * (float) (Math.PI / 180.0));
-						vec33 = new Vec3((double)(j * m - k * l), vec33.y, (double)(k * m + j * l));
-						i = (float)vec33.lengthSqr();
-						if (i <= 0.001F) {
-							return;
+				float j = h * vec2.x;
+				float k = h * vec2.y;
+				float l = Mth.sin(this.yRot * (float) (Math.PI / 180.0));
+				float m = Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+				vec33 = new Vec3((double)(j * m - k * l), vec33.y, (double)(k * m + j * l));
+				i = (float)vec33.lengthSqr();
+				if (i <= 0.001F) {
+					return;
+				}
+			}
+
+			float n = (float)Mth.fastInvSqrt((double)i);
+			Vec3 vec34 = vec33.scale((double)n);
+			Vec3 vec35 = this.getForward();
+			float l = (float)(vec35.x * vec34.x + vec35.z * vec34.z);
+			if (!(l < -0.15F)) {
+				CollisionContext collisionContext = CollisionContext.of(this);
+				BlockPos blockPos = new BlockPos(this.x, this.getBoundingBox().maxY, this.z);
+				BlockState blockState = this.level.getBlockState(blockPos);
+				if (blockState.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
+					blockPos = blockPos.above();
+					BlockState blockState2 = this.level.getBlockState(blockPos);
+					if (blockState2.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
+						float o = 7.0F;
+						float p = 1.2F;
+						if (this.hasEffect(MobEffects.JUMP)) {
+							p += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75F;
 						}
-					}
 
-					float j = (float)Mth.fastInvSqrt((double)i);
-					Vec3 vec34 = vec33.scale((double)j);
-					Vec3 vec35 = this.getForward();
-					float m = (float)(vec35.x * vec34.x + vec35.z * vec34.z);
-					if (!(m < -0.15F)) {
-						CollisionContext collisionContext = CollisionContext.of(this);
-						BlockPos blockPos = new BlockPos(this.x, this.getBoundingBox().maxY, this.z);
-						BlockState blockState = this.level.getBlockState(blockPos);
-						if (blockState.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
-							blockPos = blockPos.above();
-							BlockState blockState2 = this.level.getBlockState(blockPos);
-							if (blockState2.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
-								float n = 7.0F;
-								float o = 1.2F;
-								if (this.hasEffect(MobEffects.JUMP)) {
-									o += (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.75F;
-								}
+						float q = Math.max(h * 7.0F, 1.0F / n);
+						Vec3 vec37 = vec32.add(vec34.scale((double)q));
+						float r = this.getBbWidth();
+						float s = this.getBbHeight();
+						AABB aABB = new AABB(vec3, vec37.add(0.0, (double)s, 0.0)).inflate((double)r, 0.0, (double)r);
+						Vec3 vec36 = vec3.add(0.0, 0.51F, 0.0);
+						vec37 = vec37.add(0.0, 0.51F, 0.0);
+						Vec3 vec38 = vec34.cross(new Vec3(0.0, 1.0, 0.0));
+						Vec3 vec39 = vec38.scale((double)(r * 0.5F));
+						Vec3 vec310 = vec36.subtract(vec39);
+						Vec3 vec311 = vec37.subtract(vec39);
+						Vec3 vec312 = vec36.add(vec39);
+						Vec3 vec313 = vec37.add(vec39);
+						Iterator<AABB> iterator = this.level.getCollisions(this, aABB, Collections.emptySet()).flatMap(voxelShapex -> voxelShapex.toAabbs().stream()).iterator();
+						float t = Float.MIN_VALUE;
 
-								float p = Math.max(h * 7.0F, 1.0F / j);
-								Vec3 vec37 = vec32.add(vec34.scale((double)p));
-								float q = this.getBbWidth();
-								float r = this.getBbHeight();
-								AABB aABB = new AABB(vec3, vec37.add(0.0, (double)r, 0.0)).inflate((double)q, 0.0, (double)q);
-								Vec3 vec36 = vec3.add(0.0, 0.51F, 0.0);
-								vec37 = vec37.add(0.0, 0.51F, 0.0);
-								Vec3 vec38 = vec34.cross(new Vec3(0.0, 1.0, 0.0));
-								Vec3 vec39 = vec38.scale((double)(q * 0.5F));
-								Vec3 vec310 = vec36.subtract(vec39);
-								Vec3 vec311 = vec37.subtract(vec39);
-								Vec3 vec312 = vec36.add(vec39);
-								Vec3 vec313 = vec37.add(vec39);
-								Iterator<AABB> iterator = this.level
-									.getCollisions(this, aABB, Collections.emptySet())
-									.flatMap(voxelShapex -> voxelShapex.toAabbs().stream())
-									.iterator();
-								float s = Float.MIN_VALUE;
+						while (iterator.hasNext()) {
+							AABB aABB2 = (AABB)iterator.next();
+							if (aABB2.intersects(vec310, vec311) || aABB2.intersects(vec312, vec313)) {
+								t = (float)aABB2.maxY;
+								Vec3 vec314 = aABB2.getCenter();
+								BlockPos blockPos2 = new BlockPos(vec314);
 
-								while (iterator.hasNext()) {
-									AABB aABB2 = (AABB)iterator.next();
-									if (aABB2.intersects(vec310, vec311) || aABB2.intersects(vec312, vec313)) {
-										s = (float)aABB2.maxY;
-										Vec3 vec314 = aABB2.getCenter();
-										BlockPos blockPos2 = new BlockPos(vec314);
-
-										for (int t = 1; (float)t < o; t++) {
-											BlockPos blockPos3 = blockPos2.above(t);
-											BlockState blockState3 = this.level.getBlockState(blockPos3);
-											VoxelShape voxelShape;
-											if (!(voxelShape = blockState3.getCollisionShape(this.level, blockPos3, collisionContext)).isEmpty()) {
-												s = (float)voxelShape.max(Direction.Axis.Y) + (float)blockPos3.getY();
-												if ((double)s - this.getBoundingBox().minY > (double)o) {
-													return;
-												}
-											}
-
-											if (t > 1) {
-												blockPos = blockPos.above();
-												BlockState blockState4 = this.level.getBlockState(blockPos);
-												if (!blockState4.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
-													return;
-												}
-											}
+								for (int u = 1; (float)u < p; u++) {
+									BlockPos blockPos3 = blockPos2.above(u);
+									BlockState blockState3 = this.level.getBlockState(blockPos3);
+									VoxelShape voxelShape;
+									if (!(voxelShape = blockState3.getCollisionShape(this.level, blockPos3, collisionContext)).isEmpty()) {
+										t = (float)voxelShape.max(Direction.Axis.Y) + (float)blockPos3.getY();
+										if ((double)t - this.getBoundingBox().minY > (double)p) {
+											return;
 										}
-										break;
 									}
-								}
 
-								if (s != Float.MIN_VALUE) {
-									float u = (float)((double)s - this.getBoundingBox().minY);
-									if (!(u <= 0.5F) && !(u > o)) {
-										this.autoJumpTime = 1;
+									if (u > 1) {
+										blockPos = blockPos.above();
+										BlockState blockState4 = this.level.getBlockState(blockPos);
+										if (!blockState4.getCollisionShape(this.level, blockPos, collisionContext).isEmpty()) {
+											return;
+										}
 									}
 								}
+								break;
+							}
+						}
+
+						if (t != Float.MIN_VALUE) {
+							float v = (float)((double)t - this.getBoundingBox().minY);
+							if (!(v <= 0.5F) && !(v > p)) {
+								this.autoJumpTime = 1;
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	private boolean canAutoJump() {
+		return this.isAutoJumpEnabled() && this.autoJumpTime <= 0 && this.onGround && !this.isStayingOnGroundSurface() && !this.isPassenger() && this.isMoving();
+	}
+
+	private boolean isMoving() {
+		Vec2 vec2 = this.input.getMoveVector();
+		return vec2.x != 0.0F || vec2.y != 0.0F;
 	}
 
 	private boolean hasEnoughImpulseToStartSprinting() {

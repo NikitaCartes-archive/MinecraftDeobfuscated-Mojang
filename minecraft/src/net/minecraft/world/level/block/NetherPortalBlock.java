@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -50,16 +51,16 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (level.dimension.isNaturalDimension()
-			&& level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)
-			&& random.nextInt(2000) < level.getDifficulty().getId()) {
-			while (level.getBlockState(blockPos).getBlock() == this) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (serverLevel.dimension.isNaturalDimension()
+			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)
+			&& random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
+			while (serverLevel.getBlockState(blockPos).getBlock() == this) {
 				blockPos = blockPos.below();
 			}
 
-			if (level.getBlockState(blockPos).isValidSpawn(level, blockPos, EntityType.ZOMBIE_PIGMAN)) {
-				Entity entity = EntityType.ZOMBIE_PIGMAN.spawn(level, null, null, null, blockPos.above(), MobSpawnType.STRUCTURE, false, false);
+			if (serverLevel.getBlockState(blockPos).isValidSpawn(serverLevel, blockPos, EntityType.ZOMBIE_PIGMAN)) {
+				Entity entity = EntityType.ZOMBIE_PIGMAN.spawn(serverLevel, null, null, null, blockPos.above(), MobSpawnType.STRUCTURE, false, false);
 				if (entity != null) {
 					entity.changingDimensionDelay = entity.getDimensionChangingDelay();
 				}
@@ -177,7 +178,7 @@ public class NetherPortalBlock extends Block {
 		builder.add(AXIS);
 	}
 
-	public BlockPattern.BlockPatternMatch getPortalShape(LevelAccessor levelAccessor, BlockPos blockPos) {
+	public static BlockPattern.BlockPatternMatch getPortalShape(LevelAccessor levelAccessor, BlockPos blockPos) {
 		Direction.Axis axis = Direction.Axis.Z;
 		NetherPortalBlock.PortalShape portalShape = new NetherPortalBlock.PortalShape(levelAccessor, blockPos, Direction.Axis.X);
 		LoadingCache<BlockPos, BlockInWorld> loadingCache = BlockPattern.createLevelCache(levelAccessor, true);

@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -96,12 +96,12 @@ public class SignEditScreen extends Screen {
 	public void render(int i, int j, float f) {
 		this.renderBackground();
 		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 40, 16777215);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float)(this.width / 2), 0.0F, 50.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((float)(this.width / 2), 0.0F, 50.0F);
 		float g = 93.75F;
-		GlStateManager.scalef(-93.75F, -93.75F, -93.75F);
-		GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.scalef(-93.75F, -93.75F, -93.75F);
+		RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
 		BlockState blockState = this.sign.getBlockState();
 		float h;
 		if (blockState.getBlock() instanceof StandingSignBlock) {
@@ -110,12 +110,12 @@ public class SignEditScreen extends Screen {
 			h = ((Direction)blockState.getValue(WallSignBlock.FACING)).toYRot();
 		}
 
-		GlStateManager.rotatef(h, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(0.0F, -1.0625F, 0.0F);
+		RenderSystem.rotatef(h, 0.0F, 1.0F, 0.0F);
+		RenderSystem.translatef(0.0F, -1.0625F, 0.0F);
 		this.sign.setCursorInfo(this.line, this.signField.getCursorPos(), this.signField.getSelectionPos(), this.frame / 6 % 2 == 0);
 		BlockEntityRenderDispatcher.instance.render(this.sign, -0.5, -0.75, -0.5, 0.0F);
 		this.sign.resetCursorInfo();
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		super.render(i, j, f);
 	}
 }

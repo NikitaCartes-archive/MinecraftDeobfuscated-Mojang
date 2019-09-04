@@ -225,7 +225,7 @@ public class Horse extends AbstractHorse {
 			return super.mobInteract(player, interactionHand);
 		} else {
 			if (!this.isBaby()) {
-				if (this.isTamed() && player.isSneaking()) {
+				if (this.isTamed() && player.isSecondaryUseActive()) {
 					this.openInventory(player);
 					return true;
 				}

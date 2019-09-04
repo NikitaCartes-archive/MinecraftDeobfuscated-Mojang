@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.screens.resourcepacks.lists;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -105,19 +105,19 @@ public abstract class ResourcePackList extends ObjectSelectionList<ResourcePackL
 		public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.fill(k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
 			this.bindToIcon();
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			String string = this.getName();
 			String string2 = this.getDescription();
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
 				this.minecraft.getTextureManager().bind(ResourcePackList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(k, j, k + 32, j + 32, -1601138544);
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				int p = n - k;
 				int q = o - j;
 				if (!packCompatibility.isCompatible()) {

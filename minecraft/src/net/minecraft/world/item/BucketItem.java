@@ -115,11 +115,9 @@ public class BucketItem extends Item {
 		} else {
 			BlockState blockState = level.getBlockState(blockPos);
 			Material material = blockState.getMaterial();
-			boolean bl = !material.isSolid();
-			boolean bl2 = material.isReplaceable();
-			if (level.isEmptyBlock(blockPos)
+			boolean bl = blockState.canBeReplaced(this.content);
+			if (blockState.isAir()
 				|| bl
-				|| bl2
 				|| blockState.getBlock() instanceof LiquidBlockContainer
 					&& ((LiquidBlockContainer)blockState.getBlock()).canPlaceLiquid(level, blockPos, blockState, this.content)) {
 				if (level.dimension.isUltraWarm() && this.content.is(FluidTags.WATER)) {
@@ -138,7 +136,7 @@ public class BucketItem extends Item {
 						this.playEmptySound(player, level, blockPos);
 					}
 				} else {
-					if (!level.isClientSide && (bl || bl2) && !material.isLiquid()) {
+					if (!level.isClientSide && bl && !material.isLiquid()) {
 						level.destroyBlock(blockPos, true);
 					}
 

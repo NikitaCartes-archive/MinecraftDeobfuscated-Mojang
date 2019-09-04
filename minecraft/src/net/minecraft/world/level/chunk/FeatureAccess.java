@@ -3,10 +3,9 @@ package net.minecraft.world.level.chunk;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
-public interface FeatureAccess extends BlockGetter {
+public interface FeatureAccess {
 	@Nullable
 	StructureStart getStartForFeature(String string);
 

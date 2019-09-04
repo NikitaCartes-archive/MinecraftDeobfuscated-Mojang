@@ -1,6 +1,8 @@
 package net.minecraft.server.level;
 
 import java.util.Comparator;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Unit;
 import net.minecraft.world.level.ChunkPos;
 
@@ -13,7 +15,7 @@ public class TicketType<T> {
 	public static final TicketType<ChunkPos> PLAYER = create("player", Comparator.comparingLong(ChunkPos::toLong));
 	public static final TicketType<ChunkPos> FORCED = create("forced", Comparator.comparingLong(ChunkPos::toLong));
 	public static final TicketType<ChunkPos> LIGHT = create("light", Comparator.comparingLong(ChunkPos::toLong));
-	public static final TicketType<ColumnPos> PORTAL = create("portal", Comparator.comparingLong(ColumnPos::toLong));
+	public static final TicketType<BlockPos> PORTAL = create("portal", Vec3i::compareTo, 300);
 	public static final TicketType<Integer> POST_TELEPORT = create("post_teleport", Integer::compareTo, 5);
 	public static final TicketType<ChunkPos> UNKNOWN = create("unknown", Comparator.comparingLong(ChunkPos::toLong), 1);
 

@@ -54,6 +54,17 @@ public class SoundEvents {
 	public static final SoundEvent BEACON_AMBIENT = register("block.beacon.ambient");
 	public static final SoundEvent BEACON_DEACTIVATE = register("block.beacon.deactivate");
 	public static final SoundEvent BEACON_POWER_SELECT = register("block.beacon.power_select");
+	public static final SoundEvent BEE_DEATH = register("entity.bee.death");
+	public static final SoundEvent BEE_HURT = register("entity.bee.hurt");
+	public static final SoundEvent BEE_LOOP_AGGRESSIVE = register("entity.bee.loop_aggressive");
+	public static final SoundEvent BEE_LOOP = register("entity.bee.loop");
+	public static final SoundEvent BEE_STING = register("entity.bee.sting");
+	public static final SoundEvent BEE_POLLINATE = register("entity.bee.pollinate");
+	public static final SoundEvent BEEHIVE_DRIP = register("block.beehive.drip");
+	public static final SoundEvent BEEHIVE_ENTER = register("block.beehive.enter");
+	public static final SoundEvent BEEHIVE_EXIT = register("block.beehive.exit");
+	public static final SoundEvent BEEHIVE_SHEAR = register("block.beehive.shear");
+	public static final SoundEvent BEEHIVE_WORK = register("block.beehive.work");
 	public static final SoundEvent BELL_BLOCK = register("block.bell.use");
 	public static final SoundEvent BELL_RESONATE = register("block.bell.resonate");
 	public static final SoundEvent BLAZE_AMBIENT = register("entity.blaze.ambient");
@@ -294,6 +305,7 @@ public class SoundEvents {
 	public static final SoundEvent GUARDIAN_HURT = register("entity.guardian.hurt");
 	public static final SoundEvent GUARDIAN_HURT_LAND = register("entity.guardian.hurt_land");
 	public static final SoundEvent HOE_TILL = register("item.hoe.till");
+	public static final SoundEvent HONEY_DRINK = register("item.honey_bottle.drink");
 	public static final SoundEvent HORSE_AMBIENT = register("entity.horse.ambient");
 	public static final SoundEvent HORSE_ANGRY = register("entity.horse.angry");
 	public static final SoundEvent HORSE_ARMOR = register("entity.horse.armor");

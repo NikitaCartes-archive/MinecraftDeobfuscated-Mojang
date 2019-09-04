@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ElytraModel;
@@ -26,9 +27,9 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 		if (itemStack.getItem() == Items.ELYTRA) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.enableBlend();
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 			if (livingEntity instanceof AbstractClientPlayer) {
 				AbstractClientPlayer abstractClientPlayer = (AbstractClientPlayer)livingEntity;
 				if (abstractClientPlayer.isElytraLoaded() && abstractClientPlayer.getElytraTextureLocation() != null) {
@@ -44,16 +45,16 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 				this.bindTexture(WINGS_LOCATION);
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, 0.0F, 0.125F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, 0.0F, 0.125F);
 			this.elytraModel.setupAnim(livingEntity, f, g, i, j, k, l);
 			this.elytraModel.render(livingEntity, f, g, i, j, k, l);
 			if (itemStack.isEnchanted()) {
 				AbstractArmorLayer.renderFoil(this::bindTexture, livingEntity, this.elytraModel, f, g, h, i, j, k, l);
 			}
 
-			GlStateManager.disableBlend();
-			GlStateManager.popMatrix();
+			RenderSystem.disableBlend();
+			RenderSystem.popMatrix();
 		}
 	}
 

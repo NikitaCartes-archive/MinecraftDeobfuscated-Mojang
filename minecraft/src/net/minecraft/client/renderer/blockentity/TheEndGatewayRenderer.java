@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -15,10 +15,10 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer {
 
 	@Override
 	public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
-		GlStateManager.disableFog();
+		RenderSystem.disableFog();
 		TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)theEndPortalBlockEntity;
 		if (theEndGatewayBlockEntity.isSpawning() || theEndGatewayBlockEntity.isCoolingDown()) {
-			GlStateManager.alphaFunc(516, 0.1F);
+			RenderSystem.alphaFunc(516, 0.1F);
 			this.bindTexture(BEAM_LOCATION);
 			float h = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(g) : theEndGatewayBlockEntity.getCooldownPercent(g);
 			double j = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
@@ -30,7 +30,7 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer {
 		}
 
 		super.render(theEndPortalBlockEntity, d, e, f, g, i);
-		GlStateManager.enableFog();
+		RenderSystem.enableFog();
 	}
 
 	@Override

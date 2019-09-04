@@ -20,6 +20,8 @@ public class ClientboundCustomPayloadPacket implements Packet<ClientGamePacketLi
 	public static final ResourceLocation DEBUG_VILLAGE_SECTIONS = new ResourceLocation("debug/village_sections");
 	public static final ResourceLocation DEBUG_GOAL_SELECTOR = new ResourceLocation("debug/goal_selector");
 	public static final ResourceLocation DEBUG_BRAIN = new ResourceLocation("debug/brain");
+	public static final ResourceLocation DEBUG_GAME_TEST_ADD_MARKER = new ResourceLocation("debug/game_test_add_marker");
+	public static final ResourceLocation DEBUG_GAME_TEST_CLEAR = new ResourceLocation("debug/game_test_clear");
 	public static final ResourceLocation DEBUG_RAIDS = new ResourceLocation("debug/raids");
 	private ResourceLocation identifier;
 	private FriendlyByteBuf data;

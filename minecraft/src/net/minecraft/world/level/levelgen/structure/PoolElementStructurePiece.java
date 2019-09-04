@@ -13,6 +13,7 @@ import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
@@ -78,8 +79,8 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-		return this.element.place(this.structureManager, levelAccessor, this.position, this.rotation, boundingBox, random);
+	public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		return this.element.place(this.structureManager, levelAccessor, chunkGenerator, this.position, this.rotation, boundingBox, random);
 	}
 
 	@Override

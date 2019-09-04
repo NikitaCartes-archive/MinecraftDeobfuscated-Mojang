@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -21,15 +21,15 @@ public class ElytraModel<T extends LivingEntity> extends EntityModel<T> {
 	}
 
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableCull();
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.disableCull();
 		if (livingEntity.isBaby()) {
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.translatef(0.0F, 1.5F, -0.1F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.translatef(0.0F, 1.5F, -0.1F);
 			this.leftWing.render(k);
 			this.rightWing.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
 			this.leftWing.render(k);
 			this.rightWing.render(k);
@@ -52,7 +52,7 @@ public class ElytraModel<T extends LivingEntity> extends EntityModel<T> {
 
 			l = p * (float) (Math.PI / 9) + (1.0F - p) * l;
 			m = p * (float) (-Math.PI / 2) + (1.0F - p) * m;
-		} else if (livingEntity.isVisuallySneaking()) {
+		} else if (livingEntity.isCrouching()) {
 			l = (float) (Math.PI * 2.0 / 9.0);
 			m = (float) (-Math.PI / 4);
 			n = 3.0F;

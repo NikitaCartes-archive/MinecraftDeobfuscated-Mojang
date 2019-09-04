@@ -114,7 +114,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 
 	public Parrot(EntityType<? extends Parrot> entityType, Level level) {
 		super(entityType, level);
-		this.moveControl = new FlyingMoveControl(this);
+		this.moveControl = new FlyingMoveControl(this, 10, false);
 	}
 
 	@Nullable

@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -80,11 +81,11 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 					int v = 127;
 					Tesselator tesselator = Tesselator.getInstance();
 					BufferBuilder bufferBuilder = tesselator.getBuilder();
-					GlStateManager.disableFog();
-					GlStateManager.disableLighting();
-					GlStateManager.disableTexture();
-					GlStateManager.enableBlend();
-					GlStateManager.blendFuncSeparate(
+					RenderSystem.disableFog();
+					RenderSystem.disableLighting();
+					RenderSystem.disableTexture();
+					RenderSystem.enableBlend();
+					RenderSystem.blendFuncSeparate(
 						GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 					);
 					this.setOverlayRenderState(true);
@@ -98,12 +99,12 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 					}
 
 					this.setOverlayRenderState(false);
-					GlStateManager.lineWidth(1.0F);
-					GlStateManager.enableLighting();
-					GlStateManager.enableTexture();
-					GlStateManager.enableDepthTest();
-					GlStateManager.depthMask(true);
-					GlStateManager.enableFog();
+					RenderSystem.lineWidth(1.0F);
+					RenderSystem.enableLighting();
+					RenderSystem.enableTexture();
+					RenderSystem.enableDepthTest();
+					RenderSystem.depthMask(true);
+					RenderSystem.enableFog();
 				}
 			}
 		}
@@ -112,7 +113,7 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 	private void renderInvisibleBlocks(
 		StructureBlockEntity structureBlockEntity, double d, double e, double f, BlockPos blockPos, Tesselator tesselator, BufferBuilder bufferBuilder, boolean bl
 	) {
-		GlStateManager.lineWidth(bl ? 3.0F : 1.0F);
+		RenderSystem.lineWidth(bl ? 3.0F : 1.0F);
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 		BlockGetter blockGetter = structureBlockEntity.getLevel();
 		BlockPos blockPos2 = structureBlockEntity.getBlockPos();
@@ -144,7 +145,7 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 	}
 
 	private void renderBox(Tesselator tesselator, BufferBuilder bufferBuilder, double d, double e, double f, double g, double h, double i, int j, int k, int l) {
-		GlStateManager.lineWidth(2.0F);
+		RenderSystem.lineWidth(2.0F);
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex(d, e, f).color((float)k, (float)k, (float)k, 0.0F).endVertex();
 		bufferBuilder.vertex(d, e, f).color(k, k, k, j).endVertex();
@@ -165,7 +166,7 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 		bufferBuilder.vertex(g, e, f).color(k, k, k, j).endVertex();
 		bufferBuilder.vertex(g, e, f).color((float)k, (float)k, (float)k, 0.0F).endVertex();
 		tesselator.end();
-		GlStateManager.lineWidth(1.0F);
+		RenderSystem.lineWidth(1.0F);
 	}
 
 	public boolean shouldRenderOffScreen(StructureBlockEntity structureBlockEntity) {

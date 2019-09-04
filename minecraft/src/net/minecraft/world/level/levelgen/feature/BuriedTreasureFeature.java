@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -18,8 +19,7 @@ public class BuriedTreasureFeature extends StructureFeature<BuriedTreasureConfig
 	}
 
 	@Override
-	public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
-		Biome biome = chunkGenerator.getBiomeSource().getBiome(new BlockPos((i << 4) + 9, 0, (j << 4) + 9));
+	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
 		if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.BURIED_TREASURE)) {
 			((WorldgenRandom)random).setLargeFeatureWithSalt(chunkGenerator.getSeed(), i, j, 10387320);
 			BuriedTreasureConfiguration buriedTreasureConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.BURIED_TREASURE);
@@ -45,8 +45,8 @@ public class BuriedTreasureFeature extends StructureFeature<BuriedTreasureConfig
 	}
 
 	public static class BuriedTreasureStart extends StructureStart {
-		public BuriedTreasureStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, biome, boundingBox, k, l);
+		public BuriedTreasureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
 		@Override

@@ -105,7 +105,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 	}
 
 	@Override
-	protected boolean makeStepSound() {
+	protected boolean isMovementNoisy() {
 		return false;
 	}
 

@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -159,12 +160,12 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.renderBackground();
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
-		GlStateManager.disableLighting();
-		GlStateManager.disableFog();
+		RenderSystem.disableLighting();
+		RenderSystem.disableFog();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		float g = 32.0F;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
@@ -191,16 +192,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 
 		this.renderList(m, n, i, j, f);
-		GlStateManager.disableDepthTest();
+		RenderSystem.disableDepthTest();
 		this.renderHoleBackground(0, this.y0, 255, 255);
 		this.renderHoleBackground(this.y1, this.height, 255, 255);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 		);
-		GlStateManager.disableAlphaTest();
-		GlStateManager.shadeModel(7425);
-		GlStateManager.disableTexture();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.shadeModel(7425);
+		RenderSystem.disableTexture();
 		int o = 4;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 		bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0, 1.0).color(0, 0, 0, 0).endVertex();
@@ -244,10 +245,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 
 		this.renderDecorations(i, j);
-		GlStateManager.enableTexture();
-		GlStateManager.shadeModel(7424);
-		GlStateManager.enableAlphaTest();
-		GlStateManager.disableBlend();
+		RenderSystem.enableTexture();
+		RenderSystem.shadeModel(7424);
+		RenderSystem.enableAlphaTest();
+		RenderSystem.disableBlend();
 	}
 
 	protected void centerScrollOn(E entry) {
@@ -402,23 +403,23 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				if (this.renderSelection && this.isSelectedItem(n)) {
 					int t = this.x0 + this.width / 2 - s / 2;
 					int u = this.x0 + this.width / 2 + s / 2;
-					GlStateManager.disableTexture();
+					RenderSystem.disableTexture();
 					float g = this.isFocused() ? 1.0F : 0.5F;
-					GlStateManager.color4f(g, g, g, 1.0F);
+					RenderSystem.color4f(g, g, g, 1.0F);
 					bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)t, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q + r + 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)u, (double)(q - 2), 0.0).endVertex();
 					bufferBuilder.vertex((double)t, (double)(q - 2), 0.0).endVertex();
 					tesselator.end();
-					GlStateManager.color4f(0.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
 					bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 					bufferBuilder.vertex((double)(t + 1), (double)(q + r + 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(u - 1), (double)(q + r + 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(u - 1), (double)(q - 1), 0.0).endVertex();
 					bufferBuilder.vertex((double)(t + 1), (double)(q - 1), 0.0).endVertex();
 					tesselator.end();
-					GlStateManager.enableTexture();
+					RenderSystem.enableTexture();
 				}
 
 				int t = this.getRowLeft();
@@ -447,7 +448,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = 32.0F;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 		bufferBuilder.vertex((double)this.x0, (double)j, 0.0).uv(0.0, (double)((float)j / 32.0F)).color(64, 64, 64, l).endVertex();

@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.hash.Hashing;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.JsonOps;
@@ -389,6 +390,10 @@ public class LevelData {
 		return this.seed;
 	}
 
+	public static long obfuscateSeed(long l) {
+		return Hashing.sha256().hashLong(l).asLong();
+	}
+
 	public int getXSpawn() {
 		return this.xSpawn;
 	}
@@ -413,7 +418,7 @@ public class LevelData {
 		if (!this.upgradedPlayerTag && this.loadedPlayerTag != null) {
 			if (this.playerDataVersion < SharedConstants.getCurrentVersion().getWorldVersion()) {
 				if (this.fixerUpper == null) {
-					throw new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded.");
+					throw (NullPointerException)Util.pauseInIde(new NullPointerException("Fixer Upper not set inside LevelData, and the player tag is not upgraded."));
 				}
 
 				this.loadedPlayerTag = NbtUtils.update(this.fixerUpper, DataFixTypes.PLAYER, this.loadedPlayerTag, this.playerDataVersion);

@@ -1,7 +1,7 @@
 package com.mojang.blaze3d.vertex;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,31 +14,31 @@ public class VertexBuffer {
 
 	public VertexBuffer(VertexFormat vertexFormat) {
 		this.format = vertexFormat;
-		this.id = GLX.glGenBuffers();
+		this.id = GlStateManager.glGenBuffers();
 	}
 
 	public void bind() {
-		GLX.glBindBuffer(GLX.GL_ARRAY_BUFFER, this.id);
+		GlStateManager.glBindBuffer(34962, this.id);
 	}
 
 	public void upload(ByteBuffer byteBuffer) {
 		this.bind();
-		GLX.glBufferData(GLX.GL_ARRAY_BUFFER, byteBuffer, 35044);
+		GlStateManager.glBufferData(34962, byteBuffer, 35044);
 		unbind();
 		this.vertexCount = byteBuffer.limit() / this.format.getVertexSize();
 	}
 
 	public void draw(int i) {
-		GlStateManager.drawArrays(i, 0, this.vertexCount);
+		RenderSystem.drawArrays(i, 0, this.vertexCount);
 	}
 
 	public static void unbind() {
-		GLX.glBindBuffer(GLX.GL_ARRAY_BUFFER, 0);
+		GlStateManager.glBindBuffer(34962, 0);
 	}
 
 	public void delete() {
 		if (this.id >= 0) {
-			GLX.glDeleteBuffers(this.id);
+			GlStateManager.glDeleteBuffers(this.id);
 			this.id = -1;
 		}
 	}

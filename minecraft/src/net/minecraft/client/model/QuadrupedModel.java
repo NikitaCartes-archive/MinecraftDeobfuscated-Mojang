@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -44,19 +44,19 @@ public class QuadrupedModel<T extends Entity> extends EntityModel<T> {
 		this.setupAnim(entity, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 2.0F;
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
 			this.head.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.translatef(0.0F, 24.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
 			this.body.render(k);
 			this.leg0.render(k);
 			this.leg1.render(k);
 			this.leg2.render(k);
 			this.leg3.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
 			this.head.render(k);
 			this.body.render(k);

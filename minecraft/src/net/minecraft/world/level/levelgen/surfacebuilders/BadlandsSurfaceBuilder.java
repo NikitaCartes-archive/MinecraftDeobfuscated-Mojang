@@ -138,9 +138,9 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 		}
 
 		if (this.seed != l || this.pillarNoise == null || this.pillarRoofNoise == null) {
-			Random random = new WorldgenRandom(l);
-			this.pillarNoise = new PerlinSimplexNoise(random, 4);
-			this.pillarRoofNoise = new PerlinSimplexNoise(random, 1);
+			WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+			this.pillarNoise = new PerlinSimplexNoise(worldgenRandom, 3, 0);
+			this.pillarRoofNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
 		}
 
 		this.seed = l;
@@ -149,63 +149,63 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 	protected void generateBands(long l) {
 		this.clayBands = new BlockState[64];
 		Arrays.fill(this.clayBands, TERRACOTTA);
-		Random random = new WorldgenRandom(l);
-		this.clayBandsOffsetNoise = new PerlinSimplexNoise(random, 1);
+		WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+		this.clayBandsOffsetNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
 
 		for (int i = 0; i < 64; i++) {
-			i += random.nextInt(5) + 1;
+			i += worldgenRandom.nextInt(5) + 1;
 			if (i < 64) {
 				this.clayBands[i] = ORANGE_TERRACOTTA;
 			}
 		}
 
-		int ix = random.nextInt(4) + 2;
+		int ix = worldgenRandom.nextInt(4) + 2;
 
 		for (int j = 0; j < ix; j++) {
-			int k = random.nextInt(3) + 1;
-			int m = random.nextInt(64);
+			int k = worldgenRandom.nextInt(3) + 1;
+			int m = worldgenRandom.nextInt(64);
 
 			for (int n = 0; m + n < 64 && n < k; n++) {
 				this.clayBands[m + n] = YELLOW_TERRACOTTA;
 			}
 		}
 
-		int j = random.nextInt(4) + 2;
+		int j = worldgenRandom.nextInt(4) + 2;
 
 		for (int k = 0; k < j; k++) {
-			int m = random.nextInt(3) + 2;
-			int n = random.nextInt(64);
+			int m = worldgenRandom.nextInt(3) + 2;
+			int n = worldgenRandom.nextInt(64);
 
 			for (int o = 0; n + o < 64 && o < m; o++) {
 				this.clayBands[n + o] = BROWN_TERRACOTTA;
 			}
 		}
 
-		int k = random.nextInt(4) + 2;
+		int k = worldgenRandom.nextInt(4) + 2;
 
 		for (int m = 0; m < k; m++) {
-			int n = random.nextInt(3) + 1;
-			int o = random.nextInt(64);
+			int n = worldgenRandom.nextInt(3) + 1;
+			int o = worldgenRandom.nextInt(64);
 
 			for (int p = 0; o + p < 64 && p < n; p++) {
 				this.clayBands[o + p] = RED_TERRACOTTA;
 			}
 		}
 
-		int m = random.nextInt(3) + 3;
+		int m = worldgenRandom.nextInt(3) + 3;
 		int n = 0;
 
 		for (int o = 0; o < m; o++) {
 			int p = 1;
-			n += random.nextInt(16) + 4;
+			n += worldgenRandom.nextInt(16) + 4;
 
 			for (int q = 0; n + q < 64 && q < 1; q++) {
 				this.clayBands[n + q] = WHITE_TERRACOTTA;
-				if (n + q > 1 && random.nextBoolean()) {
+				if (n + q > 1 && worldgenRandom.nextBoolean()) {
 					this.clayBands[n + q - 1] = LIGHT_GRAY_TERRACOTTA;
 				}
 
-				if (n + q < 63 && random.nextBoolean()) {
+				if (n + q < 63 && worldgenRandom.nextBoolean()) {
 					this.clayBands[n + q + 1] = LIGHT_GRAY_TERRACOTTA;
 				}
 			}
@@ -213,7 +213,7 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 	}
 
 	protected BlockState getBand(int i, int j, int k) {
-		int l = (int)Math.round(this.clayBandsOffsetNoise.getValue((double)i / 512.0, (double)k / 512.0) * 2.0);
+		int l = (int)Math.round(this.clayBandsOffsetNoise.getValue((double)i / 512.0, (double)k / 512.0, false) * 2.0);
 		return this.clayBands[(j + l + 64) % 64];
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -125,8 +126,8 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-		if (!this.isDead(blockState) && level.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+		if (!this.isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
 			int i = 5;
 			int j = 1;
 			int k = 2;
@@ -140,10 +141,10 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 
 					for (int r = q - 2; r < q; r++) {
 						BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
-						if (blockPos2 != blockPos && random.nextInt(6) == 0 && level.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
-							BlockState blockState2 = level.getBlockState(blockPos2.below());
+						if (blockPos2 != blockPos && random.nextInt(6) == 0 && serverLevel.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+							BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
 							if (blockState2.is(BlockTags.CORAL_BLOCKS)) {
-								level.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(random.nextInt(4) + 1)), 3);
+								serverLevel.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(random.nextInt(4) + 1)), 3);
 							}
 						}
 					}
@@ -160,7 +161,7 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 				l++;
 			}
 
-			level.setBlock(blockPos, blockState.setValue(PICKLES, Integer.valueOf(4)), 2);
+			serverLevel.setBlock(blockPos, blockState.setValue(PICKLES, Integer.valueOf(4)), 2);
 		}
 	}
 }

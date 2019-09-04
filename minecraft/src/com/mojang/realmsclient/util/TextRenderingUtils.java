@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.util;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -24,30 +24,30 @@ public class TextRenderingUtils {
 
 	private static List<TextRenderingUtils.Line> insertLinks(List<String> list, List<TextRenderingUtils.LineSegment> list2) {
 		int i = 0;
-		ArrayList<TextRenderingUtils.Line> arrayList = new ArrayList();
+		List<TextRenderingUtils.Line> list3 = Lists.<TextRenderingUtils.Line>newArrayList();
 
 		for (String string : list) {
-			List<TextRenderingUtils.LineSegment> list3 = new ArrayList();
+			List<TextRenderingUtils.LineSegment> list4 = Lists.<TextRenderingUtils.LineSegment>newArrayList();
 
 			for (String string2 : split(string, "%link")) {
 				if (string2.equals("%link")) {
-					list3.add(list2.get(i++));
+					list4.add(list2.get(i++));
 				} else {
-					list3.add(TextRenderingUtils.LineSegment.text(string2));
+					list4.add(TextRenderingUtils.LineSegment.text(string2));
 				}
 			}
 
-			arrayList.add(new TextRenderingUtils.Line(list3));
+			list3.add(new TextRenderingUtils.Line(list4));
 		}
 
-		return arrayList;
+		return list3;
 	}
 
 	public static List<String> split(String string, String string2) {
 		if (string2.isEmpty()) {
 			throw new IllegalArgumentException("Delimiter cannot be the empty string");
 		} else {
-			List<String> list = new ArrayList();
+			List<String> list = Lists.<String>newArrayList();
 			int i = 0;
 
 			int j;

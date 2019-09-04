@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -23,33 +23,33 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		ItemStack itemStack = bl ? livingEntity.getOffhandItem() : livingEntity.getMainHandItem();
 		ItemStack itemStack2 = bl ? livingEntity.getMainHandItem() : livingEntity.getOffhandItem();
 		if (!itemStack.isEmpty() || !itemStack2.isEmpty()) {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			if (this.getParentModel().young) {
 				float m = 0.5F;
-				GlStateManager.translatef(0.0F, 0.75F, 0.0F);
-				GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+				RenderSystem.translatef(0.0F, 0.75F, 0.0F);
+				RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 			}
 
 			this.renderArmWithItem(livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT);
 			this.renderArmWithItem(livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 
 	private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm) {
 		if (!itemStack.isEmpty()) {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			this.translateToHand(humanoidArm);
-			if (livingEntity.isVisuallySneaking()) {
-				GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			if (livingEntity.isCrouching()) {
+				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
 			}
 
-			GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
-			GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+			RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
 			boolean bl = humanoidArm == HumanoidArm.LEFT;
-			GlStateManager.translatef((float)(bl ? -1 : 1) / 16.0F, 0.125F, -0.625F);
+			RenderSystem.translatef((float)(bl ? -1 : 1) / 16.0F, 0.125F, -0.625F);
 			Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

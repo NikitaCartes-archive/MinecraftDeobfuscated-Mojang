@@ -4,11 +4,11 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -57,14 +57,14 @@ public class KelpBlock extends Block implements LiquidBlockContainer {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(level, blockPos)) {
-			level.destroyBlock(blockPos, true);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!blockState.canSurvive(serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
 		} else {
 			BlockPos blockPos2 = blockPos.above();
-			BlockState blockState2 = level.getBlockState(blockPos2);
+			BlockState blockState2 = serverLevel.getBlockState(blockPos2);
 			if (blockState2.getBlock() == Blocks.WATER && (Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14) {
-				level.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
+				serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
 			}
 		}
 	}

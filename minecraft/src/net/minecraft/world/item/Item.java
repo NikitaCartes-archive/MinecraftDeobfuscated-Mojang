@@ -18,6 +18,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -342,6 +344,14 @@ public class Item implements ItemLike {
 	@Nullable
 	public FoodProperties getFoodProperties() {
 		return this.foodProperties;
+	}
+
+	public SoundEvent getDrinkingSound() {
+		return SoundEvents.GENERIC_DRINK;
+	}
+
+	public SoundEvent getEatingSound() {
+		return SoundEvents.GENERIC_EAT;
 	}
 
 	public static class Properties {

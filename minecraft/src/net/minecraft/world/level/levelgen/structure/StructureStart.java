@@ -11,7 +11,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -19,7 +18,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public abstract class StructureStart {
-	public static final StructureStart INVALID_START = new StructureStart(Feature.MINESHAFT, 0, 0, Biomes.PLAINS, BoundingBox.getUnknownBox(), 0, 0L) {
+	public static final StructureStart INVALID_START = new StructureStart(Feature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L) {
 		@Override
 		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 		}
@@ -29,16 +28,14 @@ public abstract class StructureStart {
 	protected BoundingBox boundingBox;
 	private final int chunkX;
 	private final int chunkZ;
-	private final Biome biome;
 	private int references;
 	protected final WorldgenRandom random;
 
-	public StructureStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
+	public StructureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 		this.feature = structureFeature;
 		this.chunkX = i;
 		this.chunkZ = j;
 		this.references = k;
-		this.biome = biome;
 		this.random = new WorldgenRandom();
 		this.random.setLargeFeatureSeed(l, i, j);
 		this.boundingBox = boundingBox;
@@ -54,13 +51,13 @@ public abstract class StructureStart {
 		return this.pieces;
 	}
 
-	public void postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+	public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 		synchronized (this.pieces) {
 			Iterator<StructurePiece> iterator = this.pieces.iterator();
 
 			while (iterator.hasNext()) {
 				StructurePiece structurePiece = (StructurePiece)iterator.next();
-				if (structurePiece.getBoundingBox().intersects(boundingBox) && !structurePiece.postProcess(levelAccessor, random, boundingBox, chunkPos)) {
+				if (structurePiece.getBoundingBox().intersects(boundingBox) && !structurePiece.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos)) {
 					iterator.remove();
 				}
 			}
@@ -81,7 +78,6 @@ public abstract class StructureStart {
 		CompoundTag compoundTag = new CompoundTag();
 		if (this.isValid()) {
 			compoundTag.putString("id", Registry.STRUCTURE_FEATURE.getKey(this.getFeature()).toString());
-			compoundTag.putString("biome", Registry.BIOME.getKey(this.biome).toString());
 			compoundTag.putInt("ChunkX", i);
 			compoundTag.putInt("ChunkZ", j);
 			compoundTag.putInt("references", this.references);

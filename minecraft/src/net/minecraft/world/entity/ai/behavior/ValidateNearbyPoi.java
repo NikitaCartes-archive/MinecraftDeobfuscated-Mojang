@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,9 +36,14 @@ public class ValidateNearbyPoi extends Behavior<LivingEntity> {
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Brain<?> brain = livingEntity.getBrain();
 		GlobalPos globalPos = (GlobalPos)brain.getMemory(this.memoryType).get();
+		BlockPos blockPos = globalPos.pos();
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(globalPos.dimension());
-		if (this.poiDoesntExist(serverLevel2, globalPos.pos()) || this.bedIsOccupied(serverLevel2, globalPos.pos(), livingEntity)) {
+		if (this.poiDoesntExist(serverLevel2, blockPos)) {
 			brain.eraseMemory(this.memoryType);
+		} else if (this.bedIsOccupied(serverLevel2, blockPos, livingEntity)) {
+			brain.eraseMemory(this.memoryType);
+			serverLevel.getPoiManager().release(blockPos);
+			DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
 		}
 	}
 

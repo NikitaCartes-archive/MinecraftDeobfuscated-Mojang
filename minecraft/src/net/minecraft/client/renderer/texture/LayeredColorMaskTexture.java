@@ -1,8 +1,8 @@
 package net.minecraft.client.renderer.texture;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -81,9 +81,9 @@ public class LayeredColorMaskTexture extends AbstractTexture {
 				}
 
 				TextureUtil.prepareImage(this.getId(), nativeImage2.getWidth(), nativeImage2.getHeight());
-				GlStateManager.pixelTransfer(3357, Float.MAX_VALUE);
+				RenderSystem.pixelTransfer(3357, Float.MAX_VALUE);
 				nativeImage2.upload(0, 0, 0, false);
-				GlStateManager.pixelTransfer(3357, 0.0F);
+				RenderSystem.pixelTransfer(3357, 0.0F);
 			} catch (Throwable var148) {
 				var3 = var148;
 				throw var148;

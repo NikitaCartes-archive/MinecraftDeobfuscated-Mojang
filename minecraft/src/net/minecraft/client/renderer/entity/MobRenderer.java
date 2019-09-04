@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -71,9 +71,9 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 			double v = (double)((float)(o - s));
 			double w = (double)((float)(p - t));
 			double x = (double)((float)(q - u));
-			GlStateManager.disableTexture();
-			GlStateManager.disableLighting();
-			GlStateManager.disableCull();
+			RenderSystem.disableTexture();
+			RenderSystem.disableLighting();
+			RenderSystem.disableCull();
 			int y = 24;
 			double z = 0.025;
 			bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
@@ -126,9 +126,9 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 			}
 
 			tesselator.end();
-			GlStateManager.enableLighting();
-			GlStateManager.enableTexture();
-			GlStateManager.enableCull();
+			RenderSystem.enableLighting();
+			RenderSystem.enableTexture();
+			RenderSystem.enableCull();
 		}
 	}
 }

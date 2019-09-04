@@ -27,7 +27,7 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 		long m,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		double e = Biome.BIOME_INFO_NOISE.getValue((double)i * 0.25, (double)j * 0.25);
+		double e = Biome.BIOME_INFO_NOISE.getValue((double)i * 0.25, (double)j * 0.25, false);
 		if (e > 0.0) {
 			int n = i & 15;
 			int o = j & 15;

@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
@@ -221,11 +221,11 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	public void render(int i, int j, float f) {
 		if (this.isVisible()) {
 			Lighting.turnOnGui();
-			GlStateManager.disableLighting();
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, 0.0F, 100.0F);
+			RenderSystem.disableLighting();
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, 0.0F, 100.0F);
 			this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
 			this.blit(k, l, 1, 1, 147, 166);
@@ -238,7 +238,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 
 			this.filterButton.render(i, j, f);
 			this.recipeBookPage.render(k, l, i, j, f);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

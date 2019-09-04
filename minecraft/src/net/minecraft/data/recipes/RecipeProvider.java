@@ -281,6 +281,14 @@ public class RecipeProvider implements DataProvider {
 			.pattern("OOO")
 			.unlocks("has_nether_star", this.has(Items.NETHER_STAR))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.BEE_HIVE)
+			.define('P', ItemTags.PLANKS)
+			.define('H', Items.HONEYCOMB)
+			.pattern("PPP")
+			.pattern("HHH")
+			.pattern("PPP")
+			.unlocks("has_honeycomb", this.has(Items.HONEYCOMB))
+			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BEETROOT_SOUP)
 			.requires(Items.BOWL)
 			.requires(Items.BEETROOT, 6)
@@ -3518,7 +3526,16 @@ public class RecipeProvider implements DataProvider {
 			.pattern("##")
 			.unlocks("has_string", this.has(Items.STRING))
 			.save(consumer, "white_wool_from_string");
-		ShapelessRecipeBuilder.shapeless(Items.SUGAR).requires(Blocks.SUGAR_CANE).unlocks("has_reeds", this.has(Blocks.SUGAR_CANE)).save(consumer);
+		ShapelessRecipeBuilder.shapeless(Items.SUGAR)
+			.requires(Blocks.SUGAR_CANE)
+			.group("sugar")
+			.unlocks("has_reeds", this.has(Blocks.SUGAR_CANE))
+			.save(consumer, "sugar_from_sugar_cane");
+		ShapelessRecipeBuilder.shapeless(Items.SUGAR, 3)
+			.requires(Items.HONEY_BOTTLE)
+			.group("sugar")
+			.unlocks("has_honey_bottle", this.has(Items.HONEY_BOTTLE))
+			.save(consumer, "sugar_from_honey_bottle");
 		ShapedRecipeBuilder.shaped(Blocks.TNT)
 			.define('#', Ingredient.of(Blocks.SAND, Blocks.RED_SAND))
 			.define('X', Items.GUNPOWDER)

@@ -35,8 +35,8 @@ public class DesertPyramidFeature extends RandomScatteredFeature<NoneFeatureConf
 	}
 
 	public static class FeatureStart extends StructureStart {
-		public FeatureStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, biome, boundingBox, k, l);
+		public FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
 		@Override

@@ -20,10 +20,7 @@ public class TimerQueue<T> {
 	private final Map<String, TimerQueue.Event<T>> events = Maps.<String, TimerQueue.Event<T>>newHashMap();
 
 	private static <T> Comparator<TimerQueue.Event<T>> createComparator() {
-		return (event, event2) -> {
-			int i = Long.compare(event.triggerTime, event2.triggerTime);
-			return i != 0 ? i : event.sequentialId.compareTo(event2.sequentialId);
-		};
+		return Comparator.comparingLong(event -> event.triggerTime).thenComparing(event -> event.sequentialId);
 	}
 
 	public TimerQueue(TimerCallbacks<T> timerCallbacks) {

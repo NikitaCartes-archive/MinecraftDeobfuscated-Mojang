@@ -3,9 +3,9 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,8 +44,8 @@ public class GrassPathBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		FarmBlock.turnToDirt(blockState, level, blockPos);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		FarmBlock.turnToDirt(blockState, serverLevel, blockPos);
 	}
 
 	@Override

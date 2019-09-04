@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.JsonOps;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
@@ -27,8 +28,9 @@ public class CreateWorldScreen extends Screen {
 	private EditBox nameEdit;
 	private EditBox seedEdit;
 	private String resultFolder;
-	private String gameModeName = "survival";
-	private String oldGameModeName;
+	private CreateWorldScreen.SelectedGameMode gameMode = CreateWorldScreen.SelectedGameMode.SURVIVAL;
+	@Nullable
+	private CreateWorldScreen.SelectedGameMode oldGameMode;
 	private boolean features = true;
 	private boolean commands;
 	private boolean commandsChanged;
@@ -76,38 +78,15 @@ public class CreateWorldScreen extends Screen {
 		});
 		this.children.add(this.nameEdit);
 		this.modeButton = this.addButton(new Button(this.width / 2 - 75, 115, 150, 20, I18n.get("selectWorld.gameMode"), button -> {
-			if ("survival".equals(this.gameModeName)) {
-				if (!this.commandsChanged) {
-					this.commands = false;
-				}
-
-				this.hardCore = false;
-				this.gameModeName = "hardcore";
-				this.hardCore = true;
-				this.commandsButton.active = false;
-				this.bonusItemsButton.active = false;
-				this.updateSelectionStrings();
-			} else if ("hardcore".equals(this.gameModeName)) {
-				if (!this.commandsChanged) {
-					this.commands = true;
-				}
-
-				this.hardCore = false;
-				this.gameModeName = "creative";
-				this.updateSelectionStrings();
-				this.hardCore = false;
-				this.commandsButton.active = true;
-				this.bonusItemsButton.active = true;
-			} else {
-				if (!this.commandsChanged) {
-					this.commands = false;
-				}
-
-				this.gameModeName = "survival";
-				this.updateSelectionStrings();
-				this.commandsButton.active = true;
-				this.bonusItemsButton.active = true;
-				this.hardCore = false;
+			switch (this.gameMode) {
+				case SURVIVAL:
+					this.setGameMode(CreateWorldScreen.SelectedGameMode.HARDCORE);
+					break;
+				case HARDCORE:
+					this.setGameMode(CreateWorldScreen.SelectedGameMode.CREATIVE);
+					break;
+				case CREATIVE:
+					this.setGameMode(CreateWorldScreen.SelectedGameMode.SURVIVAL);
 			}
 
 			this.updateSelectionStrings();
@@ -164,9 +143,11 @@ public class CreateWorldScreen extends Screen {
 			new Button(this.width / 2 - 75, 187, 150, 20, I18n.get("selectWorld.moreWorldOptions"), button -> this.toggleDisplayOptions())
 		);
 		this.createButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, I18n.get("selectWorld.create"), button -> this.onCreate()));
+		this.createButton.active = !this.initName.isEmpty();
 		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, I18n.get("gui.cancel"), button -> this.minecraft.setScreen(this.lastScreen)));
 		this.setDisplayOptions(this.displayOptions);
 		this.setInitialFocus(this.nameEdit);
+		this.setGameMode(this.gameMode);
 		this.updateResultFolder();
 		this.updateSelectionStrings();
 	}
@@ -191,9 +172,9 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void updateSelectionStrings() {
-		this.modeButton.setMessage(I18n.get("selectWorld.gameMode") + ": " + I18n.get("selectWorld.gameMode." + this.gameModeName));
-		this.gameModeHelp1 = I18n.get("selectWorld.gameMode." + this.gameModeName + ".line1");
-		this.gameModeHelp2 = I18n.get("selectWorld.gameMode." + this.gameModeName + ".line2");
+		this.modeButton.setMessage(I18n.get("selectWorld.gameMode") + ": " + I18n.get("selectWorld.gameMode." + this.gameMode.name));
+		this.gameModeHelp1 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line1");
+		this.gameModeHelp2 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line2");
 		this.featuresButton.setMessage(I18n.get("selectWorld.mapFeatures") + ' ' + I18n.get(this.features ? "options.on" : "options.off"));
 		this.bonusItemsButton.setMessage(I18n.get("selectWorld.bonusItems") + ' ' + I18n.get(this.bonusItems && !this.hardCore ? "options.on" : "options.off"));
 		this.typeButton.setMessage(I18n.get("selectWorld.mapType") + ' ' + I18n.get(LevelType.LEVEL_TYPES[this.levelTypeIndex].getDescriptionId()));
@@ -222,9 +203,7 @@ public class CreateWorldScreen extends Screen {
 				}
 			}
 
-			LevelSettings levelSettings = new LevelSettings(
-				l, GameType.byName(this.gameModeName), this.features, this.hardCore, LevelType.LEVEL_TYPES[this.levelTypeIndex]
-			);
+			LevelSettings levelSettings = new LevelSettings(l, this.gameMode.gameType, this.features, this.hardCore, LevelType.LEVEL_TYPES[this.levelTypeIndex]);
 			levelSettings.setLevelTypeOptions(Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, this.levelTypeOptions));
 			if (this.bonusItems && !this.hardCore) {
 				levelSettings.enableStartingBonusItems();
@@ -251,37 +230,52 @@ public class CreateWorldScreen extends Screen {
 		this.setDisplayOptions(!this.displayOptions);
 	}
 
+	private void setGameMode(CreateWorldScreen.SelectedGameMode selectedGameMode) {
+		if (!this.commandsChanged) {
+			this.commands = selectedGameMode == CreateWorldScreen.SelectedGameMode.CREATIVE;
+		}
+
+		if (selectedGameMode == CreateWorldScreen.SelectedGameMode.HARDCORE) {
+			this.hardCore = true;
+			this.commandsButton.active = false;
+			this.bonusItemsButton.active = false;
+		} else {
+			this.hardCore = false;
+			this.commandsButton.active = true;
+			this.bonusItemsButton.active = true;
+		}
+
+		this.gameMode = selectedGameMode;
+		this.updateSelectionStrings();
+	}
+
 	private void setDisplayOptions(boolean bl) {
 		this.displayOptions = bl;
+		this.modeButton.visible = !this.displayOptions;
+		this.typeButton.visible = this.displayOptions;
 		if (LevelType.LEVEL_TYPES[this.levelTypeIndex] == LevelType.DEBUG_ALL_BLOCK_STATES) {
-			this.modeButton.visible = !this.displayOptions;
 			this.modeButton.active = false;
-			if (this.oldGameModeName == null) {
-				this.oldGameModeName = this.gameModeName;
+			if (this.oldGameMode == null) {
+				this.oldGameMode = this.gameMode;
 			}
 
-			this.gameModeName = "spectator";
+			this.setGameMode(CreateWorldScreen.SelectedGameMode.DEBUG);
 			this.featuresButton.visible = false;
 			this.bonusItemsButton.visible = false;
-			this.typeButton.visible = this.displayOptions;
 			this.commandsButton.visible = false;
 			this.customizeTypeButton.visible = false;
 		} else {
-			this.modeButton.visible = !this.displayOptions;
 			this.modeButton.active = true;
-			if (this.oldGameModeName != null) {
-				this.gameModeName = this.oldGameModeName;
-				this.oldGameModeName = null;
+			if (this.oldGameMode != null) {
+				this.setGameMode(this.oldGameMode);
 			}
 
 			this.featuresButton.visible = this.displayOptions && LevelType.LEVEL_TYPES[this.levelTypeIndex] != LevelType.CUSTOMIZED;
 			this.bonusItemsButton.visible = this.displayOptions;
-			this.typeButton.visible = this.displayOptions;
 			this.commandsButton.visible = this.displayOptions;
 			this.customizeTypeButton.visible = this.displayOptions && LevelType.LEVEL_TYPES[this.levelTypeIndex].hasCustomOptions();
 		}
 
-		this.updateSelectionStrings();
 		this.seedEdit.setVisible(this.displayOptions);
 		this.nameEdit.setVisible(!this.displayOptions);
 		if (this.displayOptions) {
@@ -338,18 +332,34 @@ public class CreateWorldScreen extends Screen {
 
 	public void copyFromWorld(LevelData levelData) {
 		this.initName = levelData.getLevelName();
-		this.initSeed = levelData.getSeed() + "";
+		this.initSeed = Long.toString(levelData.getSeed());
 		LevelType levelType = levelData.getGeneratorType() == LevelType.CUSTOMIZED ? LevelType.NORMAL : levelData.getGeneratorType();
 		this.levelTypeIndex = levelType.getId();
 		this.levelTypeOptions = levelData.getGeneratorOptions();
 		this.features = levelData.isGenerateMapFeatures();
 		this.commands = levelData.getAllowCommands();
 		if (levelData.isHardcore()) {
-			this.gameModeName = "hardcore";
+			this.gameMode = CreateWorldScreen.SelectedGameMode.HARDCORE;
 		} else if (levelData.getGameType().isSurvival()) {
-			this.gameModeName = "survival";
+			this.gameMode = CreateWorldScreen.SelectedGameMode.SURVIVAL;
 		} else if (levelData.getGameType().isCreative()) {
-			this.gameModeName = "creative";
+			this.gameMode = CreateWorldScreen.SelectedGameMode.CREATIVE;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static enum SelectedGameMode {
+		SURVIVAL("survival", GameType.SURVIVAL),
+		HARDCORE("hardcore", GameType.SURVIVAL),
+		CREATIVE("creative", GameType.CREATIVE),
+		DEBUG("spectator", GameType.SPECTATOR);
+
+		private final String name;
+		private final GameType gameType;
+
+		private SelectedGameMode(String string2, GameType gameType) {
+			this.name = string2;
+			this.gameType = gameType;
 		}
 	}
 }

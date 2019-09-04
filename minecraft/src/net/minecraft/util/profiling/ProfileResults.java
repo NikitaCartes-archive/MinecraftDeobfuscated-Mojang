@@ -27,8 +27,6 @@ public interface ProfileResults {
 		return this.getEndTimeTicks() - this.getStartTimeTicks();
 	}
 
-	String getProfilerResults();
-
 	static String demanglePath(String string) {
 		return string.replace('\u001e', '.');
 	}

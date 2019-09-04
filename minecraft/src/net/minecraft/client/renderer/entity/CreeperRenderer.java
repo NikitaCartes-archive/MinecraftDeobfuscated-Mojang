@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CreeperModel;
@@ -26,7 +26,7 @@ public class CreeperRenderer extends MobRenderer<Creeper, CreeperModel<Creeper>>
 		g *= g;
 		float i = (1.0F + g * 0.4F) * h;
 		float j = (1.0F + g * 0.1F) / h;
-		GlStateManager.scalef(i, j, i);
+		RenderSystem.scalef(i, j, i);
 	}
 
 	protected int getOverlayColor(Creeper creeper, float f, float g) {

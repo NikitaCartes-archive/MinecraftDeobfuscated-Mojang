@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -90,7 +91,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		return 4;
 	}
 
-	protected boolean carveSphere(ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, double g, double h, BitSet bitSet) {
+	protected boolean carveSphere(
+		ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, double g, double h, BitSet bitSet
+	) {
 		Random random = new Random(l + (long)j + (long)k);
 		double m = (double)(j * 16 + 8);
 		double n = (double)(k * 16 + 8);
@@ -122,7 +125,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 							for (int aa = r; aa > q; aa--) {
 								double ab = ((double)aa - 0.5 - e) / h;
 								if (!this.skip(w, ab, z, aa)) {
-									bl |= this.carveBlock(chunkAccess, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, atomicBoolean);
+									bl |= this.carveBlock(
+										chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, atomicBoolean
+									);
 								}
 							}
 						}
@@ -138,6 +143,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 	protected boolean carveBlock(
 		ChunkAccess chunkAccess,
+		Function<BlockPos, Biome> function,
 		BitSet bitSet,
 		Random random,
 		BlockPos.MutableBlockPos mutableBlockPos,
@@ -175,7 +181,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 					if (atomicBoolean.get()) {
 						mutableBlockPos3.set(mutableBlockPos).move(Direction.DOWN);
 						if (chunkAccess.getBlockState(mutableBlockPos3).getBlock() == Blocks.DIRT) {
-							chunkAccess.setBlockState(mutableBlockPos3, chunkAccess.getBiome(mutableBlockPos).getSurfaceBuilderConfig().getTopMaterial(), false);
+							chunkAccess.setBlockState(mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getSurfaceBuilderConfig().getTopMaterial(), false);
 						}
 					}
 				}
@@ -185,7 +191,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		}
 	}
 
-	public abstract boolean carve(ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet, C carverConfiguration);
+	public abstract boolean carve(
+		ChunkAccess chunkAccess, Function<BlockPos, Biome> function, Random random, int i, int j, int k, int l, int m, BitSet bitSet, C carverConfiguration
+	);
 
 	public abstract boolean isStartChunk(Random random, int i, int j, C carverConfiguration);
 

@@ -265,8 +265,8 @@ public class LiquidBlockRenderer {
 	}
 
 	private int getLightColor(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {
-		int i = blockAndBiomeGetter.getLightColor(blockPos, 0);
-		int j = blockAndBiomeGetter.getLightColor(blockPos.above(), 0);
+		int i = blockAndBiomeGetter.getLightColor(blockPos);
+		int j = blockAndBiomeGetter.getLightColor(blockPos.above());
 		int k = i & 0xFF;
 		int l = j & 0xFF;
 		int m = i >> 16 & 0xFF;

@@ -62,8 +62,8 @@ public abstract class Biome {
 	public static final Logger LOGGER = LogManager.getLogger();
 	public static final Set<Biome> EXPLORABLE_BIOMES = Sets.<Biome>newHashSet();
 	public static final IdMapper<Biome> MUTATED_BIOMES = new IdMapper<>();
-	protected static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise(new Random(1234L), 1);
-	public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new Random(2345L), 1);
+	protected static final PerlinSimplexNoise TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(1234L), 0, 0);
+	public static final PerlinSimplexNoise BIOME_INFO_NOISE = new PerlinSimplexNoise(new WorldgenRandom(2345L), 0, 0);
 	@Nullable
 	protected String descriptionId;
 	protected final float depth;
@@ -174,7 +174,7 @@ public abstract class Biome {
 
 	protected float getTemperatureNoCache(BlockPos blockPos) {
 		if (blockPos.getY() > 64) {
-			float f = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F)) * 4.0);
+			float f = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F), false) * 4.0);
 			return this.getTemperature() - (f + (float)blockPos.getY() - 64.0F) * 0.05F / 30.0F;
 		} else {
 			return this.getTemperature();

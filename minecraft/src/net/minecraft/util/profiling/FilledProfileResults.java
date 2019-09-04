@@ -153,13 +153,6 @@ public class FilledProfileResults implements ProfileResults {
 		return stringBuilder.toString();
 	}
 
-	@Override
-	public String getProfilerResults() {
-		StringBuilder stringBuilder = new StringBuilder();
-		this.appendProfilerResults(0, "root", stringBuilder);
-		return stringBuilder.toString();
-	}
-
 	private void appendProfilerResults(int i, String string, StringBuilder stringBuilder) {
 		List<ResultField> list = this.getTimes(string);
 		if (list.size() >= 3) {

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BellModel;
@@ -15,10 +15,10 @@ public class BellRenderer extends BlockEntityRenderer<BellBlockEntity> {
 	private final BellModel bellModel = new BellModel();
 
 	public void render(BellBlockEntity bellBlockEntity, double d, double e, double f, float g, int i) {
-		GlStateManager.pushMatrix();
-		GlStateManager.enableRescaleNormal();
+		RenderSystem.pushMatrix();
+		RenderSystem.enableRescaleNormal();
 		this.bindTexture(BELL_RESOURCE_LOCATION);
-		GlStateManager.translatef((float)d, (float)e, (float)f);
+		RenderSystem.translatef((float)d, (float)e, (float)f);
 		float h = (float)bellBlockEntity.ticks + g;
 		float j = 0.0F;
 		float k = 0.0F;
@@ -36,7 +36,7 @@ public class BellRenderer extends BlockEntityRenderer<BellBlockEntity> {
 		}
 
 		this.bellModel.render(j, k, 0.0625F);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.popMatrix();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.popMatrix();
 	}
 }

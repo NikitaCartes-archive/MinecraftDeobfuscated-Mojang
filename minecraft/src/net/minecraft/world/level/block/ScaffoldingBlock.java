@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -100,21 +101,25 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		int i = getDistance(level, blockPos);
-		BlockState blockState2 = blockState.setValue(DISTANCE, Integer.valueOf(i)).setValue(BOTTOM, Boolean.valueOf(this.isBottom(level, blockPos, i)));
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		int i = getDistance(serverLevel, blockPos);
+		BlockState blockState2 = blockState.setValue(DISTANCE, Integer.valueOf(i)).setValue(BOTTOM, Boolean.valueOf(this.isBottom(serverLevel, blockPos, i)));
 		if ((Integer)blockState2.getValue(DISTANCE) == 7) {
 			if ((Integer)blockState.getValue(DISTANCE) == 7) {
-				level.addFreshEntity(
+				serverLevel.addFreshEntity(
 					new FallingBlockEntity(
-						level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, blockState2.setValue(WATERLOGGED, Boolean.valueOf(false))
+						serverLevel,
+						(double)blockPos.getX() + 0.5,
+						(double)blockPos.getY(),
+						(double)blockPos.getZ() + 0.5,
+						blockState2.setValue(WATERLOGGED, Boolean.valueOf(false))
 					)
 				);
 			} else {
-				level.destroyBlock(blockPos, true);
+				serverLevel.destroyBlock(blockPos, true);
 			}
 		} else if (blockState != blockState2) {
-			level.setBlock(blockPos, blockState2, 3);
+			serverLevel.setBlock(blockPos, blockState2, 3);
 		}
 	}
 
@@ -125,7 +130,7 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		if (collisionContext.isAbove(Shapes.block(), blockPos, true) && !collisionContext.isSneaking()) {
+		if (collisionContext.isAbove(Shapes.block(), blockPos, true) && !collisionContext.isDescending()) {
 			return STABLE_SHAPE;
 		} else {
 			return blockState.getValue(DISTANCE) != 0 && blockState.getValue(BOTTOM) && collisionContext.isAbove(BELOW_BLOCK, blockPos, true)

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,20 +27,20 @@ public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
 
 	protected void scale(Cat cat, float f) {
 		super.scale(cat, f);
-		GlStateManager.scalef(0.8F, 0.8F, 0.8F);
+		RenderSystem.scalef(0.8F, 0.8F, 0.8F);
 	}
 
 	protected void setupRotations(Cat cat, float f, float g, float h) {
 		super.setupRotations(cat, f, g, h);
 		float i = cat.getLieDownAmount(h);
 		if (i > 0.0F) {
-			GlStateManager.translatef(0.4F * i, 0.15F * i, 0.1F * i);
-			GlStateManager.rotatef(Mth.rotLerp(i, 0.0F, 90.0F), 0.0F, 0.0F, 1.0F);
+			RenderSystem.translatef(0.4F * i, 0.15F * i, 0.1F * i);
+			RenderSystem.rotatef(Mth.rotLerp(i, 0.0F, 90.0F), 0.0F, 0.0F, 1.0F);
 			BlockPos blockPos = new BlockPos(cat);
 
 			for (Player player : cat.level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0))) {
 				if (player.isSleeping()) {
-					GlStateManager.translatef(0.15F * i, 0.0F, 0.0F);
+					RenderSystem.translatef(0.15F * i, 0.0F, 0.0F);
 					break;
 				}
 			}

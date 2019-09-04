@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
@@ -34,6 +34,6 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 			this.shadowRadius = 0.5F;
 		}
 
-		GlStateManager.scalef(g, g, g);
+		RenderSystem.scalef(g, g, g);
 	}
 }

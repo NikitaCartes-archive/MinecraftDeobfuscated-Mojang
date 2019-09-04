@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +20,6 @@ public class WitherSkeletonRenderer extends SkeletonRenderer {
 	}
 
 	protected void scale(AbstractSkeleton abstractSkeleton, float f) {
-		GlStateManager.scalef(1.2F, 1.2F, 1.2F);
+		RenderSystem.scalef(1.2F, 1.2F, 1.2F);
 	}
 }

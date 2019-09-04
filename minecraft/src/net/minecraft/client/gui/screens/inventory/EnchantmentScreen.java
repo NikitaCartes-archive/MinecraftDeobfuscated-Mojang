@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import java.util.List;
 import java.util.Random;
@@ -71,34 +71,34 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 	@Override
 	protected void renderBg(float f, int i, int j) {
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-		GlStateManager.pushMatrix();
-		GlStateManager.matrixMode(5889);
-		GlStateManager.pushMatrix();
-		GlStateManager.loadIdentity();
+		RenderSystem.pushMatrix();
+		RenderSystem.matrixMode(5889);
+		RenderSystem.pushMatrix();
+		RenderSystem.loadIdentity();
 		int m = (int)this.minecraft.window.getGuiScale();
-		GlStateManager.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
-		GlStateManager.translatef(-0.34F, 0.23F, 0.0F);
-		GlStateManager.multMatrix(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
+		RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
+		RenderSystem.translatef(-0.34F, 0.23F, 0.0F);
+		RenderSystem.multMatrix(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
 		float g = 1.0F;
-		GlStateManager.matrixMode(5888);
-		GlStateManager.loadIdentity();
+		RenderSystem.matrixMode(5888);
+		RenderSystem.loadIdentity();
 		Lighting.turnOn();
-		GlStateManager.translatef(0.0F, 3.3F, -16.0F);
-		GlStateManager.scalef(1.0F, 1.0F, 1.0F);
+		RenderSystem.translatef(0.0F, 3.3F, -16.0F);
+		RenderSystem.scalef(1.0F, 1.0F, 1.0F);
 		float h = 5.0F;
-		GlStateManager.scalef(5.0F, 5.0F, 5.0F);
-		GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.scalef(5.0F, 5.0F, 5.0F);
+		RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(ENCHANTING_BOOK_LOCATION);
-		GlStateManager.rotatef(20.0F, 1.0F, 0.0F, 0.0F);
+		RenderSystem.rotatef(20.0F, 1.0F, 0.0F, 0.0F);
 		float n = Mth.lerp(f, this.oOpen, this.open);
-		GlStateManager.translatef((1.0F - n) * 0.2F, (1.0F - n) * 0.1F, (1.0F - n) * 0.25F);
-		GlStateManager.rotatef(-(1.0F - n) * 90.0F - 90.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+		RenderSystem.translatef((1.0F - n) * 0.2F, (1.0F - n) * 0.1F, (1.0F - n) * 0.25F);
+		RenderSystem.rotatef(-(1.0F - n) * 90.0F - 90.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
 		float o = Mth.lerp(f, this.oFlip, this.flip) + 0.25F;
 		float p = Mth.lerp(f, this.oFlip, this.flip) + 0.75F;
 		o = (o - (float)Mth.fastFloor((double)o)) * 1.6F - 0.3F;
@@ -119,17 +119,17 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			p = 1.0F;
 		}
 
-		GlStateManager.enableRescaleNormal();
+		RenderSystem.enableRescaleNormal();
 		BOOK_MODEL.render(0.0F, o, p, n, 0.0F, 0.0625F);
-		GlStateManager.disableRescaleNormal();
+		RenderSystem.disableRescaleNormal();
 		Lighting.turnOff();
-		GlStateManager.matrixMode(5889);
-		GlStateManager.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
-		GlStateManager.popMatrix();
-		GlStateManager.matrixMode(5888);
-		GlStateManager.popMatrix();
+		RenderSystem.matrixMode(5889);
+		RenderSystem.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+		RenderSystem.popMatrix();
+		RenderSystem.matrixMode(5888);
+		RenderSystem.popMatrix();
 		Lighting.turnOff();
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
 		int q = this.menu.getGoldCount();
 
@@ -139,7 +139,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			this.blitOffset = 0;
 			this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
 			int u = this.menu.costs[r];
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			if (u == 0) {
 				this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
 			} else {

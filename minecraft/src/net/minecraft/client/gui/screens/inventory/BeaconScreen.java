@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -140,7 +140,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 	@Override
 	protected void renderBg(float f, int i, int j) {
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BEACON_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
@@ -256,7 +256,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		@Override
 		public void renderButton(int i, int j, float f) {
 			Minecraft.getInstance().getTextureManager().bind(BeaconScreen.BEACON_LOCATION);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = 219;
 			int l = 0;
 			if (!this.active) {

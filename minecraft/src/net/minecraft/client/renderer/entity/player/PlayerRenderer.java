@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -9,6 +10,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
+import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.Deadmau5EarsLayer;
@@ -49,12 +51,13 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(new ElytraLayer<>(this));
 		this.addLayer(new ParrotOnShoulderLayer<>(this));
 		this.addLayer(new SpinAttackEffectLayer<>(this));
+		this.addLayer(new BeeStingerLayer<>(this));
 	}
 
 	public void render(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g, float h) {
 		if (!abstractClientPlayer.isLocalPlayer() || this.entityRenderDispatcher.camera.getEntity() == abstractClientPlayer) {
 			double i = e;
-			if (abstractClientPlayer.isVisuallySneaking()) {
+			if (abstractClientPlayer.isCrouching()) {
 				i = e - 0.125;
 			}
 
@@ -81,7 +84,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			playerModel.rightPants.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
 			playerModel.leftSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
 			playerModel.rightSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
-			playerModel.sneaking = abstractClientPlayer.isVisuallySneaking();
+			playerModel.crouching = abstractClientPlayer.isCrouching();
 			HumanoidModel.ArmPose armPose = this.getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.MAIN_HAND);
 			HumanoidModel.ArmPose armPose2 = this.getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.OFF_HAND);
 			if (abstractClientPlayer.getMainArm() == HumanoidArm.RIGHT) {
@@ -134,7 +137,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 
 	protected void scale(AbstractClientPlayer abstractClientPlayer, float f) {
 		float g = 0.9375F;
-		GlStateManager.scalef(0.9375F, 0.9375F, 0.9375F);
+		RenderSystem.scalef(0.9375F, 0.9375F, 0.9375F);
 	}
 
 	protected void renderNameTags(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, String string, double g) {
@@ -153,30 +156,30 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 
 	public void renderRightHand(AbstractClientPlayer abstractClientPlayer) {
 		float f = 1.0F;
-		GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
 		float g = 0.0625F;
 		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
 		this.setModelProperties(abstractClientPlayer);
-		GlStateManager.enableBlend();
+		RenderSystem.enableBlend();
 		playerModel.attackTime = 0.0F;
-		playerModel.sneaking = false;
+		playerModel.crouching = false;
 		playerModel.swimAmount = 0.0F;
 		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
 		playerModel.rightArm.xRot = 0.0F;
 		playerModel.rightArm.render(0.0625F);
 		playerModel.rightSleeve.xRot = 0.0F;
 		playerModel.rightSleeve.render(0.0625F);
-		GlStateManager.disableBlend();
+		RenderSystem.disableBlend();
 	}
 
 	public void renderLeftHand(AbstractClientPlayer abstractClientPlayer) {
 		float f = 1.0F;
-		GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
 		float g = 0.0625F;
 		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
 		this.setModelProperties(abstractClientPlayer);
-		GlStateManager.enableBlend();
-		playerModel.sneaking = false;
+		RenderSystem.enableBlend();
+		playerModel.crouching = false;
 		playerModel.attackTime = 0.0F;
 		playerModel.swimAmount = 0.0F;
 		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
@@ -184,7 +187,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		playerModel.leftArm.render(0.0625F);
 		playerModel.leftSleeve.xRot = 0.0F;
 		playerModel.leftSleeve.render(0.0625F);
-		GlStateManager.disableBlend();
+		RenderSystem.disableBlend();
 	}
 
 	protected void setupRotations(AbstractClientPlayer abstractClientPlayer, float f, float g, float h) {
@@ -194,7 +197,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
 			float k = Mth.clamp(j * j / 100.0F, 0.0F, 1.0F);
 			if (!abstractClientPlayer.isAutoSpinAttack()) {
-				GlStateManager.rotatef(k * (-90.0F - abstractClientPlayer.xRot), 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(k * (-90.0F - abstractClientPlayer.xRot), 1.0F, 0.0F, 0.0F);
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
@@ -204,15 +207,15 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			if (d > 0.0 && e > 0.0) {
 				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / (Math.sqrt(d) * Math.sqrt(e));
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;
-				GlStateManager.rotatef((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float) Math.PI, 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float) Math.PI, 0.0F, 1.0F, 0.0F);
 			}
 		} else if (i > 0.0F) {
 			super.setupRotations(abstractClientPlayer, f, g, h);
 			float jx = abstractClientPlayer.isInWater() ? -90.0F - abstractClientPlayer.xRot : -90.0F;
 			float kx = Mth.lerp(i, 0.0F, jx);
-			GlStateManager.rotatef(kx, 1.0F, 0.0F, 0.0F);
+			RenderSystem.rotatef(kx, 1.0F, 0.0F, 0.0F);
 			if (abstractClientPlayer.isVisuallySwimming()) {
-				GlStateManager.translatef(0.0F, -1.0F, 0.3F);
+				RenderSystem.translatef(0.0F, -1.0F, 0.3F);
 			}
 		} else {
 			super.setupRotations(abstractClientPlayer, f, g, h);

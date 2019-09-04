@@ -16,14 +16,14 @@ public abstract class AbstractTreeGrower {
 	@Nullable
 	protected abstract AbstractTreeFeature<NoneFeatureConfiguration> getFeature(Random random);
 
-	public boolean growTree(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random) {
+	public boolean growTree(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
 		AbstractTreeFeature<NoneFeatureConfiguration> abstractTreeFeature = this.getFeature(random);
 		if (abstractTreeFeature == null) {
 			return false;
 		} else {
 			levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
 			if (abstractTreeFeature.place(
-				levelAccessor, (ChunkGenerator<? extends ChunkGeneratorSettings>)levelAccessor.getChunkSource().getGenerator(), random, blockPos, FeatureConfiguration.NONE
+				levelAccessor, (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos, FeatureConfiguration.NONE, false
 			)) {
 				return true;
 			} else {

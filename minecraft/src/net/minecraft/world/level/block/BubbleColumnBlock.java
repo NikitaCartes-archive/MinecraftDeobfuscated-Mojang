@@ -78,8 +78,8 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		growColumn(level, blockPos.above(), getDrag(level, blockPos));
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		growColumn(serverLevel, blockPos.above(), getDrag(serverLevel, blockPos));
 	}
 
 	@Override

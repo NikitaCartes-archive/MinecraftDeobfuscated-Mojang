@@ -147,6 +147,10 @@ public class MerchantOffer {
 		this.uses = this.maxUses;
 	}
 
+	public boolean needsRestock() {
+		return this.uses > 0;
+	}
+
 	public boolean shouldRewardExp() {
 		return this.rewardExp;
 	}

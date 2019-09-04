@@ -1,7 +1,7 @@
 package com.mojang.blaze3d.shaders;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GLX;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.TextureUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,13 +25,13 @@ public class Program {
 
 	public void attachToEffect(Effect effect) {
 		this.references++;
-		GLX.glAttachShader(effect.getId(), this.id);
+		GlStateManager.glAttachShader(effect.getId(), this.id);
 	}
 
 	public void close() {
 		this.references--;
 		if (this.references <= 0) {
-			GLX.glDeleteShader(this.id);
+			GlStateManager.glDeleteShader(this.id);
 			this.type.getPrograms().remove(this.name);
 		}
 	}
@@ -45,11 +45,11 @@ public class Program {
 		if (string2 == null) {
 			throw new IOException("Could not load program " + type.getName());
 		} else {
-			int i = GLX.glCreateShader(type.getGlType());
-			GLX.glShaderSource(i, string2);
-			GLX.glCompileShader(i);
-			if (GLX.glGetShaderi(i, GLX.GL_COMPILE_STATUS) == 0) {
-				String string3 = StringUtils.trim(GLX.glGetShaderInfoLog(i, 32768));
+			int i = GlStateManager.glCreateShader(type.getGlType());
+			GlStateManager.glShaderSource(i, string2);
+			GlStateManager.glCompileShader(i);
+			if (GlStateManager.glGetShaderi(i, 35713) == 0) {
+				String string3 = StringUtils.trim(GlStateManager.glGetShaderInfoLog(i, 32768));
 				throw new IOException("Couldn't compile " + type.getName() + " program: " + string3);
 			} else {
 				Program program = new Program(type, i, string);
@@ -61,8 +61,8 @@ public class Program {
 
 	@Environment(EnvType.CLIENT)
 	public static enum Type {
-		VERTEX("vertex", ".vsh", GLX.GL_VERTEX_SHADER),
-		FRAGMENT("fragment", ".fsh", GLX.GL_FRAGMENT_SHADER);
+		VERTEX("vertex", ".vsh", 35633),
+		FRAGMENT("fragment", ".fsh", 35632);
 
 		private final String name;
 		private final String extension;

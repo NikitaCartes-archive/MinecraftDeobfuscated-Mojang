@@ -6,11 +6,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 
 @Environment(EnvType.CLIENT)
@@ -105,15 +105,13 @@ public class RenderChunkRegion implements BlockAndBiomeGetter {
 	}
 
 	@Override
-	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-		return this.level.getBrightness(lightLayer, blockPos);
+	public LevelLightEngine getLightEngine() {
+		return this.level.getLightEngine();
 	}
 
 	@Override
-	public Biome getBiome(BlockPos blockPos) {
-		int i = (blockPos.getX() >> 4) - this.centerX;
-		int j = (blockPos.getZ() >> 4) - this.centerZ;
-		return this.chunks[i][j].getBiome(blockPos);
+	public BiomeManager getBiomeManager() {
+		return this.level.getBiomeManager();
 	}
 
 	@Nullable

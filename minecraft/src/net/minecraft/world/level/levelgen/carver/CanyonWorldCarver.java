@@ -4,7 +4,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
 
@@ -20,7 +22,16 @@ public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfigurati
 	}
 
 	public boolean carve(
-		ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration
+		ChunkAccess chunkAccess,
+		Function<BlockPos, Biome> function,
+		Random random,
+		int i,
+		int j,
+		int k,
+		int l,
+		int m,
+		BitSet bitSet,
+		ProbabilityFeatureConfiguration probabilityFeatureConfiguration
 	) {
 		int n = (this.getRange() * 2 - 1) * 16;
 		double d = (double)(j * 16 + random.nextInt(16));
@@ -32,12 +43,27 @@ public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfigurati
 		float p = (random.nextFloat() * 2.0F + random.nextFloat()) * 2.0F;
 		int q = n - random.nextInt(n / 4);
 		int r = 0;
-		this.genCanyon(chunkAccess, random.nextLong(), i, l, m, d, e, f, p, g, h, 0, q, 3.0, bitSet);
+		this.genCanyon(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, p, g, h, 0, q, 3.0, bitSet);
 		return true;
 	}
 
 	private void genCanyon(
-		ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet
+		ChunkAccess chunkAccess,
+		Function<BlockPos, Biome> function,
+		long l,
+		int i,
+		int j,
+		int k,
+		double d,
+		double e,
+		double f,
+		float g,
+		float h,
+		float m,
+		int n,
+		int o,
+		double p,
+		BitSet bitSet
 	) {
 		Random random = new Random(l);
 		float q = 1.0F;
@@ -75,7 +101,7 @@ public class CanyonWorldCarver extends WorldCarver<ProbabilityFeatureConfigurati
 					return;
 				}
 
-				this.carveSphere(chunkAccess, l, i, j, k, d, e, f, v, w, bitSet);
+				this.carveSphere(chunkAccess, function, l, i, j, k, d, e, f, v, w, bitSet);
 			}
 		}
 	}

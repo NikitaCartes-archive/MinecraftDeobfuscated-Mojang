@@ -4,10 +4,10 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -40,14 +40,14 @@ public class NetherWartBlock extends BushBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		int i = (Integer)blockState.getValue(AGE);
 		if (i < 3 && random.nextInt(10) == 0) {
 			blockState = blockState.setValue(AGE, Integer.valueOf(i + 1));
-			level.setBlock(blockPos, blockState, 2);
+			serverLevel.setBlock(blockPos, blockState, 2);
 		}
 
-		super.tick(blockState, level, blockPos, random);
+		super.tick(blockState, serverLevel, blockPos, random);
 	}
 
 	@Environment(EnvType.CLIENT)

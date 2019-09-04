@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -58,8 +59,8 @@ public class RedstoneTorchBlock extends TorchBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		handleTick(blockState, level, blockPos, random, this.hasNeighborSignal(level, blockPos, blockState));
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		handleTick(blockState, serverLevel, blockPos, random, this.hasNeighborSignal(serverLevel, blockPos, blockState));
 	}
 
 	public static void handleTick(BlockState blockState, Level level, BlockPos blockPos, Random random, boolean bl) {

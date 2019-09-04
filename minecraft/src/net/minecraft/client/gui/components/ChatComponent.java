@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -44,9 +44,9 @@ public class ChatComponent extends GuiComponent {
 
 				double d = this.getScale();
 				int l = Mth.ceil((double)this.getWidth() / d);
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef(2.0F, 8.0F, 0.0F);
-				GlStateManager.scaled(d, d, 1.0);
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef(2.0F, 8.0F, 0.0F);
+				RenderSystem.scaled(d, d, 1.0);
 				double e = this.minecraft.options.chatOpacity * 0.9F + 0.1F;
 				double f = this.minecraft.options.textBackgroundOpacity;
 				int m = 0;
@@ -65,10 +65,10 @@ public class ChatComponent extends GuiComponent {
 								int s = -n * 9;
 								fill(-2, s - 9, 0 + l + 4, s, q << 24);
 								String string = guiMessage.getMessage().getColoredString();
-								GlStateManager.enableBlend();
+								RenderSystem.enableBlend();
 								this.minecraft.font.drawShadow(string, 0.0F, (float)(s - 8), 16777215 + (p << 24));
-								GlStateManager.disableAlphaTest();
-								GlStateManager.disableBlend();
+								RenderSystem.disableAlphaTest();
+								RenderSystem.disableBlend();
 							}
 						}
 					}
@@ -76,7 +76,7 @@ public class ChatComponent extends GuiComponent {
 
 				if (bl) {
 					int nx = 9;
-					GlStateManager.translatef(-3.0F, 0.0F, 0.0F);
+					RenderSystem.translatef(-3.0F, 0.0F, 0.0F);
 					int t = k * nx + k;
 					int o = m * nx + m;
 					int u = this.chatScrollbarPos * o / k;
@@ -89,7 +89,7 @@ public class ChatComponent extends GuiComponent {
 					}
 				}
 
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}

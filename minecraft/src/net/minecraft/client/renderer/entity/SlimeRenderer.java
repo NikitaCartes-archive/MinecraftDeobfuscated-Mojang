@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SlimeModel;
@@ -25,11 +25,11 @@ public class SlimeRenderer extends MobRenderer<Slime, SlimeModel<Slime>> {
 
 	protected void scale(Slime slime, float f) {
 		float g = 0.999F;
-		GlStateManager.scalef(0.999F, 0.999F, 0.999F);
+		RenderSystem.scalef(0.999F, 0.999F, 0.999F);
 		float h = (float)slime.getSize();
 		float i = Mth.lerp(f, slime.oSquish, slime.squish) / (h * 0.5F + 1.0F);
 		float j = 1.0F / (i + 1.0F);
-		GlStateManager.scalef(j * h, 1.0F / j * h, j * h);
+		RenderSystem.scalef(j * h, 1.0F / j * h, j * h);
 	}
 
 	protected ResourceLocation getTextureLocation(Slime slime) {

@@ -6,6 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
@@ -81,25 +83,6 @@ public class DripParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class DripFallParticle extends DripParticle {
-		private final ParticleOptions landParticle;
-
-		private DripFallParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
-			super(level, d, e, f, fluid);
-			this.landParticle = particleOptions;
-			this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
-		}
-
-		@Override
-		protected void postMoveUpdate() {
-			if (this.onGround) {
-				this.remove();
-				this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
-			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	static class DripHangParticle extends DripParticle {
 		private final ParticleOptions fallingParticle;
 
@@ -135,6 +118,109 @@ public class DripParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	static class FallAndLandParticle extends DripParticle.FallingParticle {
+		protected final ParticleOptions landParticle;
+
+		private FallAndLandParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(level, d, e, f, fluid);
+			this.landParticle = particleOptions;
+		}
+
+		@Override
+		protected void postMoveUpdate() {
+			if (this.onGround) {
+				this.remove();
+				this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class FallingParticle extends DripParticle {
+		private FallingParticle(Level level, double d, double e, double f, Fluid fluid) {
+			super(level, d, e, f, fluid);
+			this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
+		}
+
+		@Override
+		protected void postMoveUpdate() {
+			if (this.onGround) {
+				this.remove();
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class HoneyFallAndLandParticle extends DripParticle.FallAndLandParticle {
+		private HoneyFallAndLandParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(level, d, e, f, fluid, particleOptions);
+		}
+
+		@Override
+		protected void postMoveUpdate() {
+			if (this.onGround) {
+				this.remove();
+				this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
+				if (this.level.random.nextFloat() < 0.3F) {
+					this.level.playLocalSound(this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+				}
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class HoneyFallProvider implements ParticleProvider<SimpleParticleType> {
+		protected final SpriteSet sprite;
+
+		public HoneyFallProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.HoneyFallAndLandParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_HONEY);
+			dripParticle.gravity = 0.01F;
+			dripParticle.setColor(0.582F, 0.448F, 0.082F);
+			dripParticle.pickSprite(this.sprite);
+			return dripParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class HoneyHangProvider implements ParticleProvider<SimpleParticleType> {
+		protected final SpriteSet sprite;
+
+		public HoneyHangProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+			DripParticle.DripHangParticle dripHangParticle = new DripParticle.DripHangParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_HONEY);
+			dripHangParticle.gravity *= 0.01F;
+			dripHangParticle.lifetime = 100;
+			dripHangParticle.setColor(0.622F, 0.508F, 0.082F);
+			dripHangParticle.pickSprite(this.sprite);
+			return dripHangParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class HoneyLandProvider implements ParticleProvider<SimpleParticleType> {
+		protected final SpriteSet sprite;
+
+		public HoneyLandProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.DripLandParticle(level, d, e, f, Fluids.EMPTY);
+			dripParticle.lifetime = (int)(128.0 / (Math.random() * 0.8 + 0.2));
+			dripParticle.setColor(0.522F, 0.408F, 0.082F);
+			dripParticle.pickSprite(this.sprite);
+			return dripParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class LavaFallProvider implements ParticleProvider<SimpleParticleType> {
 		protected final SpriteSet sprite;
 
@@ -143,7 +229,7 @@ public class DripParticle extends TextureSheetParticle {
 		}
 
 		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripFallParticle(level, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+			DripParticle dripParticle = new DripParticle.FallAndLandParticle(level, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
 			dripParticle.setColor(1.0F, 0.2857143F, 0.083333336F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;
@@ -184,6 +270,24 @@ public class DripParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class NectarFallProvider implements ParticleProvider<SimpleParticleType> {
+		protected final SpriteSet sprite;
+
+		public NectarFallProvider(SpriteSet spriteSet) {
+			this.sprite = spriteSet;
+		}
+
+		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.FallingParticle(level, d, e, f, Fluids.EMPTY);
+			dripParticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+			dripParticle.gravity = 0.007F;
+			dripParticle.setColor(0.92F, 0.782F, 0.72F);
+			dripParticle.pickSprite(this.sprite);
+			return dripParticle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class WaterFallProvider implements ParticleProvider<SimpleParticleType> {
 		protected final SpriteSet sprite;
 
@@ -192,7 +296,7 @@ public class DripParticle extends TextureSheetParticle {
 		}
 
 		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripFallParticle(level, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+			DripParticle dripParticle = new DripParticle.FallAndLandParticle(level, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
 			dripParticle.setColor(0.2F, 0.3F, 1.0F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;

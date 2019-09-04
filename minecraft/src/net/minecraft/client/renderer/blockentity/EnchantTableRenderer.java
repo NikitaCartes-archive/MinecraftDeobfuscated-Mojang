@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
@@ -14,10 +14,10 @@ public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBl
 	private final BookModel bookModel = new BookModel();
 
 	public void render(EnchantmentTableBlockEntity enchantmentTableBlockEntity, double d, double e, double f, float g, int i) {
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float)d + 0.5F, (float)e + 0.75F, (float)f + 0.5F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((float)d + 0.5F, (float)e + 0.75F, (float)f + 0.5F);
 		float h = (float)enchantmentTableBlockEntity.time + g;
-		GlStateManager.translatef(0.0F, 0.1F + Mth.sin(h * 0.1F) * 0.01F, 0.0F);
+		RenderSystem.translatef(0.0F, 0.1F + Mth.sin(h * 0.1F) * 0.01F, 0.0F);
 		float j = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot;
 
 		while (j >= (float) Math.PI) {
@@ -29,8 +29,8 @@ public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBl
 		}
 
 		float k = enchantmentTableBlockEntity.oRot + j * g;
-		GlStateManager.rotatef(-k * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(80.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.rotatef(-k * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(80.0F, 0.0F, 0.0F, 1.0F);
 		this.bindTexture(BOOK_LOCATION);
 		float l = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip) + 0.25F;
 		float m = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip) + 0.75F;
@@ -53,8 +53,8 @@ public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBl
 		}
 
 		float n = Mth.lerp(g, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
-		GlStateManager.enableCull();
+		RenderSystem.enableCull();
 		this.bookModel.render(h, l, m, n, 0.0F, 0.0625F);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 }

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.annotation.Nullable;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -26,7 +27,7 @@ public class NbtToSnbt implements DataProvider {
 		Path path = this.generator.getOutputFolder();
 
 		for (Path path2 : this.generator.getInputFolders()) {
-			Files.walk(path2).filter(pathx -> pathx.toString().endsWith(".nbt")).forEach(path3 -> this.convertStructure(path3, this.getName(path2, path3), path));
+			Files.walk(path2).filter(pathx -> pathx.toString().endsWith(".nbt")).forEach(path3 -> convertStructure(path3, this.getName(path2, path3), path));
 		}
 	}
 
@@ -40,7 +41,8 @@ public class NbtToSnbt implements DataProvider {
 		return string.substring(0, string.length() - ".nbt".length());
 	}
 
-	private void convertStructure(Path path, String string, Path path2) {
+	@Nullable
+	public static Path convertStructure(Path path, String string, Path path2) {
 		try {
 			CompoundTag compoundTag = NbtIo.readCompressed(Files.newInputStream(path));
 			Component component = compoundTag.getPrettyDisplay("    ", 0);
@@ -48,20 +50,20 @@ public class NbtToSnbt implements DataProvider {
 			Path path3 = path2.resolve(string + ".snbt");
 			Files.createDirectories(path3.getParent());
 			BufferedWriter bufferedWriter = Files.newBufferedWriter(path3);
-			Throwable var9 = null;
+			Throwable var8 = null;
 
 			try {
 				bufferedWriter.write(string2);
-			} catch (Throwable var19) {
-				var9 = var19;
-				throw var19;
+			} catch (Throwable var18) {
+				var8 = var18;
+				throw var18;
 			} finally {
 				if (bufferedWriter != null) {
-					if (var9 != null) {
+					if (var8 != null) {
 						try {
 							bufferedWriter.close();
-						} catch (Throwable var18) {
-							var9.addSuppressed(var18);
+						} catch (Throwable var17) {
+							var8.addSuppressed(var17);
 						}
 					} else {
 						bufferedWriter.close();
@@ -70,8 +72,10 @@ public class NbtToSnbt implements DataProvider {
 			}
 
 			LOGGER.info("Converted {} from NBT to SNBT", string);
-		} catch (IOException var21) {
-			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var21);
+			return path3;
+		} catch (IOException var20) {
+			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var20);
+			return null;
 		}
 	}
 }

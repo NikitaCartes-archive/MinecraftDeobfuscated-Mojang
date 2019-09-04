@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -30,18 +30,18 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 			Level level = fallingBlockEntity.getLevel();
 			if (blockState != level.getBlockState(new BlockPos(fallingBlockEntity)) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
-				GlStateManager.pushMatrix();
-				GlStateManager.disableLighting();
+				RenderSystem.pushMatrix();
+				RenderSystem.disableLighting();
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = tesselator.getBuilder();
 				if (this.solidRender) {
-					GlStateManager.enableColorMaterial();
-					GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(fallingBlockEntity));
+					RenderSystem.enableColorMaterial();
+					RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(fallingBlockEntity));
 				}
 
 				bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
 				BlockPos blockPos = new BlockPos(fallingBlockEntity.x, fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.z);
-				GlStateManager.translatef((float)(d - (double)blockPos.getX() - 0.5), (float)(e - (double)blockPos.getY()), (float)(f - (double)blockPos.getZ() - 0.5));
+				RenderSystem.translatef((float)(d - (double)blockPos.getX() - 0.5), (float)(e - (double)blockPos.getY()), (float)(f - (double)blockPos.getZ() - 0.5));
 				BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
 				blockRenderDispatcher.getModelRenderer()
 					.tesselateBlock(
@@ -56,12 +56,12 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 					);
 				tesselator.end();
 				if (this.solidRender) {
-					GlStateManager.tearDownSolidRenderingTextureCombine();
-					GlStateManager.disableColorMaterial();
+					RenderSystem.tearDownSolidRenderingTextureCombine();
+					RenderSystem.disableColorMaterial();
 				}
 
-				GlStateManager.enableLighting();
-				GlStateManager.popMatrix();
+				RenderSystem.enableLighting();
+				RenderSystem.popMatrix();
 				super.render(fallingBlockEntity, d, e, f, g, h);
 			}
 		}

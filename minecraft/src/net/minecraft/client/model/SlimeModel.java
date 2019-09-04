@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -35,7 +35,7 @@ public class SlimeModel<T extends Entity> extends EntityModel<T> {
 	@Override
 	public void render(T entity, float f, float g, float h, float i, float j, float k) {
 		this.setupAnim(entity, f, g, h, i, j, k);
-		GlStateManager.translatef(0.0F, 0.001F, 0.0F);
+		RenderSystem.translatef(0.0F, 0.001F, 0.0F);
 		this.cube.render(k);
 		if (this.eye0 != null) {
 			this.eye0.render(k);

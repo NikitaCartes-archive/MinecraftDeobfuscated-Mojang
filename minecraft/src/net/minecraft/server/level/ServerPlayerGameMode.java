@@ -1,5 +1,6 @@
 package net.minecraft.server.level;
 
+import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
@@ -113,28 +114,28 @@ public class ServerPlayerGameMode {
 		double f = this.player.z - ((double)blockPos.getZ() + 0.5);
 		double g = d * d + e * e + f * f;
 		if (g > 36.0) {
-			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false));
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too far"));
 		} else if (blockPos.getY() >= i) {
-			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false));
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too high"));
 		} else {
 			if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
 				if (!this.level.mayInteract(this.player, blockPos)) {
-					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false));
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "may not interact"));
 					return;
 				}
 
 				if (this.isCreative()) {
 					if (!this.level.extinguishFire(null, blockPos, direction)) {
-						this.destroyAndAck(blockPos, action);
+						this.destroyAndAck(blockPos, action, "creative destroy");
 					} else {
-						this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true));
+						this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "fire put out"));
 					}
 
 					return;
 				}
 
 				if (this.player.blockActionRestricted(this.level, blockPos, this.gameModeForPlayer)) {
-					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false));
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "block action restricted"));
 					return;
 				}
 
@@ -148,13 +149,27 @@ public class ServerPlayerGameMode {
 				}
 
 				if (!blockState.isAir() && h >= 1.0F) {
-					this.destroyAndAck(blockPos, action);
+					this.destroyAndAck(blockPos, action, "insta mine");
 				} else {
+					if (this.isDestroyingBlock) {
+						this.player
+							.connection
+							.send(
+								new ClientboundBlockBreakAckPacket(
+									this.destroyPos,
+									this.level.getBlockState(this.destroyPos),
+									ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK,
+									false,
+									"abort destroying since another started (client insta mine, server disagreed)"
+								)
+							);
+					}
+
 					this.isDestroyingBlock = true;
-					this.destroyPos = blockPos;
+					this.destroyPos = blockPos.immutable();
 					int j = (int)(h * 10.0F);
 					this.level.destroyBlockProgress(this.player.getId(), blockPos, j);
-					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true));
+					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "actual start of destroying"));
 					this.lastSentState = j;
 				}
 			} else if (action == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
@@ -166,7 +181,7 @@ public class ServerPlayerGameMode {
 						if (l >= 0.7F) {
 							this.isDestroyingBlock = false;
 							this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);
-							this.destroyAndAck(blockPos, action);
+							this.destroyAndAck(blockPos, action, "destroyed");
 							return;
 						}
 
@@ -179,20 +194,28 @@ public class ServerPlayerGameMode {
 					}
 				}
 
-				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true));
+				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "stopped destroying"));
 			} else if (action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
 				this.isDestroyingBlock = false;
-				this.level.destroyBlockProgress(this.player.getId(), this.destroyPos, -1);
-				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true));
+				if (!Objects.equals(this.destroyPos, blockPos)) {
+					LOGGER.warn("Mismatch in destroy block pos: " + this.destroyPos + " " + blockPos);
+					this.level.destroyBlockProgress(this.player.getId(), this.destroyPos, -1);
+					this.player
+						.connection
+						.send(new ClientboundBlockBreakAckPacket(this.destroyPos, this.level.getBlockState(this.destroyPos), action, true, "aborted mismatched destroying"));
+				}
+
+				this.level.destroyBlockProgress(this.player.getId(), blockPos, -1);
+				this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "aborted destroying"));
 			}
 		}
 	}
 
-	public void destroyAndAck(BlockPos blockPos, ServerboundPlayerActionPacket.Action action) {
+	public void destroyAndAck(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, String string) {
 		if (this.destroyBlock(blockPos)) {
-			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true));
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, string));
 		} else {
-			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false));
+			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, string));
 		}
 	}
 
@@ -250,7 +273,7 @@ public class ServerPlayerGameMode {
 				player.setItemInHand(interactionHand, itemStack2);
 				if (this.isCreative()) {
 					itemStack2.setCount(i);
-					if (itemStack2.isDamageableItem()) {
+					if (itemStack2.isDamageableItem() && itemStack2.getDamageValue() != j) {
 						itemStack2.setDamageValue(j);
 					}
 				}
@@ -281,7 +304,7 @@ public class ServerPlayerGameMode {
 			}
 		} else {
 			boolean bl = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
-			boolean bl2 = player.isSneaking() && bl;
+			boolean bl2 = player.isSecondaryUseActive() && bl;
 			if (!bl2 && blockState.use(level, player, interactionHand, blockHitResult)) {
 				return InteractionResult.SUCCESS;
 			} else if (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack.getItem())) {

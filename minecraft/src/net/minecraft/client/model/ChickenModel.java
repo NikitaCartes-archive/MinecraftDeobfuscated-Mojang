@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -51,21 +51,21 @@ public class ChickenModel<T extends Entity> extends EntityModel<T> {
 		this.setupAnim(entity, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 2.0F;
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, 5.0F * k, 2.0F * k);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, 5.0F * k, 2.0F * k);
 			this.head.render(k);
 			this.beak.render(k);
 			this.redThing.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.translatef(0.0F, 24.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
 			this.body.render(k);
 			this.leg0.render(k);
 			this.leg1.render(k);
 			this.wing0.render(k);
 			this.wing1.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
 			this.head.render(k);
 			this.beak.render(k);

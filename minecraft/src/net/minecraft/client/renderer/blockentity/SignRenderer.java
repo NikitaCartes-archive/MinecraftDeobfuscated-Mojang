@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -33,41 +34,41 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 
 	public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i) {
 		BlockState blockState = signBlockEntity.getBlockState();
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		float h = 0.6666667F;
 		if (blockState.getBlock() instanceof StandingSignBlock) {
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-			GlStateManager.rotatef(-((float)((Integer)blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0F), 0.0F, 1.0F, 0.0F);
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+			RenderSystem.rotatef(-((float)((Integer)blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0F), 0.0F, 1.0F, 0.0F);
 			this.signModel.getStick().visible = true;
 		} else {
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-			GlStateManager.rotatef(-((Direction)blockState.getValue(WallSignBlock.FACING)).toYRot(), 0.0F, 1.0F, 0.0F);
-			GlStateManager.translatef(0.0F, -0.3125F, -0.4375F);
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+			RenderSystem.rotatef(-((Direction)blockState.getValue(WallSignBlock.FACING)).toYRot(), 0.0F, 1.0F, 0.0F);
+			RenderSystem.translatef(0.0F, -0.3125F, -0.4375F);
 			this.signModel.getStick().visible = false;
 		}
 
 		if (i >= 0) {
 			this.bindTexture(BREAKING_LOCATIONS[i]);
-			GlStateManager.matrixMode(5890);
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(4.0F, 2.0F, 1.0F);
-			GlStateManager.translatef(0.0625F, 0.0625F, 0.0625F);
-			GlStateManager.matrixMode(5888);
+			RenderSystem.matrixMode(5890);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(4.0F, 2.0F, 1.0F);
+			RenderSystem.translatef(0.0625F, 0.0625F, 0.0625F);
+			RenderSystem.matrixMode(5888);
 		} else {
 			this.bindTexture(this.getTexture(blockState.getBlock()));
 		}
 
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.pushMatrix();
-		GlStateManager.scalef(0.6666667F, -0.6666667F, -0.6666667F);
+		RenderSystem.enableRescaleNormal();
+		RenderSystem.pushMatrix();
+		RenderSystem.scalef(0.6666667F, -0.6666667F, -0.6666667F);
 		this.signModel.render();
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		Font font = this.getFont();
 		float j = 0.010416667F;
-		GlStateManager.translatef(0.0F, 0.33333334F, 0.046666667F);
-		GlStateManager.scalef(0.010416667F, -0.010416667F, 0.010416667F);
-		GlStateManager.normal3f(0.0F, 0.0F, -0.010416667F);
-		GlStateManager.depthMask(false);
+		RenderSystem.translatef(0.0F, 0.33333334F, 0.046666667F);
+		RenderSystem.scalef(0.010416667F, -0.010416667F, 0.010416667F);
+		RenderSystem.normal3f(0.0F, 0.0F, -0.010416667F);
+		RenderSystem.depthMask(false);
 		int k = signBlockEntity.getColor().getTextColor();
 		if (i < 0) {
 			for (int l = 0; l < 4; l++) {
@@ -102,13 +103,13 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 			}
 		}
 
-		GlStateManager.depthMask(true);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.popMatrix();
+		RenderSystem.depthMask(true);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.popMatrix();
 		if (i >= 0) {
-			GlStateManager.matrixMode(5890);
-			GlStateManager.popMatrix();
-			GlStateManager.matrixMode(5888);
+			RenderSystem.matrixMode(5890);
+			RenderSystem.popMatrix();
+			RenderSystem.matrixMode(5888);
 		}
 	}
 
@@ -131,17 +132,17 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 	private void renderHighlight(int i, int j, int k, int l) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		GlStateManager.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-		GlStateManager.disableTexture();
-		GlStateManager.enableColorLogicOp();
-		GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+		RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+		RenderSystem.disableTexture();
+		RenderSystem.enableColorLogicOp();
+		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 		bufferBuilder.vertex((double)i, (double)l, 0.0).endVertex();
 		bufferBuilder.vertex((double)k, (double)l, 0.0).endVertex();
 		bufferBuilder.vertex((double)k, (double)j, 0.0).endVertex();
 		bufferBuilder.vertex((double)i, (double)j, 0.0).endVertex();
 		tesselator.end();
-		GlStateManager.disableColorLogicOp();
-		GlStateManager.enableTexture();
+		RenderSystem.disableColorLogicOp();
+		RenderSystem.enableTexture();
 	}
 }

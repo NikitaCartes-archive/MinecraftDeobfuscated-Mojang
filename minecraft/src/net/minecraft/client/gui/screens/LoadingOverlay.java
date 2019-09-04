@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.io.InputStream;
 import net.fabricmc.api.EnvType;
@@ -74,8 +74,8 @@ public class LoadingOverlay extends Overlay {
 		int n = (this.minecraft.window.getGuiScaledWidth() - 256) / 2;
 		int p = (this.minecraft.window.getGuiScaledHeight() - 256) / 2;
 		this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
-		GlStateManager.enableBlend();
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, o);
+		RenderSystem.enableBlend();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
 		this.blit(n, p, 0, 0, 256, 256);
 		float q = this.reload.getActualProgress();
 		this.currentProgress = this.currentProgress * 0.95F + q * 0.050000012F;

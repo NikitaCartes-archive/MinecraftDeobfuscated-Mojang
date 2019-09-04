@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -47,13 +48,13 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
 		double d = camera.getPosition().x;
 		double e = camera.getPosition().y;
 		double f = camera.getPosition().z;
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.lineWidth(2.0F);
-		GlStateManager.disableTexture();
-		GlStateManager.depthMask(false);
+		RenderSystem.lineWidth(2.0F);
+		RenderSystem.disableTexture();
+		RenderSystem.depthMask(false);
 		int i = 200;
 		double g = 0.0025;
 		Set<BlockPos> set = Sets.<BlockPos>newHashSet();
@@ -95,8 +96,8 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
 			DebugRenderer.renderFloatingText(String.valueOf(integer2), blockPos2.getX(), blockPos2.getY(), blockPos2.getZ(), -1);
 		}
 
-		GlStateManager.depthMask(true);
-		GlStateManager.enableTexture();
-		GlStateManager.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
 	}
 }

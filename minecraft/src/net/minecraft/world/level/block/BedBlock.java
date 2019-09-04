@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -14,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.DyeColor;
@@ -107,7 +109,10 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 				);
 				return true;
 			} else if ((Boolean)blockState.getValue(OCCUPIED)) {
-				player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied"), true);
+				if (!this.kickVillagerOutOfBed(level, blockPos)) {
+					player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied"), true);
+				}
+
 				return true;
 			} else {
 				player.startSleepInBed(blockPos).ifLeft(bedSleepingProblem -> {
@@ -120,6 +125,16 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		}
 	}
 
+	private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {
+		List<Villager> list = level.getEntitiesOfClass(Villager.class, new AABB(blockPos), LivingEntity::isSleeping);
+		if (list.isEmpty()) {
+			return false;
+		} else {
+			((Villager)list.get(0)).stopSleeping();
+			return true;
+		}
+	}
+
 	@Override
 	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
 		super.fallOn(level, blockPos, entity, f * 0.5F);
@@ -127,14 +142,18 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 
 	@Override
 	public void updateEntityAfterFallOn(BlockGetter blockGetter, Entity entity) {
-		if (entity.isSneaking()) {
+		if (entity.isSuppressingBounce()) {
 			super.updateEntityAfterFallOn(blockGetter, entity);
 		} else {
-			Vec3 vec3 = entity.getDeltaMovement();
-			if (vec3.y < 0.0) {
-				double d = entity instanceof LivingEntity ? 1.0 : 0.8;
-				entity.setDeltaMovement(vec3.x, -vec3.y * 0.66F * d, vec3.z);
-			}
+			this.bounceUp(entity);
+		}
+	}
+
+	private void bounceUp(Entity entity) {
+		Vec3 vec3 = entity.getDeltaMovement();
+		if (vec3.y < 0.0) {
+			double d = entity instanceof LivingEntity ? 1.0 : 0.8;
+			entity.setDeltaMovement(vec3.x, -vec3.y * 0.66F * d, vec3.z);
 		}
 	}
 

@@ -164,7 +164,7 @@ public class ChestBlock extends BaseEntityBlock implements SimpleWaterloggedBloc
 		ChestType chestType = ChestType.SINGLE;
 		Direction direction = blockPlaceContext.getHorizontalDirection().getOpposite();
 		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-		boolean bl = blockPlaceContext.isSneaking();
+		boolean bl = blockPlaceContext.isSecondaryUseActive();
 		Direction direction2 = blockPlaceContext.getClickedFace();
 		if (direction2.getAxis().isHorizontal() && bl) {
 			Direction direction3 = this.candidatePartnerFacing(blockPlaceContext, direction2.getOpposite());

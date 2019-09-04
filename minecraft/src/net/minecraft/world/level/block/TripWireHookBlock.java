@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -168,8 +169,8 @@ public class TripWireHookBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		this.calculateState(level, blockPos, blockState, false, true, -1, null);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		this.calculateState(serverLevel, blockPos, blockState, false, true, -1, null);
 	}
 
 	private void playSound(Level level, BlockPos blockPos, boolean bl, boolean bl2, boolean bl3, boolean bl4) {

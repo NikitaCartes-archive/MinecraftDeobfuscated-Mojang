@@ -10,6 +10,7 @@ public class EntityTypeTags {
 	private static int resetCount;
 	public static final Tag<EntityType<?>> SKELETONS = bind("skeletons");
 	public static final Tag<EntityType<?>> RAIDERS = bind("raiders");
+	public static final Tag<EntityType<?>> BEEHIVE_INHABITORS = bind("beehive_inhabitors");
 
 	public static void reset(TagCollection<EntityType<?>> tagCollection) {
 		source = tagCollection;

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
@@ -18,16 +18,16 @@ public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
 	public void render(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, int i) {
 		BlockState blockState = lecternBlockEntity.getBlockState();
 		if ((Boolean)blockState.getValue(LecternBlock.HAS_BOOK)) {
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 1.0F + 0.0625F, (float)f + 0.5F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 1.0F + 0.0625F, (float)f + 0.5F);
 			float h = ((Direction)blockState.getValue(LecternBlock.FACING)).getClockWise().toYRot();
-			GlStateManager.rotatef(-h, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(67.5F, 0.0F, 0.0F, 1.0F);
-			GlStateManager.translatef(0.0F, -0.125F, 0.0F);
+			RenderSystem.rotatef(-h, 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef(67.5F, 0.0F, 0.0F, 1.0F);
+			RenderSystem.translatef(0.0F, -0.125F, 0.0F);
 			this.bindTexture(BOOK_LOCATION);
-			GlStateManager.enableCull();
+			RenderSystem.enableCull();
 			this.bookModel.render(0.0F, 0.1F, 0.9F, 1.2F, 0.0F, 0.0625F);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 }

@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
@@ -53,9 +54,9 @@ public class BoneMealItem extends Item {
 		if (blockState.getBlock() instanceof BonemealableBlock) {
 			BonemealableBlock bonemealableBlock = (BonemealableBlock)blockState.getBlock();
 			if (bonemealableBlock.isValidBonemealTarget(level, blockPos, blockState, level.isClientSide)) {
-				if (!level.isClientSide) {
+				if (level instanceof ServerLevel) {
 					if (bonemealableBlock.isBonemealSuccess(level, level.random, blockPos, blockState)) {
-						bonemealableBlock.performBonemeal(level, level.random, blockPos, blockState);
+						bonemealableBlock.performBonemeal((ServerLevel)level, level.random, blockPos, blockState);
 					}
 
 					itemStack.shrink(1);
@@ -70,8 +71,10 @@ public class BoneMealItem extends Item {
 
 	public static boolean growWaterPlant(ItemStack itemStack, Level level, BlockPos blockPos, @Nullable Direction direction) {
 		if (level.getBlockState(blockPos).getBlock() == Blocks.WATER && level.getFluidState(blockPos).getAmount() == 8) {
-			if (!level.isClientSide) {
-				label79:
+			if (!(level instanceof ServerLevel)) {
+				return true;
+			} else {
+				label80:
 				for (int i = 0; i < 128; i++) {
 					BlockPos blockPos2 = blockPos;
 					Biome biome = level.getBiome(blockPos);
@@ -81,7 +84,7 @@ public class BoneMealItem extends Item {
 						blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
 						biome = level.getBiome(blockPos2);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
-							continue label79;
+							continue label80;
 						}
 					}
 
@@ -104,15 +107,14 @@ public class BoneMealItem extends Item {
 						if (blockState2.getBlock() == Blocks.WATER && level.getFluidState(blockPos2).getAmount() == 8) {
 							level.setBlock(blockPos2, blockState, 3);
 						} else if (blockState2.getBlock() == Blocks.SEAGRASS && random.nextInt(10) == 0) {
-							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal(level, random, blockPos2, blockState2);
+							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)level, random, blockPos2, blockState2);
 						}
 					}
 				}
 
 				itemStack.shrink(1);
+				return true;
 			}
-
-			return true;
 		} else {
 			return false;
 		}

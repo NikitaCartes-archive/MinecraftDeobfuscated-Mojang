@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,13 +38,13 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 			float h = 0.25F;
 			float j = Mth.sin(((float)itemEntity.getAge() + g) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
 			float k = bakedModel.getTransforms().getTransform(ItemTransforms.TransformType.GROUND).scale.y();
-			GlStateManager.translatef((float)d, (float)e + j + 0.25F * k, (float)f);
+			RenderSystem.translatef((float)d, (float)e + j + 0.25F * k, (float)f);
 			if (bl || this.entityRenderDispatcher.options != null) {
 				float l = (((float)itemEntity.getAge() + g) / 20.0F + itemEntity.bobOffs) * (180.0F / (float)Math.PI);
-				GlStateManager.rotatef(l, 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(l, 0.0F, 1.0F, 0.0F);
 			}
 
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			return i;
 		}
 	}
@@ -73,14 +74,14 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 			bl = true;
 		}
 
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.alphaFunc(516, 0.1F);
-		GlStateManager.enableBlend();
+		RenderSystem.enableRescaleNormal();
+		RenderSystem.alphaFunc(516, 0.1F);
+		RenderSystem.enableBlend();
 		Lighting.turnOn();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		BakedModel bakedModel = this.itemRenderer.getModel(itemStack, itemEntity.level, null);
 		int j = this.setupBobbingItem(itemEntity, d, e, f, h, bakedModel);
 		float k = bakedModel.getTransforms().ground.scale.x();
@@ -91,50 +92,50 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 			float n = -0.0F * (float)(j - 1) * 0.5F * k;
 			float o = -0.0F * (float)(j - 1) * 0.5F * l;
 			float p = -0.09375F * (float)(j - 1) * 0.5F * m;
-			GlStateManager.translatef(n, o, p);
+			RenderSystem.translatef(n, o, p);
 		}
 
 		if (this.solidRender) {
-			GlStateManager.enableColorMaterial();
-			GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(itemEntity));
+			RenderSystem.enableColorMaterial();
+			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(itemEntity));
 		}
 
 		for (int q = 0; q < j; q++) {
 			if (bl2) {
-				GlStateManager.pushMatrix();
+				RenderSystem.pushMatrix();
 				if (q > 0) {
 					float o = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					float p = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					float r = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F;
-					GlStateManager.translatef(o, p, r);
+					RenderSystem.translatef(o, p, r);
 				}
 
 				bakedModel.getTransforms().apply(ItemTransforms.TransformType.GROUND);
 				this.itemRenderer.render(itemStack, bakedModel);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			} else {
-				GlStateManager.pushMatrix();
+				RenderSystem.pushMatrix();
 				if (q > 0) {
 					float o = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
 					float p = (this.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-					GlStateManager.translatef(o, p, 0.0F);
+					RenderSystem.translatef(o, p, 0.0F);
 				}
 
 				bakedModel.getTransforms().apply(ItemTransforms.TransformType.GROUND);
 				this.itemRenderer.render(itemStack, bakedModel);
-				GlStateManager.popMatrix();
-				GlStateManager.translatef(0.0F * k, 0.0F * l, 0.09375F * m);
+				RenderSystem.popMatrix();
+				RenderSystem.translatef(0.0F * k, 0.0F * l, 0.09375F * m);
 			}
 		}
 
 		if (this.solidRender) {
-			GlStateManager.tearDownSolidRenderingTextureCombine();
-			GlStateManager.disableColorMaterial();
+			RenderSystem.tearDownSolidRenderingTextureCombine();
+			RenderSystem.disableColorMaterial();
 		}
 
-		GlStateManager.popMatrix();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableBlend();
+		RenderSystem.popMatrix();
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.disableBlend();
 		this.bindTexture(itemEntity);
 		if (bl) {
 			this.entityRenderDispatcher.textureManager.getTexture(this.getTextureLocation(itemEntity)).popFilter();

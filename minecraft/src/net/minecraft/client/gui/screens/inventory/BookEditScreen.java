@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -458,7 +459,7 @@ public class BookEditScreen extends Screen {
 	public void render(int i, int j, float f) {
 		this.renderBackground();
 		this.setFocused(null);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BookViewScreen.BOOK_LOCATION);
 		int k = (this.width - 192) / 2;
 		int l = 2;
@@ -570,18 +571,18 @@ public class BookEditScreen extends Screen {
 		this.convertLocalToScreen(pos2i4);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		GlStateManager.color4f(0.0F, 0.0F, 255.0F, 255.0F);
-		GlStateManager.disableTexture();
-		GlStateManager.enableColorLogicOp();
-		GlStateManager.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+		RenderSystem.color4f(0.0F, 0.0F, 255.0F, 255.0F);
+		RenderSystem.disableTexture();
+		RenderSystem.enableColorLogicOp();
+		RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 		bufferBuilder.vertex((double)pos2i3.x, (double)pos2i4.y, 0.0).endVertex();
 		bufferBuilder.vertex((double)pos2i4.x, (double)pos2i4.y, 0.0).endVertex();
 		bufferBuilder.vertex((double)pos2i4.x, (double)pos2i3.y, 0.0).endVertex();
 		bufferBuilder.vertex((double)pos2i3.x, (double)pos2i3.y, 0.0).endVertex();
 		tesselator.end();
-		GlStateManager.disableColorLogicOp();
-		GlStateManager.enableTexture();
+		RenderSystem.disableColorLogicOp();
+		RenderSystem.enableTexture();
 	}
 
 	private BookEditScreen.Pos2i getPositionAtIndex(String string, int i) {

@@ -377,6 +377,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.JIGSAW_BLOCK,
 				Blocks.MOVING_PISTON
 			);
+		this.tag(BlockTags.TALL_FLOWERS).add(Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH);
+		this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS);
+		this.tag(BlockTags.BEEHIVES).add(Blocks.BEE_NEST, Blocks.BEE_HIVE);
+		this.tag(BlockTags.CROPS).add(Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
+		this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH);
 	}
 
 	@Override

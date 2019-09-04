@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,7 @@ public class HuskRenderer extends ZombieRenderer {
 
 	protected void scale(Zombie zombie, float f) {
 		float g = 1.0625F;
-		GlStateManager.scalef(1.0625F, 1.0625F, 1.0625F);
+		RenderSystem.scalef(1.0625F, 1.0625F, 1.0625F);
 		super.scale(zombie, f);
 	}
 

@@ -3,6 +3,7 @@ package net.minecraft.world.phys.shapes;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.Arrays;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 
 public final class ArrayVoxelShape extends VoxelShape {
@@ -29,7 +30,7 @@ public final class ArrayVoxelShape extends VoxelShape {
 			this.ys = doubleList2;
 			this.zs = doubleList3;
 		} else {
-			throw new IllegalArgumentException("Lengths of point arrays must be consistent with the size of the VoxelShape.");
+			throw (IllegalArgumentException)Util.pauseInIde(new IllegalArgumentException("Lengths of point arrays must be consistent with the size of the VoxelShape."));
 		}
 	}
 

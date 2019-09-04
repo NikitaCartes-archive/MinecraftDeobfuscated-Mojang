@@ -15,7 +15,7 @@ public class PlainFlowerFeature extends FlowerFeature {
 
 	@Override
 	public BlockState getRandomFlower(Random random, BlockPos blockPos) {
-		double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0);
+		double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0, false);
 		if (d < -0.8) {
 			int i = random.nextInt(4);
 			switch (i) {

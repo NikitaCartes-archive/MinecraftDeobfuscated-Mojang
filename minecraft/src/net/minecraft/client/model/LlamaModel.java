@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -62,29 +62,29 @@ public class LlamaModel<T extends AbstractChestedHorse> extends QuadrupedModel<T
 		this.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 2.0F;
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
 			float m = 0.7F;
-			GlStateManager.scalef(0.71428573F, 0.64935064F, 0.7936508F);
-			GlStateManager.translatef(0.0F, 21.0F * k, 0.22F);
+			RenderSystem.scalef(0.71428573F, 0.64935064F, 0.7936508F);
+			RenderSystem.translatef(0.0F, 21.0F * k, 0.22F);
 			this.head.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
 			float n = 1.1F;
-			GlStateManager.scalef(0.625F, 0.45454544F, 0.45454544F);
-			GlStateManager.translatef(0.0F, 33.0F * k, 0.0F);
+			RenderSystem.scalef(0.625F, 0.45454544F, 0.45454544F);
+			RenderSystem.translatef(0.0F, 33.0F * k, 0.0F);
 			this.body.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.45454544F, 0.41322312F, 0.45454544F);
-			GlStateManager.translatef(0.0F, 33.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.45454544F, 0.41322312F, 0.45454544F);
+			RenderSystem.translatef(0.0F, 33.0F * k, 0.0F);
 			this.leg0.render(k);
 			this.leg1.render(k);
 			this.leg2.render(k);
 			this.leg3.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
 			this.head.render(k);
 			this.body.render(k);

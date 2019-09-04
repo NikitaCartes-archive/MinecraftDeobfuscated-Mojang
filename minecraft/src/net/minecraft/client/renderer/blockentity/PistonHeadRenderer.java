@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -33,13 +34,13 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
 			Lighting.turnOff();
-			GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			GlStateManager.enableBlend();
-			GlStateManager.disableCull();
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			RenderSystem.enableBlend();
+			RenderSystem.disableCull();
 			if (Minecraft.useAmbientOcclusion()) {
-				GlStateManager.shadeModel(7425);
+				RenderSystem.shadeModel(7425);
 			} else {
-				GlStateManager.shadeModel(7424);
+				RenderSystem.shadeModel(7424);
 			}
 
 			ModelBlockRenderer.enableCaching();

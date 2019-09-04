@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -21,17 +21,17 @@ public class Deadmau5EarsLayer extends RenderLayer<AbstractClientPlayer, PlayerM
 			for (int m = 0; m < 2; m++) {
 				float n = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
 				float o = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
-				GlStateManager.pushMatrix();
-				GlStateManager.rotatef(n, 0.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(o, 1.0F, 0.0F, 0.0F);
-				GlStateManager.translatef(0.375F * (float)(m * 2 - 1), 0.0F, 0.0F);
-				GlStateManager.translatef(0.0F, -0.375F, 0.0F);
-				GlStateManager.rotatef(-o, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(-n, 0.0F, 1.0F, 0.0F);
+				RenderSystem.pushMatrix();
+				RenderSystem.rotatef(n, 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(o, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(0.375F * (float)(m * 2 - 1), 0.0F, 0.0F);
+				RenderSystem.translatef(0.0F, -0.375F, 0.0F);
+				RenderSystem.rotatef(-o, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(-n, 0.0F, 1.0F, 0.0F);
 				float p = 1.3333334F;
-				GlStateManager.scalef(1.3333334F, 1.3333334F, 1.3333334F);
+				RenderSystem.scalef(1.3333334F, 1.3333334F, 1.3333334F);
 				this.getParentModel().renderEars(0.0625F);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}

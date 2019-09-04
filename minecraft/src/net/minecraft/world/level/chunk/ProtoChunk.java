@@ -21,7 +21,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,7 +39,8 @@ public class ProtoChunk implements ChunkAccess {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final ChunkPos chunkPos;
 	private volatile boolean isDirty;
-	private Biome[] biomes;
+	@Nullable
+	private ChunkBiomeContainer biomes;
 	@Nullable
 	private volatile LevelLightEngine lightEngine;
 	private final Map<Heightmap.Types, Heightmap> heightmaps = Maps.newEnumMap(Heightmap.Types.class);
@@ -242,13 +242,13 @@ public class ProtoChunk implements ChunkAccess {
 		return this.entities;
 	}
 
-	@Override
-	public void setBiomes(Biome[] biomes) {
-		this.biomes = biomes;
+	public void setBiomes(ChunkBiomeContainer chunkBiomeContainer) {
+		this.biomes = chunkBiomeContainer;
 	}
 
+	@Nullable
 	@Override
-	public Biome[] getBiomes() {
+	public ChunkBiomeContainer getBiomes() {
 		return this.biomes;
 	}
 
@@ -278,7 +278,6 @@ public class ProtoChunk implements ChunkAccess {
 	}
 
 	@Nullable
-	@Override
 	public LevelLightEngine getLightEngine() {
 		return this.lightEngine;
 	}
@@ -458,7 +457,6 @@ public class ProtoChunk implements ChunkAccess {
 		this.carvingMasks.put(carving, bitSet);
 	}
 
-	@Override
 	public void setLightEngine(LevelLightEngine levelLightEngine) {
 		this.lightEngine = levelLightEngine;
 	}

@@ -204,7 +204,7 @@ public abstract class Particle {
 
 	protected int getLightColor(float f) {
 		BlockPos blockPos = new BlockPos(this.x, this.y, this.z);
-		return this.level.hasChunkAt(blockPos) ? this.level.getLightColor(blockPos, 0) : 0;
+		return this.level.hasChunkAt(blockPos) ? this.level.getLightColor(blockPos) : 0;
 	}
 
 	public boolean isAlive() {

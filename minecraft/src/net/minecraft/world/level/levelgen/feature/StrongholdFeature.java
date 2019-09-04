@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -30,7 +31,7 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 	}
 
 	@Override
-	public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
 		if (this.currentSeed != chunkGenerator.getSeed()) {
 			this.reset();
 		}
@@ -139,7 +140,7 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 				double e = (double)(4 * i + i * o * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
 				int q = (int)Math.round(Math.cos(d) * e);
 				int r = (int)Math.round(Math.sin(d) * e);
-				BlockPos blockPos = chunkGenerator.getBiomeSource().findBiome((q << 4) + 8, (r << 4) + 8, 112, list, random);
+				BlockPos blockPos = chunkGenerator.getBiomeSource().findBiomeHorizontal((q << 4) + 8, chunkGenerator.getSeaLevel(), (r << 4) + 8, 112, list, random);
 				if (blockPos != null) {
 					q = blockPos.getX() >> 4;
 					r = blockPos.getZ() >> 4;
@@ -162,8 +163,8 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 	}
 
 	public static class StrongholdStart extends StructureStart {
-		public StrongholdStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, biome, boundingBox, k, l);
+		public StrongholdStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
 		@Override

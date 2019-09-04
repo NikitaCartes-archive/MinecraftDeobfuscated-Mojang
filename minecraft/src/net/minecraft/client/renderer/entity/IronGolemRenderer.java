@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IronGolemModel;
@@ -27,7 +27,7 @@ public class IronGolemRenderer extends MobRenderer<IronGolem, IronGolemModel<Iro
 			float i = 13.0F;
 			float j = ironGolem.animationPosition - ironGolem.animationSpeed * (1.0F - h) + 6.0F;
 			float k = (Math.abs(j % 13.0F - 6.5F) - 3.25F) / 3.25F;
-			GlStateManager.rotatef(6.5F * k, 0.0F, 0.0F, 1.0F);
+			RenderSystem.rotatef(6.5F * k, 0.0F, 0.0F, 1.0F);
 		}
 	}
 }

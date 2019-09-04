@@ -11,14 +11,16 @@ import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener> {
 	private DimensionType dimension;
+	private long seed;
 	private GameType playerGameType;
 	private LevelType levelType;
 
 	public ClientboundRespawnPacket() {
 	}
 
-	public ClientboundRespawnPacket(DimensionType dimensionType, LevelType levelType, GameType gameType) {
+	public ClientboundRespawnPacket(DimensionType dimensionType, long l, LevelType levelType, GameType gameType) {
 		this.dimension = dimensionType;
+		this.seed = l;
 		this.playerGameType = gameType;
 		this.levelType = levelType;
 	}
@@ -30,6 +32,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
+		this.seed = friendlyByteBuf.readLong();
 		this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
 		this.levelType = LevelType.getLevelType(friendlyByteBuf.readUtf(16));
 		if (this.levelType == null) {
@@ -40,6 +43,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeInt(this.dimension.getId());
+		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.playerGameType.getId());
 		friendlyByteBuf.writeUtf(this.levelType.getName());
 	}
@@ -47,6 +51,11 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	@Environment(EnvType.CLIENT)
 	public DimensionType getDimension() {
 		return this.dimension;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public long getSeed() {
+		return this.seed;
 	}
 
 	@Environment(EnvType.CLIENT)

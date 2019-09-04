@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -38,6 +38,7 @@ public class DebugRenderer {
 	public final VillageDebugRenderer villageDebugRenderer;
 	public final RaidDebugRenderer raidDebugRenderer;
 	public final GoalSelectorDebugRenderer goalSelectorRenderer;
+	public final GameTestDebugRenderer gameTestDebugRenderer;
 	private boolean renderChunkborder;
 
 	public DebugRenderer(Minecraft minecraft) {
@@ -56,6 +57,7 @@ public class DebugRenderer {
 		this.villageDebugRenderer = new VillageDebugRenderer(minecraft);
 		this.raidDebugRenderer = new RaidDebugRenderer(minecraft);
 		this.goalSelectorRenderer = new GoalSelectorDebugRenderer(minecraft);
+		this.gameTestDebugRenderer = new GameTestDebugRenderer();
 	}
 
 	public void clear() {
@@ -74,10 +76,7 @@ public class DebugRenderer {
 		this.villageDebugRenderer.clear();
 		this.raidDebugRenderer.clear();
 		this.goalSelectorRenderer.clear();
-	}
-
-	public boolean shouldRender() {
-		return this.renderChunkborder;
+		this.gameTestDebugRenderer.clear();
 	}
 
 	public boolean switchRenderChunkborder() {
@@ -89,6 +88,8 @@ public class DebugRenderer {
 		if (this.renderChunkborder && !Minecraft.getInstance().showOnlyReducedInfo()) {
 			this.chunkBorderRenderer.render(l);
 		}
+
+		this.gameTestDebugRenderer.render(l);
 	}
 
 	public static Optional<Entity> getTargetedEntity(@Nullable Entity entity, int i) {
@@ -160,28 +161,28 @@ public class DebugRenderer {
 			double j = camera.getPosition().x;
 			double k = camera.getPosition().y;
 			double l = camera.getPosition().z;
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
-			GlStateManager.normal3f(0.0F, 1.0F, 0.0F);
-			GlStateManager.scalef(g, -g, g);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
+			RenderSystem.normal3f(0.0F, 1.0F, 0.0F);
+			RenderSystem.scalef(g, -g, g);
 			EntityRenderDispatcher entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
-			GlStateManager.rotatef(-entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(-entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F);
-			GlStateManager.enableTexture();
+			RenderSystem.rotatef(-entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef(-entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F);
+			RenderSystem.enableTexture();
 			if (bl2) {
-				GlStateManager.disableDepthTest();
+				RenderSystem.disableDepthTest();
 			} else {
-				GlStateManager.enableDepthTest();
+				RenderSystem.enableDepthTest();
 			}
 
-			GlStateManager.depthMask(true);
-			GlStateManager.scalef(-1.0F, 1.0F, 1.0F);
+			RenderSystem.depthMask(true);
+			RenderSystem.scalef(-1.0F, 1.0F, 1.0F);
 			float m = bl ? (float)(-font.width(string)) / 2.0F : 0.0F;
 			m -= h / g;
 			font.draw(string, m, 0.0F, i);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.enableDepthTest();
-			GlStateManager.popMatrix();
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.enableDepthTest();
+			RenderSystem.popMatrix();
 		}
 	}
 

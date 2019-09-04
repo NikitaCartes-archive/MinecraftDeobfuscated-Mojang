@@ -57,14 +57,20 @@ public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
 			double d = this.dragon.head.x + vec3.x * 5.0 / 2.0;
 			double e = this.dragon.head.z + vec3.z * 5.0 / 2.0;
 			double g = this.dragon.head.y + (double)(this.dragon.head.getBbHeight() / 2.0F);
+			double h = g;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, g, e);
 
 			while (this.dragon.level.isEmptyBlock(mutableBlockPos)) {
-				mutableBlockPos.set(d, --g, e);
+				if (--h < 0.0) {
+					h = g;
+					break;
+				}
+
+				mutableBlockPos.set(d, h, e);
 			}
 
-			g = (double)(Mth.floor(g) + 1);
-			this.flame = new AreaEffectCloud(this.dragon.level, d, g, e);
+			h = (double)(Mth.floor(h) + 1);
+			this.flame = new AreaEffectCloud(this.dragon.level, d, h, e);
 			this.flame.setOwner(this.dragon);
 			this.flame.setRadius(5.0F);
 			this.flame.setDuration(200);

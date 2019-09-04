@@ -15,7 +15,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -38,13 +37,13 @@ public class MagmaBlock extends Block {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getLightColor(BlockState blockState, BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {
-		return 15728880;
+	public boolean emissiveRendering(BlockState blockState) {
+		return true;
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		BubbleColumnBlock.growColumn(level, blockPos.above(), true);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), true);
 	}
 
 	@Override
@@ -59,16 +58,15 @@ public class MagmaBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		BlockPos blockPos2 = blockPos.above();
-		if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
-			level.playSound(null, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (level.random.nextFloat() - level.random.nextFloat()) * 0.8F);
-			if (level instanceof ServerLevel) {
-				((ServerLevel)level)
-					.sendParticles(
-						ParticleTypes.LARGE_SMOKE, (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, 8, 0.5, 0.25, 0.5, 0.0
-					);
-			}
+		if (serverLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
+			serverLevel.playSound(
+				null, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (serverLevel.random.nextFloat() - serverLevel.random.nextFloat()) * 0.8F
+			);
+			serverLevel.sendParticles(
+				ParticleTypes.LARGE_SMOKE, (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, 8, 0.5, 0.25, 0.5, 0.0
+			);
 		}
 	}
 

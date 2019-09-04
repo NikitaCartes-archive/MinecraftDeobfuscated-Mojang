@@ -7,10 +7,10 @@ import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
@@ -64,10 +65,10 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 		this.chunkCountY = k / this.chunkHeight;
 		this.chunkCountZ = 16 / this.chunkWidth;
 		this.random = new WorldgenRandom(this.seed);
-		this.minLimitPerlinNoise = new PerlinNoise(this.random, 16);
-		this.maxLimitPerlinNoise = new PerlinNoise(this.random, 16);
-		this.mainPerlinNoise = new PerlinNoise(this.random, 8);
-		this.surfaceNoise = (SurfaceNoise)(bl ? new PerlinSimplexNoise(this.random, 4) : new PerlinNoise(this.random, 4));
+		this.minLimitPerlinNoise = new PerlinNoise(this.random, 15, 0);
+		this.maxLimitPerlinNoise = new PerlinNoise(this.random, 15, 0);
+		this.mainPerlinNoise = new PerlinNoise(this.random, 7, 0);
+		this.surfaceNoise = (SurfaceNoise)(bl ? new PerlinSimplexNoise(this.random, 3, 0) : new PerlinNoise(this.random, 3, 0));
 	}
 
 	private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {
@@ -81,13 +82,24 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 			double q = PerlinNoise.wrap((double)j * e * n);
 			double r = PerlinNoise.wrap((double)k * d * n);
 			double s = e * n;
-			h += this.minLimitPerlinNoise.getOctaveNoise(o).noise(p, q, r, s, (double)j * s) / n;
-			l += this.maxLimitPerlinNoise.getOctaveNoise(o).noise(p, q, r, s, (double)j * s) / n;
+			ImprovedNoise improvedNoise = this.minLimitPerlinNoise.getOctaveNoise(o);
+			if (improvedNoise != null) {
+				h += improvedNoise.noise(p, q, r, s, (double)j * s) / n;
+			}
+
+			ImprovedNoise improvedNoise2 = this.maxLimitPerlinNoise.getOctaveNoise(o);
+			if (improvedNoise2 != null) {
+				l += improvedNoise2.noise(p, q, r, s, (double)j * s) / n;
+			}
+
 			if (o < 8) {
-				m += this.mainPerlinNoise
-						.getOctaveNoise(o)
-						.noise(PerlinNoise.wrap((double)i * f * n), PerlinNoise.wrap((double)j * g * n), PerlinNoise.wrap((double)k * f * n), g * n, (double)j * g * n)
-					/ n;
+				ImprovedNoise improvedNoise3 = this.mainPerlinNoise.getOctaveNoise(o);
+				if (improvedNoise3 != null) {
+					m += improvedNoise3.noise(
+							PerlinNoise.wrap((double)i * f * n), PerlinNoise.wrap((double)j * g * n), PerlinNoise.wrap((double)k * f * n), g * n, (double)j * g * n
+						)
+						/ n;
+				}
 			}
 
 			n /= 2.0;
@@ -186,7 +198,7 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 	}
 
 	@Override
-	public void buildSurfaceAndBedrock(ChunkAccess chunkAccess) {
+	public void buildSurfaceAndBedrock(WorldGenRegion worldGenRegion, ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		int i = chunkPos.x;
 		int j = chunkPos.z;
@@ -196,15 +208,15 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 		int k = chunkPos2.getMinBlockX();
 		int l = chunkPos2.getMinBlockZ();
 		double d = 0.0625;
-		Biome[] biomes = chunkAccess.getBiomes();
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int m = 0; m < 16; m++) {
 			for (int n = 0; n < 16; n++) {
 				int o = k + m;
 				int p = l + n;
 				int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
-				double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625);
-				biomes[n * 16 + m]
+				double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
+				worldGenRegion.getBiome(mutableBlockPos.set(k + m, q, l + n))
 					.buildSurfaceAt(
 						worldgenRandom,
 						chunkAccess,

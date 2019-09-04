@@ -1,9 +1,9 @@
 package net.minecraft.world.level.biome;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 
 public class DeepFrozenOceanBiome extends Biome {
-	protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new Random(3456L), 3);
+	protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), 2, 0);
 
 	public DeepFrozenOceanBiome() {
 		super(
@@ -69,18 +69,18 @@ public class DeepFrozenOceanBiome extends Biome {
 	@Override
 	protected float getTemperatureNoCache(BlockPos blockPos) {
 		float f = this.getTemperature();
-		double d = FROZEN_TEMPERATURE_NOISE.getValue((double)blockPos.getX() * 0.05, (double)blockPos.getZ() * 0.05);
-		double e = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.2, (double)blockPos.getZ() * 0.2);
+		double d = FROZEN_TEMPERATURE_NOISE.getValue((double)blockPos.getX() * 0.05, (double)blockPos.getZ() * 0.05, false) * 7.0;
+		double e = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.2, (double)blockPos.getZ() * 0.2, false);
 		double g = d + e;
 		if (g < 0.3) {
-			double h = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.09, (double)blockPos.getZ() * 0.09);
+			double h = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.09, (double)blockPos.getZ() * 0.09, false);
 			if (h < 0.8) {
 				f = 0.2F;
 			}
 		}
 
 		if (blockPos.getY() > 64) {
-			float i = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F)) * 4.0);
+			float i = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F), false) * 4.0);
 			return f - (i + (float)blockPos.getY() - 64.0F) * 0.05F / 30.0F;
 		} else {
 			return f;

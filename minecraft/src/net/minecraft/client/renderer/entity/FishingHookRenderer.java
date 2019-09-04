@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -27,23 +27,21 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 	public void render(FishingHook fishingHook, double d, double e, double f, float g, float h) {
 		Player player = fishingHook.getOwner();
 		if (player != null && !this.solidRender) {
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)d, (float)e, (float)f);
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)d, (float)e, (float)f);
+			RenderSystem.enableRescaleNormal();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 			this.bindTexture(fishingHook);
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			float i = 1.0F;
 			float j = 0.5F;
 			float k = 0.5F;
-			GlStateManager.rotatef(180.0F - this.entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(
-				(float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F
-			);
+			RenderSystem.rotatef(180.0F - this.entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F);
 			if (this.solidRender) {
-				GlStateManager.enableColorMaterial();
-				GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(fishingHook));
+				RenderSystem.enableColorMaterial();
+				RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(fishingHook));
 			}
 
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_NORMAL);
@@ -53,12 +51,12 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			bufferBuilder.vertex(-0.5, 0.5, 0.0).uv(0.0, 0.0).normal(0.0F, 1.0F, 0.0F).endVertex();
 			tesselator.end();
 			if (this.solidRender) {
-				GlStateManager.tearDownSolidRenderingTextureCombine();
-				GlStateManager.disableColorMaterial();
+				RenderSystem.tearDownSolidRenderingTextureCombine();
+				RenderSystem.disableColorMaterial();
 			}
 
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.popMatrix();
+			RenderSystem.disableRescaleNormal();
+			RenderSystem.popMatrix();
 			int l = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			ItemStack itemStack = player.getMainHandItem();
 			if (itemStack.getItem() != Items.FISHING_ROD) {
@@ -92,7 +90,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 				t = Mth.lerp((double)h, player.xo, player.x) - q * r - p * 0.8;
 				u = player.yo + (double)player.getEyeHeight() + (player.y - player.yo) * (double)h - 0.45;
 				v = Mth.lerp((double)h, player.zo, player.z) - p * r + q * 0.8;
-				w = player.isVisuallySneaking() ? -0.1875 : 0.0;
+				w = player.isCrouching() ? -0.1875 : 0.0;
 			}
 
 			double x = Mth.lerp((double)h, fishingHook.xo, fishingHook.x);
@@ -101,8 +99,8 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			double aa = (double)((float)(t - x));
 			double ab = (double)((float)(u - y)) + w;
 			double ac = (double)((float)(v - z));
-			GlStateManager.disableTexture();
-			GlStateManager.disableLighting();
+			RenderSystem.disableTexture();
+			RenderSystem.disableLighting();
 			bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 			int ad = 16;
 
@@ -112,8 +110,8 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			}
 
 			tesselator.end();
-			GlStateManager.enableLighting();
-			GlStateManager.enableTexture();
+			RenderSystem.enableLighting();
+			RenderSystem.enableTexture();
 			super.render(fishingHook, d, e, f, g, h);
 		}
 	}

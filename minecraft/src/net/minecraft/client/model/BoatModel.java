@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -53,7 +53,7 @@ public class BoatModel extends EntityModel<Boat> {
 	}
 
 	public void render(Boat boat, float f, float g, float h, float i, float j, float k) {
-		GlStateManager.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
 		this.setupAnim(boat, f, g, h, i, j, k);
 
 		for (int l = 0; l < 5; l++) {
@@ -65,10 +65,10 @@ public class BoatModel extends EntityModel<Boat> {
 	}
 
 	public void renderSecondPass(Entity entity, float f, float g, float h, float i, float j, float k) {
-		GlStateManager.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.colorMask(false, false, false, false);
+		RenderSystem.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.colorMask(false, false, false, false);
 		this.waterPatch.render(k);
-		GlStateManager.colorMask(true, true, true, true);
+		RenderSystem.colorMask(true, true, true, true);
 	}
 
 	protected ModelPart makePaddle(boolean bl) {

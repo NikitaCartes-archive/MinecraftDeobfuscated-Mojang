@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -24,17 +23,17 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 
 	public void render(ThrownTrident thrownTrident, double d, double e, double f, float g, float h) {
 		this.bindTexture(thrownTrident);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
-		GlStateManager.disableLighting();
-		GlStateManager.translatef((float)d, (float)e, (float)f);
-		GlStateManager.rotatef(Mth.lerp(h, thrownTrident.yRotO, thrownTrident.yRot) - 90.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(Mth.lerp(h, thrownTrident.xRotO, thrownTrident.xRot) + 90.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.pushMatrix();
+		RenderSystem.disableLighting();
+		RenderSystem.translatef((float)d, (float)e, (float)f);
+		RenderSystem.rotatef(Mth.lerp(h, thrownTrident.yRotO, thrownTrident.yRot) - 90.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(Mth.lerp(h, thrownTrident.xRotO, thrownTrident.xRot) + 90.0F, 0.0F, 0.0F, 1.0F);
 		this.model.render();
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		this.renderLeash(thrownTrident, d, e, f, g, h);
 		super.render(thrownTrident, d, e, f, g, h);
-		GlStateManager.enableLighting();
+		RenderSystem.enableLighting();
 	}
 
 	protected ResourceLocation getTextureLocation(ThrownTrident thrownTrident) {
@@ -64,10 +63,10 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 			int x = thrownTrident.getId() + thrownTrident.tickCount;
 			double y = (double)((float)x + h) * -0.1;
 			double z = Math.min(0.5, w / 30.0);
-			GlStateManager.disableTexture();
-			GlStateManager.disableLighting();
-			GlStateManager.disableCull();
-			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, 255.0F, 255.0F);
+			RenderSystem.disableTexture();
+			RenderSystem.disableLighting();
+			RenderSystem.disableCull();
+			RenderSystem.glMultiTexCoord2f(33985, 255.0F, 255.0F);
 			bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
 			int aa = 37;
 			int ab = 7 - x % 7;
@@ -113,9 +112,9 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 			}
 
 			tesselator.end();
-			GlStateManager.enableLighting();
-			GlStateManager.enableTexture();
-			GlStateManager.enableCull();
+			RenderSystem.enableLighting();
+			RenderSystem.enableTexture();
+			RenderSystem.enableCull();
 		}
 	}
 }

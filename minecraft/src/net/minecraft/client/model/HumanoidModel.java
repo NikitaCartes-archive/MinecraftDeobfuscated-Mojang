@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -23,7 +23,7 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 	public ModelPart leftLeg;
 	public HumanoidModel.ArmPose leftArmPose = HumanoidModel.ArmPose.EMPTY;
 	public HumanoidModel.ArmPose rightArmPose = HumanoidModel.ArmPose.EMPTY;
-	public boolean sneaking;
+	public boolean crouching;
 	public float swimAmount;
 	private float itemUseTicks;
 
@@ -65,16 +65,16 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
 		this.setupAnim(livingEntity, f, g, h, i, j, k);
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		if (this.young) {
 			float l = 2.0F;
-			GlStateManager.scalef(0.75F, 0.75F, 0.75F);
-			GlStateManager.translatef(0.0F, 16.0F * k, 0.0F);
+			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
+			RenderSystem.translatef(0.0F, 16.0F * k, 0.0F);
 			this.head.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.translatef(0.0F, 24.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
 			this.body.render(k);
 			this.rightArm.render(k);
 			this.leftArm.render(k);
@@ -82,8 +82,8 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 			this.leftLeg.render(k);
 			this.hat.render(k);
 		} else {
-			if (livingEntity.isVisuallySneaking()) {
-				GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			if (livingEntity.isCrouching()) {
+				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
 			}
 
 			this.head.render(k);
@@ -95,7 +95,7 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 			this.hat.render(k);
 		}
 
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	public void prepareMobModel(T livingEntity, float f, float g, float h) {
@@ -224,7 +224,7 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 			modelPart.zRot = modelPart.zRot + Mth.sin(this.attackTime * (float) Math.PI) * -0.4F;
 		}
 
-		if (this.sneaking) {
+		if (this.crouching) {
 			this.body.xRot = 0.5F;
 			this.rightArm.xRot += 0.4F;
 			this.leftArm.xRot += 0.4F;
@@ -349,7 +349,7 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 		super.copyPropertiesTo(humanoidModel);
 		humanoidModel.leftArmPose = this.leftArmPose;
 		humanoidModel.rightArmPose = this.rightArmPose;
-		humanoidModel.sneaking = this.sneaking;
+		humanoidModel.crouching = this.crouching;
 	}
 
 	public void setAllVisible(boolean bl) {

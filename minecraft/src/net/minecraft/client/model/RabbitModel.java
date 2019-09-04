@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -95,17 +95,17 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 		this.setupAnim(rabbit, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 1.5F;
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.56666666F, 0.56666666F, 0.56666666F);
-			GlStateManager.translatef(0.0F, 22.0F * k, 2.0F * k);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.56666666F, 0.56666666F, 0.56666666F);
+			RenderSystem.translatef(0.0F, 22.0F * k, 2.0F * k);
 			this.head.render(k);
 			this.earLeft.render(k);
 			this.earRight.render(k);
 			this.nose.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.4F, 0.4F, 0.4F);
-			GlStateManager.translatef(0.0F, 36.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.4F, 0.4F, 0.4F);
+			RenderSystem.translatef(0.0F, 36.0F * k, 0.0F);
 			this.rearFootLeft.render(k);
 			this.rearFootRight.render(k);
 			this.haunchLeft.render(k);
@@ -114,11 +114,11 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 			this.frontLegLeft.render(k);
 			this.frontLegRight.render(k);
 			this.tail.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.6F, 0.6F, 0.6F);
-			GlStateManager.translatef(0.0F, 16.0F * k, 0.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.6F, 0.6F, 0.6F);
+			RenderSystem.translatef(0.0F, 16.0F * k, 0.0F);
 			this.rearFootLeft.render(k);
 			this.rearFootRight.render(k);
 			this.haunchLeft.render(k);
@@ -131,7 +131,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 			this.earLeft.render(k);
 			this.tail.render(k);
 			this.nose.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

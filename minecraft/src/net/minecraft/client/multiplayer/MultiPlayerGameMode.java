@@ -192,7 +192,7 @@ public class MultiPlayerGameMode {
 					SoundType soundType = blockState.getSoundType();
 					this.minecraft
 						.getSoundManager()
-						.play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.NEUTRAL, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F, blockPos));
+						.play(new SimpleSoundInstance(soundType.getHitSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F, blockPos));
 				}
 
 				this.destroyTicks++;
@@ -260,7 +260,7 @@ public class MultiPlayerGameMode {
 				return InteractionResult.SUCCESS;
 			} else {
 				boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
-				boolean bl2 = localPlayer.isSneaking() && bl;
+				boolean bl2 = localPlayer.isSecondaryUseActive() && bl;
 				if (!bl2 && multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult)) {
 					this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
 					return InteractionResult.SUCCESS;

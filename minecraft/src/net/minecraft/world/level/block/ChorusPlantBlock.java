@@ -3,10 +3,10 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -65,9 +65,9 @@ public class ChorusPlantBlock extends PipeBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(level, blockPos)) {
-			level.destroyBlock(blockPos, true);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!blockState.canSurvive(serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
 		}
 	}
 

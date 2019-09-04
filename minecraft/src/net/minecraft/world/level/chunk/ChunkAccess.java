@@ -9,24 +9,23 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
 
-public interface ChunkAccess extends FeatureAccess {
+public interface ChunkAccess extends BlockGetter, FeatureAccess {
 	@Nullable
 	BlockState setBlockState(BlockPos blockPos, BlockState blockState, boolean bl);
 
@@ -57,20 +56,6 @@ public interface ChunkAccess extends FeatureAccess {
 
 	LevelChunkSection[] getSections();
 
-	@Nullable
-	LevelLightEngine getLightEngine();
-
-	default int getRawBrightness(BlockPos blockPos, int i, boolean bl) {
-		LevelLightEngine levelLightEngine = this.getLightEngine();
-		if (levelLightEngine != null && this.getStatus().isOrAfter(ChunkStatus.LIGHT)) {
-			int j = bl ? levelLightEngine.getLayerListener(LightLayer.SKY).getLightValue(blockPos) - i : 0;
-			int k = levelLightEngine.getLayerListener(LightLayer.BLOCK).getLightValue(blockPos);
-			return Math.max(k, j);
-		} else {
-			return 0;
-		}
-	}
-
 	Collection<Entry<Heightmap.Types, Heightmap>> getHeightmaps();
 
 	void setHeightmap(Heightmap.Types types, long[] ls);
@@ -86,12 +71,6 @@ public interface ChunkAccess extends FeatureAccess {
 	Map<String, StructureStart> getAllStarts();
 
 	void setAllStarts(Map<String, StructureStart> map);
-
-	default Biome getBiome(BlockPos blockPos) {
-		int i = blockPos.getX() & 15;
-		int j = blockPos.getZ() & 15;
-		return this.getBiomes()[j << 4 | i];
-	}
 
 	default boolean isYSpaceEmpty(int i, int j) {
 		if (i < 0) {
@@ -111,7 +90,8 @@ public interface ChunkAccess extends FeatureAccess {
 		return true;
 	}
 
-	Biome[] getBiomes();
+	@Nullable
+	ChunkBiomeContainer getBiomes();
 
 	void setUnsaved(boolean bl);
 
@@ -120,8 +100,6 @@ public interface ChunkAccess extends FeatureAccess {
 	ChunkStatus getStatus();
 
 	void removeBlockEntity(BlockPos blockPos);
-
-	void setLightEngine(LevelLightEngine levelLightEngine);
 
 	default void markPosForPostprocessing(BlockPos blockPos) {
 		LogManager.getLogger().warn("Trying to mark a block for PostProcessing @ {}, but this operation is not supported.", blockPos);
@@ -143,10 +121,6 @@ public interface ChunkAccess extends FeatureAccess {
 	@Nullable
 	CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos);
 
-	default void setBiomes(Biome[] biomes) {
-		throw new UnsupportedOperationException();
-	}
-
 	Stream<BlockPos> getLights();
 
 	TickList<Block> getBlockTicks();
@@ -154,7 +128,7 @@ public interface ChunkAccess extends FeatureAccess {
 	TickList<Fluid> getLiquidTicks();
 
 	default BitSet getCarvingMask(GenerationStep.Carving carving) {
-		throw new RuntimeException("Meaningless in this context");
+		throw (RuntimeException)Util.pauseInIde(new RuntimeException("Meaningless in this context"));
 	}
 
 	UpgradeData getUpgradeData();

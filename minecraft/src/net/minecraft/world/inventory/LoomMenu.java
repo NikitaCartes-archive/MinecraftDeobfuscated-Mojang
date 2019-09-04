@@ -27,6 +27,7 @@ public class LoomMenu extends AbstractContainerMenu {
 	private final Slot dyeSlot;
 	private final Slot patternSlot;
 	private final Slot resultSlot;
+	private long lastSoundTime;
 	private final Container inputContainer = new SimpleContainer(3) {
 		@Override
 		public void setChanged() {
@@ -82,7 +83,13 @@ public class LoomMenu extends AbstractContainerMenu {
 					LoomMenu.this.selectedBannerPatternIndex.set(0);
 				}
 
-				containerLevelAccess.execute((level, blockPos) -> level.playSound(null, blockPos, SoundEvents.UI_LOOM_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F));
+				containerLevelAccess.execute((level, blockPos) -> {
+					long l = level.getGameTime();
+					if (LoomMenu.this.lastSoundTime != l) {
+						level.playSound(null, blockPos, SoundEvents.UI_LOOM_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F);
+						LoomMenu.this.lastSoundTime = l;
+					}
+				});
 				return super.onTake(player, itemStack);
 			}
 		});

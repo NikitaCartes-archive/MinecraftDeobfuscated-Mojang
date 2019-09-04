@@ -79,6 +79,7 @@ public class BlockStateProperties {
 	public static final IntegerProperty LEVEL_CAULDRON = IntegerProperty.create("level", 0, 3);
 	public static final IntegerProperty LEVEL_COMPOSTER = IntegerProperty.create("level", 0, 8);
 	public static final IntegerProperty LEVEL_FLOWING = IntegerProperty.create("level", 1, 8);
+	public static final IntegerProperty LEVEL_HONEY = IntegerProperty.create("honey_level", 0, 5);
 	public static final IntegerProperty LEVEL = IntegerProperty.create("level", 0, 15);
 	public static final IntegerProperty MOISTURE = IntegerProperty.create("moisture", 0, 7);
 	public static final IntegerProperty NOTE = IntegerProperty.create("note", 0, 24);

@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -35,16 +36,16 @@ public class LeavesBlock extends Block {
 	}
 
 	@Override
-	public void randomTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!(Boolean)blockState.getValue(PERSISTENT) && (Integer)blockState.getValue(DISTANCE) == 7) {
-			dropResources(blockState, level, blockPos);
-			level.removeBlock(blockPos, false);
+			dropResources(blockState, serverLevel, blockPos);
+			serverLevel.removeBlock(blockPos, false);
 		}
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		level.setBlock(blockPos, updateDistance(blockState, level, blockPos), 3);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		serverLevel.setBlock(blockPos, updateDistance(blockState, serverLevel, blockPos), 3);
 	}
 
 	@Override

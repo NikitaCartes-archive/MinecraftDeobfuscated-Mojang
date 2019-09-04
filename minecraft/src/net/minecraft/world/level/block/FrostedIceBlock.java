@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -23,21 +24,21 @@ public class FrostedIceBlock extends IceBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if ((random.nextInt(3) == 0 || this.fewerNeigboursThan(level, blockPos, 4))
-			&& level.getMaxLocalRawBrightness(blockPos) > 11 - (Integer)blockState.getValue(AGE) - blockState.getLightBlock(level, blockPos)
-			&& this.slightlyMelt(blockState, level, blockPos)) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if ((random.nextInt(3) == 0 || this.fewerNeigboursThan(serverLevel, blockPos, 4))
+			&& serverLevel.getMaxLocalRawBrightness(blockPos) > 11 - (Integer)blockState.getValue(AGE) - blockState.getLightBlock(serverLevel, blockPos)
+			&& this.slightlyMelt(blockState, serverLevel, blockPos)) {
 			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
 				for (Direction direction : Direction.values()) {
 					pooledMutableBlockPos.set(blockPos).move(direction);
-					BlockState blockState2 = level.getBlockState(pooledMutableBlockPos);
-					if (blockState2.getBlock() == this && !this.slightlyMelt(blockState2, level, pooledMutableBlockPos)) {
-						level.getBlockTicks().scheduleTick(pooledMutableBlockPos, this, Mth.nextInt(random, 20, 40));
+					BlockState blockState2 = serverLevel.getBlockState(pooledMutableBlockPos);
+					if (blockState2.getBlock() == this && !this.slightlyMelt(blockState2, serverLevel, pooledMutableBlockPos)) {
+						serverLevel.getBlockTicks().scheduleTick(pooledMutableBlockPos, this, Mth.nextInt(random, 20, 40));
 					}
 				}
 			}
 		} else {
-			level.getBlockTicks().scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
+			serverLevel.getBlockTicks().scheduleTick(blockPos, this, Mth.nextInt(random, 20, 40));
 		}
 	}
 

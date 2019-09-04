@@ -1,6 +1,7 @@
 package net.minecraft.util;
 
 import java.util.function.IntConsumer;
+import net.minecraft.Util;
 import org.apache.commons.lang3.Validate;
 
 public class BitStorage {
@@ -21,7 +22,7 @@ public class BitStorage {
 		this.mask = (1L << i) - 1L;
 		int k = Mth.roundUp(j * i, 64) / 64;
 		if (ls.length != k) {
-			throw new RuntimeException("Invalid length given for storage, got: " + ls.length + " but expected: " + k);
+			throw (RuntimeException)Util.pauseInIde(new RuntimeException("Invalid length given for storage, got: " + ls.length + " but expected: " + k));
 		}
 	}
 

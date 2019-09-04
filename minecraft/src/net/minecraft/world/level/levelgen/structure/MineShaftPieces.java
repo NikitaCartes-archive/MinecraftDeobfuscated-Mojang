@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -251,7 +252,7 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -480,7 +481,7 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -758,7 +759,7 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -901,7 +902,7 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {

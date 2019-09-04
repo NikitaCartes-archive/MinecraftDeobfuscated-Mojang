@@ -44,10 +44,10 @@ public class FrozenOceanSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBase
 		double f = 0.0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		float g = biome.getTemperature(mutableBlockPos.set(i, 63, j));
-		double h = Math.min(Math.abs(d), this.icebergNoise.getValue((double)i * 0.1, (double)j * 0.1));
+		double h = Math.min(Math.abs(d), this.icebergNoise.getValue((double)i * 0.1, (double)j * 0.1, false) * 15.0);
 		if (h > 1.8) {
 			double n = 0.09765625;
-			double o = Math.abs(this.icebergRoofNoise.getValue((double)i * 0.09765625, (double)j * 0.09765625));
+			double o = Math.abs(this.icebergRoofNoise.getValue((double)i * 0.09765625, (double)j * 0.09765625, false));
 			e = h * h * 1.2;
 			double p = Math.ceil(o * 40.0) + 14.0;
 			if (e > p) {
@@ -133,9 +133,9 @@ public class FrozenOceanSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBase
 	@Override
 	public void initNoise(long l) {
 		if (this.seed != l || this.icebergNoise == null || this.icebergRoofNoise == null) {
-			Random random = new WorldgenRandom(l);
-			this.icebergNoise = new PerlinSimplexNoise(random, 4);
-			this.icebergRoofNoise = new PerlinSimplexNoise(random, 1);
+			WorldgenRandom worldgenRandom = new WorldgenRandom(l);
+			this.icebergNoise = new PerlinSimplexNoise(worldgenRandom, 3, 0);
+			this.icebergRoofNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
 		}
 
 		this.seed = l;

@@ -35,9 +35,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -47,13 +48,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.predicate.BlockMaterialPredicate;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
@@ -65,7 +66,7 @@ import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoCloseable {
+public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected static final Logger LOGGER = LogManager.getLogger();
 	private static final Direction[] DIRECTIONS = Direction.values();
 	public final List<BlockEntity> blockEntityList = Lists.<BlockEntity>newArrayList();
@@ -90,6 +91,7 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 	public final boolean isClientSide;
 	protected boolean updatingBlockEntities;
 	private final WorldBorder worldBorder;
+	private final BiomeManager biomeManager;
 
 	protected Level(
 		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, ProfilerFiller profilerFiller, boolean bl
@@ -101,18 +103,7 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 		this.isClientSide = bl;
 		this.worldBorder = this.dimension.createWorldBorder();
 		this.thread = Thread.currentThread();
-	}
-
-	@Override
-	public Biome getBiome(BlockPos blockPos) {
-		ChunkSource chunkSource = this.getChunkSource();
-		LevelChunk levelChunk = chunkSource.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, false);
-		if (levelChunk != null) {
-			return levelChunk.getBiome(blockPos);
-		} else {
-			ChunkGenerator<?> chunkGenerator = this.getChunkSource().getGenerator();
-			return chunkGenerator == null ? Biomes.PLAINS : chunkGenerator.getBiomeSource().getBiome(blockPos);
-		}
+		this.biomeManager = new BiomeManager(this, bl ? levelData.getSeed() : LevelData.obfuscateSeed(levelData.getSeed()), dimensionType.getBiomeZoomer());
 	}
 
 	@Override
@@ -243,7 +234,7 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 	}
 
 	@Override
-	public boolean destroyBlock(BlockPos blockPos, boolean bl) {
+	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (blockState.isAir()) {
 			return false;
@@ -252,7 +243,7 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 			this.levelEvent(2001, blockPos, Block.getId(blockState));
 			if (bl) {
 				BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
-				Block.dropResources(blockState, this, blockPos, blockEntity);
+				Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
 			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3);
@@ -333,21 +324,6 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 	}
 
 	@Override
-	public int getRawBrightness(BlockPos blockPos, int i) {
-		if (blockPos.getX() < -30000000 || blockPos.getZ() < -30000000 || blockPos.getX() >= 30000000 || blockPos.getZ() >= 30000000) {
-			return 15;
-		} else if (blockPos.getY() < 0) {
-			return 0;
-		} else {
-			if (blockPos.getY() >= 256) {
-				blockPos = new BlockPos(blockPos.getX(), 255, blockPos.getZ());
-			}
-
-			return this.getChunkAt(blockPos).getRawBrightness(blockPos, i);
-		}
-	}
-
-	@Override
 	public int getHeight(Heightmap.Types types, int i, int j) {
 		int k;
 		if (i >= -30000000 && j >= -30000000 && i < 30000000 && j < 30000000) {
@@ -364,8 +340,8 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 	}
 
 	@Override
-	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-		return this.getChunkSource().getLightEngine().getLayerListener(lightLayer).getLightValue(blockPos);
+	public LevelLightEngine getLightEngine() {
+		return this.getChunkSource().getLightEngine();
 	}
 
 	@Override
@@ -876,9 +852,10 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 		this.chunkSource.close();
 	}
 
+	@Nullable
 	@Override
-	public ChunkStatus statusForCollisions() {
-		return ChunkStatus.FULL;
+	public BlockGetter getChunkForCollisions(int i, int j) {
+		return this.getChunk(i, j, ChunkStatus.FULL, false);
 	}
 
 	@Override
@@ -1267,11 +1244,6 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 		throw new UnsupportedOperationException("Can't send packets to server unless you're on the client.");
 	}
 
-	@Nullable
-	public BlockPos findNearestMapFeature(String string, BlockPos blockPos, int i, boolean bl) {
-		return null;
-	}
-
 	@Override
 	public Dimension getDimension() {
 		return this.dimension;
@@ -1306,7 +1278,7 @@ public abstract class Level implements BlockAndBiomeGetter, LevelAccessor, AutoC
 	}
 
 	@Override
-	public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
-		return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());
+	public BiomeManager getBiomeManager() {
+		return this.biomeManager;
 	}
 }

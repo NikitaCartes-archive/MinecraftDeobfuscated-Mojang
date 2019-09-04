@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.util.InsensitiveStringMap;
 
 public abstract class BaseAttributeMap {
@@ -66,5 +68,15 @@ public abstract class BaseAttributeMap {
 				attributeInstance.addModifier((AttributeModifier)entry.getValue());
 			}
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void assignValues(BaseAttributeMap baseAttributeMap) {
+		this.getAttributes().forEach(attributeInstance -> {
+			AttributeInstance attributeInstance2 = baseAttributeMap.getInstance(attributeInstance.getAttribute());
+			if (attributeInstance2 != null) {
+				attributeInstance.copyFrom(attributeInstance2);
+			}
+		});
 	}
 }

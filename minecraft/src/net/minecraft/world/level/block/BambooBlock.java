@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -98,14 +99,14 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(level, blockPos)) {
-			level.destroyBlock(blockPos, true);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!blockState.canSurvive(serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
 		} else if ((Integer)blockState.getValue(STAGE) == 0) {
-			if (random.nextInt(3) == 0 && level.isEmptyBlock(blockPos.above()) && level.getRawBrightness(blockPos.above(), 0) >= 9) {
-				int i = this.getHeightBelowUpToMax(level, blockPos) + 1;
+			if (random.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
+				int i = this.getHeightBelowUpToMax(serverLevel, blockPos) + 1;
 				if (i < 16) {
-					this.growBamboo(blockState, level, blockPos, random, i);
+					this.growBamboo(blockState, serverLevel, blockPos, random, i);
 				}
 			}
 		}
@@ -144,20 +145,20 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-		int i = this.getHeightAboveUpToMax(level, blockPos);
-		int j = this.getHeightBelowUpToMax(level, blockPos);
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+		int i = this.getHeightAboveUpToMax(serverLevel, blockPos);
+		int j = this.getHeightBelowUpToMax(serverLevel, blockPos);
 		int k = i + j + 1;
 		int l = 1 + random.nextInt(2);
 
 		for (int m = 0; m < l; m++) {
 			BlockPos blockPos2 = blockPos.above(i);
-			BlockState blockState2 = level.getBlockState(blockPos2);
-			if (k >= 16 || (Integer)blockState2.getValue(STAGE) == 1 || !level.isEmptyBlock(blockPos2.above())) {
+			BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+			if (k >= 16 || (Integer)blockState2.getValue(STAGE) == 1 || !serverLevel.isEmptyBlock(blockPos2.above())) {
 				return;
 			}
 
-			this.growBamboo(blockState2, level, blockPos2, random, k);
+			this.growBamboo(blockState2, serverLevel, blockPos2, random, k);
 			i++;
 			k++;
 		}

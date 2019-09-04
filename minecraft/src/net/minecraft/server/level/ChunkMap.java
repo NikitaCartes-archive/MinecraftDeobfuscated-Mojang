@@ -916,7 +916,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				int i = entityType.chunkRange() * 16;
 				int j = entityType.updateInterval();
 				if (this.entityMap.containsKey(entity.getId())) {
-					throw new IllegalStateException("Entity is already tracked!");
+					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
 				} else {
 					ChunkMap.TrackedEntity trackedEntity = new ChunkMap.TrackedEntity(entity, i, j, entityType.trackDeltas());
 					this.entityMap.put(entity.getId(), trackedEntity);

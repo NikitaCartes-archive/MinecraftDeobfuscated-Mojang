@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
@@ -26,7 +26,7 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 	public void render(Wolf wolf, double d, double e, double f, float g, float h) {
 		if (wolf.isWet()) {
 			float i = wolf.getBrightness() * wolf.getWetShade(h);
-			GlStateManager.color3f(i, i, i);
+			RenderSystem.color3f(i, i, i);
 		}
 
 		super.render(wolf, d, e, f, g, h);

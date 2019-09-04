@@ -70,7 +70,8 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 			new BlockPos(endSpike.getCenterX() - i, 0, endSpike.getCenterZ() - i),
 			new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i)
 		)) {
-			if (blockPos.closerThan(new BlockPos(endSpike.getCenterX(), blockPos.getY(), endSpike.getCenterZ()), (double)i) && blockPos.getY() < endSpike.getHeight()) {
+			if (blockPos.distSqr((double)endSpike.getCenterX(), (double)blockPos.getY(), (double)endSpike.getCenterZ(), false) <= (double)(i * i + 1)
+				&& blockPos.getY() < endSpike.getHeight()) {
 				this.setBlock(levelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
 			} else if (blockPos.getY() > 65) {
 				this.setBlock(levelAccessor, blockPos, Blocks.AIR.defaultBlockState());

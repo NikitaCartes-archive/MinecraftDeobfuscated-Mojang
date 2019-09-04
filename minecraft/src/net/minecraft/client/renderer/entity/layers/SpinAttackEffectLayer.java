@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
@@ -21,17 +21,17 @@ public class SpinAttackEffectLayer<T extends LivingEntity> extends RenderLayer<T
 
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
 		if (livingEntity.isAutoSpinAttack()) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.bindTexture(TEXTURE);
 
 			for (int m = 0; m < 3; m++) {
-				GlStateManager.pushMatrix();
-				GlStateManager.rotatef(i * (float)(-(45 + m * 5)), 0.0F, 1.0F, 0.0F);
+				RenderSystem.pushMatrix();
+				RenderSystem.rotatef(i * (float)(-(45 + m * 5)), 0.0F, 1.0F, 0.0F);
 				float n = 0.75F * (float)m;
-				GlStateManager.scalef(n, n, n);
-				GlStateManager.translatef(0.0F, -0.2F + 0.6F * (float)m, 0.0F);
+				RenderSystem.scalef(n, n, n);
+				RenderSystem.translatef(0.0F, -0.2F + 0.6F * (float)m, 0.0F);
 				this.model.render(f, g, i, j, k, l);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,47 +33,47 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 	}
 
 	public void render(ItemFrame itemFrame, double d, double e, double f, float g, float h) {
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		BlockPos blockPos = itemFrame.getPos();
 		double i = (double)blockPos.getX() - itemFrame.x + d;
 		double j = (double)blockPos.getY() - itemFrame.y + e;
 		double k = (double)blockPos.getZ() - itemFrame.z + f;
-		GlStateManager.translated(i + 0.5, j + 0.5, k + 0.5);
-		GlStateManager.rotatef(itemFrame.xRot, 1.0F, 0.0F, 0.0F);
-		GlStateManager.rotatef(180.0F - itemFrame.yRot, 0.0F, 1.0F, 0.0F);
+		RenderSystem.translated(i + 0.5, j + 0.5, k + 0.5);
+		RenderSystem.rotatef(itemFrame.xRot, 1.0F, 0.0F, 0.0F);
+		RenderSystem.rotatef(180.0F - itemFrame.yRot, 0.0F, 1.0F, 0.0F);
 		this.entityRenderDispatcher.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 		BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
 		ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
 		ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef(-0.5F, -0.5F, -0.5F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(-0.5F, -0.5F, -0.5F);
 		if (this.solidRender) {
-			GlStateManager.enableColorMaterial();
-			GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(itemFrame));
+			RenderSystem.enableColorMaterial();
+			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(itemFrame));
 		}
 
 		blockRenderDispatcher.getModelRenderer().renderModel(modelManager.getModel(modelResourceLocation), 1.0F, 1.0F, 1.0F, 1.0F);
 		if (this.solidRender) {
-			GlStateManager.tearDownSolidRenderingTextureCombine();
-			GlStateManager.disableColorMaterial();
+			RenderSystem.tearDownSolidRenderingTextureCombine();
+			RenderSystem.disableColorMaterial();
 		}
 
-		GlStateManager.popMatrix();
-		GlStateManager.enableLighting();
+		RenderSystem.popMatrix();
+		RenderSystem.enableLighting();
 		if (itemFrame.getItem().getItem() == Items.FILLED_MAP) {
-			GlStateManager.pushLightingAttributes();
+			RenderSystem.pushLightingAttributes();
 			Lighting.turnOn();
 		}
 
-		GlStateManager.translatef(0.0F, 0.0F, 0.4375F);
+		RenderSystem.translatef(0.0F, 0.0F, 0.4375F);
 		this.drawItem(itemFrame);
 		if (itemFrame.getItem().getItem() == Items.FILLED_MAP) {
 			Lighting.turnOff();
-			GlStateManager.popAttributes();
+			RenderSystem.popAttributes();
 		}
 
-		GlStateManager.enableLighting();
-		GlStateManager.popMatrix();
+		RenderSystem.enableLighting();
+		RenderSystem.popMatrix();
 		this.renderName(
 			itemFrame, d + (double)((float)itemFrame.getDirection().getStepX() * 0.3F), e - 0.25, f + (double)((float)itemFrame.getDirection().getStepZ() * 0.3F)
 		);
@@ -87,28 +87,28 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 	private void drawItem(ItemFrame itemFrame) {
 		ItemStack itemStack = itemFrame.getItem();
 		if (!itemStack.isEmpty()) {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			boolean bl = itemStack.getItem() == Items.FILLED_MAP;
 			int i = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-			GlStateManager.rotatef((float)i * 360.0F / 8.0F, 0.0F, 0.0F, 1.0F);
+			RenderSystem.rotatef((float)i * 360.0F / 8.0F, 0.0F, 0.0F, 1.0F);
 			if (bl) {
-				GlStateManager.disableLighting();
+				RenderSystem.disableLighting();
 				this.entityRenderDispatcher.textureManager.bind(MAP_BACKGROUND_LOCATION);
-				GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 				float f = 0.0078125F;
-				GlStateManager.scalef(0.0078125F, 0.0078125F, 0.0078125F);
-				GlStateManager.translatef(-64.0F, -64.0F, 0.0F);
+				RenderSystem.scalef(0.0078125F, 0.0078125F, 0.0078125F);
+				RenderSystem.translatef(-64.0F, -64.0F, 0.0F);
 				MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, itemFrame.level);
-				GlStateManager.translatef(0.0F, 0.0F, -1.0F);
+				RenderSystem.translatef(0.0F, 0.0F, -1.0F);
 				if (mapItemSavedData != null) {
 					this.minecraft.gameRenderer.getMapRenderer().render(mapItemSavedData, true);
 				}
 			} else {
-				GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+				RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED);
 			}
 
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 
@@ -118,7 +118,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 			&& itemFrame.getItem().hasCustomHoverName()
 			&& this.entityRenderDispatcher.crosshairPickEntity == itemFrame) {
 			double g = itemFrame.distanceToSqr(this.entityRenderDispatcher.camera.getPosition());
-			float h = itemFrame.isVisuallySneaking() ? 32.0F : 64.0F;
+			float h = itemFrame.isDiscrete() ? 32.0F : 64.0F;
 			if (!(g >= (double)(h * h))) {
 				String string = itemFrame.getItem().getHoverName().getColoredString();
 				this.renderNameTag(itemFrame, string, d, e, f, 64);

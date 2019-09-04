@@ -14,6 +14,10 @@ public interface PreparableReloadListener {
 		Executor executor2
 	);
 
+	default String getName() {
+		return this.getClass().getSimpleName();
+	}
+
 	public interface PreparationBarrier {
 		<T> CompletableFuture<T> wait(T object);
 	}

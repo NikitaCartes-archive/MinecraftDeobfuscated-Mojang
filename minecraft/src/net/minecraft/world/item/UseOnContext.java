@@ -65,8 +65,8 @@ public class UseOnContext {
 		return this.player == null ? Direction.NORTH : this.player.getDirection();
 	}
 
-	public boolean isSneaking() {
-		return this.player != null && this.player.isSneaking();
+	public boolean isSecondaryUseActive() {
+		return this.player != null && this.player.isSecondaryUseActive();
 	}
 
 	public float getRotation() {

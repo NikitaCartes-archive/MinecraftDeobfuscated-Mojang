@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -27,11 +27,11 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		double f = camera.getPosition().z;
 		double g = 0.0 - e;
 		double h = 256.0 - e;
-		GlStateManager.disableTexture();
-		GlStateManager.disableBlend();
+		RenderSystem.disableTexture();
+		RenderSystem.disableBlend();
 		double i = (double)(camera.getEntity().xChunk << 4) - d;
 		double j = (double)(camera.getEntity().zChunk << 4) - f;
-		GlStateManager.lineWidth(1.0F);
+		RenderSystem.lineWidth(1.0F);
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = -16; k <= 32; k += 16) {
@@ -77,7 +77,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		tesselator.end();
-		GlStateManager.lineWidth(2.0F);
+		RenderSystem.lineWidth(2.0F);
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = 0; k <= 16; k += 16) {
@@ -101,8 +101,8 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		tesselator.end();
-		GlStateManager.lineWidth(1.0F);
-		GlStateManager.enableBlend();
-		GlStateManager.enableTexture();
+		RenderSystem.lineWidth(1.0F);
+		RenderSystem.enableBlend();
+		RenderSystem.enableTexture();
 	}
 }

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PhantomModel;
@@ -24,12 +24,12 @@ public class PhantomRenderer extends MobRenderer<Phantom, PhantomModel<Phantom>>
 	protected void scale(Phantom phantom, float f) {
 		int i = phantom.getPhantomSize();
 		float g = 1.0F + 0.15F * (float)i;
-		GlStateManager.scalef(g, g, g);
-		GlStateManager.translatef(0.0F, 1.3125F, 0.1875F);
+		RenderSystem.scalef(g, g, g);
+		RenderSystem.translatef(0.0F, 1.3125F, 0.1875F);
 	}
 
 	protected void setupRotations(Phantom phantom, float f, float g, float h) {
 		super.setupRotations(phantom, f, g, h);
-		GlStateManager.rotatef(phantom.xRot, 1.0F, 0.0F, 0.0F);
+		RenderSystem.rotatef(phantom.xRot, 1.0F, 0.0F, 0.0F);
 	}
 }

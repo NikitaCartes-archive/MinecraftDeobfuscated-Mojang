@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -75,7 +75,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	@Override
 	protected void renderBg(float f, int i, int j) {
 		this.renderBackground();
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BG_LOCATION);
 		int k = this.leftPos;
 		int l = this.topPos;

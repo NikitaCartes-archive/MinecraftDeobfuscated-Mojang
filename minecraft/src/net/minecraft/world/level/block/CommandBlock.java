@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -62,36 +63,34 @@ public class CommandBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!level.isClientSide) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CommandBlockEntity) {
-				CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
-				BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
-				boolean bl = !StringUtil.isNullOrEmpty(baseCommandBlock.getCommand());
-				CommandBlockEntity.Mode mode = commandBlockEntity.getMode();
-				boolean bl2 = commandBlockEntity.wasConditionMet();
-				if (mode == CommandBlockEntity.Mode.AUTO) {
-					commandBlockEntity.markConditionMet();
-					if (bl2) {
-						this.execute(blockState, level, blockPos, baseCommandBlock, bl);
-					} else if (commandBlockEntity.isConditional()) {
-						baseCommandBlock.setSuccessCount(0);
-					}
-
-					if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-						level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
-					}
-				} else if (mode == CommandBlockEntity.Mode.REDSTONE) {
-					if (bl2) {
-						this.execute(blockState, level, blockPos, baseCommandBlock, bl);
-					} else if (commandBlockEntity.isConditional()) {
-						baseCommandBlock.setSuccessCount(0);
-					}
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
+		if (blockEntity instanceof CommandBlockEntity) {
+			CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
+			BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
+			boolean bl = !StringUtil.isNullOrEmpty(baseCommandBlock.getCommand());
+			CommandBlockEntity.Mode mode = commandBlockEntity.getMode();
+			boolean bl2 = commandBlockEntity.wasConditionMet();
+			if (mode == CommandBlockEntity.Mode.AUTO) {
+				commandBlockEntity.markConditionMet();
+				if (bl2) {
+					this.execute(blockState, serverLevel, blockPos, baseCommandBlock, bl);
+				} else if (commandBlockEntity.isConditional()) {
+					baseCommandBlock.setSuccessCount(0);
 				}
 
-				level.updateNeighbourForOutputSignal(blockPos, this);
+				if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel));
+				}
+			} else if (mode == CommandBlockEntity.Mode.REDSTONE) {
+				if (bl2) {
+					this.execute(blockState, serverLevel, blockPos, baseCommandBlock, bl);
+				} else if (commandBlockEntity.isConditional()) {
+					baseCommandBlock.setSuccessCount(0);
+				}
 			}
+
+			serverLevel.updateNeighbourForOutputSignal(blockPos, this);
 		}
 	}
 

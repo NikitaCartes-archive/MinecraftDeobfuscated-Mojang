@@ -42,6 +42,7 @@ public class Explosion {
 	private final double x;
 	private final double y;
 	private final double z;
+	@Nullable
 	private final Entity source;
 	private final float radius;
 	private DamageSource damageSource;
@@ -247,7 +248,8 @@ public class Explosion {
 							.withRandom(this.level.random)
 							.withParameter(LootContextParams.BLOCK_POS, blockPos)
 							.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
-							.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity);
+							.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity)
+							.withOptionalParameter(LootContextParams.THIS_ENTITY, this.source);
 						if (this.blockInteraction == Explosion.BlockInteraction.DESTROY) {
 							builder.withParameter(LootContextParams.EXPLOSION_RADIUS, this.radius);
 						}

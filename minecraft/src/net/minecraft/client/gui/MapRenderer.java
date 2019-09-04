@@ -2,6 +2,7 @@ package net.minecraft.client.gui;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -103,67 +104,67 @@ public class MapRenderer implements AutoCloseable {
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			float f = 0.0F;
 			MapRenderer.this.textureManager.bind(this.location);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFuncSeparate(
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			GlStateManager.disableAlphaTest();
+			RenderSystem.disableAlphaTest();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
 			bufferBuilder.vertex(0.0, 128.0, -0.01F).uv(0.0, 1.0).endVertex();
 			bufferBuilder.vertex(128.0, 128.0, -0.01F).uv(1.0, 1.0).endVertex();
 			bufferBuilder.vertex(128.0, 0.0, -0.01F).uv(1.0, 0.0).endVertex();
 			bufferBuilder.vertex(0.0, 0.0, -0.01F).uv(0.0, 0.0).endVertex();
 			tesselator.end();
-			GlStateManager.enableAlphaTest();
-			GlStateManager.disableBlend();
+			RenderSystem.enableAlphaTest();
+			RenderSystem.disableBlend();
 			int k = 0;
 
 			for (MapDecoration mapDecoration : this.data.decorations.values()) {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					MapRenderer.this.textureManager.bind(MapRenderer.MAP_ICONS_LOCATION);
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F, -0.02F);
-					GlStateManager.rotatef((float)(mapDecoration.getRot() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
-					GlStateManager.scalef(4.0F, 4.0F, 3.0F);
-					GlStateManager.translatef(-0.125F, 0.125F, 0.0F);
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F, -0.02F);
+					RenderSystem.rotatef((float)(mapDecoration.getRot() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.scalef(4.0F, 4.0F, 3.0F);
+					RenderSystem.translatef(-0.125F, 0.125F, 0.0F);
 					byte b = mapDecoration.getImage();
 					float g = (float)(b % 16 + 0) / 16.0F;
 					float h = (float)(b / 16 + 0) / 16.0F;
 					float l = (float)(b % 16 + 1) / 16.0F;
 					float m = (float)(b / 16 + 1) / 16.0F;
 					bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-					GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 					float n = -0.001F;
 					bufferBuilder.vertex(-1.0, 1.0, (double)((float)k * -0.001F)).uv((double)g, (double)h).endVertex();
 					bufferBuilder.vertex(1.0, 1.0, (double)((float)k * -0.001F)).uv((double)l, (double)h).endVertex();
 					bufferBuilder.vertex(1.0, -1.0, (double)((float)k * -0.001F)).uv((double)l, (double)m).endVertex();
 					bufferBuilder.vertex(-1.0, -1.0, (double)((float)k * -0.001F)).uv((double)g, (double)m).endVertex();
 					tesselator.end();
-					GlStateManager.popMatrix();
+					RenderSystem.popMatrix();
 					if (mapDecoration.getName() != null) {
 						Font font = Minecraft.getInstance().font;
 						String string = mapDecoration.getName().getColoredString();
 						float o = (float)font.width(string);
 						float p = Mth.clamp(25.0F / o, 0.0F, 6.0F / 9.0F);
-						GlStateManager.pushMatrix();
-						GlStateManager.translatef(
+						RenderSystem.pushMatrix();
+						RenderSystem.translatef(
 							0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - o * p / 2.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F, -0.025F
 						);
-						GlStateManager.scalef(p, p, 1.0F);
+						RenderSystem.scalef(p, p, 1.0F);
 						GuiComponent.fill(-1, -1, (int)o, 9 - 1, Integer.MIN_VALUE);
-						GlStateManager.translatef(0.0F, 0.0F, -0.1F);
+						RenderSystem.translatef(0.0F, 0.0F, -0.1F);
 						font.draw(string, 0.0F, 0.0F, -1);
-						GlStateManager.popMatrix();
+						RenderSystem.popMatrix();
 					}
 
 					k++;
 				}
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, 0.0F, -0.04F);
-			GlStateManager.scalef(1.0F, 1.0F, 1.0F);
-			GlStateManager.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, 0.0F, -0.04F);
+			RenderSystem.scalef(1.0F, 1.0F, 1.0F);
+			RenderSystem.popMatrix();
 		}
 
 		public void close() {

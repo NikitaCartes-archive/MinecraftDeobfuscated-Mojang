@@ -1,7 +1,7 @@
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -47,27 +47,27 @@ public class MobAppearanceParticle extends Particle {
 			entityRenderDispatcher.setPosition(Particle.xOff, Particle.yOff, Particle.zOff);
 			float l = 1.0F / ElderGuardian.ELDER_SIZE_SCALE;
 			float m = ((float)this.age + f) / (float)this.lifetime;
-			GlStateManager.depthMask(true);
-			GlStateManager.enableBlend();
-			GlStateManager.enableDepthTest();
-			GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			RenderSystem.depthMask(true);
+			RenderSystem.enableBlend();
+			RenderSystem.enableDepthTest();
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			float n = 240.0F;
-			GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, 240.0F, 240.0F);
-			GlStateManager.pushMatrix();
+			RenderSystem.glMultiTexCoord2f(33985, 240.0F, 240.0F);
+			RenderSystem.pushMatrix();
 			float o = 0.05F + 0.5F * Mth.sin(m * (float) Math.PI);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, o);
-			GlStateManager.translatef(0.0F, 1.8F, 0.0F);
-			GlStateManager.rotatef(180.0F - camera.getYRot(), 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(60.0F - 150.0F * m - camera.getXRot(), 1.0F, 0.0F, 0.0F);
-			GlStateManager.translatef(0.0F, -0.4F, -1.5F);
-			GlStateManager.scalef(l, l, l);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
+			RenderSystem.translatef(0.0F, 1.8F, 0.0F);
+			RenderSystem.rotatef(180.0F - camera.getYRot(), 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef(60.0F - 150.0F * m - camera.getXRot(), 1.0F, 0.0F, 0.0F);
+			RenderSystem.translatef(0.0F, -0.4F, -1.5F);
+			RenderSystem.scalef(l, l, l);
 			this.displayEntity.yRot = 0.0F;
 			this.displayEntity.yHeadRot = 0.0F;
 			this.displayEntity.yRotO = 0.0F;
 			this.displayEntity.yHeadRotO = 0.0F;
 			entityRenderDispatcher.render(this.displayEntity, 0.0, 0.0, 0.0, 0.0F, f, false);
-			GlStateManager.popMatrix();
-			GlStateManager.enableDepthTest();
+			RenderSystem.popMatrix();
+			RenderSystem.enableDepthTest();
 		}
 	}
 

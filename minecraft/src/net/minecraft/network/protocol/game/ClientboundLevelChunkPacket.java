@@ -6,17 +6,17 @@ import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -26,6 +26,8 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	private int z;
 	private int availableSections;
 	private CompoundTag heightmaps;
+	@Nullable
+	private ChunkBiomeContainer biomes;
 	private byte[] buffer;
 	private List<CompoundTag> blockEntitiesTags;
 	private boolean fullChunk;
@@ -44,6 +46,10 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 			if (((Heightmap.Types)entry.getKey()).sendToClient()) {
 				this.heightmaps.put(((Heightmap.Types)entry.getKey()).getSerializationKey(), new LongArrayTag(((Heightmap)entry.getValue()).getRawData()));
 			}
+		}
+
+		if (this.fullChunk) {
+			this.biomes = levelChunk.getBiomes().copy();
 		}
 
 		this.buffer = new byte[this.calculateChunkSize(levelChunk, i)];
@@ -68,6 +74,10 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		this.fullChunk = friendlyByteBuf.readBoolean();
 		this.availableSections = friendlyByteBuf.readVarInt();
 		this.heightmaps = friendlyByteBuf.readNbt();
+		if (this.fullChunk) {
+			this.biomes = new ChunkBiomeContainer(friendlyByteBuf);
+		}
+
 		int i = friendlyByteBuf.readVarInt();
 		if (i > 2097152) {
 			throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
@@ -90,6 +100,10 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		friendlyByteBuf.writeBoolean(this.fullChunk);
 		friendlyByteBuf.writeVarInt(this.availableSections);
 		friendlyByteBuf.writeNbt(this.heightmaps);
+		if (this.biomes != null) {
+			this.biomes.write(friendlyByteBuf);
+		}
+
 		friendlyByteBuf.writeVarInt(this.buffer.length);
 		friendlyByteBuf.writeBytes(this.buffer);
 		friendlyByteBuf.writeVarInt(this.blockEntitiesTags.size());
@@ -127,14 +141,6 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 			}
 		}
 
-		if (this.isFullChunk()) {
-			Biome[] biomes = levelChunk.getBiomes();
-
-			for (int lx = 0; lx < biomes.length; lx++) {
-				friendlyByteBuf.writeInt(Registry.BIOME.getId(biomes[lx]));
-			}
-		}
-
 		return j;
 	}
 
@@ -148,10 +154,6 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 			if (levelChunkSection != LevelChunk.EMPTY_SECTION && (!this.isFullChunk() || !levelChunkSection.isEmpty()) && (i & 1 << k) != 0) {
 				j += levelChunkSection.getSerializedSize();
 			}
-		}
-
-		if (this.isFullChunk()) {
-			j += levelChunk.getBiomes().length * 4;
 		}
 
 		return j;
@@ -184,5 +186,11 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	@Environment(EnvType.CLIENT)
 	public List<CompoundTag> getBlockEntitiesTags() {
 		return this.blockEntitiesTags;
+	}
+
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	public ChunkBiomeContainer getBiomes() {
+		return this.biomes == null ? null : this.biomes.copy();
 	}
 }

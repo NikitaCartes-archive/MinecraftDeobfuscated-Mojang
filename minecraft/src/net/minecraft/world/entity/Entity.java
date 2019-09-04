@@ -471,7 +471,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				this.setDeltaMovement(Vec3.ZERO);
 			}
 
-			vec3 = this.applySneaking(vec3, moverType);
+			vec3 = this.maybeBackOffFromEdge(vec3, moverType);
 			Vec3 vec32 = this.collide(vec3);
 			if (vec32.lengthSqr() > 1.0E-7) {
 				this.setBoundingBox(this.getBoundingBox().move(vec32));
@@ -514,16 +514,16 @@ public abstract class Entity implements Nameable, CommandSource {
 				block2.updateEntityAfterFallOn(this.level, this);
 			}
 
-			if (this.makeStepSound() && (!this.onGround || !this.isSneaking() || !(this instanceof Player)) && !this.isPassenger()) {
+			if (this.onGround && !this.isSteppingCarefully()) {
+				block2.stepOn(this.level, blockPos, this);
+			}
+
+			if (this.isMovementNoisy() && !this.isPassenger()) {
 				double d = vec32.x;
 				double e = vec32.y;
 				double f = vec32.z;
 				if (block2 != Blocks.LADDER && block2 != Blocks.SCAFFOLDING) {
 					e = 0.0;
-				}
-
-				if (this.onGround) {
-					block2.stepOn(this.level, blockPos, this);
 				}
 
 				this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(getHorizontalDistanceSqr(vec32)) * 0.6);
@@ -581,53 +581,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 	}
 
-	protected Vec3 applySneaking(Vec3 vec3, MoverType moverType) {
-		if (this instanceof Player && (moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.onGround && this.isSneaking()) {
-			double d = vec3.x;
-			double e = vec3.z;
-			double f = 0.05;
-
-			while (d != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, (double)(-this.maxUpStep), 0.0))) {
-				if (d < 0.05 && d >= -0.05) {
-					d = 0.0;
-				} else if (d > 0.0) {
-					d -= 0.05;
-				} else {
-					d += 0.05;
-				}
-			}
-
-			while (e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(0.0, (double)(-this.maxUpStep), e))) {
-				if (e < 0.05 && e >= -0.05) {
-					e = 0.0;
-				} else if (e > 0.0) {
-					e -= 0.05;
-				} else {
-					e += 0.05;
-				}
-			}
-
-			while (d != 0.0 && e != 0.0 && this.level.noCollision(this, this.getBoundingBox().move(d, (double)(-this.maxUpStep), e))) {
-				if (d < 0.05 && d >= -0.05) {
-					d = 0.0;
-				} else if (d > 0.0) {
-					d -= 0.05;
-				} else {
-					d += 0.05;
-				}
-
-				if (e < 0.05 && e >= -0.05) {
-					e = 0.0;
-				} else if (e > 0.0) {
-					e -= 0.05;
-				} else {
-					e += 0.05;
-				}
-			}
-
-			vec3 = new Vec3(d, vec3.y, e);
-		}
-
+	protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
 		return vec3;
 	}
 
@@ -886,7 +840,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.entityData.set(DATA_NO_GRAVITY, bl);
 	}
 
-	protected boolean makeStepSound() {
+	protected boolean isMovementNoisy() {
 		return true;
 	}
 
@@ -1087,7 +1041,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.setDeltaMovement(this.getDeltaMovement().add(vec32));
 	}
 
-	protected static Vec3 getInputVector(Vec3 vec3, float f, float g) {
+	private static Vec3 getInputVector(Vec3 vec3, float f, float g) {
 		double d = vec3.lengthSqr();
 		if (d < 1.0E-7) {
 			return Vec3.ZERO;
@@ -1102,7 +1056,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	@Environment(EnvType.CLIENT)
 	public int getLightColor() {
 		BlockPos blockPos = new BlockPos(this.x, this.y + (double)this.getEyeHeight(), this.z);
-		return this.level.hasChunkAt(blockPos) ? this.level.getLightColor(blockPos, 0) : 0;
+		return this.level.hasChunkAt(blockPos) ? this.level.getLightColor(blockPos) : 0;
 	}
 
 	public float getBrightness() {
@@ -1283,7 +1237,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public HitResult pick(double d, float f, boolean bl) {
 		Vec3 vec3 = this.getEyePosition(f);
 		Vec3 vec32 = this.getViewVector(f);
@@ -1722,7 +1675,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		} else {
 			if (!this.level.isClientSide && !blockPos.equals(this.portalEntranceBlock)) {
 				this.portalEntranceBlock = new BlockPos(blockPos);
-				BlockPattern.BlockPatternMatch blockPatternMatch = ((NetherPortalBlock)Blocks.NETHER_PORTAL).getPortalShape(this.level, this.portalEntranceBlock);
+				BlockPattern.BlockPatternMatch blockPatternMatch = NetherPortalBlock.getPortalShape(this.level, this.portalEntranceBlock);
 				double d = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X
 					? (double)blockPatternMatch.getFrontTopLeft().getZ()
 					: (double)blockPatternMatch.getFrontTopLeft().getX();
@@ -1821,17 +1774,32 @@ public abstract class Entity implements Nameable, CommandSource {
 		return true;
 	}
 
-	public boolean isSneaking() {
+	public void setShiftKeyDown(boolean bl) {
+		this.setSharedFlag(1, bl);
+	}
+
+	public boolean isShiftKeyDown() {
 		return this.getSharedFlag(1);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public boolean isVisuallySneaking() {
-		return this.getPose() == Pose.SNEAKING;
+	public boolean isSteppingCarefully() {
+		return this.isShiftKeyDown();
 	}
 
-	public void setSneaking(boolean bl) {
-		this.setSharedFlag(1, bl);
+	public boolean isSuppressingBounce() {
+		return this.isShiftKeyDown();
+	}
+
+	public boolean isDiscrete() {
+		return this.isShiftKeyDown();
+	}
+
+	public boolean isDescending() {
+		return this.isShiftKeyDown();
+	}
+
+	public boolean isCrouching() {
+		return this.getPose() == Pose.CROUCHING;
 	}
 
 	public boolean isSprinting() {

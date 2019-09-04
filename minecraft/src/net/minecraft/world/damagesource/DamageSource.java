@@ -45,6 +45,10 @@ public class DamageSource {
 	private boolean isExplosion;
 	public final String msgId;
 
+	public static DamageSource sting(LivingEntity livingEntity) {
+		return new EntityDamageSource("sting", livingEntity);
+	}
+
 	public static DamageSource mobAttack(LivingEntity livingEntity) {
 		return new EntityDamageSource("mob", livingEntity);
 	}

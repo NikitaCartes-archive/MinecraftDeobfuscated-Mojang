@@ -115,83 +115,83 @@ public class FileDownload {
 		RealmsAnvilLevelStorageSource realmsAnvilLevelStorageSource
 	) {
 		if (this.currentThread == null) {
-			this.currentThread = new Thread() {
-				public void run() {
+			this.currentThread = new Thread(
+				() -> {
 					CloseableHttpClient closeableHttpClient = null;
 
 					try {
-						FileDownload.this.tempFile = File.createTempFile("backup", ".tar.gz");
-						FileDownload.this.request = new HttpGet(worldDownload.downloadLink);
-						closeableHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(FileDownload.this.requestConfig).build();
-						HttpResponse httpResponse = closeableHttpClient.execute(FileDownload.this.request);
+						this.tempFile = File.createTempFile("backup", ".tar.gz");
+						this.request = new HttpGet(worldDownload.downloadLink);
+						closeableHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
+						HttpResponse httpResponse = closeableHttpClient.execute(this.request);
 						downloadStatus.totalBytes = Long.parseLong(httpResponse.getFirstHeader("Content-Length").getValue());
 						if (httpResponse.getStatusLine().getStatusCode() == 200) {
-							OutputStream outputStream2 = new FileOutputStream(FileDownload.this.tempFile);
-							FileDownload.ProgressListener progressListener = FileDownload.this.new ProgressListener(
-								string.trim(), FileDownload.this.tempFile, realmsAnvilLevelStorageSource, downloadStatus, worldDownload
+							OutputStream outputStream2 = new FileOutputStream(this.tempFile);
+							FileDownload.ProgressListener progressListener = new FileDownload.ProgressListener(
+								string.trim(), this.tempFile, realmsAnvilLevelStorageSource, downloadStatus, worldDownload
 							);
-							FileDownload.DownloadCountingOutputStream downloadCountingOutputStream2 = FileDownload.this.new DownloadCountingOutputStream(outputStream2);
+							FileDownload.DownloadCountingOutputStream downloadCountingOutputStream2 = new FileDownload.DownloadCountingOutputStream(outputStream2);
 							downloadCountingOutputStream2.setListener(progressListener);
 							IOUtils.copy(httpResponse.getEntity().getContent(), downloadCountingOutputStream2);
 							return;
 						}
 
-						FileDownload.this.error = true;
-						FileDownload.this.request.abort();
-					} catch (Exception var89) {
-						FileDownload.LOGGER.error("Caught exception while downloading: " + var89.getMessage());
-						FileDownload.this.error = true;
+						this.error = true;
+						this.request.abort();
+					} catch (Exception var93) {
+						LOGGER.error("Caught exception while downloading: " + var93.getMessage());
+						this.error = true;
 						return;
 					} finally {
-						FileDownload.this.request.releaseConnection();
-						if (FileDownload.this.tempFile != null) {
-							FileDownload.this.tempFile.delete();
+						this.request.releaseConnection();
+						if (this.tempFile != null) {
+							this.tempFile.delete();
 						}
 
-						if (!FileDownload.this.error) {
+						if (!this.error) {
 							if (!worldDownload.resourcePackUrl.isEmpty() && !worldDownload.resourcePackHash.isEmpty()) {
 								try {
-									FileDownload.this.tempFile = File.createTempFile("resources", ".tar.gz");
-									FileDownload.this.request = new HttpGet(worldDownload.resourcePackUrl);
-									HttpResponse httpResponse3 = closeableHttpClient.execute(FileDownload.this.request);
+									this.tempFile = File.createTempFile("resources", ".tar.gz");
+									this.request = new HttpGet(worldDownload.resourcePackUrl);
+									HttpResponse httpResponse3 = closeableHttpClient.execute(this.request);
 									downloadStatus.totalBytes = Long.parseLong(httpResponse3.getFirstHeader("Content-Length").getValue());
 									if (httpResponse3.getStatusLine().getStatusCode() != 200) {
-										FileDownload.this.error = true;
-										FileDownload.this.request.abort();
+										this.error = true;
+										this.request.abort();
 										return;
 									}
 
-									OutputStream outputStream3 = new FileOutputStream(FileDownload.this.tempFile);
-									FileDownload.ResourcePackProgressListener resourcePackProgressListener3 = FileDownload.this.new ResourcePackProgressListener(
-										FileDownload.this.tempFile, downloadStatus, worldDownload
+									OutputStream outputStream3 = new FileOutputStream(this.tempFile);
+									FileDownload.ResourcePackProgressListener resourcePackProgressListener3 = new FileDownload.ResourcePackProgressListener(
+										this.tempFile, downloadStatus, worldDownload
 									);
-									FileDownload.DownloadCountingOutputStream downloadCountingOutputStream3 = FileDownload.this.new DownloadCountingOutputStream(outputStream3);
+									FileDownload.DownloadCountingOutputStream downloadCountingOutputStream3 = new FileDownload.DownloadCountingOutputStream(outputStream3);
 									downloadCountingOutputStream3.setListener(resourcePackProgressListener3);
 									IOUtils.copy(httpResponse3.getEntity().getContent(), downloadCountingOutputStream3);
-								} catch (Exception var87) {
-									FileDownload.LOGGER.error("Caught exception while downloading: " + var87.getMessage());
-									FileDownload.this.error = true;
+								} catch (Exception var91) {
+									LOGGER.error("Caught exception while downloading: " + var91.getMessage());
+									this.error = true;
 								} finally {
-									FileDownload.this.request.releaseConnection();
-									if (FileDownload.this.tempFile != null) {
-										FileDownload.this.tempFile.delete();
+									this.request.releaseConnection();
+									if (this.tempFile != null) {
+										this.tempFile.delete();
 									}
 								}
 							} else {
-								FileDownload.this.finished = true;
+								this.finished = true;
 							}
 						}
 
 						if (closeableHttpClient != null) {
 							try {
 								closeableHttpClient.close();
-							} catch (IOException var86) {
-								FileDownload.LOGGER.error("Failed to close Realms download client");
+							} catch (IOException var90) {
+								LOGGER.error("Failed to close Realms download client");
 							}
 						}
 					}
 				}
-			};
+			);
 			this.currentThread.setUncaughtExceptionHandler(new RealmsDefaultUncaughtExceptionHandler(LOGGER));
 			this.currentThread.start();
 		}

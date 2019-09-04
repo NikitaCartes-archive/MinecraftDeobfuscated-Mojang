@@ -116,4 +116,10 @@ public class LevelLightEngine implements LightEventListener {
 			this.skyEngine.retainData(chunkPos, bl);
 		}
 	}
+
+	public int getRawBrightness(BlockPos blockPos, int i) {
+		int j = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(blockPos) - i;
+		int k = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(blockPos);
+		return Math.max(k, j);
+	}
 }

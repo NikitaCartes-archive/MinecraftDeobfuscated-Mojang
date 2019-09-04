@@ -13,7 +13,7 @@ public class EntityFlagsPredicate {
 	@Nullable
 	private final Boolean isOnFire;
 	@Nullable
-	private final Boolean isSneaking;
+	private final Boolean isCrouching;
 	@Nullable
 	private final Boolean isSprinting;
 	@Nullable
@@ -25,7 +25,7 @@ public class EntityFlagsPredicate {
 		@Nullable Boolean boolean_, @Nullable Boolean boolean2, @Nullable Boolean boolean3, @Nullable Boolean boolean4, @Nullable Boolean boolean5
 	) {
 		this.isOnFire = boolean_;
-		this.isSneaking = boolean2;
+		this.isCrouching = boolean2;
 		this.isSprinting = boolean3;
 		this.isSwimming = boolean4;
 		this.isBaby = boolean5;
@@ -34,7 +34,7 @@ public class EntityFlagsPredicate {
 	public boolean matches(Entity entity) {
 		if (this.isOnFire != null && entity.isOnFire() != this.isOnFire) {
 			return false;
-		} else if (this.isSneaking != null && entity.isSneaking() != this.isSneaking) {
+		} else if (this.isCrouching != null && entity.isCrouching() != this.isCrouching) {
 			return false;
 		} else if (this.isSprinting != null && entity.isSprinting() != this.isSprinting) {
 			return false;
@@ -76,7 +76,7 @@ public class EntityFlagsPredicate {
 		} else {
 			JsonObject jsonObject = new JsonObject();
 			this.addOptionalBoolean(jsonObject, "is_on_fire", this.isOnFire);
-			this.addOptionalBoolean(jsonObject, "is_sneaking", this.isSneaking);
+			this.addOptionalBoolean(jsonObject, "is_sneaking", this.isCrouching);
 			this.addOptionalBoolean(jsonObject, "is_sprinting", this.isSprinting);
 			this.addOptionalBoolean(jsonObject, "is_swimming", this.isSwimming);
 			this.addOptionalBoolean(jsonObject, "is_baby", this.isBaby);
@@ -88,7 +88,7 @@ public class EntityFlagsPredicate {
 		@Nullable
 		private Boolean isOnFire;
 		@Nullable
-		private Boolean isSneaking;
+		private Boolean isCrouching;
 		@Nullable
 		private Boolean isSprinting;
 		@Nullable
@@ -106,7 +106,7 @@ public class EntityFlagsPredicate {
 		}
 
 		public EntityFlagsPredicate build() {
-			return new EntityFlagsPredicate(this.isOnFire, this.isSneaking, this.isSprinting, this.isSwimming, this.isBaby);
+			return new EntityFlagsPredicate(this.isOnFire, this.isCrouching, this.isSprinting, this.isSwimming, this.isBaby);
 		}
 	}
 }

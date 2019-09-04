@@ -39,7 +39,8 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.TURTLE,
 		EntityType.CAT,
 		EntityType.PANDA,
-		EntityType.FOX
+		EntityType.FOX,
+		EntityType.BEE
 	};
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};
 	private static final Item[] FISH_BUCKETS = new Item[]{Items.COD_BUCKET, Items.TROPICAL_FISH_BUCKET, Items.PUFFERFISH_BUCKET, Items.SALMON_BUCKET};
@@ -81,7 +82,8 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 		Items.BEETROOT_SOUP,
 		Items.DRIED_KELP,
 		Items.SUSPICIOUS_STEW,
-		Items.SWEET_BERRIES
+		Items.SWEET_BERRIES,
+		Items.HONEY_BOTTLE
 	};
 
 	public void accept(Consumer<Advancement> consumer) {

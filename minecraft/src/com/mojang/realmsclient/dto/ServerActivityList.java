@@ -1,10 +1,10 @@
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.realmsclient.util.JsonUtils;
-import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +12,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class ServerActivityList extends ValueObject {
 	public long periodInMillis;
-	public List<ServerActivity> serverActivities = new ArrayList();
+	public List<ServerActivity> serverActivities = Lists.<ServerActivity>newArrayList();
 
 	public static ServerActivityList parse(String string) {
 		ServerActivityList serverActivityList = new ServerActivityList();

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
@@ -25,10 +25,10 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 			&& abstractClientPlayer.getCloakTextureLocation() != null) {
 			ItemStack itemStack = abstractClientPlayer.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() != Items.ELYTRA) {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				this.bindTexture(abstractClientPlayer.getCloakTextureLocation());
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef(0.0F, 0.0F, 0.125F);
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef(0.0F, 0.0F, 0.125F);
 				double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak)
 					- Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.x);
 				double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak)
@@ -50,16 +50,16 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 
 				float t = Mth.lerp(h, abstractClientPlayer.oBob, abstractClientPlayer.bob);
 				q += Mth.sin(Mth.lerp(h, abstractClientPlayer.walkDistO, abstractClientPlayer.walkDist) * 6.0F) * 32.0F * t;
-				if (abstractClientPlayer.isVisuallySneaking()) {
+				if (abstractClientPlayer.isCrouching()) {
 					q += 25.0F;
 				}
 
-				GlStateManager.rotatef(6.0F + r / 2.0F + q, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(s / 2.0F, 0.0F, 0.0F, 1.0F);
-				GlStateManager.rotatef(-s / 2.0F, 0.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(6.0F + r / 2.0F + q, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(s / 2.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.rotatef(-s / 2.0F, 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
 				this.getParentModel().renderCloak(0.0625F);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}

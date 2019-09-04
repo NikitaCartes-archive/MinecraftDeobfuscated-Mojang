@@ -27,6 +27,7 @@ import net.minecraft.util.datafix.fixes.BlockNameFlatteningFix;
 import net.minecraft.util.datafix.fixes.BlockRenameFix;
 import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
+import net.minecraft.util.datafix.fixes.ChunkBiomeFix;
 import net.minecraft.util.datafix.fixes.ChunkLightRemoveFix;
 import net.minecraft.util.datafix.fixes.ChunkPalettedStorageFix;
 import net.minecraft.util.datafix.fixes.ChunkStatusFix;
@@ -62,6 +63,7 @@ import net.minecraft.util.datafix.fixes.EntityTippedArrowFix;
 import net.minecraft.util.datafix.fixes.EntityWolfColorFix;
 import net.minecraft.util.datafix.fixes.EntityZombieSplitFix;
 import net.minecraft.util.datafix.fixes.EntityZombieVillagerTypeFix;
+import net.minecraft.util.datafix.fixes.ForcePoiRebuild;
 import net.minecraft.util.datafix.fixes.HeightmapRenamingFix;
 import net.minecraft.util.datafix.fixes.IglooMetadataRemovalFix;
 import net.minecraft.util.datafix.fixes.ItemBannerColorFix;
@@ -141,6 +143,7 @@ import net.minecraft.util.datafix.schemas.V1920;
 import net.minecraft.util.datafix.schemas.V1928;
 import net.minecraft.util.datafix.schemas.V1929;
 import net.minecraft.util.datafix.schemas.V1931;
+import net.minecraft.util.datafix.schemas.V2100;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -511,5 +514,11 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new ZombieVillagerRebuildXpFix(schema94, false));
 		Schema schema95 = dataFixerBuilder.addSchema(1961, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ChunkLightRemoveFix(schema95, false));
+		Schema schema96 = dataFixerBuilder.addSchema(2100, V2100::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema96, "Added Bee and Bee Stinger", References.ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema96, "Add beehive", References.BLOCK_ENTITY));
+		Schema schema97 = dataFixerBuilder.addSchema(2202, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new ChunkBiomeFix(schema97, false));
+		dataFixerBuilder.addFixer(new ForcePoiRebuild(schema97, false));
 	}
 }

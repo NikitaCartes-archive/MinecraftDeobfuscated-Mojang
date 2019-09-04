@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,20 +38,20 @@ public class CollisionBoxRenderer implements DebugRenderer.SimpleDebugRenderer {
 		double e = camera.getPosition().x;
 		double f = camera.getPosition().y;
 		double g = camera.getPosition().z;
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.lineWidth(2.0F);
-		GlStateManager.disableTexture();
-		GlStateManager.depthMask(false);
+		RenderSystem.lineWidth(2.0F);
+		RenderSystem.disableTexture();
+		RenderSystem.depthMask(false);
 
 		for (VoxelShape voxelShape : this.shapes) {
 			LevelRenderer.renderVoxelShape(voxelShape, -e, -f, -g, 1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
-		GlStateManager.depthMask(true);
-		GlStateManager.enableTexture();
-		GlStateManager.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
 	}
 }

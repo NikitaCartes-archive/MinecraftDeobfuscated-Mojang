@@ -7,8 +7,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -159,11 +159,11 @@ public class PostChain implements AutoCloseable {
 							int k = GsonHelper.getAsInt(jsonObject2, "height");
 							boolean bl = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
 							if (bl) {
-								GlStateManager.texParameter(3553, 10241, 9729);
-								GlStateManager.texParameter(3553, 10240, 9729);
+								RenderSystem.texParameter(3553, 10241, 9729);
+								RenderSystem.texParameter(3553, 10240, 9729);
 							} else {
-								GlStateManager.texParameter(3553, 10241, 9728);
-								GlStateManager.texParameter(3553, 10240, 9728);
+								RenderSystem.texParameter(3553, 10241, 9728);
+								RenderSystem.texParameter(3553, 10240, 9728);
 							}
 
 							postPass.addAuxAsset(string4, textureObject.getId(), j, k);

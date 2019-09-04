@@ -2,13 +2,10 @@ package net.minecraft.world.level.levelgen.structure;
 
 import java.util.Locale;
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -43,9 +40,7 @@ public class StructureFeatureIO {
 	}
 
 	@Nullable
-	public static StructureStart loadStaticStart(
-		ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BiomeSource biomeSource, CompoundTag compoundTag
-	) {
+	public static StructureStart loadStaticStart(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, CompoundTag compoundTag) {
 		String string = compoundTag.getString("id");
 		if ("INVALID".equals(string)) {
 			return StructureStart.INVALID_START;
@@ -57,17 +52,15 @@ public class StructureFeatureIO {
 			} else {
 				int i = compoundTag.getInt("ChunkX");
 				int j = compoundTag.getInt("ChunkZ");
-				Biome biome = compoundTag.contains("biome")
-					? Registry.BIOME.get(new ResourceLocation(compoundTag.getString("biome")))
-					: biomeSource.getBiome(new BlockPos((i << 4) + 9, 0, (j << 4) + 9));
+				int k = compoundTag.getInt("references");
 				BoundingBox boundingBox = compoundTag.contains("BB") ? new BoundingBox(compoundTag.getIntArray("BB")) : BoundingBox.getUnknownBox();
 				ListTag listTag = compoundTag.getList("Children", 10);
 
 				try {
-					StructureStart structureStart = structureFeature.getStartFactory().create(structureFeature, i, j, biome, boundingBox, 0, chunkGenerator.getSeed());
+					StructureStart structureStart = structureFeature.getStartFactory().create(structureFeature, i, j, boundingBox, k, chunkGenerator.getSeed());
 
-					for (int k = 0; k < listTag.size(); k++) {
-						CompoundTag compoundTag2 = listTag.getCompound(k);
+					for (int l = 0; l < listTag.size(); l++) {
+						CompoundTag compoundTag2 = listTag.getCompound(l);
 						String string2 = compoundTag2.getString("id");
 						StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(new ResourceLocation(string2.toLowerCase(Locale.ROOT)));
 						if (structurePieceType == null) {
@@ -76,15 +69,15 @@ public class StructureFeatureIO {
 							try {
 								StructurePiece structurePiece = structurePieceType.load(structureManager, compoundTag2);
 								structureStart.pieces.add(structurePiece);
-							} catch (Exception var17) {
-								LOGGER.error("Exception loading structure piece with id {}", string2, var17);
+							} catch (Exception var16) {
+								LOGGER.error("Exception loading structure piece with id {}", string2, var16);
 							}
 						}
 					}
 
 					return structureStart;
-				} catch (Exception var18) {
-					LOGGER.error("Failed Start with id {}", string, var18);
+				} catch (Exception var17) {
+					LOGGER.error("Failed Start with id {}", string, var17);
 					return null;
 				}
 			}

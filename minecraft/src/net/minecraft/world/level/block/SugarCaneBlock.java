@@ -3,10 +3,10 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,23 +32,23 @@ public class SugarCaneBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(level, blockPos)) {
-			level.destroyBlock(blockPos, true);
-		} else if (level.isEmptyBlock(blockPos.above())) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!blockState.canSurvive(serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
+		} else if (serverLevel.isEmptyBlock(blockPos.above())) {
 			int i = 1;
 
-			while (level.getBlockState(blockPos.below(i)).getBlock() == this) {
+			while (serverLevel.getBlockState(blockPos.below(i)).getBlock() == this) {
 				i++;
 			}
 
 			if (i < 3) {
 				int j = (Integer)blockState.getValue(AGE);
 				if (j == 15) {
-					level.setBlockAndUpdate(blockPos.above(), this.defaultBlockState());
-					level.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(0)), 4);
+					serverLevel.setBlockAndUpdate(blockPos.above(), this.defaultBlockState());
+					serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(0)), 4);
 				} else {
-					level.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
+					serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
 				}
 			}
 		}

@@ -193,6 +193,9 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<BellBlockEntity> BELL = register("bell", BlockEntityType.Builder.of(BellBlockEntity::new, Blocks.BELL));
 	public static final BlockEntityType<JigsawBlockEntity> JIGSAW = register("jigsaw", BlockEntityType.Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW_BLOCK));
 	public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = register("campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE));
+	public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
+		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEE_HIVE)
+	);
 	private final Supplier<? extends T> factory;
 	private final Set<Block> validBlocks;
 	private final Type<?> dataType;
@@ -209,12 +212,11 @@ public class BlockEntityType<T extends BlockEntity> {
 			type = DataFixers.getDataFixer()
 				.getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion()))
 				.getChoiceType(References.BLOCK_ENTITY, string);
-		} catch (IllegalStateException var4) {
+		} catch (IllegalArgumentException var4) {
+			LOGGER.error("No data fixer registered for block entity {}", string);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
 				throw var4;
 			}
-
-			LOGGER.warn("No data fixer registered for block entity {}", string);
 		}
 
 		if (builder.validBlocks.isEmpty()) {

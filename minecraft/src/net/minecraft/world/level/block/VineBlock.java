@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.BlockLayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -158,85 +158,83 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!level.isClientSide) {
-			BlockState blockState2 = this.getUpdatedState(blockState, level, blockPos);
-			if (blockState2 != blockState) {
-				if (this.hasFaces(blockState2)) {
-					level.setBlock(blockPos, blockState2, 2);
-				} else {
-					dropResources(blockState, level, blockPos);
-					level.removeBlock(blockPos, false);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		BlockState blockState2 = this.getUpdatedState(blockState, serverLevel, blockPos);
+		if (blockState2 != blockState) {
+			if (this.hasFaces(blockState2)) {
+				serverLevel.setBlock(blockPos, blockState2, 2);
+			} else {
+				dropResources(blockState, serverLevel, blockPos);
+				serverLevel.removeBlock(blockPos, false);
+			}
+		} else if (serverLevel.random.nextInt(4) == 0) {
+			Direction direction = Direction.getRandomFace(random);
+			BlockPos blockPos2 = blockPos.above();
+			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
+				if (this.canSpread(serverLevel, blockPos)) {
+					BlockPos blockPos3 = blockPos.relative(direction);
+					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
+					if (blockState3.isAir()) {
+						Direction direction2 = direction.getClockWise();
+						Direction direction3 = direction.getCounterClockWise();
+						boolean bl = (Boolean)blockState.getValue(getPropertyForFace(direction2));
+						boolean bl2 = (Boolean)blockState.getValue(getPropertyForFace(direction3));
+						BlockPos blockPos4 = blockPos3.relative(direction2);
+						BlockPos blockPos5 = blockPos3.relative(direction3);
+						if (bl && isAcceptableNeighbour(serverLevel, blockPos4, direction2)) {
+							serverLevel.setBlock(blockPos3, this.defaultBlockState().setValue(getPropertyForFace(direction2), Boolean.valueOf(true)), 2);
+						} else if (bl2 && isAcceptableNeighbour(serverLevel, blockPos5, direction3)) {
+							serverLevel.setBlock(blockPos3, this.defaultBlockState().setValue(getPropertyForFace(direction3), Boolean.valueOf(true)), 2);
+						} else {
+							Direction direction4 = direction.getOpposite();
+							if (bl && serverLevel.isEmptyBlock(blockPos4) && isAcceptableNeighbour(serverLevel, blockPos.relative(direction2), direction4)) {
+								serverLevel.setBlock(blockPos4, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
+							} else if (bl2 && serverLevel.isEmptyBlock(blockPos5) && isAcceptableNeighbour(serverLevel, blockPos.relative(direction3), direction4)) {
+								serverLevel.setBlock(blockPos5, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
+							} else if ((double)serverLevel.random.nextFloat() < 0.05 && isAcceptableNeighbour(serverLevel, blockPos3.above(), Direction.UP)) {
+								serverLevel.setBlock(blockPos3, this.defaultBlockState().setValue(UP, Boolean.valueOf(true)), 2);
+							}
+						}
+					} else if (isAcceptableNeighbour(serverLevel, blockPos3, direction)) {
+						serverLevel.setBlock(blockPos, blockState.setValue(getPropertyForFace(direction), Boolean.valueOf(true)), 2);
+					}
 				}
-			} else if (level.random.nextInt(4) == 0) {
-				Direction direction = Direction.getRandomFace(random);
-				BlockPos blockPos2 = blockPos.above();
-				if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
-					if (this.canSpread(level, blockPos)) {
-						BlockPos blockPos3 = blockPos.relative(direction);
-						BlockState blockState3 = level.getBlockState(blockPos3);
-						if (blockState3.isAir()) {
-							Direction direction2 = direction.getClockWise();
-							Direction direction3 = direction.getCounterClockWise();
-							boolean bl = (Boolean)blockState.getValue(getPropertyForFace(direction2));
-							boolean bl2 = (Boolean)blockState.getValue(getPropertyForFace(direction3));
-							BlockPos blockPos4 = blockPos3.relative(direction2);
-							BlockPos blockPos5 = blockPos3.relative(direction3);
-							if (bl && isAcceptableNeighbour(level, blockPos4, direction2)) {
-								level.setBlock(blockPos3, this.defaultBlockState().setValue(getPropertyForFace(direction2), Boolean.valueOf(true)), 2);
-							} else if (bl2 && isAcceptableNeighbour(level, blockPos5, direction3)) {
-								level.setBlock(blockPos3, this.defaultBlockState().setValue(getPropertyForFace(direction3), Boolean.valueOf(true)), 2);
-							} else {
-								Direction direction4 = direction.getOpposite();
-								if (bl && level.isEmptyBlock(blockPos4) && isAcceptableNeighbour(level, blockPos.relative(direction2), direction4)) {
-									level.setBlock(blockPos4, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
-								} else if (bl2 && level.isEmptyBlock(blockPos5) && isAcceptableNeighbour(level, blockPos.relative(direction3), direction4)) {
-									level.setBlock(blockPos5, this.defaultBlockState().setValue(getPropertyForFace(direction4), Boolean.valueOf(true)), 2);
-								} else if ((double)level.random.nextFloat() < 0.05 && isAcceptableNeighbour(level, blockPos3.above(), Direction.UP)) {
-									level.setBlock(blockPos3, this.defaultBlockState().setValue(UP, Boolean.valueOf(true)), 2);
-								}
-							}
-						} else if (isAcceptableNeighbour(level, blockPos3, direction)) {
-							level.setBlock(blockPos, blockState.setValue(getPropertyForFace(direction), Boolean.valueOf(true)), 2);
-						}
+			} else {
+				if (direction == Direction.UP && blockPos.getY() < 255) {
+					if (this.canSupportAtFace(serverLevel, blockPos, direction)) {
+						serverLevel.setBlock(blockPos, blockState.setValue(UP, Boolean.valueOf(true)), 2);
+						return;
 					}
-				} else {
-					if (direction == Direction.UP && blockPos.getY() < 255) {
-						if (this.canSupportAtFace(level, blockPos, direction)) {
-							level.setBlock(blockPos, blockState.setValue(UP, Boolean.valueOf(true)), 2);
+
+					if (serverLevel.isEmptyBlock(blockPos2)) {
+						if (!this.canSpread(serverLevel, blockPos)) {
 							return;
 						}
 
-						if (level.isEmptyBlock(blockPos2)) {
-							if (!this.canSpread(level, blockPos)) {
-								return;
+						BlockState blockState4 = blockState;
+
+						for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+							if (random.nextBoolean() || !isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), Direction.UP)) {
+								blockState4 = blockState4.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
 							}
-
-							BlockState blockState4 = blockState;
-
-							for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-								if (random.nextBoolean() || !isAcceptableNeighbour(level, blockPos2.relative(direction2), Direction.UP)) {
-									blockState4 = blockState4.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
-								}
-							}
-
-							if (this.hasHorizontalConnection(blockState4)) {
-								level.setBlock(blockPos2, blockState4, 2);
-							}
-
-							return;
 						}
-					}
 
-					if (blockPos.getY() > 0) {
-						BlockPos blockPos3 = blockPos.below();
-						BlockState blockState3 = level.getBlockState(blockPos3);
-						if (blockState3.isAir() || blockState3.getBlock() == this) {
-							BlockState blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3;
-							BlockState blockState6 = this.copyRandomFaces(blockState, blockState5, random);
-							if (blockState5 != blockState6 && this.hasHorizontalConnection(blockState6)) {
-								level.setBlock(blockPos3, blockState6, 2);
-							}
+						if (this.hasHorizontalConnection(blockState4)) {
+							serverLevel.setBlock(blockPos2, blockState4, 2);
+						}
+
+						return;
+					}
+				}
+
+				if (blockPos.getY() > 0) {
+					BlockPos blockPos3 = blockPos.below();
+					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
+					if (blockState3.isAir() || blockState3.getBlock() == this) {
+						BlockState blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3;
+						BlockState blockState6 = this.copyRandomFaces(blockState, blockState5, random);
+						if (blockState5 != blockState6 && this.hasHorizontalConnection(blockState6)) {
+							serverLevel.setBlock(blockPos3, blockState6, 2);
 						}
 					}
 				}

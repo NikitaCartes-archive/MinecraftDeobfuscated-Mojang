@@ -10,6 +10,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -245,13 +246,13 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if ((Integer)blockState.getValue(LEVEL) == 7) {
-			level.setBlock(blockPos, blockState.cycle(LEVEL), 3);
-			level.playSound(null, blockPos, SoundEvents.COMPOSTER_READY, SoundSource.BLOCKS, 1.0F, 1.0F);
+			serverLevel.setBlock(blockPos, blockState.cycle(LEVEL), 3);
+			serverLevel.playSound(null, blockPos, SoundEvents.COMPOSTER_READY, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}
 
-		super.tick(blockState, level, blockPos, random);
+		super.tick(blockState, serverLevel, blockPos, random);
 	}
 
 	@Override

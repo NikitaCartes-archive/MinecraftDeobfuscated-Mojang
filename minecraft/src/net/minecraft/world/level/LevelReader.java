@@ -1,33 +1,48 @@
 package net.minecraft.world.level;
 
-import com.google.common.collect.Streams;
-import java.util.Collections;
-import java.util.Set;
-import java.util.Spliterators.AbstractSpliterator;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
-public interface LevelReader extends BlockAndBiomeGetter {
+public interface LevelReader extends BlockAndBiomeGetter, CollisionGetter, BiomeManager.NoiseBiomeSource {
+	@Nullable
+	ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl);
+
+	@Deprecated
+	boolean hasChunk(int i, int j);
+
+	int getHeight(Heightmap.Types types, int i, int j);
+
+	int getSkyDarken();
+
+	@Override
+	default Biome getNoiseBiome(int i, int j, int k) {
+		ChunkAccess chunkAccess = this.getChunk(i >> 2, k >> 2, ChunkStatus.BIOMES, false);
+		return chunkAccess != null && chunkAccess.getBiomes() != null ? chunkAccess.getBiomes().getNoiseBiome(i, j, k) : this.getUncachedNoiseBiome(i, j, k);
+	}
+
+	Biome getUncachedNoiseBiome(int i, int j, int k);
+
+	boolean isClientSide();
+
+	int getSeaLevel();
+
+	Dimension getDimension();
+
+	default BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
+		return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());
+	}
+
 	default boolean isEmptyBlock(BlockPos blockPos) {
 		return this.getBlockState(blockPos).isAir();
 	}
@@ -52,35 +67,13 @@ public interface LevelReader extends BlockAndBiomeGetter {
 		}
 	}
 
-	int getRawBrightness(BlockPos blockPos, int i);
-
-	@Nullable
-	ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl);
-
-	@Deprecated
-	boolean hasChunk(int i, int j);
-
-	BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos);
-
-	int getHeight(Heightmap.Types types, int i, int j);
-
 	default float getBrightness(BlockPos blockPos) {
 		return this.getDimension().getBrightnessRamp()[this.getMaxLocalRawBrightness(blockPos)];
 	}
 
-	int getSkyDarken();
-
-	WorldBorder getWorldBorder();
-
-	boolean isUnobstructed(@Nullable Entity entity, VoxelShape voxelShape);
-
 	default int getDirectSignal(BlockPos blockPos, Direction direction) {
 		return this.getBlockState(blockPos).getDirectSignal(this, blockPos, direction);
 	}
-
-	boolean isClientSide();
-
-	int getSeaLevel();
 
 	default ChunkAccess getChunk(BlockPos blockPos) {
 		return this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
@@ -94,96 +87,10 @@ public interface LevelReader extends BlockAndBiomeGetter {
 		return this.getChunk(i, j, chunkStatus, true);
 	}
 
-	default ChunkStatus statusForCollisions() {
-		return ChunkStatus.EMPTY;
-	}
-
-	default boolean isUnobstructed(BlockState blockState, BlockPos blockPos, CollisionContext collisionContext) {
-		VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos, collisionContext);
-		return voxelShape.isEmpty() || this.isUnobstructed(null, voxelShape.move((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ()));
-	}
-
-	default boolean isUnobstructed(Entity entity) {
-		return this.isUnobstructed(entity, Shapes.create(entity.getBoundingBox()));
-	}
-
-	default boolean noCollision(AABB aABB) {
-		return this.noCollision(null, aABB, Collections.emptySet());
-	}
-
-	default boolean noCollision(Entity entity) {
-		return this.noCollision(entity, entity.getBoundingBox(), Collections.emptySet());
-	}
-
-	default boolean noCollision(Entity entity, AABB aABB) {
-		return this.noCollision(entity, aABB, Collections.emptySet());
-	}
-
-	default boolean noCollision(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-		return this.getCollisions(entity, aABB, set).allMatch(VoxelShape::isEmpty);
-	}
-
-	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-		return Stream.empty();
-	}
-
-	default Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-		return Streams.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, set));
-	}
-
-	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
-		int i = Mth.floor(aABB.minX - 1.0E-7) - 1;
-		int j = Mth.floor(aABB.maxX + 1.0E-7) + 1;
-		int k = Mth.floor(aABB.minY - 1.0E-7) - 1;
-		int l = Mth.floor(aABB.maxY + 1.0E-7) + 1;
-		int m = Mth.floor(aABB.minZ - 1.0E-7) - 1;
-		int n = Mth.floor(aABB.maxZ + 1.0E-7) + 1;
-		final CollisionContext collisionContext = entity == null ? CollisionContext.empty() : CollisionContext.of(entity);
-		final Cursor3D cursor3D = new Cursor3D(i, k, m, j, l, n);
-		final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		final VoxelShape voxelShape = Shapes.create(aABB);
-		return StreamSupport.stream(new AbstractSpliterator<VoxelShape>(Long.MAX_VALUE, 1280) {
-			boolean checkedBorder = entity == null;
-
-			public boolean tryAdvance(Consumer<? super VoxelShape> consumer) {
-				if (!this.checkedBorder) {
-					this.checkedBorder = true;
-					VoxelShape voxelShape = LevelReader.this.getWorldBorder().getCollisionShape();
-					boolean bl = Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity.getBoundingBox().deflate(1.0E-7)), BooleanOp.AND);
-					boolean bl2 = Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity.getBoundingBox().inflate(1.0E-7)), BooleanOp.AND);
-					if (!bl && bl2) {
-						consumer.accept(voxelShape);
-						return true;
-					}
-				}
-
-				while (cursor3D.advance()) {
-					int i = cursor3D.nextX();
-					int j = cursor3D.nextY();
-					int k = cursor3D.nextZ();
-					int l = cursor3D.getNextType();
-					if (l != 3) {
-						int m = i >> 4;
-						int n = k >> 4;
-						ChunkAccess chunkAccess = LevelReader.this.getChunk(m, n, LevelReader.this.statusForCollisions(), false);
-						if (chunkAccess != null) {
-							mutableBlockPos.set(i, j, k);
-							BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-							if ((l != 1 || blockState.hasLargeCollisionShape()) && (l != 2 || blockState.getBlock() == Blocks.MOVING_PISTON)) {
-								VoxelShape voxelShape2 = blockState.getCollisionShape(LevelReader.this, mutableBlockPos, collisionContext);
-								VoxelShape voxelShape3 = voxelShape2.move((double)i, (double)j, (double)k);
-								if (Shapes.joinIsNotEmpty(voxelShape, voxelShape3, BooleanOp.AND)) {
-									consumer.accept(voxelShape3);
-									return true;
-								}
-							}
-						}
-					}
-				}
-
-				return false;
-			}
-		}, false);
+	@Nullable
+	@Override
+	default BlockGetter getChunkForCollisions(int i, int j) {
+		return this.getChunk(i, j, ChunkStatus.EMPTY, false);
 	}
 
 	default boolean isWaterAt(BlockPos blockPos) {
@@ -255,6 +162,4 @@ public interface LevelReader extends BlockAndBiomeGetter {
 			return false;
 		}
 	}
-
-	Dimension getDimension();
 }

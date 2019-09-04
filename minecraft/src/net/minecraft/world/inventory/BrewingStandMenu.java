@@ -61,16 +61,16 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
 			if ((i < 0 || i > 2) && i != 3 && i != 4) {
-				if (this.ingredientSlot.mayPlace(itemStack2)) {
+				if (BrewingStandMenu.FuelSlot.mayPlaceItem(itemStack)) {
+					if (this.moveItemStackTo(itemStack2, 4, 5, false) || this.ingredientSlot.mayPlace(itemStack2) && !this.moveItemStackTo(itemStack2, 3, 4, false)) {
+						return ItemStack.EMPTY;
+					}
+				} else if (this.ingredientSlot.mayPlace(itemStack2)) {
 					if (!this.moveItemStackTo(itemStack2, 3, 4, false)) {
 						return ItemStack.EMPTY;
 					}
 				} else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack) && itemStack.getCount() == 1) {
 					if (!this.moveItemStackTo(itemStack2, 0, 3, false)) {
-						return ItemStack.EMPTY;
-					}
-				} else if (BrewingStandMenu.FuelSlot.mayPlaceItem(itemStack)) {
-					if (!this.moveItemStackTo(itemStack2, 4, 5, false)) {
 						return ItemStack.EMPTY;
 					}
 				} else if (i >= 5 && i < 32) {

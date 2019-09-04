@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -22,20 +22,20 @@ public class SpiderEyesLayer<T extends Entity, M extends SpiderModel<T>> extends
 	@Override
 	public void render(T entity, float f, float g, float h, float i, float j, float k, float l) {
 		this.bindTexture(SPIDER_EYES_LOCATION);
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlphaTest();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+		RenderSystem.enableBlend();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		if (entity.isInvisible()) {
-			GlStateManager.depthMask(false);
+			RenderSystem.depthMask(false);
 		} else {
-			GlStateManager.depthMask(true);
+			RenderSystem.depthMask(true);
 		}
 
 		int m = 61680;
 		int n = m % 65536;
 		int o = m / 65536;
-		GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float)n, (float)o);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.glMultiTexCoord2f(33985, (float)n, (float)o);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
 		gameRenderer.resetFogColor(true);
 		this.getParentModel().render(entity, f, g, i, j, k, l);
@@ -43,11 +43,11 @@ public class SpiderEyesLayer<T extends Entity, M extends SpiderModel<T>> extends
 		m = entity.getLightColor();
 		n = m % 65536;
 		o = m / 65536;
-		GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, (float)n, (float)o);
+		RenderSystem.glMultiTexCoord2f(33985, (float)n, (float)o);
 		this.setLightColor(entity);
-		GlStateManager.depthMask(true);
-		GlStateManager.disableBlend();
-		GlStateManager.enableAlphaTest();
+		RenderSystem.depthMask(true);
+		RenderSystem.disableBlend();
+		RenderSystem.enableAlphaTest();
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,16 +25,16 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	@Override
 	public void render(long l) {
-		GlStateManager.pushMatrix();
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.pushMatrix();
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.disableTexture();
+		RenderSystem.disableTexture();
 		this.doRender();
-		GlStateManager.enableTexture();
-		GlStateManager.disableBlend();
-		GlStateManager.popMatrix();
+		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
+		RenderSystem.popMatrix();
 	}
 
 	private void doRender() {

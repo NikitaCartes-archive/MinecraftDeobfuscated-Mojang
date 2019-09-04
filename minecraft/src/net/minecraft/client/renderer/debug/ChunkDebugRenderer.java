@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -47,14 +48,14 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		if (this.data != null) {
-			GlStateManager.disableFog();
-			GlStateManager.enableBlend();
-			GlStateManager.blendFuncSeparate(
+			RenderSystem.disableFog();
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 			);
-			GlStateManager.lineWidth(2.0F);
-			GlStateManager.disableTexture();
-			GlStateManager.depthMask(false);
+			RenderSystem.lineWidth(2.0F);
+			RenderSystem.disableTexture();
+			RenderSystem.depthMask(false);
 			Map<ChunkPos, String> map = (Map<ChunkPos, String>)this.data.serverData.getNow(null);
 			double e = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
 
@@ -74,10 +75,10 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				}
 			}
 
-			GlStateManager.depthMask(true);
-			GlStateManager.enableTexture();
-			GlStateManager.disableBlend();
-			GlStateManager.enableFog();
+			RenderSystem.depthMask(true);
+			RenderSystem.enableTexture();
+			RenderSystem.disableBlend();
+			RenderSystem.enableFog();
 		}
 	}
 

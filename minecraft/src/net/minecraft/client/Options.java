@@ -117,7 +117,7 @@ public class Options {
 	public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
 	public final KeyMapping keyRight = new KeyMapping("key.right", 68, "key.categories.movement");
 	public final KeyMapping keyJump = new KeyMapping("key.jump", 32, "key.categories.movement");
-	public final KeyMapping keySneak = new KeyMapping("key.sneak", 340, "key.categories.movement");
+	public final KeyMapping keyShift = new KeyMapping("key.sneak", 340, "key.categories.movement");
 	public final KeyMapping keySprint = new KeyMapping("key.sprint", 341, "key.categories.movement");
 	public final KeyMapping keyInventory = new KeyMapping("key.inventory", 69, "key.categories.inventory");
 	public final KeyMapping keySwapHands = new KeyMapping("key.swapHands", 70, "key.categories.inventory");
@@ -156,7 +156,7 @@ public class Options {
 			this.keyDown,
 			this.keyRight,
 			this.keyJump,
-			this.keySneak,
+			this.keyShift,
 			this.keySprint,
 			this.keyDrop,
 			this.keyInventory,

@@ -1,6 +1,5 @@
 package net.minecraft.world.inventory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -13,44 +12,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 public class StonecutterMenu extends AbstractContainerMenu {
-	static final ImmutableList<Item> validItems = ImmutableList.of(
-		Items.STONE,
-		Items.SANDSTONE,
-		Items.RED_SANDSTONE,
-		Items.QUARTZ_BLOCK,
-		Items.COBBLESTONE,
-		Items.STONE_BRICKS,
-		Items.BRICKS,
-		Items.NETHER_BRICKS,
-		Items.RED_NETHER_BRICKS,
-		Items.PURPUR_BLOCK,
-		Items.PRISMARINE,
-		Items.PRISMARINE_BRICKS,
-		Items.DARK_PRISMARINE,
-		Items.ANDESITE,
-		Items.POLISHED_ANDESITE,
-		Items.GRANITE,
-		Items.POLISHED_GRANITE,
-		Items.DIORITE,
-		Items.POLISHED_DIORITE,
-		Items.MOSSY_STONE_BRICKS,
-		Items.MOSSY_COBBLESTONE,
-		Items.SMOOTH_SANDSTONE,
-		Items.SMOOTH_RED_SANDSTONE,
-		Items.SMOOTH_QUARTZ,
-		Items.END_STONE,
-		Items.END_STONE_BRICKS,
-		Items.SMOOTH_STONE,
-		Items.CUT_SANDSTONE,
-		Items.CUT_RED_SANDSTONE
-	);
 	private final ContainerLevelAccess access;
 	private final DataSlot selectedRecipeIndex = DataSlot.standalone();
 	private final Level level;
@@ -194,7 +161,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean canTakeItemForPickAll(ItemStack itemStack, Slot slot) {
-		return false;
+		return slot.container != this.resultContainer && super.canTakeItemForPickAll(itemStack, slot);
 	}
 
 	@Override
@@ -216,7 +183,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 				if (!this.moveItemStackTo(itemStack2, 2, 38, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (validItems.contains(item)) {
+			} else if (this.level.getRecipeManager().getRecipeFor(RecipeType.STONECUTTING, new SimpleContainer(itemStack2), this.level).isPresent()) {
 				if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
 					return ItemStack.EMPTY;
 				}

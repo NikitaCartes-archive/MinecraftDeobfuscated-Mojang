@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
@@ -32,15 +32,15 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
 	private int subtitleColor = 16711680;
 	private final int BUTTON_CANCEL_ID = 0;
 	private final int BUTTON_FRAME_START = 100;
-	private WorldTemplatePaginatedList templates = null;
-	private WorldTemplatePaginatedList adventuremaps = null;
-	private WorldTemplatePaginatedList experiences = null;
-	private WorldTemplatePaginatedList inspirations = null;
+	private WorldTemplatePaginatedList templates;
+	private WorldTemplatePaginatedList adventuremaps;
+	private WorldTemplatePaginatedList experiences;
+	private WorldTemplatePaginatedList inspirations;
 	public int slot = -1;
 	private RealmsResetWorldScreen.ResetType typeToReset = RealmsResetWorldScreen.ResetType.NONE;
-	private RealmsResetWorldScreen.ResetWorldInfo worldInfoToReset = null;
-	private WorldTemplate worldTemplateToReset = null;
-	private String resetTitle = null;
+	private RealmsResetWorldScreen.ResetWorldInfo worldInfoToReset;
+	private WorldTemplate worldTemplateToReset;
+	private String resetTitle;
 	private int confirmationId = -1;
 
 	public RealmsResetWorldScreen(RealmsScreen realmsScreen, RealmsServer realmsServer, RealmsScreen realmsScreen2) {
@@ -251,17 +251,17 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback<WorldTempla
 		}
 
 		if (bl) {
-			GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
+			RenderSystem.color4f(0.56F, 0.56F, 0.56F, 1.0F);
 		} else {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
 		RealmsScreen.blit(i + 2, j + 14, 0.0F, 0.0F, 56, 56, 56, 56);
 		bind("realms:textures/gui/realms/slot_frame.png");
 		if (bl) {
-			GlStateManager.color4f(0.56F, 0.56F, 0.56F, 1.0F);
+			RenderSystem.color4f(0.56F, 0.56F, 0.56F, 1.0F);
 		} else {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
 		RealmsScreen.blit(i, j + 12, 0.0F, 0.0F, 60, 60, 60, 60);

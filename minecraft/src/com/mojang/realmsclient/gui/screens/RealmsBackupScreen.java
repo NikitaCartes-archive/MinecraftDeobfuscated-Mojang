@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Backup;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -391,11 +391,11 @@ public class RealmsBackupScreen extends RealmsScreen {
 		private void drawRestore(int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 12 && l >= j && l <= j + 14 && l < RealmsBackupScreen.this.height() - 15 && l > 32;
 			RealmsScreen.bind("realms:textures/gui/realms/restore_icon.png");
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 			RealmsScreen.blit(i * 2, j * 2, 0.0F, bl ? 28.0F : 0.0F, 23, 28, 23, 56);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 			if (bl) {
 				RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.button.restore");
 			}
@@ -404,11 +404,11 @@ public class RealmsBackupScreen extends RealmsScreen {
 		private void drawInfo(int i, int j, int k, int l) {
 			boolean bl = k >= i && k <= i + 8 && l >= j && l <= j + 8 && l < RealmsBackupScreen.this.height() - 15 && l > 32;
 			RealmsScreen.bind("realms:textures/gui/realms/plus_icon.png");
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
 			RealmsScreen.blit(i * 2, j * 2, 0.0F, bl ? 15.0F : 0.0F, 15, 15, 15, 30);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 			if (bl) {
 				RealmsBackupScreen.this.toolTip = RealmsScreen.getLocalizedString("mco.backup.changes.tooltip");
 			}

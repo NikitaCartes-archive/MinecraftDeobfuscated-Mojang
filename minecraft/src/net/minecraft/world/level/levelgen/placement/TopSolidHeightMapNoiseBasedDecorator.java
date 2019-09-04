@@ -24,7 +24,7 @@ public class TopSolidHeightMapNoiseBasedDecorator extends FeatureDecorator<Decor
 		BlockPos blockPos
 	) {
 		double d = Biome.BIOME_INFO_NOISE
-			.getValue((double)blockPos.getX() / decoratorNoiseCountFactor.noiseFactor, (double)blockPos.getZ() / decoratorNoiseCountFactor.noiseFactor);
+			.getValue((double)blockPos.getX() / decoratorNoiseCountFactor.noiseFactor, (double)blockPos.getZ() / decoratorNoiseCountFactor.noiseFactor, false);
 		int i = (int)Math.ceil((d + decoratorNoiseCountFactor.noiseOffset) * (double)decoratorNoiseCountFactor.noiseToCountRatio);
 		return IntStream.range(0, i).mapToObj(ix -> {
 			int j = random.nextInt(16);

@@ -26,10 +26,6 @@ public class ExperienceBottleItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (!player.abilities.instabuild) {
-			itemStack.shrink(1);
-		}
-
 		level.playSound(null, player.x, player.y, player.z, SoundEvents.EXPERIENCE_BOTTLE_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
 		if (!level.isClientSide) {
 			ThrownExperienceBottle thrownExperienceBottle = new ThrownExperienceBottle(level, player);
@@ -39,6 +35,10 @@ public class ExperienceBottleItem extends Item {
 		}
 
 		player.awardStat(Stats.ITEM_USED.get(this));
+		if (!player.abilities.instabuild) {
+			itemStack.shrink(1);
+		}
+
 		return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
 	}
 }

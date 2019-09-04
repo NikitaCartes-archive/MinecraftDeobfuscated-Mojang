@@ -16,8 +16,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
@@ -84,7 +83,9 @@ public class ClientChunkCache extends ChunkSource {
 	}
 
 	@Nullable
-	public LevelChunk replaceWithPacketData(Level level, int i, int j, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k, boolean bl) {
+	public LevelChunk replaceWithPacketData(
+		Level level, int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k
+	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
 			return null;
@@ -92,16 +93,16 @@ public class ClientChunkCache extends ChunkSource {
 			int l = this.storage.getIndex(i, j);
 			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
 			if (!isValidChunk(levelChunk, i, j)) {
-				if (!bl) {
+				if (chunkBiomeContainer == null) {
 					LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", i, j);
 					return null;
 				}
 
-				levelChunk = new LevelChunk(level, new ChunkPos(i, j), new Biome[256]);
-				levelChunk.replaceWithPacketData(friendlyByteBuf, compoundTag, k, bl);
+				levelChunk = new LevelChunk(level, new ChunkPos(i, j), chunkBiomeContainer);
+				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
 				this.storage.replace(l, levelChunk);
 			} else {
-				levelChunk.replaceWithPacketData(friendlyByteBuf, compoundTag, k, bl);
+				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
 			}
 
 			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
@@ -155,11 +156,6 @@ public class ClientChunkCache extends ChunkSource {
 	@Override
 	public String gatherStats() {
 		return "Client Chunk Cache: " + this.storage.chunks.length() + ", " + this.getLoadedChunksCount();
-	}
-
-	@Override
-	public ChunkGenerator<?> getGenerator() {
-		return null;
 	}
 
 	public int getLoadedChunksCount() {

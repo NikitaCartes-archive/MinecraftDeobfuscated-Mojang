@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -68,19 +68,19 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 	@Override
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
 		super.render(livingEntity, f, g, h, i, j, k);
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		if (this.young) {
 			float l = 2.0F;
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.translatef(0.0F, 24.0F * k, 0.0F);
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
 			this.leftPants.render(k);
 			this.rightPants.render(k);
 			this.leftSleeve.render(k);
 			this.rightSleeve.render(k);
 			this.jacket.render(k);
 		} else {
-			if (livingEntity.isVisuallySneaking()) {
-				GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			if (livingEntity.isCrouching()) {
+				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
 			}
 
 			this.leftPants.render(k);
@@ -90,7 +90,7 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 			this.jacket.render(k);
 		}
 
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 
 	public void renderEars(float f) {
@@ -112,7 +112,7 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.leftSleeve.copyFrom(this.leftArm);
 		this.rightSleeve.copyFrom(this.rightArm);
 		this.jacket.copyFrom(this.body);
-		if (livingEntity.isVisuallySneaking()) {
+		if (livingEntity.isCrouching()) {
 			this.cloak.y = 2.0F;
 		} else {
 			this.cloak.y = 0.0F;

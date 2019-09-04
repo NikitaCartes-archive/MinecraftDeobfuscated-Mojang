@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -24,14 +24,14 @@ public class EndCrystalRenderer extends EntityRenderer<EndCrystal> {
 
 	public void render(EndCrystal endCrystal, double d, double e, double f, float g, float h) {
 		float i = (float)endCrystal.time + h;
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float)d, (float)e, (float)f);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((float)d, (float)e, (float)f);
 		this.bindTexture(END_CRYSTAL_LOCATION);
 		float j = Mth.sin(i * 0.2F) / 2.0F + 0.5F;
 		j = j * j + j;
 		if (this.solidRender) {
-			GlStateManager.enableColorMaterial();
-			GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(endCrystal));
+			RenderSystem.enableColorMaterial();
+			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(endCrystal));
 		}
 
 		if (endCrystal.showsBottom()) {
@@ -41,11 +41,11 @@ public class EndCrystalRenderer extends EntityRenderer<EndCrystal> {
 		}
 
 		if (this.solidRender) {
-			GlStateManager.tearDownSolidRenderingTextureCombine();
-			GlStateManager.disableColorMaterial();
+			RenderSystem.tearDownSolidRenderingTextureCombine();
+			RenderSystem.disableColorMaterial();
 		}
 
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		BlockPos blockPos = endCrystal.getBeamTarget();
 		if (blockPos != null) {
 			this.bindTexture(EnderDragonRenderer.CRYSTAL_BEAM_LOCATION);

@@ -4,6 +4,7 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Ravager;
@@ -70,14 +71,14 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		super.tick(blockState, level, blockPos, random);
-		if (level.getRawBrightness(blockPos, 0) >= 9) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		super.tick(blockState, serverLevel, blockPos, random);
+		if (serverLevel.getRawBrightness(blockPos, 0) >= 9) {
 			int i = this.getAge(blockState);
 			if (i < this.getMaxAge()) {
-				float f = getGrowthSpeed(this, level, blockPos);
+				float f = getGrowthSpeed(this, serverLevel, blockPos);
 				if (random.nextInt((int)(25.0F / f) + 1) == 0) {
-					level.setBlock(blockPos, this.getStateForAge(i + 1), 2);
+					serverLevel.setBlock(blockPos, this.getStateForAge(i + 1), 2);
 				}
 			}
 		}
@@ -149,7 +150,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (entity instanceof Ravager && level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-			level.destroyBlock(blockPos, true);
+			level.destroyBlock(blockPos, true, entity);
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);
@@ -177,8 +178,8 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-		this.growCrops(level, blockPos, blockState);
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+		this.growCrops(serverLevel, blockPos, blockState);
 	}
 
 	@Override

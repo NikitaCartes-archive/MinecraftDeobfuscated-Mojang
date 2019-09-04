@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -28,12 +29,12 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 		double d = camera.getPosition().x;
 		double e = camera.getPosition().y;
 		double f = camera.getPosition().z;
-		GlStateManager.pushMatrix();
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.pushMatrix();
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.disableTexture();
+		RenderSystem.disableTexture();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -73,7 +74,7 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		tesselator.end();
-		GlStateManager.enableTexture();
-		GlStateManager.popMatrix();
+		RenderSystem.enableTexture();
+		RenderSystem.popMatrix();
 	}
 }

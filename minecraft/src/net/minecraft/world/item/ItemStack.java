@@ -36,6 +36,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
@@ -762,6 +763,7 @@ public final class ItemStack {
 			multimap = this.getItem().getDefaultAttributeModifiers(equipmentSlot);
 		}
 
+		multimap.values().forEach(attributeModifierx -> attributeModifierx.setSerialize(false));
 		return multimap;
 	}
 
@@ -894,5 +896,13 @@ public final class ItemStack {
 
 	public boolean isEdible() {
 		return this.getItem().isEdible();
+	}
+
+	public SoundEvent getDrinkingSound() {
+		return this.getItem().getDrinkingSound();
+	}
+
+	public SoundEvent getEatingSound() {
+		return this.getItem().getEatingSound();
 	}
 }

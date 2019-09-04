@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -162,23 +163,23 @@ public class WinScreen extends Screen {
 		int m = this.height + 50;
 		this.time += f;
 		float g = -this.time * this.scrollSpeed;
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef(0.0F, g, 0.0F);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(0.0F, g, 0.0F);
 		this.minecraft.getTextureManager().bind(LOGO_LOCATION);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.enableAlphaTest();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableAlphaTest();
 		this.blit(l, m, 0, 0, 155, 44);
 		this.blit(l + 155, m, 0, 45, 155, 44);
 		this.minecraft.getTextureManager().bind(EDITION_LOCATION);
 		blit(l + 88, m + 37, 0.0F, 0.0F, 98, 14, 128, 16);
-		GlStateManager.disableAlphaTest();
+		RenderSystem.disableAlphaTest();
 		int n = m + 100;
 
 		for (int o = 0; o < this.lines.size(); o++) {
 			if (o == this.lines.size() - 1) {
 				float h = (float)n + g - (float)(this.height / 2 - 6);
 				if (h < 0.0F) {
-					GlStateManager.translatef(0.0F, -h, 0.0F);
+					RenderSystem.translatef(0.0F, -h, 0.0F);
 				}
 			}
 
@@ -195,10 +196,10 @@ public class WinScreen extends Screen {
 			n += 12;
 		}
 
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		this.minecraft.getTextureManager().bind(VIGNETTE_LOCATION);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
 		int o = this.width;
 		int p = this.height;
 		Tesselator tesselator = Tesselator.getInstance();
@@ -209,7 +210,7 @@ public class WinScreen extends Screen {
 		bufferBuilder.vertex((double)o, 0.0, (double)this.blitOffset).uv(1.0, 0.0).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
 		bufferBuilder.vertex(0.0, 0.0, (double)this.blitOffset).uv(0.0, 0.0).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
 		tesselator.end();
-		GlStateManager.disableBlend();
+		RenderSystem.disableBlend();
 		super.render(i, j, f);
 	}
 }

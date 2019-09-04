@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -35,9 +36,9 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 		}
 
 		if (this.isListening && !this.subtitles.isEmpty()) {
-			GlStateManager.pushMatrix();
-			GlStateManager.enableBlend();
-			GlStateManager.blendFuncSeparate(
+			RenderSystem.pushMatrix();
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 			);
 			Vec3 vec3 = new Vec3(this.minecraft.player.x, this.minecraft.player.y + (double)this.minecraft.player.getEyeHeight(), this.minecraft.player.z);
@@ -77,15 +78,15 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				int o = this.minecraft.font.width(string);
 				int p = Mth.floor(Mth.clampedLerp(255.0, 75.0, (double)((float)(Util.getMillis() - subtitle.getTime()) / 3000.0F)));
 				int q = p << 16 | p << 8 | p;
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef(
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef(
 					(float)this.minecraft.window.getGuiScaledWidth() - (float)l * 1.0F - 2.0F,
 					(float)(this.minecraft.window.getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0F,
 					0.0F
 				);
-				GlStateManager.scalef(1.0F, 1.0F, 1.0F);
+				RenderSystem.scalef(1.0F, 1.0F, 1.0F);
 				fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
-				GlStateManager.enableBlend();
+				RenderSystem.enableBlend();
 				if (!bl) {
 					if (d > 0.0) {
 						this.minecraft.font.draw(">", (float)(l - this.minecraft.font.width(">")), (float)(-n), q + -16777216);
@@ -95,12 +96,12 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				}
 
 				this.minecraft.font.draw(string, (float)(-o / 2), (float)(-n), q + -16777216);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 				i++;
 			}
 
-			GlStateManager.disableBlend();
-			GlStateManager.popMatrix();
+			RenderSystem.disableBlend();
+			RenderSystem.popMatrix();
 		}
 	}
 

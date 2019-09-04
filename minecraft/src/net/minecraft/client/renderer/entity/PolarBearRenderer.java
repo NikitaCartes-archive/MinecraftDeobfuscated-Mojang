@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PolarBearModel;
@@ -20,7 +20,7 @@ public class PolarBearRenderer extends MobRenderer<PolarBear, PolarBearModel<Pol
 	}
 
 	protected void scale(PolarBear polarBear, float f) {
-		GlStateManager.scalef(1.2F, 1.2F, 1.2F);
+		RenderSystem.scalef(1.2F, 1.2F, 1.2F);
 		super.scale(polarBear, f);
 	}
 }

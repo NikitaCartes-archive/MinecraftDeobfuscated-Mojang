@@ -26,7 +26,7 @@ public class NoiseHeightmap32Decorator extends FeatureDecorator<DecoratorNoiseDe
 		DecoratorNoiseDependant decoratorNoiseDependant,
 		BlockPos blockPos
 	) {
-		double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0);
+		double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0, false);
 		int i = d < decoratorNoiseDependant.noiseLevel ? decoratorNoiseDependant.belowNoise : decoratorNoiseDependant.aboveNoise;
 		return IntStream.range(0, i).mapToObj(ix -> {
 			int j = random.nextInt(16);

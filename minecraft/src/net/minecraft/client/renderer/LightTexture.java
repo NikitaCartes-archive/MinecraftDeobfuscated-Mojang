@@ -1,8 +1,7 @@
 package net.minecraft.client.renderer;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -43,27 +42,27 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void turnOffLightLayer() {
-		GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-		GlStateManager.disableTexture();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+		RenderSystem.activeTexture(33985);
+		RenderSystem.disableTexture();
+		RenderSystem.activeTexture(33984);
 	}
 
 	public void turnOnLightLayer() {
-		GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-		GlStateManager.matrixMode(5890);
-		GlStateManager.loadIdentity();
+		RenderSystem.activeTexture(33985);
+		RenderSystem.matrixMode(5890);
+		RenderSystem.loadIdentity();
 		float f = 0.00390625F;
-		GlStateManager.scalef(0.00390625F, 0.00390625F, 0.00390625F);
-		GlStateManager.translatef(8.0F, 8.0F, 8.0F);
-		GlStateManager.matrixMode(5888);
+		RenderSystem.scalef(0.00390625F, 0.00390625F, 0.00390625F);
+		RenderSystem.translatef(8.0F, 8.0F, 8.0F);
+		RenderSystem.matrixMode(5888);
 		this.minecraft.getTextureManager().bind(this.lightTextureLocation);
-		GlStateManager.texParameter(3553, 10241, 9729);
-		GlStateManager.texParameter(3553, 10240, 9729);
-		GlStateManager.texParameter(3553, 10242, 10496);
-		GlStateManager.texParameter(3553, 10243, 10496);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.enableTexture();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+		RenderSystem.texParameter(3553, 10241, 9729);
+		RenderSystem.texParameter(3553, 10240, 9729);
+		RenderSystem.texParameter(3553, 10242, 10496);
+		RenderSystem.texParameter(3553, 10243, 10496);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableTexture();
+		RenderSystem.activeTexture(33984);
 	}
 
 	public void updateLightTexture(float f) {

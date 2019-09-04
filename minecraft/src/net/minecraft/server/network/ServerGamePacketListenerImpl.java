@@ -282,7 +282,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 				serverboundPlayerInputPacket.getXxa(),
 				serverboundPlayerInputPacket.getZza(),
 				serverboundPlayerInputPacket.isJumping(),
-				serverboundPlayerInputPacket.isSneaking()
+				serverboundPlayerInputPacket.isShiftKeyDown()
 			);
 	}
 
@@ -1066,11 +1066,11 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlayerCommandPacket, this, this.player.getLevel());
 		this.player.resetLastActionTime();
 		switch (serverboundPlayerCommandPacket.getAction()) {
-			case START_SNEAKING:
-				this.player.setSneaking(true);
+			case PRESS_SHIFT_KEY:
+				this.player.setShiftKeyDown(true);
 				break;
-			case STOP_SNEAKING:
-				this.player.setSneaking(false);
+			case RELEASE_SHIFT_KEY:
+				this.player.setShiftKeyDown(false);
 				break;
 			case START_SPRINTING:
 				this.player.setSprinting(true);
@@ -1080,7 +1080,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 				break;
 			case STOP_SLEEPING:
 				if (this.player.isSleeping()) {
-					this.player.stopSleepInBed(false, true, true);
+					this.player.stopSleepInBed(false, true);
 					this.awaitingPositionFromClient = new Vec3(this.player.x, this.player.y, this.player.z);
 				}
 				break;

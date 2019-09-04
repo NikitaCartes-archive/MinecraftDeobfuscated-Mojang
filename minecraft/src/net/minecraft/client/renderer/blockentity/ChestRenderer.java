@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Calendar;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,44 +40,44 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends Block
 
 	@Override
 	public void render(T blockEntity, double d, double e, double f, float g, int i) {
-		GlStateManager.enableDepthTest();
-		GlStateManager.depthFunc(515);
-		GlStateManager.depthMask(true);
+		RenderSystem.enableDepthTest();
+		RenderSystem.depthFunc(515);
+		RenderSystem.depthMask(true);
 		BlockState blockState = blockEntity.hasLevel() ? blockEntity.getBlockState() : Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
 		ChestType chestType = blockState.hasProperty((Property<T>)ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 		if (chestType != ChestType.LEFT) {
 			boolean bl = chestType != ChestType.SINGLE;
 			ChestModel chestModel = this.getChestModelAndBindTexture(blockEntity, i, bl);
 			if (i >= 0) {
-				GlStateManager.matrixMode(5890);
-				GlStateManager.pushMatrix();
-				GlStateManager.scalef(bl ? 8.0F : 4.0F, 4.0F, 1.0F);
-				GlStateManager.translatef(0.0625F, 0.0625F, 0.0625F);
-				GlStateManager.matrixMode(5888);
+				RenderSystem.matrixMode(5890);
+				RenderSystem.pushMatrix();
+				RenderSystem.scalef(bl ? 8.0F : 4.0F, 4.0F, 1.0F);
+				RenderSystem.translatef(0.0625F, 0.0625F, 0.0625F);
+				RenderSystem.matrixMode(5888);
 			} else {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.translatef((float)d, (float)e + 1.0F, (float)f + 1.0F);
-			GlStateManager.scalef(1.0F, -1.0F, -1.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.enableRescaleNormal();
+			RenderSystem.translatef((float)d, (float)e + 1.0F, (float)f + 1.0F);
+			RenderSystem.scalef(1.0F, -1.0F, -1.0F);
 			float h = ((Direction)blockState.getValue(ChestBlock.FACING)).toYRot();
 			if ((double)Math.abs(h) > 1.0E-5) {
-				GlStateManager.translatef(0.5F, 0.5F, 0.5F);
-				GlStateManager.rotatef(h, 0.0F, 1.0F, 0.0F);
-				GlStateManager.translatef(-0.5F, -0.5F, -0.5F);
+				RenderSystem.translatef(0.5F, 0.5F, 0.5F);
+				RenderSystem.rotatef(h, 0.0F, 1.0F, 0.0F);
+				RenderSystem.translatef(-0.5F, -0.5F, -0.5F);
 			}
 
 			this.rotateLid(blockEntity, g, chestModel);
 			chestModel.render();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.popMatrix();
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.disableRescaleNormal();
+			RenderSystem.popMatrix();
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			if (i >= 0) {
-				GlStateManager.matrixMode(5890);
-				GlStateManager.popMatrix();
-				GlStateManager.matrixMode(5888);
+				RenderSystem.matrixMode(5890);
+				RenderSystem.popMatrix();
+				RenderSystem.matrixMode(5888);
 			}
 		}
 	}

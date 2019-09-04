@@ -112,13 +112,15 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 				}
 
 				slot.onQuickCraft(itemStack2, itemStack);
-			} else if (i >= 10 && i < 37) {
-				if (!this.moveItemStackTo(itemStack2, 37, 46, false)) {
-					return ItemStack.EMPTY;
-				}
-			} else if (i >= 37 && i < 46) {
-				if (!this.moveItemStackTo(itemStack2, 10, 37, false)) {
-					return ItemStack.EMPTY;
+			} else if (i >= 10 && i < 46) {
+				if (!this.moveItemStackTo(itemStack2, 1, 10, false)) {
+					if (i < 37) {
+						if (!this.moveItemStackTo(itemStack2, 37, 46, false)) {
+							return ItemStack.EMPTY;
+						}
+					} else if (!this.moveItemStackTo(itemStack2, 10, 37, false)) {
+						return ItemStack.EMPTY;
+					}
 				}
 			} else if (!this.moveItemStackTo(itemStack2, 10, 46, false)) {
 				return ItemStack.EMPTY;

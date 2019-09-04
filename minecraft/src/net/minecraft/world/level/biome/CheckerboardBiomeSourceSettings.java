@@ -1,8 +1,13 @@
 package net.minecraft.world.level.biome;
 
+import net.minecraft.world.level.storage.LevelData;
+
 public class CheckerboardBiomeSourceSettings implements BiomeSourceSettings {
 	private Biome[] allowedBiomes = new Biome[]{Biomes.PLAINS};
 	private int size = 1;
+
+	public CheckerboardBiomeSourceSettings(LevelData levelData) {
+	}
 
 	public CheckerboardBiomeSourceSettings setAllowedBiomes(Biome[] biomes) {
 		this.allowedBiomes = biomes;

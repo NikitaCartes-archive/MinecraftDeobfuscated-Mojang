@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -63,7 +63,7 @@ public class RecipeButton extends AbstractWidget {
 		Lighting.turnOnGui();
 		Minecraft minecraft = Minecraft.getInstance();
 		minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-		GlStateManager.disableLighting();
+		RenderSystem.disableLighting();
 		int k = 29;
 		if (!this.collection.hasCraftable()) {
 			k += 25;
@@ -77,10 +77,10 @@ public class RecipeButton extends AbstractWidget {
 		boolean bl = this.animationTime > 0.0F;
 		if (bl) {
 			float g = 1.0F + 0.1F * (float)Math.sin((double)(this.animationTime / 15.0F * (float) Math.PI));
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)(this.x + 8), (float)(this.y + 12), 0.0F);
-			GlStateManager.scalef(g, g, 1.0F);
-			GlStateManager.translatef((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)(this.x + 8), (float)(this.y + 12), 0.0F);
+			RenderSystem.scalef(g, g, 1.0F);
+			RenderSystem.translatef((float)(-(this.x + 8)), (float)(-(this.y + 12)), 0.0F);
 			this.animationTime -= f;
 		}
 
@@ -96,10 +96,10 @@ public class RecipeButton extends AbstractWidget {
 
 		minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m, this.y + m);
 		if (bl) {
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 
-		GlStateManager.enableLighting();
+		RenderSystem.enableLighting();
 		Lighting.turnOff();
 	}
 

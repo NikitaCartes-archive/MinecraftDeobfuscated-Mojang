@@ -1,8 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -91,7 +90,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 	@Override
 	protected void renderBg(float f, int i, int j) {
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
 		int k = this.leftPos;
 		int l = this.topPos;
@@ -100,26 +99,26 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
-		GlStateManager.enableColorMaterial();
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float)i, (float)j, 50.0F);
-		GlStateManager.scalef((float)(-k), (float)k, (float)k);
-		GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.enableColorMaterial();
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((float)i, (float)j, 50.0F);
+		RenderSystem.scalef((float)(-k), (float)k, (float)k);
+		RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 		float h = livingEntity.yBodyRot;
 		float l = livingEntity.yRot;
 		float m = livingEntity.xRot;
 		float n = livingEntity.yHeadRotO;
 		float o = livingEntity.yHeadRot;
-		GlStateManager.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
 		Lighting.turnOn();
-		GlStateManager.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(-((float)Math.atan((double)(g / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
+		RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(-((float)Math.atan((double)(g / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 		livingEntity.yBodyRot = (float)Math.atan((double)(f / 40.0F)) * 20.0F;
 		livingEntity.yRot = (float)Math.atan((double)(f / 40.0F)) * 40.0F;
 		livingEntity.xRot = -((float)Math.atan((double)(g / 40.0F))) * 20.0F;
 		livingEntity.yHeadRot = livingEntity.yRot;
 		livingEntity.yHeadRotO = livingEntity.yRot;
-		GlStateManager.translatef(0.0F, 0.0F, 0.0F);
+		RenderSystem.translatef(0.0F, 0.0F, 0.0F);
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		entityRenderDispatcher.setPlayerRotY(180.0F);
 		entityRenderDispatcher.setRenderShadow(false);
@@ -130,12 +129,12 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.xRot = m;
 		livingEntity.yHeadRotO = n;
 		livingEntity.yHeadRot = o;
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		Lighting.turnOff();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE1);
-		GlStateManager.disableTexture();
-		GlStateManager.activeTexture(GLX.GL_TEXTURE0);
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.activeTexture(33985);
+		RenderSystem.disableTexture();
+		RenderSystem.activeTexture(33984);
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -43,17 +44,17 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 	}
 
 	@Override
-	public boolean isFeatureChunk(ChunkGenerator<?> chunkGenerator, Random random, int i, int j) {
+	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
 		ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
 		if (i == chunkPos.x && j == chunkPos.z) {
-			for (Biome biome : chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, j * 16 + 9, 16)) {
-				if (!chunkGenerator.isBiomeValidStartForStructure(biome, Feature.OCEAN_MONUMENT)) {
+			for (Biome biome2 : chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 16)) {
+				if (!chunkGenerator.isBiomeValidStartForStructure(biome2, Feature.OCEAN_MONUMENT)) {
 					return false;
 				}
 			}
 
-			for (Biome biome2 : chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, j * 16 + 9, 29)) {
-				if (biome2.getBiomeCategory() != Biome.BiomeCategory.OCEAN && biome2.getBiomeCategory() != Biome.BiomeCategory.RIVER) {
+			for (Biome biome3 : chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 29)) {
+				if (biome3.getBiomeCategory() != Biome.BiomeCategory.OCEAN && biome3.getBiomeCategory() != Biome.BiomeCategory.RIVER) {
 					return false;
 				}
 			}
@@ -87,8 +88,8 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 	public static class OceanMonumentStart extends StructureStart {
 		private boolean isCreated;
 
-		public OceanMonumentStart(StructureFeature<?> structureFeature, int i, int j, Biome biome, BoundingBox boundingBox, int k, long l) {
-			super(structureFeature, i, j, biome, boundingBox, k, l);
+		public OceanMonumentStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
 		@Override
@@ -106,13 +107,13 @@ public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfigurat
 		}
 
 		@Override
-		public void postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			if (!this.isCreated) {
 				this.pieces.clear();
 				this.generatePieces(this.getChunkX(), this.getChunkZ());
 			}
 
-			super.postProcess(levelAccessor, random, boundingBox, chunkPos);
+			super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
 		}
 	}
 }

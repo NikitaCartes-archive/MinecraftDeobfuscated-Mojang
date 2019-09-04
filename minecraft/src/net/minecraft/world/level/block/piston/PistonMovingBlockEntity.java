@@ -30,11 +30,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	private Direction direction;
 	private boolean extending;
 	private boolean isSourcePiston;
-	private static final ThreadLocal<Direction> NOCLIP = new ThreadLocal<Direction>() {
-		protected Direction initialValue() {
-			return null;
-		}
-	};
+	private static final ThreadLocal<Direction> NOCLIP = ThreadLocal.withInitial(() -> null);
 	private float progress;
 	private float progressO;
 	private long lastTicked;

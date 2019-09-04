@@ -10,12 +10,19 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -115,13 +122,17 @@ public abstract class AbstractTreeFeature<T extends FeatureConfiguration> extend
 		}
 	}
 
-	@Override
 	public final boolean place(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration
+		LevelAccessor levelAccessor,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		BlockPos blockPos,
+		T featureConfiguration,
+		boolean bl
 	) {
 		Set<BlockPos> set = Sets.<BlockPos>newHashSet();
 		BoundingBox boundingBox = BoundingBox.getUnknownBox();
-		boolean bl = this.doPlace(set, levelAccessor, random, blockPos, boundingBox);
+		boolean bl2 = this.doPlace(set, levelAccessor, random, blockPos, boundingBox);
 		if (boundingBox.x0 > boundingBox.x1) {
 			return false;
 		} else {
@@ -135,7 +146,7 @@ public abstract class AbstractTreeFeature<T extends FeatureConfiguration> extend
 			DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 
 			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				if (bl && !set.isEmpty()) {
+				if (bl2 && !set.isEmpty()) {
 					for (BlockPos blockPos2 : Lists.newArrayList(set)) {
 						if (boundingBox.isInside(blockPos2)) {
 							discreteVoxelShape.setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
@@ -200,8 +211,53 @@ public abstract class AbstractTreeFeature<T extends FeatureConfiguration> extend
 				}
 			}
 
+			if (bl) {
+				Biome biome = levelAccessor.getBiome(blockPos);
+				if (biome == Biomes.FLOWER_FOREST || biome == Biomes.SUNFLOWER_PLAINS || biome == Biomes.PLAINS) {
+					this.spawnBeehive(levelAccessor, random, blockPos, boundingBox, list, biome);
+				}
+			}
+
 			StructureTemplate.updateShapeAtEdge(levelAccessor, 3, discreteVoxelShape, boundingBox.x0, boundingBox.y0, boundingBox.z0);
-			return bl;
+			return bl2;
+		}
+	}
+
+	@Override
+	public final boolean place(
+		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration
+	) {
+		return this.place(levelAccessor, chunkGenerator, random, blockPos, featureConfiguration, true);
+	}
+
+	private void spawnBeehive(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BoundingBox boundingBox, List<Set<BlockPos>> list, Biome biome) {
+		float f = biome == Biomes.FLOWER_FOREST ? 0.01F : 0.05F;
+		if (random.nextFloat() < f) {
+			Direction direction = BeehiveBlock.SPAWN_DIRECTIONS[random.nextInt(BeehiveBlock.SPAWN_DIRECTIONS.length)];
+			int i = boundingBox.y1;
+			if (!list.isEmpty()) {
+				for (BlockPos blockPos2 : (Set)list.get(0)) {
+					if (blockPos2.getY() < i) {
+						i = blockPos2.getY();
+					}
+				}
+			}
+
+			BlockState blockState = Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
+			BlockPos blockPos2x = blockPos.offset(direction.getStepX(), i - 1 - blockPos.getY(), direction.getStepZ());
+			if (levelAccessor.isEmptyBlock(blockPos2x) && levelAccessor.isEmptyBlock(blockPos2x.relative(Direction.SOUTH))) {
+				this.setBlock(levelAccessor, blockPos2x, blockState);
+				BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2x);
+				if (blockEntity instanceof BeehiveBlockEntity) {
+					BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+					int j = 2 + random.nextInt(2);
+
+					for (int k = 0; k < j; k++) {
+						Bee bee = new Bee(EntityType.BEE, levelAccessor.getLevel());
+						beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
+					}
+				}
+			}
 		}
 	}
 

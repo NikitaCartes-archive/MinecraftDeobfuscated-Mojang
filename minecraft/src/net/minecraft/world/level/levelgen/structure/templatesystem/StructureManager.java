@@ -146,6 +146,10 @@ public class StructureManager implements ResourceManagerReloadListener {
 
 	private StructureTemplate readStructure(InputStream inputStream) throws IOException {
 		CompoundTag compoundTag = NbtIo.readCompressed(inputStream);
+		return this.readStructure(compoundTag);
+	}
+
+	public StructureTemplate readStructure(CompoundTag compoundTag) {
 		if (!compoundTag.contains("DataVersion", 99)) {
 			compoundTag.putInt("DataVersion", 500);
 		}
@@ -205,7 +209,7 @@ public class StructureManager implements ResourceManagerReloadListener {
 		}
 	}
 
-	private Path createPathToStructure(ResourceLocation resourceLocation, String string) {
+	public Path createPathToStructure(ResourceLocation resourceLocation, String string) {
 		try {
 			Path path = this.generatedDir.resolve(resourceLocation.getNamespace());
 			Path path2 = path.resolve("structures");

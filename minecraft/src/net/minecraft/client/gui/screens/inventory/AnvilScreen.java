@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -70,8 +70,8 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 
 	@Override
 	protected void renderLabels(int i, int j) {
-		GlStateManager.disableLighting();
-		GlStateManager.disableBlend();
+		RenderSystem.disableLighting();
+		RenderSystem.disableBlend();
 		this.font.draw(this.title.getColoredString(), 60.0F, 6.0F, 4210752);
 		int k = this.menu.getCost();
 		if (k > 0) {
@@ -95,7 +95,7 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 			}
 		}
 
-		GlStateManager.enableLighting();
+		RenderSystem.enableLighting();
 	}
 
 	private void onNameChanged(String string) {
@@ -116,14 +116,14 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 		this.renderBackground();
 		super.render(i, j, f);
 		this.renderTooltip(i, j);
-		GlStateManager.disableLighting();
-		GlStateManager.disableBlend();
+		RenderSystem.disableLighting();
+		RenderSystem.disableBlend();
 		this.name.render(i, j, f);
 	}
 
 	@Override
 	protected void renderBg(float f, int i, int j) {
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(ANVIL_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;

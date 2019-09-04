@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -28,17 +28,17 @@ public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntit
 			}
 		}
 
-		GlStateManager.enableDepthTest();
-		GlStateManager.depthFunc(515);
-		GlStateManager.depthMask(true);
-		GlStateManager.disableCull();
+		RenderSystem.enableDepthTest();
+		RenderSystem.depthFunc(515);
+		RenderSystem.depthMask(true);
+		RenderSystem.disableCull();
 		if (i >= 0) {
 			this.bindTexture(BREAKING_LOCATIONS[i]);
-			GlStateManager.matrixMode(5890);
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(4.0F, 4.0F, 1.0F);
-			GlStateManager.translatef(0.0625F, 0.0625F, 0.0625F);
-			GlStateManager.matrixMode(5888);
+			RenderSystem.matrixMode(5890);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(4.0F, 4.0F, 1.0F);
+			RenderSystem.translatef(0.0625F, 0.0625F, 0.0625F);
+			RenderSystem.matrixMode(5888);
 		} else {
 			DyeColor dyeColor = shulkerBoxBlockEntity.getColor();
 			if (dyeColor == null) {
@@ -48,57 +48,57 @@ public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntit
 			}
 		}
 
-		GlStateManager.pushMatrix();
-		GlStateManager.enableRescaleNormal();
+		RenderSystem.pushMatrix();
+		RenderSystem.enableRescaleNormal();
 		if (i < 0) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		}
 
-		GlStateManager.translatef((float)d + 0.5F, (float)e + 1.5F, (float)f + 0.5F);
-		GlStateManager.scalef(1.0F, -1.0F, -1.0F);
-		GlStateManager.translatef(0.0F, 1.0F, 0.0F);
+		RenderSystem.translatef((float)d + 0.5F, (float)e + 1.5F, (float)f + 0.5F);
+		RenderSystem.scalef(1.0F, -1.0F, -1.0F);
+		RenderSystem.translatef(0.0F, 1.0F, 0.0F);
 		float h = 0.9995F;
-		GlStateManager.scalef(0.9995F, 0.9995F, 0.9995F);
-		GlStateManager.translatef(0.0F, -1.0F, 0.0F);
+		RenderSystem.scalef(0.9995F, 0.9995F, 0.9995F);
+		RenderSystem.translatef(0.0F, -1.0F, 0.0F);
 		switch (direction) {
 			case DOWN:
-				GlStateManager.translatef(0.0F, 2.0F, 0.0F);
-				GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(0.0F, 2.0F, 0.0F);
+				RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
 			case UP:
 			default:
 				break;
 			case NORTH:
-				GlStateManager.translatef(0.0F, 1.0F, 1.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(0.0F, 1.0F, 1.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 				break;
 			case SOUTH:
-				GlStateManager.translatef(0.0F, 1.0F, -1.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(0.0F, 1.0F, -1.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
 				break;
 			case WEST:
-				GlStateManager.translatef(-1.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(-90.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(-1.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(-90.0F, 0.0F, 0.0F, 1.0F);
 				break;
 			case EAST:
-				GlStateManager.translatef(1.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(1.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
 		}
 
 		this.model.getBase().render(0.0625F);
-		GlStateManager.translatef(0.0F, -shulkerBoxBlockEntity.getProgress(g) * 0.5F, 0.0F);
-		GlStateManager.rotatef(270.0F * shulkerBoxBlockEntity.getProgress(g), 0.0F, 1.0F, 0.0F);
+		RenderSystem.translatef(0.0F, -shulkerBoxBlockEntity.getProgress(g) * 0.5F, 0.0F);
+		RenderSystem.rotatef(270.0F * shulkerBoxBlockEntity.getProgress(g), 0.0F, 1.0F, 0.0F);
 		this.model.getLid().render(0.0625F);
-		GlStateManager.enableCull();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.popMatrix();
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableCull();
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.popMatrix();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		if (i >= 0) {
-			GlStateManager.matrixMode(5890);
-			GlStateManager.popMatrix();
-			GlStateManager.matrixMode(5888);
+			RenderSystem.matrixMode(5890);
+			RenderSystem.popMatrix();
+			RenderSystem.matrixMode(5888);
 		}
 	}
 }

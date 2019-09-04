@@ -14,7 +14,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -121,8 +120,8 @@ public abstract class PathNavigation {
 			float f = this.getMaxDist();
 			BlockPos blockPos = bl ? new BlockPos(this.mob).above() : new BlockPos(this.mob);
 			int k = (int)(f + (float)i);
-			LevelReader levelReader = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
-			Path path = this.pathFinder.findPath(levelReader, this.mob, set, f, j);
+			PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
+			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j);
 			this.level.getProfiler().pop();
 			if (path != null && path.getTarget() != null) {
 				this.targetPos = path.getTarget();

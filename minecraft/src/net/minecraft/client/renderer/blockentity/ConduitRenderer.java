@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -28,22 +28,22 @@ public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
 		if (!conduitBlockEntity.isActive()) {
 			float j = conduitBlockEntity.getActiveRotation(0.0F);
 			this.bindTexture(SHELL_TEXTURE);
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-			GlStateManager.rotatef(j, 0.0F, 1.0F, 0.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+			RenderSystem.rotatef(j, 0.0F, 1.0F, 0.0F);
 			this.shellModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else if (conduitBlockEntity.isActive()) {
 			float j = conduitBlockEntity.getActiveRotation(g) * (180.0F / (float)Math.PI);
 			float k = Mth.sin(h * 0.1F) / 2.0F + 0.5F;
 			k = k * k + k;
 			this.bindTexture(ACTIVE_SHELL_TEXTURE);
-			GlStateManager.disableCull();
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 0.3F + k * 0.2F, (float)f + 0.5F);
-			GlStateManager.rotatef(j, 0.5F, 1.0F, 0.5F);
+			RenderSystem.disableCull();
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 0.3F + k * 0.2F, (float)f + 0.5F);
+			RenderSystem.rotatef(j, 0.5F, 1.0F, 0.5F);
 			this.cageModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 			int l = 3;
 			int m = conduitBlockEntity.tickCount / 3 % 22;
 			this.windModel.setActiveAnim(m);
@@ -51,47 +51,47 @@ public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
 			switch (n) {
 				case 0:
 					this.bindTexture(WIND_TEXTURE);
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-					GlStateManager.scalef(0.875F, 0.875F, 0.875F);
-					GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-					GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.popMatrix();
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.scalef(0.875F, 0.875F, 0.875F);
+					RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+					RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
+					RenderSystem.popMatrix();
 					break;
 				case 1:
 					this.bindTexture(VERTICAL_WIND_TEXTURE);
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-					GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-					GlStateManager.scalef(0.875F, 0.875F, 0.875F);
-					GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-					GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.popMatrix();
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.scalef(0.875F, 0.875F, 0.875F);
+					RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+					RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
+					RenderSystem.popMatrix();
 					break;
 				case 2:
 					this.bindTexture(WIND_TEXTURE);
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-					GlStateManager.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
-					GlStateManager.pushMatrix();
-					GlStateManager.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
-					GlStateManager.scalef(0.875F, 0.875F, 0.875F);
-					GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-					GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+					RenderSystem.popMatrix();
+					RenderSystem.pushMatrix();
+					RenderSystem.translatef((float)d + 0.5F, (float)e + 0.5F, (float)f + 0.5F);
+					RenderSystem.scalef(0.875F, 0.875F, 0.875F);
+					RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+					RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 					this.windModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-					GlStateManager.popMatrix();
+					RenderSystem.popMatrix();
 			}
 
 			Camera camera = this.blockEntityRenderDispatcher.camera;
@@ -101,14 +101,14 @@ public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
 				this.bindTexture(CLOSED_EYE_TEXTURE);
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef((float)d + 0.5F, (float)e + 0.3F + k * 0.2F, (float)f + 0.5F);
-			GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-			GlStateManager.rotatef(-camera.getYRot(), 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotatef(camera.getXRot(), 1.0F, 0.0F, 0.0F);
-			GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef((float)d + 0.5F, (float)e + 0.3F + k * 0.2F, (float)f + 0.5F);
+			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+			RenderSystem.rotatef(-camera.getYRot(), 0.0F, 1.0F, 0.0F);
+			RenderSystem.rotatef(camera.getXRot(), 1.0F, 0.0F, 0.0F);
+			RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 			this.eyeModel.render(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.083333336F);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 
 		super.render(conduitBlockEntity, d, e, f, g, i);

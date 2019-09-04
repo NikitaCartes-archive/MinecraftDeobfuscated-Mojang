@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.properties.PropertyMap.Serializer;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DisplayData;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
@@ -20,6 +22,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -74,7 +77,7 @@ public class Main {
 		if (string != null) {
 			try {
 				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec7)));
-			} catch (Exception var52) {
+			} catch (Exception var66) {
 			}
 		}
 
@@ -127,8 +130,56 @@ public class Main {
 		};
 		thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
 		Runtime.getRuntime().addShutdownHook(thread);
-		Thread.currentThread().setName("Client thread");
-		new Minecraft(gameConfig).run();
+		new RenderPipeline();
+		final Minecraft minecraft = new Minecraft(gameConfig);
+		Thread.currentThread().setName("Render thread");
+		RenderSystem.initRenderThread();
+
+		try {
+			minecraft.init();
+		} catch (Throwable var65) {
+			CrashReport crashReport = CrashReport.forThrowable(var65, "Initializing game");
+			crashReport.addCategory("Initialization");
+			minecraft.crash(minecraft.fillReport(crashReport));
+			return;
+		}
+
+		Thread thread2;
+		if (minecraft.renderOnThread()) {
+			thread2 = new Thread("Client thread") {
+				public void run() {
+					try {
+						RenderSystem.initClientThread();
+						minecraft.run();
+					} catch (Throwable var2) {
+						Main.LOGGER.error("Exception in client thread", var2);
+					}
+				}
+			};
+			thread2.start();
+
+			while (minecraft.isRunning()) {
+			}
+		} else {
+			thread2 = null;
+
+			try {
+				minecraft.run();
+			} catch (Throwable var64) {
+				LOGGER.error("Unhandled game exception", var64);
+			}
+		}
+
+		try {
+			minecraft.stop();
+			if (thread2 != null) {
+				thread2.join();
+			}
+		} catch (InterruptedException var62) {
+			LOGGER.error("Exception during client thread shutdown", (Throwable)var62);
+		} finally {
+			minecraft.destroy();
+		}
 	}
 
 	private static OptionalInt ofNullable(@Nullable Integer integer) {

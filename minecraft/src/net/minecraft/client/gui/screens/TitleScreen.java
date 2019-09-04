@@ -1,18 +1,16 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.util.concurrent.Runnables;
-import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -22,13 +20,11 @@ import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsBridge;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 
@@ -41,8 +37,6 @@ public class TitleScreen extends Screen {
 	@Nullable
 	private String splash;
 	private Button resetDemoButton;
-	@Nullable
-	private TitleScreen.WarningMessageWidget warningMessage;
 	private static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
 	private static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
 	private boolean realmsNotificationsInitialized;
@@ -61,13 +55,6 @@ public class TitleScreen extends Screen {
 		super(new TranslatableComponent("narrator.screen.title"));
 		this.fading = bl;
 		this.minceraftEasterEgg = (double)new Random().nextFloat() < 1.0E-4;
-		if (!GLX.supportsOpenGL2() && !GLX.isNextGen()) {
-			this.warningMessage = new TitleScreen.WarningMessageWidget(
-				new TranslatableComponent("title.oldgl.eol.line1").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD),
-				new TranslatableComponent("title.oldgl.eol.line2").withStyle(ChatFormatting.RED).withStyle(ChatFormatting.BOLD),
-				"https://help.mojang.com/customer/portal/articles/325948?ref=game"
-			);
-		}
 	}
 
 	private boolean realmsNotificationsEnabled() {
@@ -154,10 +141,6 @@ public class TitleScreen extends Screen {
 				I18n.get("narrator.button.accessibility")
 			)
 		);
-		if (this.warningMessage != null) {
-			this.warningMessage.updatePosition(j);
-		}
-
 		this.minecraft.setConnectedToRealms(false);
 		if (this.minecraft.options.realmsNotifications && !this.realmsNotificationsInitialized) {
 			RealmsBridge realmsBridge = new RealmsBridge();
@@ -239,15 +222,15 @@ public class TitleScreen extends Screen {
 		int l = this.width / 2 - 137;
 		int m = 30;
 		this.minecraft.getTextureManager().bind(PANORAMA_OVERLAY);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0F, 1.0F)) : 1.0F);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0F, 1.0F)) : 1.0F);
 		blit(0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
 		float h = this.fading ? Mth.clamp(g - 1.0F, 0.0F, 1.0F) : 1.0F;
 		int n = Mth.ceil(h * 255.0F) << 24;
 		if ((n & -67108864) != 0) {
 			this.minecraft.getTextureManager().bind(MINECRAFT_LOGO);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, h);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, h);
 			if (this.minceraftEasterEgg) {
 				this.blit(l + 0, 30, 0, 0, 99, 44);
 				this.blit(l + 99, 30, 129, 0, 27, 44);
@@ -262,14 +245,14 @@ public class TitleScreen extends Screen {
 			this.minecraft.getTextureManager().bind(MINECRAFT_EDITION);
 			blit(l + 88, 67, 0.0F, 0.0F, 98, 14, 128, 16);
 			if (this.splash != null) {
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef((float)(this.width / 2 + 90), 70.0F, 0.0F);
-				GlStateManager.rotatef(-20.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef((float)(this.width / 2 + 90), 70.0F, 0.0F);
+				RenderSystem.rotatef(-20.0F, 0.0F, 0.0F, 1.0F);
 				float o = 1.8F - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0F * (float) (Math.PI * 2)) * 0.1F);
 				o = o * 100.0F / (float)(this.font.width(this.splash) + 32);
-				GlStateManager.scalef(o, o, o);
+				RenderSystem.scalef(o, o, o);
 				this.drawCenteredString(this.font, this.splash, 0, -8, 16776960 | n);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 
 			String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
@@ -283,10 +266,6 @@ public class TitleScreen extends Screen {
 			this.drawString(this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 16777215 | n);
 			if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
 				fill(this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 16777215 | n);
-			}
-
-			if (this.warningMessage != null) {
-				this.warningMessage.render(n);
 			}
 
 			for (AbstractWidget abstractWidget : this.buttons) {
@@ -303,8 +282,6 @@ public class TitleScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (super.mouseClicked(d, e, i)) {
-			return true;
-		} else if (this.warningMessage != null && this.warningMessage.mouseClicked(d, e)) {
 			return true;
 		} else if (this.realmsNotificationsEnabled() && this.realmsNotificationsScreen.mouseClicked(d, e, i)) {
 			return true;
@@ -331,64 +308,5 @@ public class TitleScreen extends Screen {
 		}
 
 		this.minecraft.setScreen(this);
-	}
-
-	@Environment(EnvType.CLIENT)
-	class WarningMessageWidget {
-		private int warningClickWidth;
-		private int warningx0;
-		private int warningy0;
-		private int warningx1;
-		private int warningy1;
-		private final Component warningMessageTop;
-		private final Component warningMessageBottom;
-		private final String warningMessageUrl;
-
-		public WarningMessageWidget(Component component, Component component2, String string) {
-			this.warningMessageTop = component;
-			this.warningMessageBottom = component2;
-			this.warningMessageUrl = string;
-		}
-
-		public void updatePosition(int i) {
-			int j = TitleScreen.this.font.width(this.warningMessageTop.getString());
-			this.warningClickWidth = TitleScreen.this.font.width(this.warningMessageBottom.getString());
-			int k = Math.max(j, this.warningClickWidth);
-			this.warningx0 = (TitleScreen.this.width - k) / 2;
-			this.warningy0 = i - 24;
-			this.warningx1 = this.warningx0 + k;
-			this.warningy1 = this.warningy0 + 24;
-		}
-
-		public void render(int i) {
-			GuiComponent.fill(this.warningx0 - 2, this.warningy0 - 2, this.warningx1 + 2, this.warningy1 - 1, 1428160512);
-			TitleScreen.this.drawString(TitleScreen.this.font, this.warningMessageTop.getColoredString(), this.warningx0, this.warningy0, 16777215 | i);
-			TitleScreen.this.drawString(
-				TitleScreen.this.font,
-				this.warningMessageBottom.getColoredString(),
-				(TitleScreen.this.width - this.warningClickWidth) / 2,
-				this.warningy0 + 12,
-				16777215 | i
-			);
-		}
-
-		public boolean mouseClicked(double d, double e) {
-			if (!StringUtil.isNullOrEmpty(this.warningMessageUrl)
-				&& d >= (double)this.warningx0
-				&& d <= (double)this.warningx1
-				&& e >= (double)this.warningy0
-				&& e <= (double)this.warningy1) {
-				TitleScreen.this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-					if (bl) {
-						Util.getPlatform().openUri(this.warningMessageUrl);
-					}
-
-					TitleScreen.this.minecraft.setScreen(TitleScreen.this);
-				}, this.warningMessageUrl, true));
-				return true;
-			} else {
-				return false;
-			}
-		}
 	}
 }

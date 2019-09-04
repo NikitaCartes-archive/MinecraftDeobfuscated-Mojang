@@ -1,6 +1,7 @@
 package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -55,20 +56,20 @@ public abstract class GuiComponent {
 		float o = (float)(m & 0xFF) / 255.0F;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		GlStateManager.enableBlend();
-		GlStateManager.disableTexture();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.enableBlend();
+		RenderSystem.disableTexture();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.color4f(g, h, o, f);
+		RenderSystem.color4f(g, h, o, f);
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 		bufferBuilder.vertex((double)i, (double)l, 0.0).endVertex();
 		bufferBuilder.vertex((double)k, (double)l, 0.0).endVertex();
 		bufferBuilder.vertex((double)k, (double)j, 0.0).endVertex();
 		bufferBuilder.vertex((double)i, (double)j, 0.0).endVertex();
 		tesselator.end();
-		GlStateManager.enableTexture();
-		GlStateManager.disableBlend();
+		RenderSystem.enableTexture();
+		RenderSystem.disableBlend();
 	}
 
 	protected void fillGradient(int i, int j, int k, int l, int m, int n) {
@@ -80,13 +81,13 @@ public abstract class GuiComponent {
 		float q = (float)(n >> 16 & 0xFF) / 255.0F;
 		float r = (float)(n >> 8 & 0xFF) / 255.0F;
 		float s = (float)(n & 0xFF) / 255.0F;
-		GlStateManager.disableTexture();
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlphaTest();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.disableTexture();
+		RenderSystem.enableBlend();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.shadeModel(7425);
+		RenderSystem.shadeModel(7425);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
@@ -95,10 +96,10 @@ public abstract class GuiComponent {
 		bufferBuilder.vertex((double)i, (double)l, (double)this.blitOffset).color(q, r, s, p).endVertex();
 		bufferBuilder.vertex((double)k, (double)l, (double)this.blitOffset).color(q, r, s, p).endVertex();
 		tesselator.end();
-		GlStateManager.shadeModel(7424);
-		GlStateManager.disableBlend();
-		GlStateManager.enableAlphaTest();
-		GlStateManager.enableTexture();
+		RenderSystem.shadeModel(7424);
+		RenderSystem.disableBlend();
+		RenderSystem.enableAlphaTest();
+		RenderSystem.enableTexture();
 	}
 
 	public void drawCenteredString(Font font, String string, int i, int j, int k) {

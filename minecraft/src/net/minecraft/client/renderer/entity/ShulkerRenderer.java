@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -84,32 +84,32 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 			default:
 				break;
 			case EAST:
-				GlStateManager.translatef(0.5F, 0.5F, 0.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(0.5F, 0.5F, 0.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
 				break;
 			case WEST:
-				GlStateManager.translatef(-0.5F, 0.5F, 0.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(-90.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(-0.5F, 0.5F, 0.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(-90.0F, 0.0F, 0.0F, 1.0F);
 				break;
 			case NORTH:
-				GlStateManager.translatef(0.0F, 0.5F, -0.5F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(0.0F, 0.5F, -0.5F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
 				break;
 			case SOUTH:
-				GlStateManager.translatef(0.0F, 0.5F, 0.5F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+				RenderSystem.translatef(0.0F, 0.5F, 0.5F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
 				break;
 			case UP:
-				GlStateManager.translatef(0.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
 		}
 	}
 
 	protected void scale(Shulker shulker, float f) {
 		float g = 0.999F;
-		GlStateManager.scalef(0.999F, 0.999F, 0.999F);
+		RenderSystem.scalef(0.999F, 0.999F, 0.999F);
 	}
 }

@@ -37,15 +37,9 @@ public class TickNextTickData<T> {
 	}
 
 	public static <T> Comparator<TickNextTickData<T>> createTimeComparator() {
-		return (tickNextTickData, tickNextTickData2) -> {
-			int i = Long.compare(tickNextTickData.delay, tickNextTickData2.delay);
-			if (i != 0) {
-				return i;
-			} else {
-				i = tickNextTickData.priority.compareTo(tickNextTickData2.priority);
-				return i != 0 ? i : Long.compare(tickNextTickData.c, tickNextTickData2.c);
-			}
-		};
+		return Comparator.comparingLong(tickNextTickData -> tickNextTickData.delay)
+			.thenComparing(tickNextTickData -> tickNextTickData.priority)
+			.thenComparingLong(tickNextTickData -> tickNextTickData.c);
 	}
 
 	public String toString() {

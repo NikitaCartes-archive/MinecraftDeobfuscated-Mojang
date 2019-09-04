@@ -4,10 +4,10 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -21,9 +21,9 @@ public class CoralBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!this.scanForWater(level, blockPos)) {
-			level.setBlock(blockPos, this.deadBlock.defaultBlockState(), 2);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!this.scanForWater(serverLevel, blockPos)) {
+			serverLevel.setBlock(blockPos, this.deadBlock.defaultBlockState(), 2);
 		}
 	}
 

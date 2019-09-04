@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -20,9 +21,9 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 	}
 
 	private void renderBeaconBeam(double d, double e, double f, double g, List<BeaconBlockEntity.BeaconBeamSection> list, long l) {
-		GlStateManager.alphaFunc(516, 0.1F);
+		RenderSystem.alphaFunc(516, 0.1F);
 		this.bindTexture(BEAM_LOCATION);
-		GlStateManager.disableFog();
+		RenderSystem.disableFog();
 		int i = 0;
 
 		for (int j = 0; j < list.size(); j++) {
@@ -31,7 +32,7 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 			i += beaconBeamSection.getHeight();
 		}
 
-		GlStateManager.enableFog();
+		RenderSystem.enableFog();
 	}
 
 	private static void renderBeaconBeam(double d, double e, double f, double g, long l, int i, int j, float[] fs) {
@@ -40,17 +41,17 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 
 	public static void renderBeaconBeam(double d, double e, double f, double g, double h, long l, int i, int j, float[] fs, double k, double m) {
 		int n = i + j;
-		GlStateManager.texParameter(3553, 10242, 10497);
-		GlStateManager.texParameter(3553, 10243, 10497);
-		GlStateManager.disableLighting();
-		GlStateManager.disableCull();
-		GlStateManager.disableBlend();
-		GlStateManager.depthMask(true);
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.texParameter(3553, 10242, 10497);
+		RenderSystem.texParameter(3553, 10243, 10497);
+		RenderSystem.disableLighting();
+		RenderSystem.disableCull();
+		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.pushMatrix();
-		GlStateManager.translated(d + 0.5, e, f + 0.5);
+		RenderSystem.pushMatrix();
+		RenderSystem.translated(d + 0.5, e, f + 0.5);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		double o = (double)Math.floorMod(l, 40L) + g;
@@ -59,8 +60,8 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		float r = fs[0];
 		float s = fs[1];
 		float t = fs[2];
-		GlStateManager.pushMatrix();
-		GlStateManager.rotated(o * 2.25 - 45.0, 0.0, 1.0, 0.0);
+		RenderSystem.pushMatrix();
+		RenderSystem.rotated(o * 2.25 - 45.0, 0.0, 1.0, 0.0);
 		double u = 0.0;
 		double x = 0.0;
 		double y = -k;
@@ -89,12 +90,12 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		bufferBuilder.vertex(0.0, (double)i, k).uv(0.0, ae).color(r, s, t, 1.0F).endVertex();
 		bufferBuilder.vertex(0.0, (double)n, k).uv(0.0, af).color(r, s, t, 1.0F).endVertex();
 		tesselator.end();
-		GlStateManager.popMatrix();
-		GlStateManager.enableBlend();
-		GlStateManager.blendFuncSeparate(
+		RenderSystem.popMatrix();
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(
 			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 		);
-		GlStateManager.depthMask(false);
+		RenderSystem.depthMask(false);
 		u = -m;
 		double v = -m;
 		x = -m;
@@ -121,10 +122,10 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		bufferBuilder.vertex(u, (double)i, v).uv(0.0, ae).color(r, s, t, 0.125F).endVertex();
 		bufferBuilder.vertex(u, (double)n, v).uv(0.0, af).color(r, s, t, 0.125F).endVertex();
 		tesselator.end();
-		GlStateManager.popMatrix();
-		GlStateManager.enableLighting();
-		GlStateManager.enableTexture();
-		GlStateManager.depthMask(true);
+		RenderSystem.popMatrix();
+		RenderSystem.enableLighting();
+		RenderSystem.enableTexture();
+		RenderSystem.depthMask(true);
 	}
 
 	public boolean shouldRenderOffScreen(BeaconBlockEntity beaconBlockEntity) {

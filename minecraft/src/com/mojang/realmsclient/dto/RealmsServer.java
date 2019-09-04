@@ -1,16 +1,15 @@
 package com.mojang.realmsclient.dto;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.realmsclient.util.JsonUtils;
 import com.mojang.realmsclient.util.RealmsUtil;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -107,7 +106,7 @@ public class RealmsServer extends ValueObject {
 				realmsServer.players = parseInvited(jsonObject.get("players").getAsJsonArray());
 				sortInvited(realmsServer);
 			} else {
-				realmsServer.players = new ArrayList();
+				realmsServer.players = Lists.<PlayerInfo>newArrayList();
 			}
 
 			realmsServer.daysLeft = JsonUtils.getIntOr("daysLeft", jsonObject, 0);
@@ -133,21 +132,17 @@ public class RealmsServer extends ValueObject {
 	}
 
 	private static void sortInvited(RealmsServer realmsServer) {
-		Collections.sort(
-			realmsServer.players,
-			new Comparator<PlayerInfo>() {
-				public int compare(PlayerInfo playerInfo, PlayerInfo playerInfo2) {
-					return ComparisonChain.start()
-						.compare(playerInfo2.getAccepted(), playerInfo.getAccepted())
+		realmsServer.players
+			.sort(
+				(playerInfo, playerInfo2) -> ComparisonChain.start()
+						.compareFalseFirst(playerInfo2.getAccepted(), playerInfo.getAccepted())
 						.compare(playerInfo.getName().toLowerCase(Locale.ROOT), playerInfo2.getName().toLowerCase(Locale.ROOT))
-						.result();
-				}
-			}
-		);
+						.result()
+			);
 	}
 
 	private static List<PlayerInfo> parseInvited(JsonArray jsonArray) {
-		ArrayList<PlayerInfo> arrayList = new ArrayList();
+		List<PlayerInfo> list = Lists.<PlayerInfo>newArrayList();
 
 		for (JsonElement jsonElement : jsonArray) {
 			try {
@@ -158,16 +153,16 @@ public class RealmsServer extends ValueObject {
 				playerInfo.setOperator(JsonUtils.getBooleanOr("operator", jsonObject, false));
 				playerInfo.setAccepted(JsonUtils.getBooleanOr("accepted", jsonObject, false));
 				playerInfo.setOnline(JsonUtils.getBooleanOr("online", jsonObject, false));
-				arrayList.add(playerInfo);
+				list.add(playerInfo);
 			} catch (Exception var6) {
 			}
 		}
 
-		return arrayList;
+		return list;
 	}
 
 	private static Map<Integer, RealmsWorldOptions> parseSlots(JsonArray jsonArray) {
-		Map<Integer, RealmsWorldOptions> map = new HashMap();
+		Map<Integer, RealmsWorldOptions> map = Maps.<Integer, RealmsWorldOptions>newHashMap();
 
 		for (JsonElement jsonElement : jsonArray) {
 			try {
@@ -197,11 +192,11 @@ public class RealmsServer extends ValueObject {
 	}
 
 	private static Map<Integer, RealmsWorldOptions> getEmptySlots() {
-		HashMap<Integer, RealmsWorldOptions> hashMap = new HashMap();
-		hashMap.put(1, RealmsWorldOptions.getEmptyDefaults());
-		hashMap.put(2, RealmsWorldOptions.getEmptyDefaults());
-		hashMap.put(3, RealmsWorldOptions.getEmptyDefaults());
-		return hashMap;
+		Map<Integer, RealmsWorldOptions> map = Maps.<Integer, RealmsWorldOptions>newHashMap();
+		map.put(1, RealmsWorldOptions.getEmptyDefaults());
+		map.put(2, RealmsWorldOptions.getEmptyDefaults());
+		map.put(3, RealmsWorldOptions.getEmptyDefaults());
+		return map;
 	}
 
 	public static RealmsServer parse(String string) {
@@ -292,7 +287,7 @@ public class RealmsServer extends ValueObject {
 	}
 
 	public Map<Integer, RealmsWorldOptions> cloneSlots(Map<Integer, RealmsWorldOptions> map) {
-		Map<Integer, RealmsWorldOptions> map2 = new HashMap();
+		Map<Integer, RealmsWorldOptions> map2 = Maps.<Integer, RealmsWorldOptions>newHashMap();
 
 		for (Entry<Integer, RealmsWorldOptions> entry : map.entrySet()) {
 			map2.put(entry.getKey(), ((RealmsWorldOptions)entry.getValue()).clone());

@@ -1,7 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.collect.Lists;
 import com.mojang.realmsclient.dto.Backup;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -18,7 +18,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	private final RealmsScreen lastScreen;
 	private final int BUTTON_BACK_ID = 0;
 	private final Backup backup;
-	private final List<String> keys = new ArrayList();
+	private final List<String> keys = Lists.<String>newArrayList();
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
 	String[] difficulties = new String[]{
 		getLocalizedString("options.difficulty.peaceful"),

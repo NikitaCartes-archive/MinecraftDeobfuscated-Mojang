@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -34,27 +34,27 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
 		if (!itemStack.isEmpty()) {
 			Item item = itemStack.getItem();
-			GlStateManager.pushMatrix();
-			if (livingEntity.isVisuallySneaking()) {
-				GlStateManager.translatef(0.0F, 0.2F, 0.0F);
+			RenderSystem.pushMatrix();
+			if (livingEntity.isCrouching()) {
+				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
 			}
 
 			boolean bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
 			if (livingEntity.isBaby() && !(livingEntity instanceof Villager)) {
 				float m = 2.0F;
 				float n = 1.4F;
-				GlStateManager.translatef(0.0F, 0.5F * l, 0.0F);
-				GlStateManager.scalef(0.7F, 0.7F, 0.7F);
-				GlStateManager.translatef(0.0F, 16.0F * l, 0.0F);
+				RenderSystem.translatef(0.0F, 0.5F * l, 0.0F);
+				RenderSystem.scalef(0.7F, 0.7F, 0.7F);
+				RenderSystem.translatef(0.0F, 16.0F * l, 0.0F);
 			}
 
 			this.getParentModel().translateToHead(0.0625F);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
 				float m = 1.1875F;
-				GlStateManager.scalef(1.1875F, -1.1875F, -1.1875F);
+				RenderSystem.scalef(1.1875F, -1.1875F, -1.1875F);
 				if (bl) {
-					GlStateManager.translatef(0.0F, 0.0625F, 0.0F);
+					RenderSystem.translatef(0.0F, 0.0625F, 0.0F);
 				}
 
 				GameProfile gameProfile = null;
@@ -74,17 +74,17 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				SkullBlockRenderer.instance.renderSkull(-0.5F, 0.0F, -0.5F, null, 180.0F, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, -1, f);
 			} else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
 				float mx = 0.625F;
-				GlStateManager.translatef(0.0F, -0.25F, 0.0F);
-				GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
-				GlStateManager.scalef(0.625F, -0.625F, -0.625F);
+				RenderSystem.translatef(0.0F, -0.25F, 0.0F);
+				RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+				RenderSystem.scalef(0.625F, -0.625F, -0.625F);
 				if (bl) {
-					GlStateManager.translatef(0.0F, 0.1875F, 0.0F);
+					RenderSystem.translatef(0.0F, 0.1875F, 0.0F);
 				}
 
 				Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD);
 			}
 
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

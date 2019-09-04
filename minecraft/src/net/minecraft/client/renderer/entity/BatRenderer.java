@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BatModel;
@@ -21,14 +21,14 @@ public class BatRenderer extends MobRenderer<Bat, BatModel> {
 	}
 
 	protected void scale(Bat bat, float f) {
-		GlStateManager.scalef(0.35F, 0.35F, 0.35F);
+		RenderSystem.scalef(0.35F, 0.35F, 0.35F);
 	}
 
 	protected void setupRotations(Bat bat, float f, float g, float h) {
 		if (bat.isResting()) {
-			GlStateManager.translatef(0.0F, -0.1F, 0.0F);
+			RenderSystem.translatef(0.0F, -0.1F, 0.0F);
 		} else {
-			GlStateManager.translatef(0.0F, Mth.cos(f * 0.3F) * 0.1F, 0.0F);
+			RenderSystem.translatef(0.0F, Mth.cos(f * 0.3F) * 0.1F, 0.0F);
 		}
 
 		super.setupRotations(bat, f, g, h);

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -54,12 +55,10 @@ public abstract class BasePressurePlateBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!level.isClientSide) {
-			int i = this.getSignalForState(blockState);
-			if (i > 0) {
-				this.checkPressed(level, blockPos, blockState, i);
-			}
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		int i = this.getSignalForState(blockState);
+		if (i > 0) {
+			this.checkPressed(serverLevel, blockPos, blockState, i);
 		}
 	}
 

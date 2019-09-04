@@ -66,7 +66,7 @@ public class DirectionalPlaceContext extends BlockPlaceContext {
 	}
 
 	@Override
-	public boolean isSneaking() {
+	public boolean isSecondaryUseActive() {
 		return false;
 	}
 

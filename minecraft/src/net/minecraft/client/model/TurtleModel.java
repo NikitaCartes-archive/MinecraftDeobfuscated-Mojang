@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -44,35 +44,35 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		this.setupAnim(turtle, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 6.0F;
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.16666667F, 0.16666667F, 0.16666667F);
-			GlStateManager.translatef(0.0F, 120.0F * k, 0.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.16666667F, 0.16666667F, 0.16666667F);
+			RenderSystem.translatef(0.0F, 120.0F * k, 0.0F);
 			this.head.render(k);
 			this.body.render(k);
 			this.leg0.render(k);
 			this.leg1.render(k);
 			this.leg2.render(k);
 			this.leg3.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			if (turtle.hasEgg()) {
-				GlStateManager.translatef(0.0F, -0.08F, 0.0F);
+				RenderSystem.translatef(0.0F, -0.08F, 0.0F);
 			}
 
 			this.head.render(k);
 			this.body.render(k);
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			this.leg0.render(k);
 			this.leg1.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 			this.leg2.render(k);
 			this.leg3.render(k);
 			if (turtle.hasEgg()) {
 				this.eggBelly.render(k);
 			}
 
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

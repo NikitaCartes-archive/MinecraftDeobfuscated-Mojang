@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.BlastFurnaceScreen;
 import net.minecraft.client.gui.screens.inventory.BrewingStandScreen;
-import net.minecraft.client.gui.screens.inventory.CartographyScreen;
+import net.minecraft.client.gui.screens.inventory.CartographyTableScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.DispenserScreen;
@@ -100,7 +100,7 @@ public class MenuScreens {
 		register(MenuType.MERCHANT, MerchantScreen::new);
 		register(MenuType.SHULKER_BOX, ShulkerBoxScreen::new);
 		register(MenuType.SMOKER, SmokerScreen::new);
-		register(MenuType.CARTOGRAPHY, CartographyScreen::new);
+		register(MenuType.CARTOGRAPHY_TABLE, CartographyTableScreen::new);
 		register(MenuType.STONECUTTER, StonecutterScreen::new);
 	}
 

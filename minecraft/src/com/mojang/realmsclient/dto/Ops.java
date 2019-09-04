@@ -1,16 +1,16 @@
 package com.mojang.realmsclient.dto;
 
+import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.util.HashSet;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class Ops extends ValueObject {
-	public Set<String> ops = new HashSet();
+	public Set<String> ops = Sets.<String>newHashSet();
 
 	public static Ops parse(String string) {
 		Ops ops = new Ops();

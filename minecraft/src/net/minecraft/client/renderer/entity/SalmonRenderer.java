@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,11 +32,11 @@ public class SalmonRenderer extends MobRenderer<Salmon, SalmonModel<Salmon>> {
 		}
 
 		float k = i * 4.3F * Mth.sin(j * 0.6F * f);
-		GlStateManager.rotatef(k, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(0.0F, 0.0F, -0.4F);
+		RenderSystem.rotatef(k, 0.0F, 1.0F, 0.0F);
+		RenderSystem.translatef(0.0F, 0.0F, -0.4F);
 		if (!salmon.isInWater()) {
-			GlStateManager.translatef(0.2F, 0.1F, 0.0F);
-			GlStateManager.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
+			RenderSystem.translatef(0.2F, 0.1F, 0.0F);
+			RenderSystem.rotatef(90.0F, 0.0F, 0.0F, 1.0F);
 		}
 	}
 }

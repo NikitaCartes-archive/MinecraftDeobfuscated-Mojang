@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -28,20 +28,20 @@ public class VillagerTradeItemLayer<T extends LivingEntity> extends RenderLayer<
 		if (!itemStack.isEmpty()) {
 			Item item = itemStack.getItem();
 			Block block = Block.byItem(item);
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			boolean bl = this.itemRenderer.isGui3d(itemStack) && block.getRenderLayer() == BlockLayer.TRANSLUCENT;
 			if (bl) {
-				GlStateManager.depthMask(false);
+				RenderSystem.depthMask(false);
 			}
 
-			GlStateManager.translatef(0.0F, 0.4F, -0.4F);
-			GlStateManager.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
+			RenderSystem.translatef(0.0F, 0.4F, -0.4F);
+			RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
 			this.itemRenderer.renderWithMobState(itemStack, livingEntity, ItemTransforms.TransformType.GROUND, false);
 			if (bl) {
-				GlStateManager.depthMask(true);
+				RenderSystem.depthMask(true);
 			}
 
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

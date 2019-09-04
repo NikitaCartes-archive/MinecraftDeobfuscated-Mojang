@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -143,6 +144,10 @@ public abstract class PatrollingMonster extends Monster {
 		return this.patrolling;
 	}
 
+	protected void setPatrolling(boolean bl) {
+		this.patrolling = bl;
+	}
+
 	public static class LongDistancePatrolGoal<T extends PatrollingMonster> extends Goal {
 		private final T mob;
 		private final double speedModifier;
@@ -173,7 +178,10 @@ public abstract class PatrollingMonster extends Monster {
 			boolean bl = this.mob.isPatrolLeader();
 			PathNavigation pathNavigation = this.mob.getNavigation();
 			if (pathNavigation.isDone()) {
-				if (bl && this.mob.getPatrolTarget().closerThan(this.mob.position(), 10.0)) {
+				List<PatrollingMonster> list = this.findPatrolCompanions();
+				if (this.mob.isPatrolling() && list.isEmpty()) {
+					this.mob.setPatrolling(false);
+				} else if (bl && this.mob.getPatrolTarget().closerThan(this.mob.position(), 10.0)) {
 					this.mob.findPatrolTarget();
 				} else {
 					Vec3 vec3 = new Vec3(this.mob.getPatrolTarget());
@@ -186,18 +194,22 @@ public abstract class PatrollingMonster extends Monster {
 					if (!pathNavigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
 						this.moveRandomly();
 					} else if (bl) {
-						for (PatrollingMonster patrollingMonster : this.mob
-							.level
-							.getEntitiesOfClass(
-								PatrollingMonster.class,
-								this.mob.getBoundingBox().inflate(16.0),
-								patrollingMonsterx -> !patrollingMonsterx.isPatrolLeader() && patrollingMonsterx.canJoinPatrol()
-							)) {
+						for (PatrollingMonster patrollingMonster : list) {
 							patrollingMonster.setPatrolTarget(blockPos);
 						}
 					}
 				}
 			}
+		}
+
+		private List<PatrollingMonster> findPatrolCompanions() {
+			return this.mob
+				.level
+				.getEntitiesOfClass(
+					PatrollingMonster.class,
+					this.mob.getBoundingBox().inflate(16.0),
+					patrollingMonster -> patrollingMonster.canJoinPatrol() && !patrollingMonster.is(this.mob)
+				);
 		}
 
 		private void moveRandomly() {

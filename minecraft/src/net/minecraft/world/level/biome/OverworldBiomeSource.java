@@ -1,23 +1,13 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.Sets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.OverworldGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.newbiome.layer.Layer;
 import net.minecraft.world.level.newbiome.layer.Layers;
-import net.minecraft.world.level.storage.LevelData;
 
 public class OverworldBiomeSource extends BiomeSource {
 	private final Layer noiseBiomeLayer;
-	private final Layer blockBiomeLayer;
-	private final Biome[] possibleBiomes = new Biome[]{
+	private static final Set<Biome> POSSIBLE_BIOMES = ImmutableSet.of(
 		Biomes.OCEAN,
 		Biomes.PLAINS,
 		Biomes.DESERT,
@@ -84,93 +74,17 @@ public class OverworldBiomeSource extends BiomeSource {
 		Biomes.ERODED_BADLANDS,
 		Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU,
 		Biomes.MODIFIED_BADLANDS_PLATEAU
-	};
+	);
 
 	public OverworldBiomeSource(OverworldBiomeSourceSettings overworldBiomeSourceSettings) {
-		LevelData levelData = overworldBiomeSourceSettings.getLevelData();
-		OverworldGeneratorSettings overworldGeneratorSettings = overworldBiomeSourceSettings.getGeneratorSettings();
-		Layer[] layers = Layers.getDefaultLayers(levelData.getSeed(), levelData.getGeneratorType(), overworldGeneratorSettings);
-		this.noiseBiomeLayer = layers[0];
-		this.blockBiomeLayer = layers[1];
+		super(POSSIBLE_BIOMES);
+		this.noiseBiomeLayer = Layers.getDefaultLayer(
+			overworldBiomeSourceSettings.getSeed(), overworldBiomeSourceSettings.getGeneratorType(), overworldBiomeSourceSettings.getGeneratorSettings()
+		);
 	}
 
 	@Override
-	public Biome getBiome(int i, int j) {
-		return this.blockBiomeLayer.get(i, j);
-	}
-
-	@Override
-	public Biome getNoiseBiome(int i, int j) {
-		return this.noiseBiomeLayer.get(i, j);
-	}
-
-	@Override
-	public Biome[] getBiomeBlock(int i, int j, int k, int l, boolean bl) {
-		return this.blockBiomeLayer.getArea(i, j, k, l);
-	}
-
-	@Override
-	public Set<Biome> getBiomesWithin(int i, int j, int k) {
-		int l = i - k >> 2;
-		int m = j - k >> 2;
-		int n = i + k >> 2;
-		int o = j + k >> 2;
-		int p = n - l + 1;
-		int q = o - m + 1;
-		Set<Biome> set = Sets.<Biome>newHashSet();
-		Collections.addAll(set, this.noiseBiomeLayer.getArea(l, m, p, q));
-		return set;
-	}
-
-	@Nullable
-	@Override
-	public BlockPos findBiome(int i, int j, int k, List<Biome> list, Random random) {
-		int l = i - k >> 2;
-		int m = j - k >> 2;
-		int n = i + k >> 2;
-		int o = j + k >> 2;
-		int p = n - l + 1;
-		int q = o - m + 1;
-		Biome[] biomes = this.noiseBiomeLayer.getArea(l, m, p, q);
-		BlockPos blockPos = null;
-		int r = 0;
-
-		for (int s = 0; s < p * q; s++) {
-			int t = l + s % p << 2;
-			int u = m + s / p << 2;
-			if (list.contains(biomes[s])) {
-				if (blockPos == null || random.nextInt(r + 1) == 0) {
-					blockPos = new BlockPos(t, 0, u);
-				}
-
-				r++;
-			}
-		}
-
-		return blockPos;
-	}
-
-	@Override
-	public boolean canGenerateStructure(StructureFeature<?> structureFeature) {
-		return (Boolean)this.supportedStructures.computeIfAbsent(structureFeature, structureFeaturex -> {
-			for (Biome biome : this.possibleBiomes) {
-				if (biome.isValidStart(structureFeaturex)) {
-					return true;
-				}
-			}
-
-			return false;
-		});
-	}
-
-	@Override
-	public Set<BlockState> getSurfaceBlocks() {
-		if (this.surfaceBlocks.isEmpty()) {
-			for (Biome biome : this.possibleBiomes) {
-				this.surfaceBlocks.add(biome.getSurfaceBuilderConfig().getTopMaterial());
-			}
-		}
-
-		return this.surfaceBlocks;
+	public Biome getNoiseBiome(int i, int j, int k) {
+		return this.noiseBiomeLayer.get(i, k);
 	}
 }

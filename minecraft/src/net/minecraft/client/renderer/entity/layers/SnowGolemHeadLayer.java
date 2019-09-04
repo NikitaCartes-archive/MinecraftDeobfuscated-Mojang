@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -19,14 +19,14 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 
 	public void render(SnowGolem snowGolem, float f, float g, float h, float i, float j, float k, float l) {
 		if (!snowGolem.isInvisible() && snowGolem.hasPumpkin()) {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			this.getParentModel().getHead().translateTo(0.0625F);
 			float m = 0.625F;
-			GlStateManager.translatef(0.0F, -0.34375F, 0.0F);
-			GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
-			GlStateManager.scalef(0.625F, -0.625F, -0.625F);
+			RenderSystem.translatef(0.0F, -0.34375F, 0.0F);
+			RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+			RenderSystem.scalef(0.625F, -0.625F, -0.625F);
 			Minecraft.getInstance().getItemInHandRenderer().renderItem(snowGolem, new ItemStack(Blocks.CARVED_PUMPKIN), ItemTransforms.TransformType.HEAD);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

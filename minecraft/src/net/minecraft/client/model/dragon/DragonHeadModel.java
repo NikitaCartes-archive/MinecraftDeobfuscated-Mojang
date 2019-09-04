@@ -1,6 +1,6 @@
 package net.minecraft.client.model.dragon;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SkullModel;
@@ -35,8 +35,8 @@ public class DragonHeadModel extends SkullModel {
 		this.jaw.xRot = (float)(Math.sin((double)(f * (float) Math.PI * 0.2F)) + 1.0) * 0.2F;
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
-		GlStateManager.translatef(0.0F, -0.374375F, 0.0F);
-		GlStateManager.scalef(0.75F, 0.75F, 0.75F);
+		RenderSystem.translatef(0.0F, -0.374375F, 0.0F);
+		RenderSystem.scalef(0.75F, 0.75F, 0.75F);
 		this.head.render(k);
 	}
 }

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
@@ -16,7 +16,7 @@ public abstract class AbstractHorseRenderer<T extends AbstractHorse, M extends H
 	}
 
 	protected void scale(T abstractHorse, float f) {
-		GlStateManager.scalef(this.scale, this.scale, this.scale);
+		RenderSystem.scalef(this.scale, this.scale, this.scale);
 		super.scale(abstractHorse, f);
 	}
 }

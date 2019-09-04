@@ -12,6 +12,7 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.ColorArgument;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -48,6 +49,8 @@ import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.synchronization.brigadier.BrigadierArgumentSerializers;
+import net.minecraft.gametest.framework.TestClassNameArgument;
+import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
@@ -109,6 +112,10 @@ public class ArgumentTypes {
 		register("entity_summon", EntitySummonArgument.class, new EmptyArgumentSerializer(EntitySummonArgument::id));
 		register("dimension", DimensionTypeArgument.class, new EmptyArgumentSerializer(DimensionTypeArgument::dimension));
 		register("time", TimeArgument.class, new EmptyArgumentSerializer(TimeArgument::time));
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer(TestFunctionArgument::testFunctionArgument));
+			register("test_class", TestClassNameArgument.class, new EmptyArgumentSerializer(TestClassNameArgument::testClassName));
+		}
 	}
 
 	@Nullable

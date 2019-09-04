@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -22,32 +23,32 @@ public class WitherArmorLayer extends RenderLayer<WitherBoss, WitherBossModel<Wi
 
 	public void render(WitherBoss witherBoss, float f, float g, float h, float i, float j, float k, float l) {
 		if (witherBoss.isPowered()) {
-			GlStateManager.depthMask(!witherBoss.isInvisible());
+			RenderSystem.depthMask(!witherBoss.isInvisible());
 			this.bindTexture(WITHER_ARMOR_LOCATION);
-			GlStateManager.matrixMode(5890);
-			GlStateManager.loadIdentity();
+			RenderSystem.matrixMode(5890);
+			RenderSystem.loadIdentity();
 			float m = (float)witherBoss.tickCount + h;
 			float n = Mth.cos(m * 0.02F) * 3.0F;
 			float o = m * 0.01F;
-			GlStateManager.translatef(n, o, 0.0F);
-			GlStateManager.matrixMode(5888);
-			GlStateManager.enableBlend();
+			RenderSystem.translatef(n, o, 0.0F);
+			RenderSystem.matrixMode(5888);
+			RenderSystem.enableBlend();
 			float p = 0.5F;
-			GlStateManager.color4f(0.5F, 0.5F, 0.5F, 1.0F);
-			GlStateManager.disableLighting();
-			GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+			RenderSystem.color4f(0.5F, 0.5F, 0.5F, 1.0F);
+			RenderSystem.disableLighting();
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 			this.model.prepareMobModel(witherBoss, f, g, h);
 			this.getParentModel().copyPropertiesTo(this.model);
 			GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
 			gameRenderer.resetFogColor(true);
 			this.model.render(witherBoss, f, g, i, j, k, l);
 			gameRenderer.resetFogColor(false);
-			GlStateManager.matrixMode(5890);
-			GlStateManager.loadIdentity();
-			GlStateManager.matrixMode(5888);
-			GlStateManager.enableLighting();
-			GlStateManager.disableBlend();
-			GlStateManager.depthMask(true);
+			RenderSystem.matrixMode(5890);
+			RenderSystem.loadIdentity();
+			RenderSystem.matrixMode(5888);
+			RenderSystem.enableLighting();
+			RenderSystem.disableBlend();
+			RenderSystem.depthMask(true);
 		}
 	}
 

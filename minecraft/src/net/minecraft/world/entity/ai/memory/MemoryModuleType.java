@@ -45,6 +45,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Long> CANT_REACH_WALK_TARGET_SINCE = register("cant_reach_walk_target_since");
 	public static final MemoryModuleType<Long> GOLEM_LAST_SEEN_TIME = register("golem_last_seen_time");
 	public static final MemoryModuleType<SerializableLong> LAST_SLEPT = register("last_slept", Optional.of(SerializableLong::of));
+	public static final MemoryModuleType<SerializableLong> LAST_WOKEN = register("last_woken", Optional.of(SerializableLong::of));
 	public static final MemoryModuleType<SerializableLong> LAST_WORKED_AT_POI = register("last_worked_at_poi", Optional.of(SerializableLong::of));
 	private final Optional<Function<Dynamic<?>, U>> deserializer;
 

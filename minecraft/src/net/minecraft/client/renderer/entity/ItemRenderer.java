@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -96,11 +97,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 	public void render(ItemStack itemStack, BakedModel bakedModel) {
 		if (!itemStack.isEmpty()) {
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(-0.5F, -0.5F, -0.5F);
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(-0.5F, -0.5F, -0.5F);
 			if (bakedModel.isCustomRenderer()) {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-				GlStateManager.enableRescaleNormal();
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.enableRescaleNormal();
 				EntityBlockRenderer.instance.renderByItem(itemStack);
 			} else {
 				this.renderModelLists(bakedModel, itemStack);
@@ -109,36 +110,36 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				}
 			}
 
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 
 	public static void renderFoilLayer(TextureManager textureManager, Runnable runnable, int i) {
-		GlStateManager.depthMask(false);
-		GlStateManager.depthFunc(514);
-		GlStateManager.disableLighting();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
+		RenderSystem.depthMask(false);
+		RenderSystem.depthFunc(514);
+		RenderSystem.disableLighting();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
 		textureManager.bind(ENCHANT_GLINT_LOCATION);
-		GlStateManager.matrixMode(5890);
-		GlStateManager.pushMatrix();
-		GlStateManager.scalef((float)i, (float)i, (float)i);
+		RenderSystem.matrixMode(5890);
+		RenderSystem.pushMatrix();
+		RenderSystem.scalef((float)i, (float)i, (float)i);
 		float f = (float)(Util.getMillis() % 3000L) / 3000.0F / (float)i;
-		GlStateManager.translatef(f, 0.0F, 0.0F);
-		GlStateManager.rotatef(-50.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.translatef(f, 0.0F, 0.0F);
+		RenderSystem.rotatef(-50.0F, 0.0F, 0.0F, 1.0F);
 		runnable.run();
-		GlStateManager.popMatrix();
-		GlStateManager.pushMatrix();
-		GlStateManager.scalef((float)i, (float)i, (float)i);
+		RenderSystem.popMatrix();
+		RenderSystem.pushMatrix();
+		RenderSystem.scalef((float)i, (float)i, (float)i);
 		float g = (float)(Util.getMillis() % 4873L) / 4873.0F / (float)i;
-		GlStateManager.translatef(-g, 0.0F, 0.0F);
-		GlStateManager.rotatef(10.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.translatef(-g, 0.0F, 0.0F);
+		RenderSystem.rotatef(10.0F, 0.0F, 0.0F, 1.0F);
 		runnable.run();
-		GlStateManager.popMatrix();
-		GlStateManager.matrixMode(5888);
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.enableLighting();
-		GlStateManager.depthFunc(515);
-		GlStateManager.depthMask(true);
+		RenderSystem.popMatrix();
+		RenderSystem.matrixMode(5888);
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.enableLighting();
+		RenderSystem.depthFunc(515);
+		RenderSystem.depthMask(true);
 		textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 	}
 
@@ -219,25 +220,25 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		if (!itemStack.isEmpty()) {
 			this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 			this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.enableRescaleNormal();
-			GlStateManager.alphaFunc(516, 0.1F);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFuncSeparate(
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.enableRescaleNormal();
+			RenderSystem.alphaFunc(516, 0.1F);
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 			);
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			ItemTransforms itemTransforms = bakedModel.getTransforms();
 			ItemTransforms.apply(itemTransforms.getTransform(transformType), bl);
 			if (this.needsFlip(itemTransforms.getTransform(transformType))) {
-				GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
+				RenderSystem.cullFace(GlStateManager.CullFace.FRONT);
 			}
 
 			this.render(itemStack, bakedModel);
-			GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-			GlStateManager.popMatrix();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableBlend();
+			RenderSystem.cullFace(GlStateManager.CullFace.BACK);
+			RenderSystem.popMatrix();
+			RenderSystem.disableRescaleNormal();
+			RenderSystem.disableBlend();
 			this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 			this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
 		}
@@ -252,35 +253,35 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.enableAlphaTest();
-		GlStateManager.alphaFunc(516, 0.1F);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableRescaleNormal();
+		RenderSystem.enableAlphaTest();
+		RenderSystem.alphaFunc(516, 0.1F);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.setupGuiItem(i, j, bakedModel.isGui3d());
 		bakedModel.getTransforms().apply(ItemTransforms.TransformType.GUI);
 		this.render(itemStack, bakedModel);
-		GlStateManager.disableAlphaTest();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableLighting();
-		GlStateManager.popMatrix();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.disableRescaleNormal();
+		RenderSystem.disableLighting();
+		RenderSystem.popMatrix();
 		this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
 	}
 
 	private void setupGuiItem(int i, int j, boolean bl) {
-		GlStateManager.translatef((float)i, (float)j, 100.0F + this.blitOffset);
-		GlStateManager.translatef(8.0F, 8.0F, 0.0F);
-		GlStateManager.scalef(1.0F, -1.0F, 1.0F);
-		GlStateManager.scalef(16.0F, 16.0F, 16.0F);
+		RenderSystem.translatef((float)i, (float)j, 100.0F + this.blitOffset);
+		RenderSystem.translatef(8.0F, 8.0F, 0.0F);
+		RenderSystem.scalef(1.0F, -1.0F, 1.0F);
+		RenderSystem.scalef(16.0F, 16.0F, 16.0F);
 		if (bl) {
-			GlStateManager.enableLighting();
+			RenderSystem.enableLighting();
 		} else {
-			GlStateManager.disableLighting();
+			RenderSystem.disableLighting();
 		}
 	}
 
@@ -316,21 +317,21 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		if (!itemStack.isEmpty()) {
 			if (itemStack.getCount() != 1 || string != null) {
 				String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-				GlStateManager.disableLighting();
-				GlStateManager.disableDepthTest();
-				GlStateManager.disableBlend();
+				RenderSystem.disableLighting();
+				RenderSystem.disableDepthTest();
+				RenderSystem.disableBlend();
 				font.drawShadow(string2, (float)(i + 19 - 2 - font.width(string2)), (float)(j + 6 + 3), 16777215);
-				GlStateManager.enableBlend();
-				GlStateManager.enableLighting();
-				GlStateManager.enableDepthTest();
+				RenderSystem.enableBlend();
+				RenderSystem.enableLighting();
+				RenderSystem.enableDepthTest();
 			}
 
 			if (itemStack.isDamaged()) {
-				GlStateManager.disableLighting();
-				GlStateManager.disableDepthTest();
-				GlStateManager.disableTexture();
-				GlStateManager.disableAlphaTest();
-				GlStateManager.disableBlend();
+				RenderSystem.disableLighting();
+				RenderSystem.disableDepthTest();
+				RenderSystem.disableTexture();
+				RenderSystem.disableAlphaTest();
+				RenderSystem.disableBlend();
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = tesselator.getBuilder();
 				float f = (float)itemStack.getDamageValue();
@@ -340,25 +341,25 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				int l = Mth.hsvToRgb(h / 3.0F, 1.0F, 1.0F);
 				this.fillRect(bufferBuilder, i + 2, j + 13, 13, 2, 0, 0, 0, 255);
 				this.fillRect(bufferBuilder, i + 2, j + 13, k, 1, l >> 16 & 0xFF, l >> 8 & 0xFF, l & 0xFF, 255);
-				GlStateManager.enableBlend();
-				GlStateManager.enableAlphaTest();
-				GlStateManager.enableTexture();
-				GlStateManager.enableLighting();
-				GlStateManager.enableDepthTest();
+				RenderSystem.enableBlend();
+				RenderSystem.enableAlphaTest();
+				RenderSystem.enableTexture();
+				RenderSystem.enableLighting();
+				RenderSystem.enableDepthTest();
 			}
 
 			LocalPlayer localPlayer = Minecraft.getInstance().player;
 			float m = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), Minecraft.getInstance().getFrameTime());
 			if (m > 0.0F) {
-				GlStateManager.disableLighting();
-				GlStateManager.disableDepthTest();
-				GlStateManager.disableTexture();
+				RenderSystem.disableLighting();
+				RenderSystem.disableDepthTest();
+				RenderSystem.disableTexture();
 				Tesselator tesselator2 = Tesselator.getInstance();
 				BufferBuilder bufferBuilder2 = tesselator2.getBuilder();
 				this.fillRect(bufferBuilder2, i, j + Mth.floor(16.0F * (1.0F - m)), 16, Mth.ceil(16.0F * m), 255, 255, 255, 127);
-				GlStateManager.enableTexture();
-				GlStateManager.enableLighting();
-				GlStateManager.enableDepthTest();
+				RenderSystem.enableTexture();
+				RenderSystem.enableLighting();
+				RenderSystem.enableDepthTest();
 			}
 		}
 	}

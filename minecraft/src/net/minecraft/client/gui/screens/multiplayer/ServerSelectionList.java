@@ -3,8 +3,8 @@ package net.minecraft.client.gui.screens.multiplayer;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -68,6 +68,12 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			NarratorChatListener.INSTANCE
 				.sayNow(new TranslatableComponent("narrator.select", ((ServerSelectionList.OnlineServerEntry)this.getSelected()).serverData.name).getString());
 		}
+	}
+
+	@Override
+	public boolean keyPressed(int i, int j, int k) {
+		ServerSelectionList.Entry entry = this.getSelected();
+		return entry != null && entry.keyPressed(i, j, k) || super.keyPressed(i, j, k);
 	}
 
 	@Override
@@ -290,7 +296,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				string3 = I18n.get("multiplayer.status.pinging");
 			}
 
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
 			GuiComponent.blit(k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
 			if (this.serverData.getIconB64() != null && !this.serverData.getIconB64().equals(this.lastIconB64)) {
@@ -316,7 +322,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			if (this.minecraft.options.touchscreen || bl) {
 				this.minecraft.getTextureManager().bind(ServerSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(k, j, k + 32, j + 32, -1601138544);
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				int v = n - k;
 				int w = o - j;
 				if (this.canJoin()) {
@@ -347,9 +353,9 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 		protected void drawIcon(int i, int j, ResourceLocation resourceLocation) {
 			this.minecraft.getTextureManager().bind(resourceLocation);
-			GlStateManager.enableBlend();
+			RenderSystem.enableBlend();
 			GuiComponent.blit(i, j, 0.0F, 0.0F, 32, 32, 32, 32);
-			GlStateManager.disableBlend();
+			RenderSystem.disableBlend();
 		}
 
 		private boolean canJoin() {
@@ -386,6 +392,28 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		}
 
 		@Override
+		public boolean keyPressed(int i, int j, int k) {
+			if (Screen.hasShiftDown()) {
+				ServerSelectionList serverSelectionList = this.screen.serverSelectionList;
+				int l = serverSelectionList.children().indexOf(this);
+				if (i == 264 && l < this.screen.getServers().size() - 1 || i == 265 && l > 0) {
+					this.swap(l, i == 264 ? l + 1 : l - 1);
+					return true;
+				}
+			}
+
+			return super.keyPressed(i, j, k);
+		}
+
+		private void swap(int i, int j) {
+			this.screen.getServers().swap(i, j);
+			this.screen.serverSelectionList.updateOnlineServers(this.screen.getServers());
+			ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.screen.serverSelectionList.children().get(j);
+			this.screen.serverSelectionList.setSelected(entry);
+			ServerSelectionList.this.ensureVisible(entry);
+		}
+
+		@Override
 		public boolean mouseClicked(double d, double e, int i) {
 			double f = d - (double)ServerSelectionList.this.getRowLeft();
 			double g = e - (double)ServerSelectionList.this.getRowTop(ServerSelectionList.this.children().indexOf(this));
@@ -398,25 +426,12 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 
 				int j = this.screen.serverSelectionList.children().indexOf(this);
 				if (f < 16.0 && g < 16.0 && j > 0) {
-					int k = Screen.hasShiftDown() ? 0 : j - 1;
-					this.screen.getServers().swap(j, k);
-					if (this.screen.serverSelectionList.getSelected() == this) {
-						this.screen.setSelected(this);
-					}
-
-					this.screen.serverSelectionList.updateOnlineServers(this.screen.getServers());
+					this.swap(j, j - 1);
 					return true;
 				}
 
 				if (f < 16.0 && g > 16.0 && j < this.screen.getServers().size() - 1) {
-					ServerList serverList = this.screen.getServers();
-					int l = Screen.hasShiftDown() ? serverList.size() - 1 : j + 1;
-					serverList.swap(j, l);
-					if (this.screen.serverSelectionList.getSelected() == this) {
-						this.screen.setSelected(this);
-					}
-
-					this.screen.serverSelectionList.updateOnlineServers(serverList);
+					this.swap(j, j + 1);
 					return true;
 				}
 			}

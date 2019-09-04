@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -141,6 +141,10 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.UNDERWATER, SuspendedParticle.Provider::new);
 		this.register(ParticleTypes.SPLASH, SplashParticle.Provider::new);
 		this.register(ParticleTypes.WITCH, SpellParticle.WitchProvider::new);
+		this.register(ParticleTypes.DRIPPING_HONEY, DripParticle.HoneyHangProvider::new);
+		this.register(ParticleTypes.FALLING_HONEY, DripParticle.HoneyFallProvider::new);
+		this.register(ParticleTypes.LANDING_HONEY, DripParticle.HoneyLandProvider::new);
+		this.register(ParticleTypes.FALLING_NECTAR, DripParticle.NectarFallProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
@@ -364,7 +368,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			Iterable<Particle> iterable = (Iterable<Particle>)this.particles.get(particleRenderType);
 			if (iterable != null) {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = tesselator.getBuilder();
 				particleRenderType.begin(bufferBuilder, this.textureManager);
@@ -385,9 +389,9 @@ public class ParticleEngine implements PreparableReloadListener {
 			}
 		}
 
-		GlStateManager.depthMask(true);
-		GlStateManager.disableBlend();
-		GlStateManager.alphaFunc(516, 0.1F);
+		RenderSystem.depthMask(true);
+		RenderSystem.disableBlend();
+		RenderSystem.alphaFunc(516, 0.1F);
 	}
 
 	public void setLevel(@Nullable Level level) {

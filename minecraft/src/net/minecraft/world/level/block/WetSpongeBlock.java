@@ -14,6 +14,14 @@ public class WetSpongeBlock extends Block {
 		super(properties);
 	}
 
+	@Override
+	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		if (level.getDimension().isUltraWarm()) {
+			level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 2);
+			level.levelEvent(2009, blockPos, 0);
+		}
+	}
+
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {

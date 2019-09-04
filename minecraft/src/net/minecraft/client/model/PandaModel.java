@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -75,8 +75,8 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 		}
 
 		if (this.sitAmount > 0.0F) {
-			this.body.xRot = this.rotlerpRad(this.body.xRot, 1.7407963F, this.sitAmount);
-			this.head.xRot = this.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.sitAmount);
+			this.body.xRot = ModelUtils.rotlerpRad(this.body.xRot, 1.7407963F, this.sitAmount);
+			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.sitAmount);
 			this.leg2.zRot = -0.27079642F;
 			this.leg3.zRot = 0.27079642F;
 			this.leg0.zRot = 0.5707964F;
@@ -104,11 +104,11 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 			this.leg1.xRot = 0.6F * Mth.sin(h * 0.15F);
 			this.leg2.xRot = 0.3F * Mth.sin(h * 0.25F);
 			this.leg3.xRot = -0.3F * Mth.sin(h * 0.25F);
-			this.head.xRot = this.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.lieOnBackAmount);
+			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.lieOnBackAmount);
 		}
 
 		if (this.rollAmount > 0.0F) {
-			this.head.xRot = this.rotlerpRad(this.head.xRot, 2.0561945F, this.rollAmount);
+			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, 2.0561945F, this.rollAmount);
 			this.leg0.xRot = -0.5F * Mth.sin(h * 0.5F);
 			this.leg1.xRot = 0.5F * Mth.sin(h * 0.5F);
 			this.leg2.xRot = 0.5F * Mth.sin(h * 0.5F);
@@ -116,42 +116,28 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 		}
 	}
 
-	protected float rotlerpRad(float f, float g, float h) {
-		float i = g - f;
-
-		while (i < (float) -Math.PI) {
-			i += (float) (Math.PI * 2);
-		}
-
-		while (i >= (float) Math.PI) {
-			i -= (float) (Math.PI * 2);
-		}
-
-		return f + h * i;
-	}
-
 	public void render(T panda, float f, float g, float h, float i, float j, float k) {
 		this.setupAnim(panda, f, g, h, i, j, k);
 		if (this.young) {
 			float l = 3.0F;
-			GlStateManager.pushMatrix();
-			GlStateManager.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
 			float m = 0.6F;
-			GlStateManager.scalef(0.5555555F, 0.5555555F, 0.5555555F);
-			GlStateManager.translatef(0.0F, 23.0F * k, 0.3F);
+			RenderSystem.scalef(0.5555555F, 0.5555555F, 0.5555555F);
+			RenderSystem.translatef(0.0F, 23.0F * k, 0.3F);
 			this.head.render(k);
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(0.33333334F, 0.33333334F, 0.33333334F);
-			GlStateManager.translatef(0.0F, 49.0F * k, 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(0.33333334F, 0.33333334F, 0.33333334F);
+			RenderSystem.translatef(0.0F, 49.0F * k, 0.0F);
 			this.body.render(k);
 			this.leg0.render(k);
 			this.leg1.render(k);
 			this.leg2.render(k);
 			this.leg3.render(k);
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		} else {
 			this.head.render(k);
 			this.body.render(k);

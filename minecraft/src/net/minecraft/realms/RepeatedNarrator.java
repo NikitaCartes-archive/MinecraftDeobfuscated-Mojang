@@ -10,7 +10,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TextComponent;
 
 @Environment(EnvType.CLIENT)
-class RepeatedNarrator {
+public class RepeatedNarrator {
 	final Duration repeatDelay;
 	private final float permitsPerSecond;
 	final AtomicReference<RepeatedNarrator.Params> params;

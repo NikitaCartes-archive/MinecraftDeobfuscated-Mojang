@@ -4,7 +4,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
 
@@ -18,7 +20,16 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 	}
 
 	public boolean carve(
-		ChunkAccess chunkAccess, Random random, int i, int j, int k, int l, int m, BitSet bitSet, ProbabilityFeatureConfiguration probabilityFeatureConfiguration
+		ChunkAccess chunkAccess,
+		Function<BlockPos, Biome> function,
+		Random random,
+		int i,
+		int j,
+		int k,
+		int l,
+		int m,
+		BitSet bitSet,
+		ProbabilityFeatureConfiguration probabilityFeatureConfiguration
 	) {
 		int n = (this.getRange() * 2 - 1) * 16;
 		int o = random.nextInt(random.nextInt(random.nextInt(this.getCaveBound()) + 1) + 1);
@@ -31,7 +42,7 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 			if (random.nextInt(4) == 0) {
 				double g = 0.5;
 				float h = 1.0F + random.nextFloat() * 6.0F;
-				this.genRoom(chunkAccess, random.nextLong(), i, l, m, d, e, f, h, 0.5, bitSet);
+				this.genRoom(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, h, 0.5, bitSet);
 				q += random.nextInt(4);
 			}
 
@@ -41,7 +52,7 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 				float t = this.getThickness(random);
 				int u = n - random.nextInt(n / 4);
 				int v = 0;
-				this.genTunnel(chunkAccess, random.nextLong(), i, l, m, d, e, f, t, s, h, 0, u, this.getYScale(), bitSet);
+				this.genTunnel(chunkAccess, function, random.nextLong(), i, l, m, d, e, f, t, s, h, 0, u, this.getYScale(), bitSet);
 			}
 		}
 
@@ -69,14 +80,31 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 		return random.nextInt(random.nextInt(120) + 8);
 	}
 
-	protected void genRoom(ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, double h, BitSet bitSet) {
+	protected void genRoom(
+		ChunkAccess chunkAccess, Function<BlockPos, Biome> function, long l, int i, int j, int k, double d, double e, double f, float g, double h, BitSet bitSet
+	) {
 		double m = 1.5 + (double)(Mth.sin((float) (Math.PI / 2)) * g);
 		double n = m * h;
-		this.carveSphere(chunkAccess, l, i, j, k, d + 1.0, e, f, m, n, bitSet);
+		this.carveSphere(chunkAccess, function, l, i, j, k, d + 1.0, e, f, m, n, bitSet);
 	}
 
 	protected void genTunnel(
-		ChunkAccess chunkAccess, long l, int i, int j, int k, double d, double e, double f, float g, float h, float m, int n, int o, double p, BitSet bitSet
+		ChunkAccess chunkAccess,
+		Function<BlockPos, Biome> function,
+		long l,
+		int i,
+		int j,
+		int k,
+		double d,
+		double e,
+		double f,
+		float g,
+		float h,
+		float m,
+		int n,
+		int o,
+		double p,
+		BitSet bitSet
 	) {
 		Random random = new Random(l);
 		int q = random.nextInt(o / 2) + o / 4;
@@ -99,8 +127,12 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 			s += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 2.0F;
 			r += (random.nextFloat() - random.nextFloat()) * random.nextFloat() * 4.0F;
 			if (t == q && g > 1.0F) {
-				this.genTunnel(chunkAccess, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5F + 0.5F, h - (float) (Math.PI / 2), m / 3.0F, t, o, 1.0, bitSet);
-				this.genTunnel(chunkAccess, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5F + 0.5F, h + (float) (Math.PI / 2), m / 3.0F, t, o, 1.0, bitSet);
+				this.genTunnel(
+					chunkAccess, function, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5F + 0.5F, h - (float) (Math.PI / 2), m / 3.0F, t, o, 1.0, bitSet
+				);
+				this.genTunnel(
+					chunkAccess, function, random.nextLong(), i, j, k, d, e, f, random.nextFloat() * 0.5F + 0.5F, h + (float) (Math.PI / 2), m / 3.0F, t, o, 1.0, bitSet
+				);
 				return;
 			}
 
@@ -109,7 +141,7 @@ public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration
 					return;
 				}
 
-				this.carveSphere(chunkAccess, l, i, j, k, d, e, f, u, v, bitSet);
+				this.carveSphere(chunkAccess, function, l, i, j, k, d, e, f, u, v, bitSet);
 			}
 		}
 	}

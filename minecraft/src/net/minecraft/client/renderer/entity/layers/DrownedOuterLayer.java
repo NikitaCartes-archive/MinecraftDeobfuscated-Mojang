@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DrownedModel;
@@ -21,7 +21,7 @@ public class DrownedOuterLayer<T extends Zombie> extends RenderLayer<T, DrownedM
 		if (!zombie.isInvisible()) {
 			this.getParentModel().copyPropertiesTo(this.model);
 			this.model.prepareMobModel(zombie, f, g, h);
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.bindTexture(DROWNED_OUTER_LAYER_LOCATION);
 			this.model.render(zombie, f, g, i, j, k, l);
 		}

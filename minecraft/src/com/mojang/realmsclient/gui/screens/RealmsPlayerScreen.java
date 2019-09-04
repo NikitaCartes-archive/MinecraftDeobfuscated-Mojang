@@ -1,6 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.Ops;
 import com.mojang.realmsclient.dto.PlayerInfo;
@@ -218,11 +218,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		}
 
 		int k = RealmsConstants.row(12) + 20;
-		GlStateManager.disableLighting();
-		GlStateManager.disableFog();
+		RenderSystem.disableLighting();
+		RenderSystem.disableFog();
 		Tezzelator tezzelator = Tezzelator.instance;
 		bind("textures/gui/options_background.png");
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		float g = 32.0F;
 		tezzelator.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
 		tezzelator.vertex(0.0, (double)this.height(), 0.0).tex(0.0, (double)((float)(this.height() - k) / 32.0F + 0.0F)).color(64, 64, 64, 255).endVertex();
@@ -263,10 +263,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private void drawRemoveIcon(int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
 		bind("realms:textures/gui/realms/cross_player_icon.png");
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.pushMatrix();
 		RealmsScreen.blit(i, j, 0.0F, bl ? 7.0F : 0.0F, 8, 7, 8, 14);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		if (bl) {
 			this.toolTip = getLocalizedString("mco.configure.world.invites.remove.tooltip");
 		}
@@ -275,10 +275,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private void drawOpped(int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
 		bind("realms:textures/gui/realms/op_icon.png");
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.pushMatrix();
 		RealmsScreen.blit(i, j, 0.0F, bl ? 8.0F : 0.0F, 8, 8, 8, 16);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		if (bl) {
 			this.toolTip = getLocalizedString("mco.configure.world.invites.ops.tooltip");
 		}
@@ -287,10 +287,10 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private void drawNormal(int i, int j, int k, int l) {
 		boolean bl = k >= i && k <= i + 9 && l >= j && l <= j + 9 && l < RealmsConstants.row(12) + 20 && l > RealmsConstants.row(1);
 		bind("realms:textures/gui/realms/user_icon.png");
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.pushMatrix();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.pushMatrix();
 		RealmsScreen.blit(i, j, 0.0F, bl ? 8.0F : 0.0F, 8, 8, 8, 16);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		if (bl) {
 			this.toolTip = getLocalizedString("mco.configure.world.invites.normal.tooltip");
 		}
@@ -421,7 +421,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 				RealmsScreen.getLocalizedString("mco.configure.world.activityfeed.disabled"), RealmsPlayerScreen.this.column2_x, RealmsConstants.row(5), 10526880
 			);
 			RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
-				GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, j + 1, 8.0F, 8.0F, 8, 8, 8, 8, 64, 64);
 				RealmsScreen.blit(RealmsPlayerScreen.this.column1_x + 2 + 2, j + 1, 40.0F, 8.0F, 8, 8, 8, 8, 64, 64);
 			});

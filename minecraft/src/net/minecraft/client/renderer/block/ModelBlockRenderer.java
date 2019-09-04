@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.block;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -113,7 +113,7 @@ public class ModelBlockRenderer {
 			random.setSeed(l);
 			List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
 			if (!list.isEmpty() && (!bl || Block.shouldRenderFace(blockState, blockAndBiomeGetter, blockPos, direction))) {
-				int i = blockState.getLightColor(blockAndBiomeGetter, blockPos.relative(direction));
+				int i = blockAndBiomeGetter.getLightColor(blockState, blockPos.relative(direction));
 				this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, i, false, bufferBuilder, list, bitSet);
 				bl2 = true;
 			}
@@ -261,7 +261,7 @@ public class ModelBlockRenderer {
 			if (bl) {
 				this.calculateShape(blockAndBiomeGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), null, bitSet);
 				BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(bakedQuad.getDirection()) : blockPos;
-				i = blockState.getLightColor(blockAndBiomeGetter, blockPos2);
+				i = blockAndBiomeGetter.getLightColor(blockState, blockPos2);
 			}
 
 			bufferBuilder.putBulkData(bakedQuad.getVertices());
@@ -299,13 +299,13 @@ public class ModelBlockRenderer {
 	}
 
 	public void renderSingleBlock(BakedModel bakedModel, BlockState blockState, float f, boolean bl) {
-		GlStateManager.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
 		int i = this.blockColors.getColor(blockState, null, null, 0);
 		float g = (float)(i >> 16 & 0xFF) / 255.0F;
 		float h = (float)(i >> 8 & 0xFF) / 255.0F;
 		float j = (float)(i & 0xFF) / 255.0F;
 		if (!bl) {
-			GlStateManager.color4f(f, f, f, 1.0F);
+			RenderSystem.color4f(f, f, f, 1.0F);
 		}
 
 		this.renderModel(blockState, bakedModel, f, g, h, j);
@@ -896,7 +896,7 @@ public class ModelBlockRenderer {
 				}
 			}
 
-			int i = blockState.getLightColor(blockAndBiomeGetter, blockPos);
+			int i = blockAndBiomeGetter.getLightColor(blockState, blockPos);
 			if (this.enabled) {
 				if (this.colorCache.size() == 100) {
 					this.colorCache.removeFirstInt();

@@ -2,9 +2,9 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -30,18 +30,18 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		super.tick(blockState, level, blockPos, random);
-		if (level.getMaxLocalRawBrightness(blockPos.above()) >= 9 && random.nextInt(7) == 0) {
-			this.advanceTree(level, blockPos, blockState, random);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		super.tick(blockState, serverLevel, blockPos, random);
+		if (serverLevel.getMaxLocalRawBrightness(blockPos.above()) >= 9 && random.nextInt(7) == 0) {
+			this.advanceTree(serverLevel, blockPos, blockState, random);
 		}
 	}
 
-	public void advanceTree(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random) {
+	public void advanceTree(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
 		if ((Integer)blockState.getValue(STAGE) == 0) {
-			levelAccessor.setBlock(blockPos, blockState.cycle(STAGE), 4);
+			serverLevel.setBlock(blockPos, blockState.cycle(STAGE), 4);
 		} else {
-			this.treeGrower.growTree(levelAccessor, blockPos, blockState, random);
+			this.treeGrower.growTree(serverLevel, serverLevel.getChunkSource().getGenerator(), blockPos, blockState, random);
 		}
 	}
 
@@ -56,8 +56,8 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
-		this.advanceTree(level, blockPos, blockState, random);
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+		this.advanceTree(serverLevel, blockPos, blockState, random);
 	}
 
 	@Override

@@ -1,10 +1,10 @@
 package net.minecraft.world.level.chunk.storage;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.OldDataLayer;
 
@@ -92,17 +92,7 @@ public class OldChunkStorage {
 		}
 
 		compoundTag.put("Sections", listTag);
-		byte[] cs = new byte[256];
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-		for (int k = 0; k < 16; k++) {
-			for (int l = 0; l < 16; l++) {
-				mutableBlockPos.set(oldLevelChunk.x << 4 | k, 0, oldLevelChunk.z << 4 | l);
-				cs[l << 4 | k] = (byte)(Registry.BIOME.getId(biomeSource.getBiome(mutableBlockPos)) & 0xFF);
-			}
-		}
-
-		compoundTag.putByteArray("Biomes", cs);
+		compoundTag.putIntArray("Biomes", new ChunkBiomeContainer(new ChunkPos(oldLevelChunk.x, oldLevelChunk.z), biomeSource).writeBiomes());
 		compoundTag.put("Entities", oldLevelChunk.entities);
 		compoundTag.put("TileEntities", oldLevelChunk.blockEntities);
 		if (oldLevelChunk.blockTicks != null) {

@@ -1,8 +1,8 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -55,7 +55,7 @@ public class GhostRecipe {
 		}
 
 		Lighting.turnOnGui();
-		GlStateManager.disableLighting();
+		RenderSystem.disableLighting();
 
 		for (int k = 0; k < this.ingredients.size(); k++) {
 			GhostRecipe.GhostIngredient ghostIngredient = (GhostRecipe.GhostIngredient)this.ingredients.get(k);
@@ -70,14 +70,14 @@ public class GhostRecipe {
 			ItemStack itemStack = ghostIngredient.getItem();
 			ItemRenderer itemRenderer = minecraft.getItemRenderer();
 			itemRenderer.renderAndDecorateItem(minecraft.player, itemStack, l, m);
-			GlStateManager.depthFunc(516);
+			RenderSystem.depthFunc(516);
 			GuiComponent.fill(l, m, l + 16, m + 16, 822083583);
-			GlStateManager.depthFunc(515);
+			RenderSystem.depthFunc(515);
 			if (k == 0) {
 				itemRenderer.renderGuiItemDecorations(minecraft.font, itemStack, l, m);
 			}
 
-			GlStateManager.enableLighting();
+			RenderSystem.enableLighting();
 		}
 
 		Lighting.turnOff();

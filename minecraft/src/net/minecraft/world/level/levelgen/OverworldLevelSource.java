@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.NaturalSpawner;
@@ -36,7 +37,7 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	public OverworldLevelSource(LevelAccessor levelAccessor, BiomeSource biomeSource, OverworldGeneratorSettings overworldGeneratorSettings) {
 		super(levelAccessor, biomeSource, 4, 8, 256, overworldGeneratorSettings, true);
 		this.random.consumeCount(2620);
-		this.depthNoise = new PerlinNoise(this.random, 16);
+		this.depthNoise = new PerlinNoise(this.random, 15, 0);
 		this.isAmplified = levelAccessor.getLevelData().getGeneratorType() == LevelType.AMPLIFIED;
 	}
 
@@ -44,7 +45,7 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
 		int i = worldGenRegion.getCenterX();
 		int j = worldGenRegion.getCenterZ();
-		Biome biome = worldGenRegion.getChunk(i, j).getBiomes()[0];
+		Biome biome = worldGenRegion.getBiome(new ChunkPos(i, j).getWorldPosition());
 		WorldgenRandom worldgenRandom = new WorldgenRandom();
 		worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), i << 4, j << 4);
 		NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, biome, i, j, worldgenRandom);
@@ -79,26 +80,27 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 		float g = 0.0F;
 		float h = 0.0F;
 		int k = 2;
-		float l = this.biomeSource.getNoiseBiome(i, j).getDepth();
+		int l = this.getSeaLevel();
+		float m = this.biomeSource.getNoiseBiome(i, l, j).getDepth();
 
-		for (int m = -2; m <= 2; m++) {
-			for (int n = -2; n <= 2; n++) {
-				Biome biome = this.biomeSource.getNoiseBiome(i + m, j + n);
-				float o = biome.getDepth();
-				float p = biome.getScale();
-				if (this.isAmplified && o > 0.0F) {
-					o = 1.0F + o * 2.0F;
-					p = 1.0F + p * 4.0F;
+		for (int n = -2; n <= 2; n++) {
+			for (int o = -2; o <= 2; o++) {
+				Biome biome = this.biomeSource.getNoiseBiome(i + n, l, j + o);
+				float p = biome.getDepth();
+				float q = biome.getScale();
+				if (this.isAmplified && p > 0.0F) {
+					p = 1.0F + p * 2.0F;
+					q = 1.0F + q * 4.0F;
 				}
 
-				float q = BIOME_WEIGHTS[m + 2 + (n + 2) * 5] / (o + 2.0F);
-				if (biome.getDepth() > l) {
-					q /= 2.0F;
+				float r = BIOME_WEIGHTS[n + 2 + (o + 2) * 5] / (p + 2.0F);
+				if (biome.getDepth() > m) {
+					r /= 2.0F;
 				}
 
-				f += p * q;
-				g += o * q;
-				h += q;
+				f += q * r;
+				g += p * r;
+				h += r;
 			}
 		}
 
@@ -112,7 +114,7 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	}
 
 	private double getRdepth(int i, int j) {
-		double d = this.depthNoise.getValue((double)(i * 200), 10.0, (double)(j * 200), 1.0, 0.0, true) / 8000.0;
+		double d = this.depthNoise.getValue((double)(i * 200), 10.0, (double)(j * 200), 1.0, 0.0, true) * 65535.0 / 8000.0;
 		if (d < 0.0) {
 			d = -d * 0.3;
 		}

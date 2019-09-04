@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -25,14 +25,14 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 	}
 
 	public void render(T abstractMinecart, double d, double e, double f, float g, float h) {
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		this.bindTexture(abstractMinecart);
 		long l = (long)abstractMinecart.getId() * 493286711L;
 		l = l * l * 4392167121L + l * 98761L;
 		float i = (((float)(l >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float j = (((float)(l >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float k = (((float)(l >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
-		GlStateManager.translatef(i, j, k);
+		RenderSystem.translatef(i, j, k);
 		double m = Mth.lerp((double)h, abstractMinecart.xOld, abstractMinecart.x);
 		double n = Mth.lerp((double)h, abstractMinecart.yOld, abstractMinecart.y);
 		double o = Mth.lerp((double)h, abstractMinecart.zOld, abstractMinecart.z);
@@ -61,9 +61,9 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 			}
 		}
 
-		GlStateManager.translatef((float)d, (float)e + 0.375F, (float)f);
-		GlStateManager.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(-q, 0.0F, 0.0F, 1.0F);
+		RenderSystem.translatef((float)d, (float)e + 0.375F, (float)f);
+		RenderSystem.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(-q, 0.0F, 0.0F, 1.0F);
 		float r = (float)abstractMinecart.getHurtTime() - h;
 		float s = abstractMinecart.getDamage() - h;
 		if (s < 0.0F) {
@@ -71,34 +71,34 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		}
 
 		if (r > 0.0F) {
-			GlStateManager.rotatef(Mth.sin(r) * r * s / 10.0F * (float)abstractMinecart.getHurtDir(), 1.0F, 0.0F, 0.0F);
+			RenderSystem.rotatef(Mth.sin(r) * r * s / 10.0F * (float)abstractMinecart.getHurtDir(), 1.0F, 0.0F, 0.0F);
 		}
 
 		int t = abstractMinecart.getDisplayOffset();
 		if (this.solidRender) {
-			GlStateManager.enableColorMaterial();
-			GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(abstractMinecart));
+			RenderSystem.enableColorMaterial();
+			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(abstractMinecart));
 		}
 
 		BlockState blockState = abstractMinecart.getDisplayBlockState();
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
-			GlStateManager.pushMatrix();
+			RenderSystem.pushMatrix();
 			this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
 			float u = 0.75F;
-			GlStateManager.scalef(0.75F, 0.75F, 0.75F);
-			GlStateManager.translatef(-0.5F, (float)(t - 8) / 16.0F, 0.5F);
+			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
+			RenderSystem.translatef(-0.5F, (float)(t - 8) / 16.0F, 0.5F);
 			this.renderMinecartContents(abstractMinecart, h, blockState);
-			GlStateManager.popMatrix();
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.bindTexture(abstractMinecart);
 		}
 
-		GlStateManager.scalef(-1.0F, -1.0F, 1.0F);
+		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
 		this.model.render(abstractMinecart, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		if (this.solidRender) {
-			GlStateManager.tearDownSolidRenderingTextureCombine();
-			GlStateManager.disableColorMaterial();
+			RenderSystem.tearDownSolidRenderingTextureCombine();
+			RenderSystem.disableColorMaterial();
 		}
 
 		super.render(abstractMinecart, d, e, f, g, h);
@@ -109,8 +109,8 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 	}
 
 	protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState) {
-		GlStateManager.pushMatrix();
+		RenderSystem.pushMatrix();
 		Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, abstractMinecart.getBrightness());
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 	}
 }

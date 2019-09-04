@@ -70,7 +70,11 @@ public class Arrow extends AbstractArrow {
 
 	private void updateColor() {
 		this.fixedColor = false;
-		this.entityData.set(ID_EFFECT_COLOR, PotionUtils.getColor(PotionUtils.getAllEffects(this.potion, this.effects)));
+		if (this.potion == Potions.EMPTY && this.effects.isEmpty()) {
+			this.entityData.set(ID_EFFECT_COLOR, -1);
+		} else {
+			this.entityData.set(ID_EFFECT_COLOR, PotionUtils.getColor(PotionUtils.getAllEffects(this.potion, this.effects)));
+		}
 	}
 
 	public void addEffect(MobEffectInstance mobEffectInstance) {

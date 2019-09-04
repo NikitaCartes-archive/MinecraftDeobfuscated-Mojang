@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -9,9 +10,9 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class MemoryTracker {
 	public static synchronized int genLists(int i) {
-		int j = GlStateManager.genLists(i);
+		int j = RenderSystem.genLists(i);
 		if (j == 0) {
-			int k = GlStateManager.getError();
+			int k = RenderSystem.getError();
 			String string = "No error code reported";
 			if (k != 0) {
 				string = GLX.getErrorString(k);
@@ -24,7 +25,7 @@ public class MemoryTracker {
 	}
 
 	public static synchronized void releaseLists(int i, int j) {
-		GlStateManager.deleteLists(i, j);
+		RenderSystem.deleteLists(i, j);
 	}
 
 	public static synchronized void releaseList(int i) {

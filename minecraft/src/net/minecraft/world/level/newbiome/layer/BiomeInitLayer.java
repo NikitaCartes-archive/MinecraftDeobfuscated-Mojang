@@ -3,7 +3,6 @@ package net.minecraft.world.level.newbiome.layer;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.levelgen.OverworldGeneratorSettings;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.traits.C0Transformer;
 
@@ -29,22 +28,22 @@ public class BiomeInitLayer implements C0Transformer {
 	private static final int[] MEDIUM_BIOMES = new int[]{FOREST, DARK_FOREST, MOUNTAINS, PLAINS, BIRCH_FOREST, SWAMP};
 	private static final int[] COLD_BIOMES = new int[]{FOREST, MOUNTAINS, TAIGA, PLAINS};
 	private static final int[] ICE_BIOMES = new int[]{SNOWY_TUNDRA, SNOWY_TUNDRA, SNOWY_TUNDRA, SNOWY_TAIGA};
-	private final OverworldGeneratorSettings settings;
+	private final int fixedBiome;
 	private int[] warmBiomes = WARM_BIOMES;
 
-	public BiomeInitLayer(LevelType levelType, OverworldGeneratorSettings overworldGeneratorSettings) {
+	public BiomeInitLayer(LevelType levelType, int i) {
 		if (levelType == LevelType.NORMAL_1_1) {
 			this.warmBiomes = LEGACY_WARM_BIOMES;
-			this.settings = null;
+			this.fixedBiome = -1;
 		} else {
-			this.settings = overworldGeneratorSettings;
+			this.fixedBiome = i;
 		}
 	}
 
 	@Override
 	public int apply(Context context, int i) {
-		if (this.settings != null && this.settings.getFixedBiome() >= 0) {
-			return this.settings.getFixedBiome();
+		if (this.fixedBiome >= 0) {
+			return this.fixedBiome;
 		} else {
 			int j = (i & 3840) >> 8;
 			i &= -3841;

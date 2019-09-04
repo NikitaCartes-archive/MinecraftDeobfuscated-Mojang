@@ -58,7 +58,7 @@ public final class SwampHillsBiome extends Biome {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public int getGrassColor(BlockPos blockPos) {
-		double d = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.0225, (double)blockPos.getZ() * 0.0225);
+		double d = BIOME_INFO_NOISE.getValue((double)blockPos.getX() * 0.0225, (double)blockPos.getZ() * 0.0225, false);
 		return d < -0.1 ? 5011004 : 6975545;
 	}
 

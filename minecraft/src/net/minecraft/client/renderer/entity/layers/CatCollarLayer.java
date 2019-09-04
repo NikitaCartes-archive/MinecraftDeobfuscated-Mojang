@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
@@ -21,7 +21,7 @@ public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
 		if (cat.isTame() && !cat.isInvisible()) {
 			this.bindTexture(CAT_COLLAR_LOCATION);
 			float[] fs = cat.getCollarColor().getTextureDiffuseColors();
-			GlStateManager.color3f(fs[0], fs[1], fs[2]);
+			RenderSystem.color3f(fs[0], fs[1], fs[2]);
 			this.getParentModel().copyPropertiesTo(this.catModel);
 			this.catModel.prepareMobModel(cat, f, g, h);
 			this.catModel.render(cat, f, g, i, j, k, l);

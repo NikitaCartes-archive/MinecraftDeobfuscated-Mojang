@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
@@ -23,11 +23,11 @@ public class SquidRenderer extends MobRenderer<Squid, SquidModel<Squid>> {
 	protected void setupRotations(Squid squid, float f, float g, float h) {
 		float i = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
 		float j = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
-		GlStateManager.translatef(0.0F, 0.5F, 0.0F);
-		GlStateManager.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
-		GlStateManager.rotatef(i, 1.0F, 0.0F, 0.0F);
-		GlStateManager.rotatef(j, 0.0F, 1.0F, 0.0F);
-		GlStateManager.translatef(0.0F, -1.2F, 0.0F);
+		RenderSystem.translatef(0.0F, 0.5F, 0.0F);
+		RenderSystem.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
+		RenderSystem.rotatef(i, 1.0F, 0.0F, 0.0F);
+		RenderSystem.rotatef(j, 0.0F, 1.0F, 0.0F);
+		RenderSystem.translatef(0.0F, -1.2F, 0.0F);
 	}
 
 	protected float getBob(Squid squid, float f) {

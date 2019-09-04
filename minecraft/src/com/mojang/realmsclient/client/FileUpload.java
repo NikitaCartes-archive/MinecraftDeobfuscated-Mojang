@@ -41,7 +41,7 @@ public class FileUpload {
 	private final String username;
 	private final String clientVersion;
 	private final UploadStatus uploadStatus;
-	private AtomicBoolean cancelled = new AtomicBoolean(false);
+	private final AtomicBoolean cancelled = new AtomicBoolean(false);
 	private CompletableFuture<UploadResult> uploadTask;
 	private final RequestConfig requestConfig = RequestConfig.custom()
 		.setSocketTimeout((int)TimeUnit.MINUTES.toMillis(10L))

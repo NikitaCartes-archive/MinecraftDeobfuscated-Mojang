@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EvokerFangsModel;
@@ -24,18 +24,18 @@ public class EvokerFangsRenderer extends EntityRenderer<EvokerFangs> {
 				j = (float)((double)j * ((1.0 - (double)i) / 0.1F));
 			}
 
-			GlStateManager.pushMatrix();
-			GlStateManager.disableCull();
-			GlStateManager.enableAlphaTest();
+			RenderSystem.pushMatrix();
+			RenderSystem.disableCull();
+			RenderSystem.enableAlphaTest();
 			this.bindTexture(evokerFangs);
-			GlStateManager.translatef((float)d, (float)e, (float)f);
-			GlStateManager.rotatef(90.0F - evokerFangs.yRot, 0.0F, 1.0F, 0.0F);
-			GlStateManager.scalef(-j, -j, j);
+			RenderSystem.translatef((float)d, (float)e, (float)f);
+			RenderSystem.rotatef(90.0F - evokerFangs.yRot, 0.0F, 1.0F, 0.0F);
+			RenderSystem.scalef(-j, -j, j);
 			float k = 0.03125F;
-			GlStateManager.translatef(0.0F, -0.626F, 0.0F);
+			RenderSystem.translatef(0.0F, -0.626F, 0.0F);
 			this.model.render(evokerFangs, i, 0.0F, 0.0F, evokerFangs.yRot, evokerFangs.xRot, 0.03125F);
-			GlStateManager.popMatrix();
-			GlStateManager.enableCull();
+			RenderSystem.popMatrix();
+			RenderSystem.enableCull();
 			super.render(evokerFangs, d, e, f, g, h);
 		}
 	}

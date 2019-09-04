@@ -4,8 +4,8 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -27,17 +27,17 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(level, blockPos)) {
-			level.destroyBlock(blockPos, true);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!blockState.canSurvive(serverLevel, blockPos)) {
+			serverLevel.destroyBlock(blockPos, true);
 		} else {
 			BlockPos blockPos2 = blockPos.above();
-			if (level.isEmptyBlock(blockPos2) && blockPos2.getY() < 256) {
+			if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < 256) {
 				int i = (Integer)blockState.getValue(AGE);
 				if (i < 5) {
 					boolean bl = false;
 					boolean bl2 = false;
-					BlockState blockState2 = level.getBlockState(blockPos.below());
+					BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
 					Block block = blockState2.getBlock();
 					if (block == Blocks.END_STONE) {
 						bl = true;
@@ -45,7 +45,7 @@ public class ChorusFlowerBlock extends Block {
 						int j = 1;
 
 						for (int k = 0; k < 4; k++) {
-							Block block2 = level.getBlockState(blockPos.below(j + 1)).getBlock();
+							Block block2 = serverLevel.getBlockState(blockPos.below(j + 1)).getBlock();
 							if (block2 != this.plant) {
 								if (block2 == Blocks.END_STONE) {
 									bl2 = true;
@@ -63,9 +63,9 @@ public class ChorusFlowerBlock extends Block {
 						bl = true;
 					}
 
-					if (bl && allNeighborsEmpty(level, blockPos2, null) && level.isEmptyBlock(blockPos.above(2))) {
-						level.setBlock(blockPos, this.plant.getStateForPlacement(level, blockPos), 2);
-						this.placeGrownFlower(level, blockPos2, i);
+					if (bl && allNeighborsEmpty(serverLevel, blockPos2, null) && serverLevel.isEmptyBlock(blockPos.above(2))) {
+						serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
+						this.placeGrownFlower(serverLevel, blockPos2, i);
 					} else if (i < 4) {
 						int j = random.nextInt(4);
 						if (bl2) {
@@ -77,19 +77,21 @@ public class ChorusFlowerBlock extends Block {
 						for (int l = 0; l < j; l++) {
 							Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 							BlockPos blockPos3 = blockPos.relative(direction);
-							if (level.isEmptyBlock(blockPos3) && level.isEmptyBlock(blockPos3.below()) && allNeighborsEmpty(level, blockPos3, direction.getOpposite())) {
-								this.placeGrownFlower(level, blockPos3, i + 1);
+							if (serverLevel.isEmptyBlock(blockPos3)
+								&& serverLevel.isEmptyBlock(blockPos3.below())
+								&& allNeighborsEmpty(serverLevel, blockPos3, direction.getOpposite())) {
+								this.placeGrownFlower(serverLevel, blockPos3, i + 1);
 								bl3 = true;
 							}
 						}
 
 						if (bl3) {
-							level.setBlock(blockPos, this.plant.getStateForPlacement(level, blockPos), 2);
+							serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
 						} else {
-							this.placeDeadFlower(level, blockPos);
+							this.placeDeadFlower(serverLevel, blockPos);
 						}
 					} else {
-						this.placeDeadFlower(level, blockPos);
+						this.placeDeadFlower(serverLevel, blockPos);
 					}
 				}
 			}
@@ -222,7 +224,6 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
-		popResource(level, blockPos, new ItemStack(this));
-		level.destroyBlock(blockPos, true);
+		level.destroyBlock(blockPos, true, entity);
 	}
 }

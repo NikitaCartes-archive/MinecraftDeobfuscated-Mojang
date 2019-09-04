@@ -13,30 +13,31 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-public class CartographyMenu extends AbstractContainerMenu {
+public class CartographyTableMenu extends AbstractContainerMenu {
 	private final ContainerLevelAccess access;
 	private boolean quickMoved;
+	private long lastSoundTime;
 	public final Container container = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {
-			CartographyMenu.this.slotsChanged(this);
+			CartographyTableMenu.this.slotsChanged(this);
 			super.setChanged();
 		}
 	};
 	private final ResultContainer resultContainer = new ResultContainer() {
 		@Override
 		public void setChanged() {
-			CartographyMenu.this.slotsChanged(this);
+			CartographyTableMenu.this.slotsChanged(this);
 			super.setChanged();
 		}
 	};
 
-	public CartographyMenu(int i, Inventory inventory) {
+	public CartographyTableMenu(int i, Inventory inventory) {
 		this(i, inventory, ContainerLevelAccess.NULL);
 	}
 
-	public CartographyMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
-		super(MenuType.CARTOGRAPHY, i);
+	public CartographyTableMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
+		super(MenuType.CARTOGRAPHY_TABLE, i);
 		this.access = containerLevelAccess;
 		this.addSlot(new Slot(this.container, 0, 15, 15) {
 			@Override
@@ -51,48 +52,50 @@ public class CartographyMenu extends AbstractContainerMenu {
 				return item == Items.PAPER || item == Items.MAP || item == Items.GLASS_PANE;
 			}
 		});
-		this.addSlot(
-			new Slot(this.resultContainer, 2, 145, 39) {
-				@Override
-				public boolean mayPlace(ItemStack itemStack) {
-					return false;
-				}
-
-				@Override
-				public ItemStack remove(int i) {
-					ItemStack itemStack = super.remove(i);
-					ItemStack itemStack2 = (ItemStack)containerLevelAccess.evaluate((level, blockPos) -> {
-						if (!CartographyMenu.this.quickMoved && CartographyMenu.this.container.getItem(1).getItem() == Items.GLASS_PANE) {
-							ItemStack itemStack2x = MapItem.lockMap(level, CartographyMenu.this.container.getItem(0));
-							if (itemStack2x != null) {
-								itemStack2x.setCount(1);
-								return itemStack2x;
-							}
-						}
-
-						return itemStack;
-					}).orElse(itemStack);
-					CartographyMenu.this.container.removeItem(0, 1);
-					CartographyMenu.this.container.removeItem(1, 1);
-					return itemStack2;
-				}
-
-				@Override
-				protected void onQuickCraft(ItemStack itemStack, int i) {
-					this.remove(i);
-					super.onQuickCraft(itemStack, i);
-				}
-
-				@Override
-				public ItemStack onTake(Player player, ItemStack itemStack) {
-					itemStack.getItem().onCraftedBy(itemStack, player.level, player);
-					containerLevelAccess.execute(
-						(level, blockPos) -> level.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F)
-					);
-					return super.onTake(player, itemStack);
-				}
+		this.addSlot(new Slot(this.resultContainer, 2, 145, 39) {
+			@Override
+			public boolean mayPlace(ItemStack itemStack) {
+				return false;
 			}
-		);
+
+			@Override
+			public ItemStack remove(int i) {
+				ItemStack itemStack = super.remove(i);
+				ItemStack itemStack2 = (ItemStack)containerLevelAccess.evaluate((level, blockPos) -> {
+					if (!CartographyTableMenu.this.quickMoved && CartographyTableMenu.this.container.getItem(1).getItem() == Items.GLASS_PANE) {
+						ItemStack itemStack2x = MapItem.lockMap(level, CartographyTableMenu.this.container.getItem(0));
+						if (itemStack2x != null) {
+							itemStack2x.setCount(1);
+							return itemStack2x;
+						}
+					}
+
+					return itemStack;
+				}).orElse(itemStack);
+				CartographyTableMenu.this.container.removeItem(0, 1);
+				CartographyTableMenu.this.container.removeItem(1, 1);
+				return itemStack2;
+			}
+
+			@Override
+			protected void onQuickCraft(ItemStack itemStack, int i) {
+				this.remove(i);
+				super.onQuickCraft(itemStack, i);
+			}
+
+			@Override
+			public ItemStack onTake(Player player, ItemStack itemStack) {
+				itemStack.getItem().onCraftedBy(itemStack, player.level, player);
+				containerLevelAccess.execute((level, blockPos) -> {
+					long l = level.getGameTime();
+					if (CartographyTableMenu.this.lastSoundTime != l) {
+						level.playSound(null, blockPos, SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, SoundSource.BLOCKS, 1.0F, 1.0F);
+						CartographyTableMenu.this.lastSoundTime = l;
+					}
+				});
+				return super.onTake(player, itemStack);
+			}
+		});
 
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 9; k++) {
@@ -161,7 +164,7 @@ public class CartographyMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean canTakeItemForPickAll(ItemStack itemStack, Slot slot) {
-		return false;
+		return slot.container != this.resultContainer && super.canTakeItemForPickAll(itemStack, slot);
 	}
 
 	@Override

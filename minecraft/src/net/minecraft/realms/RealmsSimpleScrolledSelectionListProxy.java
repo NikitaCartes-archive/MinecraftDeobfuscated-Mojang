@@ -1,6 +1,7 @@
 package net.minecraft.realms;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -65,8 +66,8 @@ public class RealmsSimpleScrolledSelectionListProxy extends ScrolledSelectionLis
 			int k = this.getScrollbarPosition();
 			int l = k + 6;
 			this.capYPosition();
-			GlStateManager.disableLighting();
-			GlStateManager.disableFog();
+			RenderSystem.disableLighting();
+			RenderSystem.disableFog();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			int m = this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
@@ -76,16 +77,16 @@ public class RealmsSimpleScrolledSelectionListProxy extends ScrolledSelectionLis
 			}
 
 			this.renderList(m, n, i, j, f);
-			GlStateManager.disableDepthTest();
+			RenderSystem.disableDepthTest();
 			this.renderHoleBackground(0, this.y0, 255, 255);
 			this.renderHoleBackground(this.y1, this.height, 255, 255);
-			GlStateManager.enableBlend();
-			GlStateManager.blendFuncSeparate(
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			GlStateManager.disableAlphaTest();
-			GlStateManager.shadeModel(7425);
-			GlStateManager.disableTexture();
+			RenderSystem.disableAlphaTest();
+			RenderSystem.shadeModel(7425);
+			RenderSystem.disableTexture();
 			int o = this.getMaxScroll();
 			if (o > 0) {
 				int p = (this.y1 - this.y0) * (this.y1 - this.y0) / this.getMaxPosition();
@@ -116,10 +117,10 @@ public class RealmsSimpleScrolledSelectionListProxy extends ScrolledSelectionLis
 			}
 
 			this.renderDecorations(i, j);
-			GlStateManager.enableTexture();
-			GlStateManager.shadeModel(7424);
-			GlStateManager.enableAlphaTest();
-			GlStateManager.disableBlend();
+			RenderSystem.enableTexture();
+			RenderSystem.shadeModel(7424);
+			RenderSystem.enableAlphaTest();
+			RenderSystem.disableBlend();
 		}
 	}
 

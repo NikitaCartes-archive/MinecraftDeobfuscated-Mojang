@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
@@ -37,16 +38,16 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (!this.isLocked(level, blockPos, blockState)) {
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (!this.isLocked(serverLevel, blockPos, blockState)) {
 			boolean bl = (Boolean)blockState.getValue(POWERED);
-			boolean bl2 = this.shouldTurnOn(level, blockPos, blockState);
+			boolean bl2 = this.shouldTurnOn(serverLevel, blockPos, blockState);
 			if (bl && !bl2) {
-				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 2);
+				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 2);
 			} else if (!bl) {
-				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 2);
+				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 2);
 				if (!bl2) {
-					level.getBlockTicks().scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.HIGH);
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.HIGH);
 				}
 			}
 		}

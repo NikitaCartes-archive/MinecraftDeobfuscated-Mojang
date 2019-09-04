@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -20,15 +20,15 @@ public class CampfireRenderer extends BlockEntityRenderer<CampfireBlockEntity> {
 		for (int j = 0; j < nonNullList.size(); j++) {
 			ItemStack itemStack = nonNullList.get(j);
 			if (itemStack != ItemStack.EMPTY) {
-				GlStateManager.pushMatrix();
-				GlStateManager.translatef((float)d + 0.5F, (float)e + 0.44921875F, (float)f + 0.5F);
+				RenderSystem.pushMatrix();
+				RenderSystem.translatef((float)d + 0.5F, (float)e + 0.44921875F, (float)f + 0.5F);
 				Direction direction2 = Direction.from2DDataValue((j + direction.get2DDataValue()) % 4);
-				GlStateManager.rotatef(-direction2.toYRot(), 0.0F, 1.0F, 0.0F);
-				GlStateManager.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
-				GlStateManager.translatef(-0.3125F, -0.3125F, 0.0F);
-				GlStateManager.scalef(0.375F, 0.375F, 0.375F);
+				RenderSystem.rotatef(-direction2.toYRot(), 0.0F, 1.0F, 0.0F);
+				RenderSystem.rotatef(90.0F, 1.0F, 0.0F, 0.0F);
+				RenderSystem.translatef(-0.3125F, -0.3125F, 0.0F);
+				RenderSystem.scalef(0.375F, 0.375F, 0.375F);
 				Minecraft.getInstance().getItemRenderer().renderStatic(itemStack, ItemTransforms.TransformType.FIXED);
-				GlStateManager.popMatrix();
+				RenderSystem.popMatrix();
 			}
 		}
 	}

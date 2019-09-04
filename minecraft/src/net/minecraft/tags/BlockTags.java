@@ -41,6 +41,8 @@ public class BlockTags {
 	public static final Tag<Block> SMALL_FLOWERS = bind("small_flowers");
 	public static final Tag<Block> BEDS = bind("beds");
 	public static final Tag<Block> FENCES = bind("fences");
+	public static final Tag<Block> TALL_FLOWERS = bind("tall_flowers");
+	public static final Tag<Block> FLOWERS = bind("flowers");
 	public static final Tag<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag<Block> ICE = bind("ice");
@@ -58,6 +60,9 @@ public class BlockTags {
 	public static final Tag<Block> SIGNS = bind("signs");
 	public static final Tag<Block> DRAGON_IMMUNE = bind("dragon_immune");
 	public static final Tag<Block> WITHER_IMMUNE = bind("wither_immune");
+	public static final Tag<Block> BEEHIVES = bind("beehives");
+	public static final Tag<Block> CROPS = bind("crops");
+	public static final Tag<Block> BEE_GROWABLES = bind("bee_growables");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

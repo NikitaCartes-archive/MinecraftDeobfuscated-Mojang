@@ -6,7 +6,7 @@ import com.ibm.icu.text.ArabicShapingException;
 import com.ibm.icu.text.Bidi;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -44,12 +44,12 @@ public class Font implements AutoCloseable {
 	}
 
 	public int drawShadow(String string, float f, float g, int i) {
-		GlStateManager.enableAlphaTest();
+		RenderSystem.enableAlphaTest();
 		return this.drawInternal(string, f, g, i, true);
 	}
 
 	public int draw(String string, float f, float g, int i) {
-		GlStateManager.enableAlphaTest();
+		RenderSystem.enableAlphaTest();
 		return this.drawInternal(string, f, g, i, false);
 	}
 
@@ -172,7 +172,7 @@ public class Font implements AutoCloseable {
 
 		tesselator.end();
 		if (!list.isEmpty()) {
-			GlStateManager.disableTexture();
+			RenderSystem.disableTexture();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
 
 			for (Font.Effect effect : list) {
@@ -180,7 +180,7 @@ public class Font implements AutoCloseable {
 			}
 
 			tesselator.end();
-			GlStateManager.enableTexture();
+			RenderSystem.enableTexture();
 		}
 
 		return f;

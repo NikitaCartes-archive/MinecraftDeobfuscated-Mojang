@@ -17,7 +17,7 @@ import org.lwjgl.openal.AL10;
 public class Channel {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final int source;
-	private AtomicBoolean initialized = new AtomicBoolean(true);
+	private final AtomicBoolean initialized = new AtomicBoolean(true);
 	private int streamingBufferSize = 16384;
 	@Nullable
 	private AudioStream stream;

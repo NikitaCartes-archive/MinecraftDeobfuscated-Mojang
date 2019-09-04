@@ -1,10 +1,9 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -74,21 +73,21 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		int k = this.leftPos;
 		int l = this.topPos;
 		this.renderBg(f, i, j);
-		GlStateManager.disableRescaleNormal();
+		RenderSystem.disableRescaleNormal();
 		Lighting.turnOff();
-		GlStateManager.disableLighting();
-		GlStateManager.disableDepthTest();
+		RenderSystem.disableLighting();
+		RenderSystem.disableDepthTest();
 		super.render(i, j, f);
 		Lighting.turnOnGui();
-		GlStateManager.pushMatrix();
-		GlStateManager.translatef((float)k, (float)l, 0.0F);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.enableRescaleNormal();
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef((float)k, (float)l, 0.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.enableRescaleNormal();
 		this.hoveredSlot = null;
 		int m = 240;
 		int n = 240;
-		GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, 240.0F, 240.0F);
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.glMultiTexCoord2f(33985, 240.0F, 240.0F);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
 		for (int o = 0; o < this.menu.slots.size(); o++) {
 			Slot slot = (Slot)this.menu.slots.get(o);
@@ -98,15 +97,15 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 			if (this.isHovering(slot, (double)i, (double)j) && slot.isActive()) {
 				this.hoveredSlot = slot;
-				GlStateManager.disableLighting();
-				GlStateManager.disableDepthTest();
+				RenderSystem.disableLighting();
+				RenderSystem.disableDepthTest();
 				int p = slot.x;
 				int q = slot.y;
-				GlStateManager.colorMask(true, true, true, false);
+				RenderSystem.colorMask(true, true, true, false);
 				this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
-				GlStateManager.colorMask(true, true, true, true);
-				GlStateManager.enableLighting();
-				GlStateManager.enableDepthTest();
+				RenderSystem.colorMask(true, true, true, true);
+				RenderSystem.enableLighting();
+				RenderSystem.enableDepthTest();
 			}
 		}
 
@@ -147,9 +146,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			this.renderFloatingItem(this.snapbackItem, s, t, null);
 		}
 
-		GlStateManager.popMatrix();
-		GlStateManager.enableLighting();
-		GlStateManager.enableDepthTest();
+		RenderSystem.popMatrix();
+		RenderSystem.enableLighting();
+		RenderSystem.enableDepthTest();
 		Lighting.turnOn();
 	}
 
@@ -160,7 +159,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
-		GlStateManager.translatef(0.0F, 0.0F, 32.0F);
+		RenderSystem.translatef(0.0F, 0.0F, 32.0F);
 		this.blitOffset = 200;
 		this.itemRenderer.blitOffset = 200.0F;
 		this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
@@ -213,10 +212,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			String string2 = slot.getNoItemIcon();
 			if (string2 != null) {
 				TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-				GlStateManager.disableLighting();
+				RenderSystem.disableLighting();
 				this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
 				blit(i, j, this.blitOffset, 16, 16, textureAtlasSprite);
-				GlStateManager.enableLighting();
+				RenderSystem.enableLighting();
 				bl2 = true;
 			}
 		}
@@ -226,7 +225,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				fill(i, j, i + 16, j + 16, -2130706433);
 			}
 
-			GlStateManager.enableDepthTest();
+			RenderSystem.enableDepthTest();
 			this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j);
 			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
 		}

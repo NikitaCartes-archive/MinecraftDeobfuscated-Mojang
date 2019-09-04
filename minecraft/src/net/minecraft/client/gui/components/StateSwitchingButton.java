@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -45,7 +45,7 @@ public class StateSwitchingButton extends AbstractWidget {
 	public void renderButton(int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
 		minecraft.getTextureManager().bind(this.resourceLocation);
-		GlStateManager.disableDepthTest();
+		RenderSystem.disableDepthTest();
 		int k = this.xTexStart;
 		int l = this.yTexStart;
 		if (this.isStateTriggered) {
@@ -57,6 +57,6 @@ public class StateSwitchingButton extends AbstractWidget {
 		}
 
 		this.blit(this.x, this.y, k, l, this.width, this.height);
-		GlStateManager.enableDepthTest();
+		RenderSystem.enableDepthTest();
 	}
 }

@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Ordering;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -51,8 +51,8 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int i = this.leftPos - 124;
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty()) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GlStateManager.disableLighting();
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.disableLighting();
 			int j = 33;
 			if (collection.size() > 5) {
 				j = 132 / (collection.size() - 1);
@@ -70,7 +70,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		int k = this.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
-			GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.blit(i, k, 0, 166, 140, 32);
 			k += j;
 		}

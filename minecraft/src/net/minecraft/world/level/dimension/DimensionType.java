@@ -9,28 +9,41 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Serializable;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.biome.FuzzyOffsetBiomeZoomer;
+import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 
 public class DimensionType implements Serializable {
-	public static final DimensionType OVERWORLD = register("overworld", new DimensionType(1, "", "", NormalDimension::new, true));
-	public static final DimensionType NETHER = register("the_nether", new DimensionType(0, "_nether", "DIM-1", NetherDimension::new, false));
-	public static final DimensionType THE_END = register("the_end", new DimensionType(2, "_end", "DIM1", TheEndDimension::new, false));
+	public static final DimensionType OVERWORLD = register(
+		"overworld", new DimensionType(1, "", "", NormalDimension::new, true, FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE)
+	);
+	public static final DimensionType NETHER = register(
+		"the_nether", new DimensionType(0, "_nether", "DIM-1", NetherDimension::new, false, FuzzyOffsetBiomeZoomer.INSTANCE)
+	);
+	public static final DimensionType THE_END = register(
+		"the_end", new DimensionType(2, "_end", "DIM1", TheEndDimension::new, false, FuzzyOffsetBiomeZoomer.INSTANCE)
+	);
 	private final int id;
 	private final String fileSuffix;
 	private final String folder;
 	private final BiFunction<Level, DimensionType, ? extends Dimension> factory;
 	private final boolean hasSkylight;
+	private final BiomeZoomer biomeZoomer;
 
 	private static DimensionType register(String string, DimensionType dimensionType) {
 		return Registry.registerMapping(Registry.DIMENSION_TYPE, dimensionType.id, string, dimensionType);
 	}
 
-	protected DimensionType(int i, String string, String string2, BiFunction<Level, DimensionType, ? extends Dimension> biFunction, boolean bl) {
+	protected DimensionType(
+		int i, String string, String string2, BiFunction<Level, DimensionType, ? extends Dimension> biFunction, boolean bl, BiomeZoomer biomeZoomer
+	) {
 		this.id = i;
 		this.fileSuffix = string;
 		this.folder = string2;
 		this.factory = biFunction;
 		this.hasSkylight = bl;
+		this.biomeZoomer = biomeZoomer;
 	}
 
 	public static DimensionType of(Dynamic<?> dynamic) {
@@ -78,6 +91,10 @@ public class DimensionType implements Serializable {
 
 	public boolean hasSkyLight() {
 		return this.hasSkylight;
+	}
+
+	public BiomeZoomer getBiomeZoomer() {
+		return this.biomeZoomer;
 	}
 
 	@Override

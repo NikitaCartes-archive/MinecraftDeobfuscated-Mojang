@@ -21,8 +21,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.BiomeSourceType;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.CheckerboardBiomeSource;
 import net.minecraft.world.level.biome.CheckerboardBiomeSourceSettings;
+import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.FixedBiomeSourceSettings;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
@@ -66,20 +66,20 @@ public class NormalDimension extends Dimension {
 		ChunkGeneratorType<OverworldGeneratorSettings, OverworldLevelSource> chunkGeneratorType5 = ChunkGeneratorType.SURFACE;
 		BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
 		BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
-		BiomeSourceType<CheckerboardBiomeSourceSettings, CheckerboardBiomeSource> biomeSourceType3 = BiomeSourceType.CHECKERBOARD;
+		BiomeSourceType<CheckerboardBiomeSourceSettings, CheckerboardColumnBiomeSource> biomeSourceType3 = BiomeSourceType.CHECKERBOARD;
 		if (levelType == LevelType.FLAT) {
 			FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.fromObject(
 				new Dynamic<>(NbtOps.INSTANCE, this.level.getLevelData().getGeneratorOptions())
 			);
-			FixedBiomeSourceSettings fixedBiomeSourceSettings = biomeSourceType.createSettings().setBiome(flatLevelGeneratorSettings.getBiome());
+			FixedBiomeSourceSettings fixedBiomeSourceSettings = biomeSourceType.createSettings(this.level.getLevelData())
+				.setBiome(flatLevelGeneratorSettings.getBiome());
 			return chunkGeneratorType.create(this.level, biomeSourceType.create(fixedBiomeSourceSettings), flatLevelGeneratorSettings);
 		} else if (levelType == LevelType.DEBUG_ALL_BLOCK_STATES) {
-			FixedBiomeSourceSettings fixedBiomeSourceSettings2 = biomeSourceType.createSettings().setBiome(Biomes.PLAINS);
+			FixedBiomeSourceSettings fixedBiomeSourceSettings2 = biomeSourceType.createSettings(this.level.getLevelData()).setBiome(Biomes.PLAINS);
 			return chunkGeneratorType2.create(this.level, biomeSourceType.create(fixedBiomeSourceSettings2), chunkGeneratorType2.createSettings());
 		} else if (levelType != LevelType.BUFFET) {
 			OverworldGeneratorSettings overworldGeneratorSettings2 = chunkGeneratorType5.createSettings();
-			OverworldBiomeSourceSettings overworldBiomeSourceSettings2 = biomeSourceType2.createSettings()
-				.setLevelData(this.level.getLevelData())
+			OverworldBiomeSourceSettings overworldBiomeSourceSettings2 = biomeSourceType2.createSettings(this.level.getLevelData())
 				.setGeneratorSettings(overworldGeneratorSettings2);
 			return chunkGeneratorType5.create(this.level, biomeSourceType2.create(overworldBiomeSourceSettings2), overworldGeneratorSettings2);
 		} else {
@@ -101,26 +101,26 @@ public class NormalDimension extends Dimension {
 				}
 
 				if (BiomeSourceType.FIXED == biomeSourceType4) {
-					FixedBiomeSourceSettings fixedBiomeSourceSettings3 = biomeSourceType.createSettings().setBiome(biomes[0]);
+					FixedBiomeSourceSettings fixedBiomeSourceSettings3 = biomeSourceType.createSettings(this.level.getLevelData()).setBiome(biomes[0]);
 					biomeSource = biomeSourceType.create(fixedBiomeSourceSettings3);
 				}
 
 				if (BiomeSourceType.CHECKERBOARD == biomeSourceType4) {
 					int j = jsonObject3.has("size") ? jsonObject3.getAsJsonPrimitive("size").getAsInt() : 2;
-					CheckerboardBiomeSourceSettings checkerboardBiomeSourceSettings = biomeSourceType3.createSettings().setAllowedBiomes(biomes).setSize(j);
+					CheckerboardBiomeSourceSettings checkerboardBiomeSourceSettings = biomeSourceType3.createSettings(this.level.getLevelData())
+						.setAllowedBiomes(biomes)
+						.setSize(j);
 					biomeSource = biomeSourceType3.create(checkerboardBiomeSourceSettings);
 				}
 
 				if (BiomeSourceType.VANILLA_LAYERED == biomeSourceType4) {
-					OverworldBiomeSourceSettings overworldBiomeSourceSettings = biomeSourceType2.createSettings()
-						.setGeneratorSettings(new OverworldGeneratorSettings())
-						.setLevelData(this.level.getLevelData());
+					OverworldBiomeSourceSettings overworldBiomeSourceSettings = biomeSourceType2.createSettings(this.level.getLevelData());
 					biomeSource = biomeSourceType2.create(overworldBiomeSourceSettings);
 				}
 			}
 
 			if (biomeSource == null) {
-				biomeSource = biomeSourceType.create(biomeSourceType.createSettings().setBiome(Biomes.OCEAN));
+				biomeSource = biomeSourceType.create(biomeSourceType.createSettings(this.level.getLevelData()).setBiome(Biomes.OCEAN));
 			}
 
 			BlockState blockState = Blocks.STONE.defaultBlockState();

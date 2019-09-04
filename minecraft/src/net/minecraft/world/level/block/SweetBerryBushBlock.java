@@ -4,6 +4,7 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -51,17 +52,17 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	}
 
 	@Override
-	public void tick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		super.tick(blockState, level, blockPos, random);
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		super.tick(blockState, serverLevel, blockPos, random);
 		int i = (Integer)blockState.getValue(AGE);
-		if (i < 3 && random.nextInt(5) == 0 && level.getRawBrightness(blockPos.above(), 0) >= 9) {
-			level.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(i + 1)), 2);
+		if (i < 3 && random.nextInt(5) == 0 && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
+			serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(i + 1)), 2);
 		}
 	}
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity instanceof LivingEntity && entity.getType() != EntityType.FOX) {
+		if (entity instanceof LivingEntity && entity.getType() != EntityType.FOX && entity.getType() != EntityType.BEE) {
 			entity.makeStuckInBlock(blockState, new Vec3(0.8F, 0.75, 0.8F));
 			if (!level.isClientSide && (Integer)blockState.getValue(AGE) > 0 && (entity.xOld != entity.x || entity.zOld != entity.z)) {
 				double d = Math.abs(entity.x - entity.xOld);
@@ -106,8 +107,8 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		int i = Math.min(3, (Integer)blockState.getValue(AGE) + 1);
-		level.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(i)), 2);
+		serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(i)), 2);
 	}
 }

@@ -1,7 +1,6 @@
 package com.mojang.blaze3d.vertex;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -24,26 +23,26 @@ public class BufferUploader {
 				byteBuffer.position(vertexFormat.getOffset(j));
 				switch (usage) {
 					case POSITION:
-						GlStateManager.vertexPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-						GlStateManager.enableClientState(32884);
+						RenderSystem.vertexPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
+						RenderSystem.enableClientState(32884);
 						break;
 					case UV:
-						GLX.glClientActiveTexture(GLX.GL_TEXTURE0 + l);
-						GlStateManager.texCoordPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-						GlStateManager.enableClientState(32888);
-						GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
+						RenderSystem.glClientActiveTexture(33984 + l);
+						RenderSystem.texCoordPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
+						RenderSystem.enableClientState(32888);
+						RenderSystem.glClientActiveTexture(33984);
 						break;
 					case COLOR:
-						GlStateManager.colorPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-						GlStateManager.enableClientState(32886);
+						RenderSystem.colorPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
+						RenderSystem.enableClientState(32886);
 						break;
 					case NORMAL:
-						GlStateManager.normalPointer(k, i, byteBuffer);
-						GlStateManager.enableClientState(32885);
+						RenderSystem.normalPointer(k, i, byteBuffer);
+						RenderSystem.enableClientState(32885);
 				}
 			}
 
-			GlStateManager.drawArrays(bufferBuilder.getDrawMode(), 0, bufferBuilder.getVertexCount());
+			RenderSystem.drawArrays(bufferBuilder.getDrawMode(), 0, bufferBuilder.getVertexCount());
 			int j = 0;
 
 			for (int m = list.size(); j < m; j++) {
@@ -52,19 +51,19 @@ public class BufferUploader {
 				int l = vertexFormatElement2.getIndex();
 				switch (usage2) {
 					case POSITION:
-						GlStateManager.disableClientState(32884);
+						RenderSystem.disableClientState(32884);
 						break;
 					case UV:
-						GLX.glClientActiveTexture(GLX.GL_TEXTURE0 + l);
-						GlStateManager.disableClientState(32888);
-						GLX.glClientActiveTexture(GLX.GL_TEXTURE0);
+						RenderSystem.glClientActiveTexture(33984 + l);
+						RenderSystem.disableClientState(32888);
+						RenderSystem.glClientActiveTexture(33984);
 						break;
 					case COLOR:
-						GlStateManager.disableClientState(32886);
-						GlStateManager.clearCurrentColor();
+						RenderSystem.disableClientState(32886);
+						RenderSystem.clearCurrentColor();
 						break;
 					case NORMAL:
-						GlStateManager.disableClientState(32885);
+						RenderSystem.disableClientState(32885);
 				}
 			}
 		}

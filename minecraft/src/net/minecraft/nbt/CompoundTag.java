@@ -107,6 +107,11 @@ public class CompoundTag implements Tag {
 		return this.contains(string + "Most", 99) && this.contains(string + "Least", 99);
 	}
 
+	public void removeUUID(String string) {
+		this.remove(string + "Most");
+		this.remove(string + "Least");
+	}
+
 	public void putFloat(String string, float f) {
 		this.tags.put(string, new FloatTag(f));
 	}

@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -69,13 +70,13 @@ public class Seagrass extends BushBlock implements BonemealableBlock, LiquidBloc
 	}
 
 	@Override
-	public void performBonemeal(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
 		BlockState blockState2 = Blocks.TALL_SEAGRASS.defaultBlockState();
 		BlockState blockState3 = blockState2.setValue(TallSeagrass.HALF, DoubleBlockHalf.UPPER);
 		BlockPos blockPos2 = blockPos.above();
-		if (level.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
-			level.setBlock(blockPos, blockState2, 2);
-			level.setBlock(blockPos2, blockState3, 2);
+		if (serverLevel.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+			serverLevel.setBlock(blockPos, blockState2, 2);
+			serverLevel.setBlock(blockPos2, blockState3, 2);
 		}
 	}
 

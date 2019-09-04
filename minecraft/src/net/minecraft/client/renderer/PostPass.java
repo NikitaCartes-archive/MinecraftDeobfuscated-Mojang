@@ -2,7 +2,7 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -43,15 +43,15 @@ public class PostPass implements AutoCloseable {
 	}
 
 	private void prepareState() {
-		GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.disableBlend();
-		GlStateManager.disableDepthTest();
-		GlStateManager.disableAlphaTest();
-		GlStateManager.disableFog();
-		GlStateManager.disableLighting();
-		GlStateManager.disableColorMaterial();
-		GlStateManager.enableTexture();
-		GlStateManager.bindTexture(0);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.disableBlend();
+		RenderSystem.disableDepthTest();
+		RenderSystem.disableAlphaTest();
+		RenderSystem.disableFog();
+		RenderSystem.disableLighting();
+		RenderSystem.disableColorMaterial();
+		RenderSystem.enableTexture();
+		RenderSystem.bindTexture(0);
 	}
 
 	public void setOrthoMatrix(Matrix4f matrix4f) {
@@ -63,7 +63,7 @@ public class PostPass implements AutoCloseable {
 		this.inTarget.unbindWrite();
 		float g = (float)this.outTarget.width;
 		float h = (float)this.outTarget.height;
-		GlStateManager.viewport(0, 0, (int)g, (int)h);
+		RenderSystem.viewport(0, 0, (int)g, (int)h);
 		this.effect.setSampler("DiffuseSampler", this.inTarget);
 
 		for (int i = 0; i < this.auxAssets.size(); i++) {
@@ -80,8 +80,8 @@ public class PostPass implements AutoCloseable {
 		this.effect.apply();
 		this.outTarget.clear(Minecraft.ON_OSX);
 		this.outTarget.bindWrite(false);
-		GlStateManager.depthMask(false);
-		GlStateManager.colorMask(true, true, true, true);
+		RenderSystem.depthMask(false);
+		RenderSystem.colorMask(true, true, true, true);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
@@ -90,8 +90,8 @@ public class PostPass implements AutoCloseable {
 		bufferBuilder.vertex((double)g, (double)h, 500.0).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.vertex(0.0, (double)h, 500.0).color(255, 255, 255, 255).endVertex();
 		tesselator.end();
-		GlStateManager.depthMask(true);
-		GlStateManager.colorMask(true, true, true, true);
+		RenderSystem.depthMask(true);
+		RenderSystem.colorMask(true, true, true, true);
 		this.effect.clear();
 		this.outTarget.unbindWrite();
 		this.inTarget.unbindRead();

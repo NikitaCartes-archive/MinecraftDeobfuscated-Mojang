@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -65,10 +66,16 @@ public class ListPoolElement extends StructurePoolElement {
 
 	@Override
 	public boolean place(
-		StructureManager structureManager, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random
+		StructureManager structureManager,
+		LevelAccessor levelAccessor,
+		ChunkGenerator<?> chunkGenerator,
+		BlockPos blockPos,
+		Rotation rotation,
+		BoundingBox boundingBox,
+		Random random
 	) {
 		for (StructurePoolElement structurePoolElement : this.elements) {
-			if (!structurePoolElement.place(structureManager, levelAccessor, blockPos, rotation, boundingBox, random)) {
+			if (!structurePoolElement.place(structureManager, levelAccessor, chunkGenerator, blockPos, rotation, boundingBox, random)) {
 				return false;
 			}
 		}

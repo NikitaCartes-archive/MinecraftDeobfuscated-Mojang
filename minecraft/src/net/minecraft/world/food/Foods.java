@@ -45,6 +45,7 @@ public class Foods {
 		.alwaysEat()
 		.build();
 	public static final FoodProperties GOLDEN_CARROT = new FoodProperties.Builder().nutrition(6).saturationMod(1.2F).build();
+	public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationMod(0.1F).build();
 	public static final FoodProperties MELON_SLICE = new FoodProperties.Builder().nutrition(2).saturationMod(0.3F).build();
 	public static final FoodProperties MUSHROOM_STEW = stew(6);
 	public static final FoodProperties MUTTON = new FoodProperties.Builder().nutrition(2).saturationMod(0.3F).meat().build();

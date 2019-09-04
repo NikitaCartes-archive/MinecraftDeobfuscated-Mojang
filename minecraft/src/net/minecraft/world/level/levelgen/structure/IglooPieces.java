@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -104,7 +105,7 @@ public class IglooPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
 			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
 				.setRotation(this.rotation)
 				.setMirror(Mirror.NONE)
@@ -116,7 +117,7 @@ public class IglooPieces {
 			int i = levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos2.getX(), blockPos2.getZ());
 			BlockPos blockPos3 = this.templatePosition;
 			this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-			boolean bl = super.postProcess(levelAccessor, random, boundingBox, chunkPos);
+			boolean bl = super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
 			if (this.templateLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos4 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
 				BlockState blockState = levelAccessor.getBlockState(blockPos4.below());

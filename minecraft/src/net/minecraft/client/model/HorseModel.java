@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -108,9 +108,9 @@ public class HorseModel<T extends AbstractHorse> extends EntityModel<T> {
 		}
 
 		if (bl) {
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(l, 0.5F + l * 0.5F, l);
-			GlStateManager.translatef(0.0F, 0.95F * (1.0F - l), 0.0F);
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(l, 0.5F + l * 0.5F, l);
+			RenderSystem.translatef(0.0F, 0.95F * (1.0F - l), 0.0F);
 		}
 
 		this.leg1A.render(k);
@@ -118,24 +118,24 @@ public class HorseModel<T extends AbstractHorse> extends EntityModel<T> {
 		this.leg3A.render(k);
 		this.leg4A.render(k);
 		if (bl) {
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
-			GlStateManager.scalef(l, l, l);
-			GlStateManager.translatef(0.0F, 2.3F * (1.0F - l), 0.0F);
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
+			RenderSystem.scalef(l, l, l);
+			RenderSystem.translatef(0.0F, 2.3F * (1.0F - l), 0.0F);
 		}
 
 		this.body.render(k);
 		if (bl) {
-			GlStateManager.popMatrix();
-			GlStateManager.pushMatrix();
+			RenderSystem.popMatrix();
+			RenderSystem.pushMatrix();
 			float m = l + 0.1F * l;
-			GlStateManager.scalef(m, m, m);
-			GlStateManager.translatef(0.0F, 2.25F * (1.0F - m), 0.1F * (1.4F - m));
+			RenderSystem.scalef(m, m, m);
+			RenderSystem.translatef(0.0F, 2.25F * (1.0F - m), 0.1F * (1.4F - m));
 		}
 
 		this.headParts.render(k);
 		if (bl) {
-			GlStateManager.popMatrix();
+			RenderSystem.popMatrix();
 		}
 	}
 

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -32,7 +33,13 @@ public abstract class StructurePoolElement {
 	public abstract BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation);
 
 	public abstract boolean place(
-		StructureManager structureManager, LevelAccessor levelAccessor, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random
+		StructureManager structureManager,
+		LevelAccessor levelAccessor,
+		ChunkGenerator<?> chunkGenerator,
+		BlockPos blockPos,
+		Rotation rotation,
+		BoundingBox boundingBox,
+		Random random
 	);
 
 	public abstract StructurePoolElementType getType();

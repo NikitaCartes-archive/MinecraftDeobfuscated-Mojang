@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SkullModel;
@@ -33,28 +33,28 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull> {
 	}
 
 	public void render(WitherSkull witherSkull, double d, double e, double f, float g, float h) {
-		GlStateManager.pushMatrix();
-		GlStateManager.disableCull();
+		RenderSystem.pushMatrix();
+		RenderSystem.disableCull();
 		float i = this.rotlerp(witherSkull.yRotO, witherSkull.yRot, h);
 		float j = Mth.lerp(h, witherSkull.xRotO, witherSkull.xRot);
-		GlStateManager.translatef((float)d, (float)e, (float)f);
+		RenderSystem.translatef((float)d, (float)e, (float)f);
 		float k = 0.0625F;
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.scalef(-1.0F, -1.0F, 1.0F);
-		GlStateManager.enableAlphaTest();
+		RenderSystem.enableRescaleNormal();
+		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
+		RenderSystem.enableAlphaTest();
 		this.bindTexture(witherSkull);
 		if (this.solidRender) {
-			GlStateManager.enableColorMaterial();
-			GlStateManager.setupSolidRenderingTextureCombine(this.getTeamColor(witherSkull));
+			RenderSystem.enableColorMaterial();
+			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(witherSkull));
 		}
 
 		this.model.render(0.0F, 0.0F, 0.0F, i, j, 0.0625F);
 		if (this.solidRender) {
-			GlStateManager.tearDownSolidRenderingTextureCombine();
-			GlStateManager.disableColorMaterial();
+			RenderSystem.tearDownSolidRenderingTextureCombine();
+			RenderSystem.disableColorMaterial();
 		}
 
-		GlStateManager.popMatrix();
+		RenderSystem.popMatrix();
 		super.render(witherSkull, d, e, f, g, h);
 	}
 

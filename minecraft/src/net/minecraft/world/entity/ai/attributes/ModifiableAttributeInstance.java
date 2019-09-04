@@ -50,12 +50,12 @@ public class ModifiableAttributeInstance implements AttributeInstance {
 	}
 
 	@Override
-	public Collection<AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
-		return (Collection<AttributeModifier>)this.modifiers.get(operation);
+	public Set<AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
+		return (Set<AttributeModifier>)this.modifiers.get(operation);
 	}
 
 	@Override
-	public Collection<AttributeModifier> getModifiers() {
+	public Set<AttributeModifier> getModifiers() {
 		Set<AttributeModifier> set = Sets.<AttributeModifier>newHashSet();
 
 		for (AttributeModifier.Operation operation : AttributeModifier.Operation.values()) {

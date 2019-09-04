@@ -28,8 +28,8 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 			(preparationBarrier, resourceManagerx, preparableReloadListener, executor2x, executor3) -> {
 				AtomicLong atomicLong = new AtomicLong();
 				AtomicLong atomicLong2 = new AtomicLong();
-				ActiveProfiler activeProfiler = new ActiveProfiler(Util.getNanos(), () -> 0);
-				ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.getNanos(), () -> 0);
+				ActiveProfiler activeProfiler = new ActiveProfiler(Util.getNanos(), () -> 0, false);
+				ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.getNanos(), () -> 0, false);
 				CompletableFuture<Void> completableFuturex = preparableReloadListener.reload(
 					preparationBarrier, resourceManagerx, activeProfiler, activeProfiler2, runnable -> executor2x.execute(() -> {
 							long l = Util.getNanos();
@@ -43,7 +43,7 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 				);
 				return completableFuturex.thenApplyAsync(
 					void_ -> new ProfiledReloadInstance.State(
-							preparableReloadListener.getClass().getSimpleName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2
+							preparableReloadListener.getName(), activeProfiler.getResults(), activeProfiler2.getResults(), atomicLong, atomicLong2
 						),
 					executor2
 				);
@@ -67,17 +67,6 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 			int l = j + k;
 			String string = state.name;
 			LOGGER.info(string + " took approximately " + l + " ms (" + j + " ms preparing, " + k + " ms applying)");
-			String string2 = profileResults.getProfilerResults();
-			if (string2.length() > 0) {
-				LOGGER.debug(string + " preparations:\n" + string2);
-			}
-
-			String string3 = profileResults2.getProfilerResults();
-			if (string3.length() > 0) {
-				LOGGER.debug(string + " reload:\n" + string3);
-			}
-
-			LOGGER.info("----------");
 			i += k;
 		}
 

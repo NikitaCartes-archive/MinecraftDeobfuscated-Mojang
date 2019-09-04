@@ -122,9 +122,14 @@ public class WorldUpgrader {
 							if (compoundTag != null) {
 								int i = ChunkStorage.getVersion(compoundTag);
 								CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(dimensionType3, () -> this.overworldDataStorage, compoundTag);
+								CompoundTag compoundTag3 = compoundTag2.getCompound("Level");
+								ChunkPos chunkPos2 = new ChunkPos(compoundTag3.getInt("xPos"), compoundTag3.getInt("zPos"));
+								if (!chunkPos2.equals(chunkPos)) {
+									LOGGER.warn("Chunk {} has invalid position {}", chunkPos, chunkPos2);
+								}
+
 								boolean bl3 = i < SharedConstants.getCurrentVersion().getWorldVersion();
 								if (this.eraseCache) {
-									CompoundTag compoundTag3 = compoundTag2.getCompound("Level");
 									bl3 = bl3 || compoundTag3.contains("Heightmaps");
 									compoundTag3.remove("Heightmaps");
 									bl3 = bl3 || compoundTag3.contains("isLightOn");
@@ -136,15 +141,15 @@ public class WorldUpgrader {
 									bl2 = true;
 								}
 							}
-						} catch (ReportedException var23) {
-							Throwable throwable = var23.getCause();
+						} catch (ReportedException var24) {
+							Throwable throwable = var24.getCause();
 							if (!(throwable instanceof IOException)) {
-								throw var23;
+								throw var24;
 							}
 
 							LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
-						} catch (IOException var24) {
-							LOGGER.error("Error upgrading chunk {}", chunkPos, var24);
+						} catch (IOException var25) {
+							LOGGER.error("Error upgrading chunk {}", chunkPos, var25);
 						}
 
 						if (bl2) {
@@ -172,8 +177,8 @@ public class WorldUpgrader {
 			for (ChunkStorage chunkStorage2 : immutableMap2.values()) {
 				try {
 					chunkStorage2.close();
-				} catch (IOException var22) {
-					LOGGER.error("Error upgrading chunk", (Throwable)var22);
+				} catch (IOException var23) {
+					LOGGER.error("Error upgrading chunk", (Throwable)var23);
 				}
 			}
 
@@ -199,7 +204,7 @@ public class WorldUpgrader {
 					int i = Integer.parseInt(matcher.group(1)) << 5;
 					int j = Integer.parseInt(matcher.group(2)) << 5;
 
-					try (RegionFile regionFile = new RegionFile(file3)) {
+					try (RegionFile regionFile = new RegionFile(file3, file2)) {
 						for (int k = 0; k < 32; k++) {
 							for (int l = 0; l < 32; l++) {
 								ChunkPos chunkPos = new ChunkPos(k + i, l + j);

@@ -1,7 +1,7 @@
 package net.minecraft.client.gui.spectator.categories;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -117,7 +117,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 			}
 
 			Minecraft.getInstance().getTextureManager().bind(this.location);
-			GlStateManager.color4f(f, f, f, (float)i / 255.0F);
+			RenderSystem.color4f(f, f, f, (float)i / 255.0F);
 			GuiComponent.blit(2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
 			GuiComponent.blit(2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
 		}
