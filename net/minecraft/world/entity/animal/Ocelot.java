@@ -267,23 +267,14 @@ extends Animal {
         return false;
     }
 
-    protected void addKittensDuringSpawn() {
-        for (int i = 0; i < 2; ++i) {
-            Ocelot ocelot = EntityType.OCELOT.create(this.level);
-            ocelot.moveTo(this.x, this.y, this.z, this.yRot, 0.0f);
-            ocelot.setAge(-24000);
-            this.level.addFreshEntity(ocelot);
-        }
-    }
-
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (levelAccessor.getRandom().nextInt(7) == 0) {
-            this.addKittensDuringSpawn();
+        if (spawnGroupData == null) {
+            spawnGroupData = new AgableMob.AgableMobGroupData();
+            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.14285715f);
         }
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override

@@ -230,7 +230,6 @@ implements RangedAttackMob {
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         int i;
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         this.setRandomStrength();
         if (spawnGroupData instanceof LlamaGroupData) {
             i = ((LlamaGroupData)spawnGroupData).variant;
@@ -239,7 +238,7 @@ implements RangedAttackMob {
             spawnGroupData = new LlamaGroupData(i);
         }
         this.setVariant(i);
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
@@ -486,7 +485,7 @@ implements RangedAttackMob {
     }
 
     static class LlamaGroupData
-    implements SpawnGroupData {
+    extends AgableMob.AgableMobGroupData {
         public final int variant;
 
         private LlamaGroupData(int i) {

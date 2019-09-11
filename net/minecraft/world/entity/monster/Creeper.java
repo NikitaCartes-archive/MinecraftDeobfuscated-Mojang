@@ -204,12 +204,11 @@ extends Monster {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.FLINT_AND_STEEL) {
             this.level.playSound(player2, this.x, this.y, this.z, SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
-            player2.swing(interactionHand);
             if (!this.level.isClientSide) {
                 this.ignite();
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
-                return true;
             }
+            return true;
         }
         return super.mobInteract(player2, interactionHand);
     }

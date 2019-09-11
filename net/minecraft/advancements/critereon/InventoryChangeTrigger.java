@@ -146,7 +146,7 @@ implements CriterionTrigger<TriggerInstance> {
         public static TriggerInstance hasItem(ItemLike ... itemLikes) {
             ItemPredicate[] itemPredicates = new ItemPredicate[itemLikes.length];
             for (int i = 0; i < itemLikes.length; ++i) {
-                itemPredicates[i] = new ItemPredicate(null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new EnchantmentPredicate[0], null, NbtPredicate.ANY);
+                itemPredicates[i] = new ItemPredicate(null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY);
             }
             return TriggerInstance.hasItem(itemPredicates);
         }

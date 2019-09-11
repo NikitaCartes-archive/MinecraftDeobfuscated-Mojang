@@ -42,7 +42,7 @@ extends Item {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         player.openItemGui(itemStack, interactionHand);
         player.awardStat(Stats.ITEM_USED.get(this));
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 
     public static boolean makeSureTagIsValid(@Nullable CompoundTag compoundTag) {

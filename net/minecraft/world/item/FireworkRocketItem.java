@@ -59,9 +59,9 @@ extends Item {
                     itemStack.shrink(1);
                 }
             }
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, player.getItemInHand(interactionHand));
+            return InteractionResultHolder.success(player.getItemInHand(interactionHand));
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(interactionHand));
+        return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
     }
 
     @Override

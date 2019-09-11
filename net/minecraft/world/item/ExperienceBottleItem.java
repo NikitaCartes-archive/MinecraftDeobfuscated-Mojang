@@ -9,7 +9,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
@@ -43,7 +42,7 @@ extends Item {
         if (!player.abilities.instabuild) {
             itemStack.shrink(1);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 }
 

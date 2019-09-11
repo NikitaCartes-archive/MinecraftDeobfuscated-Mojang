@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -36,7 +35,7 @@ extends Item {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         HitResult hitResult = BoatItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
         if (hitResult.getType() == HitResult.Type.MISS) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         Vec3 vec3 = player.getViewVector(1.0f);
         double d = 5.0;
@@ -46,7 +45,7 @@ extends Item {
             for (Entity entity : list) {
                 AABB aABB = entity.getBoundingBox().inflate(entity.getPickRadius());
                 if (!aABB.contains(vec32)) continue;
-                return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+                return InteractionResultHolder.pass(itemStack);
             }
         }
         if (hitResult.getType() == HitResult.Type.BLOCK) {
@@ -54,7 +53,7 @@ extends Item {
             boat.setType(this.type);
             boat.yRot = player.yRot;
             if (!level.noCollision(boat, boat.getBoundingBox().inflate(-0.1))) {
-                return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+                return InteractionResultHolder.fail(itemStack);
             }
             if (!level.isClientSide) {
                 level.addFreshEntity(boat);
@@ -63,9 +62,9 @@ extends Item {
                 itemStack.shrink(1);
             }
             player.awardStat(Stats.ITEM_USED.get(this));
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+            return InteractionResultHolder.success(itemStack);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        return InteractionResultHolder.pass(itemStack);
     }
 }
 

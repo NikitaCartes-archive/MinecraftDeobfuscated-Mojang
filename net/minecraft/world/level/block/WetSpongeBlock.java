@@ -23,7 +23,7 @@ extends Block {
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         if (level.getDimension().isUltraWarm()) {
-            level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 2);
+            level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 3);
             level.levelEvent(2009, blockPos, 0);
         }
     }

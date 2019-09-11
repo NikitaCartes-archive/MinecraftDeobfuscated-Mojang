@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class EnchantmentPredicate {
     public static final EnchantmentPredicate ANY = new EnchantmentPredicate();
+    public static final EnchantmentPredicate[] NONE = new EnchantmentPredicate[0];
     private final Enchantment enchantment;
     private final MinMaxBounds.Ints level;
 
@@ -78,7 +79,7 @@ public class EnchantmentPredicate {
 
     public static EnchantmentPredicate[] fromJsonArray(@Nullable JsonElement jsonElement) {
         if (jsonElement == null || jsonElement.isJsonNull()) {
-            return new EnchantmentPredicate[0];
+            return NONE;
         }
         JsonArray jsonArray = GsonHelper.convertToJsonArray(jsonElement, "enchantments");
         EnchantmentPredicate[] enchantmentPredicates = new EnchantmentPredicate[jsonArray.size()];

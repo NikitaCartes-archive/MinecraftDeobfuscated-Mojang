@@ -58,7 +58,9 @@ public class PortalForcer {
 
     @Nullable
     public BlockPattern.PortalInfo findPortal(BlockPos blockPos, Vec3 vec3, Direction direction, double d, double e, boolean bl) {
-        List list = this.level.getPoiManager().getInSquare(poiType -> poiType == PoiType.NETHER_PORTAL, blockPos, 128, PoiManager.Occupancy.ANY).collect(Collectors.toList());
+        PoiManager poiManager = this.level.getPoiManager();
+        poiManager.ensureLoadedAndValid(this.level, blockPos, 128);
+        List list = poiManager.getInSquare(poiType -> poiType == PoiType.NETHER_PORTAL, blockPos, 128, PoiManager.Occupancy.ANY).collect(Collectors.toList());
         Optional<PoiRecord> optional = list.stream().min(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY()));
         return optional.map(poiRecord -> {
             BlockPos blockPos = poiRecord.getPos();

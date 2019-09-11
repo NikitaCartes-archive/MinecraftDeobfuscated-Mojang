@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
@@ -33,7 +32,7 @@ extends PotionItem {
         if (!player.abilities.instabuild) {
             itemStack.shrink(1);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 }
 

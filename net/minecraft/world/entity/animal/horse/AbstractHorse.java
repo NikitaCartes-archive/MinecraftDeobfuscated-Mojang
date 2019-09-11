@@ -56,6 +56,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -480,7 +481,7 @@ PlayerRideableJumping {
         }
         for (int i = 0; i < this.inventory.getContainerSize(); ++i) {
             ItemStack itemStack = this.inventory.getItem(i);
-            if (itemStack.isEmpty()) continue;
+            if (itemStack.isEmpty() || EnchantmentHelper.hasVanishingCurse(itemStack)) continue;
             this.spawnAtLocation(itemStack);
         }
     }
@@ -914,11 +915,11 @@ PlayerRideableJumping {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (this.random.nextInt(5) == 0) {
-            this.setAge(-24000);
+        if (spawnGroupData == null) {
+            spawnGroupData = new AgableMob.AgableMobGroupData();
+            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2f);
         }
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 }
 

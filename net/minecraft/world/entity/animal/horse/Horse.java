@@ -129,6 +129,7 @@ extends AbstractHorse {
     protected void updateEquipment() {
         super.updateEquipment();
         this.setArmorEquipment(this.inventory.getItem(1));
+        this.setDropChance(EquipmentSlot.CHEST, 0.0f);
     }
 
     private void setArmorEquipment(ItemStack itemStack) {
@@ -289,18 +290,18 @@ extends AbstractHorse {
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         int i;
-        if ((spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag)) instanceof HorseGroupData) {
+        if (spawnGroupData instanceof HorseGroupData) {
             i = ((HorseGroupData)spawnGroupData).variant;
         } else {
             i = this.random.nextInt(7);
             spawnGroupData = new HorseGroupData(i);
         }
         this.setVariant(i | this.random.nextInt(5) << 8);
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public static class HorseGroupData
-    implements SpawnGroupData {
+    extends AgableMob.AgableMobGroupData {
         public final int variant;
 
         public HorseGroupData(int i) {

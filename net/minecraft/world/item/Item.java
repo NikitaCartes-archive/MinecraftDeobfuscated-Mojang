@@ -146,11 +146,11 @@ implements ItemLike {
             ItemStack itemStack = player.getItemInHand(interactionHand);
             if (player.canEat(this.getFoodProperties().canAlwaysEat())) {
                 player.startUsingItem(interactionHand);
-                return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+                return InteractionResultHolder.success(itemStack);
             }
-            return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+            return InteractionResultHolder.fail(itemStack);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, player.getItemInHand(interactionHand));
+        return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
     }
 
     public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {

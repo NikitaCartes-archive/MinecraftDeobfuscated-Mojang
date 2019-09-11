@@ -466,7 +466,7 @@ extends LivingEntity {
         boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2 = this.getItemBySlot(equipmentSlot = Mob.getEquipmentSlotForItem(itemStack)), equipmentSlot);
         if (bl && this.canHoldItem(itemStack)) {
             double d = this.getEquipmentDropChance(equipmentSlot);
-            if (!itemStack2.isEmpty() && (double)(this.random.nextFloat() - 0.1f) < d) {
+            if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
                 this.spawnAtLocation(itemStack2);
             }
             this.setItemSlot(equipmentSlot, itemStack);
@@ -699,7 +699,7 @@ extends LivingEntity {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
             float f = this.getEquipmentDropChance(equipmentSlot);
             boolean bl3 = bl2 = f > 1.0f;
-            if (itemStack.isEmpty() || EnchantmentHelper.hasVanishingCurse(itemStack) || !bl && !bl2 || !(this.random.nextFloat() - (float)i * 0.01f < f)) continue;
+            if (itemStack.isEmpty() || EnchantmentHelper.hasVanishingCurse(itemStack) || !bl && !bl2 || !(Math.max(this.random.nextFloat() - (float)i * 0.01f, 0.0f) < f)) continue;
             if (!bl2 && itemStack.isDamageableItem()) {
                 itemStack.setDamageValue(itemStack.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack.getMaxDamage() - 3, 1))));
             }

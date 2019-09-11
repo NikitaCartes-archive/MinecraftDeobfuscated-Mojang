@@ -8,7 +8,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.player.Player;
@@ -43,7 +42,6 @@ extends Item {
                 int i = player2.fishing.retrieve(itemStack);
                 itemStack.hurtAndBreak(i, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
-            player2.swing(interactionHand);
             level.playSound(null, player2.x, player2.y, player2.z, SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
         } else {
             level.playSound(null, player2.x, player2.y, player2.z, SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
@@ -52,10 +50,9 @@ extends Item {
                 int j = EnchantmentHelper.getFishingLuckBonus(itemStack);
                 level.addFreshEntity(new FishingHook(player2, level, j, i));
             }
-            player2.swing(interactionHand);
             player2.awardStat(Stats.ITEM_USED.get(this));
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 
     @Override

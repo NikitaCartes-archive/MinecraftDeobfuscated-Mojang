@@ -171,6 +171,7 @@ import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
@@ -1105,16 +1106,16 @@ AutoCloseable {
             LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
         }
         for (InteractionHand interactionHand : InteractionHand.values()) {
+            InteractionResultHolder<ItemStack> interactionResultHolder;
             ItemStack itemStack = this.player.getItemInHand(interactionHand);
             if (this.hitResult != null) {
                 switch (this.hitResult.getType()) {
                     case ENTITY: {
                         EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
                         Entity entity = entityHitResult.getEntity();
-                        if (this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand) == InteractionResult.SUCCESS) {
-                            return;
+                        if (this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand) == InteractionResult.SUCCESS || this.gameMode.interact(this.player, entity, interactionHand) == InteractionResult.SUCCESS) {
+                            this.player.swing(interactionHand);
                         }
-                        if (this.gameMode.interact(this.player, entity, interactionHand) != InteractionResult.SUCCESS) break;
                         return;
                     }
                     case BLOCK: {
@@ -1133,7 +1134,10 @@ AutoCloseable {
                     }
                 }
             }
-            if (itemStack.isEmpty() || this.gameMode.useItem(this.player, this.level, interactionHand) != InteractionResult.SUCCESS) continue;
+            if (itemStack.isEmpty() || (interactionResultHolder = this.gameMode.useItem(this.player, this.level, interactionHand)).getResult() != InteractionResult.SUCCESS) continue;
+            if (interactionResultHolder.shouldSwingOnSuccess()) {
+                this.player.swing(interactionHand);
+            }
             this.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);
             return;
         }
@@ -1292,8 +1296,8 @@ AutoCloseable {
             this.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.SWAP_HELD_ITEMS, BlockPos.ZERO, Direction.DOWN));
         }
         while (this.options.keyDrop.consumeClick()) {
-            if (this.player.isSpectator()) continue;
-            this.player.drop(Screen.hasControlDown());
+            if (this.player.isSpectator() || !this.player.drop(Screen.hasControlDown())) continue;
+            this.player.swing(InteractionHand.MAIN_HAND);
         }
         boolean bl = bl3 = this.options.chatVisibility != ChatVisiblity.HIDDEN;
         if (bl3) {

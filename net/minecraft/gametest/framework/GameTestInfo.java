@@ -4,7 +4,10 @@
 package net.minecraft.gametest.framework;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -23,6 +26,7 @@ public class GameTestInfo {
     private final Collection<GameTestListener> listeners = Lists.newArrayList();
     private int remainingTicksUntilTimeout;
     private Runnable succeedWhenThisAssertPasses;
+    private Map<Runnable, Long> assertAtTickTimeMap = Maps.newHashMap();
     private boolean started = false;
     private long startTime = -1L;
     private boolean done = false;
@@ -40,6 +44,17 @@ public class GameTestInfo {
     public void tick() {
         if (this.isDone()) {
             return;
+        }
+        Iterator<Map.Entry<Runnable, Long>> iterator = this.assertAtTickTimeMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Runnable, Long> entry = iterator.next();
+            if (entry.getValue() > this.level.getGameTime()) continue;
+            try {
+                entry.getKey().run();
+            } catch (Exception exception) {
+                this.fail(exception);
+            }
+            iterator.remove();
         }
         --this.remainingTicksUntilTimeout;
         if (this.remainingTicksUntilTimeout <= 0) {

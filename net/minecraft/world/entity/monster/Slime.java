@@ -76,13 +76,19 @@ implements Enemy {
         this.entityData.define(ID_SIZE, 1);
     }
 
+    @Override
+    protected void registerAttributes() {
+        super.registerAttributes();
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+    }
+
     protected void setSize(int i, boolean bl) {
         this.entityData.set(ID_SIZE, i);
         this.setPos(this.x, this.y, this.z);
         this.refreshDimensions();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(i * i);
         this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(i);
+        this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(i);
         if (bl) {
             this.setHealth(this.getMaxHealth());
         }

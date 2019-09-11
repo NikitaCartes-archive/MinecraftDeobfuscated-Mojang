@@ -748,7 +748,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createShearsOnlyDrop(Blocks.SEAGRASS));
-        this.add(Blocks.LARGE_FERN, BlockLoot.createShearsOnlyDrop(Blocks.FERN));
+        this.add(Blocks.LARGE_FERN, (Block block) -> BlockLoot.createShearsDispatchTable(Blocks.FERN, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.WHEAT_SEEDS))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).withProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))).when(LootItemRandomChanceCondition.randomChance(0.125f))));
         this.add(Blocks.TALL_GRASS, (Block block) -> BlockLoot.createShearsDispatchTable(Blocks.GRASS, ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.WHEAT_SEEDS))).when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(block).withProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))).when(LootItemRandomChanceCondition.randomChance(0.125f))));
         this.add(Blocks.MELON_STEM, (Block block) -> BlockLoot.createStemDrops(block, Items.MELON_SEEDS));
         this.add(Blocks.PUMPKIN_STEM, (Block block) -> BlockLoot.createStemDrops(block, Items.PUMPKIN_SEEDS));

@@ -83,29 +83,29 @@ extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (level.isClientSide) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         HitResult hitResult = SpawnEggItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         if (hitResult.getType() != HitResult.Type.BLOCK) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         BlockHitResult blockHitResult = (BlockHitResult)hitResult;
         BlockPos blockPos = blockHitResult.getBlockPos();
         if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         if (!level.mayInteract(player, blockPos) || !player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+            return InteractionResultHolder.fail(itemStack);
         }
         EntityType<?> entityType = this.getType(itemStack.getTag());
         if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         if (!player.abilities.instabuild) {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 
     public boolean spawnsEntity(@Nullable CompoundTag compoundTag, EntityType<?> entityType) {

@@ -572,9 +572,8 @@ extends LivingEntity {
         return SoundEvents.PLAYER_DEATH;
     }
 
-    @Nullable
-    public ItemEntity drop(boolean bl) {
-        return this.drop(this.inventory.removeItem(this.inventory.selected, bl && !this.inventory.getSelected().isEmpty() ? this.inventory.getSelected().getCount() : 1), false, true);
+    public boolean drop(boolean bl) {
+        return this.drop(this.inventory.removeItem(this.inventory.selected, bl && !this.inventory.getSelected().isEmpty() ? this.inventory.getSelected().getCount() : 1), false, true) != null;
     }
 
     @Nullable
@@ -729,7 +728,7 @@ extends LivingEntity {
         if (damageSource == DamageSource.FALL) {
             return !this.level.getGameRules().getBoolean(GameRules.RULE_FALL_DAMAGE);
         }
-        if (damageSource == DamageSource.ON_FIRE || damageSource == DamageSource.IN_FIRE) {
+        if (damageSource == DamageSource.ON_FIRE || damageSource == DamageSource.IN_FIRE || damageSource == DamageSource.LAVA) {
             return !this.level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE);
         }
         return false;

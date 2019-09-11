@@ -152,7 +152,7 @@ TickableBlockEntity {
         AbstractFurnaceBlockEntity.add(map, Items.WOODEN_AXE, 200);
         AbstractFurnaceBlockEntity.add(map, Items.WOODEN_PICKAXE, 200);
         AbstractFurnaceBlockEntity.add(map, ItemTags.WOODEN_DOORS, 200);
-        AbstractFurnaceBlockEntity.add(map, ItemTags.BOATS, 200);
+        AbstractFurnaceBlockEntity.add(map, ItemTags.BOATS, 1200);
         AbstractFurnaceBlockEntity.add(map, ItemTags.WOOL, 100);
         AbstractFurnaceBlockEntity.add(map, ItemTags.WOODEN_BUTTONS, 100);
         AbstractFurnaceBlockEntity.add(map, Items.STICK, 100);

@@ -339,20 +339,14 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         int i = this.getRandomRabbitType(levelAccessor);
-        boolean bl = false;
         if (spawnGroupData instanceof RabbitGroupData) {
             i = ((RabbitGroupData)spawnGroupData).rabbitType;
-            bl = true;
         } else {
             spawnGroupData = new RabbitGroupData(i);
         }
         this.setRabbitType(i);
-        if (bl) {
-            this.setAge(-24000);
-        }
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     private int getRandomRabbitType(LevelAccessor levelAccessor) {
@@ -566,11 +560,12 @@ extends Animal {
     }
 
     public static class RabbitGroupData
-    implements SpawnGroupData {
+    extends AgableMob.AgableMobGroupData {
         public final int rabbitType;
 
         public RabbitGroupData(int i) {
             this.rabbitType = i;
+            this.setBabySpawnChance(1.0f);
         }
     }
 }

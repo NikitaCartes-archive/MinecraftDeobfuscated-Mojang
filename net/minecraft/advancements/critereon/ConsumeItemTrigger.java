@@ -129,7 +129,7 @@ implements CriterionTrigger<TriggerInstance> {
         }
 
         public static TriggerInstance usedItem(ItemLike itemLike) {
-            return new TriggerInstance(new ItemPredicate(null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new EnchantmentPredicate[0], null, NbtPredicate.ANY));
+            return new TriggerInstance(new ItemPredicate(null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY));
         }
 
         public boolean matches(ItemStack itemStack) {

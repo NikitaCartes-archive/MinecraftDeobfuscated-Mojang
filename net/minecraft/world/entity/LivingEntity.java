@@ -1476,7 +1476,7 @@ extends Entity {
         double l = entity.getBoundingBox().minY + (double)entity.getBbHeight();
         double e = entity.z;
         Direction direction = entity.getMotionDirection();
-        if (direction != null) {
+        if (direction != null && direction.getAxis() != Direction.Axis.Y) {
             Direction direction2 = direction.getClockWise();
             int[][] is = new int[][]{{0, 1}, {0, -1}, {-1, 1}, {-1, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {0, 1}};
             double m = Math.floor(this.x) + 0.5;

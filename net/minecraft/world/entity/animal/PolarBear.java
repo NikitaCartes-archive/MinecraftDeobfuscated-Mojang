@@ -192,12 +192,11 @@ extends Animal {
 
     @Override
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        if (spawnGroupData instanceof PolarBearGroupData) {
-            this.setAge(-24000);
-        } else {
-            spawnGroupData = new PolarBearGroupData();
+        if (spawnGroupData == null) {
+            spawnGroupData = new AgableMob.AgableMobGroupData();
+            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0f);
         }
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     class PolarBearPanicGoal
@@ -302,12 +301,6 @@ extends Animal {
             if (mob instanceof PolarBear && !mob.isBaby()) {
                 super.alertOther(mob, livingEntity);
             }
-        }
-    }
-
-    static class PolarBearGroupData
-    implements SpawnGroupData {
-        private PolarBearGroupData() {
         }
     }
 }

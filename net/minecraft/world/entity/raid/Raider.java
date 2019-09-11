@@ -234,7 +234,7 @@ extends PatrollingMonster {
             EquipmentSlot equipmentSlot = EquipmentSlot.HEAD;
             ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
             double d = this.getEquipmentDropChance(equipmentSlot);
-            if (!itemStack2.isEmpty() && (double)(this.random.nextFloat() - 0.1f) < d) {
+            if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
                 this.spawnAtLocation(itemStack2);
             }
             this.setItemSlot(equipmentSlot, itemStack);

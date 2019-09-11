@@ -45,14 +45,14 @@ extends BlockItem {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         HitResult hitResult = WaterLilyBlockItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         if (hitResult.getType() == HitResult.Type.MISS) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockHitResult blockHitResult = (BlockHitResult)hitResult;
             BlockPos blockPos = blockHitResult.getBlockPos();
             Direction direction = blockHitResult.getDirection();
             if (!level.mayInteract(player, blockPos) || !player.mayUseItemAt(blockPos.relative(direction), direction, itemStack)) {
-                return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+                return InteractionResultHolder.fail(itemStack);
             }
             BlockPos blockPos2 = blockPos.above();
             BlockState blockState = level.getBlockState(blockPos);
@@ -68,10 +68,10 @@ extends BlockItem {
                 }
                 player.awardStat(Stats.ITEM_USED.get(this));
                 level.playSound(player, blockPos, SoundEvents.LILY_PAD_PLACE, SoundSource.BLOCKS, 1.0f, 1.0f);
-                return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+                return InteractionResultHolder.success(itemStack);
             }
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+        return InteractionResultHolder.fail(itemStack);
     }
 }
 

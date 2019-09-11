@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
@@ -42,9 +41,9 @@ extends Item {
         if (itemStack2.isEmpty()) {
             player.setItemSlot(equipmentSlot, itemStack.copy());
             itemStack.setCount(0);
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+            return InteractionResultHolder.success(itemStack);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.FAIL, itemStack);
+        return InteractionResultHolder.fail(itemStack);
     }
 }
 

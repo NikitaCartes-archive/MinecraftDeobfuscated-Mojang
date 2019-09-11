@@ -6,7 +6,6 @@ package net.minecraft.world.item;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ComplexItem;
@@ -29,13 +28,13 @@ extends ComplexItem {
             itemStack2.shrink(1);
         }
         if (itemStack2.isEmpty()) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+            return InteractionResultHolder.success(itemStack);
         }
         if (!player.inventory.add(itemStack.copy())) {
             player.drop(itemStack, false);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack2);
+        return InteractionResultHolder.success(itemStack2);
     }
 }
 

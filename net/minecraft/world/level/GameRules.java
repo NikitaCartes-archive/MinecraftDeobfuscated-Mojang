@@ -89,7 +89,11 @@ public class GameRules {
     }
 
     public void loadFromTag(CompoundTag compoundTag) {
-        this.rules.forEach((key, value) -> value.deserialize(compoundTag.getString(((Key)key).id)));
+        this.rules.forEach((key, value) -> {
+            if (compoundTag.contains(((Key)key).id)) {
+                value.deserialize(compoundTag.getString(((Key)key).id));
+            }
+        });
     }
 
     public static void visitGameRuleTypes(GameRuleTypeVisitor gameRuleTypeVisitor) {

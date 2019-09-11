@@ -137,6 +137,10 @@ implements FlyingAnimal {
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setVariant(this.random.nextInt(5));
+        if (spawnGroupData == null) {
+            spawnGroupData = new AgableMob.AgableMobGroupData();
+            ((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+        }
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

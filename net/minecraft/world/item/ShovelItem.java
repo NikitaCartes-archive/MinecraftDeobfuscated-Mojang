@@ -21,6 +21,7 @@ import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ShovelItem
@@ -40,14 +41,22 @@ extends DiggerItem {
 
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
-        BlockState blockState;
         Level level = useOnContext.getLevel();
         BlockPos blockPos = useOnContext.getClickedPos();
-        if (useOnContext.getClickedFace() != Direction.DOWN && level.getBlockState(blockPos.above()).isAir() && (blockState = FLATTENABLES.get(level.getBlockState(blockPos).getBlock())) != null) {
+        BlockState blockState = level.getBlockState(blockPos);
+        if (useOnContext.getClickedFace() != Direction.DOWN) {
             Player player2 = useOnContext.getPlayer();
-            level.playSound(player2, blockPos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
-            if (!level.isClientSide) {
-                level.setBlock(blockPos, blockState, 11);
+            BlockState blockState2 = FLATTENABLES.get(blockState.getBlock());
+            BlockState blockState3 = null;
+            if (blockState2 != null && level.getBlockState(blockPos.above()).isAir()) {
+                level.playSound(player2, blockPos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
+                blockState3 = blockState2;
+            } else if (blockState.getBlock() instanceof CampfireBlock && blockState.getValue(CampfireBlock.LIT).booleanValue()) {
+                level.levelEvent(null, 1009, blockPos, 0);
+                blockState3 = (BlockState)blockState.setValue(CampfireBlock.LIT, false);
+            }
+            if (!level.isClientSide && blockState3 != null) {
+                level.setBlock(blockPos, blockState3, 11);
                 if (player2 != null) {
                     useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
                 }

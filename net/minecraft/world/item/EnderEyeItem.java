@@ -70,7 +70,7 @@ extends Item {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         HitResult hitResult = EnderEyeItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
         if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);
         if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false)) != null) {
@@ -87,9 +87,9 @@ extends Item {
                 itemStack.shrink(1);
             }
             player.awardStat(Stats.ITEM_USED.get(this));
-            return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+            return InteractionResultHolder.success(itemStack);
         }
-        return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+        return InteractionResultHolder.success(itemStack);
     }
 }
 

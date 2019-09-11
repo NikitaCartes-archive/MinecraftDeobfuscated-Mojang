@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
@@ -24,7 +23,7 @@ extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (level.isClientSide) {
-            return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+            return InteractionResultHolder.pass(itemStack);
         }
         if (player2.isPassenger() && player2.getVehicle() instanceof Pig) {
             Pig pig = (Pig)player2.getVehicle();
@@ -33,13 +32,13 @@ extends Item {
                 if (itemStack.isEmpty()) {
                     ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
                     itemStack2.setTag(itemStack.getTag());
-                    return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack2);
+                    return InteractionResultHolder.success(itemStack2);
                 }
-                return new InteractionResultHolder<ItemStack>(InteractionResult.SUCCESS, itemStack);
+                return InteractionResultHolder.success(itemStack);
             }
         }
         player2.awardStat(Stats.ITEM_USED.get(this));
-        return new InteractionResultHolder<ItemStack>(InteractionResult.PASS, itemStack);
+        return InteractionResultHolder.pass(itemStack);
     }
 }
 

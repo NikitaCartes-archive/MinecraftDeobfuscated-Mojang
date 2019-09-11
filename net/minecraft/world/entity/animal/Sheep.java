@@ -61,7 +61,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Sheep
 extends Animal {
-    private static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
+    public static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
     private static final Map<DyeColor, ItemLike> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), enumMap -> {
         enumMap.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
         enumMap.put(DyeColor.ORANGE, Blocks.ORANGE_WOOL);
@@ -355,9 +355,8 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         this.setColor(Sheep.getRandomSheepColor(levelAccessor.getRandom()));
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     private DyeColor getOffspringColor(Animal animal, Animal animal2) {
