@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -30,7 +29,7 @@ public class BoatItem extends Item {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
 		if (hitResult.getType() == HitResult.Type.MISS) {
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		} else {
 			Vec3 vec3 = player.getViewVector(1.0F);
 			double d = 5.0;
@@ -41,7 +40,7 @@ public class BoatItem extends Item {
 				for (Entity entity : list) {
 					AABB aABB = entity.getBoundingBox().inflate((double)entity.getPickRadius());
 					if (aABB.contains(vec32)) {
-						return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+						return InteractionResultHolder.pass(itemStack);
 					}
 				}
 			}
@@ -51,7 +50,7 @@ public class BoatItem extends Item {
 				boat.setType(this.type);
 				boat.yRot = player.yRot;
 				if (!level.noCollision(boat, boat.getBoundingBox().inflate(-0.1))) {
-					return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+					return InteractionResultHolder.fail(itemStack);
 				} else {
 					if (!level.isClientSide) {
 						level.addFreshEntity(boat);
@@ -62,10 +61,10 @@ public class BoatItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+					return InteractionResultHolder.success(itemStack);
 				}
 			} else {
-				return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+				return InteractionResultHolder.pass(itemStack);
 			}
 		}
 	}

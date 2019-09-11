@@ -101,7 +101,11 @@ public class GameRules {
 	}
 
 	public void loadFromTag(CompoundTag compoundTag) {
-		this.rules.forEach((key, value) -> value.deserialize(compoundTag.getString(key.id)));
+		this.rules.forEach((key, value) -> {
+			if (compoundTag.contains(key.id)) {
+				value.deserialize(compoundTag.getString(key.id));
+			}
+		});
 	}
 
 	public static void visitGameRuleTypes(GameRules.GameRuleTypeVisitor gameRuleTypeVisitor) {

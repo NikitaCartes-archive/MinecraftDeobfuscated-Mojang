@@ -11,7 +11,8 @@ import org.apache.logging.log4j.Logger;
 
 public class BlockStateData {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final Dynamic<?>[] MAP = new Dynamic[4095];
+	private static final Dynamic<?>[] MAP = new Dynamic[4096];
+	private static final Dynamic<?>[] BLOCK_DEFAULTS = new Dynamic[256];
 	private static final Object2IntMap<Dynamic<?>> ID_BY_OLD = DataFixUtils.make(
 		new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1)
 	);
@@ -19,14 +20,27 @@ public class BlockStateData {
 		new Object2IntOpenHashMap<>(), object2IntOpenHashMap -> object2IntOpenHashMap.defaultReturnValue(-1)
 	);
 
-	static void register(int i, String string, String... strings) {
-		MAP[i] = parse(string);
+	private static void register(int i, String string, String... strings) {
+		Dynamic<?> dynamic = parse(string);
+		MAP[i] = dynamic;
+		int j = i >> 4;
+		if (BLOCK_DEFAULTS[j] == null) {
+			BLOCK_DEFAULTS[j] = dynamic;
+		}
 
 		for (String string2 : strings) {
-			Dynamic<?> dynamic = parse(string2);
-			String string3 = dynamic.get("Name").asString("");
+			Dynamic<?> dynamic2 = parse(string2);
+			String string3 = dynamic2.get("Name").asString("");
 			ID_BY_OLD_NAME.putIfAbsent(string3, i);
-			ID_BY_OLD.put(dynamic, i);
+			ID_BY_OLD.put(dynamic2, i);
+		}
+	}
+
+	private static void finalizeMaps() {
+		for (int i = 0; i < MAP.length; i++) {
+			if (MAP[i] == null) {
+				MAP[i] = BLOCK_DEFAULTS[i >> 4];
+			}
 		}
 	}
 
@@ -70,7 +84,7 @@ public class BlockStateData {
 
 	public static Dynamic<?> getTag(int i) {
 		Dynamic<?> dynamic = null;
-		if (i > 0 && i < MAP.length) {
+		if (i >= 0 && i < MAP.length) {
 			dynamic = MAP[i];
 		}
 
@@ -9045,5 +9059,6 @@ public class BlockStateData {
 		register(4081, "{Name:'minecraft:structure_block',Properties:{mode:'load'}}", "{Name:'minecraft:structure_block',Properties:{mode:'load'}}");
 		register(4082, "{Name:'minecraft:structure_block',Properties:{mode:'corner'}}", "{Name:'minecraft:structure_block',Properties:{mode:'corner'}}");
 		register(4083, "{Name:'minecraft:structure_block',Properties:{mode:'data'}}", "{Name:'minecraft:structure_block',Properties:{mode:'data'}}");
+		finalizeMaps();
 	}
 }

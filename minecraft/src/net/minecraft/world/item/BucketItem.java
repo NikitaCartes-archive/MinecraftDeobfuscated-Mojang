@@ -3,6 +3,7 @@ package net.minecraft.world.item;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -11,7 +12,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
@@ -40,14 +40,16 @@ public class BucketItem extends Item {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		HitResult hitResult = getPlayerPOVHitResult(level, player, this.content == Fluids.EMPTY ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE);
 		if (hitResult.getType() == HitResult.Type.MISS) {
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		} else if (hitResult.getType() != HitResult.Type.BLOCK) {
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		} else {
 			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
 			BlockPos blockPos = blockHitResult.getBlockPos();
-			if (!level.mayInteract(player, blockPos) || !player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
-				return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+			Direction direction = blockHitResult.getDirection();
+			BlockPos blockPos2 = blockPos.relative(direction);
+			if (!level.mayInteract(player, blockPos) || !player.mayUseItemAt(blockPos2, direction, itemStack)) {
+				return InteractionResultHolder.fail(itemStack);
 			} else if (this.content == Fluids.EMPTY) {
 				BlockState blockState = level.getBlockState(blockPos);
 				if (blockState.getBlock() instanceof BucketPickup) {
@@ -60,26 +62,24 @@ public class BucketItem extends Item {
 							CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
 						}
 
-						return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack2);
+						return InteractionResultHolder.success(itemStack2);
 					}
 				}
 
-				return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+				return InteractionResultHolder.fail(itemStack);
 			} else {
 				BlockState blockState = level.getBlockState(blockPos);
-				BlockPos blockPos2 = blockState.getBlock() instanceof LiquidBlockContainer && this.content == Fluids.WATER
-					? blockPos
-					: blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-				if (this.emptyBucket(player, level, blockPos2, blockHitResult)) {
-					this.checkExtraContent(level, itemStack, blockPos2);
+				BlockPos blockPos3 = blockState.getBlock() instanceof LiquidBlockContainer && this.content == Fluids.WATER ? blockPos : blockPos2;
+				if (this.emptyBucket(player, level, blockPos3, blockHitResult)) {
+					this.checkExtraContent(level, itemStack, blockPos3);
 					if (player instanceof ServerPlayer) {
-						CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos2, itemStack);
+						CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos3, itemStack);
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return new InteractionResultHolder<>(InteractionResult.SUCCESS, this.getEmptySuccessItem(itemStack, player));
+					return InteractionResultHolder.success(this.getEmptySuccessItem(itemStack, player));
 				} else {
-					return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+					return InteractionResultHolder.fail(itemStack);
 				}
 			}
 		}

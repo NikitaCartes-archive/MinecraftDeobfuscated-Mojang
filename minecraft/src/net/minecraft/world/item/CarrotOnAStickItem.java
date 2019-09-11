@@ -2,7 +2,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.player.Player;
@@ -17,7 +16,7 @@ public class CarrotOnAStickItem extends Item {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (level.isClientSide) {
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		} else {
 			if (player.isPassenger() && player.getVehicle() instanceof Pig) {
 				Pig pig = (Pig)player.getVehicle();
@@ -26,15 +25,15 @@ public class CarrotOnAStickItem extends Item {
 					if (itemStack.isEmpty()) {
 						ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
 						itemStack2.setTag(itemStack.getTag());
-						return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack2);
+						return InteractionResultHolder.success(itemStack2);
 					}
 
-					return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+					return InteractionResultHolder.success(itemStack);
 				}
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(this));
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		}
 	}
 }

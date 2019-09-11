@@ -23,7 +23,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -81,7 +80,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 		if (isCharged(itemStack)) {
 			performShooting(level, player, interactionHand, itemStack, getShootingPower(itemStack), 1.0F);
 			setCharged(itemStack, false);
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+			return InteractionResultHolder.successNoSwing(itemStack);
 		} else if (!player.getProjectile(itemStack).isEmpty()) {
 			if (!isCharged(itemStack)) {
 				this.startSoundPlayed = false;
@@ -89,9 +88,9 @@ public class CrossbowItem extends ProjectileWeaponItem {
 				player.startUsingItem(interactionHand);
 			}
 
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+			return InteractionResultHolder.successNoSwing(itemStack);
 		} else {
-			return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+			return InteractionResultHolder.fail(itemStack);
 		}
 	}
 

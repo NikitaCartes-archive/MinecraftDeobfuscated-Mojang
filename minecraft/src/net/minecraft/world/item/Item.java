@@ -143,12 +143,12 @@ public class Item implements ItemLike {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (player.canEat(this.getFoodProperties().canAlwaysEat())) {
 				player.startUsingItem(interactionHand);
-				return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+				return InteractionResultHolder.success(itemStack);
 			} else {
-				return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+				return InteractionResultHolder.fail(itemStack);
 			}
 		} else {
-			return new InteractionResultHolder<>(InteractionResult.PASS, player.getItemInHand(interactionHand));
+			return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
 		}
 	}
 

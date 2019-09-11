@@ -118,7 +118,9 @@ public class ConsumeItemTrigger implements CriterionTrigger<ConsumeItemTrigger.T
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemLike itemLike) {
 			return new ConsumeItemTrigger.TriggerInstance(
-				new ItemPredicate(null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new EnchantmentPredicate[0], null, NbtPredicate.ANY)
+				new ItemPredicate(
+					null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY
+				)
 			);
 		}
 

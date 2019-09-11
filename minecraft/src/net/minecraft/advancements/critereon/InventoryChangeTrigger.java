@@ -136,7 +136,7 @@ public class InventoryChangeTrigger implements CriterionTrigger<InventoryChangeT
 
 			for (int i = 0; i < itemLikes.length; i++) {
 				itemPredicates[i] = new ItemPredicate(
-					null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new EnchantmentPredicate[0], null, NbtPredicate.ANY
+					null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY
 				);
 			}
 

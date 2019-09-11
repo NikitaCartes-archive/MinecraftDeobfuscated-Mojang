@@ -244,7 +244,6 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		this.setRandomStrength();
 		int i;
 		if (spawnGroupData instanceof Llama.LlamaGroupData) {
@@ -255,7 +254,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		this.setVariant(i);
-		return spawnGroupData;
+		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
@@ -479,7 +478,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 	}
 
-	static class LlamaGroupData implements SpawnGroupData {
+	static class LlamaGroupData extends AgableMob.AgableMobGroupData {
 		public final int variant;
 
 		private LlamaGroupData(int i) {

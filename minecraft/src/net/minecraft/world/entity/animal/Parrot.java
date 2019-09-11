@@ -127,6 +127,11 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		@Nullable CompoundTag compoundTag
 	) {
 		this.setVariant(this.random.nextInt(5));
+		if (spawnGroupData == null) {
+			spawnGroupData = new AgableMob.AgableMobGroupData();
+			((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+		}
+
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 

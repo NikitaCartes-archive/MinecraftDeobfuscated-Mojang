@@ -524,19 +524,15 @@ public class Panda extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		this.setMainGene(Panda.Gene.getRandom(this.random));
 		this.setHiddenGene(Panda.Gene.getRandom(this.random));
 		this.setAttributes();
-		if (spawnGroupData instanceof Panda.PandaGroupData) {
-			if (this.random.nextInt(5) == 0) {
-				this.setAge(-24000);
-			}
-		} else {
-			spawnGroupData = new Panda.PandaGroupData();
+		if (spawnGroupData == null) {
+			spawnGroupData = new AgableMob.AgableMobGroupData();
+			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2F);
 		}
 
-		return spawnGroupData;
+		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public void setGeneFromParents(Panda panda, @Nullable Panda panda2) {
@@ -822,11 +818,6 @@ public class Panda extends Animal {
 			}
 
 			return false;
-		}
-	}
-
-	static class PandaGroupData implements SpawnGroupData {
-		private PandaGroupData() {
 		}
 	}
 

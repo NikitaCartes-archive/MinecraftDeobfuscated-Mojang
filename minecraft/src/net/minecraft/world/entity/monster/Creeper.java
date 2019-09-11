@@ -203,15 +203,15 @@ public class Creeper extends Monster {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.FLINT_AND_STEEL) {
 			this.level.playSound(player, this.x, this.y, this.z, SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.4F + 0.8F);
-			player.swing(interactionHand);
 			if (!this.level.isClientSide) {
 				this.ignite();
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-				return true;
 			}
-		}
 
-		return super.mobInteract(player, interactionHand);
+			return true;
+		} else {
+			return super.mobInteract(player, interactionHand);
+		}
 	}
 
 	private void explodeCreeper() {

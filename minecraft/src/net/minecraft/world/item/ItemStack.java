@@ -93,6 +93,10 @@ public final class ItemStack {
 	public ItemStack(ItemLike itemLike, int i) {
 		this.item = itemLike == null ? null : itemLike.asItem();
 		this.count = i;
+		if (this.item != null && this.item.canBeDepleted()) {
+			this.setDamageValue(this.getDamageValue());
+		}
+
 		this.updateEmptyCacheFlag();
 	}
 
@@ -179,7 +183,7 @@ public final class ItemStack {
 		compoundTag.putString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
 		compoundTag.putByte("Count", (byte)this.count);
 		if (this.tag != null) {
-			compoundTag.put("tag", this.tag);
+			compoundTag.put("tag", this.tag.copy());
 		}
 
 		return compoundTag;

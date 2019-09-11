@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -33,6 +34,7 @@ public class ItemPredicate {
 	private final MinMaxBounds.Ints count;
 	private final MinMaxBounds.Ints durability;
 	private final EnchantmentPredicate[] enchantments;
+	private final EnchantmentPredicate[] storedEnchantments;
 	@Nullable
 	private final Potion potion;
 	private final NbtPredicate nbt;
@@ -43,7 +45,8 @@ public class ItemPredicate {
 		this.potion = null;
 		this.count = MinMaxBounds.Ints.ANY;
 		this.durability = MinMaxBounds.Ints.ANY;
-		this.enchantments = new EnchantmentPredicate[0];
+		this.enchantments = EnchantmentPredicate.NONE;
+		this.storedEnchantments = EnchantmentPredicate.NONE;
 		this.nbt = NbtPredicate.ANY;
 	}
 
@@ -53,6 +56,7 @@ public class ItemPredicate {
 		MinMaxBounds.Ints ints,
 		MinMaxBounds.Ints ints2,
 		EnchantmentPredicate[] enchantmentPredicates,
+		EnchantmentPredicate[] enchantmentPredicates2,
 		@Nullable Potion potion,
 		NbtPredicate nbtPredicate
 	) {
@@ -61,6 +65,7 @@ public class ItemPredicate {
 		this.count = ints;
 		this.durability = ints2;
 		this.enchantments = enchantmentPredicates;
+		this.storedEnchantments = enchantmentPredicates2;
 		this.potion = potion;
 		this.nbt = nbtPredicate;
 	}
@@ -81,11 +86,23 @@ public class ItemPredicate {
 		} else if (!this.nbt.matches(itemStack)) {
 			return false;
 		} else {
-			Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
+			if (this.enchantments.length > 0) {
+				Map<Enchantment, Integer> map = EnchantmentHelper.deserializeEnchantments(itemStack.getEnchantmentTags());
 
-			for (int i = 0; i < this.enchantments.length; i++) {
-				if (!this.enchantments[i].containedIn(map)) {
-					return false;
+				for (EnchantmentPredicate enchantmentPredicate : this.enchantments) {
+					if (!enchantmentPredicate.containedIn(map)) {
+						return false;
+					}
+				}
+			}
+
+			if (this.storedEnchantments.length > 0) {
+				Map<Enchantment, Integer> map = EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(itemStack));
+
+				for (EnchantmentPredicate enchantmentPredicatex : this.storedEnchantments) {
+					if (!enchantmentPredicatex.containedIn(map)) {
+						return false;
+					}
 				}
 			}
 
@@ -118,14 +135,15 @@ public class ItemPredicate {
 					}
 				}
 
-				EnchantmentPredicate[] enchantmentPredicates = EnchantmentPredicate.fromJsonArray(jsonObject.get("enchantments"));
 				Potion potion = null;
 				if (jsonObject.has("potion")) {
 					ResourceLocation resourceLocation3 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
 					potion = (Potion)Registry.POTION.getOptional(resourceLocation3).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation3 + "'"));
 				}
 
-				return new ItemPredicate(tag, item, ints, ints2, enchantmentPredicates, potion, nbtPredicate);
+				EnchantmentPredicate[] enchantmentPredicates = EnchantmentPredicate.fromJsonArray(jsonObject.get("enchantments"));
+				EnchantmentPredicate[] enchantmentPredicates2 = EnchantmentPredicate.fromJsonArray(jsonObject.get("stored_enchantments"));
+				return new ItemPredicate(tag, item, ints, ints2, enchantmentPredicates, enchantmentPredicates2, potion, nbtPredicate);
 			}
 		} else {
 			return ANY;
@@ -158,6 +176,16 @@ public class ItemPredicate {
 				jsonObject.add("enchantments", jsonArray);
 			}
 
+			if (this.storedEnchantments.length > 0) {
+				JsonArray jsonArray = new JsonArray();
+
+				for (EnchantmentPredicate enchantmentPredicate : this.storedEnchantments) {
+					jsonArray.add(enchantmentPredicate.serializeToJson());
+				}
+
+				jsonObject.add("stored_enchantments", jsonArray);
+			}
+
 			if (this.potion != null) {
 				jsonObject.addProperty("potion", Registry.POTION.getKey(this.potion).toString());
 			}
@@ -183,6 +211,7 @@ public class ItemPredicate {
 
 	public static class Builder {
 		private final List<EnchantmentPredicate> enchantments = Lists.<EnchantmentPredicate>newArrayList();
+		private final List<EnchantmentPredicate> storedEnchantments = Lists.<EnchantmentPredicate>newArrayList();
 		@Nullable
 		private Item item;
 		@Nullable
@@ -227,7 +256,14 @@ public class ItemPredicate {
 
 		public ItemPredicate build() {
 			return new ItemPredicate(
-				this.tag, this.item, this.count, this.durability, (EnchantmentPredicate[])this.enchantments.toArray(new EnchantmentPredicate[0]), this.potion, this.nbt
+				this.tag,
+				this.item,
+				this.count,
+				this.durability,
+				(EnchantmentPredicate[])this.enchantments.toArray(EnchantmentPredicate.NONE),
+				(EnchantmentPredicate[])this.storedEnchantments.toArray(EnchantmentPredicate.NONE),
+				this.potion,
+				this.nbt
 			);
 		}
 	}

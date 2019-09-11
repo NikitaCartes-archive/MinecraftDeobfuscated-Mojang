@@ -286,15 +286,15 @@ public class MultiPlayerGameMode {
 		}
 	}
 
-	public InteractionResult useItem(Player player, Level level, InteractionHand interactionHand) {
+	public InteractionResultHolder<ItemStack> useItem(Player player, Level level, InteractionHand interactionHand) {
 		if (this.localPlayerMode == GameType.SPECTATOR) {
-			return InteractionResult.PASS;
+			return InteractionResultHolder.pass(null);
 		} else {
 			this.ensureHasSentCarriedItem();
 			this.connection.send(new ServerboundUseItemPacket(interactionHand));
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
-				return InteractionResult.PASS;
+				return InteractionResultHolder.pass(itemStack);
 			} else {
 				int i = itemStack.getCount();
 				InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
@@ -303,7 +303,7 @@ public class MultiPlayerGameMode {
 					player.setItemInHand(interactionHand, itemStack2);
 				}
 
-				return interactionResultHolder.getResult();
+				return interactionResultHolder;
 			}
 		}
 	}

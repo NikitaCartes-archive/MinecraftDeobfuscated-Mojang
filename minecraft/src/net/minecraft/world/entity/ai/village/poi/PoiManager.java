@@ -1,8 +1,11 @@
 package net.minecraft.world.entity.ai.village.poi;
 
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,15 +24,19 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.SectionTracker;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.storage.SectionStorage;
 
 public class PoiManager extends SectionStorage<PoiSection> {
-	private final PoiManager.DistanceTracker distanceTracker = new PoiManager.DistanceTracker();
+	private final PoiManager.DistanceTracker distanceTracker;
+	private final LongSet loadedChunks = new LongOpenHashSet();
 
 	public PoiManager(File file, DataFixer dataFixer) {
 		super(file, PoiSection::new, PoiSection::new, dataFixer, DataFixTypes.POI_CHUNK);
+		this.distanceTracker = new PoiManager.DistanceTracker();
 	}
 
 	public void add(BlockPos blockPos, PoiType poiType) {
@@ -165,6 +172,15 @@ public class PoiManager extends SectionStorage<PoiSection> {
 					PoiType.forState(blockState).ifPresent(poiType -> biConsumer.accept(blockPos, poiType));
 				}
 			);
+	}
+
+	public void ensureLoadedAndValid(LevelReader levelReader, BlockPos blockPos, int i) {
+		SectionPos.aroundChunk(new ChunkPos(blockPos), Math.floorDiv(i, 16))
+			.map(sectionPos -> Pair.of(sectionPos, this.getOrLoad(sectionPos.asLong())))
+			.filter(pair -> !(Boolean)((Optional)pair.getSecond()).map(PoiSection::isValid).orElse(false))
+			.map(pair -> ((SectionPos)pair.getFirst()).chunk())
+			.filter(chunkPos -> this.loadedChunks.add(chunkPos.toLong()))
+			.forEach(chunkPos -> levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY));
 	}
 
 	final class DistanceTracker extends SectionTracker {

@@ -151,6 +151,12 @@ public class SectionPos extends Vec3i {
 		return betweenClosedStream(j - i, k - i, l - i, j + i, k + i, l + i);
 	}
 
+	public static Stream<SectionPos> aroundChunk(ChunkPos chunkPos, int i) {
+		int j = chunkPos.x;
+		int k = chunkPos.z;
+		return betweenClosedStream(j - i, 0, k - i, j + i, 15, k + i);
+	}
+
 	public static Stream<SectionPos> betweenClosedStream(int i, int j, int k, int l, int m, int n) {
 		return StreamSupport.stream(new AbstractSpliterator<SectionPos>((long)((l - i + 1) * (m - j + 1) * (n - k + 1)), 64) {
 			final Cursor3D cursor = new Cursor3D(i, j, k, l, m, n);

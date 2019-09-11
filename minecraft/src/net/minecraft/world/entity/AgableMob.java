@@ -6,12 +6,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 
 public abstract class AgableMob extends PathfinderMob {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(AgableMob.class, EntityDataSerializers.BOOLEAN);
@@ -21,6 +23,27 @@ public abstract class AgableMob extends PathfinderMob {
 
 	protected AgableMob(EntityType<? extends AgableMob> entityType, Level level) {
 		super(entityType, level);
+	}
+
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		LevelAccessor levelAccessor,
+		DifficultyInstance difficultyInstance,
+		MobSpawnType mobSpawnType,
+		@Nullable SpawnGroupData spawnGroupData,
+		@Nullable CompoundTag compoundTag
+	) {
+		if (spawnGroupData == null) {
+			spawnGroupData = new AgableMob.AgableMobGroupData();
+		}
+
+		AgableMob.AgableMobGroupData agableMobGroupData = (AgableMob.AgableMobGroupData)spawnGroupData;
+		if (agableMobGroupData.isShouldSpawnBaby() && agableMobGroupData.getGroupSize() > 0 && this.random.nextFloat() <= agableMobGroupData.getBabySpawnChance()) {
+			this.setAge(-24000);
+		}
+
+		agableMobGroupData.increaseGroupSizeByOne();
+		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Nullable
@@ -164,5 +187,35 @@ public abstract class AgableMob extends PathfinderMob {
 	@Override
 	public boolean isBaby() {
 		return this.getAge() < 0;
+	}
+
+	public static class AgableMobGroupData implements SpawnGroupData {
+		private int groupSize;
+		private boolean shouldSpawnBaby = true;
+		private float babySpawnChance = 0.05F;
+
+		public int getGroupSize() {
+			return this.groupSize;
+		}
+
+		public void increaseGroupSizeByOne() {
+			this.groupSize++;
+		}
+
+		public boolean isShouldSpawnBaby() {
+			return this.shouldSpawnBaby;
+		}
+
+		public void setShouldSpawnBaby(boolean bl) {
+			this.shouldSpawnBaby = bl;
+		}
+
+		public float getBabySpawnChance() {
+			return this.babySpawnChance;
+		}
+
+		public void setBabySpawnChance(float f) {
+			this.babySpawnChance = f;
+		}
 	}
 }

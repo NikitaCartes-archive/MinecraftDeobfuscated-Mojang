@@ -8,7 +8,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.Recipe;
@@ -43,7 +42,7 @@ public class KnowledgeBookItem extends Item {
 					Optional<? extends Recipe<?>> optional = recipeManager.byKey(new ResourceLocation(string));
 					if (!optional.isPresent()) {
 						LOGGER.error("Invalid recipe: {}", string);
-						return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+						return InteractionResultHolder.fail(itemStack);
 					}
 
 					list.add(optional.get());
@@ -53,10 +52,10 @@ public class KnowledgeBookItem extends Item {
 				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+			return InteractionResultHolder.success(itemStack);
 		} else {
 			LOGGER.error("Tag not valid: {}", compoundTag);
-			return new InteractionResultHolder<>(InteractionResult.FAIL, itemStack);
+			return InteractionResultHolder.fail(itemStack);
 		}
 	}
 }

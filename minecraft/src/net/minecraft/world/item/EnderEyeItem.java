@@ -65,7 +65,7 @@ public class EnderEyeItem extends Item {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
 		if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
-			return new InteractionResultHolder<>(InteractionResult.PASS, itemStack);
+			return InteractionResultHolder.pass(itemStack);
 		} else {
 			player.startUsingItem(interactionHand);
 			if (level instanceof ServerLevel) {
@@ -86,11 +86,11 @@ public class EnderEyeItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+					return InteractionResultHolder.success(itemStack);
 				}
 			}
 
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemStack);
+			return InteractionResultHolder.success(itemStack);
 		}
 	}
 }

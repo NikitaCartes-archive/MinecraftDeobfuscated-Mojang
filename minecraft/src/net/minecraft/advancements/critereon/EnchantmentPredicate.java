@@ -14,6 +14,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EnchantmentPredicate {
 	public static final EnchantmentPredicate ANY = new EnchantmentPredicate();
+	public static final EnchantmentPredicate[] NONE = new EnchantmentPredicate[0];
 	private final Enchantment enchantment;
 	private final MinMaxBounds.Ints level;
 
@@ -93,7 +94,7 @@ public class EnchantmentPredicate {
 
 			return enchantmentPredicates;
 		} else {
-			return new EnchantmentPredicate[0];
+			return NONE;
 		}
 	}
 }

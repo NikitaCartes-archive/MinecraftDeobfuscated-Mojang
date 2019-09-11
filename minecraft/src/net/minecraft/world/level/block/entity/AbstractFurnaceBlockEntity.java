@@ -136,7 +136,7 @@ public abstract class AbstractFurnaceBlockEntity
 		add(map, Items.WOODEN_AXE, 200);
 		add(map, Items.WOODEN_PICKAXE, 200);
 		add(map, ItemTags.WOODEN_DOORS, 200);
-		add(map, ItemTags.BOATS, 200);
+		add(map, ItemTags.BOATS, 1200);
 		add(map, ItemTags.WOOL, 100);
 		add(map, ItemTags.WOODEN_BUTTONS, 100);
 		add(map, Items.STICK, 100);

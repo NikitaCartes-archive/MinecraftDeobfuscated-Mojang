@@ -1,7 +1,11 @@
 package net.minecraft.gametest.framework;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -15,6 +19,7 @@ public class GameTestInfo {
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 	private int remainingTicksUntilTimeout;
 	private Runnable succeedWhenThisAssertPasses;
+	private Map<Runnable, Long> assertAtTickTimeMap = Maps.<Runnable, Long>newHashMap();
 	private boolean started = false;
 	private long startTime = -1L;
 	private boolean done = false;
@@ -31,6 +36,21 @@ public class GameTestInfo {
 
 	public void tick() {
 		if (!this.isDone()) {
+			Iterator<Entry<Runnable, Long>> iterator = this.assertAtTickTimeMap.entrySet().iterator();
+
+			while (iterator.hasNext()) {
+				Entry<Runnable, Long> entry = (Entry<Runnable, Long>)iterator.next();
+				if ((Long)entry.getValue() <= this.level.getGameTime()) {
+					try {
+						((Runnable)entry.getKey()).run();
+					} catch (Exception var4) {
+						this.fail(var4);
+					}
+
+					iterator.remove();
+				}
+			}
+
 			this.remainingTicksUntilTimeout--;
 			if (this.remainingTicksUntilTimeout <= 0) {
 				if (this.succeedWhenThisAssertPasses == null) {

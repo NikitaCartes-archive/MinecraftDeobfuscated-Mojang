@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ShovelItem extends DiggerItem {
@@ -67,22 +68,29 @@ public class ShovelItem extends DiggerItem {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
-		if (useOnContext.getClickedFace() != Direction.DOWN && level.getBlockState(blockPos.above()).isAir()) {
-			BlockState blockState = (BlockState)FLATTENABLES.get(level.getBlockState(blockPos).getBlock());
-			if (blockState != null) {
-				Player player = useOnContext.getPlayer();
+		BlockState blockState = level.getBlockState(blockPos);
+		if (useOnContext.getClickedFace() == Direction.DOWN) {
+			return InteractionResult.PASS;
+		} else {
+			Player player = useOnContext.getPlayer();
+			BlockState blockState2 = (BlockState)FLATTENABLES.get(blockState.getBlock());
+			BlockState blockState3 = null;
+			if (blockState2 != null && level.getBlockState(blockPos.above()).isAir()) {
 				level.playSound(player, blockPos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
-				if (!level.isClientSide) {
-					level.setBlock(blockPos, blockState, 11);
-					if (player != null) {
-						useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
-					}
-				}
-
-				return InteractionResult.SUCCESS;
+				blockState3 = blockState2;
+			} else if (blockState.getBlock() instanceof CampfireBlock && (Boolean)blockState.getValue(CampfireBlock.LIT)) {
+				level.levelEvent(null, 1009, blockPos, 0);
+				blockState3 = blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
 			}
-		}
 
-		return InteractionResult.PASS;
+			if (!level.isClientSide && blockState3 != null) {
+				level.setBlock(blockPos, blockState3, 11);
+				if (player != null) {
+					useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+				}
+			}
+
+			return InteractionResult.SUCCESS;
+		}
 	}
 }

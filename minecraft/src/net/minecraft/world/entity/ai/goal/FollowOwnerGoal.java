@@ -8,7 +8,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -42,7 +41,7 @@ public class FollowOwnerGoal extends Goal {
 		LivingEntity livingEntity = this.tamable.getOwner();
 		if (livingEntity == null) {
 			return false;
-		} else if (livingEntity instanceof Player && ((Player)livingEntity).isSpectator()) {
+		} else if (livingEntity.isSpectator()) {
 			return false;
 		} else if (this.tamable.isSitting()) {
 			return false;
@@ -56,7 +55,7 @@ public class FollowOwnerGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return !this.navigation.isDone() && this.tamable.distanceToSqr(this.owner) > (double)(this.stopDistance * this.stopDistance) && !this.tamable.isSitting();
+		return !this.navigation.isDone() && !this.tamable.isSitting() && this.tamable.distanceToSqr(this.owner) > (double)(this.stopDistance * this.stopDistance);
 	}
 
 	@Override
@@ -76,27 +75,25 @@ public class FollowOwnerGoal extends Goal {
 	@Override
 	public void tick() {
 		this.tamable.getLookControl().setLookAt(this.owner, 10.0F, (float)this.tamable.getMaxHeadXRot());
-		if (!this.tamable.isSitting()) {
-			if (--this.timeToRecalcPath <= 0) {
-				this.timeToRecalcPath = 10;
-				if (!this.navigation.moveTo(this.owner, this.speedModifier)) {
-					if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
-						if (!(this.tamable.distanceToSqr(this.owner) < 144.0)) {
-							int i = Mth.floor(this.owner.x) - 2;
-							int j = Mth.floor(this.owner.z) - 2;
-							int k = Mth.floor(this.owner.getBoundingBox().minY);
+		if (--this.timeToRecalcPath <= 0) {
+			this.timeToRecalcPath = 10;
+			if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
+				if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
+					int i = Mth.floor(this.owner.x) - 2;
+					int j = Mth.floor(this.owner.z) - 2;
+					int k = Mth.floor(this.owner.getBoundingBox().minY);
 
-							for (int l = 0; l <= 4; l++) {
-								for (int m = 0; m <= 4; m++) {
-									if ((l < 1 || m < 1 || l > 3 || m > 3) && this.isTeleportFriendlyBlock(new BlockPos(i + l, k - 1, j + m))) {
-										this.tamable.moveTo((double)((float)(i + l) + 0.5F), (double)k, (double)((float)(j + m) + 0.5F), this.tamable.yRot, this.tamable.xRot);
-										this.navigation.stop();
-										return;
-									}
-								}
+					for (int l = 0; l <= 4; l++) {
+						for (int m = 0; m <= 4; m++) {
+							if ((l < 1 || m < 1 || l > 3 || m > 3) && this.isTeleportFriendlyBlock(new BlockPos(i + l, k - 1, j + m))) {
+								this.tamable.moveTo((double)((float)(i + l) + 0.5F), (double)k, (double)((float)(j + m) + 0.5F), this.tamable.yRot, this.tamable.xRot);
+								this.navigation.stop();
+								return;
 							}
 						}
 					}
+				} else {
+					this.navigation.moveTo(this.owner, this.speedModifier);
 				}
 			}
 		}
