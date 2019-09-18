@@ -974,7 +974,7 @@ ResourceManagerReloadListener {
                 int n = blockDestructionProgress.getProgress();
                 TextureAtlasSprite textureAtlasSprite = this.breakingTextures.get(n);
                 BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
-                blockRenderDispatcher.renderBreakingTexture(blockState2, blockPos, textureAtlasSprite, this.level);
+                blockRenderDispatcher.a(this.builder, blockState2, blockPos, textureAtlasSprite, this.level);
             }
             this.builder.offset(0.0, 0.0, 0.0);
         }

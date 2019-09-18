@@ -4,7 +4,6 @@
 package net.minecraft.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,14 +45,14 @@ implements ResourceManagerReloadListener {
         return this.blockModelShaper;
     }
 
-    public void renderBreakingTexture(BlockState blockState, BlockPos blockPos, TextureAtlasSprite textureAtlasSprite, BlockAndBiomeGetter blockAndBiomeGetter) {
+    public void a(BufferBuilder bufferBuilder, BlockState blockState, BlockPos blockPos, TextureAtlasSprite textureAtlasSprite, BlockAndBiomeGetter blockAndBiomeGetter) {
         if (blockState.getRenderShape() != RenderShape.MODEL) {
             return;
         }
         BakedModel bakedModel = this.blockModelShaper.getBlockModel(blockState);
         long l = blockState.getSeed(blockPos);
         BakedModel bakedModel2 = new SimpleBakedModel.Builder(blockState, bakedModel, textureAtlasSprite, this.random, l).build();
-        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel2, blockState, blockPos, Tesselator.getInstance().getBuilder(), true, this.random, l);
+        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel2, blockState, blockPos, bufferBuilder, true, this.random, l);
     }
 
     public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, BufferBuilder bufferBuilder, Random random) {
