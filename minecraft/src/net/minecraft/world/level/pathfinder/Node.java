@@ -74,11 +74,6 @@ public class Node {
 		return f + g + h;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public BlockPos asBlockPos() {
-		return new BlockPos(this.x, this.y, this.z);
-	}
-
 	public boolean equals(Object object) {
 		if (!(object instanceof Node)) {
 			return false;

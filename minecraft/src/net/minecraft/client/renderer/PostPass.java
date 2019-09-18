@@ -76,7 +76,7 @@ public class PostPass implements AutoCloseable {
 		this.effect.safeGetUniform("OutSize").set(g, h);
 		this.effect.safeGetUniform("Time").set(f);
 		Minecraft minecraft = Minecraft.getInstance();
-		this.effect.safeGetUniform("ScreenSize").set((float)minecraft.window.getWidth(), (float)minecraft.window.getHeight());
+		this.effect.safeGetUniform("ScreenSize").set((float)minecraft.getWindow().getWidth(), (float)minecraft.getWindow().getHeight());
 		this.effect.apply();
 		this.outTarget.clear(Minecraft.ON_OSX);
 		this.outTarget.bindWrite(false);

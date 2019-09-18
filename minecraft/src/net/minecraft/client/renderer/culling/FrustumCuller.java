@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.culling;
 
+import com.mojang.blaze3d.platform.Frustum;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.AABB;

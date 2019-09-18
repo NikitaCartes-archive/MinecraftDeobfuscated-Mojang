@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -49,10 +48,5 @@ public class TorchBlock extends Block {
 		double f = (double)blockPos.getZ() + 0.5;
 		level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 		level.addParticle(ParticleTypes.FLAME, d, e, f, 0.0, 0.0, 0.0);
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.CUTOUT;
 	}
 }

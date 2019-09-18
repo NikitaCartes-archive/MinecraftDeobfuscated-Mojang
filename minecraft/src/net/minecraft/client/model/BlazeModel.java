@@ -14,11 +14,11 @@ public class BlazeModel<T extends Entity> extends EntityModel<T> {
 	public BlazeModel() {
 		for (int i = 0; i < this.upperBodyParts.length; i++) {
 			this.upperBodyParts[i] = new ModelPart(this, 0, 16);
-			this.upperBodyParts[i].addBox(0.0F, 0.0F, 0.0F, 2, 8, 2);
+			this.upperBodyParts[i].addBox(0.0F, 0.0F, 0.0F, 2.0F, 8.0F, 2.0F);
 		}
 
 		this.head = new ModelPart(this, 0, 0);
-		this.head.addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
+		this.head.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
 	}
 
 	@Override

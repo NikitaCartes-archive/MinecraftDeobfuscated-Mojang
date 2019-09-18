@@ -342,8 +342,8 @@ public class Options {
 
 					if ("maxFps".equals(string)) {
 						this.framerateLimit = Integer.parseInt(string2);
-						if (this.minecraft.window != null) {
-							this.minecraft.window.setFramerateLimit(this.framerateLimit);
+						if (this.minecraft.getWindow() != null) {
+							this.minecraft.getWindow().setFramerateLimit(this.framerateLimit);
 						}
 					}
 
@@ -598,8 +598,8 @@ public class Options {
 				printWriter.println("chatOpacity:" + this.chatOpacity);
 				printWriter.println("textBackgroundOpacity:" + this.textBackgroundOpacity);
 				printWriter.println("backgroundForChatOnly:" + this.backgroundForChatOnly);
-				if (this.minecraft.window.getPreferredFullscreenVideoMode().isPresent()) {
-					printWriter.println("fullscreenResolution:" + ((VideoMode)this.minecraft.window.getPreferredFullscreenVideoMode().get()).write());
+				if (this.minecraft.getWindow().getPreferredFullscreenVideoMode().isPresent()) {
+					printWriter.println("fullscreenResolution:" + ((VideoMode)this.minecraft.getWindow().getPreferredFullscreenVideoMode().get()).write());
 				}
 
 				printWriter.println("hideServerAddress:" + this.hideServerAddress);

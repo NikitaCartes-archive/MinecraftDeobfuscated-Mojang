@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BaseSpawner;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class SpawnerRenderer extends BlockEntityRenderer<SpawnerBlockEntity> {
-	public void render(SpawnerBlockEntity spawnerBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(SpawnerBlockEntity spawnerBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef((float)d + 0.5F, (float)e, (float)f + 0.5F);
 		render(spawnerBlockEntity.getSpawner(), d, e, f, g);

@@ -16,7 +16,7 @@ public class GhastModel<T extends Entity> extends EntityModel<T> {
 	public GhastModel() {
 		int i = -16;
 		this.body = new ModelPart(this, 0, 0);
-		this.body.addBox(-8.0F, -8.0F, -8.0F, 16, 16, 16);
+		this.body.addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F);
 		this.body.y += 8.0F;
 		Random random = new Random(1660L);
 
@@ -25,7 +25,7 @@ public class GhastModel<T extends Entity> extends EntityModel<T> {
 			float f = (((float)(j % 3) - (float)(j / 3 % 2) * 0.5F + 0.25F) / 2.0F * 2.0F - 1.0F) * 5.0F;
 			float g = ((float)(j / 3) / 2.0F * 2.0F - 1.0F) * 5.0F;
 			int k = random.nextInt(7) + 8;
-			this.tentacles[j].addBox(-1.0F, 0.0F, -1.0F, 2, k, 2);
+			this.tentacles[j].addBox(-1.0F, 0.0F, -1.0F, 2.0F, (float)k, 2.0F);
 			this.tentacles[j].x = f;
 			this.tentacles[j].z = g;
 			this.tentacles[j].y = 15.0F;

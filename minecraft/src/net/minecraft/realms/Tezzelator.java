@@ -1,5 +1,6 @@
 package net.minecraft.realms;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -42,8 +43,8 @@ public class Tezzelator {
 		t.getBuilder().offset(d, e, f);
 	}
 
-	public RealmsBufferBuilder color(int i, int j, int k, int l) {
-		return new RealmsBufferBuilder(t.getBuilder().color(i, j, k, l));
+	public BufferBuilder color(int i, int j, int k, int l) {
+		return t.getBuilder().color(i, j, k, l);
 	}
 
 	public Tezzelator tex(double d, double e) {

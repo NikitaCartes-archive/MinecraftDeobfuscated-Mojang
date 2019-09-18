@@ -136,17 +136,15 @@ public class Gui extends GuiComponent {
 	}
 
 	public void render(float f) {
-		this.screenWidth = this.minecraft.window.getGuiScaledWidth();
-		this.screenHeight = this.minecraft.window.getGuiScaledHeight();
+		this.screenWidth = this.minecraft.getWindow().getGuiScaledWidth();
+		this.screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
 		Font font = this.getFont();
 		RenderSystem.enableBlend();
 		if (Minecraft.useFancyGraphics()) {
 			this.renderVignette(this.minecraft.getCameraEntity());
 		} else {
 			RenderSystem.enableDepthTest();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 		}
 
 		ItemStack itemStack = this.minecraft.player.inventory.getArmor(3);
@@ -173,9 +171,7 @@ public class Gui extends GuiComponent {
 			RenderSystem.enableBlend();
 			RenderSystem.enableAlphaTest();
 			this.renderCrosshair();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			this.minecraft.getProfiler().push("bossHealth");
 			this.bossOverlay.render();
 			this.minecraft.getProfiler().pop();
@@ -241,9 +237,7 @@ public class Gui extends GuiComponent {
 					RenderSystem.pushMatrix();
 					RenderSystem.translatef((float)(this.screenWidth / 2), (float)(this.screenHeight - 68), 0.0F);
 					RenderSystem.enableBlend();
-					RenderSystem.blendFuncSeparate(
-						GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-					);
+					RenderSystem.defaultBlendFunc();
 					int j = 16777215;
 					if (this.animateOverlayMessageColor) {
 						j = Mth.hsvToRgb(g / 50.0F, 0.7F, 0.6F) & 16777215;
@@ -277,9 +271,7 @@ public class Gui extends GuiComponent {
 					RenderSystem.pushMatrix();
 					RenderSystem.translatef((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), 0.0F);
 					RenderSystem.enableBlend();
-					RenderSystem.blendFuncSeparate(
-						GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-					);
+					RenderSystem.defaultBlendFunc();
 					RenderSystem.pushMatrix();
 					RenderSystem.scalef(4.0F, 4.0F, 4.0F);
 					int j = kx << 24 & 0xFF000000;
@@ -320,9 +312,7 @@ public class Gui extends GuiComponent {
 			}
 
 			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			RenderSystem.disableAlphaTest();
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, (float)(this.screenHeight - 48), 0.0F);
@@ -359,7 +349,7 @@ public class Gui extends GuiComponent {
 			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
 				if (options.renderDebug && !options.hideGui && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo) {
 					RenderSystem.pushMatrix();
-					RenderSystem.translatef((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), (float)this.blitOffset);
+					RenderSystem.translatef((float)(this.screenWidth / 2), (float)(this.screenHeight / 2), (float)this.getBlitOffset());
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
 					RenderSystem.rotatef(camera.getXRot(), -1.0F, 0.0F, 0.0F);
 					RenderSystem.rotatef(camera.getYRot(), 0.0F, 1.0F, 0.0F);
@@ -459,7 +449,7 @@ public class Gui extends GuiComponent {
 					float g = f;
 					list.add((Runnable)() -> {
 						RenderSystem.color4f(1.0F, 1.0F, 1.0F, g);
-						blit(n + 3, o + 3, this.blitOffset, 18, 18, textureAtlasSprite);
+						blit(n + 3, o + 3, this.getBlitOffset(), 18, 18, textureAtlasSprite);
 					});
 				}
 			}
@@ -477,10 +467,10 @@ public class Gui extends GuiComponent {
 			ItemStack itemStack = player.getOffhandItem();
 			HumanoidArm humanoidArm = player.getMainArm().getOpposite();
 			int i = this.screenWidth / 2;
-			int j = this.blitOffset;
+			int j = this.getBlitOffset();
 			int k = 182;
 			int l = 91;
-			this.blitOffset = -90;
+			this.setBlitOffset(-90);
 			this.blit(i - 91, this.screenHeight - 22, 0, 0, 182, 22);
 			this.blit(i - 91 - 1 + player.inventory.selected * 20, this.screenHeight - 22 - 1, 0, 22, 24, 22);
 			if (!itemStack.isEmpty()) {
@@ -491,12 +481,10 @@ public class Gui extends GuiComponent {
 				}
 			}
 
-			this.blitOffset = j;
+			this.setBlitOffset(j);
 			RenderSystem.enableRescaleNormal();
 			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			Lighting.turnOnGui();
 
 			for (int m = 0; m < 9; m++) {
@@ -604,9 +592,7 @@ public class Gui extends GuiComponent {
 			if (k > 0) {
 				RenderSystem.pushMatrix();
 				RenderSystem.enableBlend();
-				RenderSystem.blendFuncSeparate(
-					GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-				);
+				RenderSystem.defaultBlendFunc();
 				fill(i - 2, j - 2, i + this.getFont().width(string) + 2, j + 9 + 2, this.minecraft.options.getBackgroundColor(0));
 				this.getFont().drawShadow(string, (float)i, (float)j, 16777215 + (k << 24));
 				RenderSystem.disableBlend();
@@ -935,9 +921,7 @@ public class Gui extends GuiComponent {
 	private void renderPumpkin() {
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableAlphaTest();
 		this.minecraft.getTextureManager().bind(PUMPKIN_BLUR_LOCATION);
@@ -996,9 +980,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 	}
 
 	private void renderPortalOverlay(float f) {
@@ -1011,9 +993,7 @@ public class Gui extends GuiComponent {
 		RenderSystem.disableAlphaTest();
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, f);
 		this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
 		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());

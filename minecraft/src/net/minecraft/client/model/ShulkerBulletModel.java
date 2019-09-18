@@ -13,9 +13,9 @@ public class ShulkerBulletModel<T extends Entity> extends EntityModel<T> {
 		this.texWidth = 64;
 		this.texHeight = 32;
 		this.main = new ModelPart(this);
-		this.main.texOffs(0, 0).addBox(-4.0F, -4.0F, -1.0F, 8, 8, 2, 0.0F);
-		this.main.texOffs(0, 10).addBox(-1.0F, -4.0F, -4.0F, 2, 8, 8, 0.0F);
-		this.main.texOffs(20, 0).addBox(-4.0F, -1.0F, -4.0F, 8, 2, 8, 0.0F);
+		this.main.texOffs(0, 0).addBox(-4.0F, -4.0F, -1.0F, 8.0F, 8.0F, 2.0F, 0.0F);
+		this.main.texOffs(0, 10).addBox(-1.0F, -4.0F, -4.0F, 2.0F, 8.0F, 8.0F, 0.0F);
+		this.main.texOffs(20, 0).addBox(-4.0F, -1.0F, -4.0F, 8.0F, 2.0F, 8.0F, 0.0F);
 		this.main.setPos(0.0F, 0.0F, 0.0F);
 	}
 

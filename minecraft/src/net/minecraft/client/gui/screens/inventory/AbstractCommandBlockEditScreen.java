@@ -413,13 +413,13 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 		public boolean mouseScrolled(double d) {
 			int i = (int)(
 				AbstractCommandBlockEditScreen.this.minecraft.mouseHandler.xpos()
-					* (double)AbstractCommandBlockEditScreen.this.minecraft.window.getGuiScaledWidth()
-					/ (double)AbstractCommandBlockEditScreen.this.minecraft.window.getScreenWidth()
+					* (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getGuiScaledWidth()
+					/ (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getScreenWidth()
 			);
 			int j = (int)(
 				AbstractCommandBlockEditScreen.this.minecraft.mouseHandler.ypos()
-					* (double)AbstractCommandBlockEditScreen.this.minecraft.window.getGuiScaledHeight()
-					/ (double)AbstractCommandBlockEditScreen.this.minecraft.window.getScreenHeight()
+					* (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getGuiScaledHeight()
+					/ (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getScreenHeight()
 			);
 			if (this.rect.contains(i, j)) {
 				this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestions.getList().size() - 7, 0));

@@ -45,12 +45,12 @@ public class VideoSettingsScreen extends Screen {
 	protected void init() {
 		this.oldMipmaps = this.options.mipmapLevels;
 		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
-		this.list.addBig(new FullscreenResolutionProgressOption(this.minecraft.window));
+		this.list.addBig(new FullscreenResolutionProgressOption(this.minecraft.getWindow()));
 		this.list.addSmall(OPTIONS);
 		this.children.add(this.list);
 		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, I18n.get("gui.done"), button -> {
 			this.minecraft.options.save();
-			this.minecraft.window.changeFullscreenVideoMode();
+			this.minecraft.getWindow().changeFullscreenVideoMode();
 			this.minecraft.setScreen(this.lastScreen);
 		}));
 	}

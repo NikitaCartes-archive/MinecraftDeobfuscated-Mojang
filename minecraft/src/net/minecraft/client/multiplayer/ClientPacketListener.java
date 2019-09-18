@@ -616,14 +616,21 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(clientboundMoveEntityPacket, this, this.minecraft);
 		Entity entity = clientboundMoveEntityPacket.getEntity(this.level);
 		if (entity != null) {
-			entity.xp = entity.xp + (long)clientboundMoveEntityPacket.getXa();
-			entity.yp = entity.yp + (long)clientboundMoveEntityPacket.getYa();
-			entity.zp = entity.zp + (long)clientboundMoveEntityPacket.getZa();
-			Vec3 vec3 = ClientboundMoveEntityPacket.packetToEntity(entity.xp, entity.yp, entity.zp);
 			if (!entity.isControlledByLocalInstance()) {
-				float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F : entity.yRot;
-				float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.xRot;
-				entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
+				if (clientboundMoveEntityPacket.hasPosition()) {
+					entity.xp = entity.xp + (long)clientboundMoveEntityPacket.getXa();
+					entity.yp = entity.yp + (long)clientboundMoveEntityPacket.getYa();
+					entity.zp = entity.zp + (long)clientboundMoveEntityPacket.getZa();
+					Vec3 vec3 = ClientboundMoveEntityPacket.packetToEntity(entity.xp, entity.yp, entity.zp);
+					float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F : entity.yRot;
+					float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.xRot;
+					entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
+				} else if (clientboundMoveEntityPacket.hasRotation()) {
+					float h = (float)clientboundMoveEntityPacket.getyRot();
+					float f = (float)clientboundMoveEntityPacket.getxRot();
+					entity.lerpTo(entity.x, entity.y, entity.z, h, f, 3, false);
+				}
+
 				entity.onGround = clientboundMoveEntityPacket.isOnGround();
 			}
 		}

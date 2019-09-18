@@ -160,11 +160,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 	private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
 		RenderSystem.translatef(0.0F, 0.0F, 32.0F);
-		this.blitOffset = 200;
+		this.setBlitOffset(200);
 		this.itemRenderer.blitOffset = 200.0F;
 		this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
 		this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j - (this.draggingItem.isEmpty() ? 0 : 8), string);
-		this.blitOffset = 0;
+		this.setBlitOffset(0);
 		this.itemRenderer.blitOffset = 0.0F;
 	}
 
@@ -206,7 +206,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			}
 		}
 
-		this.blitOffset = 100;
+		this.setBlitOffset(100);
 		this.itemRenderer.blitOffset = 100.0F;
 		if (itemStack.isEmpty() && slot.isActive()) {
 			String string2 = slot.getNoItemIcon();
@@ -214,7 +214,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
 				RenderSystem.disableLighting();
 				this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-				blit(i, j, this.blitOffset, 16, 16, textureAtlasSprite);
+				blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
 				RenderSystem.enableLighting();
 				bl2 = true;
 			}
@@ -231,7 +231,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 
 		this.itemRenderer.blitOffset = 0.0F;
-		this.blitOffset = 0;
+		this.setBlitOffset(0);
 	}
 
 	private void recalculateQuickCraftRemaining() {
@@ -313,8 +313,8 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 							} else {
 								boolean bl3 = m != -999
 									&& (
-										InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 340)
-											|| InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 344)
+										InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340)
+											|| InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344)
 									);
 								ClickType clickType = ClickType.PICKUP;
 								if (bl3) {
@@ -487,7 +487,8 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				} else {
 					boolean bl2 = l != -999
 						&& (
-							InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 344)
+							InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340)
+								|| InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344)
 						);
 					if (bl2) {
 						this.lastQuickMoved = slot != null && slot.hasItem() ? slot.getItem().copy() : ItemStack.EMPTY;

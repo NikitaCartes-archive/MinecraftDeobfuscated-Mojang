@@ -3,8 +3,6 @@ package net.minecraft.world.level.lighting;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -194,11 +192,6 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 	@Override
 	public int getLightValue(BlockPos blockPos) {
 		return this.storage.getLightValue(blockPos.asLong());
-	}
-
-	@Environment(EnvType.CLIENT)
-	public String getDebugData(long l) {
-		return "" + this.storage.getLevel(l);
 	}
 
 	public void checkBlock(BlockPos blockPos) {

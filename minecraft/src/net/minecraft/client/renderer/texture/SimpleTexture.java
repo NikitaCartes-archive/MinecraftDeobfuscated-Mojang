@@ -1,7 +1,9 @@
 package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.Closeable;
 import java.io.IOException;
 import javax.annotation.Nullable;
@@ -26,37 +28,29 @@ public class SimpleTexture extends AbstractTexture {
 	@Override
 	public void load(ResourceManager resourceManager) throws IOException {
 		SimpleTexture.TextureImage textureImage = this.getTextureImage(resourceManager);
-		Throwable var3 = null;
-
-		try {
-			boolean bl = false;
-			boolean bl2 = false;
-			textureImage.throwIfError();
-			TextureMetadataSection textureMetadataSection = textureImage.getTextureMetadata();
-			if (textureMetadataSection != null) {
-				bl = textureMetadataSection.isBlur();
-				bl2 = textureMetadataSection.isClamp();
-			}
-
-			this.bind();
-			TextureUtil.prepareImage(this.getId(), 0, textureImage.getImage().getWidth(), textureImage.getImage().getHeight());
-			textureImage.getImage().upload(0, 0, 0, 0, 0, textureImage.getImage().getWidth(), textureImage.getImage().getHeight(), bl, bl2, false);
-		} catch (Throwable var14) {
-			var3 = var14;
-			throw var14;
-		} finally {
-			if (textureImage != null) {
-				if (var3 != null) {
-					try {
-						textureImage.close();
-					} catch (Throwable var13) {
-						var3.addSuppressed(var13);
-					}
-				} else {
-					textureImage.close();
-				}
-			}
+		textureImage.throwIfError();
+		TextureMetadataSection textureMetadataSection = textureImage.getTextureMetadata();
+		boolean bl;
+		boolean bl2;
+		if (textureMetadataSection != null) {
+			bl = textureMetadataSection.isBlur();
+			bl2 = textureMetadataSection.isClamp();
+		} else {
+			bl = false;
+			bl2 = false;
 		}
+
+		NativeImage nativeImage = textureImage.getImage();
+		if (!RenderSystem.isOnRenderThreadOrInit()) {
+			RenderSystem.recordRenderCall(() -> this.doLoad(nativeImage, bl, bl2));
+		} else {
+			this.doLoad(nativeImage, bl, bl2);
+		}
+	}
+
+	private void doLoad(NativeImage nativeImage, boolean bl, boolean bl2) {
+		TextureUtil.prepareImage(this.getId(), 0, nativeImage.getWidth(), nativeImage.getHeight());
+		nativeImage.upload(0, 0, 0, 0, 0, nativeImage.getWidth(), nativeImage.getHeight(), bl, bl2, false, true);
 	}
 
 	protected SimpleTexture.TextureImage getTextureImage(ResourceManager resourceManager) {

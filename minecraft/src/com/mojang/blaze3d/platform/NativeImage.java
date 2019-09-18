@@ -122,22 +122,24 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	private static void setClamp(boolean bl) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		if (bl) {
-			RenderSystem.texParameter(3553, 10242, 10496);
-			RenderSystem.texParameter(3553, 10243, 10496);
+			GlStateManager._texParameter(3553, 10242, 10496);
+			GlStateManager._texParameter(3553, 10243, 10496);
 		} else {
-			RenderSystem.texParameter(3553, 10242, 10497);
-			RenderSystem.texParameter(3553, 10243, 10497);
+			GlStateManager._texParameter(3553, 10242, 10497);
+			GlStateManager._texParameter(3553, 10243, 10497);
 		}
 	}
 
 	private static void setFilter(boolean bl, boolean bl2) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		if (bl) {
-			RenderSystem.texParameter(3553, 10241, bl2 ? 9987 : 9729);
-			RenderSystem.texParameter(3553, 10240, 9729);
+			GlStateManager._texParameter(3553, 10241, bl2 ? 9987 : 9729);
+			GlStateManager._texParameter(3553, 10240, 9729);
 		} else {
-			RenderSystem.texParameter(3553, 10241, bl2 ? 9986 : 9728);
-			RenderSystem.texParameter(3553, 10240, 9728);
+			GlStateManager._texParameter(3553, 10241, bl2 ? 9986 : 9728);
+			GlStateManager._texParameter(3553, 10240, 9728);
 		}
 	}
 
@@ -270,33 +272,46 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public void upload(int i, int j, int k, boolean bl) {
-		this.upload(i, j, k, 0, 0, this.width, this.height, bl);
+		this.upload(i, j, k, 0, 0, this.width, this.height, false, bl);
 	}
 
-	public void upload(int i, int j, int k, int l, int m, int n, int o, boolean bl) {
-		this.upload(i, j, k, l, m, n, o, false, false, bl);
+	public void upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2) {
+		this.upload(i, j, k, l, m, n, o, false, false, bl, bl2);
 	}
 
-	public void upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2, boolean bl3) {
+	public void upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+		if (!RenderSystem.isOnRenderThreadOrInit()) {
+			RenderSystem.recordRenderCall(() -> this._upload(i, j, k, l, m, n, o, bl, bl2, bl3, bl4));
+		} else {
+			this._upload(i, j, k, l, m, n, o, bl, bl2, bl3, bl4);
+		}
+	}
+
+	private void _upload(int i, int j, int k, int l, int m, int n, int o, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		this.checkAllocated();
 		setFilter(bl, bl3);
 		setClamp(bl2);
 		if (n == this.getWidth()) {
-			RenderSystem.pixelStore(3314, 0);
+			GlStateManager._pixelStore(3314, 0);
 		} else {
-			RenderSystem.pixelStore(3314, this.getWidth());
+			GlStateManager._pixelStore(3314, this.getWidth());
 		}
 
-		RenderSystem.pixelStore(3316, l);
-		RenderSystem.pixelStore(3315, m);
+		GlStateManager._pixelStore(3316, l);
+		GlStateManager._pixelStore(3315, m);
 		this.format.setUnpackPixelStoreState();
-		RenderSystem.texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
+		GlStateManager._texSubImage2D(3553, i, j, k, n, o, this.format.glFormat(), 5121, this.pixels);
+		if (bl4) {
+			this.close();
+		}
 	}
 
 	public void downloadTexture(int i, boolean bl) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		this.checkAllocated();
 		this.format.setPackPixelStoreState();
-		RenderSystem.getTexImage(3553, i, this.format.glFormat(), 5121, this.pixels);
+		GlStateManager._getTexImage(3553, i, this.format.glFormat(), 5121, this.pixels);
 		if (bl && this.format.hasAlpha()) {
 			for (int j = 0; j < this.getHeight(); j++) {
 				for (int k = 0; k < this.getWidth(); k++) {
@@ -494,11 +509,13 @@ public final class NativeImage implements AutoCloseable {
 		}
 
 		public void setPackPixelStoreState() {
-			RenderSystem.pixelStore(3333, this.components());
+			RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+			GlStateManager._pixelStore(3333, this.components());
 		}
 
 		public void setUnpackPixelStoreState() {
-			RenderSystem.pixelStore(3317, this.components());
+			RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+			GlStateManager._pixelStore(3317, this.components());
 		}
 
 		public int glFormat() {

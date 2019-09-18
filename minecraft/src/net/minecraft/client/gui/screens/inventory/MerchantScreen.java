@@ -85,7 +85,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		this.minecraft.getTextureManager().bind(VILLAGER_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		blit(k, l, this.blitOffset, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 512);
+		blit(k, l, this.getBlitOffset(), 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 512);
 		MerchantOffers merchantOffers = this.menu.getOffers();
 		if (!merchantOffers.isEmpty()) {
 			int m = this.shopItem;
@@ -98,7 +98,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 				this.minecraft.getTextureManager().bind(VILLAGER_LOCATION);
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.disableLighting();
-				blit(this.leftPos + 83 + 99, this.topPos + 35, this.blitOffset, 311.0F, 0.0F, 28, 21, 256, 512);
+				blit(this.leftPos + 83 + 99, this.topPos + 35, this.getBlitOffset(), 311.0F, 0.0F, 28, 21, 256, 512);
 			}
 		}
 	}
@@ -108,17 +108,17 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		int k = this.menu.getTraderLevel();
 		int l = this.menu.getTraderXp();
 		if (k < 5) {
-			blit(i + 136, j + 16, this.blitOffset, 0.0F, 186.0F, 102, 5, 256, 512);
+			blit(i + 136, j + 16, this.getBlitOffset(), 0.0F, 186.0F, 102, 5, 256, 512);
 			int m = VillagerData.getMinXpPerLevel(k);
 			if (l >= m && VillagerData.canLevelUp(k)) {
 				int n = 100;
 				float f = (float)(100 / (VillagerData.getMaxXpPerLevel(k) - m));
 				int o = Mth.floor(f * (float)(l - m));
-				blit(i + 136, j + 16, this.blitOffset, 0.0F, 191.0F, o + 1, 5, 256, 512);
+				blit(i + 136, j + 16, this.getBlitOffset(), 0.0F, 191.0F, o + 1, 5, 256, 512);
 				int p = this.menu.getFutureTraderXp();
 				if (p > 0) {
 					int q = Math.min(Mth.floor((float)p * f), 100 - o);
-					blit(i + 136 + o + 1, j + 16 + 1, this.blitOffset, 2.0F, 182.0F, q, 3, 256, 512);
+					blit(i + 136 + o + 1, j + 16 + 1, this.getBlitOffset(), 2.0F, 182.0F, q, 3, 256, 512);
 				}
 			}
 		}
@@ -136,9 +136,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 				o = 113;
 			}
 
-			blit(i + 94, j + 18 + o, this.blitOffset, 0.0F, 199.0F, 6, 27, 256, 512);
+			blit(i + 94, j + 18 + o, this.getBlitOffset(), 0.0F, 199.0F, 6, 27, 256, 512);
 		} else {
-			blit(i + 94, j + 18, this.blitOffset, 6.0F, 199.0F, 6, 27, 256, 512);
+			blit(i + 94, j + 18, this.getBlitOffset(), 6.0F, 199.0F, 6, 27, 256, 512);
 		}
 
 		Lighting.turnOnGui();
@@ -221,9 +221,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		RenderSystem.enableBlend();
 		this.minecraft.getTextureManager().bind(VILLAGER_LOCATION);
 		if (merchantOffer.isOutOfStock()) {
-			blit(i + 5 + 35 + 20, j + 3, this.blitOffset, 25.0F, 171.0F, 10, 9, 256, 512);
+			blit(i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 25.0F, 171.0F, 10, 9, 256, 512);
 		} else {
-			blit(i + 5 + 35 + 20, j + 3, this.blitOffset, 15.0F, 171.0F, 10, 9, 256, 512);
+			blit(i + 5 + 35 + 20, j + 3, this.getBlitOffset(), 15.0F, 171.0F, 10, 9, 256, 512);
 		}
 
 		Lighting.turnOnGui();
@@ -237,11 +237,11 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack2, i, j, itemStack2.getCount() == 1 ? "1" : null);
 			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i + 14, j, itemStack.getCount() == 1 ? "1" : null);
 			this.minecraft.getTextureManager().bind(VILLAGER_LOCATION);
-			this.blitOffset += 300;
+			this.setBlitOffset(this.getBlitOffset() + 300);
 			Lighting.turnOff();
-			blit(i + 7, j + 12, this.blitOffset, 0.0F, 176.0F, 9, 2, 256, 512);
+			blit(i + 7, j + 12, this.getBlitOffset(), 0.0F, 176.0F, 9, 2, 256, 512);
 			Lighting.turnOnGui();
-			this.blitOffset -= 300;
+			this.setBlitOffset(this.getBlitOffset() - 300);
 		}
 	}
 

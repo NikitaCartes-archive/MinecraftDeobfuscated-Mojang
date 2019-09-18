@@ -211,7 +211,7 @@ public class BitmapProvider implements GlyphProvider {
 
 		@Override
 		public void upload(int i, int j) {
-			this.image.upload(0, i, j, this.offsetX, this.offsetY, this.width, this.height, false);
+			this.image.upload(0, i, j, this.offsetX, this.offsetY, this.width, this.height, false, false);
 		}
 
 		@Override

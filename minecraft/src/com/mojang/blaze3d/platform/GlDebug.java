@@ -3,6 +3,7 @@ package com.mojang.blaze3d.platform;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -108,6 +109,7 @@ public class GlDebug {
 	}
 
 	public static void enableDebugCallback(int i, boolean bl) {
+		RenderSystem.assertThread(RenderSystem::isInInitPhase);
 		if (i > 0) {
 			GLCapabilities gLCapabilities = GL.getCapabilities();
 			if (gLCapabilities.GL_KHR_debug) {

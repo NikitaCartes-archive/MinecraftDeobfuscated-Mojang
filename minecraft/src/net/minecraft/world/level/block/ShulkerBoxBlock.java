@@ -230,11 +230,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return false;
-	}
-
-	@Override
 	public boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}

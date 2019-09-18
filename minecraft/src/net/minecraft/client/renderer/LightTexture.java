@@ -75,7 +75,7 @@ public class LightTexture implements AutoCloseable {
 				float i = this.minecraft.player.getWaterVision();
 				float j;
 				if (this.minecraft.player.hasEffect(MobEffects.NIGHT_VISION)) {
-					j = this.renderer.getNightVisionScale(this.minecraft.player, f);
+					j = GameRenderer.getNightVisionScale(this.minecraft.player, f);
 				} else if (i > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONDUIT_POWER)) {
 					j = i;
 				} else {

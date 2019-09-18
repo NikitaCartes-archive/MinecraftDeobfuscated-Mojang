@@ -23,21 +23,21 @@ public class TropicalFishModelA<T extends Entity> extends EntityModel<T> {
 		this.texHeight = 32;
 		int i = 22;
 		this.body = new ModelPart(this, 0, 0);
-		this.body.addBox(-1.0F, -1.5F, -3.0F, 2, 3, 6, f);
+		this.body.addBox(-1.0F, -1.5F, -3.0F, 2.0F, 3.0F, 6.0F, f);
 		this.body.setPos(0.0F, 22.0F, 0.0F);
 		this.tail = new ModelPart(this, 22, -6);
-		this.tail.addBox(0.0F, -1.5F, 0.0F, 0, 3, 6, f);
+		this.tail.addBox(0.0F, -1.5F, 0.0F, 0.0F, 3.0F, 6.0F, f);
 		this.tail.setPos(0.0F, 22.0F, 3.0F);
 		this.leftFin = new ModelPart(this, 2, 16);
-		this.leftFin.addBox(-2.0F, -1.0F, 0.0F, 2, 2, 0, f);
+		this.leftFin.addBox(-2.0F, -1.0F, 0.0F, 2.0F, 2.0F, 0.0F, f);
 		this.leftFin.setPos(-1.0F, 22.5F, 0.0F);
 		this.leftFin.yRot = (float) (Math.PI / 4);
 		this.rightFin = new ModelPart(this, 2, 12);
-		this.rightFin.addBox(0.0F, -1.0F, 0.0F, 2, 2, 0, f);
+		this.rightFin.addBox(0.0F, -1.0F, 0.0F, 2.0F, 2.0F, 0.0F, f);
 		this.rightFin.setPos(1.0F, 22.5F, 0.0F);
 		this.rightFin.yRot = (float) (-Math.PI / 4);
 		this.topFin = new ModelPart(this, 10, -5);
-		this.topFin.addBox(0.0F, -3.0F, 0.0F, 0, 3, 6, f);
+		this.topFin.addBox(0.0F, -3.0F, 0.0F, 0.0F, 3.0F, 6.0F, f);
 		this.topFin.setPos(0.0F, 20.5F, -3.0F);
 	}
 

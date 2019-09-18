@@ -16,7 +16,7 @@ public class SkullModel extends Model {
 		this.texWidth = k;
 		this.texHeight = l;
 		this.head = new ModelPart(this, i, j);
-		this.head.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, 0.0F);
+		this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F);
 		this.head.setPos(0.0F, 0.0F, 0.0F);
 	}
 

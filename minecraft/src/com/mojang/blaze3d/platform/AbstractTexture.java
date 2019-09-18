@@ -1,6 +1,5 @@
-package net.minecraft.client.renderer.texture;
+package com.mojang.blaze3d.platform;
 
-import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +13,7 @@ public abstract class AbstractTexture implements TextureObject {
 	protected boolean oldMipmap;
 
 	public void setFilter(boolean bl, boolean bl2) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		this.blur = bl;
 		this.mipmap = bl2;
 		int i;
@@ -26,12 +26,20 @@ public abstract class AbstractTexture implements TextureObject {
 			j = 9728;
 		}
 
-		RenderSystem.texParameter(3553, 10241, i);
-		RenderSystem.texParameter(3553, 10240, j);
+		GlStateManager._texParameter(3553, 10241, i);
+		GlStateManager._texParameter(3553, 10240, j);
 	}
 
 	@Override
 	public void pushFilter(boolean bl, boolean bl2) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> this._pushFilter(bl, bl2));
+		} else {
+			this._pushFilter(bl, bl2);
+		}
+	}
+
+	private void _pushFilter(boolean bl, boolean bl2) {
 		this.oldBlur = this.blur;
 		this.oldMipmap = this.mipmap;
 		this.setFilter(bl, bl2);
@@ -39,11 +47,20 @@ public abstract class AbstractTexture implements TextureObject {
 
 	@Override
 	public void popFilter() {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(this::_popFilter);
+		} else {
+			this._popFilter();
+		}
+	}
+
+	private void _popFilter() {
 		this.setFilter(this.oldBlur, this.oldMipmap);
 	}
 
 	@Override
 	public int getId() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		if (this.id == -1) {
 			this.id = TextureUtil.generateTextureId();
 		}
@@ -52,7 +69,14 @@ public abstract class AbstractTexture implements TextureObject {
 	}
 
 	public void releaseId() {
-		if (this.id != -1) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> {
+				if (this.id != -1) {
+					TextureUtil.releaseTextureId(this.id);
+					this.id = -1;
+				}
+			});
+		} else if (this.id != -1) {
 			TextureUtil.releaseTextureId(this.id);
 			this.id = -1;
 		}

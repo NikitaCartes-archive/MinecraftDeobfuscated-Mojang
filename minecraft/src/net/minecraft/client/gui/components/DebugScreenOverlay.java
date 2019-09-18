@@ -91,7 +91,7 @@ public class DebugScreenOverlay extends GuiComponent {
 		this.drawSystemInformation();
 		RenderSystem.popMatrix();
 		if (this.minecraft.options.renderFpsChart) {
-			int i = this.minecraft.window.getGuiScaledWidth();
+			int i = this.minecraft.getWindow().getGuiScaledWidth();
 			this.drawChart(this.minecraft.getFrameTimer(), 0, i / 2, true);
 			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 			if (integratedServer != null) {
@@ -136,7 +136,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			if (!Strings.isNullOrEmpty(string)) {
 				int j = 9;
 				int k = this.font.width(string);
-				int l = this.minecraft.window.getGuiScaledWidth() - 2 - k;
+				int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
 				int m = 2 + j * i;
 				fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
 				this.font.draw(string, (float)l, (float)m, 14737632);
@@ -406,7 +406,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			"",
 			String.format("CPU: %s", GlUtil.getCpuInfo()),
 			"",
-			String.format("Display: %dx%d (%s)", Minecraft.getInstance().window.getWidth(), Minecraft.getInstance().window.getHeight(), GlUtil.getVendor()),
+			String.format("Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()),
 			GlUtil.getRenderer(),
 			GlUtil.getOpenGLVersion()
 		);
@@ -489,7 +489,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			q += (long)u;
 		}
 
-		int t = this.minecraft.window.getGuiScaledHeight();
+		int t = this.minecraft.getWindow().getGuiScaledHeight();
 		fill(i, t - 60, i + p, t, -1873784752);
 
 		while (m != l) {

@@ -39,27 +39,27 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 		this.texWidth = i;
 		this.texHeight = j;
 		this.head = new ModelPart(this, 0, 0);
-		this.head.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, f);
+		this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, f);
 		this.head.setPos(0.0F, 0.0F + g, 0.0F);
 		this.hat = new ModelPart(this, 32, 0);
-		this.hat.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, f + 0.5F);
+		this.hat.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, f + 0.5F);
 		this.hat.setPos(0.0F, 0.0F + g, 0.0F);
 		this.body = new ModelPart(this, 16, 16);
-		this.body.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, f);
+		this.body.addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, f);
 		this.body.setPos(0.0F, 0.0F + g, 0.0F);
 		this.rightArm = new ModelPart(this, 40, 16);
-		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, f);
+		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 		this.rightArm.setPos(-5.0F, 2.0F + g, 0.0F);
 		this.leftArm = new ModelPart(this, 40, 16);
 		this.leftArm.mirror = true;
-		this.leftArm.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, f);
+		this.leftArm.addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 		this.leftArm.setPos(5.0F, 2.0F + g, 0.0F);
 		this.rightLeg = new ModelPart(this, 0, 16);
-		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, f);
+		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 		this.rightLeg.setPos(-1.9F, 12.0F + g, 0.0F);
 		this.leftLeg = new ModelPart(this, 0, 16);
 		this.leftLeg.mirror = true;
-		this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, f);
+		this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 		this.leftLeg.setPos(1.9F, 12.0F + g, 0.0F);
 	}
 

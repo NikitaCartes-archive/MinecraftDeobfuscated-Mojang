@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.renderer.culling.Culler;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Shulker;
@@ -14,25 +15,13 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
-	public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation("textures/entity/shulker/shulker.png");
-	public static final ResourceLocation[] TEXTURE_LOCATION = new ResourceLocation[]{
-		new ResourceLocation("textures/entity/shulker/shulker_white.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_orange.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_magenta.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_light_blue.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_yellow.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_lime.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_pink.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_gray.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_light_gray.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_cyan.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_purple.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_blue.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_brown.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_green.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_red.png"),
-		new ResourceLocation("textures/entity/shulker/shulker_black.png")
-	};
+	public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation(
+		"textures/" + ModelBakery.DEFAULT_SHULKER_TEXTURE_LOCATION.getPath() + ".png"
+	);
+	public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])ModelBakery.SHULKER_TEXTURE_LOCATION
+		.stream()
+		.map(resourceLocation -> new ResourceLocation("textures/" + resourceLocation.getPath() + ".png"))
+		.toArray(ResourceLocation[]::new);
 
 	public ShulkerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		super(entityRenderDispatcher, new ShulkerModel<>(), 0.0F);

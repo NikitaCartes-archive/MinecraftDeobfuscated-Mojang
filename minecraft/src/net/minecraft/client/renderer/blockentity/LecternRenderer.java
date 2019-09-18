@@ -1,33 +1,35 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
-	private static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/entity/enchanting_table_book.png");
+public class LecternRenderer extends BatchedBlockEntityRenderer<LecternBlockEntity> {
 	private final BookModel bookModel = new BookModel();
 
-	public void render(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, int i) {
+	protected void renderToBuffer(
+		LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k
+	) {
 		BlockState blockState = lecternBlockEntity.getBlockState();
 		if ((Boolean)blockState.getValue(LecternBlock.HAS_BOOK)) {
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)d + 0.5F, (float)e + 1.0F + 0.0625F, (float)f + 0.5F);
+			bufferBuilder.pushPose();
+			bufferBuilder.translate(0.5, 1.0625, 0.5);
 			float h = ((Direction)blockState.getValue(LecternBlock.FACING)).getClockWise().toYRot();
-			RenderSystem.rotatef(-h, 0.0F, 1.0F, 0.0F);
-			RenderSystem.rotatef(67.5F, 0.0F, 0.0F, 1.0F);
-			RenderSystem.translatef(0.0F, -0.125F, 0.0F);
-			this.bindTexture(BOOK_LOCATION);
-			RenderSystem.enableCull();
-			this.bookModel.render(0.0F, 0.1F, 0.9F, 1.2F, 0.0F, 0.0625F);
-			RenderSystem.popMatrix();
+			bufferBuilder.multiplyPose(new Quaternion(Vector3f.YP, -h, true));
+			bufferBuilder.multiplyPose(new Quaternion(Vector3f.ZP, 67.5F, true));
+			bufferBuilder.translate(0.0, -0.125, 0.0);
+			this.bookModel.setupAnim(0.0F, 0.1F, 0.9F, 1.2F);
+			this.bookModel.render(bufferBuilder, 0.0625F, j, k, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
+			bufferBuilder.popPose();
 		}
 	}
 }

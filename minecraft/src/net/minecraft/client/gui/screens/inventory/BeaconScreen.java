@@ -241,7 +241,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		@Override
 		protected void renderIcon() {
 			Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_MOB_EFFECTS);
-			blit(this.x + 2, this.y + 2, this.blitOffset, 18, 18, this.sprite);
+			blit(this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
 		}
 	}
 

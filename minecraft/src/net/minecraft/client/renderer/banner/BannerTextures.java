@@ -18,9 +18,6 @@ import net.minecraft.world.level.block.entity.BannerPattern;
 
 @Environment(EnvType.CLIENT)
 public class BannerTextures {
-	public static final BannerTextures.TextureCache BANNER_CACHE = new BannerTextures.TextureCache(
-		"banner_", new ResourceLocation("textures/entity/banner_base.png"), "textures/entity/banner/"
-	);
 	public static final BannerTextures.TextureCache SHIELD_CACHE = new BannerTextures.TextureCache(
 		"shield_", new ResourceLocation("textures/entity/shield_base.png"), "textures/entity/shield/"
 	);

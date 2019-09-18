@@ -143,7 +143,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	private void blitSlotIcon(int i, int j, int k, int l) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(STATS_ICON_LOCATION);
-		blit(i, j, this.blitOffset, (float)k, (float)l, 18, 18, 128, 128);
+		blit(i, j, this.getBlitOffset(), (float)k, (float)l, 18, 18, 128, 128);
 	}
 
 	@Environment(EnvType.CLIENT)

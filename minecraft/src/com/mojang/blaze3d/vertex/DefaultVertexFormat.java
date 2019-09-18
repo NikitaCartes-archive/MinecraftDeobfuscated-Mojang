@@ -15,11 +15,7 @@ public class DefaultVertexFormat {
 		.addElement(ELEMENT_POSITION)
 		.addElement(ELEMENT_COLOR)
 		.addElement(ELEMENT_UV0)
-		.addElement(ELEMENT_UV1);
-	public static final VertexFormat BLOCK_NORMALS = new VertexFormat()
-		.addElement(ELEMENT_POSITION)
-		.addElement(ELEMENT_COLOR)
-		.addElement(ELEMENT_UV0)
+		.addElement(ELEMENT_UV1)
 		.addElement(ELEMENT_NORMAL)
 		.addElement(ELEMENT_PADDING);
 	public static final VertexFormat ENTITY = new VertexFormat()

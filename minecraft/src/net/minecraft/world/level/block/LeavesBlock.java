@@ -11,7 +11,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +22,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 public class LeavesBlock extends Block {
 	public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
 	public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
-	protected static boolean renderCutout;
 
 	public LeavesBlock(Block.Properties properties) {
 		super(properties);
@@ -104,21 +102,6 @@ public class LeavesBlock extends Block {
 				}
 			}
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static void setFancy(boolean bl) {
-		renderCutout = bl;
-	}
-
-	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return false;
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return renderCutout ? BlockLayer.CUTOUT_MIPPED : BlockLayer.SOLID;
 	}
 
 	@Override

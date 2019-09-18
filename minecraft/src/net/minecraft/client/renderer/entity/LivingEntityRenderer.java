@@ -1,20 +1,15 @@
 package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.systems.RenderSystem;
-import java.nio.FloatBuffer;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,19 +23,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public abstract class LivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements RenderLayerParent<T, M> {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final DynamicTexture WHITE_TEXTURE = Util.make(new DynamicTexture(16, 16, false), dynamicTexture -> {
-		dynamicTexture.getPixels().untrack();
-
-		for (int i = 0; i < 16; i++) {
-			for (int j = 0; j < 16; j++) {
-				dynamicTexture.getPixels().setPixelRGBA(j, i, -1);
-			}
-		}
-
-		dynamicTexture.upload();
-	});
 	protected M model;
-	protected final FloatBuffer tintBuffer = MemoryTracker.createFloatBuffer(4);
 	protected final List<RenderLayer<T, M>> layers = Lists.<RenderLayer<T, M>>newArrayList();
 	protected boolean onlySolidLayers;
 
@@ -134,7 +117,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 				boolean blx = this.setupOverlayColor(livingEntity, h);
 				this.renderModel(livingEntity, p, o, lx, k, m, n);
 				if (blx) {
-					this.teardownOverlayColor();
+					RenderSystem.teardownOverlayColor();
 				}
 
 				RenderSystem.depthMask(true);
@@ -189,12 +172,12 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			}
 
 			if (bl2) {
-				GlStateManager.setProfile(GlStateManager.Profile.TRANSPARENT_MODEL);
+				RenderSystem.setProfile(RenderSystem.Profile.TRANSPARENT_MODEL);
 			}
 
 			this.model.render(livingEntity, f, g, h, i, j, k);
 			if (bl2) {
-				GlStateManager.unsetProfile(GlStateManager.Profile.TRANSPARENT_MODEL);
+				RenderSystem.unsetProfile(RenderSystem.Profile.TRANSPARENT_MODEL);
 			}
 		}
 	}
@@ -207,114 +190,16 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		return this.setupOverlayColor(livingEntity, f, true);
 	}
 
-	protected boolean setupOverlayColor(T livingEntity, float f, boolean bl) {
-		float g = livingEntity.getBrightness();
-		int i = this.getOverlayColor(livingEntity, g, f);
+	private boolean setupOverlayColor(T livingEntity, float f, boolean bl) {
+		int i = this.getOverlayColor(livingEntity, livingEntity.getBrightness(), f);
 		boolean bl2 = (i >> 24 & 0xFF) > 0;
 		boolean bl3 = livingEntity.hurtTime > 0 || livingEntity.deathTime > 0;
-		if (!bl2 && !bl3) {
-			return false;
-		} else if (!bl2 && !bl) {
-			return false;
-		} else {
-			RenderSystem.activeTexture(33984);
-			RenderSystem.enableTexture();
-			RenderSystem.texEnv(8960, 8704, 34160);
-			RenderSystem.texEnv(8960, 34161, 8448);
-			RenderSystem.texEnv(8960, 34176, 33984);
-			RenderSystem.texEnv(8960, 34177, 34167);
-			RenderSystem.texEnv(8960, 34192, 768);
-			RenderSystem.texEnv(8960, 34193, 768);
-			RenderSystem.texEnv(8960, 34162, 7681);
-			RenderSystem.texEnv(8960, 34184, 33984);
-			RenderSystem.texEnv(8960, 34200, 770);
-			RenderSystem.activeTexture(33985);
-			RenderSystem.enableTexture();
-			RenderSystem.texEnv(8960, 8704, 34160);
-			RenderSystem.texEnv(8960, 34161, 34165);
-			RenderSystem.texEnv(8960, 34176, 34166);
-			RenderSystem.texEnv(8960, 34177, 34168);
-			RenderSystem.texEnv(8960, 34178, 34166);
-			RenderSystem.texEnv(8960, 34192, 768);
-			RenderSystem.texEnv(8960, 34193, 768);
-			RenderSystem.texEnv(8960, 34194, 770);
-			RenderSystem.texEnv(8960, 34162, 7681);
-			RenderSystem.texEnv(8960, 34184, 34168);
-			RenderSystem.texEnv(8960, 34200, 770);
-			this.tintBuffer.position(0);
-			if (bl3) {
-				this.tintBuffer.put(1.0F);
-				this.tintBuffer.put(0.0F);
-				this.tintBuffer.put(0.0F);
-				this.tintBuffer.put(0.3F);
-			} else {
-				float h = (float)(i >> 24 & 0xFF) / 255.0F;
-				float j = (float)(i >> 16 & 0xFF) / 255.0F;
-				float k = (float)(i >> 8 & 0xFF) / 255.0F;
-				float l = (float)(i & 0xFF) / 255.0F;
-				this.tintBuffer.put(j);
-				this.tintBuffer.put(k);
-				this.tintBuffer.put(l);
-				this.tintBuffer.put(1.0F - h);
-			}
-
-			this.tintBuffer.flip();
-			RenderSystem.texEnv(8960, 8705, this.tintBuffer);
-			RenderSystem.activeTexture(33986);
-			RenderSystem.enableTexture();
-			RenderSystem.bindTexture(WHITE_TEXTURE.getId());
-			RenderSystem.texEnv(8960, 8704, 34160);
-			RenderSystem.texEnv(8960, 34161, 8448);
-			RenderSystem.texEnv(8960, 34176, 34168);
-			RenderSystem.texEnv(8960, 34177, 33985);
-			RenderSystem.texEnv(8960, 34192, 768);
-			RenderSystem.texEnv(8960, 34193, 768);
-			RenderSystem.texEnv(8960, 34162, 7681);
-			RenderSystem.texEnv(8960, 34184, 34168);
-			RenderSystem.texEnv(8960, 34200, 770);
-			RenderSystem.activeTexture(33984);
+		if (bl2 || bl3 && bl) {
+			RenderSystem.setupOverlayColor(i, bl3);
 			return true;
+		} else {
+			return false;
 		}
-	}
-
-	protected void teardownOverlayColor() {
-		RenderSystem.activeTexture(33984);
-		RenderSystem.enableTexture();
-		RenderSystem.texEnv(8960, 8704, 34160);
-		RenderSystem.texEnv(8960, 34161, 8448);
-		RenderSystem.texEnv(8960, 34176, 33984);
-		RenderSystem.texEnv(8960, 34177, 34167);
-		RenderSystem.texEnv(8960, 34192, 768);
-		RenderSystem.texEnv(8960, 34193, 768);
-		RenderSystem.texEnv(8960, 34162, 8448);
-		RenderSystem.texEnv(8960, 34184, 33984);
-		RenderSystem.texEnv(8960, 34185, 34167);
-		RenderSystem.texEnv(8960, 34200, 770);
-		RenderSystem.texEnv(8960, 34201, 770);
-		RenderSystem.activeTexture(33985);
-		RenderSystem.texEnv(8960, 8704, 34160);
-		RenderSystem.texEnv(8960, 34161, 8448);
-		RenderSystem.texEnv(8960, 34192, 768);
-		RenderSystem.texEnv(8960, 34193, 768);
-		RenderSystem.texEnv(8960, 34176, 5890);
-		RenderSystem.texEnv(8960, 34177, 34168);
-		RenderSystem.texEnv(8960, 34162, 8448);
-		RenderSystem.texEnv(8960, 34200, 770);
-		RenderSystem.texEnv(8960, 34184, 5890);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.activeTexture(33986);
-		RenderSystem.disableTexture();
-		RenderSystem.bindTexture(0);
-		RenderSystem.texEnv(8960, 8704, 34160);
-		RenderSystem.texEnv(8960, 34161, 8448);
-		RenderSystem.texEnv(8960, 34192, 768);
-		RenderSystem.texEnv(8960, 34193, 768);
-		RenderSystem.texEnv(8960, 34176, 5890);
-		RenderSystem.texEnv(8960, 34177, 34168);
-		RenderSystem.texEnv(8960, 34162, 8448);
-		RenderSystem.texEnv(8960, 34200, 770);
-		RenderSystem.texEnv(8960, 34184, 5890);
-		RenderSystem.activeTexture(33984);
 	}
 
 	protected void setupPosition(T livingEntity, double d, double e, double f) {
@@ -391,7 +276,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			boolean bl = this.setupOverlayColor(livingEntity, h, renderLayer.colorsOnDamage());
 			renderLayer.render(livingEntity, f, g, h, i, j, k, l);
 			if (bl) {
-				this.teardownOverlayColor();
+				RenderSystem.teardownOverlayColor();
 			}
 		}
 	}
@@ -413,7 +298,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			float h = livingEntity.isDiscrete() ? 32.0F : 64.0F;
 			if (!(g >= (double)(h * h))) {
 				String string = livingEntity.getDisplayName().getColoredString();
-				RenderSystem.alphaFunc(516, 0.1F);
+				RenderSystem.defaultAlphaFunc();
 				this.renderNameTags(livingEntity, d, e, f, string, g);
 			}
 		}

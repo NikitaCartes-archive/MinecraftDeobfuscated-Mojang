@@ -2,153 +2,201 @@ package net.minecraft.client.renderer.texture;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.HttpTextureProcessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class HttpTexture extends SimpleTexture {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	@Nullable
 	private final File file;
 	private final String urlString;
+	private final boolean processLegacySkin;
 	@Nullable
-	private final HttpTextureProcessor processor;
+	private final Runnable onDownloaded;
 	@Nullable
-	private Thread thread;
-	private volatile boolean uploaded;
+	private CompletableFuture<?> future;
+	private boolean uploaded;
 
-	public HttpTexture(@Nullable File file, String string, ResourceLocation resourceLocation, @Nullable HttpTextureProcessor httpTextureProcessor) {
+	public HttpTexture(@Nullable File file, String string, ResourceLocation resourceLocation, boolean bl, @Nullable Runnable runnable) {
 		super(resourceLocation);
 		this.file = file;
 		this.urlString = string;
-		this.processor = httpTextureProcessor;
+		this.processLegacySkin = bl;
+		this.onDownloaded = runnable;
 	}
 
-	private void uploadImage(NativeImage nativeImage) {
-		TextureUtil.prepareImage(this.getId(), nativeImage.getWidth(), nativeImage.getHeight());
-		nativeImage.upload(0, 0, 0, false);
-	}
-
-	public void loadCallback(NativeImage nativeImage) {
-		if (this.processor != null) {
-			this.processor.onTextureDownloaded();
+	private void loadCallback(NativeImage nativeImage) {
+		if (this.onDownloaded != null) {
+			this.onDownloaded.run();
 		}
 
-		synchronized (this) {
-			this.uploadImage(nativeImage);
+		Minecraft.getInstance().execute(() -> {
 			this.uploaded = true;
-		}
+			if (!RenderSystem.isOnRenderThread()) {
+				RenderSystem.recordRenderCall(() -> this.upload(nativeImage));
+			} else {
+				this.upload(nativeImage);
+			}
+		});
+	}
+
+	private void upload(NativeImage nativeImage) {
+		TextureUtil.prepareImage(this.getId(), nativeImage.getWidth(), nativeImage.getHeight());
+		nativeImage.upload(0, 0, 0, true);
 	}
 
 	@Override
 	public void load(ResourceManager resourceManager) throws IOException {
-		if (!this.uploaded) {
-			synchronized (this) {
-				super.load(resourceManager);
+		Minecraft.getInstance().execute(() -> {
+			if (!this.uploaded) {
+				try {
+					super.load(resourceManager);
+				} catch (IOException var3x) {
+					LOGGER.warn("Failed to load texture: {}", this.location, var3x);
+				}
+
 				this.uploaded = true;
 			}
-		}
-
-		if (this.thread == null) {
+		});
+		if (this.future == null) {
+			NativeImage nativeImage;
 			if (this.file != null && this.file.isFile()) {
 				LOGGER.debug("Loading http texture from local cache ({})", this.file);
-				NativeImage nativeImage = null;
-
-				try {
-					try {
-						nativeImage = NativeImage.read(new FileInputStream(this.file));
-						if (this.processor != null) {
-							nativeImage = this.processor.process(nativeImage);
-						}
-
-						this.loadCallback(nativeImage);
-					} catch (IOException var8) {
-						LOGGER.error("Couldn't load skin {}", this.file, var8);
-						this.startDownloadThread();
-					}
-				} finally {
-					if (nativeImage != null) {
-						nativeImage.close();
-					}
-				}
+				FileInputStream fileInputStream = new FileInputStream(this.file);
+				nativeImage = this.load(fileInputStream);
 			} else {
-				this.startDownloadThread();
+				nativeImage = null;
+			}
+
+			if (nativeImage != null) {
+				this.loadCallback(nativeImage);
+			} else {
+				this.future = CompletableFuture.runAsync(() -> {
+					HttpURLConnection httpURLConnection = null;
+					LOGGER.debug("Downloading http texture from {} to {}", this.urlString, this.file);
+
+					try {
+						httpURLConnection = (HttpURLConnection)new URL(this.urlString).openConnection(Minecraft.getInstance().getProxy());
+						httpURLConnection.setDoInput(true);
+						httpURLConnection.setDoOutput(false);
+						httpURLConnection.connect();
+						if (httpURLConnection.getResponseCode() / 100 == 2) {
+							InputStream inputStream;
+							if (this.file != null) {
+								FileUtils.copyInputStreamToFile(httpURLConnection.getInputStream(), this.file);
+								inputStream = new FileInputStream(this.file);
+							} else {
+								inputStream = httpURLConnection.getInputStream();
+							}
+
+							Minecraft.getInstance().execute(() -> {
+								NativeImage nativeImagex = this.load(inputStream);
+								if (nativeImagex != null) {
+									this.loadCallback(nativeImagex);
+								}
+							});
+							return;
+						}
+					} catch (Exception var6) {
+						LOGGER.error("Couldn't download http texture", (Throwable)var6);
+						return;
+					} finally {
+						if (httpURLConnection != null) {
+							httpURLConnection.disconnect();
+						}
+					}
+				}, Util.backgroundExecutor());
 			}
 		}
 	}
 
-	protected void startDownloadThread() {
-		this.thread = new Thread("Texture Downloader #" + UNIQUE_THREAD_ID.incrementAndGet()) {
-			public void run() {
-				HttpURLConnection httpURLConnection = null;
-				HttpTexture.LOGGER.debug("Downloading http texture from {} to {}", HttpTexture.this.urlString, HttpTexture.this.file);
+	@Nullable
+	private NativeImage load(InputStream inputStream) {
+		NativeImage nativeImage = null;
 
-				try {
-					httpURLConnection = (HttpURLConnection)new URL(HttpTexture.this.urlString).openConnection(Minecraft.getInstance().getProxy());
-					httpURLConnection.setDoInput(true);
-					httpURLConnection.setDoOutput(false);
-					httpURLConnection.connect();
-					if (httpURLConnection.getResponseCode() / 100 == 2) {
-						InputStream inputStream;
-						if (HttpTexture.this.file != null) {
-							FileUtils.copyInputStreamToFile(httpURLConnection.getInputStream(), HttpTexture.this.file);
-							inputStream = new FileInputStream(HttpTexture.this.file);
-						} else {
-							inputStream = httpURLConnection.getInputStream();
-						}
+		try {
+			nativeImage = NativeImage.read(inputStream);
+			if (this.processLegacySkin) {
+				nativeImage = processLegacySkin(nativeImage);
+			}
+		} catch (IOException var4) {
+			LOGGER.warn("Error while loading the skin texture", (Throwable)var4);
+		}
 
-						Minecraft.getInstance().execute(() -> {
-							NativeImage nativeImage = null;
+		return nativeImage;
+	}
 
-							try {
-								nativeImage = NativeImage.read(inputStream);
-								if (HttpTexture.this.processor != null) {
-									nativeImage = HttpTexture.this.processor.process(nativeImage);
-								}
+	private static NativeImage processLegacySkin(NativeImage nativeImage) {
+		boolean bl = nativeImage.getHeight() == 32;
+		if (bl) {
+			NativeImage nativeImage2 = new NativeImage(64, 64, true);
+			nativeImage2.copyFrom(nativeImage);
+			nativeImage.close();
+			nativeImage = nativeImage2;
+			nativeImage2.fillRect(0, 32, 64, 32, 0);
+			nativeImage2.copyRect(4, 16, 16, 32, 4, 4, true, false);
+			nativeImage2.copyRect(8, 16, 16, 32, 4, 4, true, false);
+			nativeImage2.copyRect(0, 20, 24, 32, 4, 12, true, false);
+			nativeImage2.copyRect(4, 20, 16, 32, 4, 12, true, false);
+			nativeImage2.copyRect(8, 20, 8, 32, 4, 12, true, false);
+			nativeImage2.copyRect(12, 20, 16, 32, 4, 12, true, false);
+			nativeImage2.copyRect(44, 16, -8, 32, 4, 4, true, false);
+			nativeImage2.copyRect(48, 16, -8, 32, 4, 4, true, false);
+			nativeImage2.copyRect(40, 20, 0, 32, 4, 12, true, false);
+			nativeImage2.copyRect(44, 20, -8, 32, 4, 12, true, false);
+			nativeImage2.copyRect(48, 20, -16, 32, 4, 12, true, false);
+			nativeImage2.copyRect(52, 20, -8, 32, 4, 12, true, false);
+		}
 
-								HttpTexture.this.loadCallback(nativeImage);
-							} catch (IOException var7x) {
-								HttpTexture.LOGGER.warn("Error while loading the skin texture", (Throwable)var7x);
-							} finally {
-								if (nativeImage != null) {
-									nativeImage.close();
-								}
+		setNoAlpha(nativeImage, 0, 0, 32, 16);
+		if (bl) {
+			doNotchTransparencyHack(nativeImage, 32, 0, 64, 32);
+		}
 
-								IOUtils.closeQuietly(inputStream);
-							}
-						});
-						return;
-					}
-				} catch (Exception var6) {
-					HttpTexture.LOGGER.error("Couldn't download http texture", (Throwable)var6);
+		setNoAlpha(nativeImage, 0, 16, 64, 32);
+		setNoAlpha(nativeImage, 16, 48, 48, 64);
+		return nativeImage;
+	}
+
+	private static void doNotchTransparencyHack(NativeImage nativeImage, int i, int j, int k, int l) {
+		for (int m = i; m < k; m++) {
+			for (int n = j; n < l; n++) {
+				int o = nativeImage.getPixelRGBA(m, n);
+				if ((o >> 24 & 0xFF) < 128) {
 					return;
-				} finally {
-					if (httpURLConnection != null) {
-						httpURLConnection.disconnect();
-					}
 				}
 			}
-		};
-		this.thread.setDaemon(true);
-		this.thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
-		this.thread.start();
+		}
+
+		for (int m = i; m < k; m++) {
+			for (int nx = j; nx < l; nx++) {
+				nativeImage.setPixelRGBA(m, nx, nativeImage.getPixelRGBA(m, nx) & 16777215);
+			}
+		}
+	}
+
+	private static void setNoAlpha(NativeImage nativeImage, int i, int j, int k, int l) {
+		for (int m = i; m < k; m++) {
+			for (int n = j; n < l; n++) {
+				nativeImage.setPixelRGBA(m, n, nativeImage.getPixelRGBA(m, n) | 0xFF000000);
+			}
+		}
 	}
 }

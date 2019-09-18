@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -62,18 +61,8 @@ public class StonecutterBlock extends Block {
 	}
 
 	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return true;
-	}
-
-	@Override
 	public RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.CUTOUT;
 	}
 
 	@Override

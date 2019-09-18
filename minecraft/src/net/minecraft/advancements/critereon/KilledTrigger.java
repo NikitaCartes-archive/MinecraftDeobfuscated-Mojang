@@ -1,24 +1,15 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 
-public class KilledTrigger implements CriterionTrigger<KilledTrigger.TriggerInstance> {
-	private final Map<PlayerAdvancements, KilledTrigger.PlayerListeners> players = Maps.<PlayerAdvancements, KilledTrigger.PlayerListeners>newHashMap();
+public class KilledTrigger extends SimpleCriterionTrigger<KilledTrigger.TriggerInstance> {
 	private final ResourceLocation id;
 
 	public KilledTrigger(ResourceLocation resourceLocation) {
@@ -30,33 +21,6 @@ public class KilledTrigger implements CriterionTrigger<KilledTrigger.TriggerInst
 		return this.id;
 	}
 
-	@Override
-	public void addPlayerListener(PlayerAdvancements playerAdvancements, CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listener) {
-		KilledTrigger.PlayerListeners playerListeners = (KilledTrigger.PlayerListeners)this.players.get(playerAdvancements);
-		if (playerListeners == null) {
-			playerListeners = new KilledTrigger.PlayerListeners(playerAdvancements);
-			this.players.put(playerAdvancements, playerListeners);
-		}
-
-		playerListeners.addListener(listener);
-	}
-
-	@Override
-	public void removePlayerListener(PlayerAdvancements playerAdvancements, CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listener) {
-		KilledTrigger.PlayerListeners playerListeners = (KilledTrigger.PlayerListeners)this.players.get(playerAdvancements);
-		if (playerListeners != null) {
-			playerListeners.removeListener(listener);
-			if (playerListeners.isEmpty()) {
-				this.players.remove(playerAdvancements);
-			}
-		}
-	}
-
-	@Override
-	public void removePlayerListeners(PlayerAdvancements playerAdvancements) {
-		this.players.remove(playerAdvancements);
-	}
-
 	public KilledTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
 		return new KilledTrigger.TriggerInstance(
 			this.id, EntityPredicate.fromJson(jsonObject.get("entity")), DamageSourcePredicate.fromJson(jsonObject.get("killing_blow"))
@@ -64,51 +28,7 @@ public class KilledTrigger implements CriterionTrigger<KilledTrigger.TriggerInst
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity, DamageSource damageSource) {
-		KilledTrigger.PlayerListeners playerListeners = (KilledTrigger.PlayerListeners)this.players.get(serverPlayer.getAdvancements());
-		if (playerListeners != null) {
-			playerListeners.trigger(serverPlayer, entity, damageSource);
-		}
-	}
-
-	static class PlayerListeners {
-		private final PlayerAdvancements player;
-		private final Set<CriterionTrigger.Listener<KilledTrigger.TriggerInstance>> listeners = Sets.<CriterionTrigger.Listener<KilledTrigger.TriggerInstance>>newHashSet();
-
-		public PlayerListeners(PlayerAdvancements playerAdvancements) {
-			this.player = playerAdvancements;
-		}
-
-		public boolean isEmpty() {
-			return this.listeners.isEmpty();
-		}
-
-		public void addListener(CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listener) {
-			this.listeners.add(listener);
-		}
-
-		public void removeListener(CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listener) {
-			this.listeners.remove(listener);
-		}
-
-		public void trigger(ServerPlayer serverPlayer, Entity entity, DamageSource damageSource) {
-			List<CriterionTrigger.Listener<KilledTrigger.TriggerInstance>> list = null;
-
-			for (CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listener : this.listeners) {
-				if (listener.getTriggerInstance().matches(serverPlayer, entity, damageSource)) {
-					if (list == null) {
-						list = Lists.<CriterionTrigger.Listener<KilledTrigger.TriggerInstance>>newArrayList();
-					}
-
-					list.add(listener);
-				}
-			}
-
-			if (list != null) {
-				for (CriterionTrigger.Listener<KilledTrigger.TriggerInstance> listenerx : list) {
-					listenerx.run(this.player);
-				}
-			}
-		}
+		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, entity, damageSource));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {

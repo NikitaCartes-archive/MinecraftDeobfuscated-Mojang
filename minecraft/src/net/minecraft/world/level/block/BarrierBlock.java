@@ -22,11 +22,6 @@ public class BarrierBlock extends Block {
 		return RenderShape.INVISIBLE;
 	}
 
-	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return false;
-	}
-
 	@Environment(EnvType.CLIENT)
 	@Override
 	public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {

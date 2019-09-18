@@ -11,14 +11,14 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class TheEndPortalRenderer extends BlockEntityRenderer<TheEndPortalBlockEntity> {
+public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends BlockEntityRenderer<T> {
 	private static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
 	private static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
 	private static final Random RANDOM = new Random(31100L);
@@ -26,7 +26,7 @@ public class TheEndPortalRenderer extends BlockEntityRenderer<TheEndPortalBlockE
 	private static final FloatBuffer PROJECTION = MemoryTracker.createFloatBuffer(16);
 	private final FloatBuffer buffer = MemoryTracker.createFloatBuffer(16);
 
-	public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(T theEndPortalBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		RenderSystem.disableLighting();
 		RANDOM.setSeed(31100L);
 		RenderSystem.getMatrix(2982, MODELVIEW);
@@ -35,7 +35,6 @@ public class TheEndPortalRenderer extends BlockEntityRenderer<TheEndPortalBlockE
 		int j = this.getPasses(h);
 		float k = this.getOffset();
 		boolean bl = false;
-		GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
 
 		for (int l = 0; l < j; l++) {
 			RenderSystem.pushMatrix();
@@ -50,7 +49,7 @@ public class TheEndPortalRenderer extends BlockEntityRenderer<TheEndPortalBlockE
 			if (l >= 1) {
 				this.bindTexture(END_PORTAL_LOCATION);
 				bl = true;
-				gameRenderer.resetFogColor(true);
+				FogRenderer.resetFogColor(true);
 			}
 
 			if (l == 1) {
@@ -139,7 +138,7 @@ public class TheEndPortalRenderer extends BlockEntityRenderer<TheEndPortalBlockE
 		RenderSystem.disableTexGen(GlStateManager.TexGen.R);
 		RenderSystem.enableLighting();
 		if (bl) {
-			gameRenderer.resetFogColor(false);
+			FogRenderer.resetFogColor(false);
 		}
 	}
 

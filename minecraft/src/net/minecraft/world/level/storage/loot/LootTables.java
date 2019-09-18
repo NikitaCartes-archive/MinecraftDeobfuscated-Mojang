@@ -1,7 +1,6 @@
 package net.minecraft.world.level.storage.loot;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,7 +8,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -18,6 +16,7 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.apache.logging.log4j.LogManager;
@@ -38,9 +37,11 @@ public class LootTables extends SimpleJsonResourceReloadListener {
 		.registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer())
 		.create();
 	private Map<ResourceLocation, LootTable> tables = ImmutableMap.of();
+	private final PredicateManager predicateManager;
 
-	public LootTables() {
+	public LootTables(PredicateManager predicateManager) {
 		super(GSON, "loot_tables");
+		this.predicateManager = predicateManager;
 	}
 
 	public LootTable get(ResourceLocation resourceLocation) {
@@ -64,17 +65,14 @@ public class LootTables extends SimpleJsonResourceReloadListener {
 		});
 		builder.put(BuiltInLootTables.EMPTY, LootTable.EMPTY);
 		ImmutableMap<ResourceLocation, LootTable> immutableMap = builder.build();
-		LootTableProblemCollector lootTableProblemCollector = new LootTableProblemCollector();
-		immutableMap.forEach((resourceLocation, lootTable) -> validate(lootTableProblemCollector, resourceLocation, lootTable, immutableMap::get));
-		lootTableProblemCollector.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+		ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, this.predicateManager::get, immutableMap::get);
+		immutableMap.forEach((resourceLocation, lootTable) -> validate(validationContext, resourceLocation, lootTable));
+		validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
 		this.tables = immutableMap;
 	}
 
-	public static void validate(
-		LootTableProblemCollector lootTableProblemCollector, ResourceLocation resourceLocation, LootTable lootTable, Function<ResourceLocation, LootTable> function
-	) {
-		Set<ResourceLocation> set = ImmutableSet.of(resourceLocation);
-		lootTable.validate(lootTableProblemCollector.forChild("{" + resourceLocation.toString() + "}"), function, set, lootTable.getParamSet());
+	public static void validate(ValidationContext validationContext, ResourceLocation resourceLocation, LootTable lootTable) {
+		lootTable.validate(validationContext.setParams(lootTable.getParamSet()).enterTable("{" + resourceLocation + "}", resourceLocation));
 	}
 
 	public static JsonElement serialize(LootTable lootTable) {

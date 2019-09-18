@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer;
 
 import com.google.gson.JsonSyntaxException;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,30 +20,18 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
-import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.MapRenderer;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.culling.Culler;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.client.renderer.culling.FrustumCuller;
-import net.minecraft.client.renderer.culling.FrustumData;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.server.packs.resources.SimpleResource;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -56,31 +43,21 @@ import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class GameRenderer implements AutoCloseable, ResourceManagerReloadListener {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ResourceLocation RAIN_LOCATION = new ResourceLocation("textures/environment/rain.png");
-	private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");
 	private final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final Random random = new Random();
@@ -97,14 +74,10 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 	private long lastScreenshotAttempt;
 	private long lastActiveTime = Util.getMillis();
 	private final LightTexture lightTexture;
-	private int rainSoundTime;
-	private final float[] rainSizeX = new float[1024];
-	private final float[] rainSizeZ = new float[1024];
-	private final FogRenderer fog;
 	private boolean panoramicMode;
 	private double zoom = 1.0;
-	private double zoom_x;
-	private double zoom_y;
+	private double zoomX;
+	private double zoomY;
 	private ItemStack itemActivationItem;
 	private int itemActivationTicks;
 	private float itemActivationOffX;
@@ -139,7 +112,6 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 	public static final int EFFECT_NONE = EFFECTS.length;
 	private int effectIndex = EFFECT_NONE;
 	private boolean effectActive;
-	private int frameId;
 	private final Camera mainCamera = new Camera();
 
 	public GameRenderer(Minecraft minecraft, ResourceManager resourceManager) {
@@ -148,18 +120,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		this.itemInHandRenderer = minecraft.getItemInHandRenderer();
 		this.mapRenderer = new MapRenderer(minecraft.getTextureManager());
 		this.lightTexture = new LightTexture(this);
-		this.fog = new FogRenderer(this);
 		this.postEffect = null;
-
-		for (int i = 0; i < 32; i++) {
-			for (int j = 0; j < 32; j++) {
-				float f = (float)(j - 16);
-				float g = (float)(i - 16);
-				float h = Mth.sqrt(f * f + g * g);
-				this.rainSizeX[i << 5 | j] = -g / h;
-				this.rainSizeZ[i << 5 | j] = f / h;
-			}
-		}
 	}
 
 	public void close() {
@@ -207,7 +168,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 
 		try {
 			this.postEffect = new PostChain(this.minecraft.getTextureManager(), this.resourceManager, this.minecraft.getMainRenderTarget(), resourceLocation);
-			this.postEffect.resize(this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+			this.postEffect.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			this.effectActive = true;
 		} catch (IOException var3) {
 			LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
@@ -244,7 +205,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		this.mainCamera.tick();
 		this.tick++;
 		this.itemInHandRenderer.tick();
-		this.tickRain();
+		this.minecraft.levelRenderer.tickRain(this.mainCamera);
 		this.darkenWorldAmountO = this.darkenWorldAmount;
 		if (this.minecraft.gui.getBossOverlay().shouldDarkenScreen()) {
 			this.darkenWorldAmount += 0.05F;
@@ -403,55 +364,9 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		}
 	}
 
-	private void setupCamera(float f) {
-		this.renderDistance = (float)(this.minecraft.options.renderDistance * 16);
-		RenderSystem.matrixMode(5889);
-		RenderSystem.loadIdentity();
-		if (this.zoom != 1.0) {
-			RenderSystem.translatef((float)this.zoom_x, (float)(-this.zoom_y), 0.0F);
-			RenderSystem.scaled(this.zoom, this.zoom, 1.0);
-		}
-
-		RenderSystem.multMatrix(
-			Matrix4f.perspective(
-				this.getFov(this.mainCamera, f, true),
-				(float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(),
-				0.05F,
-				this.renderDistance * Mth.SQRT_OF_TWO
-			)
-		);
-		RenderSystem.matrixMode(5888);
-		RenderSystem.loadIdentity();
-		this.bobHurt(f);
-		if (this.minecraft.options.bobView) {
-			this.bobView(f);
-		}
-
-		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
-		if (g > 0.0F) {
-			int i = 20;
-			if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-				i = 7;
-			}
-
-			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
-			h *= h;
-			RenderSystem.rotatef(((float)this.tick + f) * (float)i, 0.0F, 1.0F, 1.0F);
-			RenderSystem.scalef(1.0F / h, 1.0F, 1.0F);
-			RenderSystem.rotatef(-((float)this.tick + f) * (float)i, 0.0F, 1.0F, 1.0F);
-		}
-	}
-
 	private void renderItemInHand(Camera camera, float f) {
 		if (!this.panoramicMode) {
-			RenderSystem.matrixMode(5889);
-			RenderSystem.loadIdentity();
-			RenderSystem.multMatrix(
-				Matrix4f.perspective(
-					this.getFov(camera, f, false), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05F, this.renderDistance * 2.0F
-				)
-			);
-			RenderSystem.matrixMode(5888);
+			this.resetProjectionMatrix(camera, f, false, false, 2.0F);
 			RenderSystem.loadIdentity();
 			RenderSystem.pushMatrix();
 			this.bobHurt(f);
@@ -461,9 +376,9 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 
 			boolean bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
 			if (this.minecraft.options.thirdPersonView == 0 && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
-				this.turnOnLightLayer();
+				this.lightTexture.turnOnLightLayer();
 				this.itemInHandRenderer.render(f);
-				this.turnOffLightLayer();
+				this.lightTexture.turnOffLightLayer();
 			}
 
 			RenderSystem.popMatrix();
@@ -478,15 +393,23 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		}
 	}
 
-	public void turnOffLightLayer() {
-		this.lightTexture.turnOffLightLayer();
+	public void resetProjectionMatrix(Camera camera, float f, boolean bl, boolean bl2, float g) {
+		RenderSystem.matrixMode(5889);
+		RenderSystem.loadIdentity();
+		if (bl2 && this.zoom != 1.0) {
+			RenderSystem.translated(this.zoomX, -this.zoomY, 0.0);
+			RenderSystem.scaled(this.zoom, this.zoom, 1.0);
+		}
+
+		RenderSystem.multMatrix(
+			Matrix4f.perspective(
+				this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05F, this.renderDistance * g
+			)
+		);
+		RenderSystem.matrixMode(5888);
 	}
 
-	public void turnOnLightLayer() {
-		this.lightTexture.turnOnLightLayer();
-	}
-
-	public float getNightVisionScale(LivingEntity livingEntity, float f) {
+	public static float getNightVisionScale(LivingEntity livingEntity, float f) {
 		int i = livingEntity.getEffect(MobEffects.NIGHT_VISION).getDuration();
 		return i > 200 ? 1.0F : 0.7F + Mth.sin(((float)i - f) * (float) Math.PI * 0.2F) * 0.3F;
 	}
@@ -503,8 +426,12 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		}
 
 		if (!this.minecraft.noRender) {
-			int i = (int)(this.minecraft.mouseHandler.xpos() * (double)this.minecraft.window.getGuiScaledWidth() / (double)this.minecraft.window.getScreenWidth());
-			int j = (int)(this.minecraft.mouseHandler.ypos() * (double)this.minecraft.window.getGuiScaledHeight() / (double)this.minecraft.window.getScreenHeight());
+			int i = (int)(
+				this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
+			);
+			int j = (int)(
+				this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
+			);
 			int k = this.minecraft.options.framerateLimit;
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
@@ -532,20 +459,20 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 				this.minecraft.getMainRenderTarget().bindWrite(true);
 				this.minecraft.getProfiler().popPush("gui");
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
-					RenderSystem.alphaFunc(516, 0.1F);
-					this.minecraft.window.setupGuiState(Minecraft.ON_OSX);
-					this.renderItemActivationAnimation(this.minecraft.window.getGuiScaledWidth(), this.minecraft.window.getGuiScaledHeight(), f);
+					RenderSystem.defaultAlphaFunc();
+					this.minecraft.getWindow().setupGuiState(Minecraft.ON_OSX);
+					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
 					this.minecraft.gui.render(f);
 				}
 
 				this.minecraft.getProfiler().pop();
 			} else {
-				RenderSystem.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
+				RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 				RenderSystem.matrixMode(5889);
 				RenderSystem.loadIdentity();
 				RenderSystem.matrixMode(5888);
 				RenderSystem.loadIdentity();
-				this.minecraft.window.setupGuiState(Minecraft.ON_OSX);
+				this.minecraft.getWindow().setupGuiState(Minecraft.ON_OSX);
 			}
 
 			if (this.minecraft.overlay != null) {
@@ -579,11 +506,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 						(CrashReportDetail<String>)(() -> String.format(
 								Locale.ROOT,
 								"Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %f",
-								this.minecraft.window.getGuiScaledWidth(),
-								this.minecraft.window.getGuiScaledHeight(),
-								this.minecraft.window.getWidth(),
-								this.minecraft.window.getHeight(),
-								this.minecraft.window.getGuiScale()
+								this.minecraft.getWindow().getGuiScaledWidth(),
+								this.minecraft.getWindow().getGuiScaledHeight(),
+								this.minecraft.getWindow().getWidth(),
+								this.minecraft.getWindow().getHeight(),
+								this.minecraft.getWindow().getGuiScale()
 							))
 					);
 					throw new ReportedException(crashReport);
@@ -597,7 +524,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			&& this.minecraft.levelRenderer.hasRenderedAllChunks()
 			&& !this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
 			NativeImage nativeImage = Screenshot.takeScreenshot(
-				this.minecraft.window.getWidth(), this.minecraft.window.getHeight(), this.minecraft.getMainRenderTarget()
+				this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getMainRenderTarget()
 			);
 			SimpleResource.IO_EXECUTOR.execute(() -> {
 				int i = nativeImage.getWidth();
@@ -660,22 +587,32 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		}
 
 		this.pick(f);
-		RenderSystem.enableDepthTest();
-		RenderSystem.enableAlphaTest();
-		RenderSystem.alphaFunc(516, 0.5F);
 		this.minecraft.getProfiler().push("center");
-		this.render(f, l);
-		this.minecraft.getProfiler().pop();
-	}
-
-	private void render(float f, long l) {
-		LevelRenderer levelRenderer = this.minecraft.levelRenderer;
-		ParticleEngine particleEngine = this.minecraft.particleEngine;
 		boolean bl = this.shouldRenderBlockOutline();
-		RenderSystem.enableCull();
 		this.minecraft.getProfiler().popPush("camera");
-		this.setupCamera(f);
 		Camera camera = this.mainCamera;
+		this.renderDistance = (float)(this.minecraft.options.renderDistance * 16);
+		this.resetProjectionMatrix(camera, f, true, true, Mth.SQRT_OF_TWO);
+		RenderSystem.loadIdentity();
+		this.bobHurt(f);
+		if (this.minecraft.options.bobView) {
+			this.bobView(f);
+		}
+
+		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+		if (g > 0.0F) {
+			int i = 20;
+			if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
+				i = 7;
+			}
+
+			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
+			h *= h;
+			RenderSystem.rotatef(((float)this.tick + f) * (float)i, 0.0F, 1.0F, 1.0F);
+			RenderSystem.scalef(1.0F / h, 1.0F, 1.0F);
+			RenderSystem.rotatef(-((float)this.tick + f) * (float)i, 0.0F, 1.0F, 1.0F);
+		}
+
 		camera.setup(
 			this.minecraft.level,
 			(Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity()),
@@ -683,416 +620,14 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			this.minecraft.options.thirdPersonView == 2,
 			f
 		);
-		FrustumData frustumData = Frustum.getFrustum();
-		levelRenderer.prepare(camera);
-		this.minecraft.getProfiler().popPush("clear");
-		RenderSystem.viewport(0, 0, this.minecraft.window.getWidth(), this.minecraft.window.getHeight());
-		this.fog.setupClearColor(camera, f);
-		RenderSystem.clear(16640, Minecraft.ON_OSX);
-		this.minecraft.getProfiler().popPush("culling");
-		Culler culler = new FrustumCuller(frustumData);
-		double d = camera.getPosition().x;
-		double e = camera.getPosition().y;
-		double g = camera.getPosition().z;
-		culler.prepare(d, e, g);
-		if (this.minecraft.options.renderDistance >= 4) {
-			this.fog.setupFog(camera, -1);
-			this.minecraft.getProfiler().popPush("sky");
-			RenderSystem.matrixMode(5889);
-			RenderSystem.loadIdentity();
-			RenderSystem.multMatrix(
-				Matrix4f.perspective(
-					this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05F, this.renderDistance * 2.0F
-				)
-			);
-			RenderSystem.matrixMode(5888);
-			levelRenderer.renderSky(f);
-			RenderSystem.matrixMode(5889);
-			RenderSystem.loadIdentity();
-			RenderSystem.multMatrix(
-				Matrix4f.perspective(
-					this.getFov(camera, f, true),
-					(float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(),
-					0.05F,
-					this.renderDistance * Mth.SQRT_OF_TWO
-				)
-			);
-			RenderSystem.matrixMode(5888);
-		}
-
-		this.fog.setupFog(camera, 0);
-		RenderSystem.shadeModel(7425);
-		if (camera.getPosition().y < 128.0) {
-			this.prepareAndRenderClouds(camera, levelRenderer, f, d, e, g);
-		}
-
-		this.minecraft.getProfiler().popPush("prepareterrain");
-		this.fog.setupFog(camera, 0);
-		this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-		Lighting.turnOff();
-		this.minecraft.getProfiler().popPush("terrain_setup");
-		this.minecraft.level.getChunkSource().getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
-		levelRenderer.setupRender(camera, culler, this.frameId++, this.minecraft.player.isSpectator());
-		this.minecraft.getProfiler().popPush("updatechunks");
-		this.minecraft.levelRenderer.compileChunksUntil(l);
-		this.minecraft.getProfiler().popPush("terrain");
-		RenderSystem.matrixMode(5888);
-		RenderSystem.pushMatrix();
-		RenderSystem.disableAlphaTest();
-		levelRenderer.render(BlockLayer.SOLID, camera);
-		RenderSystem.enableAlphaTest();
-		levelRenderer.render(BlockLayer.CUTOUT_MIPPED, camera);
-		this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
-		levelRenderer.render(BlockLayer.CUTOUT, camera);
-		this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
-		RenderSystem.shadeModel(7424);
-		RenderSystem.alphaFunc(516, 0.1F);
-		RenderSystem.matrixMode(5888);
-		RenderSystem.popMatrix();
-		RenderSystem.pushMatrix();
-		Lighting.turnOn();
-		this.minecraft.getProfiler().popPush("entities");
-		levelRenderer.renderEntities(camera, culler, f);
-		Lighting.turnOff();
-		this.turnOffLightLayer();
-		RenderSystem.matrixMode(5888);
-		RenderSystem.popMatrix();
-		if (bl && this.minecraft.hitResult != null) {
-			RenderSystem.disableAlphaTest();
-			this.minecraft.getProfiler().popPush("outline");
-			levelRenderer.renderHitOutline(camera, this.minecraft.hitResult, 0);
-			RenderSystem.enableAlphaTest();
-		}
-
-		this.minecraft.debugRenderer.render(l);
-		this.minecraft.getProfiler().popPush("destroyProgress");
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
-		this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
-		levelRenderer.renderDestroyAnimation(Tesselator.getInstance(), Tesselator.getInstance().getBuilder(), camera);
-		this.minecraft.getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
-		RenderSystem.disableBlend();
-		this.turnOnLightLayer();
-		this.fog.setupFog(camera, 0);
-		this.minecraft.getProfiler().popPush("particles");
-		particleEngine.render(camera, f);
-		this.turnOffLightLayer();
-		RenderSystem.depthMask(false);
-		RenderSystem.enableCull();
-		this.minecraft.getProfiler().popPush("weather");
-		this.renderSnowAndRain(f);
-		RenderSystem.depthMask(true);
-		levelRenderer.renderWorldBounds(camera, f);
-		RenderSystem.disableBlend();
-		RenderSystem.enableCull();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
-		RenderSystem.alphaFunc(516, 0.1F);
-		this.fog.setupFog(camera, 0);
-		RenderSystem.enableBlend();
-		RenderSystem.depthMask(false);
-		this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-		RenderSystem.shadeModel(7425);
-		this.minecraft.getProfiler().popPush("translucent");
-		levelRenderer.render(BlockLayer.TRANSLUCENT, camera);
-		RenderSystem.shadeModel(7424);
-		RenderSystem.depthMask(true);
-		RenderSystem.enableCull();
-		RenderSystem.disableBlend();
-		RenderSystem.disableFog();
-		if (camera.getPosition().y >= 128.0) {
-			this.minecraft.getProfiler().popPush("aboveClouds");
-			this.prepareAndRenderClouds(camera, levelRenderer, f, d, e, g);
-		}
-
+		this.minecraft.levelRenderer.renderLevel(f, l, bl, camera, this, this.lightTexture);
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
 			RenderSystem.clear(256, Minecraft.ON_OSX);
 			this.renderItemInHand(camera, f);
 		}
-	}
 
-	private void prepareAndRenderClouds(Camera camera, LevelRenderer levelRenderer, float f, double d, double e, double g) {
-		if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
-			this.minecraft.getProfiler().popPush("clouds");
-			RenderSystem.matrixMode(5889);
-			RenderSystem.loadIdentity();
-			RenderSystem.multMatrix(
-				Matrix4f.perspective(
-					this.getFov(camera, f, true), (float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(), 0.05F, this.renderDistance * 4.0F
-				)
-			);
-			RenderSystem.matrixMode(5888);
-			RenderSystem.pushMatrix();
-			this.fog.setupFog(camera, 0);
-			levelRenderer.renderClouds(f, d, e, g);
-			RenderSystem.disableFog();
-			RenderSystem.popMatrix();
-			RenderSystem.matrixMode(5889);
-			RenderSystem.loadIdentity();
-			RenderSystem.multMatrix(
-				Matrix4f.perspective(
-					this.getFov(camera, f, true),
-					(float)this.minecraft.window.getWidth() / (float)this.minecraft.window.getHeight(),
-					0.05F,
-					this.renderDistance * Mth.SQRT_OF_TWO
-				)
-			);
-			RenderSystem.matrixMode(5888);
-		}
-	}
-
-	private void tickRain() {
-		float f = this.minecraft.level.getRainLevel(1.0F);
-		if (!this.minecraft.options.fancyGraphics) {
-			f /= 2.0F;
-		}
-
-		if (f != 0.0F) {
-			this.random.setSeed((long)this.tick * 312987231L);
-			LevelReader levelReader = this.minecraft.level;
-			BlockPos blockPos = new BlockPos(this.mainCamera.getPosition());
-			int i = 10;
-			double d = 0.0;
-			double e = 0.0;
-			double g = 0.0;
-			int j = 0;
-			int k = (int)(100.0F * f * f);
-			if (this.minecraft.options.particles == ParticleStatus.DECREASED) {
-				k >>= 1;
-			} else if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
-				k = 0;
-			}
-
-			for (int l = 0; l < k; l++) {
-				BlockPos blockPos2 = levelReader.getHeightmapPos(
-					Heightmap.Types.MOTION_BLOCKING, blockPos.offset(this.random.nextInt(10) - this.random.nextInt(10), 0, this.random.nextInt(10) - this.random.nextInt(10))
-				);
-				Biome biome = levelReader.getBiome(blockPos2);
-				BlockPos blockPos3 = blockPos2.below();
-				if (blockPos2.getY() <= blockPos.getY() + 10
-					&& blockPos2.getY() >= blockPos.getY() - 10
-					&& biome.getPrecipitation() == Biome.Precipitation.RAIN
-					&& biome.getTemperature(blockPos2) >= 0.15F) {
-					double h = this.random.nextDouble();
-					double m = this.random.nextDouble();
-					BlockState blockState = levelReader.getBlockState(blockPos3);
-					FluidState fluidState = levelReader.getFluidState(blockPos2);
-					VoxelShape voxelShape = blockState.getCollisionShape(levelReader, blockPos3);
-					double n = voxelShape.max(Direction.Axis.Y, h, m);
-					double o = (double)fluidState.getHeight(levelReader, blockPos2);
-					double p;
-					double q;
-					if (n >= o) {
-						p = n;
-						q = voxelShape.min(Direction.Axis.Y, h, m);
-					} else {
-						p = 0.0;
-						q = 0.0;
-					}
-
-					if (p > -Double.MAX_VALUE) {
-						if (!fluidState.is(FluidTags.LAVA)
-							&& blockState.getBlock() != Blocks.MAGMA_BLOCK
-							&& (blockState.getBlock() != Blocks.CAMPFIRE || !(Boolean)blockState.getValue(CampfireBlock.LIT))) {
-							if (this.random.nextInt(++j) == 0) {
-								d = (double)blockPos3.getX() + h;
-								e = (double)((float)blockPos3.getY() + 0.1F) + p - 1.0;
-								g = (double)blockPos3.getZ() + m;
-							}
-
-							this.minecraft
-								.level
-								.addParticle(
-									ParticleTypes.RAIN, (double)blockPos3.getX() + h, (double)((float)blockPos3.getY() + 0.1F) + p, (double)blockPos3.getZ() + m, 0.0, 0.0, 0.0
-								);
-						} else {
-							this.minecraft
-								.level
-								.addParticle(
-									ParticleTypes.SMOKE, (double)blockPos2.getX() + h, (double)((float)blockPos2.getY() + 0.1F) - q, (double)blockPos2.getZ() + m, 0.0, 0.0, 0.0
-								);
-						}
-					}
-				}
-			}
-
-			if (j > 0 && this.random.nextInt(3) < this.rainSoundTime++) {
-				this.rainSoundTime = 0;
-				if (e > (double)(blockPos.getY() + 1) && levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > Mth.floor((float)blockPos.getY())) {
-					this.minecraft.level.playLocalSound(d, e, g, SoundEvents.WEATHER_RAIN_ABOVE, SoundSource.WEATHER, 0.1F, 0.5F, false);
-				} else {
-					this.minecraft.level.playLocalSound(d, e, g, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.2F, 1.0F, false);
-				}
-			}
-		}
-	}
-
-	protected void renderSnowAndRain(float f) {
-		float g = this.minecraft.level.getRainLevel(f);
-		if (!(g <= 0.0F)) {
-			this.turnOnLightLayer();
-			Level level = this.minecraft.level;
-			int i = Mth.floor(this.mainCamera.getPosition().x);
-			int j = Mth.floor(this.mainCamera.getPosition().y);
-			int k = Mth.floor(this.mainCamera.getPosition().z);
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder bufferBuilder = tesselator.getBuilder();
-			RenderSystem.disableCull();
-			RenderSystem.normal3f(0.0F, 1.0F, 0.0F);
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
-			RenderSystem.alphaFunc(516, 0.1F);
-			double d = this.mainCamera.getPosition().x;
-			double e = this.mainCamera.getPosition().y;
-			double h = this.mainCamera.getPosition().z;
-			int l = Mth.floor(e);
-			int m = 5;
-			if (this.minecraft.options.fancyGraphics) {
-				m = 10;
-			}
-
-			int n = -1;
-			float o = (float)this.tick + f;
-			bufferBuilder.offset(-d, -e, -h);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-			for (int p = k - m; p <= k + m; p++) {
-				for (int q = i - m; q <= i + m; q++) {
-					int r = (p - k + 16) * 32 + q - i + 16;
-					double s = (double)this.rainSizeX[r] * 0.5;
-					double t = (double)this.rainSizeZ[r] * 0.5;
-					mutableBlockPos.set(q, 0, p);
-					Biome biome = level.getBiome(mutableBlockPos);
-					if (biome.getPrecipitation() != Biome.Precipitation.NONE) {
-						int u = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, mutableBlockPos).getY();
-						int v = j - m;
-						int w = j + m;
-						if (v < u) {
-							v = u;
-						}
-
-						if (w < u) {
-							w = u;
-						}
-
-						int x = u;
-						if (u < l) {
-							x = l;
-						}
-
-						if (v != w) {
-							this.random.setSeed((long)(q * q * 3121 + q * 45238971 ^ p * p * 418711 + p * 13761));
-							mutableBlockPos.set(q, v, p);
-							float y = biome.getTemperature(mutableBlockPos);
-							if (y >= 0.15F) {
-								if (n != 0) {
-									if (n >= 0) {
-										tesselator.end();
-									}
-
-									n = 0;
-									this.minecraft.getTextureManager().bind(RAIN_LOCATION);
-									bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
-								}
-
-								double z = -((double)(this.tick + q * q * 3121 + q * 45238971 + p * p * 418711 + p * 13761 & 31) + (double)f) / 32.0 * (3.0 + this.random.nextDouble());
-								double aa = (double)((float)q + 0.5F) - this.mainCamera.getPosition().x;
-								double ab = (double)((float)p + 0.5F) - this.mainCamera.getPosition().z;
-								float ac = Mth.sqrt(aa * aa + ab * ab) / (float)m;
-								float ad = ((1.0F - ac * ac) * 0.5F + 0.5F) * g;
-								mutableBlockPos.set(q, x, p);
-								int ae = level.getLightColor(mutableBlockPos);
-								int af = ae >> 16 & 65535;
-								int ag = ae & 65535;
-								bufferBuilder.vertex((double)q - s + 0.5, (double)w, (double)p - t + 0.5)
-									.uv(0.0, (double)v * 0.25 + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(af, ag)
-									.endVertex();
-								bufferBuilder.vertex((double)q + s + 0.5, (double)w, (double)p + t + 0.5)
-									.uv(1.0, (double)v * 0.25 + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(af, ag)
-									.endVertex();
-								bufferBuilder.vertex((double)q + s + 0.5, (double)v, (double)p + t + 0.5)
-									.uv(1.0, (double)w * 0.25 + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(af, ag)
-									.endVertex();
-								bufferBuilder.vertex((double)q - s + 0.5, (double)v, (double)p - t + 0.5)
-									.uv(0.0, (double)w * 0.25 + z)
-									.color(1.0F, 1.0F, 1.0F, ad)
-									.uv2(af, ag)
-									.endVertex();
-							} else {
-								if (n != 1) {
-									if (n >= 0) {
-										tesselator.end();
-									}
-
-									n = 1;
-									this.minecraft.getTextureManager().bind(SNOW_LOCATION);
-									bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
-								}
-
-								double z = (double)(-((float)(this.tick & 511) + f) / 512.0F);
-								double aa = this.random.nextDouble() + (double)o * 0.01 * (double)((float)this.random.nextGaussian());
-								double ab = this.random.nextDouble() + (double)(o * (float)this.random.nextGaussian()) * 0.001;
-								double ah = (double)((float)q + 0.5F) - this.mainCamera.getPosition().x;
-								double ai = (double)((float)p + 0.5F) - this.mainCamera.getPosition().z;
-								float aj = Mth.sqrt(ah * ah + ai * ai) / (float)m;
-								float ak = ((1.0F - aj * aj) * 0.3F + 0.5F) * g;
-								mutableBlockPos.set(q, x, p);
-								int al = (level.getLightColor(mutableBlockPos) * 3 + 15728880) / 4;
-								int am = al >> 16 & 65535;
-								int an = al & 65535;
-								bufferBuilder.vertex((double)q - s + 0.5, (double)w, (double)p - t + 0.5)
-									.uv(0.0 + aa, (double)v * 0.25 + z + ab)
-									.color(1.0F, 1.0F, 1.0F, ak)
-									.uv2(am, an)
-									.endVertex();
-								bufferBuilder.vertex((double)q + s + 0.5, (double)w, (double)p + t + 0.5)
-									.uv(1.0 + aa, (double)v * 0.25 + z + ab)
-									.color(1.0F, 1.0F, 1.0F, ak)
-									.uv2(am, an)
-									.endVertex();
-								bufferBuilder.vertex((double)q + s + 0.5, (double)v, (double)p + t + 0.5)
-									.uv(1.0 + aa, (double)w * 0.25 + z + ab)
-									.color(1.0F, 1.0F, 1.0F, ak)
-									.uv2(am, an)
-									.endVertex();
-								bufferBuilder.vertex((double)q - s + 0.5, (double)v, (double)p - t + 0.5)
-									.uv(0.0 + aa, (double)w * 0.25 + z + ab)
-									.color(1.0F, 1.0F, 1.0F, ak)
-									.uv2(am, an)
-									.endVertex();
-							}
-						}
-					}
-				}
-			}
-
-			if (n >= 0) {
-				tesselator.end();
-			}
-
-			bufferBuilder.offset(0.0, 0.0, 0.0);
-			RenderSystem.enableCull();
-			RenderSystem.disableBlend();
-			RenderSystem.alphaFunc(516, 0.1F);
-			this.turnOffLightLayer();
-		}
-	}
-
-	public void resetFogColor(boolean bl) {
-		this.fog.resetFogColor(bl);
+		this.minecraft.getProfiler().pop();
 	}
 
 	public void resetData() {
@@ -1119,9 +654,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		}
 
 		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		int l = font.width(string) / 2;
 		RenderSystem.disableTexture();
 		Tesselator tesselator = Tesselator.getInstance();

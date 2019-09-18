@@ -12,6 +12,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.model.SignModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +33,7 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 	private static final ResourceLocation DARK_OAK_TEXTURE = new ResourceLocation("textures/entity/signs/dark_oak.png");
 	private final SignModel signModel = new SignModel();
 
-	public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		BlockState blockState = signBlockEntity.getBlockState();
 		RenderSystem.pushMatrix();
 		float h = 0.6666667F;
@@ -48,7 +49,7 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 		}
 
 		if (i >= 0) {
-			this.bindTexture(BREAKING_LOCATIONS[i]);
+			this.bindTexture((ResourceLocation)BREAKING_LOCATIONS.get(i));
 			RenderSystem.matrixMode(5890);
 			RenderSystem.pushMatrix();
 			RenderSystem.scalef(4.0F, 2.0F, 1.0F);

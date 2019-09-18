@@ -6,6 +6,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Effect;
@@ -21,7 +23,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
@@ -226,19 +227,21 @@ public class EffectInstance implements Effect, AutoCloseable {
 	}
 
 	public void clear() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		ProgramManager.glUseProgram(0);
 		lastProgramId = -1;
 		lastAppliedEffect = null;
 
 		for (int i = 0; i < this.samplerLocations.size(); i++) {
 			if (this.samplerMap.get(this.samplerNames.get(i)) != null) {
-				RenderSystem.activeTexture(33984 + i);
-				RenderSystem.bindTexture(0);
+				GlStateManager._activeTexture(33984 + i);
+				GlStateManager._bindTexture(0);
 			}
 		}
 	}
 
 	public void apply() {
+		RenderSystem.assertThread(RenderSystem::isOnGameThread);
 		this.dirty = false;
 		lastAppliedEffect = this;
 		this.blend.apply();
@@ -286,15 +289,18 @@ public class EffectInstance implements Effect, AutoCloseable {
 
 	@Nullable
 	public Uniform getUniform(String string) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		return (Uniform)this.uniformMap.get(string);
 	}
 
 	public AbstractUniform safeGetUniform(String string) {
+		RenderSystem.assertThread(RenderSystem::isOnGameThread);
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
 	}
 
 	private void updateLocations() {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		int i = 0;
 
 		for (int j = 0; i < this.samplerNames.size(); j++) {

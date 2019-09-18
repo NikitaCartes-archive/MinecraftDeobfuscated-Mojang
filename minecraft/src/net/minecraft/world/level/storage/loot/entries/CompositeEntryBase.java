@@ -3,15 +3,11 @@ package net.minecraft.world.level.storage.loot.entries;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public abstract class CompositeEntryBase extends LootPoolEntryContainer {
@@ -25,19 +21,14 @@ public abstract class CompositeEntryBase extends LootPoolEntryContainer {
 	}
 
 	@Override
-	public void validate(
-		LootTableProblemCollector lootTableProblemCollector,
-		Function<ResourceLocation, LootTable> function,
-		Set<ResourceLocation> set,
-		LootContextParamSet lootContextParamSet
-	) {
-		super.validate(lootTableProblemCollector, function, set, lootContextParamSet);
+	public void validate(ValidationContext validationContext) {
+		super.validate(validationContext);
 		if (this.children.length == 0) {
-			lootTableProblemCollector.reportProblem("Empty children list");
+			validationContext.reportProblem("Empty children list");
 		}
 
 		for (int i = 0; i < this.children.length; i++) {
-			this.children[i].validate(lootTableProblemCollector.forChild(".entry[" + i + "]"), function, set, lootContextParamSet);
+			this.children[i].validate(validationContext.forChild(".entry[" + i + "]"));
 		}
 	}
 

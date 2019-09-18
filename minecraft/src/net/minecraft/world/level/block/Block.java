@@ -43,7 +43,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
@@ -102,6 +101,7 @@ public class Block implements ItemLike {
 	private BlockState defaultBlockState;
 	protected final boolean hasCollision;
 	private final boolean dynamicShape;
+	private final boolean canOcclude;
 	@Nullable
 	private ResourceLocation drops;
 	@Nullable
@@ -254,6 +254,7 @@ public class Block implements ItemLike {
 		this.friction = properties.friction;
 		this.dynamicShape = properties.dynamicShape;
 		this.drops = properties.drops;
+		this.canOcclude = properties.canOcclude;
 		this.stateDefinition = builder.create(BlockState::new);
 		this.registerDefaultState(this.stateDefinition.any());
 	}
@@ -365,8 +366,8 @@ public class Block implements ItemLike {
 	}
 
 	@Deprecated
-	public boolean canOcclude(BlockState blockState) {
-		return this.hasCollision && this.getRenderLayer() == BlockLayer.SOLID;
+	public final boolean canOcclude(BlockState blockState) {
+		return this.canOcclude;
 	}
 
 	@Deprecated
@@ -601,10 +602,6 @@ public class Block implements ItemLike {
 	}
 
 	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
-	}
-
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.SOLID;
 	}
 
 	@Deprecated
@@ -859,6 +856,7 @@ public class Block implements ItemLike {
 		private boolean isTicking;
 		private float friction = 0.6F;
 		private ResourceLocation drops;
+		private boolean canOcclude = true;
 		private boolean dynamicShape;
 
 		private Properties(Material material, MaterialColor materialColor) {
@@ -890,11 +888,18 @@ public class Block implements ItemLike {
 			properties.soundType = block.soundType;
 			properties.friction = block.getFriction();
 			properties.dynamicShape = block.dynamicShape;
+			properties.canOcclude = block.canOcclude;
 			return properties;
 		}
 
 		public Block.Properties noCollission() {
 			this.hasCollision = false;
+			this.canOcclude = false;
+			return this;
+		}
+
+		public Block.Properties noOcclusion() {
+			this.canOcclude = false;
 			return this;
 		}
 

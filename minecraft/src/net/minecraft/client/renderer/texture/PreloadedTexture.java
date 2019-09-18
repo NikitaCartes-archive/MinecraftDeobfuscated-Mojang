@@ -1,7 +1,9 @@
 package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -10,6 +12,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
 public class PreloadedTexture extends SimpleTexture {
+	@Nullable
 	private CompletableFuture<SimpleTexture.TextureImage> future;
 
 	public PreloadedTexture(ResourceManager resourceManager, ResourceLocation resourceLocation, Executor executor) {
@@ -35,6 +38,10 @@ public class PreloadedTexture extends SimpleTexture {
 	@Override
 	public void reset(TextureManager textureManager, ResourceManager resourceManager, ResourceLocation resourceLocation, Executor executor) {
 		this.future = CompletableFuture.supplyAsync(() -> SimpleTexture.TextureImage.load(resourceManager, this.location), Util.backgroundExecutor());
-		this.future.thenRunAsync(() -> textureManager.register(this.location, this), executor);
+		this.future.thenRunAsync(() -> textureManager.register(this.location, this), executor(executor));
+	}
+
+	private static Executor executor(Executor executor) {
+		return runnable -> executor.execute(() -> RenderSystem.recordRenderCall(runnable::run));
 	}
 }

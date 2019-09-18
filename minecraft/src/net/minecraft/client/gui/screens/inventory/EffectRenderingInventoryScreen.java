@@ -83,7 +83,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			MobEffect mobEffect = mobEffectInstance.getEffect();
-			blit(i + 6, k + 7, this.blitOffset, 18, 18, mobEffectTextureManager.get(mobEffect));
+			blit(i + 6, k + 7, this.getBlitOffset(), 18, 18, mobEffectTextureManager.get(mobEffect));
 			k += j;
 		}
 	}

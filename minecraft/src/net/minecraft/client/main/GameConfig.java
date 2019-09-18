@@ -34,6 +34,7 @@ public class GameConfig {
 		public final File gameDirectory;
 		public final File resourcePackDirectory;
 		public final File assetDirectory;
+		@Nullable
 		public final String assetIndex;
 
 		public FolderData(File file, File file2, File file3, @Nullable String string) {
@@ -63,10 +64,11 @@ public class GameConfig {
 
 	@Environment(EnvType.CLIENT)
 	public static class ServerData {
+		@Nullable
 		public final String hostname;
 		public final int port;
 
-		public ServerData(String string, int i) {
+		public ServerData(@Nullable String string, int i) {
 			this.hostname = string;
 			this.port = i;
 		}

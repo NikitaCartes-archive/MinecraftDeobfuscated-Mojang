@@ -27,29 +27,29 @@ public class GuardianModel extends EntityModel<Guardian> {
 		this.texHeight = 64;
 		this.spikeParts = new ModelPart[12];
 		this.head = new ModelPart(this);
-		this.head.texOffs(0, 0).addBox(-6.0F, 10.0F, -8.0F, 12, 12, 16);
-		this.head.texOffs(0, 28).addBox(-8.0F, 10.0F, -6.0F, 2, 12, 12);
-		this.head.texOffs(0, 28).addBox(6.0F, 10.0F, -6.0F, 2, 12, 12, true);
-		this.head.texOffs(16, 40).addBox(-6.0F, 8.0F, -6.0F, 12, 2, 12);
-		this.head.texOffs(16, 40).addBox(-6.0F, 22.0F, -6.0F, 12, 2, 12);
+		this.head.texOffs(0, 0).addBox(-6.0F, 10.0F, -8.0F, 12.0F, 12.0F, 16.0F);
+		this.head.texOffs(0, 28).addBox(-8.0F, 10.0F, -6.0F, 2.0F, 12.0F, 12.0F);
+		this.head.texOffs(0, 28).addBox(6.0F, 10.0F, -6.0F, 2.0F, 12.0F, 12.0F, true);
+		this.head.texOffs(16, 40).addBox(-6.0F, 8.0F, -6.0F, 12.0F, 2.0F, 12.0F);
+		this.head.texOffs(16, 40).addBox(-6.0F, 22.0F, -6.0F, 12.0F, 2.0F, 12.0F);
 
 		for (int i = 0; i < this.spikeParts.length; i++) {
 			this.spikeParts[i] = new ModelPart(this, 0, 0);
-			this.spikeParts[i].addBox(-1.0F, -4.5F, -1.0F, 2, 9, 2);
+			this.spikeParts[i].addBox(-1.0F, -4.5F, -1.0F, 2.0F, 9.0F, 2.0F);
 			this.head.addChild(this.spikeParts[i]);
 		}
 
 		this.eye = new ModelPart(this, 8, 0);
-		this.eye.addBox(-1.0F, 15.0F, 0.0F, 2, 2, 1);
+		this.eye.addBox(-1.0F, 15.0F, 0.0F, 2.0F, 2.0F, 1.0F);
 		this.head.addChild(this.eye);
 		this.tailParts = new ModelPart[3];
 		this.tailParts[0] = new ModelPart(this, 40, 0);
-		this.tailParts[0].addBox(-2.0F, 14.0F, 7.0F, 4, 4, 8);
+		this.tailParts[0].addBox(-2.0F, 14.0F, 7.0F, 4.0F, 4.0F, 8.0F);
 		this.tailParts[1] = new ModelPart(this, 0, 54);
-		this.tailParts[1].addBox(0.0F, 14.0F, 0.0F, 3, 3, 7);
+		this.tailParts[1].addBox(0.0F, 14.0F, 0.0F, 3.0F, 3.0F, 7.0F);
 		this.tailParts[2] = new ModelPart(this);
-		this.tailParts[2].texOffs(41, 32).addBox(0.0F, 14.0F, 0.0F, 2, 2, 6);
-		this.tailParts[2].texOffs(25, 19).addBox(1.0F, 10.5F, 3.0F, 1, 9, 9);
+		this.tailParts[2].texOffs(41, 32).addBox(0.0F, 14.0F, 0.0F, 2.0F, 2.0F, 6.0F);
+		this.tailParts[2].texOffs(25, 19).addBox(1.0F, 10.5F, 3.0F, 1.0F, 9.0F, 9.0F);
 		this.head.addChild(this.tailParts[0]);
 		this.tailParts[0].addChild(this.tailParts[1]);
 		this.tailParts[1].addChild(this.tailParts[2]);

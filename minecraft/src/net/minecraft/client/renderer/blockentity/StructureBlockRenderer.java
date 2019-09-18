@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -9,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.state.properties.StructureMode;
 
 @Environment(EnvType.CLIENT)
 public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEntity> {
-	public void render(StructureBlockEntity structureBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(StructureBlockEntity structureBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		if (Minecraft.getInstance().player.canUseGameMasterBlocks() || Minecraft.getInstance().player.isSpectator()) {
-			super.render(structureBlockEntity, d, e, f, g, i);
+			this.renderNameTag(structureBlockEntity, d, e, f);
 			BlockPos blockPos = structureBlockEntity.getStructurePos();
 			BlockPos blockPos2 = structureBlockEntity.getStructureSize();
 			if (blockPos2.getX() >= 1 && blockPos2.getY() >= 1 && blockPos2.getZ() >= 1) {
@@ -85,9 +85,7 @@ public class StructureBlockRenderer extends BlockEntityRenderer<StructureBlockEn
 					RenderSystem.disableLighting();
 					RenderSystem.disableTexture();
 					RenderSystem.enableBlend();
-					RenderSystem.blendFuncSeparate(
-						GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-					);
+					RenderSystem.defaultBlendFunc();
 					this.setOverlayRenderState(true);
 					if (structureBlockEntity.getMode() == StructureMode.SAVE || structureBlockEntity.getShowBoundingBox()) {
 						this.renderBox(tesselator, bufferBuilder, p, l, q, r, m, s, 255, 223, 127);

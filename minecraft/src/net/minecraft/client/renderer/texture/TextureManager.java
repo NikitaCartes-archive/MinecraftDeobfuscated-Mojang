@@ -2,7 +2,9 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -40,6 +43,14 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 	}
 
 	public void bind(ResourceLocation resourceLocation) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> this._bind(resourceLocation));
+		} else {
+			this._bind(resourceLocation);
+		}
+	}
+
+	private void _bind(ResourceLocation resourceLocation) {
 		TextureObject textureObject = (TextureObject)this.byPath.get(resourceLocation);
 		if (textureObject == null) {
 			textureObject = new SimpleTexture(resourceLocation);
@@ -83,6 +94,7 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 		return bl;
 	}
 
+	@Nullable
 	public TextureObject getTexture(ResourceLocation resourceLocation) {
 		return (TextureObject)this.byPath.get(resourceLocation);
 	}
@@ -105,10 +117,14 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 		if (!this.byPath.containsKey(resourceLocation)) {
 			PreloadedTexture preloadedTexture = new PreloadedTexture(this.resourceManager, resourceLocation, executor);
 			this.byPath.put(resourceLocation, preloadedTexture);
-			return preloadedTexture.getFuture().thenRunAsync(() -> this.register(resourceLocation, preloadedTexture), Minecraft.getInstance());
+			return preloadedTexture.getFuture().thenRunAsync(() -> this.register(resourceLocation, preloadedTexture), TextureManager::execute);
 		} else {
 			return CompletableFuture.completedFuture(null);
 		}
+	}
+
+	private static void execute(Runnable runnable) {
+		Minecraft.getInstance().execute(() -> RenderSystem.recordRenderCall(runnable::run));
 	}
 
 	@Override
@@ -150,6 +166,6 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 						textureObject.reset(this, resourceManager, resourceLocation, executor2);
 					}
 				}
-			}, executor2);
+			}, runnable -> RenderSystem.recordRenderCall(runnable::run));
 	}
 }

@@ -81,7 +81,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	private void renderModelLists(BakedModel bakedModel, int i, ItemStack itemStack) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		bufferBuilder.begin(7, DefaultVertexFormat.BLOCK_NORMALS);
+		bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
 		Random random = new Random();
 		long l = 42L;
 
@@ -150,6 +150,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 	private void putQuadData(BufferBuilder bufferBuilder, BakedQuad bakedQuad, int i) {
 		bufferBuilder.putBulkData(bakedQuad.getVertices());
+		bufferBuilder.faceTex2(15728880, 15728880, 15728880, 15728880);
 		bufferBuilder.fixupQuadColor(i);
 		this.applyNormal(bufferBuilder, bakedQuad);
 	}
@@ -222,11 +223,9 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableRescaleNormal();
-			RenderSystem.alphaFunc(516, 0.1F);
+			RenderSystem.defaultAlphaFunc();
 			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			RenderSystem.pushMatrix();
 			ItemTransforms itemTransforms = bakedModel.getTransforms();
 			ItemTransforms.apply(itemTransforms.getTransform(transformType), bl);
@@ -258,7 +257,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
 		RenderSystem.enableRescaleNormal();
 		RenderSystem.enableAlphaTest();
-		RenderSystem.alphaFunc(516, 0.1F);
+		RenderSystem.defaultAlphaFunc();
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

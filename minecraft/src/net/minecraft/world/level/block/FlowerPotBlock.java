@@ -13,7 +13,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -84,11 +83,6 @@ public class FlowerPotBlock extends Block {
 		return direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)
 			? Blocks.AIR.defaultBlockState()
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.CUTOUT;
 	}
 
 	public Block getContent() {

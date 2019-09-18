@@ -21,27 +21,27 @@ public class CodModel<T extends Entity> extends EntityModel<T> {
 		this.texHeight = 32;
 		int i = 22;
 		this.body = new ModelPart(this, 0, 0);
-		this.body.addBox(-1.0F, -2.0F, 0.0F, 2, 4, 7);
+		this.body.addBox(-1.0F, -2.0F, 0.0F, 2.0F, 4.0F, 7.0F);
 		this.body.setPos(0.0F, 22.0F, 0.0F);
 		this.head = new ModelPart(this, 11, 0);
-		this.head.addBox(-1.0F, -2.0F, -3.0F, 2, 4, 3);
+		this.head.addBox(-1.0F, -2.0F, -3.0F, 2.0F, 4.0F, 3.0F);
 		this.head.setPos(0.0F, 22.0F, 0.0F);
 		this.nose = new ModelPart(this, 0, 0);
-		this.nose.addBox(-1.0F, -2.0F, -1.0F, 2, 3, 1);
+		this.nose.addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 1.0F);
 		this.nose.setPos(0.0F, 22.0F, -3.0F);
 		this.sideFin0 = new ModelPart(this, 22, 1);
-		this.sideFin0.addBox(-2.0F, 0.0F, -1.0F, 2, 0, 2);
+		this.sideFin0.addBox(-2.0F, 0.0F, -1.0F, 2.0F, 0.0F, 2.0F);
 		this.sideFin0.setPos(-1.0F, 23.0F, 0.0F);
 		this.sideFin0.zRot = (float) (-Math.PI / 4);
 		this.sideFin1 = new ModelPart(this, 22, 4);
-		this.sideFin1.addBox(0.0F, 0.0F, -1.0F, 2, 0, 2);
+		this.sideFin1.addBox(0.0F, 0.0F, -1.0F, 2.0F, 0.0F, 2.0F);
 		this.sideFin1.setPos(1.0F, 23.0F, 0.0F);
 		this.sideFin1.zRot = (float) (Math.PI / 4);
 		this.tailFin = new ModelPart(this, 22, 3);
-		this.tailFin.addBox(0.0F, -2.0F, 0.0F, 0, 4, 4);
+		this.tailFin.addBox(0.0F, -2.0F, 0.0F, 0.0F, 4.0F, 4.0F);
 		this.tailFin.setPos(0.0F, 22.0F, 7.0F);
 		this.topFin = new ModelPart(this, 20, -6);
-		this.topFin.addBox(0.0F, -1.0F, -1.0F, 0, 1, 6);
+		this.topFin.addBox(0.0F, -1.0F, -1.0F, 0.0F, 1.0F, 6.0F);
 		this.topFin.setPos(0.0F, 20.0F, 0.0F);
 	}
 

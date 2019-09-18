@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class RenderPipeline {
-	private final List<ConcurrentLinkedQueue<Object>> renderCalls = ImmutableList.of(
+	private final List<ConcurrentLinkedQueue<RenderCall>> renderCalls = ImmutableList.of(
 		new ConcurrentLinkedQueue(), new ConcurrentLinkedQueue(), new ConcurrentLinkedQueue(), new ConcurrentLinkedQueue()
 	);
 	private volatile int recordingBuffer;

@@ -13,7 +13,7 @@ public class SquidModel<T extends Entity> extends EntityModel<T> {
 	public SquidModel() {
 		int i = -16;
 		this.body = new ModelPart(this, 0, 0);
-		this.body.addBox(-6.0F, -8.0F, -6.0F, 12, 16, 12);
+		this.body.addBox(-6.0F, -8.0F, -6.0F, 12.0F, 16.0F, 12.0F);
 		this.body.y += 8.0F;
 
 		for (int j = 0; j < this.tentacles.length; j++) {
@@ -21,7 +21,7 @@ public class SquidModel<T extends Entity> extends EntityModel<T> {
 			double d = (double)j * Math.PI * 2.0 / (double)this.tentacles.length;
 			float f = (float)Math.cos(d) * 5.0F;
 			float g = (float)Math.sin(d) * 5.0F;
-			this.tentacles[j].addBox(-1.0F, 0.0F, -1.0F, 2, 18, 2);
+			this.tentacles[j].addBox(-1.0F, 0.0F, -1.0F, 2.0F, 18.0F, 2.0F);
 			this.tentacles[j].x = f;
 			this.tentacles[j].z = g;
 			this.tentacles[j].y = 15.0F;

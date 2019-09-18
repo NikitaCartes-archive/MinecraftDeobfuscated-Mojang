@@ -64,7 +64,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 				}
 			}
 
-			for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW_BLOCK)) {
+			for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW)) {
 				if (structureBlockInfo2.nbt != null) {
 					String string = structureBlockInfo2.nbt.getString("final_state");
 					BlockStateParser blockStateParser = new BlockStateParser(new StringReader(string), false);

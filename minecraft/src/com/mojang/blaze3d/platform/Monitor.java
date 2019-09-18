@@ -1,6 +1,7 @@
 package com.mojang.blaze3d.platform;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -23,7 +24,8 @@ public final class Monitor {
 		this.refreshVideoModes();
 	}
 
-	private void refreshVideoModes() {
+	public void refreshVideoModes() {
+		RenderSystem.assertThread(RenderSystem::isInInitPhase);
 		this.videoModes.clear();
 		Buffer buffer = GLFW.glfwGetVideoModes(this.monitor);
 
@@ -45,6 +47,7 @@ public final class Monitor {
 	}
 
 	public VideoMode getPreferredVidMode(Optional<VideoMode> optional) {
+		RenderSystem.assertThread(RenderSystem::isInInitPhase);
 		if (optional.isPresent()) {
 			VideoMode videoMode = (VideoMode)optional.get();
 
@@ -59,6 +62,7 @@ public final class Monitor {
 	}
 
 	public int getVideoModeIndex(VideoMode videoMode) {
+		RenderSystem.assertThread(RenderSystem::isInInitPhase);
 		return this.videoModes.indexOf(videoMode);
 	}
 

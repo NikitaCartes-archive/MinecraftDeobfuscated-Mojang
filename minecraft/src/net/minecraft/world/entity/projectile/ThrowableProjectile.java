@@ -224,12 +224,12 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 
 	@Nullable
 	public LivingEntity getOwner() {
-		if (this.owner == null && this.ownerId != null && this.level instanceof ServerLevel) {
+		if ((this.owner == null || this.owner.removed) && this.ownerId != null && this.level instanceof ServerLevel) {
 			Entity entity = ((ServerLevel)this.level).getEntity(this.ownerId);
 			if (entity instanceof LivingEntity) {
 				this.owner = (LivingEntity)entity;
 			} else {
-				this.ownerId = null;
+				this.owner = null;
 			}
 		}
 

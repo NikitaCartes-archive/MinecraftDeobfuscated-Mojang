@@ -19,6 +19,7 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 	protected byte xRot;
 	protected boolean onGround;
 	protected boolean hasRot;
+	protected boolean hasPos;
 
 	public static long entityToPacket(double d) {
 		return Mth.lfloor(d * 4096.0);
@@ -89,12 +90,18 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 	}
 
 	@Environment(EnvType.CLIENT)
+	public boolean hasPosition() {
+		return this.hasPos;
+	}
+
+	@Environment(EnvType.CLIENT)
 	public boolean isOnGround() {
 		return this.onGround;
 	}
 
 	public static class Pos extends ClientboundMoveEntityPacket {
 		public Pos() {
+			this.hasPos = true;
 		}
 
 		public Pos(int i, short s, short t, short u, boolean bl) {
@@ -103,6 +110,7 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 			this.ya = t;
 			this.za = u;
 			this.onGround = bl;
+			this.hasPos = true;
 		}
 
 		@Override
@@ -127,6 +135,7 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 	public static class PosRot extends ClientboundMoveEntityPacket {
 		public PosRot() {
 			this.hasRot = true;
+			this.hasPos = true;
 		}
 
 		public PosRot(int i, short s, short t, short u, byte b, byte c, boolean bl) {
@@ -138,6 +147,7 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 			this.xRot = c;
 			this.onGround = bl;
 			this.hasRot = true;
+			this.hasPos = true;
 		}
 
 		@Override

@@ -1,57 +1,21 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
-public class FishingRodHookedTrigger implements CriterionTrigger<FishingRodHookedTrigger.TriggerInstance> {
+public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHookedTrigger.TriggerInstance> {
 	private static final ResourceLocation ID = new ResourceLocation("fishing_rod_hooked");
-	private final Map<PlayerAdvancements, FishingRodHookedTrigger.PlayerListeners> players = Maps.<PlayerAdvancements, FishingRodHookedTrigger.PlayerListeners>newHashMap();
 
 	@Override
 	public ResourceLocation getId() {
 		return ID;
-	}
-
-	@Override
-	public void addPlayerListener(PlayerAdvancements playerAdvancements, CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listener) {
-		FishingRodHookedTrigger.PlayerListeners playerListeners = (FishingRodHookedTrigger.PlayerListeners)this.players.get(playerAdvancements);
-		if (playerListeners == null) {
-			playerListeners = new FishingRodHookedTrigger.PlayerListeners(playerAdvancements);
-			this.players.put(playerAdvancements, playerListeners);
-		}
-
-		playerListeners.addListener(listener);
-	}
-
-	@Override
-	public void removePlayerListener(PlayerAdvancements playerAdvancements, CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listener) {
-		FishingRodHookedTrigger.PlayerListeners playerListeners = (FishingRodHookedTrigger.PlayerListeners)this.players.get(playerAdvancements);
-		if (playerListeners != null) {
-			playerListeners.removeListener(listener);
-			if (playerListeners.isEmpty()) {
-				this.players.remove(playerAdvancements);
-			}
-		}
-	}
-
-	@Override
-	public void removePlayerListeners(PlayerAdvancements playerAdvancements) {
-		this.players.remove(playerAdvancements);
 	}
 
 	public FishingRodHookedTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
@@ -62,51 +26,7 @@ public class FishingRodHookedTrigger implements CriterionTrigger<FishingRodHooke
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, FishingHook fishingHook, Collection<ItemStack> collection) {
-		FishingRodHookedTrigger.PlayerListeners playerListeners = (FishingRodHookedTrigger.PlayerListeners)this.players.get(serverPlayer.getAdvancements());
-		if (playerListeners != null) {
-			playerListeners.trigger(serverPlayer, itemStack, fishingHook, collection);
-		}
-	}
-
-	static class PlayerListeners {
-		private final PlayerAdvancements player;
-		private final Set<CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance>> listeners = Sets.<CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance>>newHashSet();
-
-		public PlayerListeners(PlayerAdvancements playerAdvancements) {
-			this.player = playerAdvancements;
-		}
-
-		public boolean isEmpty() {
-			return this.listeners.isEmpty();
-		}
-
-		public void addListener(CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listener) {
-			this.listeners.add(listener);
-		}
-
-		public void removeListener(CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listener) {
-			this.listeners.remove(listener);
-		}
-
-		public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, FishingHook fishingHook, Collection<ItemStack> collection) {
-			List<CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance>> list = null;
-
-			for (CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listener : this.listeners) {
-				if (listener.getTriggerInstance().matches(serverPlayer, itemStack, fishingHook, collection)) {
-					if (list == null) {
-						list = Lists.<CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance>>newArrayList();
-					}
-
-					list.add(listener);
-				}
-			}
-
-			if (list != null) {
-				for (CriterionTrigger.Listener<FishingRodHookedTrigger.TriggerInstance> listenerx : list) {
-					listenerx.run(this.player);
-				}
-			}
-		}
+		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, itemStack, fishingHook, collection));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {

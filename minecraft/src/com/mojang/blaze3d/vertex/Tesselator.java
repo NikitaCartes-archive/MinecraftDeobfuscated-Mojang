@@ -1,15 +1,16 @@
 package com.mojang.blaze3d.vertex;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class Tesselator {
 	private final BufferBuilder builder;
-	private final BufferUploader uploader = new BufferUploader();
-	private static final Tesselator INSTANCE = new Tesselator(2097152);
+	private static final Tesselator INSTANCE = new Tesselator();
 
 	public static Tesselator getInstance() {
+		RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
 		return INSTANCE;
 	}
 
@@ -17,9 +18,13 @@ public class Tesselator {
 		this.builder = new BufferBuilder(i);
 	}
 
+	public Tesselator() {
+		this(2097152);
+	}
+
 	public void end() {
 		this.builder.end();
-		this.uploader.end(this.builder);
+		BufferUploader.end(this.builder);
 	}
 
 	public BufferBuilder getBuilder() {

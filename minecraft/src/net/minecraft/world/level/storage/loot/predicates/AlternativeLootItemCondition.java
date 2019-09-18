@@ -5,15 +5,11 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 
 public class AlternativeLootItemCondition implements LootItemCondition {
 	private final LootItemCondition[] terms;
@@ -29,16 +25,11 @@ public class AlternativeLootItemCondition implements LootItemCondition {
 	}
 
 	@Override
-	public void validate(
-		LootTableProblemCollector lootTableProblemCollector,
-		Function<ResourceLocation, LootTable> function,
-		Set<ResourceLocation> set,
-		LootContextParamSet lootContextParamSet
-	) {
-		LootItemCondition.super.validate(lootTableProblemCollector, function, set, lootContextParamSet);
+	public void validate(ValidationContext validationContext) {
+		LootItemCondition.super.validate(validationContext);
 
 		for (int i = 0; i < this.terms.length; i++) {
-			this.terms[i].validate(lootTableProblemCollector.forChild(".term[" + i + "]"), function, set, lootContextParamSet);
+			this.terms[i].validate(validationContext.forChild(".term[" + i + "]"));
 		}
 	}
 

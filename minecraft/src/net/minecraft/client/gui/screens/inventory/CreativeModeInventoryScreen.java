@@ -739,7 +739,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 		RenderSystem.disableLighting();
 		this.blit(l, m, j, k, 28, 32);
-		this.blitOffset = 100;
+		this.setBlitOffset(100);
 		this.itemRenderer.blitOffset = 100.0F;
 		l += 6;
 		m += 8 + (bl2 ? 1 : -1);
@@ -750,7 +750,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, l, m);
 		RenderSystem.disableLighting();
 		this.itemRenderer.blitOffset = 0.0F;
-		this.blitOffset = 0;
+		this.setBlitOffset(0);
 	}
 
 	public int getSelectedTab() {

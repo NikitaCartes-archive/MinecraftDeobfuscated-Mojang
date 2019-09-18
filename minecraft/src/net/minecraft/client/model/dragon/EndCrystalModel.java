@@ -10,16 +10,16 @@ import net.minecraft.world.entity.Entity;
 @Environment(EnvType.CLIENT)
 public class EndCrystalModel<T extends Entity> extends EntityModel<T> {
 	private final ModelPart cube;
-	private final ModelPart glass = new ModelPart(this, "glass");
+	private final ModelPart glass = new ModelPart(this);
 	private final ModelPart base;
 
 	public EndCrystalModel(float f, boolean bl) {
-		this.glass.texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
-		this.cube = new ModelPart(this, "cube");
-		this.cube.texOffs(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
+		this.glass.texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
+		this.cube = new ModelPart(this);
+		this.cube.texOffs(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
 		if (bl) {
-			this.base = new ModelPart(this, "base");
-			this.base.texOffs(0, 16).addBox(-6.0F, 0.0F, -6.0F, 12, 4, 12);
+			this.base = new ModelPart(this);
+			this.base.texOffs(0, 16).addBox(-6.0F, 0.0F, -6.0F, 12.0F, 4.0F, 12.0F);
 		} else {
 			this.base = null;
 		}

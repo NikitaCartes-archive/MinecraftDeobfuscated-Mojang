@@ -18,7 +18,8 @@ public class EndermiteModel<T extends Entity> extends EntityModel<T> {
 
 		for (int i = 0; i < this.bodyParts.length; i++) {
 			this.bodyParts[i] = new ModelPart(this, BODY_TEXS[i][0], BODY_TEXS[i][1]);
-			this.bodyParts[i].addBox((float)BODY_SIZES[i][0] * -0.5F, 0.0F, (float)BODY_SIZES[i][2] * -0.5F, BODY_SIZES[i][0], BODY_SIZES[i][1], BODY_SIZES[i][2]);
+			this.bodyParts[i]
+				.addBox((float)BODY_SIZES[i][0] * -0.5F, 0.0F, (float)BODY_SIZES[i][2] * -0.5F, (float)BODY_SIZES[i][0], (float)BODY_SIZES[i][1], (float)BODY_SIZES[i][2]);
 			this.bodyParts[i].setPos(0.0F, (float)(24 - BODY_SIZES[i][1]), f);
 			if (i < this.bodyParts.length - 1) {
 				f += (float)(BODY_SIZES[i][2] + BODY_SIZES[i + 1][2]) * 0.5F;

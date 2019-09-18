@@ -1,13 +1,12 @@
 package com.mojang.blaze3d.platform;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class GlUtil {
 	public static String getVendor() {
-		return RenderSystem.getString(7936);
+		return "GLU.getVendor";
 	}
 
 	public static String getCpuInfo() {
@@ -15,10 +14,10 @@ public class GlUtil {
 	}
 
 	public static String getRenderer() {
-		return RenderSystem.getString(7937);
+		return "GLU.getRenderer";
 	}
 
 	public static String getOpenGLVersion() {
-		return RenderSystem.getString(7938);
+		return "GLU.getOpenGLVersion";
 	}
 }

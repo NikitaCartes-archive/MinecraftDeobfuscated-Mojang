@@ -14,7 +14,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -33,12 +32,6 @@ public abstract class LavaFluid extends FlowingFluid {
 	@Override
 	public Fluid getSource() {
 		return Fluids.LAVA;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.SOLID;
 	}
 
 	@Override

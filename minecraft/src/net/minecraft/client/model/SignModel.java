@@ -10,9 +10,9 @@ public class SignModel extends Model {
 	private final ModelPart stick;
 
 	public SignModel() {
-		this.sign.addBox(-12.0F, -14.0F, -1.0F, 24, 12, 2, 0.0F);
+		this.sign.addBox(-12.0F, -14.0F, -1.0F, 24.0F, 12.0F, 2.0F, 0.0F);
 		this.stick = new ModelPart(this, 0, 14);
-		this.stick.addBox(-1.0F, -2.0F, -1.0F, 2, 14, 2, 0.0F);
+		this.stick.addBox(-1.0F, -2.0F, -1.0F, 2.0F, 14.0F, 2.0F, 0.0F);
 	}
 
 	public void render() {

@@ -3,7 +3,6 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Comparator;
 import java.util.List;
@@ -139,9 +138,7 @@ public class PlayerTabOverlay extends GuiComponent {
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableAlphaTest();
 			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			if (v < list.size()) {
 				PlayerInfo playerInfo2 = (PlayerInfo)list.get(v);
 				GameProfile gameProfile = playerInfo2.getProfile();
@@ -213,9 +210,9 @@ public class PlayerTabOverlay extends GuiComponent {
 			m = 4;
 		}
 
-		this.blitOffset += 100;
+		this.setBlitOffset(this.getBlitOffset() + 100);
 		this.blit(j + i - 11, k, 0, 176 + m * 8, 10, 8);
-		this.blitOffset -= 100;
+		this.setBlitOffset(this.getBlitOffset() - 100);
 	}
 
 	private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo) {

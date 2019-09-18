@@ -2,16 +2,15 @@ package net.minecraft.client.player;
 
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.TextureObject;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.renderer.MobSkinTextureProcessor;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureObject;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
@@ -93,7 +92,8 @@ public abstract class AbstractClientPlayer extends Player {
 				null,
 				String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)),
 				DefaultPlayerSkin.getDefaultSkin(createPlayerUUID(string)),
-				new MobSkinTextureProcessor()
+				true,
+				null
 			);
 			textureManager.register(resourceLocation, textureObject);
 		}

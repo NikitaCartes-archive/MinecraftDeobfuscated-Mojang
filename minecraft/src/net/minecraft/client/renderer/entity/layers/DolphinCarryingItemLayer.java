@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.DolphinModel;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -14,7 +15,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Dolphin;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.block.Block;
 
 @Environment(EnvType.CLIENT)
@@ -39,7 +39,7 @@ public class DolphinCarryingItemLayer extends RenderLayer<Dolphin, DolphinModel<
 			Item item = itemStack.getItem();
 			Block block = Block.byItem(item);
 			RenderSystem.pushMatrix();
-			boolean bl = this.itemRenderer.isGui3d(itemStack) && block.getRenderLayer() == BlockLayer.TRANSLUCENT;
+			boolean bl = this.itemRenderer.isGui3d(itemStack) && RenderType.getRenderLayer(block.defaultBlockState()) == RenderType.TRANSLUCENT;
 			if (bl) {
 				RenderSystem.depthMask(false);
 			}

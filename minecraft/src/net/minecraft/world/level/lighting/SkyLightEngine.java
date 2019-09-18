@@ -1,8 +1,6 @@
 package net.minecraft.world.level.lighting;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -221,11 +219,5 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 				super.checkNode(l);
 			}
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public String getDebugData(long l) {
-		return super.getDebugData(l) + (this.storage.isAboveData(l) ? "*" : "");
 	}
 }

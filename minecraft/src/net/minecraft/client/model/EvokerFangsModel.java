@@ -14,13 +14,13 @@ public class EvokerFangsModel<T extends Entity> extends EntityModel<T> {
 
 	public EvokerFangsModel() {
 		this.base.setPos(-5.0F, 22.0F, -5.0F);
-		this.base.addBox(0.0F, 0.0F, 0.0F, 10, 12, 10);
+		this.base.addBox(0.0F, 0.0F, 0.0F, 10.0F, 12.0F, 10.0F);
 		this.upperJaw = new ModelPart(this, 40, 0);
 		this.upperJaw.setPos(1.5F, 22.0F, -4.0F);
-		this.upperJaw.addBox(0.0F, 0.0F, 0.0F, 4, 14, 8);
+		this.upperJaw.addBox(0.0F, 0.0F, 0.0F, 4.0F, 14.0F, 8.0F);
 		this.lowerJaw = new ModelPart(this, 40, 0);
 		this.lowerJaw.setPos(-1.5F, 22.0F, 4.0F);
-		this.lowerJaw.addBox(0.0F, 0.0F, 0.0F, 4, 14, 8);
+		this.lowerJaw.addBox(0.0F, 0.0F, 0.0F, 4.0F, 14.0F, 8.0F);
 	}
 
 	@Override

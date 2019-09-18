@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
@@ -140,9 +139,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 			}
 
 			RenderSystem.enableRescaleNormal();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-			);
+			RenderSystem.defaultBlendFunc();
 			Lighting.turnOnGui();
 
 			for (AdvancementTab advancementTab : this.tabs.values()) {

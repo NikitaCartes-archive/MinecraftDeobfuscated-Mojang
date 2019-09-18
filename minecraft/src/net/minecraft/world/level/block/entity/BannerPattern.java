@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -77,6 +78,11 @@ public enum BannerPattern {
 		this.patterns[0] = string4;
 		this.patterns[1] = string5;
 		this.patterns[2] = string6;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ResourceLocation location() {
+		return new ResourceLocation("entity/banner/" + this.getFilename());
 	}
 
 	@Environment(EnvType.CLIENT)

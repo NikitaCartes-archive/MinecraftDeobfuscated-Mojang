@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -15,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidHeadModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.dragon.DragonHeadModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +48,7 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		hashMap.put(SkullBlock.Types.PLAYER, DefaultPlayerSkin.getDefaultSkin());
 	});
 
-	public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		float h = skullBlockEntity.getMouthAnimation(g);
 		BlockState blockState = skullBlockEntity.getBlockState();
 		boolean bl = blockState.getBlock() instanceof WallSkullBlock;
@@ -68,7 +68,7 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 	) {
 		SkullModel skullModel = (SkullModel)MODEL_BY_TYPE.get(type);
 		if (j >= 0) {
-			this.bindTexture(BREAKING_LOCATIONS[j]);
+			this.bindTexture((ResourceLocation)BREAKING_LOCATIONS.get(j));
 			RenderSystem.matrixMode(5890);
 			RenderSystem.pushMatrix();
 			RenderSystem.scalef(4.0F, 2.0F, 1.0F);
@@ -79,7 +79,6 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		}
 
 		RenderSystem.pushMatrix();
-		RenderSystem.disableCull();
 		if (direction == null) {
 			RenderSystem.translatef(f + 0.5F, g, h + 0.5F);
 		} else {
@@ -103,7 +102,7 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
 		RenderSystem.enableAlphaTest();
 		if (type == SkullBlock.Types.PLAYER) {
-			GlStateManager.setProfile(GlStateManager.Profile.PLAYER_SKIN);
+			RenderSystem.setProfile(RenderSystem.Profile.PLAYER_SKIN);
 		}
 
 		skullModel.render(k, 0.0F, 0.0F, i, 0.0F, 0.0625F);

@@ -3,22 +3,20 @@ package net.minecraft.client.renderer.blockentity;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
-import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(EnvType.CLIENT)
-public class TheEndGatewayRenderer extends TheEndPortalRenderer {
+public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
 	private static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/end_gateway_beam.png");
 
-	@Override
-	public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
+	public void render(TheEndGatewayBlockEntity theEndGatewayBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
 		RenderSystem.disableFog();
-		TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)theEndPortalBlockEntity;
 		if (theEndGatewayBlockEntity.isSpawning() || theEndGatewayBlockEntity.isCoolingDown()) {
-			RenderSystem.alphaFunc(516, 0.1F);
+			RenderSystem.defaultAlphaFunc();
 			this.bindTexture(BEAM_LOCATION);
 			float h = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(g) : theEndGatewayBlockEntity.getCooldownPercent(g);
 			double j = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
@@ -29,7 +27,7 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer {
 			BeaconRenderer.renderBeaconBeam(d, e, f, (double)g, (double)h, theEndGatewayBlockEntity.getLevel().getGameTime(), 0, -k, fs, 0.15, 0.175);
 		}
 
-		super.render(theEndPortalBlockEntity, d, e, f, g, i);
+		super.render(theEndGatewayBlockEntity, d, e, f, g, i, renderType);
 		RenderSystem.enableFog();
 	}
 

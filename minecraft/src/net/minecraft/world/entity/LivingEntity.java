@@ -2,6 +2,7 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.Dynamic;
 import java.util.Collection;
@@ -1648,73 +1649,89 @@ public abstract class LivingEntity extends Entity {
 
 	public void findStandUpPosition(Entity entity) {
 		if (!(entity instanceof Boat) && !(entity instanceof AbstractHorse)) {
-			double k = entity.x;
-			double l = entity.getBoundingBox().minY + (double)entity.getBbHeight();
-			double e = entity.z;
+			double q = entity.x;
+			double r = entity.getBoundingBox().minY + (double)entity.getBbHeight();
+			double s = entity.z;
 			Direction direction = entity.getMotionDirection();
 			if (direction != null && direction.getAxis() != Direction.Axis.Y) {
 				Direction direction2 = direction.getClockWise();
 				int[][] is = new int[][]{{0, 1}, {0, -1}, {-1, 1}, {-1, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {0, 1}};
-				double m = Math.floor(this.x) + 0.5;
-				double n = Math.floor(this.z) + 0.5;
-				double o = this.getBoundingBox().maxX - this.getBoundingBox().minX;
-				double p = this.getBoundingBox().maxZ - this.getBoundingBox().minZ;
-				AABB aABB = new AABB(
-					m - o / 2.0, entity.getBoundingBox().minY, n - p / 2.0, m + o / 2.0, Math.floor(entity.getBoundingBox().minY) + (double)this.getBbHeight(), n + p / 2.0
+				double k = Math.floor(this.x) + 0.5;
+				double t = Math.floor(this.z) + 0.5;
+				double l = this.getBoundingBox().maxX - this.getBoundingBox().minX;
+				double m = this.getBoundingBox().maxZ - this.getBoundingBox().minZ;
+				AABB aABB3 = new AABB(
+					k - l / 2.0, entity.getBoundingBox().minY, t - m / 2.0, k + l / 2.0, Math.floor(entity.getBoundingBox().minY) + (double)this.getBbHeight(), t + m / 2.0
 				);
 
 				for (int[] js : is) {
-					double q = (double)(direction.getStepX() * js[0] + direction2.getStepX() * js[1]);
-					double r = (double)(direction.getStepZ() * js[0] + direction2.getStepZ() * js[1]);
-					double s = m + q;
-					double t = n + r;
-					AABB aABB2 = aABB.move(q, 0.0, r);
-					if (this.level.noCollision(this, aABB2)) {
-						BlockPos blockPos = new BlockPos(s, this.y, t);
+					double u = (double)(direction.getStepX() * js[0] + direction2.getStepX() * js[1]);
+					double v = (double)(direction.getStepZ() * js[0] + direction2.getStepZ() * js[1]);
+					double w = k + u;
+					double x = t + v;
+					AABB aABB4 = aABB3.move(u, 0.0, v);
+					if (this.level.noCollision(this, aABB4)) {
+						BlockPos blockPos = new BlockPos(w, this.y, x);
 						if (this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, this)) {
-							this.teleportTo(s, this.y + 1.0, t);
+							this.teleportTo(w, this.y + 1.0, x);
 							return;
 						}
 
-						BlockPos blockPos2 = new BlockPos(s, this.y - 1.0, t);
+						BlockPos blockPos2 = new BlockPos(w, this.y - 1.0, x);
 						if (this.level.getBlockState(blockPos2).entityCanStandOn(this.level, blockPos2, this) || this.level.getFluidState(blockPos2).is(FluidTags.WATER)) {
-							k = s;
-							l = this.y + 1.0;
-							e = t;
+							q = w;
+							r = this.y + 1.0;
+							s = x;
 						}
 					} else {
-						BlockPos blockPosx = new BlockPos(s, this.y + 1.0, t);
-						if (this.level.noCollision(this, aABB2.move(0.0, 1.0, 0.0)) && this.level.getBlockState(blockPosx).entityCanStandOn(this.level, blockPosx, this)) {
-							k = s;
-							l = this.y + 2.0;
-							e = t;
+						BlockPos blockPosx = new BlockPos(w, this.y + 1.0, x);
+						if (this.level.noCollision(this, aABB4.move(0.0, 1.0, 0.0)) && this.level.getBlockState(blockPosx).entityCanStandOn(this.level, blockPosx, this)) {
+							q = w;
+							r = this.y + 2.0;
+							s = x;
 						}
 					}
 				}
 			}
 
-			this.teleportTo(k, l, e);
+			this.teleportTo(q, r, s);
 		} else {
 			double d = (double)(this.getBbWidth() / 2.0F + entity.getBbWidth() / 2.0F) + 0.4;
+			AABB aABB = entity.getBoundingBox();
 			float f;
+			double e;
+			int i;
 			if (entity instanceof Boat) {
+				e = aABB.maxY;
+				i = 2;
 				f = 0.0F;
 			} else {
+				e = aABB.minY;
+				i = 3;
 				f = (float) (Math.PI / 2) * (float)(this.getMainArm() == HumanoidArm.RIGHT ? -1 : 1);
 			}
 
-			float g = -Mth.sin(-this.yRot * (float) (Math.PI / 180.0) - (float) Math.PI + f);
-			float h = -Mth.cos(-this.yRot * (float) (Math.PI / 180.0) - (float) Math.PI + f);
-			double e = Math.abs(g) > Math.abs(h) ? d / (double)Math.abs(g) : d / (double)Math.abs(h);
-			double i = this.x + (double)g * e;
-			double j = this.z + (double)h * e;
-			this.setPos(i, entity.y + (double)entity.getBbHeight() + 0.001, j);
-			if (!this.level.noCollision(this, this.getBoundingBox().minmax(entity.getBoundingBox()))) {
-				this.setPos(i, entity.y + (double)entity.getBbHeight() + 1.001, j);
-				if (!this.level.noCollision(this, this.getBoundingBox().minmax(entity.getBoundingBox()))) {
-					this.setPos(entity.x, entity.y + (double)this.getBbHeight() + 0.001, entity.z);
+			float g = -this.yRot * (float) (Math.PI / 180.0) - (float) Math.PI + f;
+			float h = -Mth.sin(g);
+			float j = -Mth.cos(g);
+			double k = Math.abs(h) > Math.abs(j) ? d / (double)Math.abs(h) : d / (double)Math.abs(j);
+			AABB aABB2 = this.getBoundingBox().move(-this.x, -this.y, -this.z);
+			ImmutableSet<Entity> immutableSet = ImmutableSet.of(this, entity);
+			double l = this.x + (double)h * k;
+			double m = this.z + (double)j * k;
+			double n = 0.001;
+
+			for (int o = 0; o < i; o++) {
+				double p = e + n;
+				if (this.level.noCollision(this, aABB2.move(l, p, m), immutableSet)) {
+					this.setPos(l, p, m);
+					return;
 				}
+
+				n++;
 			}
+
+			this.setPos(entity.x, entity.y + (double)this.getBbHeight() + 0.001, entity.z);
 		}
 	}
 
@@ -2140,7 +2157,11 @@ public abstract class LivingEntity extends Entity {
 			this.noJumpDelay--;
 		}
 
-		if (this.lerpSteps > 0 && !this.isControlledByLocalInstance()) {
+		if (this.isControlledByLocalInstance()) {
+			this.lerpSteps = 0;
+		}
+
+		if (this.lerpSteps > 0) {
 			double d = this.x + (this.lerpX - this.x) / (double)this.lerpSteps;
 			double e = this.y + (this.lerpY - this.y) / (double)this.lerpSteps;
 			double f = this.z + (this.lerpZ - this.z) / (double)this.lerpSteps;

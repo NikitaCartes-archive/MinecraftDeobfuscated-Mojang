@@ -4,18 +4,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class SlimeBlock extends HalfTransparentBlock {
 	public SlimeBlock(Block.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.TRANSLUCENT;
 	}
 
 	@Override

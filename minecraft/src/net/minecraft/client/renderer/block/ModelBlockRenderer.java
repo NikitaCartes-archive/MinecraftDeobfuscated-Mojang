@@ -184,9 +184,9 @@ public class ModelBlockRenderer {
 		float k = -32.0F;
 
 		for (int l = 0; l < 4; l++) {
-			float m = Float.intBitsToFloat(is[l * 7]);
-			float n = Float.intBitsToFloat(is[l * 7 + 1]);
-			float o = Float.intBitsToFloat(is[l * 7 + 2]);
+			float m = Float.intBitsToFloat(is[l * 8]);
+			float n = Float.intBitsToFloat(is[l * 8 + 1]);
+			float o = Float.intBitsToFloat(is[l * 8 + 2]);
 			f = Math.min(f, m);
 			g = Math.min(g, n);
 			h = Math.min(h, o);
@@ -318,7 +318,7 @@ public class ModelBlockRenderer {
 
 		for (int k = list.size(); j < k; j++) {
 			BakedQuad bakedQuad = (BakedQuad)list.get(j);
-			bufferBuilder.begin(7, DefaultVertexFormat.BLOCK_NORMALS);
+			bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
 			bufferBuilder.putBulkData(bakedQuad.getVertices());
 			if (bakedQuad.isTinted()) {
 				bufferBuilder.fixupQuadColor(g * f, h * f, i * f);

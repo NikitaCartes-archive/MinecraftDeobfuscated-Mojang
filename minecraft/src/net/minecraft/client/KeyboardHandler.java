@@ -271,15 +271,14 @@ public class KeyboardHandler {
 	}
 
 	public void keyPress(long l, int i, int j, int k, int m) {
-		if (l == this.minecraft.window.getWindow()) {
+		if (l == this.minecraft.getWindow().getWindow()) {
 			if (this.debugCrashKeyTime > 0L) {
-				if (!InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 67) || !InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 292)
-					)
-				 {
+				if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67)
+					|| !InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292)) {
 					this.debugCrashKeyTime = -1L;
 				}
-			} else if (InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 67)
-				&& InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 292)) {
+			} else if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67)
+				&& InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292)) {
 				this.handledDebugKey = true;
 				this.debugCrashKeyTime = Util.getMillis();
 				this.debugCrashKeyReportedTime = Util.getMillis();
@@ -289,8 +288,8 @@ public class KeyboardHandler {
 			ContainerEventHandler containerEventHandler = this.minecraft.screen;
 			if (k == 1 && (!(this.minecraft.screen instanceof ControlsScreen) || ((ControlsScreen)containerEventHandler).lastKeySelection <= Util.getMillis() - 20L)) {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
-					this.minecraft.window.toggleFullScreen();
-					this.minecraft.options.fullscreen = this.minecraft.window.isFullscreen();
+					this.minecraft.getWindow().toggleFullScreen();
+					this.minecraft.options.fullscreen = this.minecraft.getWindow().isFullscreen();
 					return;
 				}
 
@@ -300,8 +299,8 @@ public class KeyboardHandler {
 
 					Screenshot.grab(
 						this.minecraft.gameDirectory,
-						this.minecraft.window.getWidth(),
-						this.minecraft.window.getHeight(),
+						this.minecraft.getWindow().getWidth(),
+						this.minecraft.getWindow().getHeight(),
 						this.minecraft.getMainRenderTarget(),
 						component -> this.minecraft.execute(() -> this.minecraft.gui.getChat().addMessage(component))
 					);
@@ -360,11 +359,11 @@ public class KeyboardHandler {
 					boolean bl2 = false;
 					if (this.minecraft.screen == null) {
 						if (i == 256) {
-							boolean bl3 = InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 292);
+							boolean bl3 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
 							this.minecraft.pauseGame(bl3);
 						}
 
-						bl2 = InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 292) && this.handleDebugKeys(i);
+						bl2 = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292) && this.handleDebugKeys(i);
 						this.handledDebugKey |= bl2;
 						if (i == 290) {
 							this.minecraft.options.hideGui = !this.minecraft.options.hideGui;
@@ -395,7 +394,7 @@ public class KeyboardHandler {
 	}
 
 	private void charTyped(long l, int i, int j) {
-		if (l == this.minecraft.window.getWindow()) {
+		if (l == this.minecraft.getWindow().getWindow()) {
 			GuiEventListener guiEventListener = this.minecraft.screen;
 			if (guiEventListener != null && this.minecraft.getOverlay() == null) {
 				if (Character.charCount(i) == 1) {
@@ -414,19 +413,21 @@ public class KeyboardHandler {
 	}
 
 	public void setup(long l) {
-		InputConstants.setupKeyboardCallbacks(l, this::keyPress, this::charTyped);
+		InputConstants.setupKeyboardCallbacks(
+			l, (lx, i, j, k, m) -> this.minecraft.execute(() -> this.keyPress(lx, i, j, k, m)), (lx, i, j) -> this.minecraft.execute(() -> this.charTyped(lx, i, j))
+		);
 	}
 
 	public String getClipboard() {
-		return this.clipboardManager.getClipboard(this.minecraft.window.getWindow(), (i, l) -> {
+		return this.clipboardManager.getClipboard(this.minecraft.getWindow().getWindow(), (i, l) -> {
 			if (i != 65545) {
-				this.minecraft.window.defaultErrorCallback(i, l);
+				this.minecraft.getWindow().defaultErrorCallback(i, l);
 			}
 		});
 	}
 
 	public void setClipboard(String string) {
-		this.clipboardManager.setClipboard(this.minecraft.window.getWindow(), string);
+		this.clipboardManager.setClipboard(this.minecraft.getWindow().getWindow(), string);
 	}
 
 	public void tick() {

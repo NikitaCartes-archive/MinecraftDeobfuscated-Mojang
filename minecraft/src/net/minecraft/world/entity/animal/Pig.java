@@ -217,6 +217,7 @@ public class Pig extends Animal {
 
 					this.setSpeed(f);
 					super.travel(new Vec3(0.0, 0.0, 1.0));
+					this.lerpSteps = 0;
 				} else {
 					this.setDeltaMovement(Vec3.ZERO);
 				}

@@ -3,9 +3,16 @@ package com.mojang.math;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class Vector3f {
+	public static Vector3f XN = new Vector3f(-1.0F, 0.0F, 0.0F);
+	public static Vector3f XP = new Vector3f(1.0F, 0.0F, 0.0F);
+	public static Vector3f YN = new Vector3f(0.0F, -1.0F, 0.0F);
+	public static Vector3f YP = new Vector3f(0.0F, 1.0F, 0.0F);
+	public static Vector3f ZN = new Vector3f(0.0F, 0.0F, -1.0F);
+	public static Vector3f ZP = new Vector3f(0.0F, 0.0F, 1.0F);
 	private final float[] values;
 
 	@Environment(EnvType.CLIENT)
@@ -17,7 +24,6 @@ public final class Vector3f {
 		this.values = new float[3];
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Vector3f(float f, float g, float h) {
 		this.values = new float[]{f, g, h};
 	}
@@ -115,8 +121,10 @@ public final class Vector3f {
 			f += this.values[i] * this.values[i];
 		}
 
-		for (int i = 0; i < 3; i++) {
-			this.values[i] = this.values[i] / f;
+		float g = (float)Mth.fastInvSqrt((double)f);
+
+		for (int j = 0; j < 3; j++) {
+			this.values[j] = this.values[j] * g;
 		}
 	}
 

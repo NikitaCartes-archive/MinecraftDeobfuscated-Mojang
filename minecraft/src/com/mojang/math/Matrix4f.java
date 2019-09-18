@@ -7,9 +7,10 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public final class Matrix4f {
-	private final float[] values = new float[16];
+	private final float[] values;
 
 	public Matrix4f() {
+		this.values = new float[16];
 	}
 
 	public Matrix4f(Quaternion quaternion) {
@@ -37,6 +38,24 @@ public final class Matrix4f {
 		this.values[8] = 2.0F * (o + q);
 		this.values[6] = 2.0F * (n + p);
 		this.values[9] = 2.0F * (n - p);
+	}
+
+	public Matrix4f(float[] fs) {
+		this(fs, false);
+	}
+
+	public Matrix4f(float[] fs, boolean bl) {
+		if (bl) {
+			this.values = new float[16];
+
+			for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 4; j++) {
+					this.values[i * 4 + j] = fs[j * 4 + i];
+				}
+			}
+		} else {
+			this.values = Arrays.copyOf(fs, fs.length);
+		}
 	}
 
 	public boolean equals(Object object) {
@@ -104,8 +123,49 @@ public final class Matrix4f {
 		}
 	}
 
+	public void setIdentity() {
+		this.values[0] = 1.0F;
+		this.values[1] = 0.0F;
+		this.values[2] = 0.0F;
+		this.values[3] = 0.0F;
+		this.values[4] = 0.0F;
+		this.values[5] = 1.0F;
+		this.values[6] = 0.0F;
+		this.values[7] = 0.0F;
+		this.values[8] = 0.0F;
+		this.values[9] = 0.0F;
+		this.values[10] = 1.0F;
+		this.values[11] = 0.0F;
+		this.values[12] = 0.0F;
+		this.values[13] = 0.0F;
+		this.values[14] = 0.0F;
+		this.values[15] = 1.0F;
+	}
+
+	public float get(int i, int j) {
+		return this.values[i + 4 * j];
+	}
+
 	public void set(int i, int j, float f) {
 		this.values[i + 4 * j] = f;
+	}
+
+	public void multiply(Matrix4f matrix4f) {
+		float[] fs = Arrays.copyOf(this.values, 16);
+
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				this.values[i + j * 4] = 0.0F;
+
+				for (int k = 0; k < 4; k++) {
+					this.values[i + j * 4] = this.values[i + j * 4] + fs[i + k * 4] * matrix4f.values[k + j * 4];
+				}
+			}
+		}
+	}
+
+	public void multiply(Quaternion quaternion) {
+		this.multiply(new Matrix4f(quaternion));
 	}
 
 	public static Matrix4f perspective(double d, float f, float g, float h) {
@@ -130,5 +190,15 @@ public final class Matrix4f {
 		matrix4f.set(1, 3, -1.0F);
 		matrix4f.set(2, 3, -(i + h) / j);
 		return matrix4f;
+	}
+
+	public void translate(Vector3f vector3f) {
+		this.set(0, 3, this.get(0, 3) + vector3f.x());
+		this.set(1, 3, this.get(1, 3) + vector3f.y());
+		this.set(2, 3, this.get(2, 3) + vector3f.z());
+	}
+
+	public Matrix4f copy() {
+		return new Matrix4f((float[])this.values.clone());
 	}
 }

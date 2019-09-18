@@ -16,6 +16,10 @@ public class FluidTags {
 		resetCount++;
 	}
 
+	public static TagCollection<Fluid> getAllTags() {
+		return source;
+	}
+
 	private static Tag<Fluid> bind(String string) {
 		return new FluidTags.Wrapper(new ResourceLocation(string));
 	}

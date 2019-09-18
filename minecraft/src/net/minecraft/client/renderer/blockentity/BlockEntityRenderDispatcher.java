@@ -1,8 +1,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -13,6 +12,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -101,40 +101,46 @@ public class BlockEntityRenderDispatcher {
 		this.cameraHitResult = hitResult;
 	}
 
-	public void render(BlockEntity blockEntity, float f, int i) {
+	public void render(BlockEntity blockEntity, float f, RenderType renderType, BufferBuilder bufferBuilder) {
+		this.render(blockEntity, f, -1, renderType, bufferBuilder);
+	}
+
+	public void renderBreaking(BlockEntity blockEntity, float f, int i, BufferBuilder bufferBuilder) {
+		this.render(blockEntity, f, i, RenderType.CRUMBLING, bufferBuilder);
+	}
+
+	private void render(BlockEntity blockEntity, float f, int i, RenderType renderType, BufferBuilder bufferBuilder) {
 		if (blockEntity.distanceToSqr(this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z) < blockEntity.getViewDistance()) {
-			Lighting.turnOn();
-			int j = this.level.getLightColor(blockEntity.getBlockPos());
-			int k = j % 65536;
-			int l = j / 65536;
-			RenderSystem.glMultiTexCoord2f(33985, (float)k, (float)l);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			BlockPos blockPos = blockEntity.getBlockPos();
-			this.render(blockEntity, (double)blockPos.getX() - xOff, (double)blockPos.getY() - yOff, (double)blockPos.getZ() - zOff, f, i, false);
+			BlockEntityRenderer<BlockEntity> blockEntityRenderer = this.getRenderer(blockEntity);
+			if (blockEntityRenderer != null) {
+				if (blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
+					BlockPos blockPos = blockEntity.getBlockPos();
+					tryRender(
+						blockEntity,
+						() -> blockEntityRenderer.setupAndRender(
+								blockEntity, (double)blockPos.getX() - xOff, (double)blockPos.getY() - yOff, (double)blockPos.getZ() - zOff, f, i, bufferBuilder, renderType, blockPos
+							)
+					);
+				}
+			}
 		}
 	}
 
-	public void render(BlockEntity blockEntity, double d, double e, double f, float g) {
-		this.render(blockEntity, d, e, f, g, -1, false);
-	}
-
 	public void renderItem(BlockEntity blockEntity) {
-		this.render(blockEntity, 0.0, 0.0, 0.0, 0.0F, -1, true);
-	}
-
-	public void render(BlockEntity blockEntity, double d, double e, double f, float g, int i, boolean bl) {
 		BlockEntityRenderer<BlockEntity> blockEntityRenderer = this.getRenderer(blockEntity);
 		if (blockEntityRenderer != null) {
-			try {
-				if (bl || blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
-					blockEntityRenderer.render(blockEntity, d, e, f, g, i);
-				}
-			} catch (Throwable var15) {
-				CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering Block Entity");
-				CrashReportCategory crashReportCategory = crashReport.addCategory("Block Entity Details");
-				blockEntity.fillCrashReportCategory(crashReportCategory);
-				throw new ReportedException(crashReport);
-			}
+			tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0F, -1, RenderType.ENTITY));
+		}
+	}
+
+	private static void tryRender(BlockEntity blockEntity, Runnable runnable) {
+		try {
+			runnable.run();
+		} catch (Throwable var5) {
+			CrashReport crashReport = CrashReport.forThrowable(var5, "Rendering Block Entity");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Block Entity Details");
+			blockEntity.fillCrashReportCategory(crashReportCategory);
+			throw new ReportedException(crashReport);
 		}
 	}
 

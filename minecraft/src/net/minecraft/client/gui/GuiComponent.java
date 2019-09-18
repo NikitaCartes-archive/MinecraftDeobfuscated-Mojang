@@ -1,6 +1,5 @@
 package net.minecraft.client.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -15,7 +14,7 @@ public abstract class GuiComponent {
 	public static final ResourceLocation BACKGROUND_LOCATION = new ResourceLocation("textures/gui/options_background.png");
 	public static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
 	public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
-	protected int blitOffset;
+	private int blitOffset;
 
 	protected void hLine(int i, int j, int k, int l) {
 		if (j < i) {
@@ -58,9 +57,7 @@ public abstract class GuiComponent {
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.color4f(g, h, o, f);
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
 		bufferBuilder.vertex((double)i, (double)l, 0.0).endVertex();
@@ -84,9 +81,7 @@ public abstract class GuiComponent {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.disableAlphaTest();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.shadeModel(7425);
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -147,5 +142,13 @@ public abstract class GuiComponent {
 		bufferBuilder.vertex((double)j, (double)k, (double)m).uv((double)g, (double)h).endVertex();
 		bufferBuilder.vertex((double)i, (double)k, (double)m).uv((double)f, (double)h).endVertex();
 		tesselator.end();
+	}
+
+	public int getBlitOffset() {
+		return this.blitOffset;
+	}
+
+	public void setBlitOffset(int i) {
+		this.blitOffset = i;
 	}
 }

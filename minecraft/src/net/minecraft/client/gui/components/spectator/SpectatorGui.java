@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components.spectator;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
@@ -47,13 +46,13 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 			if (g <= 0.0F) {
 				this.menu.exit();
 			} else {
-				int i = this.minecraft.window.getGuiScaledWidth() / 2;
-				int j = this.blitOffset;
-				this.blitOffset = -90;
-				int k = Mth.floor((float)this.minecraft.window.getGuiScaledHeight() - 22.0F * g);
+				int i = this.minecraft.getWindow().getGuiScaledWidth() / 2;
+				int j = this.getBlitOffset();
+				this.setBlitOffset(-90);
+				int k = Mth.floor((float)this.minecraft.getWindow().getGuiScaledHeight() - 22.0F * g);
 				SpectatorPage spectatorPage = this.menu.getCurrentPage();
 				this.renderPage(g, i, k, spectatorPage);
-				this.blitOffset = j;
+				this.setBlitOffset(j);
 			}
 		}
 	}
@@ -61,9 +60,7 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 	protected void renderPage(float f, int i, int j, SpectatorPage spectatorPage) {
 		RenderSystem.enableRescaleNormal();
 		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-		);
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, f);
 		this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
 		this.blit(i - 91, j, 0, 0, 182, 22);
@@ -74,7 +71,7 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 		Lighting.turnOnGui();
 
 		for (int k = 0; k < 9; k++) {
-			this.renderSlot(k, this.minecraft.window.getGuiScaledWidth() / 2 - 90 + k * 20 + 2, (float)(j + 3), f, spectatorPage.getItem(k));
+			this.renderSlot(k, this.minecraft.getWindow().getGuiScaledWidth() / 2 - 90 + k * 20 + 2, (float)(j + 3), f, spectatorPage.getItem(k));
 		}
 
 		Lighting.turnOff();
@@ -107,13 +104,11 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 				? this.menu.getSelectedCategory().getPrompt().getColoredString()
 				: spectatorMenuItem.getName().getColoredString();
 			if (string != null) {
-				int j = (this.minecraft.window.getGuiScaledWidth() - this.minecraft.font.width(string)) / 2;
-				int k = this.minecraft.window.getGuiScaledHeight() - 35;
+				int j = (this.minecraft.getWindow().getGuiScaledWidth() - this.minecraft.font.width(string)) / 2;
+				int k = this.minecraft.getWindow().getGuiScaledHeight() - 35;
 				RenderSystem.pushMatrix();
 				RenderSystem.enableBlend();
-				RenderSystem.blendFuncSeparate(
-					GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
-				);
+				RenderSystem.defaultBlendFunc();
 				this.minecraft.font.drawShadow(string, (float)j, (float)k, 16777215 + (i << 24));
 				RenderSystem.disableBlend();
 				RenderSystem.popMatrix();

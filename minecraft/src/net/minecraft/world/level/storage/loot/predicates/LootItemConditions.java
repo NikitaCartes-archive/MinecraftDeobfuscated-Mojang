@@ -107,6 +107,8 @@ public class LootItemConditions {
 		register(new DamageSourceCondition.Serializer());
 		register(new LocationCheck.Serializer());
 		register(new WeatherCheck.Serializer());
+		register(new ConditionReference.Serializer());
+		register(new TimeCheck.Serializer());
 	}
 
 	public static class Serializer implements JsonDeserializer<LootItemCondition>, JsonSerializer<LootItemCondition> {

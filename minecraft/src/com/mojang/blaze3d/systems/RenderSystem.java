@@ -1,39 +1,41 @@
 package com.mojang.blaze3d.systems;
 
 import com.google.common.collect.Queues;
+import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
 
 @Environment(EnvType.CLIENT)
 public class RenderSystem {
-	private static final ConcurrentLinkedQueue<Runnable> recordingQueue = Queues.newConcurrentLinkedQueue();
-	private static Thread clientThread;
+	private static final Logger LOGGER = LogManager.getLogger();
+	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
+	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator();
+	private static final float DEFAULTALPHACUTOFF = 0.1F;
+	private static boolean isReplayingQueue;
+	private static Thread gameThread;
 	private static Thread renderThread;
-
-	public static void initClientThread() {
-		if (clientThread == null && renderThread != Thread.currentThread()) {
-			clientThread = Thread.currentThread();
-		} else {
-			throw new IllegalStateException("Could not initialize tick thread");
-		}
-	}
-
-	public static boolean isOnClientThread() {
-		return clientThread == Thread.currentThread();
-	}
+	private static int MAX_SUPPORTED_TEXTURE_SIZE = -1;
+	private static boolean isInInit;
 
 	public static void initRenderThread() {
-		if (renderThread == null && clientThread != Thread.currentThread()) {
+		if (renderThread == null && gameThread != Thread.currentThread()) {
 			renderThread = Thread.currentThread();
 		} else {
 			throw new IllegalStateException("Could not initialize render thread");
@@ -41,102 +43,137 @@ public class RenderSystem {
 	}
 
 	public static boolean isOnRenderThread() {
-		return renderThread == Thread.currentThread();
+		return Thread.currentThread() == renderThread;
+	}
+
+	public static boolean isOnRenderThreadOrInit() {
+		return isInInit || isOnRenderThread();
+	}
+
+	public static void initGameThread(boolean bl) {
+		boolean bl2 = renderThread == Thread.currentThread();
+		if (gameThread == null && renderThread != null && bl2 != bl) {
+			gameThread = Thread.currentThread();
+		} else {
+			throw new IllegalStateException("Could not initialize tick thread");
+		}
+	}
+
+	public static boolean isOnGameThread() {
+		return true;
+	}
+
+	public static boolean isOnGameThreadOrInit() {
+		return isInInit || isOnGameThread();
+	}
+
+	public static void assertThread(Supplier<Boolean> supplier) {
+		if (!(Boolean)supplier.get()) {
+			throw new IllegalStateException("Rendersystem called from wrong thread");
+		}
+	}
+
+	public static boolean isInInitPhase() {
+		return true;
 	}
 
 	public static void pushLightingAttributes() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._pushLightingAttributes();
 	}
 
 	public static void pushTextureAttributes() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._pushTextureAttributes();
 	}
 
 	public static void popAttributes() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._popAttributes();
 	}
 
 	public static void disableAlphaTest() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableAlphaTest();
 	}
 
 	public static void enableAlphaTest() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableAlphaTest();
 	}
 
 	public static void alphaFunc(int i, float f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._alphaFunc(i, f);
 	}
 
 	public static void enableLighting() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableLighting();
 	}
 
 	public static void disableLighting() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableLighting();
 	}
 
-	public static void enableLight(int i) {
-		GlStateManager._enableLight(i);
-	}
-
-	public static void disableLight(int i) {
-		GlStateManager._disableLight(i);
-	}
-
 	public static void enableColorMaterial() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableColorMaterial();
 	}
 
 	public static void disableColorMaterial() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableColorMaterial();
 	}
 
 	public static void colorMaterial(int i, int j) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._colorMaterial(i, j);
 	}
 
-	public static void light(int i, int j, FloatBuffer floatBuffer) {
-		GlStateManager._light(i, j, floatBuffer);
-	}
-
-	public static void lightModel(int i, FloatBuffer floatBuffer) {
-		GlStateManager._lightModel(i, floatBuffer);
-	}
-
 	public static void normal3f(float f, float g, float h) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._normal3f(f, g, h);
 	}
 
 	public static void disableDepthTest() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableDepthTest();
 	}
 
 	public static void enableDepthTest() {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._enableDepthTest();
 	}
 
 	public static void depthFunc(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._depthFunc(i);
 	}
 
 	public static void depthMask(boolean bl) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._depthMask(bl);
 	}
 
 	public static void enableBlend() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableBlend();
 	}
 
 	public static void disableBlend() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableBlend();
 	}
 
 	public static void blendFunc(GlStateManager.SourceFactor sourceFactor, GlStateManager.DestFactor destFactor) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._blendFunc(sourceFactor.value, destFactor.value);
 	}
 
 	public static void blendFunc(int i, int j) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._blendFunc(i, j);
 	}
 
@@ -146,174 +183,186 @@ public class RenderSystem {
 		GlStateManager.SourceFactor sourceFactor2,
 		GlStateManager.DestFactor destFactor2
 	) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._blendFuncSeparate(sourceFactor.value, destFactor.value, sourceFactor2.value, destFactor2.value);
 	}
 
 	public static void blendFuncSeparate(int i, int j, int k, int l) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._blendFuncSeparate(i, j, k, l);
 	}
 
 	public static void blendEquation(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._blendEquation(i);
 	}
 
 	public static void setupSolidRenderingTextureCombine(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._setupSolidRenderingTextureCombine(i);
 	}
 
 	public static void tearDownSolidRenderingTextureCombine() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._tearDownSolidRenderingTextureCombine();
 	}
 
 	public static void enableFog() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableFog();
 	}
 
 	public static void disableFog() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableFog();
 	}
 
 	public static void fogMode(GlStateManager.FogMode fogMode) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogMode(fogMode.value);
 	}
 
 	public static void fogMode(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogMode(i);
 	}
 
 	public static void fogDensity(float f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogDensity(f);
 	}
 
 	public static void fogStart(float f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogStart(f);
 	}
 
 	public static void fogEnd(float f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogEnd(f);
 	}
 
 	public static void fog(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fog(i, floatBuffer);
 	}
 
 	public static void fogi(int i, int j) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._fogi(i, j);
 	}
 
 	public static void enableCull() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableCull();
 	}
 
 	public static void disableCull() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableCull();
 	}
 
 	public static void cullFace(GlStateManager.CullFace cullFace) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._cullFace(cullFace.value);
 	}
 
 	public static void cullFace(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._cullFace(i);
 	}
 
 	public static void polygonMode(int i, int j) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._polygonMode(i, j);
 	}
 
 	public static void enablePolygonOffset() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enablePolygonOffset();
 	}
 
 	public static void disablePolygonOffset() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disablePolygonOffset();
 	}
 
 	public static void enableLineOffset() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableLineOffset();
 	}
 
 	public static void disableLineOffset() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableLineOffset();
 	}
 
 	public static void polygonOffset(float f, float g) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._polygonOffset(f, g);
 	}
 
 	public static void enableColorLogicOp() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableColorLogicOp();
 	}
 
 	public static void disableColorLogicOp() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableColorLogicOp();
 	}
 
 	public static void logicOp(GlStateManager.LogicOp logicOp) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._logicOp(logicOp.value);
 	}
 
 	public static void logicOp(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._logicOp(i);
 	}
 
 	public static void enableTexGen(GlStateManager.TexGen texGen) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableTexGen(texGen);
 	}
 
 	public static void disableTexGen(GlStateManager.TexGen texGen) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableTexGen(texGen);
 	}
 
 	public static void texGenMode(GlStateManager.TexGen texGen, int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._texGenMode(texGen, i);
 	}
 
 	public static void texGenParam(GlStateManager.TexGen texGen, int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._texGenParam(texGen, i, floatBuffer);
 	}
 
 	public static void activeTexture(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._activeTexture(i);
 	}
 
 	public static void enableTexture() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableTexture();
 	}
 
 	public static void disableTexture() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableTexture();
-	}
-
-	public static void texEnv(int i, int j, FloatBuffer floatBuffer) {
-		GlStateManager._texEnv(i, j, floatBuffer);
-	}
-
-	public static void texEnv(int i, int j, int k) {
-		GlStateManager._texEnv(i, j, k);
-	}
-
-	public static void texEnv(int i, int j, float f) {
-		GlStateManager._texEnv(i, j, f);
-	}
-
-	public static void texParameter(int i, int j, float f) {
-		GlStateManager._texParameter(i, j, f);
 	}
 
 	public static void texParameter(int i, int j, int k) {
 		GlStateManager._texParameter(i, j, k);
 	}
 
-	public static int getTexLevelParameter(int i, int j, int k) {
-		return GlStateManager._getTexLevelParameter(i, j, k);
-	}
-
-	public static int genTexture() {
-		return GlStateManager._genTexture();
-	}
-
 	public static void deleteTexture(int i) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._deleteTexture(i);
 	}
 
@@ -322,234 +371,197 @@ public class RenderSystem {
 	}
 
 	public static void texImage2D(int i, int j, int k, int l, int m, int n, int o, int p, @Nullable IntBuffer intBuffer) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._texImage2D(i, j, k, l, m, n, o, p, intBuffer);
 	}
 
 	public static void texSubImage2D(int i, int j, int k, int l, int m, int n, int o, int p, long q) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._texSubImage2D(i, j, k, l, m, n, o, p, q);
 	}
 
 	public static void copyTexSubImage2D(int i, int j, int k, int l, int m, int n, int o, int p) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._copyTexSubImage2D(i, j, k, l, m, n, o, p);
 	}
 
 	public static void getTexImage(int i, int j, int k, int l, long m) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._getTexImage(i, j, k, l, m);
 	}
 
 	public static void enableNormalize() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableNormalize();
 	}
 
 	public static void disableNormalize() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableNormalize();
 	}
 
 	public static void shadeModel(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._shadeModel(i);
 	}
 
 	public static void enableRescaleNormal() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._enableRescaleNormal();
 	}
 
 	public static void disableRescaleNormal() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._disableRescaleNormal();
 	}
 
 	public static void viewport(int i, int j, int k, int l) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._viewport(i, j, k, l);
 	}
 
 	public static void colorMask(boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._colorMask(bl, bl2, bl3, bl4);
 	}
 
 	public static void stencilFunc(int i, int j, int k) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._stencilFunc(i, j, k);
 	}
 
 	public static void stencilMask(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._stencilMask(i);
 	}
 
 	public static void stencilOp(int i, int j, int k) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._stencilOp(i, j, k);
 	}
 
 	public static void clearDepth(double d) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._clearDepth(d);
 	}
 
 	public static void clearColor(float f, float g, float h, float i) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._clearColor(f, g, h, i);
 	}
 
 	public static void clearStencil(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._clearStencil(i);
 	}
 
 	public static void clear(int i, boolean bl) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._clear(i, bl);
 	}
 
 	public static void matrixMode(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._matrixMode(i);
 	}
 
 	public static void loadIdentity() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._loadIdentity();
 	}
 
 	public static void pushMatrix() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._pushMatrix();
 	}
 
 	public static void popMatrix() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._popMatrix();
 	}
 
 	public static void getMatrix(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._getMatrix(i, floatBuffer);
 	}
 
-	public static Matrix4f getMatrix4f(int i) {
-		return GlStateManager._getMatrix4f(i);
+	public static void getMatrix4f(int i, Consumer<Matrix4f> consumer) {
+		assertThread(RenderSystem::isOnGameThread);
+		consumer.accept(GlStateManager._getMatrix4f(i));
 	}
 
 	public static void ortho(double d, double e, double f, double g, double h, double i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._ortho(d, e, f, g, h, i);
 	}
 
 	public static void rotatef(float f, float g, float h, float i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._rotatef(f, g, h, i);
 	}
 
 	public static void rotated(double d, double e, double f, double g) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._rotated(d, e, f, g);
 	}
 
 	public static void scalef(float f, float g, float h) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._scalef(f, g, h);
 	}
 
 	public static void scaled(double d, double e, double f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._scaled(d, e, f);
 	}
 
 	public static void translatef(float f, float g, float h) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._translatef(f, g, h);
 	}
 
 	public static void translated(double d, double e, double f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._translated(d, e, f);
 	}
 
 	public static void multMatrix(FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._multMatrix(floatBuffer);
 	}
 
 	public static void multMatrix(Matrix4f matrix4f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._multMatrix(matrix4f);
 	}
 
 	public static void color4f(float f, float g, float h, float i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._color4f(f, g, h, i);
 	}
 
 	public static void color3f(float f, float g, float h) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._color4f(f, g, h, 1.0F);
 	}
 
-	public static void texCoord2f(float f, float g) {
-		GlStateManager._texCoord2f(f, g);
-	}
-
-	public static void vertex3f(float f, float g, float h) {
-		GlStateManager._vertex3f(f, g, h);
-	}
-
 	public static void clearCurrentColor() {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._clearCurrentColor();
 	}
 
-	public static void normalPointer(int i, int j, int k) {
-		GlStateManager._normalPointer(i, j, k);
-	}
-
-	public static void normalPointer(int i, int j, ByteBuffer byteBuffer) {
-		GlStateManager._normalPointer(i, j, byteBuffer);
-	}
-
-	public static void texCoordPointer(int i, int j, int k, int l) {
-		GlStateManager._texCoordPointer(i, j, k, l);
-	}
-
-	public static void texCoordPointer(int i, int j, int k, ByteBuffer byteBuffer) {
-		GlStateManager._texCoordPointer(i, j, k, byteBuffer);
-	}
-
-	public static void vertexPointer(int i, int j, int k, int l) {
-		GlStateManager._vertexPointer(i, j, k, l);
-	}
-
-	public static void vertexPointer(int i, int j, int k, ByteBuffer byteBuffer) {
-		GlStateManager._vertexPointer(i, j, k, byteBuffer);
-	}
-
-	public static void colorPointer(int i, int j, int k, int l) {
-		GlStateManager._colorPointer(i, j, k, l);
-	}
-
-	public static void colorPointer(int i, int j, int k, ByteBuffer byteBuffer) {
-		GlStateManager._colorPointer(i, j, k, byteBuffer);
-	}
-
-	public static void disableClientState(int i) {
-		GlStateManager._disableClientState(i);
-	}
-
-	public static void enableClientState(int i) {
-		GlStateManager._enableClientState(i);
-	}
-
-	public static void begin(int i) {
-		GlStateManager._begin(i);
-	}
-
-	public static void end() {
-		GlStateManager._end();
-	}
-
 	public static void drawArrays(int i, int j, int k) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._drawArrays(i, j, k);
 	}
 
 	public static void lineWidth(float f) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._lineWidth(f);
 	}
 
-	public static void callList(int i) {
-		GlStateManager._callList(i);
-	}
-
-	public static void deleteLists(int i, int j) {
-		GlStateManager._deleteLists(i, j);
-	}
-
-	public static void newList(int i, int j) {
-		GlStateManager._newList(i, j);
-	}
-
-	public static void endList() {
-		GlStateManager._endList();
-	}
-
-	public static int genLists(int i) {
-		return GlStateManager._genLists(i);
-	}
-
 	public static void pixelStore(int i, int j) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
 		GlStateManager._pixelStore(i, j);
 	}
 
@@ -558,70 +570,359 @@ public class RenderSystem {
 	}
 
 	public static void readPixels(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._readPixels(i, j, k, l, m, n, byteBuffer);
 	}
 
-	public static void readPixels(int i, int j, int k, int l, int m, int n, long o) {
-		GlStateManager._readPixels(i, j, k, l, m, n, o);
+	public static void getError(Consumer<Integer> consumer) {
+		assertThread(RenderSystem::isOnGameThread);
+		consumer.accept(GlStateManager._getError());
 	}
 
-	public static int getError() {
-		return GlStateManager._getError();
-	}
-
-	public static String getString(int i) {
-		return GlStateManager._getString(i);
-	}
-
-	public static void getInteger(int i, IntBuffer intBuffer) {
-		GlStateManager._getInteger(i, intBuffer);
-	}
-
-	public static int getInteger(int i) {
-		return GlStateManager._getInteger(i);
+	public static void getString(int i, Consumer<String> consumer) {
+		assertThread(RenderSystem::isOnGameThread);
+		consumer.accept(GlStateManager._getString(i));
 	}
 
 	public static String getBackendDescription() {
+		assertThread(RenderSystem::isInInitPhase);
 		return String.format("LWJGL version %s", GLX._getLWJGLVersion());
 	}
 
 	public static String getApiDescription() {
+		assertThread(RenderSystem::isInInitPhase);
 		return GLX.getOpenGLVersionString();
 	}
 
 	public static LongSupplier initBackendSystem() {
+		assertThread(RenderSystem::isInInitPhase);
 		return GLX._initGlfw();
 	}
 
 	public static void initRenderer(int i, boolean bl) {
+		assertThread(RenderSystem::isInInitPhase);
 		GLX._init(i, bl);
 	}
 
 	public static void setErrorCallback(GLFWErrorCallbackI gLFWErrorCallbackI) {
+		assertThread(RenderSystem::isInInitPhase);
 		GLX._setGlfwErrorCallback(gLFWErrorCallbackI);
 	}
 
 	public static void pollEvents() {
-		GLX._pollEvents();
+	}
+
+	public static void recordRenderCall(RenderCall renderCall) {
+		recordingQueue.add(renderCall);
 	}
 
 	public static void glClientActiveTexture(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._glClientActiveTexture(i);
 	}
 
 	public static void renderCrosshair(int i) {
+		assertThread(RenderSystem::isOnGameThread);
 		GLX._renderCrosshair(i, true, true, true);
 	}
 
 	public static void setupNvFogDistance() {
+		assertThread(RenderSystem::isOnGameThread);
 		GLX._setupNvFogDistance();
 	}
 
 	public static void glMultiTexCoord2f(int i, float f, float g) {
+		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager._glMultiTexCoord2f(i, f, g);
 	}
 
 	public static String getCapsString() {
+		assertThread(RenderSystem::isOnGameThread);
 		return GLX._getCapsString();
+	}
+
+	public static void setupDefaultState(int i, int j, int k, int l) {
+		assertThread(RenderSystem::isInInitPhase);
+		GlStateManager._enableTexture();
+		GlStateManager._shadeModel(7425);
+		GlStateManager._clearDepth(1.0);
+		GlStateManager._enableDepthTest();
+		GlStateManager._depthFunc(515);
+		GlStateManager._enableAlphaTest();
+		GlStateManager._alphaFunc(516, 0.1F);
+		GlStateManager._cullFace(GlStateManager.CullFace.BACK.value);
+		GlStateManager._matrixMode(5889);
+		GlStateManager._loadIdentity();
+		GlStateManager._matrixMode(5888);
+		GlStateManager._viewport(i, j, k, l);
+	}
+
+	public static int maxSupportedTextureSize() {
+		assertThread(RenderSystem::isInInitPhase);
+		if (MAX_SUPPORTED_TEXTURE_SIZE == -1) {
+			for (int i = 16384; i > 0; i >>= 1) {
+				GlStateManager._texImage2D(32868, 0, 6408, i, i, 0, 6408, 5121, null);
+				int j = GlStateManager._getTexLevelParameter(32868, 0, 4096);
+				if (j != 0) {
+					MAX_SUPPORTED_TEXTURE_SIZE = i;
+					return i;
+				}
+			}
+
+			MAX_SUPPORTED_TEXTURE_SIZE = Mth.clamp(GlStateManager._getInteger(3379), 1024, 16384);
+			LOGGER.info("Failed to determine maximum texture size by probing, trying GL_MAX_TEXTURE_SIZE = {}", MAX_SUPPORTED_TEXTURE_SIZE);
+		}
+
+		return MAX_SUPPORTED_TEXTURE_SIZE;
+	}
+
+	public static void flipFrame() {
+		GLFW.glfwPollEvents();
+		isReplayingQueue = true;
+
+		while (!recordingQueue.isEmpty()) {
+			RenderCall renderCall = (RenderCall)recordingQueue.poll();
+			renderCall.execute();
+		}
+
+		isReplayingQueue = false;
+		Tesselator.getInstance().getBuilder().clear();
+	}
+
+	public static void glBindFramebuffer(int i, int j) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glBindFramebuffer(i, j);
+	}
+
+	public static void glDeleteRenderbuffers(int i) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glDeleteRenderbuffers(i);
+	}
+
+	public static void glDeleteFramebuffers(int i) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glDeleteFramebuffers(i);
+	}
+
+	public static void glFramebufferTexture2D(int i, int j, int k, int l, int m) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glFramebufferTexture2D(i, j, k, l, m);
+	}
+
+	public static void glBindRenderbuffer(int i, int j) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glBindRenderbuffer(i, j);
+	}
+
+	public static void glRenderbufferStorage(int i, int j, int k, int l) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glRenderbufferStorage(i, j, k, l);
+	}
+
+	public static void glFramebufferRenderbuffer(int i, int j, int k, int l) {
+		assertThread(RenderSystem::isOnGameThreadOrInit);
+		GlStateManager._glFramebufferRenderbuffer(i, j, k, l);
+	}
+
+	public static void glBindBuffer(int i, Supplier<Integer> supplier) {
+		GlStateManager._glBindBuffer(i, (Integer)supplier.get());
+	}
+
+	public static void glBufferData(int i, ByteBuffer byteBuffer, int j) {
+		assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GlStateManager._glBufferData(i, byteBuffer, j);
+	}
+
+	public static void glDeleteBuffers(int i) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glDeleteBuffers(i);
+	}
+
+	public static void glUniform1i(int i, int j) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform1i(i, j);
+	}
+
+	public static void glUniform1(int i, IntBuffer intBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform1(i, intBuffer);
+	}
+
+	public static void glUniform2(int i, IntBuffer intBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform2(i, intBuffer);
+	}
+
+	public static void glUniform3(int i, IntBuffer intBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform3(i, intBuffer);
+	}
+
+	public static void glUniform4(int i, IntBuffer intBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform4(i, intBuffer);
+	}
+
+	public static void glUniform1(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform1(i, floatBuffer);
+	}
+
+	public static void glUniform2(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform2(i, floatBuffer);
+	}
+
+	public static void glUniform3(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform3(i, floatBuffer);
+	}
+
+	public static void glUniform4(int i, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniform4(i, floatBuffer);
+	}
+
+	public static void glUniformMatrix2(int i, boolean bl, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniformMatrix2(i, bl, floatBuffer);
+	}
+
+	public static void glUniformMatrix3(int i, boolean bl, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniformMatrix3(i, bl, floatBuffer);
+	}
+
+	public static void glUniformMatrix4(int i, boolean bl, FloatBuffer floatBuffer) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
+	}
+
+	public static void glUseProgram(int i) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._glUseProgram(i);
+	}
+
+	public static void setupOverlayColor(int i, boolean bl) {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.setupOverlayColor(i, bl);
+	}
+
+	public static void teardownOverlayColor() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.teardownOverlayColor();
+	}
+
+	public static void enableUsualDiffuseLighting() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.enableUsualDiffuseLighting();
+	}
+
+	public static void enableGuiDiffuseLighting() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.enableGuiDiffuseLighting();
+	}
+
+	public static void disableDiffuseLighting() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.disableDiffuseLighting();
+	}
+
+	public static void setProfile(RenderSystem.Profile profile) {
+		profile.apply();
+	}
+
+	public static void unsetProfile(RenderSystem.Profile profile) {
+		profile.clean();
+	}
+
+	public static void beginInitialization() {
+		isInInit = true;
+	}
+
+	public static void finishInitialization() {
+		isInInit = false;
+		if (!recordingQueue.isEmpty()) {
+			flipFrame();
+		}
+
+		if (!recordingQueue.isEmpty()) {
+			throw new IllegalStateException("Recorded to render queue during initialization");
+		}
+	}
+
+	public static void glGenBuffers(Consumer<Integer> consumer) {
+		if (!isOnRenderThread()) {
+			recordRenderCall(() -> consumer.accept(GlStateManager._glGenBuffers()));
+		} else {
+			consumer.accept(GlStateManager._glGenBuffers());
+		}
+	}
+
+	public static Tesselator renderThreadTesselator() {
+		assertThread(RenderSystem::isOnRenderThread);
+		return RENDER_THREAD_TESSELATOR;
+	}
+
+	public static void defaultBlendFunc() {
+		blendFuncSeparate(
+			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
+		);
+	}
+
+	public static void defaultAlphaFunc() {
+		alphaFunc(516, 0.1F);
+	}
+
+	private static void setupDefaultGlState() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager._setupDefaultGlState();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public interface Profile {
+		RenderSystem.Profile DEFAULT = new RenderSystem.Profile() {
+			@Override
+			public void apply() {
+				RenderSystem.setupDefaultGlState();
+			}
+
+			@Override
+			public void clean() {
+			}
+		};
+		RenderSystem.Profile PLAYER_SKIN = new RenderSystem.Profile() {
+			@Override
+			public void apply() {
+				RenderSystem.enableBlend();
+				RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+			}
+
+			@Override
+			public void clean() {
+				RenderSystem.disableBlend();
+			}
+		};
+		RenderSystem.Profile TRANSPARENT_MODEL = new RenderSystem.Profile() {
+			@Override
+			public void apply() {
+				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.15F);
+				RenderSystem.depthMask(false);
+				RenderSystem.enableBlend();
+				RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+				RenderSystem.alphaFunc(516, 0.003921569F);
+			}
+
+			@Override
+			public void clean() {
+				RenderSystem.disableBlend();
+				RenderSystem.defaultAlphaFunc();
+				RenderSystem.depthMask(true);
+			}
+		};
+
+		void apply();
+
+		void clean();
 	}
 }

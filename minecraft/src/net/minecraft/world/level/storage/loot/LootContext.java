@@ -11,21 +11,26 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootContext {
 	private final Random random;
 	private final float luck;
 	private final ServerLevel level;
-	private final LootTables lootTables;
+	private final Function<ResourceLocation, LootTable> lootTables;
 	private final Set<LootTable> visitedTables = Sets.<LootTable>newLinkedHashSet();
+	private final Function<ResourceLocation, LootItemCondition> conditions;
+	private final Set<LootItemCondition> visitedConditions = Sets.<LootItemCondition>newLinkedHashSet();
 	private final Map<LootContextParam<?>, Object> params;
 	private final Map<ResourceLocation, LootContext.DynamicDrop> dynamicDrops;
 
@@ -33,14 +38,16 @@ public class LootContext {
 		Random random,
 		float f,
 		ServerLevel serverLevel,
-		LootTables lootTables,
+		Function<ResourceLocation, LootTable> function,
+		Function<ResourceLocation, LootItemCondition> function2,
 		Map<LootContextParam<?>, Object> map,
 		Map<ResourceLocation, LootContext.DynamicDrop> map2
 	) {
 		this.random = random;
 		this.luck = f;
 		this.level = serverLevel;
-		this.lootTables = lootTables;
+		this.lootTables = function;
+		this.conditions = function2;
 		this.params = ImmutableMap.copyOf(map);
 		this.dynamicDrops = ImmutableMap.copyOf(map2);
 	}
@@ -69,8 +76,20 @@ public class LootContext {
 		this.visitedTables.remove(lootTable);
 	}
 
-	public LootTables getLootTables() {
-		return this.lootTables;
+	public boolean addVisitedCondition(LootItemCondition lootItemCondition) {
+		return this.visitedConditions.add(lootItemCondition);
+	}
+
+	public void removeVisitedCondition(LootItemCondition lootItemCondition) {
+		this.visitedConditions.remove(lootItemCondition);
+	}
+
+	public LootTable getLootTable(ResourceLocation resourceLocation) {
+		return (LootTable)this.lootTables.apply(resourceLocation);
+	}
+
+	public LootItemCondition getCondition(ResourceLocation resourceLocation) {
+		return (LootItemCondition)this.conditions.apply(resourceLocation);
 	}
 
 	public Random getRandom() {
@@ -180,7 +199,10 @@ public class LootContext {
 						random = new Random();
 					}
 
-					return new LootContext(random, this.luck, this.level, this.level.getServer().getLootTables(), this.params, this.dynamicDrops);
+					MinecraftServer minecraftServer = this.level.getServer();
+					return new LootContext(
+						random, this.luck, this.level, minecraftServer.getLootTables()::get, minecraftServer.getPredicateManager()::get, this.params, this.dynamicDrops
+					);
 				}
 			}
 		}

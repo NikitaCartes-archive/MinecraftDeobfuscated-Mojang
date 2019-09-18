@@ -1,8 +1,9 @@
 package com.mojang.blaze3d.vertex;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -14,18 +15,37 @@ public class VertexBuffer {
 
 	public VertexBuffer(VertexFormat vertexFormat) {
 		this.format = vertexFormat;
-		this.id = GlStateManager.glGenBuffers();
+		RenderSystem.glGenBuffers(integer -> this.id = integer);
 	}
 
 	public void bind() {
-		GlStateManager.glBindBuffer(34962, this.id);
+		RenderSystem.glBindBuffer(34962, () -> this.id);
 	}
 
-	public void upload(ByteBuffer byteBuffer) {
+	public void upload(BufferBuilder bufferBuilder) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> this.upload_(bufferBuilder));
+		} else {
+			this.upload_(bufferBuilder);
+		}
+	}
+
+	public CompletableFuture<Void> uploadLater(BufferBuilder bufferBuilder) {
+		if (!RenderSystem.isOnRenderThread()) {
+			return CompletableFuture.runAsync(() -> this.upload_(bufferBuilder), runnable -> RenderSystem.recordRenderCall(runnable::run));
+		} else {
+			this.upload_(bufferBuilder);
+			return CompletableFuture.completedFuture(null);
+		}
+	}
+
+	private void upload_(BufferBuilder bufferBuilder) {
+		Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
+		ByteBuffer byteBuffer = pair.getSecond();
+		this.vertexCount = byteBuffer.remaining() / this.format.getVertexSize();
 		this.bind();
-		GlStateManager.glBufferData(34962, byteBuffer, 35044);
+		RenderSystem.glBufferData(34962, byteBuffer, 35044);
 		unbind();
-		this.vertexCount = byteBuffer.limit() / this.format.getVertexSize();
 	}
 
 	public void draw(int i) {
@@ -33,12 +53,12 @@ public class VertexBuffer {
 	}
 
 	public static void unbind() {
-		GlStateManager.glBindBuffer(34962, 0);
+		RenderSystem.glBindBuffer(34962, () -> 0);
 	}
 
 	public void delete() {
 		if (this.id >= 0) {
-			GlStateManager.glDeleteBuffers(this.id);
+			RenderSystem.glDeleteBuffers(this.id);
 			this.id = -1;
 		}
 	}

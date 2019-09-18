@@ -79,7 +79,7 @@ public class SinglePoolElement extends StructurePoolElement {
 	) {
 		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
-			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW_BLOCK, true
+			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
 		);
 		Collections.shuffle(list, random);
 		return list;

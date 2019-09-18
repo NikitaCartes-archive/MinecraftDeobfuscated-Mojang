@@ -1,9 +1,6 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.base.MoreObjects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.IntArrayTag;
@@ -147,11 +144,6 @@ public class BoundingBox {
 
 	public int getZSpan() {
 		return this.z1 - this.z0 + 1;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public Vec3i getCenter() {
-		return new BlockPos(this.x0 + (this.x1 - this.x0 + 1) / 2, this.y0 + (this.y1 - this.y0 + 1) / 2, this.z0 + (this.z1 - this.z0 + 1) / 2);
 	}
 
 	public String toString() {

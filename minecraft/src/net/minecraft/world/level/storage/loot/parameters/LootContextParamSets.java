@@ -13,6 +13,12 @@ public class LootContextParamSets {
 	public static final LootContextParamSet CHEST = register(
 		"chest", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY)
 	);
+	public static final LootContextParamSet COMMAND = register(
+		"command", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY)
+	);
+	public static final LootContextParamSet SELECTOR = register(
+		"selector", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY)
+	);
 	public static final LootContextParamSet FISHING = register(
 		"fishing", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.TOOL)
 	);

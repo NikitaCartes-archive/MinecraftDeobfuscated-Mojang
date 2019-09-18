@@ -195,7 +195,7 @@ public class ChatComponent extends GuiComponent {
 		} else {
 			double f = this.getScale();
 			double g = d - 2.0;
-			double h = (double)this.minecraft.window.getGuiScaledHeight() - e - 40.0;
+			double h = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
 			g = (double)Mth.floor(g / f);
 			h = (double)Mth.floor(h / f);
 			if (!(g < 0.0) && !(h < 0.0)) {

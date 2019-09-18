@@ -1,6 +1,7 @@
 package com.mojang.blaze3d.shaders;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -44,7 +45,7 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 	}
 
 	public static void uploadInteger(int i, int j) {
-		GlStateManager._glUniform1i(i, j);
+		RenderSystem.glUniform1i(i, j);
 	}
 
 	public static int glGetAttribLocation(int i, CharSequence charSequence) {
@@ -216,16 +217,16 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 		this.floatValues.clear();
 		switch (this.type) {
 			case 0:
-				GlStateManager.glUniform1(this.location, this.intValues);
+				RenderSystem.glUniform1(this.location, this.intValues);
 				break;
 			case 1:
-				GlStateManager.glUniform2(this.location, this.intValues);
+				RenderSystem.glUniform2(this.location, this.intValues);
 				break;
 			case 2:
-				GlStateManager.glUniform3(this.location, this.intValues);
+				RenderSystem.glUniform3(this.location, this.intValues);
 				break;
 			case 3:
-				GlStateManager.glUniform4(this.location, this.intValues);
+				RenderSystem.glUniform4(this.location, this.intValues);
 				break;
 			default:
 				LOGGER.warn("Uniform.upload called, but count value ({}) is  not in the range of 1 to 4. Ignoring.", this.count);
@@ -236,16 +237,16 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 		this.floatValues.clear();
 		switch (this.type) {
 			case 4:
-				GlStateManager.glUniform1(this.location, this.floatValues);
+				RenderSystem.glUniform1(this.location, this.floatValues);
 				break;
 			case 5:
-				GlStateManager.glUniform2(this.location, this.floatValues);
+				RenderSystem.glUniform2(this.location, this.floatValues);
 				break;
 			case 6:
-				GlStateManager.glUniform3(this.location, this.floatValues);
+				RenderSystem.glUniform3(this.location, this.floatValues);
 				break;
 			case 7:
-				GlStateManager.glUniform4(this.location, this.floatValues);
+				RenderSystem.glUniform4(this.location, this.floatValues);
 				break;
 			default:
 				LOGGER.warn("Uniform.upload called, but count value ({}) is not in the range of 1 to 4. Ignoring.", this.count);
@@ -256,13 +257,13 @@ public class Uniform extends AbstractUniform implements AutoCloseable {
 		this.floatValues.clear();
 		switch (this.type) {
 			case 8:
-				GlStateManager.glUniformMatrix2(this.location, false, this.floatValues);
+				RenderSystem.glUniformMatrix2(this.location, false, this.floatValues);
 				break;
 			case 9:
-				GlStateManager.glUniformMatrix3(this.location, false, this.floatValues);
+				RenderSystem.glUniformMatrix3(this.location, false, this.floatValues);
 				break;
 			case 10:
-				GlStateManager.glUniformMatrix4(this.location, false, this.floatValues);
+				RenderSystem.glUniformMatrix4(this.location, false, this.floatValues);
 		}
 	}
 }

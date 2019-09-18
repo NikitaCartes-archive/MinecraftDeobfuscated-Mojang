@@ -30,6 +30,14 @@ public class Screenshot {
 	}
 
 	public static void grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
+		if (!RenderSystem.isOnRenderThread()) {
+			RenderSystem.recordRenderCall(() -> _grab(file, string, i, j, renderTarget, consumer));
+		} else {
+			_grab(file, string, i, j, renderTarget, consumer);
+		}
+	}
+
+	private static void _grab(File file, @Nullable String string, int i, int j, RenderTarget renderTarget, Consumer<Component> consumer) {
 		NativeImage nativeImage = takeScreenshot(i, j, renderTarget);
 		File file2 = new File(file, "screenshots");
 		file2.mkdir();

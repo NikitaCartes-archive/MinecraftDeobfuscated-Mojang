@@ -8,7 +8,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.TickPriority;
@@ -199,14 +198,4 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	protected abstract int getDelay(BlockState blockState);
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.CUTOUT;
-	}
-
-	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return true;
-	}
 }

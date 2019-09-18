@@ -18,19 +18,19 @@ public class SnowGolemModel<T extends Entity> extends EntityModel<T> {
 		float f = 4.0F;
 		float g = 0.0F;
 		this.head = new ModelPart(this, 0, 0).setTexSize(64, 64);
-		this.head.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, -0.5F);
+		this.head.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, -0.5F);
 		this.head.setPos(0.0F, 4.0F, 0.0F);
 		this.arm1 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-		this.arm1.addBox(-1.0F, 0.0F, -1.0F, 12, 2, 2, -0.5F);
+		this.arm1.addBox(-1.0F, 0.0F, -1.0F, 12.0F, 2.0F, 2.0F, -0.5F);
 		this.arm1.setPos(0.0F, 6.0F, 0.0F);
 		this.arm2 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-		this.arm2.addBox(-1.0F, 0.0F, -1.0F, 12, 2, 2, -0.5F);
+		this.arm2.addBox(-1.0F, 0.0F, -1.0F, 12.0F, 2.0F, 2.0F, -0.5F);
 		this.arm2.setPos(0.0F, 6.0F, 0.0F);
 		this.piece1 = new ModelPart(this, 0, 16).setTexSize(64, 64);
-		this.piece1.addBox(-5.0F, -10.0F, -5.0F, 10, 10, 10, -0.5F);
+		this.piece1.addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F, -0.5F);
 		this.piece1.setPos(0.0F, 13.0F, 0.0F);
 		this.piece2 = new ModelPart(this, 0, 36).setTexSize(64, 64);
-		this.piece2.addBox(-6.0F, -12.0F, -6.0F, 12, 12, 12, -0.5F);
+		this.piece2.addBox(-6.0F, -12.0F, -6.0F, 12.0F, 12.0F, 12.0F, -0.5F);
 		this.piece2.setPos(0.0F, 24.0F, 0.0F);
 	}
 

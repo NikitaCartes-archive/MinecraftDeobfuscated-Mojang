@@ -1,8 +1,10 @@
 package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -35,18 +37,14 @@ public class LayeredTexture extends AbstractTexture {
 			Resource resource = resourceManager.getResource(new ResourceLocation(string));
 			Throwable var5 = null;
 
-			try (NativeImage nativeImage = NativeImage.read(resource.getInputStream())) {
-				while (true) {
-					if (!iterator.hasNext()) {
-						TextureUtil.prepareImage(this.getId(), nativeImage.getWidth(), nativeImage.getHeight());
-						nativeImage.upload(0, 0, 0, false);
-						break;
-					}
+			try {
+				NativeImage nativeImage = NativeImage.read(resource.getInputStream());
 
+				while (iterator.hasNext()) {
 					String string2 = (String)iterator.next();
 					if (string2 != null) {
 						Resource resource2 = resourceManager.getResource(new ResourceLocation(string2));
-						Throwable var10 = null;
+						Throwable var9 = null;
 
 						try (NativeImage nativeImage2 = NativeImage.read(resource2.getInputStream())) {
 							for (int i = 0; i < nativeImage2.getHeight(); i++) {
@@ -54,16 +52,16 @@ public class LayeredTexture extends AbstractTexture {
 									nativeImage.blendPixel(j, i, nativeImage2.getPixelRGBA(j, i));
 								}
 							}
-						} catch (Throwable var91) {
-							var10 = var91;
-							throw var91;
+						} catch (Throwable var61) {
+							var9 = var61;
+							throw var61;
 						} finally {
 							if (resource2 != null) {
-								if (var10 != null) {
+								if (var9 != null) {
 									try {
 										resource2.close();
-									} catch (Throwable var87) {
-										var10.addSuppressed(var87);
+									} catch (Throwable var57) {
+										var9.addSuppressed(var57);
 									}
 								} else {
 									resource2.close();
@@ -72,24 +70,35 @@ public class LayeredTexture extends AbstractTexture {
 						}
 					}
 				}
-			} catch (Throwable var95) {
-				var5 = var95;
-				throw var95;
+
+				if (!RenderSystem.isOnRenderThreadOrInit()) {
+					RenderSystem.recordRenderCall(() -> this.doLoad(nativeImage));
+				} else {
+					this.doLoad(nativeImage);
+				}
+			} catch (Throwable var63) {
+				var5 = var63;
+				throw var63;
 			} finally {
 				if (resource != null) {
 					if (var5 != null) {
 						try {
 							resource.close();
-						} catch (Throwable var85) {
-							var5.addSuppressed(var85);
+						} catch (Throwable var56) {
+							var5.addSuppressed(var56);
 						}
 					} else {
 						resource.close();
 					}
 				}
 			}
-		} catch (IOException var97) {
-			LOGGER.error("Couldn't load layered image", (Throwable)var97);
+		} catch (IOException var65) {
+			LOGGER.error("Couldn't load layered image", (Throwable)var65);
 		}
+	}
+
+	private void doLoad(NativeImage nativeImage) {
+		TextureUtil.prepareImage(this.getId(), nativeImage.getWidth(), nativeImage.getHeight());
+		nativeImage.upload(0, 0, 0, true);
 	}
 }

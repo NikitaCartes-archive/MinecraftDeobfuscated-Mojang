@@ -489,11 +489,6 @@ public class ServerChunkCache extends ChunkSource {
 		this.spawnFriendlies = bl2;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public String getChunkDebugData(ChunkPos chunkPos) {
-		return this.chunkMap.getChunkDebugData(chunkPos);
-	}
-
 	public DimensionDataStorage getDataStorage() {
 		return this.dataStorage;
 	}

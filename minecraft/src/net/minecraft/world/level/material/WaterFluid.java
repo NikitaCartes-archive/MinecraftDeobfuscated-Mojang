@@ -14,7 +14,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -34,12 +33,6 @@ public abstract class WaterFluid extends FlowingFluid {
 	@Override
 	public Fluid getSource() {
 		return Fluids.WATER;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.TRANSLUCENT;
 	}
 
 	@Override

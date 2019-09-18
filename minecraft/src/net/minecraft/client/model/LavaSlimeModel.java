@@ -24,11 +24,11 @@ public class LavaSlimeModel<T extends Slime> extends EntityModel<T> {
 			}
 
 			this.bodyCubes[i] = new ModelPart(this, j, k);
-			this.bodyCubes[i].addBox(-4.0F, (float)(16 + i), -4.0F, 8, 1, 8);
+			this.bodyCubes[i].addBox(-4.0F, (float)(16 + i), -4.0F, 8.0F, 1.0F, 8.0F);
 		}
 
 		this.insideCube = new ModelPart(this, 0, 16);
-		this.insideCube.addBox(-2.0F, 18.0F, -2.0F, 4, 4, 4);
+		this.insideCube.addBox(-2.0F, 18.0F, -2.0F, 4.0F, 4.0F, 4.0F);
 	}
 
 	public void prepareMobModel(T slime, float f, float g, float h) {

@@ -14,10 +14,10 @@ public class ElytraModel<T extends LivingEntity> extends EntityModel<T> {
 	private final ModelPart leftWing = new ModelPart(this, 22, 0);
 
 	public ElytraModel() {
-		this.leftWing.addBox(-10.0F, 0.0F, 0.0F, 10, 20, 2, 1.0F);
+		this.leftWing.addBox(-10.0F, 0.0F, 0.0F, 10.0F, 20.0F, 2.0F, 1.0F);
 		this.rightWing = new ModelPart(this, 22, 0);
 		this.rightWing.mirror = true;
-		this.rightWing.addBox(0.0F, 0.0F, 0.0F, 10, 20, 2, 1.0F);
+		this.rightWing.addBox(0.0F, 0.0F, 0.0F, 10.0F, 20.0F, 2.0F, 1.0F);
 	}
 
 	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {

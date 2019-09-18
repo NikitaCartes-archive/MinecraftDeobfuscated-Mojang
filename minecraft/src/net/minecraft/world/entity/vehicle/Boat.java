@@ -371,7 +371,11 @@ public class Boat extends Entity {
 	}
 
 	private void tickLerp() {
-		if (this.lerpSteps > 0 && !this.isControlledByLocalInstance()) {
+		if (this.isControlledByLocalInstance()) {
+			this.lerpSteps = 0;
+		}
+
+		if (this.lerpSteps > 0) {
 			double d = this.x + (this.lerpX - this.x) / (double)this.lerpSteps;
 			double e = this.y + (this.lerpY - this.y) / (double)this.lerpSteps;
 			double f = this.z + (this.lerpZ - this.z) / (double)this.lerpSteps;

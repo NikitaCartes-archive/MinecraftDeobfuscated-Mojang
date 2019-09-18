@@ -8,10 +8,9 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -94,8 +93,7 @@ public abstract class AbstractArmorLayer<T extends LivingEntity, M extends Human
 	) {
 		float m = (float)entity.tickCount + h;
 		consumer.accept(ENCHANT_GLINT_LOCATION);
-		GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
-		gameRenderer.resetFogColor(true);
+		FogRenderer.resetFogColor(true);
 		RenderSystem.enableBlend();
 		RenderSystem.depthFunc(514);
 		RenderSystem.depthMask(false);
@@ -125,7 +123,7 @@ public abstract class AbstractArmorLayer<T extends LivingEntity, M extends Human
 		RenderSystem.depthMask(true);
 		RenderSystem.depthFunc(515);
 		RenderSystem.disableBlend();
-		gameRenderer.resetFogColor(false);
+		FogRenderer.resetFogColor(false);
 	}
 
 	private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl) {

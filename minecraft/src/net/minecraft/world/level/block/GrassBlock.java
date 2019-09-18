@@ -5,7 +5,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -67,15 +66,5 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 				}
 			}
 		}
-	}
-
-	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return true;
-	}
-
-	@Override
-	public BlockLayer getRenderLayer() {
-		return BlockLayer.CUTOUT_MIPPED;
 	}
 }

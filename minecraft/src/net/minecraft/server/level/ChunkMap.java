@@ -17,6 +17,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,8 +35,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -198,29 +197,6 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				? ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1
 				: Math.min(chunkHolder.getQueueLevel(), ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1);
 		};
-	}
-
-	@Environment(EnvType.CLIENT)
-	public String getChunkDebugData(ChunkPos chunkPos) {
-		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
-		if (chunkHolder == null) {
-			return "null";
-		} else {
-			String string = chunkHolder.getTicketLevel() + "\n";
-			ChunkStatus chunkStatus = chunkHolder.getLastAvailableStatus();
-			ChunkAccess chunkAccess = chunkHolder.getLastAvailable();
-			if (chunkStatus != null) {
-				string = string + "St: §" + chunkStatus.getIndex() + chunkStatus + '§' + "r\n";
-			}
-
-			if (chunkAccess != null) {
-				string = string + "Ch: §" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + '§' + "r\n";
-			}
-
-			ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
-			string = string + "§" + fullChunkStatus.ordinal() + fullChunkStatus;
-			return string + '§' + "r";
-		}
 	}
 
 	private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(
@@ -972,8 +948,10 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			trackedEntity.serverEntity.sendChanges();
 		}
 
-		for (ChunkMap.TrackedEntity trackedEntity : this.entityMap.values()) {
-			trackedEntity.updatePlayers(list);
+		if (!list.isEmpty()) {
+			for (ChunkMap.TrackedEntity trackedEntity : this.entityMap.values()) {
+				trackedEntity.updatePlayers(list);
+			}
 		}
 	}
 
@@ -1110,7 +1088,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		public void updatePlayer(ServerPlayer serverPlayer) {
 			if (serverPlayer != this.entity) {
 				Vec3 vec3 = new Vec3(serverPlayer.x, serverPlayer.y, serverPlayer.z).subtract(this.serverEntity.sentPos());
-				int i = Math.min(this.range, (ChunkMap.this.viewDistance - 1) * 16);
+				int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
 				boolean bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
 				if (bl) {
 					boolean bl2 = this.entity.forcedLoading;
@@ -1129,6 +1107,20 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 					this.serverEntity.removePairing(serverPlayer);
 				}
 			}
+		}
+
+		private int getEffectiveRange() {
+			Collection<Entity> collection = this.entity.getIndirectPassengers();
+			int i = this.range;
+
+			for (Entity entity : collection) {
+				int j = entity.getType().chunkRange() * 16;
+				if (j > i) {
+					i = j;
+				}
+			}
+
+			return i;
 		}
 
 		public void updatePlayers(List<ServerPlayer> list) {

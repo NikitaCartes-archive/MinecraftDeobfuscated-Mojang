@@ -16,16 +16,16 @@ public class SlimeModel<T extends Entity> extends EntityModel<T> {
 	public SlimeModel(int i) {
 		if (i > 0) {
 			this.cube = new ModelPart(this, 0, i);
-			this.cube.addBox(-3.0F, 17.0F, -3.0F, 6, 6, 6);
+			this.cube.addBox(-3.0F, 17.0F, -3.0F, 6.0F, 6.0F, 6.0F);
 			this.eye0 = new ModelPart(this, 32, 0);
-			this.eye0.addBox(-3.25F, 18.0F, -3.5F, 2, 2, 2);
+			this.eye0.addBox(-3.25F, 18.0F, -3.5F, 2.0F, 2.0F, 2.0F);
 			this.eye1 = new ModelPart(this, 32, 4);
-			this.eye1.addBox(1.25F, 18.0F, -3.5F, 2, 2, 2);
+			this.eye1.addBox(1.25F, 18.0F, -3.5F, 2.0F, 2.0F, 2.0F);
 			this.mouth = new ModelPart(this, 32, 8);
-			this.mouth.addBox(0.0F, 21.0F, -3.5F, 1, 1, 1);
+			this.mouth.addBox(0.0F, 21.0F, -3.5F, 1.0F, 1.0F, 1.0F);
 		} else {
 			this.cube = new ModelPart(this, 0, i);
-			this.cube.addBox(-4.0F, 16.0F, -4.0F, 8, 8, 8);
+			this.cube.addBox(-4.0F, 16.0F, -4.0F, 8.0F, 8.0F, 8.0F);
 			this.eye0 = null;
 			this.eye1 = null;
 			this.mouth = null;

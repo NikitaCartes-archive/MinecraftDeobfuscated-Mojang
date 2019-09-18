@@ -51,11 +51,6 @@ public class CauldronBlock extends Block {
 	}
 
 	@Override
-	public boolean canOcclude(BlockState blockState) {
-		return false;
-	}
-
-	@Override
 	public VoxelShape getInteractionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return INSIDE;
 	}

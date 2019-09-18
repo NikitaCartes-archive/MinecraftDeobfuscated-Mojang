@@ -52,6 +52,7 @@ public class Horse extends AbstractHorse {
 		"textures/entity/horse/horse_markings_blackdots.png"
 	};
 	private static final String[] MARKING_HASHES = new String[]{"", "wo_", "wmo", "wdo", "bdo"};
+	@Nullable
 	private String layerTextureHashName;
 	private final String[] layerTextureLayers = new String[2];
 

@@ -21,6 +21,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -30,6 +31,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.Tag;
@@ -39,6 +41,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
@@ -474,6 +480,30 @@ public class EntitySelectorOptions {
 
 				entitySelectorParser.setHasAdvancements(true);
 			}, entitySelectorParser -> !entitySelectorParser.hasAdvancements(), new TranslatableComponent("argument.entity.options.advancements.description"));
+			register(
+				"predicate",
+				entitySelectorParser -> {
+					boolean bl = entitySelectorParser.shouldInvertValue();
+					ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
+					entitySelectorParser.addPredicate(
+						entity -> {
+							if (!(entity.level instanceof ServerLevel)) {
+								return false;
+							} else {
+								ServerLevel serverLevel = (ServerLevel)entity.level;
+								LootItemCondition lootItemCondition = serverLevel.getServer().getPredicateManager().get(resourceLocation, LootItemCondition.FALSE);
+								LootContext lootContext = new LootContext.Builder(serverLevel)
+									.withParameter(LootContextParams.THIS_ENTITY, entity)
+									.withParameter(LootContextParams.BLOCK_POS, new BlockPos(entity))
+									.create(LootContextParamSets.SELECTOR);
+								return bl ^ lootItemCondition.test(lootContext);
+							}
+						}
+					);
+				},
+				entitySelectorParser -> true,
+				new TranslatableComponent("argument.entity.options.predicate.description")
+			);
 		}
 	}
 

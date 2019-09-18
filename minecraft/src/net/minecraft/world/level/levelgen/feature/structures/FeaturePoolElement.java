@@ -60,9 +60,7 @@ public class FeaturePoolElement extends StructurePoolElement {
 	) {
 		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
 		list.add(
-			new StructureTemplate.StructureBlockInfo(
-				blockPos, Blocks.JIGSAW_BLOCK.defaultBlockState().setValue(JigsawBlock.FACING, Direction.DOWN), this.defaultJigsawNBT
-			)
+			new StructureTemplate.StructureBlockInfo(blockPos, Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.FACING, Direction.DOWN), this.defaultJigsawNBT)
 		);
 		return list;
 	}
