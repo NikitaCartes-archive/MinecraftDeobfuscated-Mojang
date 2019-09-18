@@ -121,16 +121,6 @@ public class Path {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public Node[] getOpenSet() {
-        return this.openSet;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Node[] getClosedSet() {
-        return this.closedSet;
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public static Path createFromStream(FriendlyByteBuf friendlyByteBuf) {
         boolean bl = friendlyByteBuf.readBoolean();
         int i = friendlyByteBuf.readInt();

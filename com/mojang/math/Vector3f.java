@@ -7,9 +7,16 @@ import com.mojang.math.Quaternion;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class Vector3f {
+    public static Vector3f XN = new Vector3f(-1.0f, 0.0f, 0.0f);
+    public static Vector3f XP = new Vector3f(1.0f, 0.0f, 0.0f);
+    public static Vector3f YN = new Vector3f(0.0f, -1.0f, 0.0f);
+    public static Vector3f YP = new Vector3f(0.0f, 1.0f, 0.0f);
+    public static Vector3f ZN = new Vector3f(0.0f, 0.0f, -1.0f);
+    public static Vector3f ZP = new Vector3f(0.0f, 0.0f, 1.0f);
     private final float[] values;
 
     @Environment(value=EnvType.CLIENT)
@@ -21,7 +28,6 @@ public final class Vector3f {
         this.values = new float[3];
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Vector3f(float f, float g, float h) {
         this.values = new float[]{f, g, h};
     }
@@ -116,15 +122,15 @@ public final class Vector3f {
 
     @Environment(value=EnvType.CLIENT)
     public void normalize() {
-        int i;
         float f = 0.0f;
-        for (i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i) {
             f += this.values[i] * this.values[i];
         }
-        i = 0;
-        while (i < 3) {
-            int n = i++;
-            this.values[n] = this.values[n] / f;
+        float g = (float)Mth.fastInvSqrt(f);
+        int j = 0;
+        while (j < 3) {
+            int n = j++;
+            this.values[n] = this.values[n] * g;
         }
     }
 

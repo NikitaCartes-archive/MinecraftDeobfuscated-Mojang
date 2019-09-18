@@ -20,10 +20,10 @@ extends EntityModel<T> {
     private final ModelPart leftWing = new ModelPart(this, 22, 0);
 
     public ElytraModel() {
-        this.leftWing.addBox(-10.0f, 0.0f, 0.0f, 10, 20, 2, 1.0f);
+        this.leftWing.addBox(-10.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, 1.0f);
         this.rightWing = new ModelPart(this, 22, 0);
         this.rightWing.mirror = true;
-        this.rightWing.addBox(0.0f, 0.0f, 0.0f, 10, 20, 2, 1.0f);
+        this.rightWing.addBox(0.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, 1.0f);
     }
 
     @Override

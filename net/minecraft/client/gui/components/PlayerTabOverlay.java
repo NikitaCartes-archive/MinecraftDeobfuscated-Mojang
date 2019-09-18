@@ -6,7 +6,6 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Comparator;
 import java.util.List;
@@ -126,7 +125,7 @@ extends GuiComponent {
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.enableAlphaTest();
             RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            RenderSystem.defaultBlendFunc();
             if (v >= list.size()) continue;
             PlayerInfo playerInfo2 = list.get(v);
             GameProfile gameProfile = playerInfo2.getProfile();
@@ -170,9 +169,9 @@ extends GuiComponent {
         this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
         boolean l = false;
         int m = playerInfo.getLatency() < 0 ? 5 : (playerInfo.getLatency() < 150 ? 0 : (playerInfo.getLatency() < 300 ? 1 : (playerInfo.getLatency() < 600 ? 2 : (playerInfo.getLatency() < 1000 ? 3 : 4))));
-        this.blitOffset += 100;
+        this.setBlitOffset(this.getBlitOffset() + 100);
         this.blit(j + i - 11, k, 0, 176 + m * 8, 10, 8);
-        this.blitOffset -= 100;
+        this.setBlitOffset(this.getBlitOffset() - 100);
     }
 
     private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo) {

@@ -14,7 +14,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -28,7 +27,6 @@ public class LeavesBlock
 extends Block {
     public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
     public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
-    protected static boolean renderCutout;
 
     public LeavesBlock(Block.Properties properties) {
         super(properties);
@@ -108,21 +106,6 @@ extends Block {
         double e = (double)blockPos.getY() - 0.05;
         double f = (float)blockPos.getZ() + random.nextFloat();
         level.addParticle(ParticleTypes.DRIPPING_WATER, d, e, f, 0.0, 0.0, 0.0);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static void setFancy(boolean bl) {
-        renderCutout = bl;
-    }
-
-    @Override
-    public boolean canOcclude(BlockState blockState) {
-        return false;
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return renderCutout ? BlockLayer.CUTOUT_MIPPED : BlockLayer.SOLID;
     }
 
     @Override

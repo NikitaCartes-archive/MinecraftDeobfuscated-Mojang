@@ -14,20 +14,17 @@ import net.minecraft.world.entity.monster.Shulker;
 public class ShulkerModel<T extends Shulker>
 extends EntityModel<T> {
     private final ModelPart base;
-    private final ModelPart lid;
+    private final ModelPart lid = new ModelPart(64, 64, 0, 0);
     private final ModelPart head;
 
     public ShulkerModel() {
-        this.texHeight = 64;
-        this.texWidth = 64;
-        this.lid = new ModelPart(this);
-        this.base = new ModelPart(this);
-        this.head = new ModelPart(this);
-        this.lid.texOffs(0, 0).addBox(-8.0f, -16.0f, -8.0f, 16, 12, 16);
+        this.base = new ModelPart(64, 64, 0, 28);
+        this.head = new ModelPart(64, 64, 0, 52);
+        this.lid.addBox(-8.0f, -16.0f, -8.0f, 16.0f, 12.0f, 16.0f);
         this.lid.setPos(0.0f, 24.0f, 0.0f);
-        this.base.texOffs(0, 28).addBox(-8.0f, -8.0f, -8.0f, 16, 8, 16);
+        this.base.addBox(-8.0f, -8.0f, -8.0f, 16.0f, 8.0f, 16.0f);
         this.base.setPos(0.0f, 24.0f, 0.0f);
-        this.head.texOffs(0, 52).addBox(-3.0f, 0.0f, -3.0f, 6, 6, 6);
+        this.head.addBox(-3.0f, 0.0f, -3.0f, 6.0f, 6.0f, 6.0f);
         this.head.setPos(0.0f, 12.0f, 0.0f);
     }
 

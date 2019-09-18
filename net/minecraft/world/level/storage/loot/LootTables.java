@@ -4,7 +4,6 @@
 package net.minecraft.world.level.storage.loot;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -12,7 +11,6 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -24,12 +22,14 @@ import net.minecraft.world.level.storage.loot.IntLimiter;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
+import net.minecraft.world.level.storage.loot.PredicateManager;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.apache.logging.log4j.LogManager;
@@ -40,9 +40,11 @@ extends SimpleJsonResourceReloadListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)RandomValueBounds.class), new RandomValueBounds.Serializer()).registerTypeAdapter((Type)((Object)BinomialDistributionGenerator.class), new BinomialDistributionGenerator.Serializer()).registerTypeAdapter((Type)((Object)ConstantIntValue.class), new ConstantIntValue.Serializer()).registerTypeAdapter((Type)((Object)IntLimiter.class), new IntLimiter.Serializer()).registerTypeAdapter((Type)((Object)LootPool.class), new LootPool.Serializer()).registerTypeAdapter((Type)((Object)LootTable.class), new LootTable.Serializer()).registerTypeHierarchyAdapter(LootPoolEntryContainer.class, new LootPoolEntries.Serializer()).registerTypeHierarchyAdapter(LootItemFunction.class, new LootItemFunctions.Serializer()).registerTypeHierarchyAdapter(LootItemCondition.class, new LootItemConditions.Serializer()).registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer()).create();
     private Map<ResourceLocation, LootTable> tables = ImmutableMap.of();
+    private final PredicateManager predicateManager;
 
-    public LootTables() {
+    public LootTables(PredicateManager predicateManager) {
         super(GSON, "loot_tables");
+        this.predicateManager = predicateManager;
     }
 
     public LootTable get(ResourceLocation resourceLocation) {
@@ -66,15 +68,14 @@ extends SimpleJsonResourceReloadListener {
         });
         builder.put(BuiltInLootTables.EMPTY, LootTable.EMPTY);
         ImmutableMap<ResourceLocation, LootTable> immutableMap = builder.build();
-        LootTableProblemCollector lootTableProblemCollector = new LootTableProblemCollector();
-        immutableMap.forEach((resourceLocation, lootTable) -> LootTables.validate(lootTableProblemCollector, resourceLocation, lootTable, immutableMap::get));
-        lootTableProblemCollector.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
+        ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, this.predicateManager::get, immutableMap::get);
+        immutableMap.forEach((resourceLocation, lootTable) -> LootTables.validate(validationContext, resourceLocation, lootTable));
+        validationContext.getProblems().forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
         this.tables = immutableMap;
     }
 
-    public static void validate(LootTableProblemCollector lootTableProblemCollector, ResourceLocation resourceLocation, LootTable lootTable, Function<ResourceLocation, LootTable> function) {
-        ImmutableSet<ResourceLocation> set = ImmutableSet.of(resourceLocation);
-        lootTable.validate(lootTableProblemCollector.forChild("{" + resourceLocation.toString() + "}"), function, set, lootTable.getParamSet());
+    public static void validate(ValidationContext validationContext, ResourceLocation resourceLocation, LootTable lootTable) {
+        lootTable.validate(validationContext.setParams(lootTable.getParamSet()).enterTable("{" + resourceLocation + "}", resourceLocation));
     }
 
     public static JsonElement serialize(LootTable lootTable) {

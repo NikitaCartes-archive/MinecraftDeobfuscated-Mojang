@@ -15,6 +15,8 @@ public class LootContextParamSets {
     private static final BiMap<ResourceLocation, LootContextParamSet> REGISTRY = HashBiMap.create();
     public static final LootContextParamSet EMPTY = LootContextParamSets.register("empty", builder -> {});
     public static final LootContextParamSet CHEST = LootContextParamSets.register("chest", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY));
+    public static final LootContextParamSet COMMAND = LootContextParamSets.register("command", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY));
+    public static final LootContextParamSet SELECTOR = LootContextParamSets.register("selector", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY));
     public static final LootContextParamSet FISHING = LootContextParamSets.register("fishing", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.TOOL));
     public static final LootContextParamSet ENTITY = LootContextParamSets.register("entity", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.BLOCK_POS).required(LootContextParams.DAMAGE_SOURCE).optional(LootContextParams.KILLER_ENTITY).optional(LootContextParams.DIRECT_KILLER_ENTITY).optional(LootContextParams.LAST_DAMAGE_PLAYER));
     public static final LootContextParamSet GIFT = LootContextParamSets.register("gift", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY));

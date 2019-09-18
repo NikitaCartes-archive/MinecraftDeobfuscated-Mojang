@@ -19,10 +19,10 @@ extends EntityModel<T> {
     public BlazeModel() {
         for (int i = 0; i < this.upperBodyParts.length; ++i) {
             this.upperBodyParts[i] = new ModelPart(this, 0, 16);
-            this.upperBodyParts[i].addBox(0.0f, 0.0f, 0.0f, 2, 8, 2);
+            this.upperBodyParts[i].addBox(0.0f, 0.0f, 0.0f, 2.0f, 8.0f, 2.0f);
         }
         this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -4.0f, -4.0f, 8, 8, 8);
+        this.head.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
     }
 
     @Override

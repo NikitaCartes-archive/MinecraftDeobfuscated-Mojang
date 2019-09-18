@@ -78,11 +78,6 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean canOcclude(BlockState blockState) {
-        return false;
-    }
-
-    @Override
     public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return false;
     }

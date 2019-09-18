@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -10,7 +11,6 @@ import java.io.IOException;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,8 +36,8 @@ extends AbstractTexture {
     @Override
     public void load(ResourceManager resourceManager) throws IOException {
         try (Resource resource = resourceManager.getResource(this.baseLayerResource);
-             NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-             NativeImage nativeImage2 = new NativeImage(nativeImage.getWidth(), nativeImage.getHeight(), false);){
+             NativeImage nativeImage = NativeImage.read(resource.getInputStream());){
+            NativeImage nativeImage2 = new NativeImage(nativeImage.getWidth(), nativeImage.getHeight(), false);
             nativeImage2.copyFrom(nativeImage);
             for (int i = 0; i < 17 && i < this.layerMaskPaths.size() && i < this.layerColors.size(); ++i) {
                 String string = this.layerMaskPaths.get(i);
@@ -59,13 +59,21 @@ extends AbstractTexture {
                     continue;
                 }
             }
-            TextureUtil.prepareImage(this.getId(), nativeImage2.getWidth(), nativeImage2.getHeight());
-            RenderSystem.pixelTransfer(3357, Float.MAX_VALUE);
-            nativeImage2.upload(0, 0, 0, false);
-            RenderSystem.pixelTransfer(3357, 0.0f);
+            if (!RenderSystem.isOnRenderThreadOrInit()) {
+                RenderSystem.recordRenderCall(() -> this.doLoad(nativeImage2));
+            } else {
+                this.doLoad(nativeImage2);
+            }
         } catch (IOException iOException) {
             LOGGER.error("Couldn't load layered color mask image", (Throwable)iOException);
         }
+    }
+
+    private void doLoad(NativeImage nativeImage) {
+        TextureUtil.prepareImage(this.getId(), nativeImage.getWidth(), nativeImage.getHeight());
+        RenderSystem.pixelTransfer(3357, Float.MAX_VALUE);
+        nativeImage.upload(0, 0, 0, true);
+        RenderSystem.pixelTransfer(3357, 0.0f);
     }
 }
 

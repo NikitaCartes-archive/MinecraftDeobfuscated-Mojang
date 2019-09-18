@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Iterator;
 import java.util.List;
@@ -44,7 +43,7 @@ implements SoundEventListener {
         }
         RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         Vec3 vec3 = new Vec3(this.minecraft.player.x, this.minecraft.player.y + (double)this.minecraft.player.getEyeHeight(), this.minecraft.player.z);
         Vec3 vec32 = new Vec3(0.0, 0.0, -1.0).xRot(-this.minecraft.player.xRot * ((float)Math.PI / 180)).yRot(-this.minecraft.player.yRot * ((float)Math.PI / 180));
         Vec3 vec33 = new Vec3(0.0, 1.0, 0.0).xRot(-this.minecraft.player.xRot * ((float)Math.PI / 180)).yRot(-this.minecraft.player.yRot * ((float)Math.PI / 180));
@@ -76,7 +75,7 @@ implements SoundEventListener {
             int p = Mth.floor(Mth.clampedLerp(255.0, 75.0, (float)(Util.getMillis() - subtitle.getTime()) / 3000.0f));
             int q = p << 16 | p << 8 | p;
             RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)this.minecraft.window.getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.window.getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0f, 0.0f);
+            RenderSystem.translatef((float)this.minecraft.getWindow().getGuiScaledWidth() - (float)l * 1.0f - 2.0f, (float)(this.minecraft.getWindow().getGuiScaledHeight() - 30) - (float)(i * (m + 1)) * 1.0f, 0.0f);
             RenderSystem.scalef(1.0f, 1.0f, 1.0f);
             SubtitleOverlay.fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8f));
             RenderSystem.enableBlend();

@@ -30,15 +30,15 @@ extends EntityModel<Boat> {
         int k = 20;
         int l = 4;
         int m = 28;
-        this.cubes[0].addBox(-14.0f, -9.0f, -3.0f, 28, 16, 3, 0.0f);
+        this.cubes[0].addBox(-14.0f, -9.0f, -3.0f, 28.0f, 16.0f, 3.0f, 0.0f);
         this.cubes[0].setPos(0.0f, 3.0f, 1.0f);
-        this.cubes[1].addBox(-13.0f, -7.0f, -1.0f, 18, 6, 2, 0.0f);
+        this.cubes[1].addBox(-13.0f, -7.0f, -1.0f, 18.0f, 6.0f, 2.0f, 0.0f);
         this.cubes[1].setPos(-15.0f, 4.0f, 4.0f);
-        this.cubes[2].addBox(-8.0f, -7.0f, -1.0f, 16, 6, 2, 0.0f);
+        this.cubes[2].addBox(-8.0f, -7.0f, -1.0f, 16.0f, 6.0f, 2.0f, 0.0f);
         this.cubes[2].setPos(15.0f, 4.0f, 0.0f);
-        this.cubes[3].addBox(-14.0f, -7.0f, -1.0f, 28, 6, 2, 0.0f);
+        this.cubes[3].addBox(-14.0f, -7.0f, -1.0f, 28.0f, 6.0f, 2.0f, 0.0f);
         this.cubes[3].setPos(0.0f, 4.0f, -9.0f);
-        this.cubes[4].addBox(-14.0f, -7.0f, -1.0f, 28, 6, 2, 0.0f);
+        this.cubes[4].addBox(-14.0f, -7.0f, -1.0f, 28.0f, 6.0f, 2.0f, 0.0f);
         this.cubes[4].setPos(0.0f, 4.0f, 9.0f);
         this.cubes[0].xRot = 1.5707964f;
         this.cubes[1].yRot = 4.712389f;
@@ -52,7 +52,7 @@ extends EntityModel<Boat> {
         this.paddles[0].zRot = 0.19634955f;
         this.paddles[1].zRot = 0.19634955f;
         this.waterPatch = new ModelPart(this, 0, 0).setTexSize(128, 64);
-        this.waterPatch.addBox(-14.0f, -9.0f, -3.0f, 28, 16, 3, 0.0f);
+        this.waterPatch.addBox(-14.0f, -9.0f, -3.0f, 28.0f, 16.0f, 3.0f, 0.0f);
         this.waterPatch.setPos(0.0f, -3.0f, 1.0f);
         this.waterPatch.xRot = 1.5707964f;
     }
@@ -81,8 +81,8 @@ extends EntityModel<Boat> {
         int j = 7;
         int k = 6;
         float f = -5.0f;
-        modelPart.addBox(-1.0f, 0.0f, -5.0f, 2, 2, 18);
-        modelPart.addBox(bl ? -1.001f : 0.001f, -3.0f, 8.0f, 1, 6, 7);
+        modelPart.addBox(-1.0f, 0.0f, -5.0f, 2.0f, 2.0f, 18.0f);
+        modelPart.addBox(bl ? -1.001f : 0.001f, -3.0f, 8.0f, 1.0f, 6.0f, 7.0f);
         return modelPart;
     }
 

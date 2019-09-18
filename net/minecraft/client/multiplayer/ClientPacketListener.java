@@ -560,14 +560,20 @@ implements ClientGamePacketListener {
         if (entity == null) {
             return;
         }
-        entity.xp += (long)clientboundMoveEntityPacket.getXa();
-        entity.yp += (long)clientboundMoveEntityPacket.getYa();
-        entity.zp += (long)clientboundMoveEntityPacket.getZa();
-        Vec3 vec3 = ClientboundMoveEntityPacket.packetToEntity(entity.xp, entity.yp, entity.zp);
         if (!entity.isControlledByLocalInstance()) {
-            float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f : entity.yRot;
-            float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.xRot;
-            entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
+            if (clientboundMoveEntityPacket.hasPosition()) {
+                entity.xp += (long)clientboundMoveEntityPacket.getXa();
+                entity.yp += (long)clientboundMoveEntityPacket.getYa();
+                entity.zp += (long)clientboundMoveEntityPacket.getZa();
+                Vec3 vec3 = ClientboundMoveEntityPacket.packetToEntity(entity.xp, entity.yp, entity.zp);
+                float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f : entity.yRot;
+                float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.xRot;
+                entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
+            } else if (clientboundMoveEntityPacket.hasRotation()) {
+                float h = clientboundMoveEntityPacket.getyRot();
+                float f = clientboundMoveEntityPacket.getxRot();
+                entity.lerpTo(entity.x, entity.y, entity.z, h, f, 3, false);
+            }
             entity.onGround = clientboundMoveEntityPacket.isOnGround();
         }
     }

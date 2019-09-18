@@ -68,7 +68,7 @@ extends StructurePiece {
                 if (structureBlockInfo.nbt == null || (structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"))) != StructureMode.DATA) continue;
                 this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, levelAccessor, random, boundingBox);
             }
-            List<StructureTemplate.StructureBlockInfo> list2 = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW_BLOCK);
+            List<StructureTemplate.StructureBlockInfo> list2 = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
                 if (structureBlockInfo2.nbt == null) continue;
                 String string = structureBlockInfo2.nbt.getString("final_state");

@@ -3,84 +3,49 @@
  */
 package com.mojang.blaze3d.vertex;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.datafixers.util.Pair;
 import java.nio.ByteBuffer;
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.lwjgl.system.MemoryUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class BufferUploader {
-    public void end(BufferBuilder bufferBuilder) {
-        if (bufferBuilder.getVertexCount() > 0) {
-            int l;
-            int j;
-            VertexFormat vertexFormat = bufferBuilder.getVertexFormat();
-            int i = vertexFormat.getVertexSize();
-            ByteBuffer byteBuffer = bufferBuilder.getBuffer();
-            List<VertexFormatElement> list = vertexFormat.getElements();
-            block12: for (j = 0; j < list.size(); ++j) {
-                VertexFormatElement vertexFormatElement = list.get(j);
-                VertexFormatElement.Usage usage = vertexFormatElement.getUsage();
-                int k = vertexFormatElement.getType().getGlType();
-                l = vertexFormatElement.getIndex();
-                byteBuffer.position(vertexFormat.getOffset(j));
-                switch (usage) {
-                    case POSITION: {
-                        RenderSystem.vertexPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-                        RenderSystem.enableClientState(32884);
-                        continue block12;
-                    }
-                    case UV: {
-                        RenderSystem.glClientActiveTexture(33984 + l);
-                        RenderSystem.texCoordPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-                        RenderSystem.enableClientState(32888);
-                        RenderSystem.glClientActiveTexture(33984);
-                        continue block12;
-                    }
-                    case COLOR: {
-                        RenderSystem.colorPointer(vertexFormatElement.getCount(), k, i, byteBuffer);
-                        RenderSystem.enableClientState(32886);
-                        continue block12;
-                    }
-                    case NORMAL: {
-                        RenderSystem.normalPointer(k, i, byteBuffer);
-                        RenderSystem.enableClientState(32885);
-                    }
-                }
-            }
-            RenderSystem.drawArrays(bufferBuilder.getDrawMode(), 0, bufferBuilder.getVertexCount());
-            int m = list.size();
-            block13: for (j = 0; j < m; ++j) {
-                VertexFormatElement vertexFormatElement2 = list.get(j);
-                VertexFormatElement.Usage usage2 = vertexFormatElement2.getUsage();
-                l = vertexFormatElement2.getIndex();
-                switch (usage2) {
-                    case POSITION: {
-                        RenderSystem.disableClientState(32884);
-                        continue block13;
-                    }
-                    case UV: {
-                        RenderSystem.glClientActiveTexture(33984 + l);
-                        RenderSystem.disableClientState(32888);
-                        RenderSystem.glClientActiveTexture(33984);
-                        continue block13;
-                    }
-                    case COLOR: {
-                        RenderSystem.disableClientState(32886);
-                        RenderSystem.clearCurrentColor();
-                        continue block13;
-                    }
-                    case NORMAL: {
-                        RenderSystem.disableClientState(32885);
-                    }
-                }
-            }
+    public static void end(BufferBuilder bufferBuilder) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> {
+                Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
+                BufferBuilder.DrawState drawState = pair.getFirst();
+                BufferUploader._end(pair.getSecond(), drawState.mode(), drawState.format(), drawState.vertexCount());
+            });
+        } else {
+            Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
+            BufferBuilder.DrawState drawState = pair.getFirst();
+            BufferUploader._end(pair.getSecond(), drawState.mode(), drawState.format(), drawState.vertexCount());
         }
-        bufferBuilder.clear();
+    }
+
+    public static void end(ByteBuffer byteBuffer, int i, VertexFormat vertexFormat, int j) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> BufferUploader._end(byteBuffer, i, vertexFormat, j));
+        } else {
+            BufferUploader._end(byteBuffer, i, vertexFormat, j);
+        }
+    }
+
+    private static void _end(ByteBuffer byteBuffer, int i, VertexFormat vertexFormat, int j) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        byteBuffer.clear();
+        if (j <= 0) {
+            return;
+        }
+        vertexFormat.setupBufferState(MemoryUtil.memAddress(byteBuffer));
+        GlStateManager._drawArrays(i, 0, j);
+        vertexFormat.clearBufferState();
     }
 }
 

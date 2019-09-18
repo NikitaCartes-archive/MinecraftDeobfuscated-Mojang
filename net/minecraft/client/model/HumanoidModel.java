@@ -47,27 +47,27 @@ HeadedModel {
         this.texWidth = i;
         this.texHeight = j;
         this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, f);
+        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);
         this.head.setPos(0.0f, 0.0f + g, 0.0f);
         this.hat = new ModelPart(this, 32, 0);
-        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, f + 0.5f);
+        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f + 0.5f);
         this.hat.setPos(0.0f, 0.0f + g, 0.0f);
         this.body = new ModelPart(this, 16, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, f);
+        this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
         this.body.setPos(0.0f, 0.0f + g, 0.0f);
         this.rightArm = new ModelPart(this, 40, 16);
-        this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4, 12, 4, f);
+        this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.rightArm.setPos(-5.0f, 2.0f + g, 0.0f);
         this.leftArm = new ModelPart(this, 40, 16);
         this.leftArm.mirror = true;
-        this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, f);
+        this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.leftArm.setPos(5.0f, 2.0f + g, 0.0f);
         this.rightLeg = new ModelPart(this, 0, 16);
-        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+        this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.rightLeg.setPos(-1.9f, 12.0f + g, 0.0f);
         this.leftLeg = new ModelPart(this, 0, 16);
         this.leftLeg.mirror = true;
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.leftLeg.setPos(1.9f, 12.0f + g, 0.0f);
     }
 

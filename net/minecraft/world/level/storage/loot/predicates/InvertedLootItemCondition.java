@@ -7,14 +7,11 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class InvertedLootItemCondition
@@ -36,9 +33,9 @@ implements LootItemCondition {
     }
 
     @Override
-    public void validate(LootTableProblemCollector lootTableProblemCollector, Function<ResourceLocation, LootTable> function, Set<ResourceLocation> set, LootContextParamSet lootContextParamSet) {
-        LootItemCondition.super.validate(lootTableProblemCollector, function, set, lootContextParamSet);
-        this.term.validate(lootTableProblemCollector, function, set, lootContextParamSet);
+    public void validate(ValidationContext validationContext) {
+        LootItemCondition.super.validate(validationContext);
+        this.term.validate(validationContext);
     }
 
     public static LootItemCondition.Builder invert(LootItemCondition.Builder builder) {

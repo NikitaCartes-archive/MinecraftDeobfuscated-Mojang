@@ -1,8 +1,9 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.renderer.texture;
+package com.mojang.blaze3d.platform;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -23,7 +24,11 @@ public interface TextureObject {
     public int getId();
 
     default public void bind() {
-        RenderSystem.bindTexture(this.getId());
+        if (!RenderSystem.isOnRenderThreadOrInit()) {
+            RenderSystem.recordRenderCall(() -> GlStateManager._bindTexture(this.getId()));
+        } else {
+            GlStateManager._bindTexture(this.getId());
+        }
     }
 
     default public void reset(TextureManager textureManager, ResourceManager resourceManager, ResourceLocation resourceLocation, Executor executor) {

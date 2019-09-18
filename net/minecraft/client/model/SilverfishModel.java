@@ -32,13 +32,13 @@ extends EntityModel<T> {
         }
         this.bodyLayers = new ModelPart[3];
         this.bodyLayers[0] = new ModelPart(this, 20, 0);
-        this.bodyLayers[0].addBox(-5.0f, 0.0f, (float)BODY_SIZES[2][2] * -0.5f, 10, 8, BODY_SIZES[2][2]);
+        this.bodyLayers[0].addBox(-5.0f, 0.0f, (float)BODY_SIZES[2][2] * -0.5f, 10.0f, 8.0f, BODY_SIZES[2][2]);
         this.bodyLayers[0].setPos(0.0f, 16.0f, this.zPlacement[2]);
         this.bodyLayers[1] = new ModelPart(this, 20, 11);
-        this.bodyLayers[1].addBox(-3.0f, 0.0f, (float)BODY_SIZES[4][2] * -0.5f, 6, 4, BODY_SIZES[4][2]);
+        this.bodyLayers[1].addBox(-3.0f, 0.0f, (float)BODY_SIZES[4][2] * -0.5f, 6.0f, 4.0f, BODY_SIZES[4][2]);
         this.bodyLayers[1].setPos(0.0f, 20.0f, this.zPlacement[4]);
         this.bodyLayers[2] = new ModelPart(this, 20, 18);
-        this.bodyLayers[2].addBox(-3.0f, 0.0f, (float)BODY_SIZES[4][2] * -0.5f, 6, 5, BODY_SIZES[1][2]);
+        this.bodyLayers[2].addBox(-3.0f, 0.0f, (float)BODY_SIZES[4][2] * -0.5f, 6.0f, 5.0f, BODY_SIZES[1][2]);
         this.bodyLayers[2].setPos(0.0f, 19.0f, this.zPlacement[1]);
     }
 

@@ -15,27 +15,22 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
 import net.minecraft.world.level.storage.loot.RandomIntGenerator;
 import net.minecraft.world.level.storage.loot.RandomIntGenerators;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
@@ -102,16 +97,16 @@ public class LootPool {
         }
     }
 
-    public void validate(LootTableProblemCollector lootTableProblemCollector, Function<ResourceLocation, LootTable> function, Set<ResourceLocation> set, LootContextParamSet lootContextParamSet) {
+    public void validate(ValidationContext validationContext) {
         int i;
         for (i = 0; i < this.conditions.length; ++i) {
-            this.conditions[i].validate(lootTableProblemCollector.forChild(".condition[" + i + "]"), function, set, lootContextParamSet);
+            this.conditions[i].validate(validationContext.forChild(".condition[" + i + "]"));
         }
         for (i = 0; i < this.functions.length; ++i) {
-            this.functions[i].validate(lootTableProblemCollector.forChild(".functions[" + i + "]"), function, set, lootContextParamSet);
+            this.functions[i].validate(validationContext.forChild(".functions[" + i + "]"));
         }
         for (i = 0; i < this.entries.length; ++i) {
-            this.entries[i].validate(lootTableProblemCollector.forChild(".entries[" + i + "]"), function, set, lootContextParamSet);
+            this.entries[i].validate(validationContext.forChild(".entries[" + i + "]"));
         }
     }
 

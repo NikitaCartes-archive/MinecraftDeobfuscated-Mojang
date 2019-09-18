@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -22,12 +23,12 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
     private static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
 
     @Override
-    public void render(BeaconBlockEntity beaconBlockEntity, double d, double e, double f, float g, int i) {
+    public void render(BeaconBlockEntity beaconBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
         this.renderBeaconBeam(d, e, f, g, beaconBlockEntity.getBeamSections(), beaconBlockEntity.getLevel().getGameTime());
     }
 
     private void renderBeaconBeam(double d, double e, double f, double g, List<BeaconBlockEntity.BeaconBeamSection> list, long l) {
-        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.defaultAlphaFunc();
         this.bindTexture(BEAM_LOCATION);
         RenderSystem.disableFog();
         int i = 0;
@@ -48,7 +49,6 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         RenderSystem.texParameter(3553, 10242, 10497);
         RenderSystem.texParameter(3553, 10243, 10497);
         RenderSystem.disableLighting();
-        RenderSystem.disableCull();
         RenderSystem.disableBlend();
         RenderSystem.depthMask(true);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -77,26 +77,11 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         double ae = -1.0 + q;
         double af = (double)j * h * (0.5 / k) + ae;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, n, v).uv(1.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, i, v).uv(1.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(w, i, 0.0).uv(0.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(w, n, 0.0).uv(0.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, n, ab).uv(1.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, i, ab).uv(1.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(y, i, 0.0).uv(0.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(y, n, 0.0).uv(0.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(w, n, 0.0).uv(1.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(w, i, 0.0).uv(1.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, i, ab).uv(0.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, n, ab).uv(0.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(y, n, 0.0).uv(1.0, af).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(y, i, 0.0).uv(1.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, i, v).uv(0.0, ae).color(r, s, t, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, n, v).uv(0.0, af).color(r, s, t, 1.0f).endVertex();
+        BeaconRenderer.renderPart(bufferBuilder, r, s, t, 1.0f, i, n, 0.0, v, w, 0.0, y, 0.0, 0.0, ab, 0.0, 1.0, af, ae);
         tesselator.end();
         RenderSystem.popMatrix();
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.depthMask(false);
         u = -m;
         v = -m;
@@ -111,27 +96,26 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         ae = -1.0 + q;
         af = (double)j * h + ae;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(u, n, v).uv(1.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(u, i, v).uv(1.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(w, i, x).uv(0.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(w, n, x).uv(0.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(aa, n, ab).uv(1.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(aa, i, ab).uv(1.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(y, i, z).uv(0.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(y, n, z).uv(0.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(w, n, x).uv(1.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(w, i, x).uv(1.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(aa, i, ab).uv(0.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(aa, n, ab).uv(0.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(y, n, z).uv(1.0, af).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(y, i, z).uv(1.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(u, i, v).uv(0.0, ae).color(r, s, t, 0.125f).endVertex();
-        bufferBuilder.vertex(u, n, v).uv(0.0, af).color(r, s, t, 0.125f).endVertex();
+        BeaconRenderer.renderPart(bufferBuilder, r, s, t, 0.125f, i, n, u, v, w, x, y, z, aa, ab, 0.0, 1.0, af, ae);
         tesselator.end();
         RenderSystem.popMatrix();
         RenderSystem.enableLighting();
         RenderSystem.enableTexture();
         RenderSystem.depthMask(true);
+    }
+
+    private static void renderPart(BufferBuilder bufferBuilder, float f, float g, float h, float i, int j, int k, double d, double e, double l, double m, double n, double o, double p, double q, double r, double s, double t, double u) {
+        BeaconRenderer.renderQuad(bufferBuilder, f, g, h, i, j, k, d, e, l, m, r, s, t, u);
+        BeaconRenderer.renderQuad(bufferBuilder, f, g, h, i, j, k, p, q, n, o, r, s, t, u);
+        BeaconRenderer.renderQuad(bufferBuilder, f, g, h, i, j, k, l, m, p, q, r, s, t, u);
+        BeaconRenderer.renderQuad(bufferBuilder, f, g, h, i, j, k, n, o, d, e, r, s, t, u);
+    }
+
+    private static void renderQuad(BufferBuilder bufferBuilder, float f, float g, float h, float i, int j, int k, double d, double e, double l, double m, double n, double o, double p, double q) {
+        bufferBuilder.vertex(d, k, e).uv(o, p).color(f, g, h, i).endVertex();
+        bufferBuilder.vertex(d, j, e).uv(o, q).color(f, g, h, i).endVertex();
+        bufferBuilder.vertex(l, j, m).uv(n, q).color(f, g, h, i).endVertex();
+        bufferBuilder.vertex(l, k, m).uv(n, p).color(f, g, h, i).endVertex();
     }
 
     @Override

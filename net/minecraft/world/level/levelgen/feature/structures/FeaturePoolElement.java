@@ -65,7 +65,7 @@ extends StructurePoolElement {
     @Override
     public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random) {
         ArrayList<StructureTemplate.StructureBlockInfo> list = Lists.newArrayList();
-        list.add(new StructureTemplate.StructureBlockInfo(blockPos, (BlockState)Blocks.JIGSAW_BLOCK.defaultBlockState().setValue(JigsawBlock.FACING, Direction.DOWN), this.defaultJigsawNBT));
+        list.add(new StructureTemplate.StructureBlockInfo(blockPos, (BlockState)Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.FACING, Direction.DOWN), this.defaultJigsawNBT));
         return list;
     }
 

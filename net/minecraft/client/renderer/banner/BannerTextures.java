@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BannerTextures {
-    public static final TextureCache BANNER_CACHE = new TextureCache("banner_", new ResourceLocation("textures/entity/banner_base.png"), "textures/entity/banner/");
     public static final TextureCache SHIELD_CACHE = new TextureCache("shield_", new ResourceLocation("textures/entity/shield_base.png"), "textures/entity/shield/");
     public static final ResourceLocation NO_PATTERN_SHIELD = new ResourceLocation("textures/entity/shield_base_nopattern.png");
     public static final ResourceLocation DEFAULT_PATTERN_BANNER = new ResourceLocation("textures/entity/banner/base.png");

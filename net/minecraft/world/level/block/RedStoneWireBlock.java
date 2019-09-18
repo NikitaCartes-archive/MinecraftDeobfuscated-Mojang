@@ -20,7 +20,6 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -400,11 +399,6 @@ extends Block {
         float j = Math.max(0.0f, g * g * 0.7f - 0.5f);
         float k = Math.max(0.0f, g * g * 0.6f - 0.7f);
         level.addParticle(new DustParticleOptions(h, j, k, 1.0f), d, e, f, 0.0, 0.0, 0.0);
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.CUTOUT;
     }
 
     @Override

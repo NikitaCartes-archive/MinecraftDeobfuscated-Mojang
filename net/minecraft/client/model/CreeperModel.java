@@ -28,25 +28,25 @@ extends EntityModel<T> {
     public CreeperModel(float f) {
         int i = 6;
         this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, f);
+        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);
         this.head.setPos(0.0f, 6.0f, 0.0f);
         this.hair = new ModelPart(this, 32, 0);
-        this.hair.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, f + 0.5f);
+        this.hair.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, f + 0.5f);
         this.hair.setPos(0.0f, 6.0f, 0.0f);
         this.body = new ModelPart(this, 16, 16);
-        this.body.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, f);
+        this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
         this.body.setPos(0.0f, 6.0f, 0.0f);
         this.leg0 = new ModelPart(this, 0, 16);
-        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4, 6, 4, f);
+        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 6.0f, 4.0f, f);
         this.leg0.setPos(-2.0f, 18.0f, 4.0f);
         this.leg1 = new ModelPart(this, 0, 16);
-        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4, 6, 4, f);
+        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 6.0f, 4.0f, f);
         this.leg1.setPos(2.0f, 18.0f, 4.0f);
         this.leg2 = new ModelPart(this, 0, 16);
-        this.leg2.addBox(-2.0f, 0.0f, -2.0f, 4, 6, 4, f);
+        this.leg2.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 6.0f, 4.0f, f);
         this.leg2.setPos(-2.0f, 18.0f, -4.0f);
         this.leg3 = new ModelPart(this, 0, 16);
-        this.leg3.addBox(-2.0f, 0.0f, -2.0f, 4, 6, 4, f);
+        this.leg3.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 6.0f, 4.0f, f);
         this.leg3.setPos(2.0f, 18.0f, -4.0f);
     }
 

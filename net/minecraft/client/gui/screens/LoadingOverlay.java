@@ -48,8 +48,8 @@ extends Overlay {
         float o;
         int n;
         float h;
-        int k = this.minecraft.window.getGuiScaledWidth();
-        int l = this.minecraft.window.getGuiScaledHeight();
+        int k = this.minecraft.getWindow().getGuiScaledWidth();
+        int l = this.minecraft.getWindow().getGuiScaledHeight();
         long m = Util.getMillis();
         if (this.fadeIn && (this.reload.isApplying() || this.minecraft.screen != null) && this.fadeInStart == -1L) {
             this.fadeInStart = m;
@@ -74,8 +74,8 @@ extends Overlay {
             LoadingOverlay.fill(0, 0, k, l, -1);
             o = 1.0f;
         }
-        n = (this.minecraft.window.getGuiScaledWidth() - 256) / 2;
-        int p = (this.minecraft.window.getGuiScaledHeight() - 256) / 2;
+        n = (this.minecraft.getWindow().getGuiScaledWidth() - 256) / 2;
+        int p = (this.minecraft.getWindow().getGuiScaledHeight() - 256) / 2;
         this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
@@ -93,7 +93,7 @@ extends Overlay {
             this.fadeOutStart = Util.getMillis();
             this.onFinish.run();
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.init(this.minecraft, this.minecraft.window.getGuiScaledWidth(), this.minecraft.window.getGuiScaledHeight());
+                this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
             }
         }
     }

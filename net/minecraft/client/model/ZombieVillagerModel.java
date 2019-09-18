@@ -26,43 +26,43 @@ implements VillagerHeadModel {
         super(f, 0.0f, 64, bl ? 32 : 64);
         if (bl) {
             this.head = new ModelPart(this, 0, 0);
-            this.head.addBox(-4.0f, -10.0f, -4.0f, 8, 8, 8, f);
+            this.head.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);
             this.body = new ModelPart(this, 16, 16);
-            this.body.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, f + 0.1f);
+            this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f + 0.1f);
             this.rightLeg = new ModelPart(this, 0, 16);
             this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
-            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f + 0.1f);
+            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.1f);
             this.leftLeg = new ModelPart(this, 0, 16);
             this.leftLeg.mirror = true;
             this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
-            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f + 0.1f);
+            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.1f);
         } else {
             this.head = new ModelPart(this, 0, 0);
-            this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8, 10, 8, f);
-            this.head.texOffs(24, 0).addBox(-1.0f, -3.0f, -6.0f, 2, 4, 2, f);
+            this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f);
+            this.head.texOffs(24, 0).addBox(-1.0f, -3.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
             this.hat = new ModelPart(this, 32, 0);
-            this.hat.addBox(-4.0f, -10.0f, -4.0f, 8, 10, 8, f + 0.5f);
+            this.hat.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f + 0.5f);
             this.hatRim = new ModelPart(this);
-            this.hatRim.texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16, 16, 1, f);
+            this.hatRim.texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16.0f, 16.0f, 1.0f, f);
             this.hatRim.xRot = -1.5707964f;
             this.hat.addChild(this.hatRim);
             this.body = new ModelPart(this, 16, 20);
-            this.body.addBox(-4.0f, 0.0f, -3.0f, 8, 12, 6, f);
-            this.body.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8, 18, 6, f + 0.05f);
+            this.body.addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f, f);
+            this.body.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, f + 0.05f);
             this.rightArm = new ModelPart(this, 44, 22);
-            this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4, 12, 4, f);
+            this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
             this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
             this.leftArm = new ModelPart(this, 44, 22);
             this.leftArm.mirror = true;
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, f);
+            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
             this.leftArm.setPos(5.0f, 2.0f, 0.0f);
             this.rightLeg = new ModelPart(this, 0, 22);
             this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
-            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+            this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
             this.leftLeg = new ModelPart(this, 0, 22);
             this.leftLeg.mirror = true;
             this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
-            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+            this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         }
     }
 

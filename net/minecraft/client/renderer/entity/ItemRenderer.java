@@ -81,7 +81,7 @@ implements ResourceManagerReloadListener {
     private void renderModelLists(BakedModel bakedModel, int i, ItemStack itemStack) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.BLOCK_NORMALS);
+        bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
         Random random = new Random();
         long l = 42L;
         for (Direction direction : Direction.values()) {
@@ -148,6 +148,7 @@ implements ResourceManagerReloadListener {
 
     private void putQuadData(BufferBuilder bufferBuilder, BakedQuad bakedQuad, int i) {
         bufferBuilder.putBulkData(bakedQuad.getVertices());
+        bufferBuilder.faceTex2(0xF000F0, 0xF000F0, 0xF000F0, 0xF000F0);
         bufferBuilder.fixupQuadColor(i);
         this.applyNormal(bufferBuilder, bakedQuad);
     }
@@ -225,9 +226,9 @@ implements ResourceManagerReloadListener {
         this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableRescaleNormal();
-        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.pushMatrix();
         ItemTransforms itemTransforms = bakedModel.getTransforms();
         ItemTransforms.apply(itemTransforms.getTransform(transformType), bl);
@@ -257,7 +258,7 @@ implements ResourceManagerReloadListener {
         this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableAlphaTest();
-        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);

@@ -15,7 +15,7 @@ extends SkullModel {
 
     public HumanoidHeadModel() {
         super(0, 0, 64, 64);
-        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, 0.25f);
+        this.hat.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, 0.25f);
         this.hat.setPos(0.0f, 0.0f, 0.0f);
     }
 

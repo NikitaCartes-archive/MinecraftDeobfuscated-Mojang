@@ -349,7 +349,10 @@ extends Entity {
     }
 
     private void tickLerp() {
-        if (this.lerpSteps <= 0 || this.isControlledByLocalInstance()) {
+        if (this.isControlledByLocalInstance()) {
+            this.lerpSteps = 0;
+        }
+        if (this.lerpSteps <= 0) {
             return;
         }
         double d = this.x + (this.lerpX - this.x) / (double)this.lerpSteps;

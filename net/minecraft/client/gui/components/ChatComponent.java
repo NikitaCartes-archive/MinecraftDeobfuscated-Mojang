@@ -190,7 +190,7 @@ extends GuiComponent {
         }
         double f = this.getScale();
         double g = d - 2.0;
-        double h = (double)this.minecraft.window.getGuiScaledHeight() - e - 40.0;
+        double h = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
         g = Mth.floor(g / f);
         h = Mth.floor(h / f);
         if (g < 0.0 || h < 0.0) {

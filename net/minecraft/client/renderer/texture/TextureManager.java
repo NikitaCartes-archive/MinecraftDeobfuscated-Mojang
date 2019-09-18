@@ -5,7 +5,9 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +26,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.PreloadedTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureObject;
 import net.minecraft.client.renderer.texture.Tickable;
 import net.minecraft.client.renderer.texture.TickableTextureObject;
 import net.minecraft.resources.ResourceLocation;
@@ -33,6 +34,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureManager
@@ -50,6 +52,14 @@ PreparableReloadListener {
     }
 
     public void bind(ResourceLocation resourceLocation) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> this._bind(resourceLocation));
+        } else {
+            this._bind(resourceLocation);
+        }
+    }
+
+    private void _bind(ResourceLocation resourceLocation) {
         TextureObject textureObject = this.byPath.get(resourceLocation);
         if (textureObject == null) {
             textureObject = new SimpleTexture(resourceLocation);
@@ -89,6 +99,7 @@ PreparableReloadListener {
         return bl;
     }
 
+    @Nullable
     public TextureObject getTexture(ResourceLocation resourceLocation) {
         return this.byPath.get(resourceLocation);
     }
@@ -111,9 +122,13 @@ PreparableReloadListener {
         if (!this.byPath.containsKey(resourceLocation)) {
             PreloadedTexture preloadedTexture = new PreloadedTexture(this.resourceManager, resourceLocation, executor);
             this.byPath.put(resourceLocation, preloadedTexture);
-            return preloadedTexture.getFuture().thenRunAsync(() -> this.register(resourceLocation, preloadedTexture), Minecraft.getInstance());
+            return preloadedTexture.getFuture().thenRunAsync(() -> this.register(resourceLocation, preloadedTexture), TextureManager::execute);
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    private static void execute(Runnable runnable) {
+        Minecraft.getInstance().execute(() -> RenderSystem.recordRenderCall(runnable::run));
     }
 
     @Override
@@ -145,7 +160,7 @@ PreparableReloadListener {
                 }
                 textureObject.reset(this, resourceManager, resourceLocation, executor2);
             }
-        }, executor2);
+        }, runnable -> RenderSystem.recordRenderCall(runnable::run));
     }
 }
 

@@ -342,6 +342,11 @@ public class Mth {
         return i & 0xFF000000 | q << 16 | r << 8 | s;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static float frac(float f) {
+        return f - (float)Mth.floor(f);
+    }
+
     public static double frac(double d) {
         return d - (double)Mth.lfloor(d);
     }
@@ -535,6 +540,11 @@ public class Mth {
     @Environment(value=EnvType.CLIENT)
     public static float rotLerp(float f, float g, float h) {
         return g + f * Mth.wrapDegrees(h - g);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static float diffuseLight(float f, float g, float h) {
+        return Math.min(f * f * 0.6f + g * g * ((3.0f + g) / 4.0f) + h * h * 0.8f, 1.0f);
     }
 
     static {

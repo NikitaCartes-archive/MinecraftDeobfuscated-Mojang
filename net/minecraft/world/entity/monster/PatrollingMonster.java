@@ -145,17 +145,20 @@ extends Monster {
         private final T mob;
         private final double speedModifier;
         private final double leaderSpeedModifier;
+        private long cooldownUntil;
 
         public LongDistancePatrolGoal(T patrollingMonster, double d, double e) {
             this.mob = patrollingMonster;
             this.speedModifier = d;
             this.leaderSpeedModifier = e;
+            this.cooldownUntil = -1L;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
         @Override
         public boolean canUse() {
-            return ((PatrollingMonster)this.mob).isPatrolling() && ((Mob)this.mob).getTarget() == null && !((Entity)this.mob).isVehicle() && ((PatrollingMonster)this.mob).hasPatrolTarget();
+            boolean bl = ((PatrollingMonster)this.mob).level.getGameTime() < this.cooldownUntil;
+            return ((PatrollingMonster)this.mob).isPatrolling() && ((Mob)this.mob).getTarget() == null && !((Entity)this.mob).isVehicle() && ((PatrollingMonster)this.mob).hasPatrolTarget() && !bl;
         }
 
         @Override
@@ -182,7 +185,9 @@ extends Monster {
                     Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);
                     BlockPos blockPos = new BlockPos(vec34);
                     if (!pathNavigation.moveTo((blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos)).getX(), blockPos.getY(), blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
-                        this.moveRandomly();
+                        if (!this.moveRandomly()) {
+                            this.cooldownUntil = ((PatrollingMonster)this.mob).level.getGameTime() + 200L;
+                        }
                     } else if (bl) {
                         for (PatrollingMonster patrollingMonster : list) {
                             patrollingMonster.setPatrolTarget(blockPos);
@@ -198,10 +203,10 @@ extends Monster {
             return ((PatrollingMonster)this.mob).level.getEntitiesOfClass(PatrollingMonster.class, ((Entity)this.mob).getBoundingBox().inflate(16.0), patrollingMonster -> patrollingMonster.canJoinPatrol() && !patrollingMonster.is((Entity)this.mob));
         }
 
-        private void moveRandomly() {
+        private boolean moveRandomly() {
             Random random = ((LivingEntity)this.mob).getRandom();
             BlockPos blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos((Entity)this.mob).offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
-            ((Mob)this.mob).getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.speedModifier);
+            return ((Mob)this.mob).getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.speedModifier);
         }
     }
 }

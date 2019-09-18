@@ -3,10 +3,10 @@
  */
 package net.minecraft.client.renderer.culling;
 
+import com.mojang.blaze3d.platform.Frustum;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.culling.Culler;
-import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.culling.FrustumData;
 import net.minecraft.world.phys.AABB;
 

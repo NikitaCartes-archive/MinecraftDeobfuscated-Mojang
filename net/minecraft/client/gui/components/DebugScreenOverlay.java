@@ -94,7 +94,7 @@ extends GuiComponent {
         this.drawSystemInformation();
         RenderSystem.popMatrix();
         if (this.minecraft.options.renderFpsChart) {
-            int i = this.minecraft.window.getGuiScaledWidth();
+            int i = this.minecraft.getWindow().getGuiScaledWidth();
             this.drawChart(this.minecraft.getFrameTimer(), 0, i / 2, true);
             IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
             if (integratedServer != null) {
@@ -129,7 +129,7 @@ extends GuiComponent {
             if (Strings.isNullOrEmpty(string)) continue;
             int j = this.font.lineHeight;
             int k = this.font.width(string);
-            int l = this.minecraft.window.getGuiScaledWidth() - 2 - k;
+            int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
             int m = 2 + j * i;
             DebugScreenOverlay.fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
             this.font.draw(string, l, m, 0xE0E0E0);
@@ -295,7 +295,7 @@ extends GuiComponent {
         long m = Runtime.getRuntime().totalMemory();
         long n = Runtime.getRuntime().freeMemory();
         long o = m - n;
-        ArrayList<String> list = Lists.newArrayList(String.format("Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32), String.format("Mem: % 2d%% %03d/%03dMB", o * 100L / l, DebugScreenOverlay.bytesToMegabytes(o), DebugScreenOverlay.bytesToMegabytes(l)), String.format("Allocated: % 2d%% %03dMB", m * 100L / l, DebugScreenOverlay.bytesToMegabytes(m)), "", String.format("CPU: %s", GlUtil.getCpuInfo()), "", String.format("Display: %dx%d (%s)", Minecraft.getInstance().window.getWidth(), Minecraft.getInstance().window.getHeight(), GlUtil.getVendor()), GlUtil.getRenderer(), GlUtil.getOpenGLVersion());
+        ArrayList<String> list = Lists.newArrayList(String.format("Java: %s %dbit", System.getProperty("java.version"), this.minecraft.is64Bit() ? 64 : 32), String.format("Mem: % 2d%% %03d/%03dMB", o * 100L / l, DebugScreenOverlay.bytesToMegabytes(o), DebugScreenOverlay.bytesToMegabytes(l)), String.format("Allocated: % 2d%% %03dMB", m * 100L / l, DebugScreenOverlay.bytesToMegabytes(m)), "", String.format("CPU: %s", GlUtil.getCpuInfo()), "", String.format("Display: %dx%d (%s)", Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow().getHeight(), GlUtil.getVendor()), GlUtil.getRenderer(), GlUtil.getOpenGLVersion());
         if (this.minecraft.showOnlyReducedInfo()) {
             return list;
         }
@@ -366,7 +366,7 @@ extends GuiComponent {
             s = Math.max(s, u);
             q += (long)u;
         }
-        t = this.minecraft.window.getGuiScaledHeight();
+        t = this.minecraft.getWindow().getGuiScaledHeight();
         DebugScreenOverlay.fill(i, t - 60, i + p, t, -1873784752);
         while (m != l) {
             u = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);

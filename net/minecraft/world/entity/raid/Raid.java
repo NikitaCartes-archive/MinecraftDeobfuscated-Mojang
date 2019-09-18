@@ -5,6 +5,7 @@ package net.minecraft.world.entity.raid;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -397,14 +398,15 @@ public class Raid {
     private void playSound(BlockPos blockPos) {
         float f = 13.0f;
         int i = 64;
-        for (Player player : this.level.players()) {
-            Vec3 vec3 = new Vec3(player.x, player.y, player.z);
+        Collection<ServerPlayer> collection = this.raidEvent.getPlayers();
+        for (ServerPlayer serverPlayer : this.level.players()) {
+            Vec3 vec3 = new Vec3(serverPlayer.x, serverPlayer.y, serverPlayer.z);
             Vec3 vec32 = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             float g = Mth.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
             double d = vec3.x + (double)(13.0f / g) * (vec32.x - vec3.x);
             double e = vec3.z + (double)(13.0f / g) * (vec32.z - vec3.z);
-            if (!(g <= 64.0f) && !this.level.isVillage(new BlockPos(player))) continue;
-            ((ServerPlayer)player).connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, d, player.y, e, 64.0f, 1.0f));
+            if (!(g <= 64.0f) && !collection.contains(serverPlayer)) continue;
+            serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, d, serverPlayer.y, e, 64.0f, 1.0f));
         }
     }
 

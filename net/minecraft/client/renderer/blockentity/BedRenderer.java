@@ -3,13 +3,18 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.BedModel;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BatchedBlockEntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -20,51 +25,72 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 
 @Environment(value=EnvType.CLIENT)
 public class BedRenderer
-extends BlockEntityRenderer<BedBlockEntity> {
-    private static final ResourceLocation[] TEXTURES = (ResourceLocation[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new ResourceLocation("textures/entity/bed/" + dyeColor.getName() + ".png")).toArray(ResourceLocation[]::new);
-    private final BedModel bedModel = new BedModel();
+extends BatchedBlockEntityRenderer<BedBlockEntity> {
+    public static final ResourceLocation[] TEXTURES = (ResourceLocation[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new ResourceLocation("entity/bed/" + dyeColor.getName())).toArray(ResourceLocation[]::new);
+    private final ModelPart headPiece;
+    private final ModelPart footPiece;
+    private final ModelPart[] legs = new ModelPart[4];
+
+    public BedRenderer() {
+        this.headPiece = new ModelPart(64, 64, 0, 0);
+        this.headPiece.addBox(0.0f, 0.0f, 0.0f, 16.0f, 16.0f, 6.0f, 0.0f);
+        this.footPiece = new ModelPart(64, 64, 0, 22);
+        this.footPiece.addBox(0.0f, 0.0f, 0.0f, 16.0f, 16.0f, 6.0f, 0.0f);
+        this.legs[0] = new ModelPart(64, 64, 50, 0);
+        this.legs[1] = new ModelPart(64, 64, 50, 6);
+        this.legs[2] = new ModelPart(64, 64, 50, 12);
+        this.legs[3] = new ModelPart(64, 64, 50, 18);
+        this.legs[0].addBox(0.0f, 6.0f, -16.0f, 3.0f, 3.0f, 3.0f);
+        this.legs[1].addBox(0.0f, 6.0f, 0.0f, 3.0f, 3.0f, 3.0f);
+        this.legs[2].addBox(-16.0f, 6.0f, -16.0f, 3.0f, 3.0f, 3.0f);
+        this.legs[3].addBox(-16.0f, 6.0f, 0.0f, 3.0f, 3.0f, 3.0f);
+        this.legs[0].xRot = 1.5707964f;
+        this.legs[1].xRot = 1.5707964f;
+        this.legs[2].xRot = 1.5707964f;
+        this.legs[3].xRot = 1.5707964f;
+        this.legs[0].zRot = 0.0f;
+        this.legs[1].zRot = 1.5707964f;
+        this.legs[2].zRot = 4.712389f;
+        this.legs[3].zRot = (float)Math.PI;
+    }
 
     @Override
-    public void render(BedBlockEntity bedBlockEntity, double d, double e, double f, float g, int i) {
-        if (i >= 0) {
-            this.bindTexture(BREAKING_LOCATIONS[i]);
-            RenderSystem.matrixMode(5890);
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(4.0f, 4.0f, 1.0f);
-            RenderSystem.translatef(0.0625f, 0.0625f, 0.0625f);
-            RenderSystem.matrixMode(5888);
-        } else {
-            ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
-            if (resourceLocation != null) {
-                this.bindTexture(resourceLocation);
-            }
-        }
+    protected void renderToBuffer(BedBlockEntity bedBlockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k) {
+        ResourceLocation resourceLocation = i >= 0 ? ModelBakery.DESTROY_STAGES.get(i) : TEXTURES[bedBlockEntity.getColor().getId()];
+        this.doRender(bufferBuilder, resourceLocation, bedBlockEntity, j, k);
+    }
+
+    public void doRender(BufferBuilder bufferBuilder, ResourceLocation resourceLocation, BedBlockEntity bedBlockEntity, int i, int j) {
         if (bedBlockEntity.hasLevel()) {
             BlockState blockState = bedBlockEntity.getBlockState();
-            this.renderPiece(blockState.getValue(BedBlock.PART) == BedPart.HEAD, d, e, f, blockState.getValue(BedBlock.FACING));
+            this.renderPiece(bufferBuilder, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), resourceLocation, i, j, false);
         } else {
-            this.renderPiece(true, d, e, f, Direction.SOUTH);
-            this.renderPiece(false, d, e, f - 1.0, Direction.SOUTH);
-        }
-        if (i >= 0) {
-            RenderSystem.matrixMode(5890);
-            RenderSystem.popMatrix();
-            RenderSystem.matrixMode(5888);
+            this.renderPiece(bufferBuilder, true, Direction.SOUTH, resourceLocation, i, j, false);
+            this.renderPiece(bufferBuilder, false, Direction.SOUTH, resourceLocation, i, j, true);
         }
     }
 
-    private void renderPiece(boolean bl, double d, double e, double f, Direction direction) {
-        this.bedModel.preparePiece(bl);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)d, (float)e + 0.5625f, (float)f);
-        RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-        RenderSystem.translatef(0.5f, 0.5f, 0.5f);
-        RenderSystem.rotatef(180.0f + direction.toYRot(), 0.0f, 0.0f, 1.0f);
-        RenderSystem.translatef(-0.5f, -0.5f, -0.5f);
-        RenderSystem.enableRescaleNormal();
-        this.bedModel.render();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.popMatrix();
+    private void renderPiece(BufferBuilder bufferBuilder, boolean bl, Direction direction, ResourceLocation resourceLocation, int i, int j, boolean bl2) {
+        this.headPiece.visible = bl;
+        this.footPiece.visible = !bl;
+        this.legs[0].visible = !bl;
+        this.legs[1].visible = bl;
+        this.legs[2].visible = !bl;
+        this.legs[3].visible = bl;
+        bufferBuilder.pushPose();
+        bufferBuilder.translate(0.0, 0.5625, bl2 ? -1.0 : 0.0);
+        bufferBuilder.multiplyPose(new Quaternion(Vector3f.XP, 90.0f, true));
+        bufferBuilder.translate(0.5, 0.5, 0.5);
+        bufferBuilder.multiplyPose(new Quaternion(Vector3f.ZP, 180.0f + direction.toYRot(), true));
+        bufferBuilder.translate(-0.5, -0.5, -0.5);
+        TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
+        this.headPiece.render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        this.footPiece.render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[0].render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[1].render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[2].render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[3].render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        bufferBuilder.popPose();
     }
 }
 

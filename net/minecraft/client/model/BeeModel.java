@@ -37,16 +37,16 @@ extends EntityModel<T> {
         this.body = new ModelPart(this, 0, 0);
         this.body.setPos(0.0f, 0.0f, 0.0f);
         this.bone.addChild(this.body);
-        this.body.addBox(-3.5f, -4.0f, -5.0f, 7, 7, 10, 0.0f);
+        this.body.addBox(-3.5f, -4.0f, -5.0f, 7.0f, 7.0f, 10.0f, 0.0f);
         this.stinger = new ModelPart(this, 26, 7);
-        this.stinger.addBox(0.0f, -1.0f, 5.0f, 0, 1, 2, 0.0f);
+        this.stinger.addBox(0.0f, -1.0f, 5.0f, 0.0f, 1.0f, 2.0f, 0.0f);
         this.body.addChild(this.stinger);
         this.leftAntenna = new ModelPart(this, 2, 0);
         this.leftAntenna.setPos(0.0f, -2.0f, -5.0f);
-        this.leftAntenna.addBox(1.5f, -2.0f, -3.0f, 1, 2, 3, 0.0f);
+        this.leftAntenna.addBox(1.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f, 0.0f);
         this.rightAntenna = new ModelPart(this, 2, 3);
         this.rightAntenna.setPos(0.0f, -2.0f, -5.0f);
-        this.rightAntenna.addBox(-2.5f, -2.0f, -3.0f, 1, 2, 3, 0.0f);
+        this.rightAntenna.addBox(-2.5f, -2.0f, -3.0f, 1.0f, 2.0f, 3.0f, 0.0f);
         this.body.addChild(this.leftAntenna);
         this.body.addChild(this.rightAntenna);
         this.rightWing = new ModelPart(this, 0, 18);
@@ -55,7 +55,7 @@ extends EntityModel<T> {
         this.rightWing.yRot = -0.2618f;
         this.rightWing.zRot = 0.0f;
         this.bone.addChild(this.rightWing);
-        this.rightWing.addBox(-9.0f, 0.0f, 0.0f, 9, 0, 6, 0.001f);
+        this.rightWing.addBox(-9.0f, 0.0f, 0.0f, 9.0f, 0.0f, 6.0f, 0.001f);
         this.leftWing = new ModelPart(this, 0, 18);
         this.leftWing.setPos(1.5f, -4.0f, -3.0f);
         this.leftWing.xRot = 0.0f;
@@ -63,7 +63,7 @@ extends EntityModel<T> {
         this.leftWing.zRot = 0.0f;
         this.leftWing.mirror = true;
         this.bone.addChild(this.leftWing);
-        this.leftWing.addBox(0.0f, 0.0f, 0.0f, 9, 0, 6, 0.001f);
+        this.leftWing.addBox(0.0f, 0.0f, 0.0f, 9.0f, 0.0f, 6.0f, 0.001f);
         this.frontLeg = new ModelPart(this);
         this.frontLeg.setPos(1.5f, 3.0f, -2.0f);
         this.bone.addChild(this.frontLeg);

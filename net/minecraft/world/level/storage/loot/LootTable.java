@@ -17,10 +17,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
@@ -28,7 +26,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
@@ -95,13 +93,13 @@ public class LootTable {
         return this.paramSet;
     }
 
-    public void validate(LootTableProblemCollector lootTableProblemCollector, Function<ResourceLocation, LootTable> function, Set<ResourceLocation> set, LootContextParamSet lootContextParamSet) {
+    public void validate(ValidationContext validationContext) {
         int i;
         for (i = 0; i < this.pools.length; ++i) {
-            this.pools[i].validate(lootTableProblemCollector.forChild(".pools[" + i + "]"), function, set, lootContextParamSet);
+            this.pools[i].validate(validationContext.forChild(".pools[" + i + "]"));
         }
         for (i = 0; i < this.functions.length; ++i) {
-            this.functions[i].validate(lootTableProblemCollector.forChild(".functions[" + i + "]"), function, set, lootContextParamSet);
+            this.functions[i].validate(validationContext.forChild(".functions[" + i + "]"));
         }
     }
 

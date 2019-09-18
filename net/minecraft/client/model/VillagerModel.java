@@ -18,7 +18,7 @@ public class VillagerModel<T extends Entity>
 extends EntityModel<T>
 implements HeadedModel,
 VillagerHeadModel {
-    protected final ModelPart head;
+    protected ModelPart head;
     protected ModelPart hat;
     protected final ModelPart hatRim;
     protected final ModelPart body;
@@ -36,39 +36,39 @@ VillagerHeadModel {
         float g = 0.5f;
         this.head = new ModelPart(this).setTexSize(i, j);
         this.head.setPos(0.0f, 0.0f, 0.0f);
-        this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8, 10, 8, f);
+        this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f);
         this.hat = new ModelPart(this).setTexSize(i, j);
         this.hat.setPos(0.0f, 0.0f, 0.0f);
-        this.hat.texOffs(32, 0).addBox(-4.0f, -10.0f, -4.0f, 8, 10, 8, f + 0.5f);
+        this.hat.texOffs(32, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f + 0.5f);
         this.head.addChild(this.hat);
         this.hatRim = new ModelPart(this).setTexSize(i, j);
         this.hatRim.setPos(0.0f, 0.0f, 0.0f);
-        this.hatRim.texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16, 16, 1, f);
+        this.hatRim.texOffs(30, 47).addBox(-8.0f, -8.0f, -6.0f, 16.0f, 16.0f, 1.0f, f);
         this.hatRim.xRot = -1.5707964f;
         this.hat.addChild(this.hatRim);
         this.nose = new ModelPart(this).setTexSize(i, j);
         this.nose.setPos(0.0f, -2.0f, 0.0f);
-        this.nose.texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2, 4, 2, f);
+        this.nose.texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
         this.head.addChild(this.nose);
         this.body = new ModelPart(this).setTexSize(i, j);
         this.body.setPos(0.0f, 0.0f, 0.0f);
-        this.body.texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8, 12, 6, f);
+        this.body.texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f, f);
         this.jacket = new ModelPart(this).setTexSize(i, j);
         this.jacket.setPos(0.0f, 0.0f, 0.0f);
-        this.jacket.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8, 18, 6, f + 0.5f);
+        this.jacket.texOffs(0, 38).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 18.0f, 6.0f, f + 0.5f);
         this.body.addChild(this.jacket);
         this.arms = new ModelPart(this).setTexSize(i, j);
         this.arms.setPos(0.0f, 2.0f, 0.0f);
-        this.arms.texOffs(44, 22).addBox(-8.0f, -2.0f, -2.0f, 4, 8, 4, f);
-        this.arms.texOffs(44, 22).addBox(4.0f, -2.0f, -2.0f, 4, 8, 4, f, true);
-        this.arms.texOffs(40, 38).addBox(-4.0f, 2.0f, -2.0f, 8, 4, 4, f);
+        this.arms.texOffs(44, 22).addBox(-8.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
+        this.arms.texOffs(44, 22).addBox(4.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f, true);
+        this.arms.texOffs(40, 38).addBox(-4.0f, 2.0f, -2.0f, 8.0f, 4.0f, 4.0f, f);
         this.leg0 = new ModelPart(this, 0, 22).setTexSize(i, j);
         this.leg0.setPos(-2.0f, 12.0f, 0.0f);
-        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.leg1 = new ModelPart(this, 0, 22).setTexSize(i, j);
         this.leg1.mirror = true;
         this.leg1.setPos(2.0f, 12.0f, 0.0f);
-        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
     }
 
     @Override

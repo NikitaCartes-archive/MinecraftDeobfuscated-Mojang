@@ -16,8 +16,7 @@ public class DefaultVertexFormat {
     public static final VertexFormatElement ELEMENT_UV1 = new VertexFormatElement(1, VertexFormatElement.Type.SHORT, VertexFormatElement.Usage.UV, 2);
     public static final VertexFormatElement ELEMENT_NORMAL = new VertexFormatElement(0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.NORMAL, 3);
     public static final VertexFormatElement ELEMENT_PADDING = new VertexFormatElement(0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.PADDING, 1);
-    public static final VertexFormat BLOCK = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_UV1);
-    public static final VertexFormat BLOCK_NORMALS = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
+    public static final VertexFormat BLOCK = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_UV1).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
     public static final VertexFormat ENTITY = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
     public static final VertexFormat PARTICLE = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV1);
     public static final VertexFormat POSITION = new VertexFormat().addElement(ELEMENT_POSITION);

@@ -80,7 +80,7 @@ implements AutoCloseable {
         this.effect.safeGetUniform("OutSize").set(g, h);
         this.effect.safeGetUniform("Time").set(f);
         Minecraft minecraft = Minecraft.getInstance();
-        this.effect.safeGetUniform("ScreenSize").set(minecraft.window.getWidth(), minecraft.window.getHeight());
+        this.effect.safeGetUniform("ScreenSize").set(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
         this.effect.apply();
         this.outTarget.clear(Minecraft.ON_OSX);
         this.outTarget.bindWrite(false);

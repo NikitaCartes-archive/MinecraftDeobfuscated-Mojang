@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import net.minecraft.world.level.storage.loot.LootContextUser;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
 public class LootContextParamSet {
@@ -32,11 +32,11 @@ public class LootContextParamSet {
         return "[" + Joiner.on(", ").join(this.all.stream().map(lootContextParam -> (this.required.contains(lootContextParam) ? "!" : "") + lootContextParam.getName()).iterator()) + "]";
     }
 
-    public void validateUser(LootTableProblemCollector lootTableProblemCollector, LootContextUser lootContextUser) {
+    public void validateUser(ValidationContext validationContext, LootContextUser lootContextUser) {
         Set<LootContextParam<?>> set = lootContextUser.getReferencedContextParams();
         Sets.SetView<LootContextParam<?>> set2 = Sets.difference(set, this.all);
         if (!set2.isEmpty()) {
-            lootTableProblemCollector.reportProblem("Parameters " + set2 + " are not provided in this context");
+            validationContext.reportProblem("Parameters " + set2 + " are not provided in this context");
         }
     }
 

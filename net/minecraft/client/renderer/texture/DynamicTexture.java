@@ -3,12 +3,13 @@
  */
 package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,11 +21,19 @@ implements AutoCloseable {
 
     public DynamicTexture(NativeImage nativeImage) {
         this.pixels = nativeImage;
-        TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
-        this.upload();
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> {
+                TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
+                this.upload();
+            });
+        } else {
+            TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
+            this.upload();
+        }
     }
 
     public DynamicTexture(int i, int j, boolean bl) {
+        RenderSystem.assertThread(RenderSystem::isOnGameThreadOrInit);
         this.pixels = new NativeImage(i, j, bl);
         TextureUtil.prepareImage(this.getId(), this.pixels.getWidth(), this.pixels.getHeight());
     }

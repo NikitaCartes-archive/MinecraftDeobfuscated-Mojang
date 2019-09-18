@@ -3,23 +3,18 @@
  */
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootTableReference
@@ -33,23 +28,22 @@ extends LootPoolSingletonContainer {
 
     @Override
     public void createItemStack(Consumer<ItemStack> consumer, LootContext lootContext) {
-        LootTable lootTable = lootContext.getLootTables().get(this.name);
+        LootTable lootTable = lootContext.getLootTable(this.name);
         lootTable.getRandomItemsRaw(lootContext, consumer);
     }
 
     @Override
-    public void validate(LootTableProblemCollector lootTableProblemCollector, Function<ResourceLocation, LootTable> function, Set<ResourceLocation> set, LootContextParamSet lootContextParamSet) {
-        if (set.contains(this.name)) {
-            lootTableProblemCollector.reportProblem("Table " + this.name + " is recursively called");
+    public void validate(ValidationContext validationContext) {
+        if (validationContext.hasVisitedTable(this.name)) {
+            validationContext.reportProblem("Table " + this.name + " is recursively called");
             return;
         }
-        super.validate(lootTableProblemCollector, function, set, lootContextParamSet);
-        LootTable lootTable = function.apply(this.name);
+        super.validate(validationContext);
+        LootTable lootTable = validationContext.resolveLootTable(this.name);
         if (lootTable == null) {
-            lootTableProblemCollector.reportProblem("Unknown loot table called " + this.name);
+            validationContext.reportProblem("Unknown loot table called " + this.name);
         } else {
-            ImmutableCollection set2 = ((ImmutableSet.Builder)((ImmutableSet.Builder)ImmutableSet.builder().addAll(set)).add(this.name)).build();
-            lootTable.validate(lootTableProblemCollector.forChild("->{" + this.name + "}"), function, (Set<ResourceLocation>)((Object)set2), lootContextParamSet);
+            lootTable.validate(validationContext.enterTable("->{" + this.name + "}", this.name));
         }
     }
 

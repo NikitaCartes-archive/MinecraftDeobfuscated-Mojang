@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.vertex;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -156,6 +157,28 @@ public class VertexFormat {
         i = 31 * i + this.offsets.hashCode();
         i = 31 * i + this.vertexSize;
         return i;
+    }
+
+    public void setupBufferState(long l) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> this.setupBufferState(l));
+            return;
+        }
+        int i = this.getVertexSize();
+        List<VertexFormatElement> list = this.getElements();
+        for (int j = 0; j < list.size(); ++j) {
+            list.get(j).setupBufferState(l + (long)this.getOffset(j), i);
+        }
+    }
+
+    public void clearBufferState() {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(this::clearBufferState);
+            return;
+        }
+        for (VertexFormatElement vertexFormatElement : this.getElements()) {
+            vertexFormatElement.clearBufferState();
+        }
     }
 }
 

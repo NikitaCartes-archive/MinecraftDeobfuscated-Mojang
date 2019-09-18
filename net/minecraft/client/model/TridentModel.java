@@ -19,16 +19,16 @@ extends Model {
         this.texWidth = 32;
         this.texHeight = 32;
         this.pole = new ModelPart(this, 0, 0);
-        this.pole.addBox(-0.5f, -4.0f, -0.5f, 1, 31, 1, 0.0f);
+        this.pole.addBox(-0.5f, -4.0f, -0.5f, 1.0f, 31.0f, 1.0f, 0.0f);
         ModelPart modelPart = new ModelPart(this, 4, 0);
-        modelPart.addBox(-1.5f, 0.0f, -0.5f, 3, 2, 1);
+        modelPart.addBox(-1.5f, 0.0f, -0.5f, 3.0f, 2.0f, 1.0f);
         this.pole.addChild(modelPart);
         ModelPart modelPart2 = new ModelPart(this, 4, 3);
-        modelPart2.addBox(-2.5f, -3.0f, -0.5f, 1, 4, 1);
+        modelPart2.addBox(-2.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f);
         this.pole.addChild(modelPart2);
         ModelPart modelPart3 = new ModelPart(this, 4, 3);
         modelPart3.mirror = true;
-        modelPart3.addBox(1.5f, -3.0f, -0.5f, 1, 4, 1);
+        modelPart3.addBox(1.5f, -3.0f, -0.5f, 1.0f, 4.0f, 1.0f);
         this.pole.addChild(modelPart3);
     }
 

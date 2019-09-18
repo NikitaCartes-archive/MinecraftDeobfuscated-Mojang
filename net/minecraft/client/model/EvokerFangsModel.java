@@ -19,13 +19,13 @@ extends EntityModel<T> {
 
     public EvokerFangsModel() {
         this.base.setPos(-5.0f, 22.0f, -5.0f);
-        this.base.addBox(0.0f, 0.0f, 0.0f, 10, 12, 10);
+        this.base.addBox(0.0f, 0.0f, 0.0f, 10.0f, 12.0f, 10.0f);
         this.upperJaw = new ModelPart(this, 40, 0);
         this.upperJaw.setPos(1.5f, 22.0f, -4.0f);
-        this.upperJaw.addBox(0.0f, 0.0f, 0.0f, 4, 14, 8);
+        this.upperJaw.addBox(0.0f, 0.0f, 0.0f, 4.0f, 14.0f, 8.0f);
         this.lowerJaw = new ModelPart(this, 40, 0);
         this.lowerJaw.setPos(-1.5f, 22.0f, 4.0f);
-        this.lowerJaw.addBox(0.0f, 0.0f, 0.0f, 4, 14, 8);
+        this.lowerJaw.addBox(0.0f, 0.0f, 0.0f, 4.0f, 14.0f, 8.0f);
     }
 
     @Override

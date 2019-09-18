@@ -32,27 +32,27 @@ extends EntityModel<Guardian> {
         this.texHeight = 64;
         this.spikeParts = new ModelPart[12];
         this.head = new ModelPart(this);
-        this.head.texOffs(0, 0).addBox(-6.0f, 10.0f, -8.0f, 12, 12, 16);
-        this.head.texOffs(0, 28).addBox(-8.0f, 10.0f, -6.0f, 2, 12, 12);
-        this.head.texOffs(0, 28).addBox(6.0f, 10.0f, -6.0f, 2, 12, 12, true);
-        this.head.texOffs(16, 40).addBox(-6.0f, 8.0f, -6.0f, 12, 2, 12);
-        this.head.texOffs(16, 40).addBox(-6.0f, 22.0f, -6.0f, 12, 2, 12);
+        this.head.texOffs(0, 0).addBox(-6.0f, 10.0f, -8.0f, 12.0f, 12.0f, 16.0f);
+        this.head.texOffs(0, 28).addBox(-8.0f, 10.0f, -6.0f, 2.0f, 12.0f, 12.0f);
+        this.head.texOffs(0, 28).addBox(6.0f, 10.0f, -6.0f, 2.0f, 12.0f, 12.0f, true);
+        this.head.texOffs(16, 40).addBox(-6.0f, 8.0f, -6.0f, 12.0f, 2.0f, 12.0f);
+        this.head.texOffs(16, 40).addBox(-6.0f, 22.0f, -6.0f, 12.0f, 2.0f, 12.0f);
         for (int i = 0; i < this.spikeParts.length; ++i) {
             this.spikeParts[i] = new ModelPart(this, 0, 0);
-            this.spikeParts[i].addBox(-1.0f, -4.5f, -1.0f, 2, 9, 2);
+            this.spikeParts[i].addBox(-1.0f, -4.5f, -1.0f, 2.0f, 9.0f, 2.0f);
             this.head.addChild(this.spikeParts[i]);
         }
         this.eye = new ModelPart(this, 8, 0);
-        this.eye.addBox(-1.0f, 15.0f, 0.0f, 2, 2, 1);
+        this.eye.addBox(-1.0f, 15.0f, 0.0f, 2.0f, 2.0f, 1.0f);
         this.head.addChild(this.eye);
         this.tailParts = new ModelPart[3];
         this.tailParts[0] = new ModelPart(this, 40, 0);
-        this.tailParts[0].addBox(-2.0f, 14.0f, 7.0f, 4, 4, 8);
+        this.tailParts[0].addBox(-2.0f, 14.0f, 7.0f, 4.0f, 4.0f, 8.0f);
         this.tailParts[1] = new ModelPart(this, 0, 54);
-        this.tailParts[1].addBox(0.0f, 14.0f, 0.0f, 3, 3, 7);
+        this.tailParts[1].addBox(0.0f, 14.0f, 0.0f, 3.0f, 3.0f, 7.0f);
         this.tailParts[2] = new ModelPart(this);
-        this.tailParts[2].texOffs(41, 32).addBox(0.0f, 14.0f, 0.0f, 2, 2, 6);
-        this.tailParts[2].texOffs(25, 19).addBox(1.0f, 10.5f, 3.0f, 1, 9, 9);
+        this.tailParts[2].texOffs(41, 32).addBox(0.0f, 14.0f, 0.0f, 2.0f, 2.0f, 6.0f);
+        this.tailParts[2].texOffs(25, 19).addBox(1.0f, 10.5f, 3.0f, 1.0f, 9.0f, 9.0f);
         this.head.addChild(this.tailParts[0]);
         this.tailParts[0].addChild(this.tailParts[1]);
         this.tailParts[1].addChild(this.tailParts[2]);

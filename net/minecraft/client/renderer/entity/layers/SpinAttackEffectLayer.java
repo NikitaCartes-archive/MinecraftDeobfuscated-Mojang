@@ -56,7 +56,7 @@ extends RenderLayer<T, PlayerModel<T>> {
             this.texWidth = 64;
             this.texHeight = 64;
             this.box = new ModelPart(this, 0, 0);
-            this.box.addBox(-8.0f, -16.0f, -8.0f, 16, 32, 16);
+            this.box.addBox(-8.0f, -16.0f, -8.0f, 16.0f, 32.0f, 16.0f);
         }
 
         public void render(float f, float g, float h, float i, float j, float k) {

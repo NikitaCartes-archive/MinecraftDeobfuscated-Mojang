@@ -3,9 +3,9 @@
  */
 package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.platform.TextureObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureObject;
 import net.minecraft.client.renderer.texture.Tickable;
 
 @Environment(value=EnvType.CLIENT)

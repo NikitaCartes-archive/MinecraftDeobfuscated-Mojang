@@ -34,6 +34,7 @@ implements Nameable {
     private List<BannerPattern> patterns;
     private List<DyeColor> colors;
     private String textureHashName;
+    private boolean onlyRenderPattern = false;
 
     public BannerBlockEntity() {
         super(BlockEntityType.BANNER);
@@ -204,6 +205,16 @@ implements Nameable {
             this.baseColor = ((AbstractBannerBlock)supplier.get().getBlock()).getColor();
         }
         return this.baseColor;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public void setOnlyRenderPattern(boolean bl) {
+        this.onlyRenderPattern = bl;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean onlyRenderPattern() {
+        return this.onlyRenderPattern;
     }
 }
 

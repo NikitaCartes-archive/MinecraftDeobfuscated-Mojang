@@ -1,15 +1,15 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.renderer.culling;
+package com.mojang.blaze3d.platform;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.FloatBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.culling.FrustumData;
-import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public class Frustum
@@ -25,7 +25,7 @@ extends FrustumData {
     }
 
     private void normalizePlane(float[] fs) {
-        float f = Mth.sqrt(fs[0] * fs[0] + fs[1] * fs[1] + fs[2] * fs[2]);
+        float f = (float)Math.sqrt(fs[0] * fs[0] + fs[1] * fs[1] + fs[2] * fs[2]);
         fs[0] = fs[0] / f;
         fs[1] = fs[1] / f;
         fs[2] = fs[2] / f;
@@ -33,11 +33,19 @@ extends FrustumData {
     }
 
     public void calculateFrustum() {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(this::_calculateFrustum);
+        } else {
+            this._calculateFrustum();
+        }
+    }
+
+    private void _calculateFrustum() {
         this._proj.clear();
         this._modl.clear();
         this._clip.clear();
-        RenderSystem.getMatrix(2983, this._proj);
-        RenderSystem.getMatrix(2982, this._modl);
+        GlStateManager._getMatrix(2983, this._proj);
+        GlStateManager._getMatrix(2982, this._modl);
         float[] fs = this.projectionMatrix;
         float[] gs = this.modelViewMatrix;
         this._proj.flip().limit(16);

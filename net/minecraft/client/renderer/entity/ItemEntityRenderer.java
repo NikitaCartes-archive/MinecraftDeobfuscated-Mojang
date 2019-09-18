@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Random;
@@ -81,10 +80,10 @@ extends EntityRenderer<ItemEntity> {
             bl = true;
         }
         RenderSystem.enableRescaleNormal();
-        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.defaultAlphaFunc();
         RenderSystem.enableBlend();
         Lighting.turnOn();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.pushMatrix();
         BakedModel bakedModel = this.itemRenderer.getModel(itemStack, itemEntity.level, null);
         int j = this.setupBobbingItem(itemEntity, d, e, f, h, bakedModel);

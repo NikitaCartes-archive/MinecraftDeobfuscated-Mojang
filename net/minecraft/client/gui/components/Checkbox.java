@@ -41,7 +41,7 @@ extends AbstractButton {
         Font font = minecraft.font;
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, this.alpha);
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         Checkbox.blit(this.x, this.y, 0.0f, this.selected ? 20.0f : 0.0f, 20, this.height, 32, 64);
         this.renderBg(minecraft, i, j);

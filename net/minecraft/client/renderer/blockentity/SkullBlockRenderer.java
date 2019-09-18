@@ -6,7 +6,6 @@ package net.minecraft.client.renderer.blockentity;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -16,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidHeadModel;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.dragon.DragonHeadModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -37,7 +37,7 @@ extends BlockEntityRenderer<SkullBlockEntity> {
     private static final Map<SkullBlock.Type, ResourceLocation> SKIN_BY_TYPE;
 
     @Override
-    public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, int i) {
+    public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
         float h = skullBlockEntity.getMouthAnimation(g);
         BlockState blockState = skullBlockEntity.getBlockState();
         boolean bl = blockState.getBlock() instanceof WallSkullBlock;
@@ -55,7 +55,7 @@ extends BlockEntityRenderer<SkullBlockEntity> {
     public void renderSkull(float f, float g, float h, @Nullable Direction direction, float i, SkullBlock.Type type, @Nullable GameProfile gameProfile, int j, float k) {
         SkullModel skullModel = MODEL_BY_TYPE.get(type);
         if (j >= 0) {
-            this.bindTexture(BREAKING_LOCATIONS[j]);
+            this.bindTexture((ResourceLocation)BREAKING_LOCATIONS.get(j));
             RenderSystem.matrixMode(5890);
             RenderSystem.pushMatrix();
             RenderSystem.scalef(4.0f, 2.0f, 1.0f);
@@ -65,7 +65,6 @@ extends BlockEntityRenderer<SkullBlockEntity> {
             this.bindTexture(this.getLocation(type, gameProfile));
         }
         RenderSystem.pushMatrix();
-        RenderSystem.disableCull();
         if (direction == null) {
             RenderSystem.translatef(f + 0.5f, g, h + 0.5f);
         } else {
@@ -91,7 +90,7 @@ extends BlockEntityRenderer<SkullBlockEntity> {
         RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
         RenderSystem.enableAlphaTest();
         if (type == SkullBlock.Types.PLAYER) {
-            GlStateManager.setProfile(GlStateManager.Profile.PLAYER_SKIN);
+            RenderSystem.setProfile(RenderSystem.Profile.PLAYER_SKIN);
         }
         skullModel.render(k, 0.0f, 0.0f, i, 0.0f, 0.0625f);
         RenderSystem.popMatrix();

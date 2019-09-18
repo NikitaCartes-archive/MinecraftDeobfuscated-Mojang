@@ -19,7 +19,7 @@ extends SkullModel {
         this.texWidth = 256;
         this.texHeight = 256;
         float g = -16.0f;
-        this.head = new ModelPart(this, "head");
+        this.head = new ModelPart(this);
         this.head.addBox("upperlip", -6.0f, -1.0f, -24.0f, 12, 5, 16, f, 176, 44);
         this.head.addBox("upperhead", -8.0f, -8.0f, -10.0f, 16, 16, 16, f, 112, 30);
         this.head.mirror = true;
@@ -28,7 +28,7 @@ extends SkullModel {
         this.head.mirror = false;
         this.head.addBox("scale", 3.0f, -12.0f, -4.0f, 2, 4, 6, f, 0, 0);
         this.head.addBox("nostril", 3.0f, -3.0f, -22.0f, 2, 2, 4, f, 112, 0);
-        this.jaw = new ModelPart(this, "jaw");
+        this.jaw = new ModelPart(this);
         this.jaw.setPos(0.0f, 4.0f, -8.0f);
         this.jaw.addBox("jaw", -6.0f, 0.0f, -16.0f, 12, 4, 16, f, 176, 65);
         this.head.addChild(this.jaw);

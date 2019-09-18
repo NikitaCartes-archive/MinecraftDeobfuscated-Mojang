@@ -383,8 +383,8 @@ extends Screen {
 
         public boolean mouseScrolled(double d) {
             int j;
-            int i = (int)(((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.mouseHandler.xpos() * (double)((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.window.getGuiScaledWidth() / (double)((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.window.getScreenWidth());
-            if (this.rect.contains(i, j = (int)(((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.mouseHandler.ypos() * (double)((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.window.getGuiScaledHeight() / (double)((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.window.getScreenHeight()))) {
+            int i = (int)(((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.mouseHandler.xpos() * (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getGuiScaledWidth() / (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getScreenWidth());
+            if (this.rect.contains(i, j = (int)(((AbstractCommandBlockEditScreen)AbstractCommandBlockEditScreen.this).minecraft.mouseHandler.ypos() * (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getGuiScaledHeight() / (double)AbstractCommandBlockEditScreen.this.minecraft.getWindow().getScreenHeight()))) {
                 this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestions.getList().size() - 7, 0));
                 return true;
             }

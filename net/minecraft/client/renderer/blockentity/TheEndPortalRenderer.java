@@ -14,16 +14,16 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
-public class TheEndPortalRenderer
-extends BlockEntityRenderer<TheEndPortalBlockEntity> {
+public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity>
+extends BlockEntityRenderer<T> {
     private static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
     private static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
     private static final Random RANDOM = new Random(31100L);
@@ -32,7 +32,7 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
     private final FloatBuffer buffer = MemoryTracker.createFloatBuffer(16);
 
     @Override
-    public void render(TheEndPortalBlockEntity theEndPortalBlockEntity, double d, double e, double f, float g, int i) {
+    public void render(T theEndPortalBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
         RenderSystem.disableLighting();
         RANDOM.setSeed(31100L);
         RenderSystem.getMatrix(2982, MODELVIEW);
@@ -41,7 +41,6 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
         int j = this.getPasses(h);
         float k = this.getOffset();
         boolean bl = false;
-        GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
         for (int l = 0; l < j; ++l) {
             RenderSystem.pushMatrix();
             float m = 2.0f / (float)(18 - l);
@@ -54,7 +53,7 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
             if (l >= 1) {
                 this.bindTexture(END_PORTAL_LOCATION);
                 bl = true;
-                gameRenderer.resetFogColor(true);
+                FogRenderer.resetFogColor(true);
             }
             if (l == 1) {
                 RenderSystem.enableBlend();
@@ -87,37 +86,37 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
             float o = (RANDOM.nextFloat() * 0.5f + 0.1f) * m;
             float p = (RANDOM.nextFloat() * 0.5f + 0.4f) * m;
             float q = (RANDOM.nextFloat() * 0.5f + 0.5f) * m;
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.SOUTH)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.SOUTH)) {
                 bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e + 1.0, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e + 1.0, f + 1.0).color(o, p, q, 1.0f).endVertex();
             }
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.NORTH)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.NORTH)) {
                 bufferBuilder.vertex(d, e + 1.0, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e + 1.0, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0f).endVertex();
             }
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.EAST)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.EAST)) {
                 bufferBuilder.vertex(d + 1.0, e + 1.0, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e + 1.0, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0f).endVertex();
             }
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.WEST)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.WEST)) {
                 bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e + 1.0, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e + 1.0, f).color(o, p, q, 1.0f).endVertex();
             }
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.DOWN)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.DOWN)) {
                 bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0f).endVertex();
             }
-            if (theEndPortalBlockEntity.shouldRenderFace(Direction.UP)) {
+            if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(Direction.UP)) {
                 bufferBuilder.vertex(d, e + (double)k, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e + (double)k, f + 1.0).color(o, p, q, 1.0f).endVertex();
                 bufferBuilder.vertex(d + 1.0, e + (double)k, f).color(o, p, q, 1.0f).endVertex();
@@ -134,7 +133,7 @@ extends BlockEntityRenderer<TheEndPortalBlockEntity> {
         RenderSystem.disableTexGen(GlStateManager.TexGen.R);
         RenderSystem.enableLighting();
         if (bl) {
-            gameRenderer.resetFogColor(false);
+            FogRenderer.resetFogColor(false);
         }
     }
 

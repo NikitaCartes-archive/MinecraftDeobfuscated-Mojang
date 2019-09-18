@@ -6,7 +6,7 @@ package net.minecraft.client.renderer.entity.layers;
 import com.mojang.blaze3d.platform.Lighting;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.StuckInBodyLayer;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Arrow;
 
 @Environment(value=EnvType.CLIENT)
-public class ArrowLayer<T extends LivingEntity, M extends EntityModel<T>>
+public class ArrowLayer<T extends LivingEntity, M extends PlayerModel<T>>
 extends StuckInBodyLayer<T, M> {
     private final EntityRenderDispatcher dispatcher;
     private Arrow arrow;

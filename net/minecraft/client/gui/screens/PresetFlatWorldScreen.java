@@ -228,7 +228,7 @@ extends Screen {
             private void blitSlotBg(int i, int j) {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 PresetsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
-                GuiComponent.blit(i, j, PresetFlatWorldScreen.this.blitOffset, 0.0f, 0.0f, 18, 18, 128, 128);
+                GuiComponent.blit(i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }
         }
     }

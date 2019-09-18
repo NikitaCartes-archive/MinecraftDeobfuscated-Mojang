@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.Direction;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 public class CampfireRenderer
 extends BlockEntityRenderer<CampfireBlockEntity> {
     @Override
-    public void render(CampfireBlockEntity campfireBlockEntity, double d, double e, double f, float g, int i) {
+    public void render(CampfireBlockEntity campfireBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
         Direction direction = campfireBlockEntity.getBlockState().getValue(CampfireBlock.FACING);
         NonNullList<ItemStack> nonNullList = campfireBlockEntity.getItems();
         for (int j = 0; j < nonNullList.size(); ++j) {

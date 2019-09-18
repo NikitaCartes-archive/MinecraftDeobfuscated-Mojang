@@ -83,7 +83,7 @@ implements AutoCloseable {
         float g = level.getSkyDarken(1.0f);
         float h = g * 0.95f + 0.05f;
         float i = this.minecraft.player.getWaterVision();
-        float j = this.minecraft.player.hasEffect(MobEffects.NIGHT_VISION) ? this.renderer.getNightVisionScale(this.minecraft.player, f) : (i > 0.0f && this.minecraft.player.hasEffect(MobEffects.CONDUIT_POWER) ? i : 0.0f);
+        float j = this.minecraft.player.hasEffect(MobEffects.NIGHT_VISION) ? GameRenderer.getNightVisionScale(this.minecraft.player, f) : (i > 0.0f && this.minecraft.player.hasEffect(MobEffects.CONDUIT_POWER) ? i : 0.0f);
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
                 float x;

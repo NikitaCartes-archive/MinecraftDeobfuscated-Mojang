@@ -80,10 +80,7 @@ implements BucketPickup {
     @Override
     @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
-        if (blockState2.getFluidState().getType().isSame(this.fluid)) {
-            return true;
-        }
-        return super.canOcclude(blockState);
+        return blockState2.getFluidState().getType().isSame(this.fluid);
     }
 
     @Override

@@ -26,17 +26,15 @@ public class PlayerInfo {
     private GameType gameMode;
     private int latency;
     private boolean pendingTextures;
+    @Nullable
     private String skinModel;
+    @Nullable
     private Component tabListDisplayName;
     private int lastHealth;
     private int displayHealth;
     private long lastHealthTime;
     private long healthBlinkTime;
     private long renderVisibilityId;
-
-    public PlayerInfo(GameProfile gameProfile) {
-        this.profile = gameProfile;
-    }
 
     public PlayerInfo(ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate) {
         this.profile = playerUpdate.getProfile();
@@ -49,6 +47,7 @@ public class PlayerInfo {
         return this.profile;
     }
 
+    @Nullable
     public GameType getGameMode() {
         return this.gameMode;
     }
@@ -107,20 +106,11 @@ public class PlayerInfo {
             if (!this.pendingTextures) {
                 this.pendingTextures = true;
                 Minecraft.getInstance().getSkinManager().registerSkins(this.profile, (type, resourceLocation, minecraftProfileTexture) -> {
-                    switch (type) {
-                        case SKIN: {
-                            this.textureLocations.put(MinecraftProfileTexture.Type.SKIN, resourceLocation);
-                            this.skinModel = minecraftProfileTexture.getMetadata("model");
-                            if (this.skinModel != null) break;
+                    this.textureLocations.put(type, resourceLocation);
+                    if (type == MinecraftProfileTexture.Type.SKIN) {
+                        this.skinModel = minecraftProfileTexture.getMetadata("model");
+                        if (this.skinModel == null) {
                             this.skinModel = "default";
-                            break;
-                        }
-                        case CAPE: {
-                            this.textureLocations.put(MinecraftProfileTexture.Type.CAPE, resourceLocation);
-                            break;
-                        }
-                        case ELYTRA: {
-                            this.textureLocations.put(MinecraftProfileTexture.Type.ELYTRA, resourceLocation);
                         }
                     }
                 }, true);

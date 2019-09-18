@@ -471,8 +471,8 @@ extends Screen {
 
         public boolean mouseScrolled(double d) {
             int j;
-            int i = (int)(ChatScreen.this.minecraft.mouseHandler.xpos() * (double)ChatScreen.this.minecraft.window.getGuiScaledWidth() / (double)ChatScreen.this.minecraft.window.getScreenWidth());
-            if (this.rect.contains(i, j = (int)(ChatScreen.this.minecraft.mouseHandler.ypos() * (double)ChatScreen.this.minecraft.window.getGuiScaledHeight() / (double)ChatScreen.this.minecraft.window.getScreenHeight()))) {
+            int i = (int)(ChatScreen.this.minecraft.mouseHandler.xpos() * (double)ChatScreen.this.minecraft.getWindow().getGuiScaledWidth() / (double)ChatScreen.this.minecraft.getWindow().getScreenWidth());
+            if (this.rect.contains(i, j = (int)(ChatScreen.this.minecraft.mouseHandler.ypos() * (double)ChatScreen.this.minecraft.getWindow().getGuiScaledHeight() / (double)ChatScreen.this.minecraft.getWindow().getScreenHeight()))) {
                 this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestions.getList().size() - 10, 0));
                 return true;
             }

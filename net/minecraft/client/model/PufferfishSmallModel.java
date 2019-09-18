@@ -25,22 +25,22 @@ extends EntityModel<T> {
         this.texHeight = 32;
         int i = 23;
         this.cube = new ModelPart(this, 0, 27);
-        this.cube.addBox(-1.5f, -2.0f, -1.5f, 3, 2, 3);
+        this.cube.addBox(-1.5f, -2.0f, -1.5f, 3.0f, 2.0f, 3.0f);
         this.cube.setPos(0.0f, 23.0f, 0.0f);
         this.eye0 = new ModelPart(this, 24, 6);
-        this.eye0.addBox(-1.5f, 0.0f, -1.5f, 1, 1, 1);
+        this.eye0.addBox(-1.5f, 0.0f, -1.5f, 1.0f, 1.0f, 1.0f);
         this.eye0.setPos(0.0f, 20.0f, 0.0f);
         this.eye1 = new ModelPart(this, 28, 6);
-        this.eye1.addBox(0.5f, 0.0f, -1.5f, 1, 1, 1);
+        this.eye1.addBox(0.5f, 0.0f, -1.5f, 1.0f, 1.0f, 1.0f);
         this.eye1.setPos(0.0f, 20.0f, 0.0f);
         this.finBack = new ModelPart(this, -3, 0);
-        this.finBack.addBox(-1.5f, 0.0f, 0.0f, 3, 0, 3);
+        this.finBack.addBox(-1.5f, 0.0f, 0.0f, 3.0f, 0.0f, 3.0f);
         this.finBack.setPos(0.0f, 22.0f, 1.5f);
         this.fin0 = new ModelPart(this, 25, 0);
-        this.fin0.addBox(-1.0f, 0.0f, 0.0f, 1, 0, 2);
+        this.fin0.addBox(-1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f);
         this.fin0.setPos(-1.5f, 22.0f, -1.5f);
         this.fin1 = new ModelPart(this, 25, 0);
-        this.fin1.addBox(0.0f, 0.0f, 0.0f, 1, 0, 2);
+        this.fin1.addBox(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f);
         this.fin1.setPos(1.5f, 22.0f, -1.5f);
     }
 

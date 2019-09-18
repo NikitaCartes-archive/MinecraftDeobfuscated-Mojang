@@ -28,13 +28,13 @@ extends HumanoidModel<Vex> {
         this.leftLeg.visible = false;
         this.hat.visible = false;
         this.rightLeg = new ModelPart(this, 32, 0);
-        this.rightLeg.addBox(-1.0f, -1.0f, -2.0f, 6, 10, 4, 0.0f);
+        this.rightLeg.addBox(-1.0f, -1.0f, -2.0f, 6.0f, 10.0f, 4.0f, 0.0f);
         this.rightLeg.setPos(-1.9f, 12.0f, 0.0f);
         this.rightWing = new ModelPart(this, 0, 32);
-        this.rightWing.addBox(-20.0f, 0.0f, 0.0f, 20, 12, 1);
+        this.rightWing.addBox(-20.0f, 0.0f, 0.0f, 20.0f, 12.0f, 1.0f);
         this.leftWing = new ModelPart(this, 0, 32);
         this.leftWing.mirror = true;
-        this.leftWing.addBox(0.0f, 0.0f, 0.0f, 20, 12, 1);
+        this.leftWing.addBox(0.0f, 0.0f, 0.0f, 20.0f, 12.0f, 1.0f);
     }
 
     @Override

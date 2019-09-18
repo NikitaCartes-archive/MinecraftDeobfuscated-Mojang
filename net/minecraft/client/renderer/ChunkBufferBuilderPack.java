@@ -4,27 +4,22 @@
 package net.minecraft.client.renderer;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import java.util.Map;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.level.BlockLayer;
+import net.minecraft.client.renderer.RenderType;
 
 @Environment(value=EnvType.CLIENT)
 public class ChunkBufferBuilderPack {
-    private final BufferBuilder[] builders = new BufferBuilder[BlockLayer.values().length];
+    private final Map<RenderType, BufferBuilder> builders = RenderType.chunkBufferLayers().stream().collect(Collectors.toMap(renderType -> renderType, renderType -> new BufferBuilder(renderType.bufferSize())));
 
-    public ChunkBufferBuilderPack() {
-        this.builders[BlockLayer.SOLID.ordinal()] = new BufferBuilder(0x200000);
-        this.builders[BlockLayer.CUTOUT.ordinal()] = new BufferBuilder(131072);
-        this.builders[BlockLayer.CUTOUT_MIPPED.ordinal()] = new BufferBuilder(131072);
-        this.builders[BlockLayer.TRANSLUCENT.ordinal()] = new BufferBuilder(262144);
+    public BufferBuilder builder(RenderType renderType) {
+        return this.builders.get(renderType);
     }
 
-    public BufferBuilder builder(BlockLayer blockLayer) {
-        return this.builders[blockLayer.ordinal()];
-    }
-
-    public BufferBuilder builder(int i) {
-        return this.builders[i];
+    public void clearAll() {
+        this.builders.values().forEach(BufferBuilder::clear);
     }
 }
 

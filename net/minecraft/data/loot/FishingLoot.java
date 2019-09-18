@@ -30,13 +30,13 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class FishingLoot
 implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
-    public static final LootItemCondition.Builder IN_JUNGLE = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.JUNGLE));
-    public static final LootItemCondition.Builder IN_JUNGLE_HILLS = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.JUNGLE_HILLS));
-    public static final LootItemCondition.Builder IN_JUNGLE_EDGE = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.JUNGLE_EDGE));
-    public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.BAMBOO_JUNGLE));
-    public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.MODIFIED_JUNGLE));
-    public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE_EDGE = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.MODIFIED_JUNGLE_EDGE));
-    public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE_HILLS = LocationCheck.checkLocation(new LocationPredicate.Builder().setBiome(Biomes.BAMBOO_JUNGLE_HILLS));
+    public static final LootItemCondition.Builder IN_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE));
+    public static final LootItemCondition.Builder IN_JUNGLE_HILLS = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE_HILLS));
+    public static final LootItemCondition.Builder IN_JUNGLE_EDGE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE_EDGE));
+    public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.BAMBOO_JUNGLE));
+    public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.MODIFIED_JUNGLE));
+    public static final LootItemCondition.Builder IN_MODIFIED_JUNGLE_EDGE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.MODIFIED_JUNGLE_EDGE));
+    public static final LootItemCondition.Builder IN_BAMBOO_JUNGLE_HILLS = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.BAMBOO_JUNGLE_HILLS));
 
     @Override
     public void accept(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {

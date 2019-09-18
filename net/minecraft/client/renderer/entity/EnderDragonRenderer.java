@@ -58,7 +58,7 @@ extends MobRenderer<EnderDragon, DragonModel> {
             RenderSystem.alphaFunc(516, l);
             this.bindTexture(DRAGON_EXPLODING_LOCATION);
             ((DragonModel)this.model).render(enderDragon, f, g, h, i, j, k);
-            RenderSystem.alphaFunc(516, 0.1f);
+            RenderSystem.defaultAlphaFunc();
             RenderSystem.depthFunc(514);
         }
         this.bindTexture(enderDragon);

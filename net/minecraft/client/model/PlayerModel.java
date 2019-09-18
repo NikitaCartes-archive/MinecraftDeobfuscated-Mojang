@@ -3,7 +3,10 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.List;
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 @Environment(value=EnvType.CLIENT)
 public class PlayerModel<T extends LivingEntity>
 extends HumanoidModel<T> {
+    private List<ModelPart> cubes = Lists.newArrayList();
     public final ModelPart leftSleeve;
     public final ModelPart rightSleeve;
     public final ModelPart leftPants;
@@ -28,45 +32,45 @@ extends HumanoidModel<T> {
         super(f, 0.0f, 64, 64);
         this.slim = bl;
         this.ear = new ModelPart(this, 24, 0);
-        this.ear.addBox(-3.0f, -6.0f, -1.0f, 6, 6, 1, f);
+        this.ear.addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, f);
         this.cloak = new ModelPart(this, 0, 0);
         this.cloak.setTexSize(64, 32);
-        this.cloak.addBox(-5.0f, 0.0f, -1.0f, 10, 16, 1, f);
+        this.cloak.addBox(-5.0f, 0.0f, -1.0f, 10.0f, 16.0f, 1.0f, f);
         if (bl) {
             this.leftArm = new ModelPart(this, 32, 48);
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 3, 12, 4, f);
+            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f);
             this.leftArm.setPos(5.0f, 2.5f, 0.0f);
             this.rightArm = new ModelPart(this, 40, 16);
-            this.rightArm.addBox(-2.0f, -2.0f, -2.0f, 3, 12, 4, f);
+            this.rightArm.addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f);
             this.rightArm.setPos(-5.0f, 2.5f, 0.0f);
             this.leftSleeve = new ModelPart(this, 48, 48);
-            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 3, 12, 4, f + 0.25f);
+            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f + 0.25f);
             this.leftSleeve.setPos(5.0f, 2.5f, 0.0f);
             this.rightSleeve = new ModelPart(this, 40, 32);
-            this.rightSleeve.addBox(-2.0f, -2.0f, -2.0f, 3, 12, 4, f + 0.25f);
+            this.rightSleeve.addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, f + 0.25f);
             this.rightSleeve.setPos(-5.0f, 2.5f, 10.0f);
         } else {
             this.leftArm = new ModelPart(this, 32, 48);
-            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, f);
+            this.leftArm.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
             this.leftArm.setPos(5.0f, 2.0f, 0.0f);
             this.leftSleeve = new ModelPart(this, 48, 48);
-            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 4, 12, 4, f + 0.25f);
+            this.leftSleeve.addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
             this.leftSleeve.setPos(5.0f, 2.0f, 0.0f);
             this.rightSleeve = new ModelPart(this, 40, 32);
-            this.rightSleeve.addBox(-3.0f, -2.0f, -2.0f, 4, 12, 4, f + 0.25f);
+            this.rightSleeve.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
             this.rightSleeve.setPos(-5.0f, 2.0f, 10.0f);
         }
         this.leftLeg = new ModelPart(this, 16, 48);
-        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f);
+        this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.leftLeg.setPos(1.9f, 12.0f, 0.0f);
         this.leftPants = new ModelPart(this, 0, 48);
-        this.leftPants.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f + 0.25f);
+        this.leftPants.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
         this.leftPants.setPos(1.9f, 12.0f, 0.0f);
         this.rightPants = new ModelPart(this, 0, 32);
-        this.rightPants.addBox(-2.0f, 0.0f, -2.0f, 4, 12, 4, f + 0.25f);
+        this.rightPants.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f + 0.25f);
         this.rightPants.setPos(-1.9f, 12.0f, 0.0f);
         this.jacket = new ModelPart(this, 16, 32);
-        this.jacket.addBox(-4.0f, 0.0f, -2.0f, 8, 12, 4, f + 0.25f);
+        this.jacket.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f + 0.25f);
         this.jacket.setPos(0.0f, 0.0f, 0.0f);
     }
 
@@ -141,6 +145,23 @@ extends HumanoidModel<T> {
         } else {
             modelPart.translateTo(f);
         }
+    }
+
+    public ModelPart getRandomModelPart(Random random) {
+        return this.cubes.get(random.nextInt(this.cubes.size()));
+    }
+
+    @Override
+    public void accept(ModelPart modelPart) {
+        if (this.cubes == null) {
+            this.cubes = Lists.newArrayList();
+        }
+        this.cubes.add(modelPart);
+    }
+
+    @Override
+    public /* synthetic */ void accept(Object object) {
+        this.accept((ModelPart)object);
     }
 }
 

@@ -8,7 +8,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -61,16 +60,6 @@ implements BonemealableBlock {
             if (!blockState4.canSurvive(serverLevel, blockPos3)) continue;
             serverLevel.setBlock(blockPos3, blockState4, 3);
         }
-    }
-
-    @Override
-    public boolean canOcclude(BlockState blockState) {
-        return true;
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.CUTOUT_MIPPED;
     }
 }
 

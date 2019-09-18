@@ -3,12 +3,15 @@
  */
 package net.minecraft.world.level.timers;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import com.google.common.primitives.UnsignedLong;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -22,7 +25,7 @@ public class TimerQueue<T> {
     private final TimerCallbacks<T> callbacksRegistry;
     private final Queue<Event<T>> queue = new PriorityQueue<Event<T>>(TimerQueue.createComparator());
     private UnsignedLong sequentialId = UnsignedLong.ZERO;
-    private final Map<String, Event<T>> events = Maps.newHashMap();
+    private final Table<String, Long, Event<T>> events = HashBasedTable.create();
 
     private static <T> Comparator<Event<T>> createComparator() {
         return Comparator.comparingLong(event -> event.triggerTime).thenComparing(event -> event.sequentialId);
@@ -36,32 +39,31 @@ public class TimerQueue<T> {
         Event<T> event;
         while ((event = this.queue.peek()) != null && event.triggerTime <= l) {
             this.queue.remove();
-            this.events.remove(event.id);
+            this.events.remove(event.id, l);
             event.callback.handle(object, this, l);
         }
     }
 
-    private void addEvent(String string, long l, TimerCallback<T> timerCallback) {
+    public void schedule(String string, long l, TimerCallback<T> timerCallback) {
+        if (this.events.contains(string, l)) {
+            return;
+        }
         this.sequentialId = this.sequentialId.plus(UnsignedLong.ONE);
         Event event = new Event(l, this.sequentialId, string, timerCallback);
-        this.events.put(string, event);
+        this.events.put(string, l, event);
         this.queue.add(event);
     }
 
-    public boolean schedule(String string, long l, TimerCallback<T> timerCallback) {
-        if (this.events.containsKey(string)) {
-            return false;
-        }
-        this.addEvent(string, l, timerCallback);
-        return true;
+    public int remove(String string) {
+        Collection<Event<Event>> collection = this.events.row(string).values();
+        collection.forEach(this.queue::remove);
+        int i = collection.size();
+        collection.clear();
+        return i;
     }
 
-    public void reschedule(String string, long l, TimerCallback<T> timerCallback) {
-        Event<T> event = this.events.remove(string);
-        if (event != null) {
-            this.queue.remove(event);
-        }
-        this.addEvent(string, l, timerCallback);
+    public Set<String> getEventsIds() {
+        return Collections.unmodifiableSet(this.events.rowKeySet());
     }
 
     private void loadEvent(CompoundTag compoundTag) {

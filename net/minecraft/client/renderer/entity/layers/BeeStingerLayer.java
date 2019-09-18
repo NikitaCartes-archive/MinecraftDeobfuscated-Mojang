@@ -10,7 +10,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.StuckInBodyLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 @Environment(value=EnvType.CLIENT)
-public class BeeStingerLayer<T extends LivingEntity, M extends EntityModel<T>>
+public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>>
 extends StuckInBodyLayer<T, M> {
     private static final ResourceLocation BEE_STINGER_LOCATION = new ResourceLocation("textures/entity/bee/bee_stinger.png");
 

@@ -45,7 +45,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
@@ -115,6 +114,7 @@ implements ItemLike {
     private BlockState defaultBlockState;
     protected final boolean hasCollision;
     private final boolean dynamicShape;
+    private final boolean canOcclude;
     @Nullable
     private ResourceLocation drops;
     @Nullable
@@ -262,6 +262,7 @@ implements ItemLike {
         this.friction = properties.friction;
         this.dynamicShape = properties.dynamicShape;
         this.drops = properties.drops;
+        this.canOcclude = properties.canOcclude;
         this.stateDefinition = builder.create(BlockState::new);
         this.registerDefaultState(this.stateDefinition.any());
     }
@@ -368,8 +369,8 @@ implements ItemLike {
     }
 
     @Deprecated
-    public boolean canOcclude(BlockState blockState) {
-        return this.hasCollision && this.getRenderLayer() == BlockLayer.SOLID;
+    public final boolean canOcclude(BlockState blockState) {
+        return this.canOcclude;
     }
 
     @Deprecated
@@ -590,10 +591,6 @@ implements ItemLike {
     public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
     }
 
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.SOLID;
-    }
-
     @Deprecated
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         return true;
@@ -811,6 +808,7 @@ implements ItemLike {
         private boolean isTicking;
         private float friction = 0.6f;
         private ResourceLocation drops;
+        private boolean canOcclude = true;
         private boolean dynamicShape;
 
         private Properties(Material material, MaterialColor materialColor) {
@@ -842,11 +840,18 @@ implements ItemLike {
             properties.soundType = block.soundType;
             properties.friction = block.getFriction();
             properties.dynamicShape = block.dynamicShape;
+            properties.canOcclude = block.canOcclude;
             return properties;
         }
 
         public Properties noCollission() {
             this.hasCollision = false;
+            this.canOcclude = false;
+            return this;
+        }
+
+        public Properties noOcclusion() {
+            this.canOcclude = false;
             return this;
         }
 

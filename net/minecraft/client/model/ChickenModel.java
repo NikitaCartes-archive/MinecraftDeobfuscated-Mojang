@@ -26,28 +26,28 @@ extends EntityModel<T> {
     public ChickenModel() {
         int i = 16;
         this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-2.0f, -6.0f, -2.0f, 4, 6, 3, 0.0f);
+        this.head.addBox(-2.0f, -6.0f, -2.0f, 4.0f, 6.0f, 3.0f, 0.0f);
         this.head.setPos(0.0f, 15.0f, -4.0f);
         this.beak = new ModelPart(this, 14, 0);
-        this.beak.addBox(-2.0f, -4.0f, -4.0f, 4, 2, 2, 0.0f);
+        this.beak.addBox(-2.0f, -4.0f, -4.0f, 4.0f, 2.0f, 2.0f, 0.0f);
         this.beak.setPos(0.0f, 15.0f, -4.0f);
         this.redThing = new ModelPart(this, 14, 4);
-        this.redThing.addBox(-1.0f, -2.0f, -3.0f, 2, 2, 2, 0.0f);
+        this.redThing.addBox(-1.0f, -2.0f, -3.0f, 2.0f, 2.0f, 2.0f, 0.0f);
         this.redThing.setPos(0.0f, 15.0f, -4.0f);
         this.body = new ModelPart(this, 0, 9);
-        this.body.addBox(-3.0f, -4.0f, -3.0f, 6, 8, 6, 0.0f);
+        this.body.addBox(-3.0f, -4.0f, -3.0f, 6.0f, 8.0f, 6.0f, 0.0f);
         this.body.setPos(0.0f, 16.0f, 0.0f);
         this.leg0 = new ModelPart(this, 26, 0);
-        this.leg0.addBox(-1.0f, 0.0f, -3.0f, 3, 5, 3);
+        this.leg0.addBox(-1.0f, 0.0f, -3.0f, 3.0f, 5.0f, 3.0f);
         this.leg0.setPos(-2.0f, 19.0f, 1.0f);
         this.leg1 = new ModelPart(this, 26, 0);
-        this.leg1.addBox(-1.0f, 0.0f, -3.0f, 3, 5, 3);
+        this.leg1.addBox(-1.0f, 0.0f, -3.0f, 3.0f, 5.0f, 3.0f);
         this.leg1.setPos(1.0f, 19.0f, 1.0f);
         this.wing0 = new ModelPart(this, 24, 13);
-        this.wing0.addBox(0.0f, 0.0f, -3.0f, 1, 4, 6);
+        this.wing0.addBox(0.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f);
         this.wing0.setPos(-4.0f, 13.0f, 0.0f);
         this.wing1 = new ModelPart(this, 24, 13);
-        this.wing1.addBox(-1.0f, 0.0f, -3.0f, 1, 4, 6);
+        this.wing1.addBox(-1.0f, 0.0f, -3.0f, 1.0f, 4.0f, 6.0f);
         this.wing1.setPos(4.0f, 13.0f, 0.0f);
     }
 

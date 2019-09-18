@@ -3,57 +3,46 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.BatchedBlockEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
 public class EnchantTableRenderer
-extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
-    private static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/entity/enchanting_table_book.png");
+extends BatchedBlockEntityRenderer<EnchantmentTableBlockEntity> {
+    public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("entity/enchanting_table_book");
     private final BookModel bookModel = new BookModel();
 
     @Override
-    public void render(EnchantmentTableBlockEntity enchantmentTableBlockEntity, double d, double e, double f, float g, int i) {
-        float j;
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)d + 0.5f, (float)e + 0.75f, (float)f + 0.5f);
+    protected void renderToBuffer(EnchantmentTableBlockEntity enchantmentTableBlockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k) {
+        float l;
+        bufferBuilder.pushPose();
+        bufferBuilder.translate(0.5, 0.75, 0.5);
         float h = (float)enchantmentTableBlockEntity.time + g;
-        RenderSystem.translatef(0.0f, 0.1f + Mth.sin(h * 0.1f) * 0.01f, 0.0f);
-        for (j = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot; j >= (float)Math.PI; j -= (float)Math.PI * 2) {
+        bufferBuilder.translate(0.0, 0.1f + Mth.sin(h * 0.1f) * 0.01f, 0.0);
+        for (l = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot; l >= (float)Math.PI; l -= (float)Math.PI * 2) {
         }
-        while (j < (float)(-Math.PI)) {
-            j += (float)Math.PI * 2;
+        while (l < (float)(-Math.PI)) {
+            l += (float)Math.PI * 2;
         }
-        float k = enchantmentTableBlockEntity.oRot + j * g;
-        RenderSystem.rotatef(-k * 57.295776f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(80.0f, 0.0f, 0.0f, 1.0f);
-        this.bindTexture(BOOK_LOCATION);
-        float l = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip) + 0.25f;
-        float m = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip) + 0.75f;
-        l = (l - (float)Mth.fastFloor(l)) * 1.6f - 0.3f;
-        m = (m - (float)Mth.fastFloor(m)) * 1.6f - 0.3f;
-        if (l < 0.0f) {
-            l = 0.0f;
-        }
-        if (m < 0.0f) {
-            m = 0.0f;
-        }
-        if (l > 1.0f) {
-            l = 1.0f;
-        }
-        if (m > 1.0f) {
-            m = 1.0f;
-        }
-        float n = Mth.lerp(g, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
-        RenderSystem.enableCull();
-        this.bookModel.render(h, l, m, n, 0.0f, 0.0625f);
-        RenderSystem.popMatrix();
+        float m = enchantmentTableBlockEntity.oRot + l * g;
+        bufferBuilder.multiplyPose(new Quaternion(Vector3f.YP, -m, false));
+        bufferBuilder.multiplyPose(new Quaternion(Vector3f.ZP, 80.0f, true));
+        float n = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip);
+        float o = Mth.frac(n + 0.25f) * 1.6f - 0.3f;
+        float p = Mth.frac(n + 0.75f) * 1.6f - 0.3f;
+        float q = Mth.lerp(g, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
+        this.bookModel.setupAnim(h, Mth.clamp(o, 0.0f, 1.0f), Mth.clamp(p, 0.0f, 1.0f), q);
+        this.bookModel.render(bufferBuilder, 0.0625f, j, k, this.getSprite(BOOK_LOCATION));
+        bufferBuilder.popPose();
     }
 }
 

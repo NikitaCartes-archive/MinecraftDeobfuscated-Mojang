@@ -10,10 +10,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -99,8 +98,7 @@ extends RenderLayer<T, M> {
     public static <T extends Entity> void renderFoil(Consumer<ResourceLocation> consumer, T entity, EntityModel<T> entityModel, float f, float g, float h, float i, float j, float k, float l) {
         float m = (float)entity.tickCount + h;
         consumer.accept(ENCHANT_GLINT_LOCATION);
-        GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
-        gameRenderer.resetFogColor(true);
+        FogRenderer.resetFogColor(true);
         RenderSystem.enableBlend();
         RenderSystem.depthFunc(514);
         RenderSystem.depthMask(false);
@@ -128,7 +126,7 @@ extends RenderLayer<T, M> {
         RenderSystem.depthMask(true);
         RenderSystem.depthFunc(515);
         RenderSystem.disableBlend();
-        gameRenderer.resetFogColor(false);
+        FogRenderer.resetFogColor(false);
     }
 
     private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl) {

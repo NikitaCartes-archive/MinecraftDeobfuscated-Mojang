@@ -617,7 +617,7 @@ public class Items {
     public static final Item REPEATER = Items.registerBlock(Blocks.REPEATER, CreativeModeTab.TAB_REDSTONE);
     public static final Item COMPARATOR = Items.registerBlock(Blocks.COMPARATOR, CreativeModeTab.TAB_REDSTONE);
     public static final Item STRUCTURE_BLOCK = Items.registerBlock(new GameMasterBlockItem(Blocks.STRUCTURE_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
-    public static final Item JIGSAW_BLOCK = Items.registerBlock(new GameMasterBlockItem(Blocks.JIGSAW_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
+    public static final Item JIGSAW = Items.registerBlock(new GameMasterBlockItem(Blocks.JIGSAW, new Item.Properties().rarity(Rarity.EPIC)));
     public static final Item COMPOSTER = Items.registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_MISC);
     public static final Item TURTLE_HELMET = Items.registerItem("turtle_helmet", (Item)new ArmorItem(ArmorMaterials.TURTLE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item SCUTE = Items.registerItem("scute", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));

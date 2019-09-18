@@ -87,7 +87,7 @@ extends AbstractContainerScreen<T> {
         int k = this.topPos;
         for (MobEffectInstance mobEffectInstance : iterable) {
             MobEffect mobEffect = mobEffectInstance.getEffect();
-            EffectRenderingInventoryScreen.blit(i + 6, k + 7, this.blitOffset, 18, 18, mobEffectTextureManager.get(mobEffect));
+            EffectRenderingInventoryScreen.blit(i + 6, k + 7, this.getBlitOffset(), 18, 18, mobEffectTextureManager.get(mobEffect));
             k += j;
         }
     }

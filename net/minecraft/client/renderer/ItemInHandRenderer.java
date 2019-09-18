@@ -4,7 +4,6 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.base.MoreObjects;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -16,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -35,7 +35,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -73,7 +72,7 @@ public class ItemInHandRenderer {
         Item item = itemStack.getItem();
         Block block = Block.byItem(item);
         RenderSystem.pushMatrix();
-        boolean bl3 = bl2 = this.itemRenderer.isGui3d(itemStack) && block.getRenderLayer() == BlockLayer.TRANSLUCENT;
+        boolean bl3 = bl2 = this.itemRenderer.isGui3d(itemStack) && RenderType.getRenderLayer(block.defaultBlockState()) == RenderType.TRANSLUCENT;
         if (bl2) {
             RenderSystem.depthMask(false);
         }
@@ -517,7 +516,7 @@ public class ItemInHandRenderer {
         float g = this.minecraft.player.getBrightness();
         RenderSystem.color4f(g, g, g, 0.1f);
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         RenderSystem.pushMatrix();
         float h = 4.0f;
         float i = -1.0f;
@@ -545,7 +544,7 @@ public class ItemInHandRenderer {
         RenderSystem.depthFunc(519);
         RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.defaultBlendFunc();
         float f = 1.0f;
         for (int i = 0; i < 2; ++i) {
             RenderSystem.pushMatrix();

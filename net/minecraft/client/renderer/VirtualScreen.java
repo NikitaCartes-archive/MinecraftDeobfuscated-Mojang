@@ -10,6 +10,7 @@ import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public final class VirtualScreen
@@ -22,7 +23,7 @@ implements AutoCloseable {
         this.screenManager = new ScreenManager(Monitor::new);
     }
 
-    public Window newWindow(DisplayData displayData, String string, String string2) {
+    public Window newWindow(DisplayData displayData, @Nullable String string, String string2) {
         return new Window(this.minecraft, this.screenManager, displayData, string, string2);
     }
 

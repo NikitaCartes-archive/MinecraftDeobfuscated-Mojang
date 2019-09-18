@@ -35,6 +35,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.commands.data.BlockDataAccessor;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.EntityDataAccessor;
+import net.minecraft.server.commands.data.StorageDataAccessor;
 import net.minecraft.util.Mth;
 
 public class DataCommands {
@@ -45,7 +46,7 @@ public class DataCommands {
     private static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.expected_list", object));
     private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.expected_object", object));
     private static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.invalid_index", object));
-    public static final List<Function<String, DataProvider>> ALL_PROVIDERS = ImmutableList.of(EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER);
+    public static final List<Function<String, DataProvider>> ALL_PROVIDERS = ImmutableList.of(EntityDataAccessor.PROVIDER, BlockDataAccessor.PROVIDER, StorageDataAccessor.PROVIDER);
     public static final List<DataProvider> TARGET_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("target")).collect(ImmutableList.toImmutableList());
     public static final List<DataProvider> SOURCE_PROVIDERS = ALL_PROVIDERS.stream().map(function -> (DataProvider)function.apply("source")).collect(ImmutableList.toImmutableList());
 

@@ -4,8 +4,7 @@
 package net.minecraft.client.renderer.blockentity;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,6 +14,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.BedRenderer;
@@ -122,40 +122,45 @@ public class BlockEntityRenderDispatcher {
         this.cameraHitResult = hitResult;
     }
 
-    public void render(BlockEntity blockEntity, float f, int i) {
-        if (blockEntity.distanceToSqr(this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z) < blockEntity.getViewDistance()) {
-            Lighting.turnOn();
-            int j = this.level.getLightColor(blockEntity.getBlockPos());
-            int k = j % 65536;
-            int l = j / 65536;
-            RenderSystem.glMultiTexCoord2f(33985, k, l);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            BlockPos blockPos = blockEntity.getBlockPos();
-            this.render(blockEntity, (double)blockPos.getX() - xOff, (double)blockPos.getY() - yOff, (double)blockPos.getZ() - zOff, f, i, false);
-        }
+    public void render(BlockEntity blockEntity, float f, RenderType renderType, BufferBuilder bufferBuilder) {
+        this.render(blockEntity, f, -1, renderType, bufferBuilder);
     }
 
-    public void render(BlockEntity blockEntity, double d, double e, double f, float g) {
-        this.render(blockEntity, d, e, f, g, -1, false);
+    public void renderBreaking(BlockEntity blockEntity, float f, int i, BufferBuilder bufferBuilder) {
+        this.render(blockEntity, f, i, RenderType.CRUMBLING, bufferBuilder);
+    }
+
+    private void render(BlockEntity blockEntity, float f, int i, RenderType renderType, BufferBuilder bufferBuilder) {
+        if (!(blockEntity.distanceToSqr(this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z) < blockEntity.getViewDistance())) {
+            return;
+        }
+        BlockEntityRenderer blockEntityRenderer = this.getRenderer(blockEntity);
+        if (blockEntityRenderer == null) {
+            return;
+        }
+        if (!blockEntity.hasLevel() || !blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
+            return;
+        }
+        BlockPos blockPos = blockEntity.getBlockPos();
+        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.setupAndRender(blockEntity, (double)blockPos.getX() - xOff, (double)blockPos.getY() - yOff, (double)blockPos.getZ() - zOff, f, i, bufferBuilder, renderType, blockPos));
     }
 
     public void renderItem(BlockEntity blockEntity) {
-        this.render(blockEntity, 0.0, 0.0, 0.0, 0.0f, -1, true);
+        BlockEntityRenderer blockEntityRenderer = this.getRenderer(blockEntity);
+        if (blockEntityRenderer == null) {
+            return;
+        }
+        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0f, -1, RenderType.ENTITY));
     }
 
-    public void render(BlockEntity blockEntity, double d, double e, double f, float g, int i, boolean bl) {
-        BlockEntityRenderer<BlockEntity> blockEntityRenderer = this.getRenderer(blockEntity);
-        if (blockEntityRenderer != null) {
-            try {
-                if (bl || blockEntity.hasLevel() && blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
-                    blockEntityRenderer.render(blockEntity, d, e, f, g, i);
-                }
-            } catch (Throwable throwable) {
-                CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Block Entity");
-                CrashReportCategory crashReportCategory = crashReport.addCategory("Block Entity Details");
-                blockEntity.fillCrashReportCategory(crashReportCategory);
-                throw new ReportedException(crashReport);
-            }
+    private static void tryRender(BlockEntity blockEntity, Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable throwable) {
+            CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Block Entity");
+            CrashReportCategory crashReportCategory = crashReport.addCategory("Block Entity Details");
+            blockEntity.fillCrashReportCategory(crashReportCategory);
+            throw new ReportedException(crashReport);
         }
     }
 

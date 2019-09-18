@@ -15,7 +15,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -127,11 +126,6 @@ implements SimpleWaterloggedBlock {
     @Override
     public float getExplosionResistance() {
         return this.base.getExplosionResistance();
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return this.base.getRenderLayer();
     }
 
     @Override

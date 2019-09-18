@@ -160,7 +160,7 @@ implements Widget {
         if (n + o + 6 > this.height) {
             n = this.height - o - 6;
         }
-        this.blitOffset = 300;
+        this.setBlitOffset(300);
         this.itemRenderer.blitOffset = 300.0f;
         int p = -267386864;
         this.fillGradient(m - 3, n - 4, m + l + 3, n - 3, -267386864, -267386864);
@@ -182,7 +182,7 @@ implements Widget {
             }
             n += 10;
         }
-        this.blitOffset = 0;
+        this.setBlitOffset(0);
         this.itemRenderer.blitOffset = 0.0f;
         RenderSystem.enableLighting();
         RenderSystem.enableDepthTest();
@@ -375,17 +375,17 @@ implements Widget {
 
     public static boolean hasControlDown() {
         if (Minecraft.ON_OSX) {
-            return InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 343) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 347);
+            return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 343) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 347);
         }
-        return InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 341) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 345);
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 341) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 345);
     }
 
     public static boolean hasShiftDown() {
-        return InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 344);
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344);
     }
 
     public static boolean hasAltDown() {
-        return InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 342) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 346);
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 342) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 346);
     }
 
     public static boolean isCut(int i) {

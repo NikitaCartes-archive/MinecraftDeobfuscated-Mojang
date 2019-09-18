@@ -57,9 +57,9 @@ extends Item {
             }
             if (!level.isClientSide) {
                 level.addFreshEntity(boat);
-            }
-            if (!player.abilities.instabuild) {
-                itemStack.shrink(1);
+                if (!player.abilities.instabuild) {
+                    itemStack.shrink(1);
+                }
             }
             player.awardStat(Stats.ITEM_USED.get(this));
             return InteractionResultHolder.success(itemStack);

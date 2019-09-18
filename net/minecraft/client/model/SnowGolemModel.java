@@ -23,19 +23,19 @@ extends EntityModel<T> {
         float f = 4.0f;
         float g = 0.0f;
         this.head = new ModelPart(this, 0, 0).setTexSize(64, 64);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, -0.5f);
+        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, -0.5f);
         this.head.setPos(0.0f, 4.0f, 0.0f);
         this.arm1 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-        this.arm1.addBox(-1.0f, 0.0f, -1.0f, 12, 2, 2, -0.5f);
+        this.arm1.addBox(-1.0f, 0.0f, -1.0f, 12.0f, 2.0f, 2.0f, -0.5f);
         this.arm1.setPos(0.0f, 6.0f, 0.0f);
         this.arm2 = new ModelPart(this, 32, 0).setTexSize(64, 64);
-        this.arm2.addBox(-1.0f, 0.0f, -1.0f, 12, 2, 2, -0.5f);
+        this.arm2.addBox(-1.0f, 0.0f, -1.0f, 12.0f, 2.0f, 2.0f, -0.5f);
         this.arm2.setPos(0.0f, 6.0f, 0.0f);
         this.piece1 = new ModelPart(this, 0, 16).setTexSize(64, 64);
-        this.piece1.addBox(-5.0f, -10.0f, -5.0f, 10, 10, 10, -0.5f);
+        this.piece1.addBox(-5.0f, -10.0f, -5.0f, 10.0f, 10.0f, 10.0f, -0.5f);
         this.piece1.setPos(0.0f, 13.0f, 0.0f);
         this.piece2 = new ModelPart(this, 0, 36).setTexSize(64, 64);
-        this.piece2.addBox(-6.0f, -12.0f, -6.0f, 12, 12, 12, -0.5f);
+        this.piece2.addBox(-6.0f, -12.0f, -6.0f, 12.0f, 12.0f, 12.0f, -0.5f);
         this.piece2.setPos(0.0f, 24.0f, 0.0f);
     }
 

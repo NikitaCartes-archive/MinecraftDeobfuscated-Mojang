@@ -18,14 +18,14 @@ extends EntityModel<T> {
     public SquidModel() {
         int i = -16;
         this.body = new ModelPart(this, 0, 0);
-        this.body.addBox(-6.0f, -8.0f, -6.0f, 12, 16, 12);
+        this.body.addBox(-6.0f, -8.0f, -6.0f, 12.0f, 16.0f, 12.0f);
         this.body.y += 8.0f;
         for (int j = 0; j < this.tentacles.length; ++j) {
             this.tentacles[j] = new ModelPart(this, 48, 0);
             double d = (double)j * Math.PI * 2.0 / (double)this.tentacles.length;
             float f = (float)Math.cos(d) * 5.0f;
             float g = (float)Math.sin(d) * 5.0f;
-            this.tentacles[j].addBox(-1.0f, 0.0f, -1.0f, 2, 18, 2);
+            this.tentacles[j].addBox(-1.0f, 0.0f, -1.0f, 2.0f, 18.0f, 2.0f);
             this.tentacles[j].x = f;
             this.tentacles[j].z = g;
             this.tentacles[j].y = 15.0f;

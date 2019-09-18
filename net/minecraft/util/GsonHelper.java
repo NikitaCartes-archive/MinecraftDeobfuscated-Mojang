@@ -165,6 +165,13 @@ public class GsonHelper {
         throw new JsonSyntaxException("Expected " + string + " to be a Long, was " + GsonHelper.getType(jsonElement));
     }
 
+    public static long getAsLong(JsonObject jsonObject, String string) {
+        if (jsonObject.has(string)) {
+            return GsonHelper.convertToLong(jsonObject.get(string), string);
+        }
+        throw new JsonSyntaxException("Missing " + string + ", expected to find a Long");
+    }
+
     public static long getAsLong(JsonObject jsonObject, String string, long l) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToLong(jsonObject.get(string), string);
@@ -242,6 +249,7 @@ public class GsonHelper {
         throw new JsonSyntaxException("Missing " + string + ", expected to find a JsonArray");
     }
 
+    @Nullable
     public static JsonArray getAsJsonArray(JsonObject jsonObject, String string, @Nullable JsonArray jsonArray) {
         if (jsonObject.has(string)) {
             return GsonHelper.convertToJsonArray(jsonObject.get(string), string);

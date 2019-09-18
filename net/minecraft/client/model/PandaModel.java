@@ -25,27 +25,27 @@ extends QuadrupedModel<T> {
         this.texWidth = 64;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 6);
-        this.head.addBox(-6.5f, -5.0f, -4.0f, 13, 10, 9);
+        this.head.addBox(-6.5f, -5.0f, -4.0f, 13.0f, 10.0f, 9.0f);
         this.head.setPos(0.0f, 11.5f, -17.0f);
-        this.head.texOffs(45, 16).addBox(-3.5f, 0.0f, -6.0f, 7, 5, 2);
-        this.head.texOffs(52, 25).addBox(-8.5f, -8.0f, -1.0f, 5, 4, 1);
-        this.head.texOffs(52, 25).addBox(3.5f, -8.0f, -1.0f, 5, 4, 1);
+        this.head.texOffs(45, 16).addBox(-3.5f, 0.0f, -6.0f, 7.0f, 5.0f, 2.0f);
+        this.head.texOffs(52, 25).addBox(-8.5f, -8.0f, -1.0f, 5.0f, 4.0f, 1.0f);
+        this.head.texOffs(52, 25).addBox(3.5f, -8.0f, -1.0f, 5.0f, 4.0f, 1.0f);
         this.body = new ModelPart(this, 0, 25);
-        this.body.addBox(-9.5f, -13.0f, -6.5f, 19, 26, 13);
+        this.body.addBox(-9.5f, -13.0f, -6.5f, 19.0f, 26.0f, 13.0f);
         this.body.setPos(0.0f, 10.0f, 0.0f);
         int j = 9;
         int k = 6;
         this.leg0 = new ModelPart(this, 40, 0);
-        this.leg0.addBox(-3.0f, 0.0f, -3.0f, 6, 9, 6);
+        this.leg0.addBox(-3.0f, 0.0f, -3.0f, 6.0f, 9.0f, 6.0f);
         this.leg0.setPos(-5.5f, 15.0f, 9.0f);
         this.leg1 = new ModelPart(this, 40, 0);
-        this.leg1.addBox(-3.0f, 0.0f, -3.0f, 6, 9, 6);
+        this.leg1.addBox(-3.0f, 0.0f, -3.0f, 6.0f, 9.0f, 6.0f);
         this.leg1.setPos(5.5f, 15.0f, 9.0f);
         this.leg2 = new ModelPart(this, 40, 0);
-        this.leg2.addBox(-3.0f, 0.0f, -3.0f, 6, 9, 6);
+        this.leg2.addBox(-3.0f, 0.0f, -3.0f, 6.0f, 9.0f, 6.0f);
         this.leg2.setPos(-5.5f, 15.0f, -9.0f);
         this.leg3 = new ModelPart(this, 40, 0);
-        this.leg3.addBox(-3.0f, 0.0f, -3.0f, 6, 9, 6);
+        this.leg3.addBox(-3.0f, 0.0f, -3.0f, 6.0f, 9.0f, 6.0f);
         this.leg3.setPos(5.5f, 15.0f, -9.0f);
     }
 

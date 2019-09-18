@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.DebugMemoryUntracker;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -121,6 +122,7 @@ public class GlDebug {
     }
 
     public static void enableDebugCallback(int i, boolean bl) {
+        RenderSystem.assertThread(RenderSystem::isInInitPhase);
         if (i <= 0) {
             return;
         }

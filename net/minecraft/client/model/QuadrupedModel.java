@@ -24,22 +24,22 @@ extends EntityModel<T> {
     protected float zHeadOffs = 4.0f;
 
     public QuadrupedModel(int i, float f) {
-        this.head.addBox(-4.0f, -4.0f, -8.0f, 8, 8, 8, f);
+        this.head.addBox(-4.0f, -4.0f, -8.0f, 8.0f, 8.0f, 8.0f, f);
         this.head.setPos(0.0f, 18 - i, -6.0f);
         this.body = new ModelPart(this, 28, 8);
-        this.body.addBox(-5.0f, -10.0f, -7.0f, 10, 16, 8, f);
+        this.body.addBox(-5.0f, -10.0f, -7.0f, 10.0f, 16.0f, 8.0f, f);
         this.body.setPos(0.0f, 17 - i, 2.0f);
         this.leg0 = new ModelPart(this, 0, 16);
-        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4, i, 4, f);
+        this.leg0.addBox(-2.0f, 0.0f, -2.0f, 4.0f, (float)i, 4.0f, f);
         this.leg0.setPos(-3.0f, 24 - i, 7.0f);
         this.leg1 = new ModelPart(this, 0, 16);
-        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4, i, 4, f);
+        this.leg1.addBox(-2.0f, 0.0f, -2.0f, 4.0f, (float)i, 4.0f, f);
         this.leg1.setPos(3.0f, 24 - i, 7.0f);
         this.leg2 = new ModelPart(this, 0, 16);
-        this.leg2.addBox(-2.0f, 0.0f, -2.0f, 4, i, 4, f);
+        this.leg2.addBox(-2.0f, 0.0f, -2.0f, 4.0f, (float)i, 4.0f, f);
         this.leg2.setPos(-3.0f, 24 - i, -5.0f);
         this.leg3 = new ModelPart(this, 0, 16);
-        this.leg3.addBox(-2.0f, 0.0f, -2.0f, 4, i, 4, f);
+        this.leg3.addBox(-2.0f, 0.0f, -2.0f, 4.0f, (float)i, 4.0f, f);
         this.leg3.setPos(3.0f, 24 - i, -5.0f);
     }
 

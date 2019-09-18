@@ -117,6 +117,7 @@ extends Item {
         return i == 0 ? this.color1 : this.color2;
     }
 
+    @Nullable
     @Environment(value=EnvType.CLIENT)
     public static SpawnEggItem byId(@Nullable EntityType<?> entityType) {
         return BY_ID.get(entityType);

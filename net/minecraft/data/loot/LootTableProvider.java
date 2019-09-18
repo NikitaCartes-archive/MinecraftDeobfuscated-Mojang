@@ -28,8 +28,8 @@ import net.minecraft.data.loot.GiftLoot;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTableProblemCollector;
 import net.minecraft.world.level.storage.loot.LootTables;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import org.apache.logging.log4j.LogManager;
@@ -55,13 +55,13 @@ implements DataProvider {
                 throw new IllegalStateException("Duplicate loot table " + resourceLocation);
             }
         }));
-        LootTableProblemCollector lootTableProblemCollector = new LootTableProblemCollector();
+        ValidationContext validationContext = new ValidationContext(LootContextParamSets.ALL_PARAMS, resourceLocation -> null, map::get);
         Sets.SetView<ResourceLocation> set = Sets.difference(BuiltInLootTables.all(), map.keySet());
         for (ResourceLocation resourceLocation2 : set) {
-            lootTableProblemCollector.reportProblem("Missing built-in table: " + resourceLocation2);
+            validationContext.reportProblem("Missing built-in table: " + resourceLocation2);
         }
-        map.forEach((resourceLocation, lootTable) -> LootTables.validate(lootTableProblemCollector, resourceLocation, lootTable, map::get));
-        Multimap<String, String> multimap = lootTableProblemCollector.getProblems();
+        map.forEach((resourceLocation, lootTable) -> LootTables.validate(validationContext, resourceLocation, lootTable));
+        Multimap<String, String> multimap = validationContext.getProblems();
         if (!multimap.isEmpty()) {
             multimap.forEach((string, string2) -> LOGGER.warn("Found validation problem in " + string + ": " + string2));
             throw new IllegalStateException("Failed to validate loot tables, see logs");

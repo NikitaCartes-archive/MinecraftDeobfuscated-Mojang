@@ -18,9 +18,9 @@ extends EntityModel<T> {
         this.texWidth = 64;
         this.texHeight = 32;
         this.main = new ModelPart(this);
-        this.main.texOffs(0, 0).addBox(-4.0f, -4.0f, -1.0f, 8, 8, 2, 0.0f);
-        this.main.texOffs(0, 10).addBox(-1.0f, -4.0f, -4.0f, 2, 8, 8, 0.0f);
-        this.main.texOffs(20, 0).addBox(-4.0f, -1.0f, -4.0f, 8, 2, 8, 0.0f);
+        this.main.texOffs(0, 0).addBox(-4.0f, -4.0f, -1.0f, 8.0f, 8.0f, 2.0f, 0.0f);
+        this.main.texOffs(0, 10).addBox(-1.0f, -4.0f, -4.0f, 2.0f, 8.0f, 8.0f, 0.0f);
+        this.main.texOffs(20, 0).addBox(-4.0f, -1.0f, -4.0f, 8.0f, 2.0f, 8.0f, 0.0f);
         this.main.setPos(0.0f, 0.0f, 0.0f);
     }
 

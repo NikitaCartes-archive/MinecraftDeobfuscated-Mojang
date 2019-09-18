@@ -676,7 +676,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         }
         RenderSystem.disableLighting();
         this.blit(l, m, j, k, 28, 32);
-        this.blitOffset = 100;
+        this.setBlitOffset(100);
         this.itemRenderer.blitOffset = 100.0f;
         int n2 = bl2 ? 1 : -1;
         RenderSystem.enableLighting();
@@ -686,7 +686,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, l, m);
         RenderSystem.disableLighting();
         this.itemRenderer.blitOffset = 0.0f;
-        this.blitOffset = 0;
+        this.setBlitOffset(0);
     }
 
     public int getSelectedTab() {

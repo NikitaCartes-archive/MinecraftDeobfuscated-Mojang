@@ -10,7 +10,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -138,11 +137,6 @@ implements SimpleWaterloggedBlock {
             blockState = (BlockState)((BlockState)blockState.setValue(OPEN, true)).setValue(POWERED, true);
         }
         return (BlockState)blockState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.CUTOUT;
     }
 
     @Override

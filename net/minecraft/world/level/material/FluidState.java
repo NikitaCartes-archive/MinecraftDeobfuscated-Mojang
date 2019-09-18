@@ -19,7 +19,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -96,11 +95,6 @@ extends StateHolder<FluidState> {
     @Environment(value=EnvType.CLIENT)
     default public ParticleOptions getDripParticle() {
         return this.getType().getDripParticle();
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    default public BlockLayer getRenderLayer() {
-        return this.getType().getRenderLayer();
     }
 
     default public boolean is(Tag<Fluid> tag) {

@@ -85,7 +85,7 @@ public class FaceBakery {
     }
 
     private int[] makeVertices(BlockFaceUV blockFaceUV, TextureAtlasSprite textureAtlasSprite, Direction direction, float[] fs, BlockModelRotation blockModelRotation, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
-        int[] is = new int[28];
+        int[] is = new int[32];
         for (int i = 0; i < 4; ++i) {
             this.bakeVertex(is, i, direction, blockFaceUV, fs, textureAtlasSprite, blockModelRotation, blockElementRotation, bl);
         }
@@ -140,7 +140,7 @@ public class FaceBakery {
     }
 
     private void fillVertex(int[] is, int i, int j, Vector3f vector3f, int k, TextureAtlasSprite textureAtlasSprite, BlockFaceUV blockFaceUV) {
-        int l = i * 7;
+        int l = i * 8;
         is[l] = Float.floatToRawIntBits(vector3f.x());
         is[l + 1] = Float.floatToRawIntBits(vector3f.y());
         is[l + 2] = Float.floatToRawIntBits(vector3f.z());
@@ -206,8 +206,8 @@ public class FaceBakery {
 
     public static Direction calculateFacing(int[] is) {
         Vector3f vector3f = new Vector3f(Float.intBitsToFloat(is[0]), Float.intBitsToFloat(is[1]), Float.intBitsToFloat(is[2]));
-        Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(is[7]), Float.intBitsToFloat(is[8]), Float.intBitsToFloat(is[9]));
-        Vector3f vector3f3 = new Vector3f(Float.intBitsToFloat(is[14]), Float.intBitsToFloat(is[15]), Float.intBitsToFloat(is[16]));
+        Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(is[8]), Float.intBitsToFloat(is[9]), Float.intBitsToFloat(is[10]));
+        Vector3f vector3f3 = new Vector3f(Float.intBitsToFloat(is[16]), Float.intBitsToFloat(is[17]), Float.intBitsToFloat(is[18]));
         Vector3f vector3f4 = new Vector3f(vector3f);
         vector3f4.sub(vector3f2);
         Vector3f vector3f5 = new Vector3f(vector3f3);
@@ -244,7 +244,7 @@ public class FaceBakery {
         fs[FaceInfo.Constants.MAX_Y] = -999.0f;
         fs[FaceInfo.Constants.MAX_Z] = -999.0f;
         for (int i = 0; i < 4; ++i) {
-            j = 7 * i;
+            j = 8 * i;
             float f = Float.intBitsToFloat(js[j]);
             float g = Float.intBitsToFloat(js[j + 1]);
             h = Float.intBitsToFloat(js[j + 2]);
@@ -268,7 +268,7 @@ public class FaceBakery {
         }
         FaceInfo faceInfo = FaceInfo.fromFacing(direction);
         for (j = 0; j < 4; ++j) {
-            int k = 7 * j;
+            int k = 8 * j;
             FaceInfo.VertexInfo vertexInfo = faceInfo.getVertexInfo(j);
             h = fs[vertexInfo.xFace];
             float l = fs[vertexInfo.yFace];
@@ -277,7 +277,7 @@ public class FaceBakery {
             is[k + 1] = Float.floatToRawIntBits(l);
             is[k + 2] = Float.floatToRawIntBits(m);
             for (int n = 0; n < 4; ++n) {
-                int o = 7 * n;
+                int o = 8 * n;
                 float p = Float.intBitsToFloat(js[o]);
                 float q = Float.intBitsToFloat(js[o + 1]);
                 float r = Float.intBitsToFloat(js[o + 2]);

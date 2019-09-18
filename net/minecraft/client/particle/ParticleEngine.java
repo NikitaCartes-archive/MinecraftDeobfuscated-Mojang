@@ -361,7 +361,7 @@ implements PreparableReloadListener {
         }
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
-        RenderSystem.alphaFunc(516, 0.1f);
+        RenderSystem.defaultAlphaFunc();
     }
 
     public void setLevel(@Nullable Level level) {

@@ -6,8 +6,10 @@ package net.minecraft.client.renderer.texture;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.PngInfo;
 import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +27,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.Stitcher;
 import net.minecraft.client.renderer.texture.StitcherException;
@@ -61,7 +61,7 @@ implements TickableTextureObject {
 
     public TextureAtlas(String string) {
         this.path = string;
-        this.maxSupportedTextureSize = Minecraft.maxSupportedTextureSize();
+        this.maxSupportedTextureSize = RenderSystem.maxSupportedTextureSize();
     }
 
     @Override
@@ -234,7 +234,11 @@ implements TickableTextureObject {
 
     @Override
     public void tick() {
-        this.cycleAnimationFrames();
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(this::cycleAnimationFrames);
+        } else {
+            this.cycleAnimationFrames();
+        }
     }
 
     public void setMaxMipLevel(int i) {

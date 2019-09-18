@@ -26,27 +26,27 @@ extends EntityModel<T> {
         this.texHeight = 32;
         int i = 22;
         this.body = new ModelPart(this, 0, 0);
-        this.body.addBox(-1.0f, -2.0f, 0.0f, 2, 4, 7);
+        this.body.addBox(-1.0f, -2.0f, 0.0f, 2.0f, 4.0f, 7.0f);
         this.body.setPos(0.0f, 22.0f, 0.0f);
         this.head = new ModelPart(this, 11, 0);
-        this.head.addBox(-1.0f, -2.0f, -3.0f, 2, 4, 3);
+        this.head.addBox(-1.0f, -2.0f, -3.0f, 2.0f, 4.0f, 3.0f);
         this.head.setPos(0.0f, 22.0f, 0.0f);
         this.nose = new ModelPart(this, 0, 0);
-        this.nose.addBox(-1.0f, -2.0f, -1.0f, 2, 3, 1);
+        this.nose.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 3.0f, 1.0f);
         this.nose.setPos(0.0f, 22.0f, -3.0f);
         this.sideFin0 = new ModelPart(this, 22, 1);
-        this.sideFin0.addBox(-2.0f, 0.0f, -1.0f, 2, 0, 2);
+        this.sideFin0.addBox(-2.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f);
         this.sideFin0.setPos(-1.0f, 23.0f, 0.0f);
         this.sideFin0.zRot = -0.7853982f;
         this.sideFin1 = new ModelPart(this, 22, 4);
-        this.sideFin1.addBox(0.0f, 0.0f, -1.0f, 2, 0, 2);
+        this.sideFin1.addBox(0.0f, 0.0f, -1.0f, 2.0f, 0.0f, 2.0f);
         this.sideFin1.setPos(1.0f, 23.0f, 0.0f);
         this.sideFin1.zRot = 0.7853982f;
         this.tailFin = new ModelPart(this, 22, 3);
-        this.tailFin.addBox(0.0f, -2.0f, 0.0f, 0, 4, 4);
+        this.tailFin.addBox(0.0f, -2.0f, 0.0f, 0.0f, 4.0f, 4.0f);
         this.tailFin.setPos(0.0f, 22.0f, 7.0f);
         this.topFin = new ModelPart(this, 20, -6);
-        this.topFin.addBox(0.0f, -1.0f, -1.0f, 0, 1, 6);
+        this.topFin.addBox(0.0f, -1.0f, -1.0f, 0.0f, 1.0f, 6.0f);
         this.topFin.setPos(0.0f, 20.0f, 0.0f);
     }
 

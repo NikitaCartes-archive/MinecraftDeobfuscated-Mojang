@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
@@ -28,11 +27,6 @@ public class IceBlock
 extends HalfTransparentBlock {
     public IceBlock(Block.Properties properties) {
         super(properties);
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.TRANSLUCENT;
     }
 
     @Override

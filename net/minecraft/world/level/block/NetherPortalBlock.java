@@ -19,7 +19,6 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PigZombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -102,11 +101,6 @@ extends Block {
             return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
         }
         return Blocks.AIR.defaultBlockState();
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.TRANSLUCENT;
     }
 
     @Override

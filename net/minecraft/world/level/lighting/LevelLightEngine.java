@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.lighting;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -102,18 +100,6 @@ implements LightEventListener {
             return LayerLightEventListener.DummyLightLayerEventListener.INSTANCE;
         }
         return this.skyEngine;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public String getDebugData(LightLayer lightLayer, SectionPos sectionPos) {
-        if (lightLayer == LightLayer.BLOCK) {
-            if (this.blockEngine != null) {
-                return this.blockEngine.getDebugData(sectionPos.asLong());
-            }
-        } else if (this.skyEngine != null) {
-            return this.skyEngine.getDebugData(sectionPos.asLong());
-        }
-        return "n/a";
     }
 
     public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer) {

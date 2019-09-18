@@ -51,6 +51,10 @@ public class RecipeBook {
         return this.known.contains(recipe.getId());
     }
 
+    public boolean contains(ResourceLocation resourceLocation) {
+        return this.known.contains(resourceLocation);
+    }
+
     @Environment(value=EnvType.CLIENT)
     public void remove(Recipe<?> recipe) {
         this.remove(recipe.getId());

@@ -29,7 +29,7 @@ extends StructureProcessor {
     @Nullable
     public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
         Block block = structureBlockInfo2.state.getBlock();
-        if (block != Blocks.JIGSAW_BLOCK) {
+        if (block != Blocks.JIGSAW) {
             return structureBlockInfo2;
         }
         String string = structureBlockInfo2.nbt.getString("final_state");

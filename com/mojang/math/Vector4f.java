@@ -3,6 +3,7 @@
  */
 package com.mojang.math;
 
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.util.Arrays;
@@ -63,6 +64,17 @@ public class Vector4f {
         this.values[1] = g;
         this.values[2] = h;
         this.values[3] = i;
+    }
+
+    public void transform(Matrix4f matrix4f) {
+        float[] fs = Arrays.copyOf(this.values, 4);
+        for (int i = 0; i < 4; ++i) {
+            this.values[i] = 0.0f;
+            for (int j = 0; j < 4; ++j) {
+                int n = i;
+                this.values[n] = this.values[n] + matrix4f.get(i, j) * fs[j];
+            }
+        }
     }
 
     public void transform(Quaternion quaternion) {

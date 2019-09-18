@@ -47,6 +47,7 @@ TickableBlockEntity {
     private AnimationStatus animationStatus = AnimationStatus.CLOSED;
     private float progress;
     private float progressOld;
+    @Nullable
     private DyeColor color;
     private boolean loadColorFromBlock;
 
@@ -274,6 +275,7 @@ TickableBlockEntity {
         return Mth.lerp(f, this.progressOld, this.progress);
     }
 
+    @Nullable
     @Environment(value=EnvType.CLIENT)
     public DyeColor getColor() {
         if (this.loadColorFromBlock) {

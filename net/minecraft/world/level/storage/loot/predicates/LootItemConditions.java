@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.predicates.AlternativeLootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition;
+import net.minecraft.world.level.storage.loot.predicates.ConditionReference;
 import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.minecraft.world.level.storage.loot.predicates.EntityHasScoreCondition;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemKilledByPlayerC
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithLootingCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
+import net.minecraft.world.level.storage.loot.predicates.TimeCheck;
 import net.minecraft.world.level.storage.loot.predicates.WeatherCheck;
 
 public class LootItemConditions {
@@ -123,6 +125,8 @@ public class LootItemConditions {
         LootItemConditions.register(new DamageSourceCondition.Serializer());
         LootItemConditions.register(new LocationCheck.Serializer());
         LootItemConditions.register(new WeatherCheck.Serializer());
+        LootItemConditions.register(new ConditionReference.Serializer());
+        LootItemConditions.register(new TimeCheck.Serializer());
     }
 
     public static class Serializer

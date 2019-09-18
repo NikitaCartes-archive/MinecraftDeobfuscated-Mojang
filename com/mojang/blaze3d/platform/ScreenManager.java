@@ -6,6 +6,7 @@ package com.mojang.blaze3d.platform;
 import com.mojang.blaze3d.platform.Monitor;
 import com.mojang.blaze3d.platform.MonitorCreator;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.api.EnvType;
@@ -21,6 +22,7 @@ public class ScreenManager {
     private final MonitorCreator monitorCreator;
 
     public ScreenManager(MonitorCreator monitorCreator) {
+        RenderSystem.assertThread(RenderSystem::isInInitPhase);
         this.monitorCreator = monitorCreator;
         GLFW.glfwSetMonitorCallback(this::onMonitorChange);
         PointerBuffer pointerBuffer = GLFW.glfwGetMonitors();
@@ -33,6 +35,7 @@ public class ScreenManager {
     }
 
     private void onMonitorChange(long l, int i) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         if (i == 262145) {
             this.monitors.put(l, this.monitorCreator.createMonitor(l));
         } else if (i == 262146) {
@@ -42,6 +45,7 @@ public class ScreenManager {
 
     @Nullable
     public Monitor getMonitor(long l) {
+        RenderSystem.assertThread(RenderSystem::isInInitPhase);
         return (Monitor)this.monitors.get(l);
     }
 
@@ -87,6 +91,7 @@ public class ScreenManager {
     }
 
     public void shutdown() {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
         GLFWMonitorCallback gLFWMonitorCallback = GLFW.glfwSetMonitorCallback(null);
         if (gLFWMonitorCallback != null) {
             gLFWMonitorCallback.free();

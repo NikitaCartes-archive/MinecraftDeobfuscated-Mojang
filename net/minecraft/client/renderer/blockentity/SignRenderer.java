@@ -15,6 +15,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.model.SignModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ extends BlockEntityRenderer<SignBlockEntity> {
     private final SignModel signModel = new SignModel();
 
     @Override
-    public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i) {
+    public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
         BlockState blockState = signBlockEntity.getBlockState();
         RenderSystem.pushMatrix();
         float h = 0.6666667f;
@@ -52,7 +53,7 @@ extends BlockEntityRenderer<SignBlockEntity> {
             this.signModel.getStick().visible = false;
         }
         if (i >= 0) {
-            this.bindTexture(BREAKING_LOCATIONS[i]);
+            this.bindTexture((ResourceLocation)BREAKING_LOCATIONS.get(i));
             RenderSystem.matrixMode(5890);
             RenderSystem.pushMatrix();
             RenderSystem.scalef(4.0f, 2.0f, 1.0f);

@@ -148,10 +148,10 @@ extends Screen {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, this.height, this.blitOffset).uv(0.0, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(k, this.height, this.blitOffset).uv((float)k * 0.015625f, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(k, 0.0, this.blitOffset).uv((float)k * 0.015625f, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, this.blitOffset).uv(0.0, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, this.height, this.getBlitOffset()).uv(0.0, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(k, this.height, this.getBlitOffset()).uv((float)k * 0.015625f, g * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(k, 0.0, this.getBlitOffset()).uv((float)k * 0.015625f, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, this.getBlitOffset()).uv(0.0, h * 0.015625f).color(m, m, m, 1.0f).endVertex();
         tesselator.end();
     }
 
@@ -200,10 +200,10 @@ extends Screen {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, p, this.blitOffset).uv(0.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(o, p, this.blitOffset).uv(1.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(o, 0.0, this.blitOffset).uv(1.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, this.blitOffset).uv(0.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, p, this.getBlitOffset()).uv(0.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(o, p, this.getBlitOffset()).uv(1.0, 1.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(o, 0.0, this.getBlitOffset()).uv(1.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, this.getBlitOffset()).uv(0.0, 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
         super.render(i, j, f);

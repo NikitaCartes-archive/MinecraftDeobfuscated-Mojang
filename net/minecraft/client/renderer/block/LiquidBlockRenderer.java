@@ -157,15 +157,15 @@ public class LiquidBlockRenderer {
             aj = 1.0f * f;
             ak = 1.0f * g;
             al = 1.0f * h;
-            bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).endVertex();
-            bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).endVertex();
-            bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).endVertex();
-            bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).endVertex();
+            bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
             if (fluidState.shouldRenderBackwardUpFace(blockAndBiomeGetter, blockPos.above())) {
-                bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).endVertex();
-                bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).endVertex();
-                bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).endVertex();
-                bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).endVertex();
+                bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+                bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+                bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+                bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
             }
         }
         if (bl3) {
@@ -179,10 +179,10 @@ public class LiquidBlockRenderer {
             aa = 0.5f * f;
             float ap = 0.5f * g;
             af = 0.5f * h;
-            bufferBuilder.vertex(d, e, r + 1.0).color(aa, ap, af, 1.0f).uv(t, z).uv2(an, ao).endVertex();
-            bufferBuilder.vertex(d, e, r).color(aa, ap, af, 1.0f).uv(t, x).uv2(an, ao).endVertex();
-            bufferBuilder.vertex(d + 1.0, e, r).color(aa, ap, af, 1.0f).uv(v, x).uv2(an, ao).endVertex();
-            bufferBuilder.vertex(d + 1.0, e, r + 1.0).color(aa, ap, af, 1.0f).uv(v, z).uv2(an, ao).endVertex();
+            bufferBuilder.vertex(d, e, r + 1.0).color(aa, ap, af, 1.0f).uv(t, z).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d, e, r).color(aa, ap, af, 1.0f).uv(t, x).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d + 1.0, e, r).color(aa, ap, af, 1.0f).uv(v, x).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(d + 1.0, e, r + 1.0).color(aa, ap, af, 1.0f).uv(v, z).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
             bl82 = true;
         }
         for (int aq = 0; aq < 4; ++aq) {
@@ -249,15 +249,15 @@ public class LiquidBlockRenderer {
             float bb = 1.0f * ba * f;
             float bc = 1.0f * ba * g;
             float bd = 1.0f * ba * h;
-            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).endVertex();
+            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
             if (textureAtlasSprite2 == this.waterOverlay) continue;
-            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).endVertex();
-            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).endVertex();
+            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
         }
         return bl82;
     }

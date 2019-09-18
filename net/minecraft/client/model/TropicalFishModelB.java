@@ -29,24 +29,24 @@ extends EntityModel<T> {
         this.texHeight = 32;
         int i = 19;
         this.body = new ModelPart(this, 0, 20);
-        this.body.addBox(-1.0f, -3.0f, -3.0f, 2, 6, 6, f);
+        this.body.addBox(-1.0f, -3.0f, -3.0f, 2.0f, 6.0f, 6.0f, f);
         this.body.setPos(0.0f, 19.0f, 0.0f);
         this.tail = new ModelPart(this, 21, 16);
-        this.tail.addBox(0.0f, -3.0f, 0.0f, 0, 6, 5, f);
+        this.tail.addBox(0.0f, -3.0f, 0.0f, 0.0f, 6.0f, 5.0f, f);
         this.tail.setPos(0.0f, 19.0f, 3.0f);
         this.leftFin = new ModelPart(this, 2, 16);
-        this.leftFin.addBox(-2.0f, 0.0f, 0.0f, 2, 2, 0, f);
+        this.leftFin.addBox(-2.0f, 0.0f, 0.0f, 2.0f, 2.0f, 0.0f, f);
         this.leftFin.setPos(-1.0f, 20.0f, 0.0f);
         this.leftFin.yRot = 0.7853982f;
         this.rightFin = new ModelPart(this, 2, 12);
-        this.rightFin.addBox(0.0f, 0.0f, 0.0f, 2, 2, 0, f);
+        this.rightFin.addBox(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 0.0f, f);
         this.rightFin.setPos(1.0f, 20.0f, 0.0f);
         this.rightFin.yRot = -0.7853982f;
         this.topFin = new ModelPart(this, 20, 11);
-        this.topFin.addBox(0.0f, -4.0f, 0.0f, 0, 4, 6, f);
+        this.topFin.addBox(0.0f, -4.0f, 0.0f, 0.0f, 4.0f, 6.0f, f);
         this.topFin.setPos(0.0f, 16.0f, -3.0f);
         this.bottomFin = new ModelPart(this, 20, 21);
-        this.bottomFin.addBox(0.0f, 0.0f, 0.0f, 0, 4, 6, f);
+        this.bottomFin.addBox(0.0f, 0.0f, 0.0f, 0.0f, 4.0f, 6.0f, f);
         this.bottomFin.setPos(0.0f, 22.0f, -3.0f);
     }
 

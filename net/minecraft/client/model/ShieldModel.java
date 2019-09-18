@@ -18,9 +18,9 @@ extends Model {
         this.texWidth = 64;
         this.texHeight = 64;
         this.plate = new ModelPart(this, 0, 0);
-        this.plate.addBox(-6.0f, -11.0f, -2.0f, 12, 22, 1, 0.0f);
+        this.plate.addBox(-6.0f, -11.0f, -2.0f, 12.0f, 22.0f, 1.0f, 0.0f);
         this.handle = new ModelPart(this, 26, 0);
-        this.handle.addBox(-1.0f, -3.0f, -1.0f, 2, 6, 6, 0.0f);
+        this.handle.addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f, 0.0f);
     }
 
     public void render() {

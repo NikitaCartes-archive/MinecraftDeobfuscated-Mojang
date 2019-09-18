@@ -7,6 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.advancements.critereon.FluidPredicate;
+import net.minecraft.advancements.critereon.LightPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -20,7 +23,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import org.jetbrains.annotations.Nullable;
 
 public class LocationPredicate {
-    public static final LocationPredicate ANY = new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, null);
+    public static final LocationPredicate ANY = new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     private final MinMaxBounds.Floats x;
     private final MinMaxBounds.Floats y;
     private final MinMaxBounds.Floats z;
@@ -30,26 +33,32 @@ public class LocationPredicate {
     private final StructureFeature<?> feature;
     @Nullable
     private final DimensionType dimension;
+    private final LightPredicate light;
+    private final BlockPredicate block;
+    private final FluidPredicate fluid;
 
-    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable Biome biome, @Nullable StructureFeature<?> structureFeature, @Nullable DimensionType dimensionType) {
+    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable Biome biome, @Nullable StructureFeature<?> structureFeature, @Nullable DimensionType dimensionType, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
         this.x = floats;
         this.y = floats2;
         this.z = floats3;
         this.biome = biome;
         this.feature = structureFeature;
         this.dimension = dimensionType;
+        this.light = lightPredicate;
+        this.block = blockPredicate;
+        this.fluid = fluidPredicate;
     }
 
     public static LocationPredicate inBiome(Biome biome) {
-        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, biome, null, null);
+        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, biome, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
     public static LocationPredicate inDimension(DimensionType dimensionType) {
-        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, dimensionType);
+        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, dimensionType, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
     public static LocationPredicate inFeature(StructureFeature<?> structureFeature) {
-        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, structureFeature, null);
+        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, structureFeature, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
     public boolean matches(ServerLevel serverLevel, double d, double e, double f) {
@@ -70,10 +79,22 @@ public class LocationPredicate {
             return false;
         }
         BlockPos blockPos = new BlockPos(f, g, h);
+        if (!serverLevel.isLoaded(blockPos)) {
+            return false;
+        }
         if (this.biome != null && this.biome != serverLevel.getBiome(blockPos)) {
             return false;
         }
-        return this.feature == null || this.feature.isInsideFeature(serverLevel, blockPos);
+        if (this.feature != null && !this.feature.isInsideFeature(serverLevel, blockPos)) {
+            return false;
+        }
+        if (!this.light.matches(serverLevel, blockPos)) {
+            return false;
+        }
+        if (!this.block.matches(serverLevel, blockPos)) {
+            return false;
+        }
+        return this.fluid.matches(serverLevel, blockPos);
     }
 
     public JsonElement serializeToJson() {
@@ -97,6 +118,9 @@ public class LocationPredicate {
         if (this.biome != null) {
             jsonObject.addProperty("biome", Registry.BIOME.getKey(this.biome).toString());
         }
+        jsonObject.add("light", this.light.serializeToJson());
+        jsonObject.add("block", this.block.serializeToJson());
+        jsonObject.add("fluid", this.fluid.serializeToJson());
         return jsonObject;
     }
 
@@ -116,7 +140,10 @@ public class LocationPredicate {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
             biome = Registry.BIOME.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation + "'"));
         }
-        return new LocationPredicate(floats, floats2, floats3, biome, structureFeature, dimensionType);
+        LightPredicate lightPredicate = LightPredicate.fromJson(jsonObject.get("light"));
+        BlockPredicate blockPredicate = BlockPredicate.fromJson(jsonObject.get("block"));
+        FluidPredicate fluidPredicate = FluidPredicate.fromJson(jsonObject.get("fluid"));
+        return new LocationPredicate(floats, floats2, floats3, biome, structureFeature, dimensionType, lightPredicate, blockPredicate, fluidPredicate);
     }
 
     public static class Builder {
@@ -129,6 +156,13 @@ public class LocationPredicate {
         private StructureFeature<?> feature;
         @Nullable
         private DimensionType dimension;
+        private LightPredicate light = LightPredicate.ANY;
+        private BlockPredicate block = BlockPredicate.ANY;
+        private FluidPredicate fluid = FluidPredicate.ANY;
+
+        public static Builder location() {
+            return new Builder();
+        }
 
         public Builder setBiome(@Nullable Biome biome) {
             this.biome = biome;
@@ -136,7 +170,7 @@ public class LocationPredicate {
         }
 
         public LocationPredicate build() {
-            return new LocationPredicate(this.x, this.y, this.z, this.biome, this.feature, this.dimension);
+            return new LocationPredicate(this.x, this.y, this.z, this.biome, this.feature, this.dimension, this.light, this.block, this.fluid);
         }
     }
 }

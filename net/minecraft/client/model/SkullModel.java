@@ -21,7 +21,7 @@ extends Model {
         this.texWidth = k;
         this.texHeight = l;
         this.head = new ModelPart(this, i, j);
-        this.head.addBox(-4.0f, -8.0f, -4.0f, 8, 8, 8, 0.0f);
+        this.head.addBox(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f, 0.0f);
         this.head.setPos(0.0f, 0.0f, 0.0f);
     }
 

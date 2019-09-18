@@ -26,18 +26,18 @@ extends HumanoidModel<T> {
         super(f, 0.0f, 64, 32);
         if (!bl) {
             this.rightArm = new ModelPart(this, 40, 16);
-            this.rightArm.addBox(-1.0f, -2.0f, -1.0f, 2, 12, 2, f);
+            this.rightArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
             this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
             this.leftArm = new ModelPart(this, 40, 16);
             this.leftArm.mirror = true;
-            this.leftArm.addBox(-1.0f, -2.0f, -1.0f, 2, 12, 2, f);
+            this.leftArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
             this.leftArm.setPos(5.0f, 2.0f, 0.0f);
             this.rightLeg = new ModelPart(this, 0, 16);
-            this.rightLeg.addBox(-1.0f, 0.0f, -1.0f, 2, 12, 2, f);
+            this.rightLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
             this.rightLeg.setPos(-2.0f, 12.0f, 0.0f);
             this.leftLeg = new ModelPart(this, 0, 16);
             this.leftLeg.mirror = true;
-            this.leftLeg.addBox(-1.0f, 0.0f, -1.0f, 2, 12, 2, f);
+            this.leftLeg.addBox(-1.0f, 0.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);
             this.leftLeg.setPos(2.0f, 12.0f, 0.0f);
         }
     }

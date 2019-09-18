@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.entity.player;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -68,9 +67,9 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             i -= 0.125;
         }
         this.setModelProperties(abstractClientPlayer);
-        GlStateManager.setProfile(GlStateManager.Profile.PLAYER_SKIN);
+        RenderSystem.setProfile(RenderSystem.Profile.PLAYER_SKIN);
         super.render(abstractClientPlayer, d, i, f, g, h);
-        GlStateManager.unsetProfile(GlStateManager.Profile.PLAYER_SKIN);
+        RenderSystem.unsetProfile(RenderSystem.Profile.PLAYER_SKIN);
     }
 
     private void setModelProperties(AbstractClientPlayer abstractClientPlayer) {

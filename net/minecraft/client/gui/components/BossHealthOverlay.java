@@ -31,7 +31,7 @@ extends GuiComponent {
         if (this.events.isEmpty()) {
             return;
         }
-        int i = this.minecraft.window.getGuiScaledWidth();
+        int i = this.minecraft.getWindow().getGuiScaledWidth();
         int j = 12;
         for (LerpingBossEvent lerpingBossEvent : this.events.values()) {
             int k = i / 2 - 91;
@@ -44,7 +44,7 @@ extends GuiComponent {
             int n = i / 2 - m / 2;
             int o = l - 9;
             this.minecraft.font.drawShadow(string, n, o, 0xFFFFFF);
-            if ((j += 10 + this.minecraft.font.lineHeight) < this.minecraft.window.getGuiScaledHeight() / 3) continue;
+            if ((j += 10 + this.minecraft.font.lineHeight) < this.minecraft.getWindow().getGuiScaledHeight() / 3) continue;
             break;
         }
     }

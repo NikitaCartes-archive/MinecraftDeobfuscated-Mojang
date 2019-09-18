@@ -22,7 +22,7 @@ extends EntityModel<T> {
         this.texWidth = k;
         this.texHeight = l;
         this.knot = new ModelPart(this, i, j);
-        this.knot.addBox(-3.0f, -6.0f, -3.0f, 6, 8, 6, 0.0f);
+        this.knot.addBox(-3.0f, -6.0f, -3.0f, 6.0f, 8.0f, 6.0f, 0.0f);
         this.knot.setPos(0.0f, 0.0f, 0.0f);
     }
 

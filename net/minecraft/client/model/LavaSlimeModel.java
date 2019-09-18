@@ -29,10 +29,10 @@ extends EntityModel<T> {
                 k = 19;
             }
             this.bodyCubes[i] = new ModelPart(this, j, k);
-            this.bodyCubes[i].addBox(-4.0f, 16 + i, -4.0f, 8, 1, 8);
+            this.bodyCubes[i].addBox(-4.0f, 16 + i, -4.0f, 8.0f, 1.0f, 8.0f);
         }
         this.insideCube = new ModelPart(this, 0, 16);
-        this.insideCube.addBox(-2.0f, 18.0f, -2.0f, 4, 4, 4);
+        this.insideCube.addBox(-2.0f, 18.0f, -2.0f, 4.0f, 4.0f, 4.0f);
     }
 
     @Override

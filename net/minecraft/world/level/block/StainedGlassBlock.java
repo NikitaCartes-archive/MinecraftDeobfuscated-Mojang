@@ -4,7 +4,6 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.BlockLayer;
 import net.minecraft.world.level.block.AbstractGlassBlock;
 import net.minecraft.world.level.block.BeaconBeamBlock;
 import net.minecraft.world.level.block.Block;
@@ -22,11 +21,6 @@ implements BeaconBeamBlock {
     @Override
     public DyeColor getColor() {
         return this.color;
-    }
-
-    @Override
-    public BlockLayer getRenderLayer() {
-        return BlockLayer.TRANSLUCENT;
     }
 }
 

@@ -161,11 +161,11 @@ implements MenuAccess<T> {
 
     private void renderFloatingItem(ItemStack itemStack, int i, int j, String string) {
         RenderSystem.translatef(0.0f, 0.0f, 32.0f);
-        this.blitOffset = 200;
+        this.setBlitOffset(200);
         this.itemRenderer.blitOffset = 200.0f;
         this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
         this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j - (this.draggingItem.isEmpty() ? 0 : 8), string);
-        this.blitOffset = 0;
+        this.setBlitOffset(0);
         this.itemRenderer.blitOffset = 0.0f;
     }
 
@@ -204,13 +204,13 @@ implements MenuAccess<T> {
                 this.recalculateQuickCraftRemaining();
             }
         }
-        this.blitOffset = 100;
+        this.setBlitOffset(100);
         this.itemRenderer.blitOffset = 100.0f;
         if (itemStack.isEmpty() && slot.isActive() && (string2 = slot.getNoItemIcon()) != null) {
             TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
             RenderSystem.disableLighting();
             this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-            AbstractContainerScreen.blit(i, j, this.blitOffset, 16, 16, textureAtlasSprite);
+            AbstractContainerScreen.blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
             RenderSystem.enableLighting();
             bl2 = true;
         }
@@ -223,7 +223,7 @@ implements MenuAccess<T> {
             this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j, string);
         }
         this.itemRenderer.blitOffset = 0.0f;
-        this.blitOffset = 0;
+        this.setBlitOffset(0);
     }
 
     private void recalculateQuickCraftRemaining() {
@@ -297,7 +297,7 @@ implements MenuAccess<T> {
                         if (this.minecraft.options.keyPickItem.matchesMouse(i)) {
                             this.slotClicked(slot, m, i, ClickType.CLONE);
                         } else {
-                            boolean bl3 = m != -999 && (InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 344));
+                            boolean bl3 = m != -999 && (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
                             ClickType clickType = ClickType.PICKUP;
                             if (bl3) {
                                 this.lastQuickMoved = slot != null && slot.hasItem() ? slot.getItem().copy() : ItemStack.EMPTY;
@@ -443,7 +443,7 @@ implements MenuAccess<T> {
                     this.slotClicked(slot, l, i, ClickType.CLONE);
                 } else {
                     boolean bl2;
-                    boolean bl3 = bl2 = l != -999 && (InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().window.getWindow(), 344));
+                    boolean bl3 = bl2 = l != -999 && (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 340) || InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 344));
                     if (bl2) {
                         this.lastQuickMoved = slot != null && slot.hasItem() ? slot.getItem().copy() : ItemStack.EMPTY;
                     }

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +39,6 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -200,26 +199,6 @@ implements ChunkHolder.PlayerProvider {
             }
             return Math.min(chunkHolder.getQueueLevel(), ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1);
         };
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public String getChunkDebugData(ChunkPos chunkPos) {
-        ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
-        if (chunkHolder == null) {
-            return "null";
-        }
-        String string = chunkHolder.getTicketLevel() + "\n";
-        ChunkStatus chunkStatus = chunkHolder.getLastAvailableStatus();
-        ChunkAccess chunkAccess = chunkHolder.getLastAvailable();
-        if (chunkStatus != null) {
-            string = string + "St: \u00a7" + chunkStatus.getIndex() + chunkStatus + '\u00a7' + "r\n";
-        }
-        if (chunkAccess != null) {
-            string = string + "Ch: \u00a7" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + '\u00a7' + "r\n";
-        }
-        ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
-        string = string + "\u00a7" + fullChunkStatus.ordinal() + (Object)((Object)fullChunkStatus);
-        return string + '\u00a7' + "r";
     }
 
     private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(ChunkPos chunkPos, final int i, IntFunction<ChunkStatus> intFunction) {
@@ -859,8 +838,10 @@ implements ChunkHolder.PlayerProvider {
             }
             trackedEntity.serverEntity.sendChanges();
         }
-        for (TrackedEntity trackedEntity : this.entityMap.values()) {
-            trackedEntity.updatePlayers(list);
+        if (!list.isEmpty()) {
+            for (TrackedEntity trackedEntity : this.entityMap.values()) {
+                trackedEntity.updatePlayers(list);
+            }
         }
     }
 
@@ -973,7 +954,7 @@ implements ChunkHolder.PlayerProvider {
                 return;
             }
             Vec3 vec3 = new Vec3(serverPlayer.x, serverPlayer.y, serverPlayer.z).subtract(this.serverEntity.sentPos());
-            int i = Math.min(this.range, (ChunkMap.this.viewDistance - 1) * 16);
+            int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
             boolean bl2 = bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
             if (bl) {
                 ChunkPos chunkPos;
@@ -988,6 +969,17 @@ implements ChunkHolder.PlayerProvider {
             } else if (this.seenBy.remove(serverPlayer)) {
                 this.serverEntity.removePairing(serverPlayer);
             }
+        }
+
+        private int getEffectiveRange() {
+            Collection<Entity> collection = this.entity.getIndirectPassengers();
+            int i = this.range;
+            for (Entity entity : collection) {
+                int j = entity.getType().chunkRange() * 16;
+                if (j <= i) continue;
+                i = j;
+            }
+            return i;
         }
 
         public void updatePlayers(List<ServerPlayer> list) {

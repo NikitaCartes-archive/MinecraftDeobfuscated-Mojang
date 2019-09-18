@@ -29,11 +29,6 @@ extends Block {
     }
 
     @Override
-    public boolean canOcclude(BlockState blockState) {
-        return false;
-    }
-
-    @Override
     @Environment(value=EnvType.CLIENT)
     public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return 1.0f;
