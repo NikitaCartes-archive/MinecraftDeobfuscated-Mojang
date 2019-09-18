@@ -1104,7 +1104,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 							int n = blockDestructionProgressx.getProgress();
 							TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.breakingTextures.get(n);
 							BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
-							blockRenderDispatcher.renderBreakingTexture(blockState2, blockPos, textureAtlasSprite, this.level);
+							blockRenderDispatcher.renderBreakingTexture(this.builder, blockState2, blockPos, textureAtlasSprite, this.level);
 						}
 					}
 				}
