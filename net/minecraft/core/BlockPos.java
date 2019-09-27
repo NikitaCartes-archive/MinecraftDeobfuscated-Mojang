@@ -154,10 +154,12 @@ implements Serializable {
         return this.relative(Direction.UP, i);
     }
 
+    @Override
     public BlockPos below() {
         return this.below(1);
     }
 
+    @Override
     public BlockPos below(int i) {
         return this.relative(Direction.DOWN, i);
     }
@@ -198,6 +200,7 @@ implements Serializable {
         return this.relative(direction, 1);
     }
 
+    @Override
     public BlockPos relative(Direction direction, int i) {
         if (i == 0) {
             return this;
@@ -283,6 +286,21 @@ implements Serializable {
     @Override
     public /* synthetic */ Vec3i cross(Vec3i vec3i) {
         return this.cross(vec3i);
+    }
+
+    @Override
+    public /* synthetic */ Vec3i relative(Direction direction, int i) {
+        return this.relative(direction, i);
+    }
+
+    @Override
+    public /* synthetic */ Vec3i below(int i) {
+        return this.below(i);
+    }
+
+    @Override
+    public /* synthetic */ Vec3i below() {
+        return this.below();
     }
 
     private static /* synthetic */ void method_19441(int[] is, int i) {
@@ -541,6 +559,21 @@ implements Serializable {
         @Override
         public /* synthetic */ Vec3i cross(Vec3i vec3i) {
             return super.cross(vec3i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i relative(Direction direction, int i) {
+            return this.relative(direction, i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i below(int i) {
+            return super.below(i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i below() {
+            return super.below();
         }
     }
 }

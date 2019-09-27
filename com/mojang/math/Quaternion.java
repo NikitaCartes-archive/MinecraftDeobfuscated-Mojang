@@ -7,13 +7,14 @@ import com.mojang.math.Vector3f;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
 
 public final class Quaternion {
     private final float[] values;
 
     public Quaternion() {
         this.values = new float[4];
-        this.values[4] = 1.0f;
+        this.values[3] = 1.0f;
     }
 
     public Quaternion(float f, float g, float h, float i) {
@@ -115,6 +116,14 @@ public final class Quaternion {
         this.values[3] = i * m - f * j - g * k - h * l;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public void mul(float f) {
+        this.values[0] = this.values[0] * f;
+        this.values[1] = this.values[1] * f;
+        this.values[2] = this.values[2] * f;
+        this.values[3] = this.values[3] * f;
+    }
+
     public void conj() {
         this.values[0] = -this.values[0];
         this.values[1] = -this.values[1];
@@ -127,6 +136,23 @@ public final class Quaternion {
 
     private static float sin(float f) {
         return (float)Math.sin(f);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public void normalize() {
+        float f = this.i() * this.i() + this.j() * this.j() + this.k() * this.k() + this.r() * this.r();
+        if (f > 1.0E-6f) {
+            float g = Mth.fastInvSqrt(f);
+            this.values[0] = this.values[0] * g;
+            this.values[1] = this.values[1] * g;
+            this.values[2] = this.values[2] * g;
+            this.values[3] = this.values[3] * g;
+        } else {
+            this.values[0] = 0.0f;
+            this.values[1] = 0.0f;
+            this.values[2] = 0.0f;
+            this.values[3] = 0.0f;
+        }
     }
 }
 

@@ -5,12 +5,12 @@ package net.minecraft.client.player;
 
 import com.google.common.hash.Hashing;
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.platform.TextureObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -89,12 +89,12 @@ extends Player {
 
     public static HttpTexture registerSkinTexture(ResourceLocation resourceLocation, String string) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        TextureObject textureObject = textureManager.getTexture(resourceLocation);
-        if (textureObject == null) {
-            textureObject = new HttpTexture(null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
-            textureManager.register(resourceLocation, textureObject);
+        AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
+        if (abstractTexture == null) {
+            abstractTexture = new HttpTexture(null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", StringUtil.stripColor(string)), DefaultPlayerSkin.getDefaultSkin(AbstractClientPlayer.createPlayerUUID(string)), true, null);
+            textureManager.register(resourceLocation, abstractTexture);
         }
-        return (HttpTexture)textureObject;
+        return (HttpTexture)abstractTexture;
     }
 
     public static ResourceLocation getSkinLocation(String string) {

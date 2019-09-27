@@ -3,17 +3,18 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.math.Quaternion;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import java.util.Calendar;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BatchedBlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 
 @Environment(value=EnvType.CLIENT)
 public class ChestRenderer<T extends BlockEntity>
-extends BatchedBlockEntityRenderer<T> {
+extends BlockEntityRenderer<T> {
     public static final ResourceLocation CHEST_LARGE_TRAP_LOCATION = new ResourceLocation("entity/chest/trapped_double");
     public static final ResourceLocation CHEST_LARGE_XMAS_LOCATION = new ResourceLocation("entity/chest/christmas_double");
     public static final ResourceLocation CHEST_LARGE_LOCATION = new ResourceLocation("entity/chest/normal_double");
@@ -43,7 +44,8 @@ extends BatchedBlockEntityRenderer<T> {
     private final ModelPart doubleLock;
     private boolean xmasTextures;
 
-    public ChestRenderer() {
+    public ChestRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
+        super(blockEntityRenderDispatcher);
         Calendar calendar = Calendar.getInstance();
         if (calendar.get(2) + 1 == 12 && calendar.get(5) >= 24 && calendar.get(5) <= 26) {
             this.xmasTextures = true;
@@ -69,38 +71,38 @@ extends BatchedBlockEntityRenderer<T> {
     }
 
     @Override
-    protected void renderToBuffer(T blockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k) {
+    public void render(T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         boolean bl;
-        ChestType chestType;
         BlockState blockState = ((BlockEntity)blockEntity).hasLevel() ? ((BlockEntity)blockEntity).getBlockState() : (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
-        ChestType chestType2 = chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-        if (chestType == ChestType.LEFT) {
-            return;
-        }
+        ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
         boolean bl2 = bl = chestType != ChestType.SINGLE;
-        ResourceLocation resourceLocation = i >= 0 ? ModelBakery.DESTROY_STAGES.get(i) : (this.xmasTextures ? (bl ? CHEST_LARGE_XMAS_LOCATION : CHEST_XMAS_LOCATION) : (blockEntity instanceof TrappedChestBlockEntity ? (bl ? CHEST_LARGE_TRAP_LOCATION : CHEST_TRAP_LOCATION) : (blockEntity instanceof EnderChestBlockEntity ? ENDER_CHEST_LOCATION : (bl ? CHEST_LARGE_LOCATION : CHEST_LOCATION))));
-        bufferBuilder.pushPose();
+        ResourceLocation resourceLocation = this.xmasTextures ? (bl ? CHEST_LARGE_XMAS_LOCATION : CHEST_XMAS_LOCATION) : (blockEntity instanceof TrappedChestBlockEntity ? (bl ? CHEST_LARGE_TRAP_LOCATION : CHEST_TRAP_LOCATION) : (blockEntity instanceof EnderChestBlockEntity ? ENDER_CHEST_LOCATION : (bl ? CHEST_LARGE_LOCATION : CHEST_LOCATION)));
+        poseStack.pushPose();
         float h = blockState.getValue(ChestBlock.FACING).toYRot();
-        bufferBuilder.translate(0.5, 0.5, 0.5);
-        bufferBuilder.multiplyPose(new Quaternion(Vector3f.YP, -h, true));
-        bufferBuilder.translate(-0.5, -0.5, -0.5);
-        float l = ((LidBlockEntity)blockEntity).getOpenNess(g);
-        l = 1.0f - l;
-        l = 1.0f - l * l * l;
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Vector3f.YP.rotation(-h, true));
+        poseStack.translate(-0.5, -0.5, -0.5);
+        float j = ((LidBlockEntity)blockEntity).getOpenNess(g);
+        j = 1.0f - j;
+        j = 1.0f - j * j * j;
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
         TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
         if (bl) {
-            this.render(bufferBuilder, this.doubleLid, this.doubleLock, this.doubleBottom, l, j, k, textureAtlasSprite);
+            if (chestType == ChestType.LEFT) {
+                poseStack.translate(-1.0, 0.0, 0.0);
+            }
+            this.render(poseStack, vertexConsumer, this.doubleLid, this.doubleLock, this.doubleBottom, j, i, textureAtlasSprite);
         } else {
-            this.render(bufferBuilder, this.lid, this.lock, this.bottom, l, j, k, textureAtlasSprite);
+            this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, j, i, textureAtlasSprite);
         }
-        bufferBuilder.popPose();
+        poseStack.popPose();
     }
 
-    private void render(BufferBuilder bufferBuilder, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, int j, TextureAtlasSprite textureAtlasSprite) {
+    private void render(PoseStack poseStack, VertexConsumer vertexConsumer, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, TextureAtlasSprite textureAtlasSprite) {
         modelPart2.xRot = modelPart.xRot = -(f * 1.5707964f);
-        modelPart.render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
-        modelPart2.render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
-        modelPart3.render(bufferBuilder, 0.0625f, i, j, textureAtlasSprite);
+        modelPart.render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
+        modelPart2.render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
+        modelPart3.render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
     }
 }
 

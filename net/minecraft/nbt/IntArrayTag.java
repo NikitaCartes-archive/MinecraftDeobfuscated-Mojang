@@ -13,16 +13,43 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag
 extends CollectionTag<IntTag> {
-    private int[] data;
+    public static final TagType<IntArrayTag> TYPE = new TagType<IntArrayTag>(){
 
-    IntArrayTag() {
-    }
+        @Override
+        public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(192L);
+            int j = dataInput.readInt();
+            nbtAccounter.accountBits(32 * j);
+            int[] is = new int[j];
+            for (int k = 0; k < j; ++k) {
+                is[k] = dataInput.readInt();
+            }
+            return new IntArrayTag(is);
+        }
+
+        @Override
+        public String getName() {
+            return "INT[]";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Int";
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private int[] data;
 
     public IntArrayTag(int[] is) {
         this.data = is;
@@ -50,19 +77,12 @@ extends CollectionTag<IntTag> {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(192L);
-        int j = dataInput.readInt();
-        nbtAccounter.accountBits(32 * j);
-        this.data = new int[j];
-        for (int k = 0; k < j; ++k) {
-            this.data[k] = dataInput.readInt();
-        }
-    }
-
-    @Override
     public byte getId() {
         return 11;
+    }
+
+    public TagType<IntArrayTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -121,14 +141,14 @@ extends CollectionTag<IntTag> {
 
     @Override
     public IntTag get(int i) {
-        return new IntTag(this.data[i]);
+        return IntTag.valueOf(this.data[i]);
     }
 
     @Override
     public IntTag set(int i, IntTag intTag) {
         int j = this.data[i];
         this.data[i] = intTag.getAsInt();
-        return new IntTag(j);
+        return IntTag.valueOf(j);
     }
 
     @Override
@@ -158,7 +178,7 @@ extends CollectionTag<IntTag> {
     public IntTag remove(int i) {
         int j = this.data[i];
         this.data = ArrayUtils.remove(this.data, i);
-        return new IntTag(j);
+        return IntTag.valueOf(j);
     }
 
     @Override

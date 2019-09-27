@@ -3,11 +3,13 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.FoxModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -23,47 +25,39 @@ extends RenderLayer<Fox, FoxModel<Fox>> {
     }
 
     @Override
-    public void render(Fox fox, float f, float g, float h, float i, float j, float k, float l) {
-        float m;
-        ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (itemStack.isEmpty()) {
-            return;
-        }
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Fox fox, float f, float g, float h, float j, float k, float l, float m) {
+        float n;
         boolean bl = fox.isSleeping();
         boolean bl2 = fox.isBaby();
-        RenderSystem.pushMatrix();
+        poseStack.pushPose();
         if (bl2) {
-            m = 0.75f;
-            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
-            RenderSystem.translatef(0.0f, 8.0f * l, 3.35f * l);
+            n = 0.75f;
+            poseStack.scale(0.75f, 0.75f, 0.75f);
+            poseStack.translate(0.0, 8.0f * m, 3.35f * m);
         }
-        RenderSystem.translatef(((FoxModel)this.getParentModel()).head.x / 16.0f, ((FoxModel)this.getParentModel()).head.y / 16.0f, ((FoxModel)this.getParentModel()).head.z / 16.0f);
-        m = fox.getHeadRollAngle(h) * 57.295776f;
-        RenderSystem.rotatef(m, 0.0f, 0.0f, 1.0f);
-        RenderSystem.rotatef(j, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(k, 1.0f, 0.0f, 0.0f);
+        poseStack.translate(((FoxModel)this.getParentModel()).head.x / 16.0f, ((FoxModel)this.getParentModel()).head.y / 16.0f, ((FoxModel)this.getParentModel()).head.z / 16.0f);
+        n = fox.getHeadRollAngle(h);
+        poseStack.mulPose(Vector3f.ZP.rotation(n, false));
+        poseStack.mulPose(Vector3f.YP.rotation(k, true));
+        poseStack.mulPose(Vector3f.XP.rotation(l, true));
         if (fox.isBaby()) {
             if (bl) {
-                RenderSystem.translatef(0.4f, 0.26f, 0.15f);
+                poseStack.translate(0.4f, 0.26f, 0.15f);
             } else {
-                RenderSystem.translatef(0.06f, 0.26f, -0.5f);
+                poseStack.translate(0.06f, 0.26f, -0.5);
             }
         } else if (bl) {
-            RenderSystem.translatef(0.46f, 0.26f, 0.22f);
+            poseStack.translate(0.46f, 0.26f, 0.22f);
         } else {
-            RenderSystem.translatef(0.06f, 0.27f, -0.5f);
+            poseStack.translate(0.06f, 0.27f, -0.5);
         }
-        RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+        poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
         if (bl) {
-            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
         }
-        Minecraft.getInstance().getItemRenderer().renderWithMobState(itemStack, fox, ItemTransforms.TransformType.GROUND, false);
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 }
 

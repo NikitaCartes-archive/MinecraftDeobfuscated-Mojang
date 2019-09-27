@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
@@ -23,7 +23,7 @@ extends HumanoidMobRenderer<Vex, VexModel> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Vex vex) {
+    public ResourceLocation getTextureLocation(Vex vex) {
         if (vex.isCharging()) {
             return VEX_CHARGING_LOCATION;
         }
@@ -31,8 +31,8 @@ extends HumanoidMobRenderer<Vex, VexModel> {
     }
 
     @Override
-    protected void scale(Vex vex, float f) {
-        RenderSystem.scalef(0.4f, 0.4f, 0.4f);
+    protected void scale(Vex vex, PoseStack poseStack, float f) {
+        poseStack.scale(0.4f, 0.4f, 0.4f);
     }
 }
 

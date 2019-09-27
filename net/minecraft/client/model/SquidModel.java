@@ -3,17 +3,20 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class SquidModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart body;
     private final ModelPart[] tentacles = new ModelPart[8];
+    private final ImmutableList<ModelPart> parts;
 
     public SquidModel() {
         int i = -16;
@@ -32,6 +35,10 @@ extends EntityModel<T> {
             d = (double)j * Math.PI * -2.0 / (double)this.tentacles.length + 1.5707963267948966;
             this.tentacles[j].yRot = (float)d;
         }
+        ImmutableList.Builder builder = ImmutableList.builder();
+        builder.add(this.body);
+        builder.addAll(Arrays.asList(this.tentacles));
+        this.parts = builder.build();
     }
 
     @Override
@@ -42,12 +49,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.body.render(k);
-        for (ModelPart modelPart : this.tentacles) {
-            modelPart.render(k);
-        }
+    public Iterable<ModelPart> parts() {
+        return this.parts;
     }
 }
 

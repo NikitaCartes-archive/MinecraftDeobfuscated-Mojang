@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PhantomModel;
@@ -24,22 +25,22 @@ extends MobRenderer<Phantom, PhantomModel<Phantom>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Phantom phantom) {
+    public ResourceLocation getTextureLocation(Phantom phantom) {
         return PHANTOM_LOCATION;
     }
 
     @Override
-    protected void scale(Phantom phantom, float f) {
+    protected void scale(Phantom phantom, PoseStack poseStack, float f) {
         int i = phantom.getPhantomSize();
         float g = 1.0f + 0.15f * (float)i;
-        RenderSystem.scalef(g, g, g);
-        RenderSystem.translatef(0.0f, 1.3125f, 0.1875f);
+        poseStack.scale(g, g, g);
+        poseStack.translate(0.0, 1.3125, 0.1875);
     }
 
     @Override
-    protected void setupRotations(Phantom phantom, float f, float g, float h) {
-        super.setupRotations(phantom, f, g, h);
-        RenderSystem.rotatef(phantom.xRot, 1.0f, 0.0f, 0.0f);
+    protected void setupRotations(Phantom phantom, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(phantom, poseStack, f, g, h);
+        poseStack.mulPose(Vector3f.XP.rotation(phantom.xRot, true));
     }
 }
 

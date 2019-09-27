@@ -4,6 +4,7 @@
 package net.minecraft.core;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Unmodifiable;
@@ -68,6 +69,21 @@ implements Comparable<Vec3i> {
 
     public int getZ() {
         return this.z;
+    }
+
+    public Vec3i below() {
+        return this.below(1);
+    }
+
+    public Vec3i below(int i) {
+        return this.relative(Direction.DOWN, i);
+    }
+
+    public Vec3i relative(Direction direction, int i) {
+        if (i == 0) {
+            return this;
+        }
+        return new Vec3i(this.getX() + direction.getStepX() * i, this.getY() + direction.getStepY() * i, this.getZ() + direction.getStepZ() * i);
     }
 
     public Vec3i cross(Vec3i vec3i) {

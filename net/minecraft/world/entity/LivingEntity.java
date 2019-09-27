@@ -171,7 +171,6 @@ extends Entity {
     public float xxa;
     public float yya;
     public float zza;
-    public float yRotA;
     protected int lerpSteps;
     protected double lerpX;
     protected double lerpY;
@@ -1889,6 +1888,7 @@ extends Entity {
         }
         if (this.isControlledByLocalInstance()) {
             this.lerpSteps = 0;
+            this.setPacketCoordinates(this.x, this.y, this.z);
         }
         if (this.lerpSteps > 0) {
             double d = this.x + (this.lerpX - this.x) / (double)this.lerpSteps;
@@ -1926,7 +1926,6 @@ extends Entity {
             this.jumping = false;
             this.xxa = 0.0f;
             this.zza = 0.0f;
-            this.yRotA = 0.0f;
         } else if (this.isEffectiveAi()) {
             this.level.getProfiler().push("newAi");
             this.serverAiStep();
@@ -1950,7 +1949,6 @@ extends Entity {
         this.level.getProfiler().push("travel");
         this.xxa *= 0.98f;
         this.zza *= 0.98f;
-        this.yRotA *= 0.9f;
         this.updateFallFlying();
         AABB aABB = this.getBoundingBox();
         this.travel(new Vec3(this.xxa, this.yya, this.zza));

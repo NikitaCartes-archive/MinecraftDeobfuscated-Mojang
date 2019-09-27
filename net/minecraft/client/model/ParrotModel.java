@@ -3,17 +3,19 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Parrot;
 
 @Environment(value=EnvType.CLIENT)
 public class ParrotModel
-extends EntityModel<Parrot> {
+extends ListModel<Parrot> {
     private final ModelPart body;
     private final ModelPart tail;
     private final ModelPart wingLeft;
@@ -69,8 +71,8 @@ extends EntityModel<Parrot> {
     }
 
     @Override
-    public void render(Parrot parrot, float f, float g, float h, float i, float j, float k) {
-        this.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.body, this.wingLeft, this.wingRight, this.tail, this.head, this.legLeft, this.legRight);
     }
 
     @Override
@@ -83,20 +85,10 @@ extends EntityModel<Parrot> {
         this.prepare(ParrotModel.getState(parrot));
     }
 
-    public void renderOnShoulder(float f, float g, float h, float i, float j, int k) {
+    public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h, float j, float k, int l) {
         this.prepare(State.ON_SHOULDER);
-        this.setupAnim(State.ON_SHOULDER, k, f, g, 0.0f, h, i);
-        this.render(j);
-    }
-
-    private void render(float f) {
-        this.body.render(f);
-        this.wingLeft.render(f);
-        this.wingRight.render(f);
-        this.tail.render(f);
-        this.head.render(f);
-        this.legLeft.render(f);
-        this.legRight.render(f);
+        this.setupAnim(State.ON_SHOULDER, l, f, g, 0.0f, h, j);
+        this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, k, i, null));
     }
 
     private void setupAnim(State state, int i, float f, float g, float h, float j, float k) {
@@ -206,16 +198,6 @@ extends EntityModel<Parrot> {
             return State.FLYING;
         }
         return State.STANDING;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Parrot)entity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((Parrot)entity, f, g, h, i, j, k);
     }
 
     @Environment(value=EnvType.CLIENT)

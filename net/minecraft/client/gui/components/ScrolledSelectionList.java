@@ -166,7 +166,6 @@ implements Widget {
         int k = this.getScrollbarPosition();
         int l = k + 6;
         this.capYPosition();
-        RenderSystem.disableLighting();
         RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -195,16 +194,16 @@ implements Widget {
         RenderSystem.disableTexture();
         int o = 4;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).uv(0.0, 1.0).color(0, 0, 0, 0).endVertex();
-        bufferBuilder.vertex(this.x1, this.y0 + 4, 0.0).uv(1.0, 1.0).color(0, 0, 0, 0).endVertex();
-        bufferBuilder.vertex(this.x1, this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-        bufferBuilder.vertex(this.x0, this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.x0, this.y0 + 4, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 0).endVertex();
+        bufferBuilder.vertex(this.x1, this.y0 + 4, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 0).endVertex();
+        bufferBuilder.vertex(this.x1, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.x0, this.y0, 0.0).uv(0.0f, 0.0f).color(0, 0, 0, 255).endVertex();
         tesselator.end();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(this.x0, this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-        bufferBuilder.vertex(this.x1, this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-        bufferBuilder.vertex(this.x1, this.y1 - 4, 0.0).uv(1.0, 0.0).color(0, 0, 0, 0).endVertex();
-        bufferBuilder.vertex(this.x0, this.y1 - 4, 0.0).uv(0.0, 0.0).color(0, 0, 0, 0).endVertex();
+        bufferBuilder.vertex(this.x0, this.y1, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.x1, this.y1, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+        bufferBuilder.vertex(this.x1, this.y1 - 4, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 0).endVertex();
+        bufferBuilder.vertex(this.x0, this.y1 - 4, 0.0).uv(0.0f, 0.0f).color(0, 0, 0, 0).endVertex();
         tesselator.end();
         int p = this.getMaxScroll();
         if (p > 0) {
@@ -214,22 +213,22 @@ implements Widget {
                 r = this.y0;
             }
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(k, this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(k, this.y0, 0.0).uv(0.0f, 0.0f).color(0, 0, 0, 255).endVertex();
             tesselator.end();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, r + q, 0.0).uv(0.0, 1.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, r + q, 0.0).uv(1.0, 1.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, r, 0.0).uv(1.0, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(k, r, 0.0).uv(0.0, 0.0).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(k, r + q, 0.0).uv(0.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(l, r + q, 0.0).uv(1.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(l, r, 0.0).uv(1.0f, 0.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(k, r, 0.0).uv(0.0f, 0.0f).color(128, 128, 128, 255).endVertex();
             tesselator.end();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, r + q - 1, 0.0).uv(0.0, 1.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, r + q - 1, 0.0).uv(1.0, 1.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, r, 0.0).uv(1.0, 0.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(k, r, 0.0).uv(0.0, 0.0).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(k, r + q - 1, 0.0).uv(0.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(l - 1, r + q - 1, 0.0).uv(1.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(l - 1, r, 0.0).uv(1.0f, 0.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(k, r, 0.0).uv(0.0f, 0.0f).color(192, 192, 192, 255).endVertex();
             tesselator.end();
         }
         this.renderDecorations(i, j);
@@ -398,10 +397,10 @@ implements Widget {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float f = 32.0f;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(this.x0, j, 0.0).uv(0.0, (float)j / 32.0f).color(64, 64, 64, l).endVertex();
+        bufferBuilder.vertex(this.x0, j, 0.0).uv(0.0f, (float)j / 32.0f).color(64, 64, 64, l).endVertex();
         bufferBuilder.vertex(this.x0 + this.width, j, 0.0).uv((float)this.width / 32.0f, (float)j / 32.0f).color(64, 64, 64, l).endVertex();
         bufferBuilder.vertex(this.x0 + this.width, i, 0.0).uv((float)this.width / 32.0f, (float)i / 32.0f).color(64, 64, 64, k).endVertex();
-        bufferBuilder.vertex(this.x0, i, 0.0).uv(0.0, (float)i / 32.0f).color(64, 64, 64, k).endVertex();
+        bufferBuilder.vertex(this.x0, i, 0.0).uv(0.0f, (float)i / 32.0f).color(64, 64, 64, k).endVertex();
         tesselator.end();
     }
 

@@ -3,6 +3,7 @@
  */
 package com.mojang.math;
 
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Quaternion;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
@@ -121,17 +122,21 @@ public final class Vector3f {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public void normalize() {
+    public boolean normalize() {
         float f = 0.0f;
         for (int i = 0; i < 3; ++i) {
             f += this.values[i] * this.values[i];
         }
-        float g = (float)Mth.fastInvSqrt(f);
+        if ((double)f < 1.0E-5) {
+            return false;
+        }
+        float g = Mth.fastInvSqrt(f);
         int j = 0;
         while (j < 3) {
             int n = j++;
             this.values[n] = this.values[n] * g;
         }
+        return true;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -147,6 +152,18 @@ public final class Vector3f {
         this.values[2] = f * j - g * i;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public void transform(Matrix3f matrix3f) {
+        float[] fs = Arrays.copyOf(this.values, 3);
+        for (int i = 0; i < 3; ++i) {
+            this.values[i] = 0.0f;
+            for (int j = 0; j < 3; ++j) {
+                int n = i;
+                this.values[n] = this.values[n] + matrix3f.get(i, j) * fs[j];
+            }
+        }
+    }
+
     public void transform(Quaternion quaternion) {
         Quaternion quaternion2 = new Quaternion(quaternion);
         quaternion2.mul(new Quaternion(this.x(), this.y(), this.z(), 0.0f));
@@ -154,6 +171,11 @@ public final class Vector3f {
         quaternion3.conj();
         quaternion2.mul(quaternion3);
         this.set(quaternion2.i(), quaternion2.j(), quaternion2.k());
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Quaternion rotation(float f, boolean bl) {
+        return new Quaternion(this, f, bl);
     }
 }
 

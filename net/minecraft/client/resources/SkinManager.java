@@ -13,7 +13,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.InsecureTextureException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -65,8 +65,8 @@ public class SkinManager {
     public ResourceLocation registerTexture(MinecraftProfileTexture minecraftProfileTexture, MinecraftProfileTexture.Type type, @Nullable SkinTextureCallback skinTextureCallback) {
         String string = Hashing.sha1().hashUnencodedChars(minecraftProfileTexture.getHash()).toString();
         ResourceLocation resourceLocation = new ResourceLocation("skins/" + string);
-        TextureObject textureObject = this.textureManager.getTexture(resourceLocation);
-        if (textureObject != null) {
+        AbstractTexture abstractTexture = this.textureManager.getTexture(resourceLocation);
+        if (abstractTexture != null) {
             if (skinTextureCallback != null) {
                 skinTextureCallback.onSkinTextureAvailable(type, resourceLocation, minecraftProfileTexture);
             }

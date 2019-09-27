@@ -60,7 +60,6 @@ extends AbstractContainerScreen<T> {
             return;
         }
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableLighting();
         int j = 33;
         if (collection.size() > 5) {
             j = 132 / (collection.size() - 1);

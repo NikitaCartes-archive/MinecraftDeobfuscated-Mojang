@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class EvokerFangsModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart base = new ModelPart(this, 0, 0);
     private final ModelPart upperJaw;
     private final ModelPart lowerJaw;
@@ -29,7 +30,7 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
         float l = f * 2.0f;
         if (l > 1.0f) {
             l = 1.0f;
@@ -41,9 +42,11 @@ extends EntityModel<T> {
         float m = (f + Mth.sin(f * 2.7f)) * 0.6f * 12.0f;
         this.lowerJaw.y = this.upperJaw.y = 24.0f - m;
         this.base.y = this.upperJaw.y;
-        this.base.render(k);
-        this.upperJaw.render(k);
-        this.lowerJaw.render(k);
+    }
+
+    @Override
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.base, this.upperJaw, this.lowerJaw);
     }
 }
 

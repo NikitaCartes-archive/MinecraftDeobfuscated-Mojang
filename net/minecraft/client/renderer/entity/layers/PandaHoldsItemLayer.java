@@ -3,11 +3,12 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PandaModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -24,26 +25,21 @@ extends RenderLayer<Panda, PandaModel<Panda>> {
     }
 
     @Override
-    public void render(Panda panda, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Panda panda, float f, float g, float h, float j, float k, float l, float m) {
         ItemStack itemStack = panda.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (!panda.isSitting() || itemStack.isEmpty() || panda.isScared()) {
+        if (!panda.isSitting() || panda.isScared()) {
             return;
         }
-        float m = -0.6f;
-        float n = 1.4f;
+        float n = -0.6f;
+        float o = 1.4f;
         if (panda.isEating()) {
-            m -= 0.2f * Mth.sin(i * 0.6f) + 0.2f;
-            n -= 0.09f * Mth.sin(i * 0.6f);
+            n -= 0.2f * Mth.sin(j * 0.6f) + 0.2f;
+            o -= 0.09f * Mth.sin(j * 0.6f);
         }
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.1f, n, m);
-        Minecraft.getInstance().getItemRenderer().renderWithMobState(itemStack, panda, ItemTransforms.TransformType.GROUND, false);
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        poseStack.pushPose();
+        poseStack.translate(0.1f, o, n);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(panda, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 }
 

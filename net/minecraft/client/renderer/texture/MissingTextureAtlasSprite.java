@@ -4,10 +4,10 @@
 package net.minecraft.client.renderer.texture;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.TextureObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +46,7 @@ extends TextureAtlasSprite {
     public static DynamicTexture getTexture() {
         if (missingTexture == null) {
             missingTexture = new DynamicTexture(MISSING_IMAGE_DATA.get());
-            Minecraft.getInstance().getTextureManager().register(MISSING_TEXTURE_LOCATION, (TextureObject)missingTexture);
+            Minecraft.getInstance().getTextureManager().register(MISSING_TEXTURE_LOCATION, (AbstractTexture)missingTexture);
         }
         return missingTexture;
     }

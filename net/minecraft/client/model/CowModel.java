@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 public class CowModel<T extends Entity>
 extends QuadrupedModel<T> {
     public CowModel() {
-        super(12, 0.0f);
+        super(12, 0.0f, false, 10.0f, 4.0f, 2.0f, 2.0f, 24);
         this.head = new ModelPart(this, 0, 0);
         this.head.addBox(-4.0f, -4.0f, -6.0f, 8.0f, 8.0f, 6.0f, 0.0f);
         this.head.setPos(0.0f, 4.0f, -8.0f);
@@ -31,7 +31,6 @@ extends QuadrupedModel<T> {
         this.leg3.x += 1.0f;
         this.leg2.z -= 1.0f;
         this.leg3.z -= 1.0f;
-        this.zHeadOffs += 2.0f;
     }
 
     public ModelPart getHead() {

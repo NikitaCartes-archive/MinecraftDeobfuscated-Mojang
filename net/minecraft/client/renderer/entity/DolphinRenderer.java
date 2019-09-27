@@ -3,10 +3,9 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.entity.DolphinModel;
+import net.minecraft.client.model.DolphinModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.DolphinCarryingItemLayer;
@@ -24,19 +23,8 @@ extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Dolphin dolphin) {
+    public ResourceLocation getTextureLocation(Dolphin dolphin) {
         return DOLPHIN_LOCATION;
-    }
-
-    @Override
-    protected void scale(Dolphin dolphin, float f) {
-        float g = 1.0f;
-        RenderSystem.scalef(1.0f, 1.0f, 1.0f);
-    }
-
-    @Override
-    protected void setupRotations(Dolphin dolphin, float f, float g, float h) {
-        super.setupRotations(dolphin, f, g, h);
     }
 }
 

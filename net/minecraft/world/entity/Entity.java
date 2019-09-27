@@ -180,11 +180,8 @@ CommandSource {
     public int xChunk;
     public int yChunk;
     public int zChunk;
-    @Environment(value=EnvType.CLIENT)
     public long xp;
-    @Environment(value=EnvType.CLIENT)
     public long yp;
-    @Environment(value=EnvType.CLIENT)
     public long zp;
     public boolean noCulling;
     public boolean hasImpulse;
@@ -226,6 +223,15 @@ CommandSource {
         this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public int getTeamColor() {
+        Team team = this.getTeam();
+        if (team != null && team.getColor().getColor() != null) {
+            return team.getColor().getColor();
+        }
+        return 0xFFFFFF;
+    }
+
     public boolean isSpectator() {
         return false;
     }
@@ -239,7 +245,6 @@ CommandSource {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setPacketCoordinates(double d, double e, double f) {
         this.xp = ClientboundMoveEntityPacket.entityToPacket(d);
         this.yp = ClientboundMoveEntityPacket.entityToPacket(e);
@@ -365,9 +370,6 @@ CommandSource {
             --this.boardingCooldown;
         }
         this.walkDistO = this.walkDist;
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
         this.xRotO = this.xRot;
         this.yRotO = this.yRot;
         this.handleNetherPortal();
@@ -1009,20 +1011,11 @@ CommandSource {
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
-        h = Mth.clamp(h, -90.0f, 90.0f);
-        this.yRot = g;
-        this.xRot = h;
+        this.setPos(this.x, this.y, this.z);
+        this.yRot = g % 360.0f;
+        this.xRot = Mth.clamp(h, -90.0f, 90.0f) % 360.0f;
         this.yRotO = this.yRot;
         this.xRotO = this.xRot;
-        double i = this.yRotO - g;
-        if (i < -180.0) {
-            this.yRotO += 360.0f;
-        }
-        if (i >= 180.0) {
-            this.yRotO -= 360.0f;
-        }
-        this.setPos(this.x, this.y, this.z);
-        this.setRot(g, h);
     }
 
     public void moveTo(BlockPos blockPos, float f, float g) {
@@ -1030,6 +1023,13 @@ CommandSource {
     }
 
     public void moveTo(double d, double e, double f, float g, float h) {
+        this.setPosAndOldPos(d, e, f);
+        this.yRot = g;
+        this.xRot = h;
+        this.setPos(this.x, this.y, this.z);
+    }
+
+    public void setPosAndOldPos(double d, double e, double f) {
         this.x = d;
         this.y = e;
         this.z = f;
@@ -1039,9 +1039,6 @@ CommandSource {
         this.xOld = this.x;
         this.yOld = this.y;
         this.zOld = this.z;
-        this.yRot = g;
-        this.xRot = h;
-        this.setPos(this.x, this.y, this.z);
     }
 
     public float distanceTo(Entity entity) {
@@ -1258,7 +1255,7 @@ CommandSource {
             if (!this.tags.isEmpty()) {
                 listTag = new ListTag();
                 for (String string : this.tags) {
-                    listTag.add(new StringTag(string));
+                    listTag.add(StringTag.valueOf(string));
                 }
                 compoundTag.put("Tags", listTag);
             }
@@ -1292,15 +1289,7 @@ CommandSource {
             double e = listTag2.getDouble(1);
             double f = listTag2.getDouble(2);
             this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-            this.x = listTag.getDouble(0);
-            this.y = listTag.getDouble(1);
-            this.z = listTag.getDouble(2);
-            this.xOld = this.x;
-            this.yOld = this.y;
-            this.zOld = this.z;
-            this.xo = this.x;
-            this.yo = this.y;
-            this.zo = this.z;
+            this.setPosAndOldPos(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
             this.yRot = listTag3.getFloat(0);
             this.xRot = listTag3.getFloat(1);
             this.yRotO = this.yRot;
@@ -1373,7 +1362,7 @@ CommandSource {
     protected ListTag newDoubleList(double ... ds) {
         ListTag listTag = new ListTag();
         for (double d : ds) {
-            listTag.add(new DoubleTag(d));
+            listTag.add(DoubleTag.valueOf(d));
         }
         return listTag;
     }
@@ -1381,7 +1370,7 @@ CommandSource {
     protected ListTag newFloatList(float ... fs) {
         ListTag listTag = new ListTag();
         for (float f : fs) {
-            listTag.add(new FloatTag(f));
+            listTag.add(FloatTag.valueOf(f));
         }
         return listTag;
     }
@@ -2022,7 +2011,7 @@ CommandSource {
 
     @Environment(value=EnvType.CLIENT)
     public boolean displayFireAnimation() {
-        return this.isOnFire();
+        return this.isOnFire() && !this.isSpectator();
     }
 
     public void setUUID(UUID uUID) {

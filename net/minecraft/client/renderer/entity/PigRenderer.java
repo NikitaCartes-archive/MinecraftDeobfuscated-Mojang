@@ -23,7 +23,7 @@ extends MobRenderer<Pig, PigModel<Pig>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Pig pig) {
+    public ResourceLocation getTextureLocation(Pig pig) {
         return PIG_LOCATION;
     }
 }

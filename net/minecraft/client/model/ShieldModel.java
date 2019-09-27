@@ -3,6 +3,8 @@
  */
 package net.minecraft.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
@@ -23,9 +25,9 @@ extends Model {
         this.handle.addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f, 0.0f);
     }
 
-    public void render() {
-        this.plate.render(0.0625f);
-        this.handle.render(0.0625f);
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
+        this.plate.render(poseStack, vertexConsumer, 0.0625f, i, null);
+        this.handle.render(poseStack, vertexConsumer, 0.0625f, i, null);
     }
 }
 

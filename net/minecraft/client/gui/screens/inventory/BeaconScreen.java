@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -126,7 +125,6 @@ extends AbstractContainerScreen<BeaconMenu> {
 
     @Override
     protected void renderLabels(int i, int j) {
-        Lighting.turnOff();
         this.drawCenteredString(this.font, I18n.get("block.minecraft.beacon.primary", new Object[0]), 62, 10, 0xE0E0E0);
         this.drawCenteredString(this.font, I18n.get("block.minecraft.beacon.secondary", new Object[0]), 169, 10, 0xE0E0E0);
         for (AbstractWidget abstractWidget : this.buttons) {
@@ -134,7 +132,6 @@ extends AbstractContainerScreen<BeaconMenu> {
             abstractWidget.renderToolTip(i - this.leftPos, j - this.topPos);
             break;
         }
-        Lighting.turnOnGui();
     }
 
     @Override

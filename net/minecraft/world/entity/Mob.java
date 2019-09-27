@@ -330,12 +330,12 @@ extends LivingEntity {
         compoundTag.put("HandItems", listTag2);
         ListTag listTag3 = new ListTag();
         for (float f : this.armorDropChances) {
-            listTag3.add(new FloatTag(f));
+            listTag3.add(FloatTag.valueOf(f));
         }
         compoundTag.put("ArmorDropChances", listTag3);
         ListTag listTag4 = new ListTag();
         for (float g : this.handDropChances) {
-            listTag4.add(new FloatTag(g));
+            listTag4.add(FloatTag.valueOf(g));
         }
         compoundTag.put("HandDropChances", listTag4);
         if (this.leashHolder != null) {
@@ -350,6 +350,8 @@ extends LivingEntity {
                 ((CompoundTag)compoundTag3).putInt("Z", blockPos.getZ());
             }
             compoundTag.put("Leash", (net.minecraft.nbt.Tag)compoundTag3);
+        } else if (this.leashInfoTag != null) {
+            compoundTag.put("Leash", this.leashInfoTag.copy());
         }
         compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
         if (this.lootTable != null) {

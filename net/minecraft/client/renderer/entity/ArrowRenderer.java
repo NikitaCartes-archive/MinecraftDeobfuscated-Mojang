@@ -3,15 +3,19 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,16 +26,10 @@ extends EntityRenderer<T> {
     }
 
     @Override
-    public void render(T abstractArrow, double d, double e, double f, float g, float h) {
-        this.bindTexture(abstractArrow);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.pushMatrix();
-        RenderSystem.disableLighting();
-        RenderSystem.translatef((float)d, (float)e, (float)f);
-        RenderSystem.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot), 0.0f, 0.0f, 1.0f);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+    public void render(T abstractArrow, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        poseStack.pushPose();
+        poseStack.mulPose(Vector3f.YP.rotation(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot), true));
         boolean i = false;
         float j = 0.0f;
         float k = 0.5f;
@@ -42,51 +40,40 @@ extends EntityRenderer<T> {
         float p = 0.15625f;
         float q = 0.3125f;
         float r = 0.05625f;
-        RenderSystem.enableRescaleNormal();
         float s = (float)((AbstractArrow)abstractArrow).shakeTime - h;
         if (s > 0.0f) {
             float t = -Mth.sin(s * 3.0f) * s;
-            RenderSystem.rotatef(t, 0.0f, 0.0f, 1.0f);
+            poseStack.mulPose(Vector3f.ZP.rotation(t, true));
         }
-        RenderSystem.rotatef(45.0f, 1.0f, 0.0f, 0.0f);
-        RenderSystem.scalef(0.05625f, 0.05625f, 0.05625f);
-        RenderSystem.translatef(-4.0f, 0.0f, 0.0f);
-        if (this.solidRender) {
-            RenderSystem.enableColorMaterial();
-            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(abstractArrow));
+        poseStack.mulPose(Vector3f.XP.rotation(45.0f, true));
+        poseStack.scale(0.05625f, 0.05625f, 0.05625f);
+        poseStack.translate(-4.0, 0.0, 0.0);
+        int u = ((Entity)abstractArrow).getLightColor();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(abstractArrow)));
+        OverlayTexture.setDefault(vertexConsumer);
+        Matrix4f matrix4f = poseStack.getPose();
+        this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0f, 0.15625f, 1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625f, 0.15625f, 1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, 2, 2, 0.15625f, 0.3125f, 1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, 2, -2, 0.0f, 0.3125f, 1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, 2, -2, 0.0f, 0.15625f, -1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, 2, 2, 0.15625f, 0.15625f, -1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625f, 0.3125f, -1, 0, 0, u);
+        this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0f, 0.3125f, -1, 0, 0, u);
+        for (int v = 0; v < 4; ++v) {
+            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+            this.vertex(matrix4f, vertexConsumer, -8, -2, 0, 0.0f, 0.0f, 0, 1, 0, u);
+            this.vertex(matrix4f, vertexConsumer, 8, -2, 0, 0.5f, 0.0f, 0, 1, 0, u);
+            this.vertex(matrix4f, vertexConsumer, 8, 2, 0, 0.5f, 0.15625f, 0, 1, 0, u);
+            this.vertex(matrix4f, vertexConsumer, -8, 2, 0, 0.0f, 0.15625f, 0, 1, 0, u);
         }
-        RenderSystem.normal3f(0.05625f, 0.0f, 0.0f);
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(-7.0, -2.0, -2.0).uv(0.0, 0.15625).endVertex();
-        bufferBuilder.vertex(-7.0, -2.0, 2.0).uv(0.15625, 0.15625).endVertex();
-        bufferBuilder.vertex(-7.0, 2.0, 2.0).uv(0.15625, 0.3125).endVertex();
-        bufferBuilder.vertex(-7.0, 2.0, -2.0).uv(0.0, 0.3125).endVertex();
-        tesselator.end();
-        RenderSystem.normal3f(-0.05625f, 0.0f, 0.0f);
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(-7.0, 2.0, -2.0).uv(0.0, 0.15625).endVertex();
-        bufferBuilder.vertex(-7.0, 2.0, 2.0).uv(0.15625, 0.15625).endVertex();
-        bufferBuilder.vertex(-7.0, -2.0, 2.0).uv(0.15625, 0.3125).endVertex();
-        bufferBuilder.vertex(-7.0, -2.0, -2.0).uv(0.0, 0.3125).endVertex();
-        tesselator.end();
-        for (int u = 0; u < 4; ++u) {
-            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            RenderSystem.normal3f(0.0f, 0.0f, 0.05625f);
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(-8.0, -2.0, 0.0).uv(0.0, 0.0).endVertex();
-            bufferBuilder.vertex(8.0, -2.0, 0.0).uv(0.5, 0.0).endVertex();
-            bufferBuilder.vertex(8.0, 2.0, 0.0).uv(0.5, 0.15625).endVertex();
-            bufferBuilder.vertex(-8.0, 2.0, 0.0).uv(0.0, 0.15625).endVertex();
-            tesselator.end();
-        }
-        if (this.solidRender) {
-            RenderSystem.tearDownSolidRenderingTextureCombine();
-            RenderSystem.disableColorMaterial();
-        }
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.enableLighting();
-        RenderSystem.popMatrix();
-        super.render(abstractArrow, d, e, f, g, h);
+        vertexConsumer.unsetDefaultOverlayCoords();
+        poseStack.popPose();
+        super.render(abstractArrow, d, e, f, g, h, poseStack, multiBufferSource);
+    }
+
+    public void vertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
+        vertexConsumer.vertex(matrix4f, i, j, k).color(255, 255, 255, 255).uv(f, g).uv2(o).normal(l, n, m).endVertex();
     }
 }
 

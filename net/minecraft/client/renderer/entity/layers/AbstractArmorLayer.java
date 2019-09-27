@@ -4,19 +4,19 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
-import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
@@ -27,14 +27,8 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>>
 extends RenderLayer<T, M> {
-    protected static final ResourceLocation ENCHANT_GLINT_LOCATION = new ResourceLocation("textures/misc/enchanted_item_glint.png");
     protected final A innerModel;
     protected final A outerModel;
-    private float alpha = 1.0f;
-    private float red = 1.0f;
-    private float green = 1.0f;
-    private float blue = 1.0f;
-    private boolean colorized;
     private static final Map<String, ResourceLocation> ARMOR_LOCATION_CACHE = Maps.newHashMap();
 
     protected AbstractArmorLayer(RenderLayerParent<T, M> renderLayerParent, A humanoidModel, A humanoidModel2) {
@@ -44,19 +38,14 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
-        this.renderArmorPiece(livingEntity, f, g, h, i, j, k, l, EquipmentSlot.CHEST);
-        this.renderArmorPiece(livingEntity, f, g, h, i, j, k, l, EquipmentSlot.LEGS);
-        this.renderArmorPiece(livingEntity, f, g, h, i, j, k, l, EquipmentSlot.FEET);
-        this.renderArmorPiece(livingEntity, f, g, h, i, j, k, l, EquipmentSlot.HEAD);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.CHEST, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.LEGS, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.FEET, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.HEAD, i);
     }
 
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
-    }
-
-    private void renderArmorPiece(T livingEntity, float f, float g, float h, float i, float j, float k, float l, EquipmentSlot equipmentSlot) {
+    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, float f, float g, float h, float i, float j, float k, float l, EquipmentSlot equipmentSlot, int m) {
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(equipmentSlot);
         if (!(itemStack.getItem() instanceof ArmorItem)) {
             return;
@@ -69,22 +58,26 @@ extends RenderLayer<T, M> {
         ((HumanoidModel)this.getParentModel()).copyPropertiesTo(humanoidModel);
         ((HumanoidModel)humanoidModel).prepareMobModel(livingEntity, f, g, h);
         this.setPartVisibility(humanoidModel, equipmentSlot);
+        ((HumanoidModel)humanoidModel).setupAnim(livingEntity, f, g, i, j, k, l);
         boolean bl = this.usesInnerModel(equipmentSlot);
-        this.bindTexture(this.getArmorLocation(armorItem, bl));
+        boolean bl2 = itemStack.hasFoil();
         if (armorItem instanceof DyeableArmorItem) {
-            int m = ((DyeableArmorItem)armorItem).getColor(itemStack);
-            float n = (float)(m >> 16 & 0xFF) / 255.0f;
-            float o = (float)(m >> 8 & 0xFF) / 255.0f;
-            float p = (float)(m & 0xFF) / 255.0f;
-            RenderSystem.color4f(this.red * n, this.green * o, this.blue * p, this.alpha);
-            ((HumanoidModel)humanoidModel).render(livingEntity, f, g, i, j, k, l);
-            this.bindTexture(this.getArmorLocation(armorItem, bl, "overlay"));
+            int n = ((DyeableArmorItem)armorItem).getColor(itemStack);
+            float o = (float)(n >> 16 & 0xFF) / 255.0f;
+            float p = (float)(n >> 8 & 0xFF) / 255.0f;
+            float q = (float)(n & 0xFF) / 255.0f;
+            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, o, p, q, null);
+            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, "overlay");
+        } else {
+            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, null);
         }
-        RenderSystem.color4f(this.red, this.green, this.blue, this.alpha);
-        ((HumanoidModel)humanoidModel).render(livingEntity, f, g, i, j, k, l);
-        if (!this.colorized && itemStack.isEnchanted()) {
-            AbstractArmorLayer.renderFoil(this::bindTexture, livingEntity, humanoidModel, f, g, h, i, j, k, l);
-        }
+    }
+
+    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorItem armorItem, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h, @Nullable String string) {
+        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.getArmorLocation(armorItem, bl2, string), false, bl, false);
+        OverlayTexture.setDefault(vertexConsumer);
+        ((AgeableListModel)humanoidModel).renderToBuffer(poseStack, vertexConsumer, i, f, g, h);
+        vertexConsumer.unsetDefaultOverlayCoords();
     }
 
     public A getArmorModel(EquipmentSlot equipmentSlot) {
@@ -93,44 +86,6 @@ extends RenderLayer<T, M> {
 
     private boolean usesInnerModel(EquipmentSlot equipmentSlot) {
         return equipmentSlot == EquipmentSlot.LEGS;
-    }
-
-    public static <T extends Entity> void renderFoil(Consumer<ResourceLocation> consumer, T entity, EntityModel<T> entityModel, float f, float g, float h, float i, float j, float k, float l) {
-        float m = (float)entity.tickCount + h;
-        consumer.accept(ENCHANT_GLINT_LOCATION);
-        FogRenderer.resetFogColor(true);
-        RenderSystem.enableBlend();
-        RenderSystem.depthFunc(514);
-        RenderSystem.depthMask(false);
-        float n = 0.5f;
-        RenderSystem.color4f(0.5f, 0.5f, 0.5f, 1.0f);
-        for (int o = 0; o < 2; ++o) {
-            RenderSystem.disableLighting();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
-            float p = 0.76f;
-            RenderSystem.color4f(0.38f, 0.19f, 0.608f, 1.0f);
-            RenderSystem.matrixMode(5890);
-            RenderSystem.loadIdentity();
-            float q = 0.33333334f;
-            RenderSystem.scalef(0.33333334f, 0.33333334f, 0.33333334f);
-            RenderSystem.rotatef(30.0f - (float)o * 60.0f, 0.0f, 0.0f, 1.0f);
-            RenderSystem.translatef(0.0f, m * (0.001f + (float)o * 0.003f) * 20.0f, 0.0f);
-            RenderSystem.matrixMode(5888);
-            entityModel.render(entity, f, g, i, j, k, l);
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        }
-        RenderSystem.matrixMode(5890);
-        RenderSystem.loadIdentity();
-        RenderSystem.matrixMode(5888);
-        RenderSystem.enableLighting();
-        RenderSystem.depthMask(true);
-        RenderSystem.depthFunc(515);
-        RenderSystem.disableBlend();
-        FogRenderer.resetFogColor(false);
-    }
-
-    private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl) {
-        return this.getArmorLocation(armorItem, bl, null);
     }
 
     private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, @Nullable String string) {

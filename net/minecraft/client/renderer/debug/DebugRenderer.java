@@ -3,9 +3,18 @@
  */
 package net.minecraft.client.renderer.debug;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import java.util.Optional;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.debug.CaveDebugRenderer;
 import net.minecraft.client.renderer.debug.ChunkBorderRenderer;
 import net.minecraft.client.renderer.debug.ChunkDebugRenderer;
@@ -22,6 +31,14 @@ import net.minecraft.client.renderer.debug.StructureRenderer;
 import net.minecraft.client.renderer.debug.VillageDebugRenderer;
 import net.minecraft.client.renderer.debug.WaterDebugRenderer;
 import net.minecraft.client.renderer.debug.WorldGenAttemptRenderer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class DebugRenderer {
@@ -86,8 +103,113 @@ public class DebugRenderer {
         return this.renderChunkborder;
     }
 
+    public void render(long l) {
+        if (this.renderChunkborder && !Minecraft.getInstance().showOnlyReducedInfo()) {
+            this.chunkBorderRenderer.render(l);
+        }
+        this.gameTestDebugRenderer.render(l);
+    }
+
+    public static Optional<Entity> getTargetedEntity(@Nullable Entity entity2, int i) {
+        int j;
+        Predicate<Entity> predicate;
+        AABB aABB;
+        Vec3 vec32;
+        Vec3 vec33;
+        if (entity2 == null) {
+            return Optional.empty();
+        }
+        Vec3 vec3 = entity2.getEyePosition(1.0f);
+        EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity2, vec3, vec33 = vec3.add(vec32 = entity2.getViewVector(1.0f).scale(i)), aABB = entity2.getBoundingBox().expandTowards(vec32).inflate(1.0), predicate = entity -> !entity.isSpectator() && entity.isPickable(), j = i * i);
+        if (entityHitResult == null) {
+            return Optional.empty();
+        }
+        if (vec3.distanceToSqr(entityHitResult.getLocation()) > (double)j) {
+            return Optional.empty();
+        }
+        return Optional.of(entityHitResult.getEntity());
+    }
+
+    public static void renderFilledBox(BlockPos blockPos, BlockPos blockPos2, float f, float g, float h, float i) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        if (!camera.isInitialized()) {
+            return;
+        }
+        Vec3 vec3 = camera.getPosition().reverse();
+        AABB aABB = new AABB(blockPos, blockPos2).move(vec3);
+        DebugRenderer.renderFilledBox(aABB, f, g, h, i);
+    }
+
+    public static void renderFilledBox(BlockPos blockPos, float f, float g, float h, float i, float j) {
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        if (!camera.isInitialized()) {
+            return;
+        }
+        Vec3 vec3 = camera.getPosition().reverse();
+        AABB aABB = new AABB(blockPos).move(vec3).inflate(f);
+        DebugRenderer.renderFilledBox(aABB, g, h, i, j);
+    }
+
+    public static void renderFilledBox(AABB aABB, float f, float g, float h, float i) {
+        DebugRenderer.renderFilledBox(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, f, g, h, i);
+    }
+
+    public static void renderFilledBox(double d, double e, double f, double g, double h, double i, float j, float k, float l, float m) {
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+        LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, d, e, f, g, h, i, j, k, l, m);
+        tesselator.end();
+    }
+
+    public static void renderFloatingText(String string, int i, int j, int k, int l) {
+        DebugRenderer.renderFloatingText(string, (double)i + 0.5, (double)j + 0.5, (double)k + 0.5, l);
+    }
+
+    public static void renderFloatingText(String string, double d, double e, double f, int i) {
+        DebugRenderer.renderFloatingText(string, d, e, f, i, 0.02f);
+    }
+
+    public static void renderFloatingText(String string, double d, double e, double f, int i, float g) {
+        DebugRenderer.renderFloatingText(string, d, e, f, i, g, true, 0.0f, false);
+    }
+
+    public static void renderFloatingText(String string, double d, double e, double f, int i, float g, boolean bl, float h, boolean bl2) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Camera camera = minecraft.gameRenderer.getMainCamera();
+        if (!camera.isInitialized() || minecraft.getEntityRenderDispatcher().options == null) {
+            return;
+        }
+        Font font = minecraft.font;
+        double j = camera.getPosition().x;
+        double k = camera.getPosition().y;
+        double l = camera.getPosition().z;
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
+        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
+        RenderSystem.scalef(g, -g, g);
+        EntityRenderDispatcher entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
+        RenderSystem.rotatef(-entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
+        RenderSystem.rotatef(-entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+        RenderSystem.enableTexture();
+        if (bl2) {
+            RenderSystem.disableDepthTest();
+        } else {
+            RenderSystem.enableDepthTest();
+        }
+        RenderSystem.depthMask(true);
+        RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
+        float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
+        font.draw(string, m -= h / g, 0.0f, i);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.enableDepthTest();
+        RenderSystem.popMatrix();
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static interface SimpleDebugRenderer {
+        public void render(long var1);
+
         default public void clear() {
         }
     }

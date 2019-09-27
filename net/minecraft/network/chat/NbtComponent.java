@@ -24,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.ContextAwareComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -98,6 +99,49 @@ implements ContextAwareComponent {
             }).reduce((component, component2) -> component.append(", ").append((Component)component2)).orElse(new TextComponent(""));
         }
         return new TextComponent(Joiner.on(", ").join(stream.iterator()));
+    }
+
+    public static class StorageNbtComponent
+    extends NbtComponent {
+        private final ResourceLocation id;
+
+        public StorageNbtComponent(String string, boolean bl, ResourceLocation resourceLocation) {
+            super(string, bl);
+            this.id = resourceLocation;
+        }
+
+        public StorageNbtComponent(String string, @Nullable NbtPathArgument.NbtPath nbtPath, boolean bl, ResourceLocation resourceLocation) {
+            super(string, nbtPath, bl);
+            this.id = resourceLocation;
+        }
+
+        @Override
+        public Component copy() {
+            return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
+        }
+
+        @Override
+        protected Stream<CompoundTag> getData(CommandSourceStack commandSourceStack) {
+            CompoundTag compoundTag = commandSourceStack.getServer().getCommandStorage().get(this.id);
+            return Stream.of(compoundTag);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object instanceof StorageNbtComponent) {
+                StorageNbtComponent storageNbtComponent = (StorageNbtComponent)object;
+                return Objects.equals(this.id, storageNbtComponent.id) && Objects.equals(this.nbtPathPattern, storageNbtComponent.nbtPathPattern) && super.equals(object);
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "StorageNbtComponent{id='" + this.id + '\'' + "path='" + this.nbtPathPattern + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        }
     }
 
     public static class BlockNbtComponent

@@ -3,9 +3,11 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -25,34 +27,22 @@ extends EntityRenderer<FireworkRocketEntity> {
     }
 
     @Override
-    public void render(FireworkRocketEntity fireworkRocketEntity, double d, double e, double f, float g, float h) {
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)d, (float)e, (float)f);
-        RenderSystem.enableRescaleNormal();
-        RenderSystem.rotatef(-this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
+    public void render(FireworkRocketEntity fireworkRocketEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        poseStack.pushPose();
+        poseStack.mulPose(Vector3f.YP.rotation(-this.entityRenderDispatcher.playerRotY, true));
+        poseStack.mulPose(Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, true));
         if (fireworkRocketEntity.isShotAtAngle()) {
-            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
         } else {
-            RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+            poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
         }
-        this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
-        if (this.solidRender) {
-            RenderSystem.enableColorMaterial();
-            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(fireworkRocketEntity));
-        }
-        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND);
-        if (this.solidRender) {
-            RenderSystem.tearDownSolidRenderingTextureCombine();
-            RenderSystem.disableColorMaterial();
-        }
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();
-        super.render(fireworkRocketEntity, d, e, f, g, h);
+        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, fireworkRocketEntity.getLightColor(), poseStack, multiBufferSource);
+        poseStack.popPose();
+        super.render(fireworkRocketEntity, d, e, f, g, h, poseStack, multiBufferSource);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(FireworkRocketEntity fireworkRocketEntity) {
+    public ResourceLocation getTextureLocation(FireworkRocketEntity fireworkRocketEntity) {
         return TextureAtlas.LOCATION_BLOCKS;
     }
 }

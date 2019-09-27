@@ -3,10 +3,10 @@
  */
 package net.minecraft.client.gui.font.glyphs;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,25 +34,57 @@ public class BakedGlyph {
         this.down = m;
     }
 
-    public void render(TextureManager textureManager, boolean bl, float f, float g, BufferBuilder bufferBuilder, float h, float i, float j, float k) {
-        int l = 3;
-        float m = f + this.left;
-        float n = f + this.right;
-        float o = this.up - 3.0f;
-        float p = this.down - 3.0f;
-        float q = g + o;
+    public void render(boolean bl, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, float h, float i, float j, float k, int l) {
+        int m = 3;
+        float n = f + this.left;
+        float o = f + this.right;
+        float p = this.up - 3.0f;
+        float q = this.down - 3.0f;
         float r = g + p;
-        float s = bl ? 1.0f - 0.25f * o : 0.0f;
+        float s = g + q;
         float t = bl ? 1.0f - 0.25f * p : 0.0f;
-        bufferBuilder.vertex(m + s, q, 0.0).uv(this.u0, this.v0).color(h, i, j, k).endVertex();
-        bufferBuilder.vertex(m + t, r, 0.0).uv(this.u0, this.v1).color(h, i, j, k).endVertex();
-        bufferBuilder.vertex(n + t, r, 0.0).uv(this.u1, this.v1).color(h, i, j, k).endVertex();
-        bufferBuilder.vertex(n + s, q, 0.0).uv(this.u1, this.v0).color(h, i, j, k).endVertex();
+        float u = bl ? 1.0f - 0.25f * q : 0.0f;
+        vertexConsumer.vertex(matrix4f, n + t, r, 0.0f).uv(this.u0, this.v0).uv2(l).color(h, i, j, k).endVertex();
+        vertexConsumer.vertex(matrix4f, n + u, s, 0.0f).uv(this.u0, this.v1).uv2(l).color(h, i, j, k).endVertex();
+        vertexConsumer.vertex(matrix4f, o + u, s, 0.0f).uv(this.u1, this.v1).uv2(l).color(h, i, j, k).endVertex();
+        vertexConsumer.vertex(matrix4f, o + t, r, 0.0f).uv(this.u1, this.v0).uv2(l).color(h, i, j, k).endVertex();
+    }
+
+    public void renderEffect(Effect effect, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i) {
+        vertexConsumer.vertex(matrix4f, effect.x0, effect.y0, effect.depth).uv(this.u0, this.v0).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x1, effect.y0, effect.depth).uv(this.u0, this.v1).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x1, effect.y1, effect.depth).uv(this.u1, this.v1).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).uv(this.u1, this.v0).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
     }
 
     @Nullable
     public ResourceLocation getTexture() {
         return this.texture;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class Effect {
+        protected final float x0;
+        protected final float y0;
+        protected final float x1;
+        protected final float y1;
+        protected final float depth;
+        protected final float r;
+        protected final float g;
+        protected final float b;
+        protected final float a;
+
+        public Effect(float f, float g, float h, float i, float j, float k, float l, float m, float n) {
+            this.x0 = f;
+            this.y0 = g;
+            this.x1 = h;
+            this.y1 = i;
+            this.depth = j;
+            this.r = k;
+            this.g = l;
+            this.b = m;
+            this.a = n;
+        }
     }
 }
 

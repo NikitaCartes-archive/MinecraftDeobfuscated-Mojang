@@ -11,10 +11,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 @Environment(value=EnvType.CLIENT)
 public class ArmorStandArmorModel
 extends HumanoidModel<ArmorStand> {
-    public ArmorStandArmorModel() {
-        this(0.0f);
-    }
-
     public ArmorStandArmorModel(float f) {
         this(f, 64, 32);
     }

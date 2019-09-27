@@ -40,6 +40,7 @@ public abstract class BaseSpawner {
     private int minSpawnDelay = 200;
     private int maxSpawnDelay = 800;
     private int spawnCount = 4;
+    @Nullable
     private Entity displayEntity;
     private int maxNearbyEntities = 6;
     private int requiredPlayerRange = 16;
@@ -214,6 +215,7 @@ public abstract class BaseSpawner {
         return compoundTag;
     }
 
+    @Nullable
     @Environment(value=EnvType.CLIENT)
     public Entity getOrCreateDisplayEntity() {
         if (this.displayEntity == null) {

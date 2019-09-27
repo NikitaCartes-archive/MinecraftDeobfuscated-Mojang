@@ -13,16 +13,41 @@ import net.minecraft.nbt.CollectionTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class ByteArrayTag
 extends CollectionTag<ByteTag> {
-    private byte[] data;
+    public static final TagType<ByteArrayTag> TYPE = new TagType<ByteArrayTag>(){
 
-    ByteArrayTag() {
-    }
+        @Override
+        public ByteArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(192L);
+            int j = dataInput.readInt();
+            nbtAccounter.accountBits(8 * j);
+            byte[] bs = new byte[j];
+            dataInput.readFully(bs);
+            return new ByteArrayTag(bs);
+        }
+
+        @Override
+        public String getName() {
+            return "BYTE[]";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Byte_Array";
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private byte[] data;
 
     public ByteArrayTag(byte[] bs) {
         this.data = bs;
@@ -48,17 +73,12 @@ extends CollectionTag<ByteTag> {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(192L);
-        int j = dataInput.readInt();
-        nbtAccounter.accountBits(8 * j);
-        this.data = new byte[j];
-        dataInput.readFully(this.data);
-    }
-
-    @Override
     public byte getId() {
         return 7;
+    }
+
+    public TagType<ByteArrayTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -118,14 +138,14 @@ extends CollectionTag<ByteTag> {
 
     @Override
     public ByteTag get(int i) {
-        return new ByteTag(this.data[i]);
+        return ByteTag.valueOf(this.data[i]);
     }
 
     @Override
     public ByteTag set(int i, ByteTag byteTag) {
         byte b = this.data[i];
         this.data[i] = byteTag.getAsByte();
-        return new ByteTag(b);
+        return ByteTag.valueOf(b);
     }
 
     @Override
@@ -155,7 +175,7 @@ extends CollectionTag<ByteTag> {
     public ByteTag remove(int i) {
         byte b = this.data[i];
         this.data = ArrayUtils.remove(this.data, i);
-        return new ByteTag(b);
+        return ByteTag.valueOf(b);
     }
 
     @Override

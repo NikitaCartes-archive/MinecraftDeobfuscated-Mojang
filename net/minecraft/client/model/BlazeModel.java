@@ -3,35 +3,38 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class BlazeModel<T extends Entity>
-extends EntityModel<T> {
-    private final ModelPart[] upperBodyParts = new ModelPart[12];
-    private final ModelPart head;
+extends ListModel<T> {
+    private final ModelPart[] upperBodyParts;
+    private final ModelPart head = new ModelPart(this, 0, 0);
+    private final ImmutableList<ModelPart> parts;
 
     public BlazeModel() {
+        this.head.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
+        this.upperBodyParts = new ModelPart[12];
         for (int i = 0; i < this.upperBodyParts.length; ++i) {
             this.upperBodyParts[i] = new ModelPart(this, 0, 16);
             this.upperBodyParts[i].addBox(0.0f, 0.0f, 0.0f, 2.0f, 8.0f, 2.0f);
         }
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
+        ImmutableList.Builder builder = ImmutableList.builder();
+        builder.add(this.head);
+        builder.addAll(Arrays.asList(this.upperBodyParts));
+        this.parts = builder.build();
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.head.render(k);
-        for (ModelPart modelPart : this.upperBodyParts) {
-            modelPart.render(k);
-        }
+    public Iterable<ModelPart> parts() {
+        return this.parts;
     }
 
     @Override

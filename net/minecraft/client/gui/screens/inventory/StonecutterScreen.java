@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -79,7 +78,6 @@ extends AbstractContainerScreen<StonecutterMenu> {
     }
 
     private void renderRecipes(int i, int j, int k) {
-        Lighting.turnOnGui();
         List<StonecutterRecipe> list = ((StonecutterMenu)this.menu).getRecipes();
         for (int l = this.startIndex; l < k && l < ((StonecutterMenu)this.menu).getNumRecipes(); ++l) {
             int m = l - this.startIndex;
@@ -88,7 +86,6 @@ extends AbstractContainerScreen<StonecutterMenu> {
             int p = j + o * 18 + 2;
             this.minecraft.getItemRenderer().renderAndDecorateItem(list.get(l).getResultItem(), n, p);
         }
-        Lighting.turnOff();
     }
 
     @Override

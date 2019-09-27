@@ -5,7 +5,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -83,11 +82,8 @@ implements MenuAccess<T> {
         int l = this.topPos;
         this.renderBg(f, i, j);
         RenderSystem.disableRescaleNormal();
-        Lighting.turnOff();
-        RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         super.render(i, j, f);
-        Lighting.turnOnGui();
         RenderSystem.pushMatrix();
         RenderSystem.translatef(k, l, 0.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -95,7 +91,7 @@ implements MenuAccess<T> {
         this.hoveredSlot = null;
         int m = 240;
         int n = 240;
-        RenderSystem.glMultiTexCoord2f(33985, 240.0f, 240.0f);
+        RenderSystem.glMultiTexCoord2f(33986, 240.0f, 240.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         for (int o = 0; o < ((AbstractContainerMenu)this.menu).slots.size(); ++o) {
             Slot slot = ((AbstractContainerMenu)this.menu).slots.get(o);
@@ -104,19 +100,15 @@ implements MenuAccess<T> {
             }
             if (!this.isHovering(slot, i, j) || !slot.isActive()) continue;
             this.hoveredSlot = slot;
-            RenderSystem.disableLighting();
             RenderSystem.disableDepthTest();
             p = slot.x;
             q = slot.y;
             RenderSystem.colorMask(true, true, true, false);
             this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
             RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.enableLighting();
             RenderSystem.enableDepthTest();
         }
-        Lighting.turnOff();
         this.renderLabels(i, j);
-        Lighting.turnOnGui();
         Inventory inventory = this.minecraft.player.inventory;
         ItemStack itemStack2 = itemStack = this.draggingItem.isEmpty() ? inventory.getCarried() : this.draggingItem;
         if (!itemStack.isEmpty()) {
@@ -148,9 +140,7 @@ implements MenuAccess<T> {
             this.renderFloatingItem(this.snapbackItem, s, t, null);
         }
         RenderSystem.popMatrix();
-        RenderSystem.enableLighting();
         RenderSystem.enableDepthTest();
-        Lighting.turnOn();
     }
 
     protected void renderTooltip(int i, int j) {
@@ -208,10 +198,8 @@ implements MenuAccess<T> {
         this.itemRenderer.blitOffset = 100.0f;
         if (itemStack.isEmpty() && slot.isActive() && (string2 = slot.getNoItemIcon()) != null) {
             TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-            RenderSystem.disableLighting();
             this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
             AbstractContainerScreen.blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
-            RenderSystem.enableLighting();
             bl2 = true;
         }
         if (!bl2) {

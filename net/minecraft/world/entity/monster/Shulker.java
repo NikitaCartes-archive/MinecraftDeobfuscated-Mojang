@@ -259,15 +259,7 @@ implements Enemy {
                     this.oldAttachPosition = blockPos;
                 }
             }
-            this.x = (double)blockPos.getX() + 0.5;
-            this.y = blockPos.getY();
-            this.z = (double)blockPos.getZ() + 0.5;
-            this.xo = this.x;
-            this.yo = this.y;
-            this.zo = this.z;
-            this.xOld = this.x;
-            this.yOld = this.y;
-            this.zOld = this.z;
+            this.setPosAndOldPos((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
             double d = 0.5 - (double)Mth.sin((0.5f + this.currentPeekAmount) * (float)Math.PI) * 0.5;
             double e = 0.5 - (double)Mth.sin((0.5f + this.currentPeekAmountO) * (float)Math.PI) * 0.5;
             Direction direction3 = this.getAttachFace().getOpposite();
@@ -349,15 +341,7 @@ implements Enemy {
             } else {
                 this.clientSideTeleportInterpolation = 6;
             }
-            this.x = (double)blockPos.getX() + 0.5;
-            this.y = blockPos.getY();
-            this.z = (double)blockPos.getZ() + 0.5;
-            this.xo = this.x;
-            this.yo = this.y;
-            this.zo = this.z;
-            this.xOld = this.x;
-            this.yOld = this.y;
-            this.zOld = this.z;
+            this.setPosAndOldPos((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
         }
         super.onSyncedDataUpdated(entityDataAccessor);
     }

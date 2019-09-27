@@ -156,7 +156,7 @@ extends SavedData {
             compoundTag.putString("CollisionRule", playerTeam.getCollisionRule().name);
             ListTag listTag2 = new ListTag();
             for (String string : playerTeam.getPlayers()) {
-                listTag2.add(new StringTag(string));
+                listTag2.add(StringTag.valueOf(string));
             }
             compoundTag.put("Players", listTag2);
             listTag.add(compoundTag);

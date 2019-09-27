@@ -3,11 +3,11 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
-import net.minecraft.client.renderer.culling.Culler;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
@@ -30,25 +30,24 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    public void render(Shulker shulker, double d, double e, double f, float g, float h) {
+    public Vec3 getRenderOffset(Shulker shulker, double d, double e, double f, float g) {
         int i = shulker.getClientSideTeleportInterpolation();
         if (i > 0 && shulker.hasValidInterpolationPositions()) {
             BlockPos blockPos = shulker.getAttachPosition();
             BlockPos blockPos2 = shulker.getOldAttachPosition();
-            double j = (double)((float)i - h) / 6.0;
-            j *= j;
-            double k = (double)(blockPos.getX() - blockPos2.getX()) * j;
-            double l = (double)(blockPos.getY() - blockPos2.getY()) * j;
-            double m = (double)(blockPos.getZ() - blockPos2.getZ()) * j;
-            super.render(shulker, d - k, e - l, f - m, g, h);
-        } else {
-            super.render(shulker, d, e, f, g, h);
+            double h = (double)((float)i - g) / 6.0;
+            h *= h;
+            double j = (double)(blockPos.getX() - blockPos2.getX()) * h;
+            double k = (double)(blockPos.getY() - blockPos2.getY()) * h;
+            double l = (double)(blockPos.getZ() - blockPos2.getZ()) * h;
+            return new Vec3(-j, -k, -l);
         }
+        return super.getRenderOffset(shulker, d, e, f, g);
     }
 
     @Override
-    public boolean shouldRender(Shulker shulker, Culler culler, double d, double e, double f) {
-        if (super.shouldRender(shulker, culler, d, e, f)) {
+    public boolean shouldRender(Shulker shulker, Frustum frustum, double d, double e, double f) {
+        if (super.shouldRender(shulker, frustum, d, e, f)) {
             return true;
         }
         if (shulker.getClientSideTeleportInterpolation() > 0 && shulker.hasValidInterpolationPositions()) {
@@ -56,7 +55,7 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
             BlockPos blockPos2 = shulker.getAttachPosition();
             Vec3 vec3 = new Vec3(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
             Vec3 vec32 = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-            if (culler.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
+            if (frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
                 return true;
             }
         }
@@ -64,7 +63,7 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Shulker shulker) {
+    public ResourceLocation getTextureLocation(Shulker shulker) {
         if (shulker.getColor() == null) {
             return DEFAULT_TEXTURE_LOCATION;
         }
@@ -72,46 +71,17 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    protected void setupRotations(Shulker shulker, float f, float g, float h) {
-        super.setupRotations(shulker, f, g, h);
-        switch (shulker.getAttachFace()) {
-            case DOWN: {
-                break;
-            }
-            case EAST: {
-                RenderSystem.translatef(0.5f, 0.5f, 0.0f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
-                break;
-            }
-            case WEST: {
-                RenderSystem.translatef(-0.5f, 0.5f, 0.0f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-                break;
-            }
-            case NORTH: {
-                RenderSystem.translatef(0.0f, 0.5f, -0.5f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                break;
-            }
-            case SOUTH: {
-                RenderSystem.translatef(0.0f, 0.5f, 0.5f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
-                break;
-            }
-            case UP: {
-                RenderSystem.translatef(0.0f, 1.0f, 0.0f);
-                RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
-            }
-        }
+    protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(shulker, poseStack, f, g, h);
+        poseStack.translate(0.0, 0.5, 0.0);
+        poseStack.mulPose(shulker.getAttachFace().getOpposite().getRotation());
+        poseStack.translate(0.0, -0.5, 0.0);
     }
 
     @Override
-    protected void scale(Shulker shulker, float f) {
+    protected void scale(Shulker shulker, PoseStack poseStack, float f) {
         float g = 0.999f;
-        RenderSystem.scalef(0.999f, 0.999f, 0.999f);
+        poseStack.scale(0.999f, 0.999f, 0.999f);
     }
 }
 

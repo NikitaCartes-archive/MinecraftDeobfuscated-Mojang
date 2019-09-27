@@ -10,9 +10,10 @@ import com.ibm.icu.text.Bidi;
 import com.mojang.blaze3d.font.GlyphInfo;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -51,12 +54,12 @@ implements AutoCloseable {
 
     public int drawShadow(String string, float f, float g, int i) {
         RenderSystem.enableAlphaTest();
-        return this.drawInternal(string, f, g, i, true);
+        return this.drawInternal(string, f, g, i, Transformation.identity().getMatrix(), true);
     }
 
     public int draw(String string, float f, float g, int i) {
         RenderSystem.enableAlphaTest();
-        return this.drawInternal(string, f, g, i, false);
+        return this.drawInternal(string, f, g, i, Transformation.identity().getMatrix(), false);
     }
 
     public String bidirectionalShaping(String string) {
@@ -69,10 +72,21 @@ implements AutoCloseable {
         }
     }
 
-    private int drawInternal(String string, float f, float g, int i, boolean bl) {
+    private int drawInternal(String string, float f, float g, int i, Matrix4f matrix4f, boolean bl) {
         if (string == null) {
             return 0;
         }
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        int j = this.drawInBatch(string, f, g, i, bl, matrix4f, bufferSource, false, 0, 0xF000F0);
+        bufferSource.endBatch();
+        return j;
+    }
+
+    public int drawInBatch(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+        return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+    }
+
+    private int drawInternal(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
         if (this.bidirectional) {
             string = this.bidirectionalShaping(string);
         }
@@ -80,109 +94,106 @@ implements AutoCloseable {
             i |= 0xFF000000;
         }
         if (bl) {
-            this.renderText(string, f, g, i, true);
+            this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
         }
-        f = this.renderText(string, f, g, i, false);
+        f = this.renderText(string, f, g, i, false, matrix4f, multiBufferSource, bl2, j, k);
         return (int)f + (bl ? 1 : 0);
     }
 
-    private float renderText(String string, float f, float g, int i, boolean bl) {
+    private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+        BakedGlyph bakedGlyph2;
+        ResourceLocation resourceLocation2;
         float h = bl ? 0.25f : 1.0f;
-        float j = (float)(i >> 16 & 0xFF) / 255.0f * h;
-        float k = (float)(i >> 8 & 0xFF) / 255.0f * h;
-        float l = (float)(i & 0xFF) / 255.0f * h;
-        float m = j;
-        float n = k;
-        float o = l;
-        float p = (float)(i >> 24 & 0xFF) / 255.0f;
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        ResourceLocation resourceLocation = null;
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        boolean bl2 = false;
+        float l = (float)(i >> 16 & 0xFF) / 255.0f * h;
+        float m = (float)(i >> 8 & 0xFF) / 255.0f * h;
+        float n = (float)(i & 0xFF) / 255.0f * h;
+        float o = f;
+        float p = l;
+        float q = m;
+        float r = n;
+        float s = (float)(i >> 24 & 0xFF) / 255.0f;
         boolean bl3 = false;
         boolean bl4 = false;
         boolean bl5 = false;
         boolean bl6 = false;
-        ArrayList<Effect> list = Lists.newArrayList();
-        for (int q = 0; q < string.length(); ++q) {
-            float t;
-            float s;
-            char c = string.charAt(q);
-            if (c == '\u00a7' && q + 1 < string.length()) {
-                ChatFormatting chatFormatting = ChatFormatting.getByCode(string.charAt(q + 1));
+        boolean bl7 = false;
+        ArrayList<BakedGlyph.Effect> list = Lists.newArrayList();
+        for (int t = 0; t < string.length(); ++t) {
+            float w;
+            float v;
+            char c = string.charAt(t);
+            if (c == '\u00a7' && t + 1 < string.length()) {
+                ChatFormatting chatFormatting = ChatFormatting.getByCode(string.charAt(t + 1));
                 if (chatFormatting != null) {
                     if (chatFormatting.shouldReset()) {
-                        bl2 = false;
                         bl3 = false;
+                        bl4 = false;
+                        bl7 = false;
                         bl6 = false;
                         bl5 = false;
-                        bl4 = false;
-                        m = j;
-                        n = k;
-                        o = l;
+                        p = l;
+                        q = m;
+                        r = n;
                     }
                     if (chatFormatting.getColor() != null) {
-                        int r = chatFormatting.getColor();
-                        m = (float)(r >> 16 & 0xFF) / 255.0f * h;
-                        n = (float)(r >> 8 & 0xFF) / 255.0f * h;
-                        o = (float)(r & 0xFF) / 255.0f * h;
+                        int u = chatFormatting.getColor();
+                        p = (float)(u >> 16 & 0xFF) / 255.0f * h;
+                        q = (float)(u >> 8 & 0xFF) / 255.0f * h;
+                        r = (float)(u & 0xFF) / 255.0f * h;
                     } else if (chatFormatting == ChatFormatting.OBFUSCATED) {
-                        bl2 = true;
-                    } else if (chatFormatting == ChatFormatting.BOLD) {
                         bl3 = true;
-                    } else if (chatFormatting == ChatFormatting.STRIKETHROUGH) {
-                        bl6 = true;
-                    } else if (chatFormatting == ChatFormatting.UNDERLINE) {
-                        bl5 = true;
-                    } else if (chatFormatting == ChatFormatting.ITALIC) {
+                    } else if (chatFormatting == ChatFormatting.BOLD) {
                         bl4 = true;
+                    } else if (chatFormatting == ChatFormatting.STRIKETHROUGH) {
+                        bl7 = true;
+                    } else if (chatFormatting == ChatFormatting.UNDERLINE) {
+                        bl6 = true;
+                    } else if (chatFormatting == ChatFormatting.ITALIC) {
+                        bl5 = true;
                     }
                 }
-                ++q;
+                ++t;
                 continue;
             }
             GlyphInfo glyphInfo = this.fonts.getGlyphInfo(c);
-            BakedGlyph bakedGlyph = bl2 && c != ' ' ? this.fonts.getRandomGlyph(glyphInfo) : this.fonts.getGlyph(c);
-            ResourceLocation resourceLocation2 = bakedGlyph.getTexture();
-            if (resourceLocation2 != null) {
-                if (resourceLocation != resourceLocation2) {
-                    tesselator.end();
-                    this.textureManager.bind(resourceLocation2);
-                    bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-                    resourceLocation = resourceLocation2;
-                }
-                s = bl3 ? glyphInfo.getBoldOffset() : 0.0f;
-                t = bl ? glyphInfo.getShadowOffset() : 0.0f;
-                this.renderChar(bakedGlyph, bl3, bl4, s, f + t, g + t, bufferBuilder, m, n, o, p);
+            BakedGlyph bakedGlyph = bl3 && c != ' ' ? this.fonts.getRandomGlyph(glyphInfo) : this.fonts.getGlyph(c);
+            ResourceLocation resourceLocation = bakedGlyph.getTexture();
+            if (resourceLocation != null) {
+                v = bl4 ? glyphInfo.getBoldOffset() : 0.0f;
+                w = bl ? glyphInfo.getShadowOffset() : 0.0f;
+                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation) : RenderType.TEXT(resourceLocation));
+                this.renderChar(bakedGlyph, bl4, bl5, v, o + w, g + w, matrix4f, vertexConsumer, p, q, r, s, k);
             }
-            s = glyphInfo.getAdvance(bl3);
-            float f2 = t = bl ? 1.0f : 0.0f;
+            v = glyphInfo.getAdvance(bl4);
+            float f2 = w = bl ? 1.0f : 0.0f;
+            if (bl7) {
+                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 4.5f, o + w + v, g + w + 4.5f - 1.0f, 0.001f, p, q, r, s));
+            }
             if (bl6) {
-                list.add(new Effect(f + t - 1.0f, g + t + 4.5f, f + t + s, g + t + 4.5f - 1.0f, m, n, o, p));
+                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 9.0f, o + w + v, g + w + 9.0f - 1.0f, 0.001f, p, q, r, s));
             }
-            if (bl5) {
-                list.add(new Effect(f + t - 1.0f, g + t + 9.0f, f + t + s, g + t + 9.0f - 1.0f, m, n, o, p));
-            }
-            f += s;
+            o += v;
         }
-        tesselator.end();
-        if (!list.isEmpty()) {
-            RenderSystem.disableTexture();
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
-            for (Effect effect : list) {
-                effect.render(bufferBuilder);
-            }
-            tesselator.end();
-            RenderSystem.enableTexture();
+        if (j != 0) {
+            float x = (float)(j >> 24 & 0xFF) / 255.0f;
+            float y = (float)(j >> 16 & 0xFF) / 255.0f;
+            float z = (float)(j >> 8 & 0xFF) / 255.0f;
+            float aa = (float)(j & 0xFF) / 255.0f;
+            list.add(new BakedGlyph.Effect(f - 1.0f, g + 9.0f, o + 1.0f, g - 1.0f, -0.001f, y, z, aa, x));
         }
-        return f;
+        if (!list.isEmpty() && (resourceLocation2 = (bakedGlyph2 = this.fonts.whiteGlyph()).getTexture()) != null) {
+            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation2) : RenderType.TEXT(resourceLocation2));
+            for (BakedGlyph.Effect effect : list) {
+                bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);
+            }
+        }
+        return o;
     }
 
-    private void renderChar(BakedGlyph bakedGlyph, boolean bl, boolean bl2, float f, float g, float h, BufferBuilder bufferBuilder, float i, float j, float k, float l) {
-        bakedGlyph.render(this.textureManager, bl2, g, h, bufferBuilder, i, j, k, l);
+    private void renderChar(BakedGlyph bakedGlyph, boolean bl, boolean bl2, float f, float g, float h, Matrix4f matrix4f, VertexConsumer vertexConsumer, float i, float j, float k, float l, int m) {
+        bakedGlyph.render(bl2, g, h, matrix4f, vertexConsumer, i, j, k, l, m);
         if (bl) {
-            bakedGlyph.render(this.textureManager, bl2, g + f, h, bufferBuilder, i, j, k, l);
+            bakedGlyph.render(bl2, g + f, h, matrix4f, vertexConsumer, i, j, k, l, m);
         }
     }
 
@@ -269,13 +280,14 @@ implements AutoCloseable {
 
     private void drawWordWrapInternal(String string, int i, int j, int k, int l) {
         List<String> list = this.split(string, k);
+        Matrix4f matrix4f = Transformation.identity().getMatrix();
         for (String string2 : list) {
             float f = i;
             if (this.bidirectional) {
                 int m = this.width(this.bidirectionalShaping(string2));
                 f += (float)(k - m);
             }
-            this.drawInternal(string2, f, j, l, false);
+            this.drawInternal(string2, f, j, l, matrix4f, false);
             j += 9;
         }
     }
@@ -392,36 +404,6 @@ implements AutoCloseable {
 
     public boolean isBidirectional() {
         return this.bidirectional;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class Effect {
-        protected final float x0;
-        protected final float y0;
-        protected final float x1;
-        protected final float y1;
-        protected final float r;
-        protected final float g;
-        protected final float b;
-        protected final float a;
-
-        private Effect(float f, float g, float h, float i, float j, float k, float l, float m) {
-            this.x0 = f;
-            this.y0 = g;
-            this.x1 = h;
-            this.y1 = i;
-            this.r = j;
-            this.g = k;
-            this.b = l;
-            this.a = m;
-        }
-
-        public void render(BufferBuilder bufferBuilder) {
-            bufferBuilder.vertex(this.x0, this.y0, 0.0).color(this.r, this.g, this.b, this.a).endVertex();
-            bufferBuilder.vertex(this.x1, this.y0, 0.0).color(this.r, this.g, this.b, this.a).endVertex();
-            bufferBuilder.vertex(this.x1, this.y1, 0.0).color(this.r, this.g, this.b, this.a).endVertex();
-            bufferBuilder.vertex(this.x0, this.y1, 0.0).color(this.r, this.g, this.b, this.a).endVertex();
-        }
     }
 }
 

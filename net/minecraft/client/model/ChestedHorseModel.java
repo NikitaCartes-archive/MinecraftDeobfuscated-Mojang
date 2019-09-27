@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(value=EnvType.CLIENT)
@@ -46,7 +45,8 @@ extends HorseModel<T> {
     }
 
     @Override
-    public void render(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+        super.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
         if (((AbstractChestedHorse)abstractChestedHorse).hasChest()) {
             this.boxL.visible = true;
             this.boxR.visible = true;
@@ -54,12 +54,6 @@ extends HorseModel<T> {
             this.boxL.visible = false;
             this.boxR.visible = false;
         }
-        super.render(abstractChestedHorse, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((AbstractChestedHorse)entity), f, g, h, i, j, k);
     }
 }
 

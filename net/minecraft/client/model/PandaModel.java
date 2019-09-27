@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ModelUtils;
@@ -21,7 +20,7 @@ extends QuadrupedModel<T> {
     private float rollAmount;
 
     public PandaModel(int i, float f) {
-        super(i, f);
+        super(i, f, true, 23.0f, 0.3f, 1.2f, 3.0f, 49);
         this.texWidth = 64;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 6);
@@ -117,39 +116,6 @@ extends QuadrupedModel<T> {
             this.leg1.xRot = 0.5f * Mth.sin(h * 0.5f);
             this.leg2.xRot = 0.5f * Mth.sin(h * 0.5f);
             this.leg3.xRot = -0.5f * Mth.sin(h * 0.5f);
-        }
-    }
-
-    @Override
-    public void render(T panda, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(panda, f, g, h, i, j, k);
-        if (this.young) {
-            float l = 3.0f;
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            float m = 0.6f;
-            RenderSystem.scalef(0.5555555f, 0.5555555f, 0.5555555f);
-            RenderSystem.translatef(0.0f, 23.0f * k, 0.3f);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.33333334f, 0.33333334f, 0.33333334f);
-            RenderSystem.translatef(0.0f, 49.0f * k, 0.0f);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
         }
     }
 }

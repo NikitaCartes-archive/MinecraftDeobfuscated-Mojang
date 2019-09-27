@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.components.toasts;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -62,7 +61,6 @@ implements Toast {
                     toastComponent.getMinecraft().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f));
                 }
             }
-            Lighting.turnOnGui();
             toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, displayInfo.getIcon(), 8, 8);
             return l >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
         }

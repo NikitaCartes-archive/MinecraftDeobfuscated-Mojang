@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -56,8 +55,6 @@ public class GhostRecipe {
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
-        Lighting.turnOnGui();
-        RenderSystem.disableLighting();
         for (int k = 0; k < this.ingredients.size(); ++k) {
             GhostIngredient ghostIngredient = this.ingredients.get(k);
             int l = ghostIngredient.getX() + i;
@@ -73,12 +70,9 @@ public class GhostRecipe {
             RenderSystem.depthFunc(516);
             GuiComponent.fill(l, m, l + 16, m + 16, 0x30FFFFFF);
             RenderSystem.depthFunc(515);
-            if (k == 0) {
-                itemRenderer.renderGuiItemDecorations(minecraft.font, itemStack, l, m);
-            }
-            RenderSystem.enableLighting();
+            if (k != 0) continue;
+            itemRenderer.renderGuiItemDecorations(minecraft.font, itemStack, l, m);
         }
-        Lighting.turnOff();
     }
 
     @Environment(value=EnvType.CLIENT)

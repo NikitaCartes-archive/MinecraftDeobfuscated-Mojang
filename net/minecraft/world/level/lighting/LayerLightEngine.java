@@ -5,6 +5,8 @@ package net.minecraft.world.level.lighting;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -188,6 +190,11 @@ implements LayerLightEventListener {
     @Override
     public int getLightValue(BlockPos blockPos) {
         return ((LayerLightSectionStorage)this.storage).getLightValue(blockPos.asLong());
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public String getDebugData(long l) {
+        return "" + ((LayerLightSectionStorage)this.storage).getLevel(l);
     }
 
     public void checkBlock(BlockPos blockPos) {

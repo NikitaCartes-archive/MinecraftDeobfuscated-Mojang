@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.Iterator;
@@ -126,7 +125,6 @@ GuiEventListener {
             return;
         }
         this.time += f;
-        Lighting.turnOnGui();
         RenderSystem.enableBlend();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
@@ -141,7 +139,6 @@ GuiEventListener {
         int q = 208;
         this.nineInchSprite(l, m, 24, 4, 82, 208);
         RenderSystem.disableBlend();
-        Lighting.turnOff();
         for (OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
             overlayRecipeButton.render(i, j, f);
         }
@@ -215,7 +212,6 @@ GuiEventListener {
         @Override
         public void renderButton(int i, int j, float f) {
             int l;
-            Lighting.turnOnGui();
             RenderSystem.enableAlphaTest();
             OverlayRecipeComponent.this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
             int k = 152;
@@ -233,13 +229,10 @@ GuiEventListener {
                 int m = (int)((float)(this.x + pos.x) / 0.42f - 3.0f);
                 int n2 = (int)((float)(this.y + pos.y) / 0.42f - 3.0f);
                 RenderSystem.scalef(0.42f, 0.42f, 1.0f);
-                RenderSystem.enableLighting();
                 OverlayRecipeComponent.this.minecraft.getItemRenderer().renderAndDecorateItem(pos.ingredients[Mth.floor(OverlayRecipeComponent.this.time / 30.0f) % pos.ingredients.length], m, n2);
-                RenderSystem.disableLighting();
                 RenderSystem.popMatrix();
             }
             RenderSystem.disableAlphaTest();
-            Lighting.turnOff();
         }
 
         @Environment(value=EnvType.CLIENT)

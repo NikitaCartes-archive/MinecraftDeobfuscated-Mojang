@@ -5,7 +5,7 @@ package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -48,12 +48,11 @@ extends Particle {
     }
 
     @Override
-    public void render(BufferBuilder bufferBuilder, Camera camera, float f, float g, float h, float i, float j, float k) {
+    public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
         if (this.displayEntity == null) {
             return;
         }
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        entityRenderDispatcher.setPosition(Particle.xOff, Particle.yOff, Particle.zOff);
         float l = 1.0f / ElderGuardian.ELDER_SIZE_SCALE;
         float m = ((float)this.age + f) / (float)this.lifetime;
         RenderSystem.depthMask(true);
@@ -61,7 +60,7 @@ extends Particle {
         RenderSystem.enableDepthTest();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         float n = 240.0f;
-        RenderSystem.glMultiTexCoord2f(33985, 240.0f, 240.0f);
+        RenderSystem.glMultiTexCoord2f(33986, 240.0f, 240.0f);
         RenderSystem.pushMatrix();
         float o = 0.05f + 0.5f * Mth.sin(m * (float)Math.PI);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
@@ -74,7 +73,7 @@ extends Particle {
         this.displayEntity.yHeadRot = 0.0f;
         this.displayEntity.yRotO = 0.0f;
         this.displayEntity.yHeadRotO = 0.0f;
-        entityRenderDispatcher.render(this.displayEntity, 0.0, 0.0, 0.0, 0.0f, f, false);
+        entityRenderDispatcher.render(this.displayEntity, f);
         RenderSystem.popMatrix();
         RenderSystem.enableDepthTest();
     }

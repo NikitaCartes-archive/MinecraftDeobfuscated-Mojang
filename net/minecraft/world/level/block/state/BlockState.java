@@ -136,11 +136,6 @@ implements StateHolder<BlockState> {
         return this.getBlock().mirror(this, mirror);
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public boolean hasCustomBreakingProgress() {
-        return this.getBlock().hasCustomBreakingProgress(this);
-    }
-
     public RenderShape getRenderShape() {
         return this.getBlock().getRenderShape(this);
     }

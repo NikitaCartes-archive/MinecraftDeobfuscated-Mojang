@@ -9,19 +9,53 @@ import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 
 public class DoubleTag
 extends NumericTag {
-    private double data;
+    public static final DoubleTag ZERO = new DoubleTag(0.0);
+    public static final TagType<DoubleTag> TYPE = new TagType<DoubleTag>(){
 
-    DoubleTag() {
+        @Override
+        public DoubleTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(128L);
+            return DoubleTag.valueOf(dataInput.readDouble());
+        }
+
+        @Override
+        public String getName() {
+            return "DOUBLE";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Double";
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private final double data;
+
+    private DoubleTag(double d) {
+        this.data = d;
     }
 
-    public DoubleTag(double d) {
-        this.data = d;
+    public static DoubleTag valueOf(double d) {
+        if (d == 0.0) {
+            return ZERO;
+        }
+        return new DoubleTag(d);
     }
 
     @Override
@@ -30,14 +64,12 @@ extends NumericTag {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(128L);
-        this.data = dataInput.readDouble();
-    }
-
-    @Override
     public byte getId() {
         return 6;
+    }
+
+    public TagType<DoubleTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -47,7 +79,7 @@ extends NumericTag {
 
     @Override
     public DoubleTag copy() {
-        return new DoubleTag(this.data);
+        return this;
     }
 
     public boolean equals(Object object) {

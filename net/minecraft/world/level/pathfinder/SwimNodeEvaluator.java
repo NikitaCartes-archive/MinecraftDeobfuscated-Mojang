@@ -102,7 +102,7 @@ extends NodeEvaluator {
                 for (int n = k; n < k + this.entityDepth; ++n) {
                     FluidState fluidState = this.level.getFluidState(mutableBlockPos.set(l, m, n));
                     BlockState blockState = this.level.getBlockState(mutableBlockPos.set(l, m, n));
-                    if (fluidState.isEmpty() && blockState.isPathfindable(this.level, mutableBlockPos.below(), PathComputationType.WATER) && blockState.isAir()) {
+                    if (fluidState.isEmpty() && blockState.isPathfindable(this.level, (BlockPos)mutableBlockPos.below(), PathComputationType.WATER) && blockState.isAir()) {
                         return BlockPathTypes.BREACH;
                     }
                     if (fluidState.is(FluidTags.WATER)) continue;

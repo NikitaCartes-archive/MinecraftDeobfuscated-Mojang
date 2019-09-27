@@ -21,7 +21,7 @@ extends MobRenderer<Cow, CowModel<Cow>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Cow cow) {
+    public ResourceLocation getTextureLocation(Cow cow) {
         return COW_LOCATION;
     }
 }

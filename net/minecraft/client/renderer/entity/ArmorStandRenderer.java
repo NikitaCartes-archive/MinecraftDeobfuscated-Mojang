@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
@@ -33,33 +34,36 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(ArmorStand armorStand) {
+    public ResourceLocation getTextureLocation(ArmorStand armorStand) {
         return DEFAULT_SKIN_LOCATION;
     }
 
     @Override
-    protected void setupRotations(ArmorStand armorStand, float f, float g, float h) {
-        RenderSystem.rotatef(180.0f - g, 0.0f, 1.0f, 0.0f);
+    protected void setupRotations(ArmorStand armorStand, PoseStack poseStack, float f, float g, float h) {
+        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
         float i = (float)(armorStand.level.getGameTime() - armorStand.lastHit) + h;
         if (i < 5.0f) {
-            RenderSystem.rotatef(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f, 0.0f, 1.0f, 0.0f);
+            poseStack.mulPose(Vector3f.YP.rotation(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f, true));
         }
     }
 
     @Override
     protected boolean shouldShowName(ArmorStand armorStand) {
+        float f;
+        double d = this.entityRenderDispatcher.distanceToSqr(armorStand);
+        float f2 = f = armorStand.isCrouching() ? 32.0f : 64.0f;
+        if (d >= (double)(f * f)) {
+            return false;
+        }
         return armorStand.isCustomNameVisible();
     }
 
     @Override
-    public void render(ArmorStand armorStand, double d, double e, double f, float g, float h) {
+    protected boolean isVisible(ArmorStand armorStand, boolean bl) {
         if (armorStand.isMarker()) {
-            this.onlySolidLayers = true;
+            return !armorStand.isInvisible() && !bl;
         }
-        super.render(armorStand, d, e, f, g, h);
-        if (armorStand.isMarker()) {
-            this.onlySolidLayers = false;
-        }
+        return !armorStand.isInvisible() || bl;
     }
 
     @Override

@@ -3,13 +3,18 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.PlayerModelPart;
@@ -24,7 +29,7 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     }
 
     @Override
-    public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float j, float k, float l, float m) {
         if (!abstractClientPlayer.isCapeLoaded() || abstractClientPlayer.isInvisible() || !abstractClientPlayer.isModelPartShown(PlayerModelPart.CAPE) || abstractClientPlayer.getCloakTextureLocation() == null) {
             return;
         }
@@ -32,41 +37,36 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         if (itemStack.getItem() == Items.ELYTRA) {
             return;
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.bindTexture(abstractClientPlayer.getCloakTextureLocation());
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.0f, 0.0f, 0.125f);
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.0, 0.125);
         double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak) - Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.x);
         double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak) - Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.y);
-        double m = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.z);
-        float n = abstractClientPlayer.yBodyRotO + (abstractClientPlayer.yBodyRot - abstractClientPlayer.yBodyRotO);
-        double o = Mth.sin(n * ((float)Math.PI / 180));
-        double p = -Mth.cos(n * ((float)Math.PI / 180));
-        float q = (float)e * 10.0f;
-        q = Mth.clamp(q, -6.0f, 32.0f);
-        float r = (float)(d * o + m * p) * 100.0f;
-        r = Mth.clamp(r, 0.0f, 150.0f);
-        float s = (float)(d * p - m * o) * 100.0f;
-        s = Mth.clamp(s, -20.0f, 20.0f);
-        if (r < 0.0f) {
-            r = 0.0f;
+        double n = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.z);
+        float o = abstractClientPlayer.yBodyRotO + (abstractClientPlayer.yBodyRot - abstractClientPlayer.yBodyRotO);
+        double p = Mth.sin(o * ((float)Math.PI / 180));
+        double q = -Mth.cos(o * ((float)Math.PI / 180));
+        float r = (float)e * 10.0f;
+        r = Mth.clamp(r, -6.0f, 32.0f);
+        float s = (float)(d * p + n * q) * 100.0f;
+        s = Mth.clamp(s, 0.0f, 150.0f);
+        float t = (float)(d * q - n * p) * 100.0f;
+        t = Mth.clamp(t, -20.0f, 20.0f);
+        if (s < 0.0f) {
+            s = 0.0f;
         }
-        float t = Mth.lerp(h, abstractClientPlayer.oBob, abstractClientPlayer.bob);
-        q += Mth.sin(Mth.lerp(h, abstractClientPlayer.walkDistO, abstractClientPlayer.walkDist) * 6.0f) * 32.0f * t;
+        float u = Mth.lerp(h, abstractClientPlayer.oBob, abstractClientPlayer.bob);
+        r += Mth.sin(Mth.lerp(h, abstractClientPlayer.walkDistO, abstractClientPlayer.walkDist) * 6.0f) * 32.0f * u;
         if (abstractClientPlayer.isCrouching()) {
-            q += 25.0f;
+            r += 25.0f;
         }
-        RenderSystem.rotatef(6.0f + r / 2.0f + q, 1.0f, 0.0f, 0.0f);
-        RenderSystem.rotatef(s / 2.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.rotatef(-s / 2.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
-        ((PlayerModel)this.getParentModel()).renderCloak(0.0625f);
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        poseStack.mulPose(Vector3f.XP.rotation(6.0f + s / 2.0f + r, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(t / 2.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotation(180.0f - t / 2.0f, true));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getCloakTextureLocation()));
+        OverlayTexture.setDefault(vertexConsumer);
+        ((PlayerModel)this.getParentModel()).renderCloak(poseStack, vertexConsumer, 0.0625f, i);
+        vertexConsumer.unsetDefaultOverlayCoords();
+        poseStack.popPose();
     }
 }
 

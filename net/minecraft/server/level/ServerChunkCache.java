@@ -453,6 +453,11 @@ extends ChunkSource {
         this.spawnFriendlies = bl2;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public String getChunkDebugData(ChunkPos chunkPos) {
+        return this.chunkMap.getChunkDebugData(chunkPos);
+    }
+
     public DimensionDataStorage getDataStorage() {
         return this.dataStorage;
     }

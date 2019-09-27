@@ -1,19 +1,19 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.renderer.entity;
+package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class DolphinModel<T extends Entity>
-extends EntityModel<T> {
-    private final ModelPart head;
+extends ListModel<T> {
     private final ModelPart body;
     private final ModelPart tail;
     private final ModelPart tailFin;
@@ -53,18 +53,18 @@ extends EntityModel<T> {
         this.tailFin.setPos(0.0f, 0.0f, 9.0f);
         this.tailFin.xRot = 0.0f;
         this.tail.addChild(this.tailFin);
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -3.0f, -3.0f, 8.0f, 7.0f, 6.0f);
-        this.head.setPos(0.0f, -4.0f, -3.0f);
-        ModelPart modelPart4 = new ModelPart(this, 0, 13);
-        modelPart4.addBox(-1.0f, 2.0f, -7.0f, 2.0f, 2.0f, 4.0f);
-        this.head.addChild(modelPart4);
-        this.body.addChild(this.head);
+        ModelPart modelPart4 = new ModelPart(this, 0, 0);
+        modelPart4.addBox(-4.0f, -3.0f, -3.0f, 8.0f, 7.0f, 6.0f);
+        modelPart4.setPos(0.0f, -4.0f, -3.0f);
+        ModelPart modelPart5 = new ModelPart(this, 0, 13);
+        modelPart5.addBox(-1.0f, 2.0f, -7.0f, 2.0f, 2.0f, 4.0f);
+        modelPart4.addChild(modelPart5);
+        this.body.addChild(modelPart4);
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.body.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.body);
     }
 
     @Override

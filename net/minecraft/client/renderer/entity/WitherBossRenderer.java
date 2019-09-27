@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitherBossModel;
@@ -25,7 +25,7 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(WitherBoss witherBoss) {
+    public ResourceLocation getTextureLocation(WitherBoss witherBoss) {
         int i = witherBoss.getInvulnerableTicks();
         if (i <= 0 || i <= 80 && i / 5 % 2 == 1) {
             return WITHER_LOCATION;
@@ -34,13 +34,13 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     }
 
     @Override
-    protected void scale(WitherBoss witherBoss, float f) {
+    protected void scale(WitherBoss witherBoss, PoseStack poseStack, float f) {
         float g = 2.0f;
         int i = witherBoss.getInvulnerableTicks();
         if (i > 0) {
             g -= ((float)i - f) / 220.0f * 0.5f;
         }
-        RenderSystem.scalef(g, g, g);
+        poseStack.scale(g, g, g);
     }
 }
 

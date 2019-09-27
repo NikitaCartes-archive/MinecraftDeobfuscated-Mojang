@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -137,12 +135,6 @@ implements SimpleWaterloggedBlock {
     protected ChestBlock(Block.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(TYPE, ChestType.SINGLE)).setValue(WATERLOGGED, false));
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean hasCustomBreakingProgress(BlockState blockState) {
-        return true;
     }
 
     @Override

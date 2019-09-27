@@ -109,7 +109,7 @@ extends TamableAnimal {
     }
 
     public ResourceLocation getResourceLocation() {
-        return TEXTURE_BY_TYPE.get(this.getCatType());
+        return TEXTURE_BY_TYPE.getOrDefault(this.getCatType(), TEXTURE_BY_TYPE.get(0));
     }
 
     @Override

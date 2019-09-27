@@ -1,8 +1,9 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.renderer.entity;
+package net.minecraft.client.renderer.entity.layers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -12,8 +13,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.VillagerHeadModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.VillagerHeadModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.metadata.animation.VillagerMetaDataSection;
 import net.minecraft.core.DefaultedRegistry;
@@ -55,7 +57,7 @@ implements ResourceManagerReloadListener {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
         if (((Entity)livingEntity).isInvisible()) {
             return;
         }
@@ -65,23 +67,18 @@ implements ResourceManagerReloadListener {
         VillagerMetaDataSection.Hat hat = this.getHatData(this.typeHatCache, "type", Registry.VILLAGER_TYPE, villagerType);
         VillagerMetaDataSection.Hat hat2 = this.getHatData(this.professionHatCache, "profession", Registry.VILLAGER_PROFESSION, villagerProfession);
         Object entityModel = this.getParentModel();
-        this.bindTexture(this.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerType)));
         ((VillagerHeadModel)entityModel).hatVisible(hat2 == VillagerMetaDataSection.Hat.NONE || hat2 == VillagerMetaDataSection.Hat.PARTIAL && hat != VillagerMetaDataSection.Hat.FULL);
-        ((EntityModel)entityModel).render(livingEntity, f, g, i, j, k, l);
+        ResourceLocation resourceLocation = this.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerType));
+        VillagerProfessionLayer.renderColoredModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity);
         ((VillagerHeadModel)entityModel).hatVisible(true);
         if (villagerProfession != VillagerProfession.NONE && !((LivingEntity)livingEntity).isBaby()) {
-            this.bindTexture(this.getResourceLocation("profession", Registry.VILLAGER_PROFESSION.getKey(villagerProfession)));
-            ((EntityModel)entityModel).render(livingEntity, f, g, i, j, k, l);
+            ResourceLocation resourceLocation2 = this.getResourceLocation("profession", Registry.VILLAGER_PROFESSION.getKey(villagerProfession));
+            VillagerProfessionLayer.renderColoredModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity);
             if (villagerProfession != VillagerProfession.NITWIT) {
-                this.bindTexture(this.getResourceLocation("profession_level", (ResourceLocation)LEVEL_LOCATIONS.get(Mth.clamp(villagerData.getLevel(), 1, LEVEL_LOCATIONS.size()))));
-                ((EntityModel)entityModel).render(livingEntity, f, g, i, j, k, l);
+                ResourceLocation resourceLocation3 = this.getResourceLocation("profession_level", (ResourceLocation)LEVEL_LOCATIONS.get(Mth.clamp(villagerData.getLevel(), 1, LEVEL_LOCATIONS.size())));
+                VillagerProfessionLayer.renderColoredModel(entityModel, resourceLocation3, poseStack, multiBufferSource, i, livingEntity);
             }
         }
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
     }
 
     private ResourceLocation getResourceLocation(String string, ResourceLocation resourceLocation) {

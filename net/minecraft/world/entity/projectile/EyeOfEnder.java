@@ -114,9 +114,6 @@ implements ItemSupplier {
 
     @Override
     public void tick() {
-        this.xOld = this.x;
-        this.yOld = this.y;
-        this.zOld = this.z;
         super.tick();
         Vec3 vec3 = this.getDeltaMovement();
         this.x += vec3.x;

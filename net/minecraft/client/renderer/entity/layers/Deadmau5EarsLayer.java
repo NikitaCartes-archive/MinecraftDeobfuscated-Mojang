@@ -3,11 +3,16 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.util.Mth;
@@ -20,31 +25,28 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     }
 
     @Override
-    public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float j, float k, float l, float m) {
         if (!"deadmau5".equals(abstractClientPlayer.getName().getString()) || !abstractClientPlayer.isSkinLoaded() || abstractClientPlayer.isInvisible()) {
             return;
         }
-        this.bindTexture(abstractClientPlayer.getSkinTextureLocation());
-        for (int m = 0; m < 2; ++m) {
-            float n = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
-            float o = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
-            RenderSystem.pushMatrix();
-            RenderSystem.rotatef(n, 0.0f, 1.0f, 0.0f);
-            RenderSystem.rotatef(o, 1.0f, 0.0f, 0.0f);
-            RenderSystem.translatef(0.375f * (float)(m * 2 - 1), 0.0f, 0.0f);
-            RenderSystem.translatef(0.0f, -0.375f, 0.0f);
-            RenderSystem.rotatef(-o, 1.0f, 0.0f, 0.0f);
-            RenderSystem.rotatef(-n, 0.0f, 1.0f, 0.0f);
-            float p = 1.3333334f;
-            RenderSystem.scalef(1.3333334f, 1.3333334f, 1.3333334f);
-            ((PlayerModel)this.getParentModel()).renderEars(0.0625f);
-            RenderSystem.popMatrix();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getSkinTextureLocation()));
+        LivingEntityRenderer.setOverlayCoords(abstractClientPlayer, vertexConsumer, 0.0f);
+        for (int n = 0; n < 2; ++n) {
+            float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
+            float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
+            poseStack.pushPose();
+            poseStack.mulPose(Vector3f.YP.rotation(o, true));
+            poseStack.mulPose(Vector3f.XP.rotation(p, true));
+            poseStack.translate(0.375f * (float)(n * 2 - 1), 0.0, 0.0);
+            poseStack.translate(0.0, -0.375, 0.0);
+            poseStack.mulPose(Vector3f.XP.rotation(-p, true));
+            poseStack.mulPose(Vector3f.YP.rotation(-o, true));
+            float q = 1.3333334f;
+            poseStack.scale(1.3333334f, 1.3333334f, 1.3333334f);
+            ((PlayerModel)this.getParentModel()).renderEars(poseStack, vertexConsumer, 0.0625f, i);
+            poseStack.popPose();
         }
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
+        vertexConsumer.unsetDefaultOverlayCoords();
     }
 }
 

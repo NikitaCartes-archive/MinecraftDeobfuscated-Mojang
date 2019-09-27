@@ -3,13 +3,14 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieVillagerModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
-import net.minecraft.client.renderer.entity.VillagerProfessionLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.monster.ZombieVillager;
@@ -26,16 +27,16 @@ extends HumanoidMobRenderer<ZombieVillager, ZombieVillagerModel<ZombieVillager>>
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(ZombieVillager zombieVillager) {
+    public ResourceLocation getTextureLocation(ZombieVillager zombieVillager) {
         return ZOMBIE_VILLAGER_LOCATION;
     }
 
     @Override
-    protected void setupRotations(ZombieVillager zombieVillager, float f, float g, float h) {
+    protected void setupRotations(ZombieVillager zombieVillager, PoseStack poseStack, float f, float g, float h) {
         if (zombieVillager.isConverting()) {
             g += (float)(Math.cos((double)zombieVillager.tickCount * 3.25) * Math.PI * 0.25);
         }
-        super.setupRotations(zombieVillager, f, g, h);
+        super.setupRotations(zombieVillager, poseStack, f, g, h);
     }
 }
 

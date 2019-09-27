@@ -27,7 +27,7 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Horse horse) {
+    public ResourceLocation getTextureLocation(Horse horse) {
         String string = horse.getLayeredTextureHashName();
         ResourceLocation resourceLocation = LAYERED_LOCATION_CACHE.get(string);
         if (resourceLocation == null) {

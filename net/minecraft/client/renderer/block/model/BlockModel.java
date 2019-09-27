@@ -183,11 +183,11 @@ implements UnbakedModel {
     }
 
     @Override
-    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState) {
-        return this.bake(modelBakery, this, function, modelState);
+    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
+        return this.bake(modelBakery, this, function, modelState, resourceLocation);
     }
 
-    public BakedModel bake(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState) {
+    public BakedModel bake(ModelBakery modelBakery, BlockModel blockModel, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
         TextureAtlasSprite textureAtlasSprite = function.apply(new ResourceLocation(this.getTexture("particle")));
         if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
             return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBakery, blockModel), textureAtlasSprite);
@@ -198,17 +198,17 @@ implements UnbakedModel {
                 BlockElementFace blockElementFace = blockElement.faces.get(direction);
                 TextureAtlasSprite textureAtlasSprite2 = function.apply(new ResourceLocation(this.getTexture(blockElementFace.texture)));
                 if (blockElementFace.cullForDirection == null) {
-                    builder.addUnculledFace(BlockModel.bakeFace(blockElement, blockElementFace, textureAtlasSprite2, direction, modelState));
+                    builder.addUnculledFace(BlockModel.bakeFace(blockElement, blockElementFace, textureAtlasSprite2, direction, modelState, resourceLocation));
                     continue;
                 }
-                builder.addCulledFace(modelState.getRotation().rotate(blockElementFace.cullForDirection), BlockModel.bakeFace(blockElement, blockElementFace, textureAtlasSprite2, direction, modelState));
+                builder.addCulledFace(Direction.rotate(modelState.getRotation().getMatrix(), blockElementFace.cullForDirection), BlockModel.bakeFace(blockElement, blockElementFace, textureAtlasSprite2, direction, modelState, resourceLocation));
             }
         }
         return builder.build();
     }
 
-    private static BakedQuad bakeFace(BlockElement blockElement, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState) {
-        return FACE_BAKERY.bakeQuad(blockElement.from, blockElement.to, blockElementFace, textureAtlasSprite, direction, modelState, blockElement.rotation, blockElement.shade);
+    private static BakedQuad bakeFace(BlockElement blockElement, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState, ResourceLocation resourceLocation) {
+        return FACE_BAKERY.bakeQuad(blockElement.from, blockElement.to, blockElementFace, textureAtlasSprite, direction, modelState, blockElement.rotation, blockElement.shade, resourceLocation);
     }
 
     public boolean hasTexture(String string) {

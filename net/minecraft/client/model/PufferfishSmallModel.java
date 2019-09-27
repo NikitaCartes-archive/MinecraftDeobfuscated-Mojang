@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class PufferfishSmallModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart cube;
     private final ModelPart eye0;
     private final ModelPart eye1;
@@ -45,14 +46,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.cube.render(k);
-        this.eye0.render(k);
-        this.eye1.render(k);
-        this.finBack.render(k);
-        this.fin0.render(k);
-        this.fin1.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.cube, this.eye0, this.eye1, this.finBack, this.fin0, this.fin1);
     }
 
     @Override

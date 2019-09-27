@@ -3,75 +3,42 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.model.DolphinModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.DolphinModel;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Dolphin;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 
 @Environment(value=EnvType.CLIENT)
 public class DolphinCarryingItemLayer
 extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
-    private final ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-
     public DolphinCarryingItemLayer(RenderLayerParent<Dolphin, DolphinModel<Dolphin>> renderLayerParent) {
         super(renderLayerParent);
     }
 
     @Override
-    public void render(Dolphin dolphin, float f, float g, float h, float i, float j, float k, float l) {
-        ItemStack itemStack2;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Dolphin dolphin, float f, float g, float h, float j, float k, float l, float m) {
         boolean bl = dolphin.getMainArm() == HumanoidArm.RIGHT;
-        ItemStack itemStack = bl ? dolphin.getOffhandItem() : dolphin.getMainHandItem();
-        ItemStack itemStack3 = itemStack2 = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();
-        if (itemStack.isEmpty() && itemStack2.isEmpty()) {
-            return;
-        }
-        this.renderItemOnNose(dolphin, itemStack2);
-    }
-
-    private void renderItemOnNose(LivingEntity livingEntity, ItemStack itemStack) {
-        boolean bl;
-        if (itemStack.isEmpty()) {
-            return;
-        }
-        Item item = itemStack.getItem();
-        Block block = Block.byItem(item);
-        RenderSystem.pushMatrix();
-        boolean bl2 = bl = this.itemRenderer.isGui3d(itemStack) && RenderType.getRenderLayer(block.defaultBlockState()) == RenderType.TRANSLUCENT;
-        if (bl) {
-            RenderSystem.depthMask(false);
-        }
-        float f = 1.0f;
-        float g = -1.0f;
-        float h = Mth.abs(livingEntity.xRot) / 60.0f;
-        if (livingEntity.xRot < 0.0f) {
-            RenderSystem.translatef(0.0f, 1.0f - h * 0.5f, -1.0f + h * 0.5f);
+        poseStack.pushPose();
+        float n = 1.0f;
+        float o = -1.0f;
+        float p = Mth.abs(dolphin.xRot) / 60.0f;
+        if (dolphin.xRot < 0.0f) {
+            poseStack.translate(0.0, 1.0f - p * 0.5f, -1.0f + p * 0.5f);
         } else {
-            RenderSystem.translatef(0.0f, 1.0f + h * 0.8f, -1.0f + h * 0.2f);
+            poseStack.translate(0.0, 1.0f + p * 0.8f, -1.0f + p * 0.2f);
         }
-        this.itemRenderer.renderWithMobState(itemStack, livingEntity, ItemTransforms.TransformType.GROUND, false);
-        if (bl) {
-            RenderSystem.depthMask(true);
-        }
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        ItemStack itemStack = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 }
 

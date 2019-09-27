@@ -3,14 +3,15 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.TurtleModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Turtle;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TurtleRenderer
@@ -22,16 +23,15 @@ extends MobRenderer<Turtle, TurtleModel<Turtle>> {
     }
 
     @Override
-    public void render(Turtle turtle, double d, double e, double f, float g, float h) {
+    public void render(Turtle turtle, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         if (turtle.isBaby()) {
             this.shadowRadius *= 0.5f;
         }
-        super.render(turtle, d, e, f, g, h);
+        super.render(turtle, d, e, f, g, h, poseStack, multiBufferSource);
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Turtle turtle) {
+    public ResourceLocation getTextureLocation(Turtle turtle) {
         return TURTLE_LOCATION;
     }
 }

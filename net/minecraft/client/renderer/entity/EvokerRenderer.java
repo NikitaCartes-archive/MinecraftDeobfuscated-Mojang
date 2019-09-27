@@ -3,9 +3,11 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.IllagerRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
@@ -22,16 +24,16 @@ extends IllagerRenderer<T> {
         this.addLayer(new ItemInHandLayer<T, IllagerModel<T>>(this){
 
             @Override
-            public void render(T spellcasterIllager, float f, float g, float h, float i, float j, float k, float l) {
+            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l, float m) {
                 if (((SpellcasterIllager)spellcasterIllager).isCastingSpell()) {
-                    super.render(spellcasterIllager, f, g, h, i, j, k, l);
+                    super.render(poseStack, multiBufferSource, i, spellcasterIllager, f, g, h, j, k, l, m);
                 }
             }
         });
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(T spellcasterIllager) {
+    public ResourceLocation getTextureLocation(T spellcasterIllager) {
         return EVOKER_ILLAGER;
     }
 }

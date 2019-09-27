@@ -299,9 +299,9 @@ public class StructureTemplate {
             Vec3 vec3 = StructureTemplate.transform(structureEntityInfo.pos, mirror, rotation, blockPos2);
             Vec3 vec32 = vec3.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             ListTag listTag = new ListTag();
-            listTag.add(new DoubleTag(vec32.x));
-            listTag.add(new DoubleTag(vec32.y));
-            listTag.add(new DoubleTag(vec32.z));
+            listTag.add(DoubleTag.valueOf(vec32.x));
+            listTag.add(DoubleTag.valueOf(vec32.y));
+            listTag.add(DoubleTag.valueOf(vec32.z));
             compoundTag.put("Pos", listTag);
             compoundTag.remove("UUIDMost");
             compoundTag.remove("UUIDLeast");
@@ -592,7 +592,7 @@ public class StructureTemplate {
     private ListTag newIntegerList(int ... is) {
         ListTag listTag = new ListTag();
         for (int i : is) {
-            listTag.add(new IntTag(i));
+            listTag.add(IntTag.valueOf(i));
         }
         return listTag;
     }
@@ -600,7 +600,7 @@ public class StructureTemplate {
     private ListTag newDoubleList(double ... ds) {
         ListTag listTag = new ListTag();
         for (double d : ds) {
-            listTag.add(new DoubleTag(d));
+            listTag.add(DoubleTag.valueOf(d));
         }
         return listTag;
     }

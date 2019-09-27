@@ -3,18 +3,21 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class SilverfishModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart[] bodyParts;
     private final ModelPart[] bodyLayers;
+    private final ImmutableList<ModelPart> parts;
     private final float[] zPlacement = new float[7];
     private static final int[][] BODY_SIZES = new int[][]{{3, 2, 2}, {4, 3, 2}, {6, 4, 3}, {3, 3, 3}, {2, 2, 3}, {2, 1, 2}, {1, 1, 2}};
     private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 4}, {0, 9}, {0, 16}, {0, 22}, {11, 0}, {13, 4}};
@@ -40,17 +43,14 @@ extends EntityModel<T> {
         this.bodyLayers[2] = new ModelPart(this, 20, 18);
         this.bodyLayers[2].addBox(-3.0f, 0.0f, (float)BODY_SIZES[4][2] * -0.5f, 6.0f, 5.0f, BODY_SIZES[1][2]);
         this.bodyLayers[2].setPos(0.0f, 19.0f, this.zPlacement[1]);
+        ImmutableList.Builder builder = ImmutableList.builder();
+        builder.addAll(Arrays.asList(this.bodyParts));
+        builder.addAll(Arrays.asList(this.bodyLayers));
+        this.parts = builder.build();
     }
 
-    @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        for (ModelPart modelPart : this.bodyParts) {
-            modelPart.render(k);
-        }
-        for (ModelPart modelPart : this.bodyLayers) {
-            modelPart.render(k);
-        }
+    public ImmutableList<ModelPart> parts() {
+        return this.parts;
     }
 
     @Override
@@ -64,6 +64,11 @@ extends EntityModel<T> {
         this.bodyLayers[1].x = this.bodyParts[4].x;
         this.bodyLayers[2].yRot = this.bodyParts[1].yRot;
         this.bodyLayers[2].x = this.bodyParts[1].x;
+    }
+
+    @Override
+    public /* synthetic */ Iterable parts() {
+        return this.parts();
     }
 }
 

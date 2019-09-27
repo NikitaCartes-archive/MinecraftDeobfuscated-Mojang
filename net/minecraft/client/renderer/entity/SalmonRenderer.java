@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SalmonModel;
@@ -12,7 +13,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Salmon;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SalmonRenderer
@@ -24,14 +24,13 @@ extends MobRenderer<Salmon, SalmonModel<Salmon>> {
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Salmon salmon) {
+    public ResourceLocation getTextureLocation(Salmon salmon) {
         return SALMON_LOCATION;
     }
 
     @Override
-    protected void setupRotations(Salmon salmon, float f, float g, float h) {
-        super.setupRotations(salmon, f, g, h);
+    protected void setupRotations(Salmon salmon, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(salmon, poseStack, f, g, h);
         float i = 1.0f;
         float j = 1.0f;
         if (!salmon.isInWater()) {
@@ -39,11 +38,11 @@ extends MobRenderer<Salmon, SalmonModel<Salmon>> {
             j = 1.7f;
         }
         float k = i * 4.3f * Mth.sin(j * 0.6f * f);
-        RenderSystem.rotatef(k, 0.0f, 1.0f, 0.0f);
-        RenderSystem.translatef(0.0f, 0.0f, -0.4f);
+        poseStack.mulPose(Vector3f.YP.rotation(k, true));
+        poseStack.translate(0.0, 0.0, -0.4f);
         if (!salmon.isInWater()) {
-            RenderSystem.translatef(0.2f, 0.1f, 0.0f);
-            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            poseStack.translate(0.2f, 0.1f, 0.0);
+            poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
         }
     }
 }

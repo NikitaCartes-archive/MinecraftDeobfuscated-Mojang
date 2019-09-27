@@ -1651,19 +1651,6 @@ extends LivingEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean isInvisibleTo(Player player) {
-        if (!this.isInvisible()) {
-            return false;
-        }
-        if (player.isSpectator()) {
-            return false;
-        }
-        Team team = this.getTeam();
-        return team == null || player == null || player.getTeam() != team || !team.canSeeFriendlyInvisibles();
-    }
-
-    @Override
     public abstract boolean isSpectator();
 
     @Override

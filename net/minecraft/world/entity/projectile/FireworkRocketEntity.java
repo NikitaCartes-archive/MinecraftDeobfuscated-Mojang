@@ -112,9 +112,6 @@ Projectile {
     @Override
     public void tick() {
         Vec3 vec3;
-        this.xOld = this.x;
-        this.yOld = this.y;
-        this.zOld = this.z;
         super.tick();
         if (this.isAttachedToEntity()) {
             if (this.attachedToEntity == null) {

@@ -4,18 +4,12 @@
 package net.minecraft.client.model.geom;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.datafixers.util.Pair;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -28,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelPart {
-    private static final BufferBuilder COMPILE_BUFFER = new BufferBuilder(256);
     private float xTexSize = 64.0f;
     private float yTexSize = 32.0f;
     private int xTexOffs;
@@ -39,8 +32,6 @@ public class ModelPart {
     public float xRot;
     public float yRot;
     public float zRot;
-    @Nullable
-    private ByteBuffer compiled;
     public boolean mirror;
     public boolean visible = true;
     private final List<Cube> cubes = Lists.newArrayList();
@@ -82,26 +73,34 @@ public class ModelPart {
 
     public ModelPart addBox(String string, float f, float g, float h, int i, int j, int k, float l, int m, int n) {
         this.texOffs(m, n);
-        this.cubes.add(new Cube(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, this.mirror, this.xTexSize, this.yTexSize));
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, l, l, this.mirror, false);
         return this;
     }
 
     public ModelPart addBox(float f, float g, float h, float i, float j, float k) {
-        this.cubes.add(new Cube(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0f, this.mirror, this.xTexSize, this.yTexSize));
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0f, 0.0f, 0.0f, this.mirror, false);
         return this;
     }
 
     public ModelPart addBox(float f, float g, float h, float i, float j, float k, boolean bl) {
-        this.cubes.add(new Cube(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0f, bl, this.xTexSize, this.yTexSize));
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, 0.0f, 0.0f, 0.0f, bl, false);
         return this;
     }
 
     public void addBox(float f, float g, float h, float i, float j, float k, float l) {
-        this.cubes.add(new Cube(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, this.mirror, this.xTexSize, this.yTexSize));
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, l, l, this.mirror, false);
+    }
+
+    public void addBox(float f, float g, float h, float i, float j, float k, float l, float m, float n) {
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, m, n, this.mirror, false);
     }
 
     public void addBox(float f, float g, float h, float i, float j, float k, float l, boolean bl) {
-        this.cubes.add(new Cube(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, bl, this.xTexSize, this.yTexSize));
+        this.addBox(this.xTexOffs, this.yTexOffs, f, g, h, i, j, k, l, l, l, bl, false);
+    }
+
+    private void addBox(int i, int j, float f, float g, float h, float k, float l, float m, float n, float o, float p, boolean bl, boolean bl2) {
+        this.cubes.add(new Cube(i, j, f, g, h, k, l, m, n, o, p, bl, this.xTexSize, this.yTexSize));
     }
 
     public void setPos(float f, float g, float h) {
@@ -110,125 +109,67 @@ public class ModelPart {
         this.z = h;
     }
 
-    public void render(float f) {
-        if (!this.visible) {
-            return;
-        }
-        this.compile(f);
-        if (this.compiled == null) {
-            return;
-        }
-        RenderSystem.pushMatrix();
-        this.translateAndRotate(f);
-        this.compiled.clear();
-        int i = this.compiled.remaining() / DefaultVertexFormat.ENTITY.getVertexSize();
-        BufferUploader.end(this.compiled, 7, DefaultVertexFormat.ENTITY, i);
-        for (ModelPart modelPart : this.children) {
-            modelPart.render(f);
-        }
-        RenderSystem.popMatrix();
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite) {
+        this.render(poseStack, vertexConsumer, f, i, textureAtlasSprite, 1.0f, 1.0f, 1.0f);
     }
 
-    public void render(BufferBuilder bufferBuilder, float f, int i, int j, TextureAtlasSprite textureAtlasSprite) {
-        this.render(bufferBuilder, f, i, j, textureAtlasSprite, 1.0f, 1.0f, 1.0f);
-    }
-
-    public void render(BufferBuilder bufferBuilder, float f, int i, int j, TextureAtlasSprite textureAtlasSprite, float g, float h, float k) {
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float j) {
         if (!this.visible) {
             return;
         }
         if (this.cubes.isEmpty() && this.children.isEmpty()) {
             return;
         }
-        bufferBuilder.pushPose();
-        bufferBuilder.translate(this.x * f, this.y * f, this.z * f);
-        if (this.zRot != 0.0f) {
-            bufferBuilder.multiplyPose(new Quaternion(Vector3f.ZP, this.zRot, false));
-        }
-        if (this.yRot != 0.0f) {
-            bufferBuilder.multiplyPose(new Quaternion(Vector3f.YP, this.yRot, false));
-        }
-        if (this.xRot != 0.0f) {
-            bufferBuilder.multiplyPose(new Quaternion(Vector3f.XP, this.xRot, false));
-        }
-        this.compile(bufferBuilder, f, i, j, textureAtlasSprite, g, h, k);
+        poseStack.pushPose();
+        this.translateAndRotate(poseStack, f);
+        this.compile(poseStack.getPose(), vertexConsumer, f, i, textureAtlasSprite, g, h, j);
         for (ModelPart modelPart : this.children) {
-            modelPart.render(bufferBuilder, f, i, j, textureAtlasSprite);
+            modelPart.render(poseStack, vertexConsumer, f, i, textureAtlasSprite, g, h, j);
         }
-        bufferBuilder.popPose();
+        poseStack.popPose();
     }
 
-    private void compile(float f) {
-        if (!this.visible) {
-            return;
-        }
-        if (this.cubes.isEmpty() && this.children.isEmpty()) {
-            return;
-        }
-        if (this.compiled == null) {
-            COMPILE_BUFFER.begin(7, DefaultVertexFormat.ENTITY);
-            this.compile(COMPILE_BUFFER, f, 240, 240, null);
-            COMPILE_BUFFER.end();
-            Pair<BufferBuilder.DrawState, ByteBuffer> pair = COMPILE_BUFFER.popNextBuffer();
-            ByteBuffer byteBuffer = pair.getSecond();
-            this.compiled = MemoryTracker.createByteBuffer(byteBuffer.remaining());
-            this.compiled.put(byteBuffer);
-        }
-    }
-
-    public void translateTo(float f) {
-        if (!this.visible) {
-            return;
-        }
-        this.translateAndRotate(f);
-    }
-
-    private void translateAndRotate(float f) {
-        RenderSystem.translatef(this.x * f, this.y * f, this.z * f);
+    public void translateAndRotate(PoseStack poseStack, float f) {
+        poseStack.translate(this.x * f, this.y * f, this.z * f);
         if (this.zRot != 0.0f) {
-            RenderSystem.rotatef(this.zRot * 57.295776f, 0.0f, 0.0f, 1.0f);
+            poseStack.mulPose(Vector3f.ZP.rotation(this.zRot, false));
         }
         if (this.yRot != 0.0f) {
-            RenderSystem.rotatef(this.yRot * 57.295776f, 0.0f, 1.0f, 0.0f);
+            poseStack.mulPose(Vector3f.YP.rotation(this.yRot, false));
         }
         if (this.xRot != 0.0f) {
-            RenderSystem.rotatef(this.xRot * 57.295776f, 1.0f, 0.0f, 0.0f);
+            poseStack.mulPose(Vector3f.XP.rotation(this.xRot, false));
         }
     }
 
-    private void compile(BufferBuilder bufferBuilder, float f, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite) {
-        this.compile(bufferBuilder, f, i, j, textureAtlasSprite, 1.0f, 1.0f, 1.0f);
-    }
-
-    private void compile(BufferBuilder bufferBuilder, float f, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float k) {
-        Matrix4f matrix4f = bufferBuilder.getPose();
-        VertexFormat vertexFormat = bufferBuilder.getVertexFormat();
+    private void compile(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float j) {
+        Matrix3f matrix3f = new Matrix3f(matrix4f);
         for (Cube cube : this.cubes) {
             for (Polygon polygon : cube.polygons) {
-                Vec3 vec3 = polygon.vertices[1].pos.vectorTo(polygon.vertices[0].pos);
-                Vec3 vec32 = polygon.vertices[1].pos.vectorTo(polygon.vertices[2].pos);
-                Vec3 vec33 = vec32.cross(vec3).normalize();
-                float l = (float)vec33.x;
-                float m = (float)vec33.y;
-                float n = (float)vec33.z;
-                for (int o = 0; o < 4; ++o) {
-                    Vertex vertex = polygon.vertices[o];
+                Vector3f vector3f = new Vector3f(polygon.vertices[1].pos.vectorTo(polygon.vertices[0].pos));
+                Vector3f vector3f2 = new Vector3f(polygon.vertices[1].pos.vectorTo(polygon.vertices[2].pos));
+                vector3f.transform(matrix3f);
+                vector3f2.transform(matrix3f);
+                vector3f2.cross(vector3f);
+                vector3f2.normalize();
+                float k = vector3f2.x();
+                float l = vector3f2.y();
+                float m = vector3f2.z();
+                for (int n = 0; n < 4; ++n) {
+                    float q;
+                    float p;
+                    Vertex vertex = polygon.vertices[n];
                     Vector4f vector4f = new Vector4f((float)vertex.pos.x * f, (float)vertex.pos.y * f, (float)vertex.pos.z * f, 1.0f);
                     vector4f.transform(matrix4f);
-                    bufferBuilder.vertex(vector4f.x(), vector4f.y(), vector4f.z());
-                    if (vertexFormat.hasColor()) {
-                        float p = Mth.diffuseLight(l, m, n);
-                        bufferBuilder.color(p * g, p * h, p * k, 1.0f);
-                    }
+                    float o = Mth.diffuseLight(k, l, m);
                     if (textureAtlasSprite == null) {
-                        bufferBuilder.uv(vertex.u, vertex.v);
+                        p = vertex.u;
+                        q = vertex.v;
                     } else {
-                        bufferBuilder.uv(textureAtlasSprite.getU(vertex.u * 16.0f), textureAtlasSprite.getV(vertex.v * 16.0f));
+                        p = textureAtlasSprite.getU(vertex.u * 16.0f);
+                        q = textureAtlasSprite.getV(vertex.v * 16.0f);
                     }
-                    if (vertexFormat.hasUv(1)) {
-                        bufferBuilder.uv2(i, j);
-                    }
-                    bufferBuilder.normal(l, m, n).endVertex();
+                    vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z()).color(o * g, o * h, o * j, 1.0f).uv(p, q).uv2(i).normal(k, l, m).endVertex();
                 }
             }
         }
@@ -302,7 +243,7 @@ public class ModelPart {
         public final float maxY;
         public final float maxZ;
 
-        public Cube(int i, int j, float f, float g, float h, float k, float l, float m, float n, boolean bl, float o, float p) {
+        public Cube(int i, int j, float f, float g, float h, float k, float l, float m, float n, float o, float p, boolean bl, float q, float r) {
             this.minX = f;
             this.minY = g;
             this.minZ = h;
@@ -310,34 +251,43 @@ public class ModelPart {
             this.maxY = g + l;
             this.maxZ = h + m;
             this.polygons = new Polygon[6];
-            float q = f + k;
-            float r = g + l;
-            float s = h + m;
+            float s = f + k;
+            float t = g + l;
+            float u = h + m;
             f -= n;
-            g -= n;
-            h -= n;
-            q += n;
-            r += n;
+            g -= o;
+            h -= p;
             s += n;
+            t += o;
+            u += p;
             if (bl) {
-                float t = q;
-                q = f;
-                f = t;
+                float v = s;
+                s = f;
+                f = v;
             }
             Vertex vertex = new Vertex(f, g, h, 0.0f, 0.0f);
-            Vertex vertex2 = new Vertex(q, g, h, 0.0f, 8.0f);
-            Vertex vertex3 = new Vertex(q, r, h, 8.0f, 8.0f);
-            Vertex vertex4 = new Vertex(f, r, h, 8.0f, 0.0f);
-            Vertex vertex5 = new Vertex(f, g, s, 0.0f, 0.0f);
-            Vertex vertex6 = new Vertex(q, g, s, 0.0f, 8.0f);
-            Vertex vertex7 = new Vertex(q, r, s, 8.0f, 8.0f);
-            Vertex vertex8 = new Vertex(f, r, s, 8.0f, 0.0f);
-            this.polygons[0] = new Polygon(new Vertex[]{vertex6, vertex2, vertex3, vertex7}, (float)i + m + k, (float)j + m, (float)i + m + k + m, (float)j + m + l, o, p);
-            this.polygons[1] = new Polygon(new Vertex[]{vertex, vertex5, vertex8, vertex4}, i, (float)j + m, (float)i + m, (float)j + m + l, o, p);
-            this.polygons[2] = new Polygon(new Vertex[]{vertex6, vertex5, vertex, vertex2}, (float)i + m, j, (float)i + m + k, (float)j + m, o, p);
-            this.polygons[3] = new Polygon(new Vertex[]{vertex3, vertex4, vertex8, vertex7}, (float)i + m + k, (float)j + m, (float)i + m + k + k, j, o, p);
-            this.polygons[4] = new Polygon(new Vertex[]{vertex2, vertex, vertex4, vertex3}, (float)i + m, (float)j + m, (float)i + m + k, (float)j + m + l, o, p);
-            this.polygons[5] = new Polygon(new Vertex[]{vertex5, vertex6, vertex7, vertex8}, (float)i + m + k + m, (float)j + m, (float)i + m + k + m + k, (float)j + m + l, o, p);
+            Vertex vertex2 = new Vertex(s, g, h, 0.0f, 8.0f);
+            Vertex vertex3 = new Vertex(s, t, h, 8.0f, 8.0f);
+            Vertex vertex4 = new Vertex(f, t, h, 8.0f, 0.0f);
+            Vertex vertex5 = new Vertex(f, g, u, 0.0f, 0.0f);
+            Vertex vertex6 = new Vertex(s, g, u, 0.0f, 8.0f);
+            Vertex vertex7 = new Vertex(s, t, u, 8.0f, 8.0f);
+            Vertex vertex8 = new Vertex(f, t, u, 8.0f, 0.0f);
+            float w = i;
+            float x = (float)i + m;
+            float y = (float)i + m + k;
+            float z = (float)i + m + k + k;
+            float aa = (float)i + m + k + m;
+            float ab = (float)i + m + k + m + k;
+            float ac = j;
+            float ad = (float)j + m;
+            float ae = (float)j + m + l;
+            this.polygons[2] = new Polygon(new Vertex[]{vertex6, vertex5, vertex, vertex2}, x, ac, y, ad, q, r);
+            this.polygons[3] = new Polygon(new Vertex[]{vertex3, vertex4, vertex8, vertex7}, y, ad, z, ac, q, r);
+            this.polygons[1] = new Polygon(new Vertex[]{vertex, vertex5, vertex8, vertex4}, w, ad, x, ae, q, r);
+            this.polygons[4] = new Polygon(new Vertex[]{vertex2, vertex, vertex4, vertex3}, x, ad, y, ae, q, r);
+            this.polygons[0] = new Polygon(new Vertex[]{vertex6, vertex2, vertex3, vertex7}, y, ad, aa, ae, q, r);
+            this.polygons[5] = new Polygon(new Vertex[]{vertex5, vertex6, vertex7, vertex8}, aa, ad, ab, ae, q, r);
             if (bl) {
                 for (Polygon polygon : this.polygons) {
                     polygon.mirror();

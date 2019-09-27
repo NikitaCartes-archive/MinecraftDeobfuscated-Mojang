@@ -124,7 +124,7 @@ public class EndDragonFight {
         }
         ListTag listTag = new ListTag();
         for (int i : this.gateways) {
-            listTag.add(new IntTag(i));
+            listTag.add(IntTag.valueOf(i));
         }
         compoundTag.put("Gateways", listTag);
         return compoundTag;

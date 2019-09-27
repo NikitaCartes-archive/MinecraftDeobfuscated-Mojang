@@ -4,7 +4,6 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -20,7 +19,6 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            Lighting.turnOff();
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
@@ -40,7 +38,6 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            Lighting.turnOff();
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
@@ -60,8 +57,7 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            Lighting.turnOff();
-            RenderSystem.depthMask(false);
+            RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -85,7 +81,6 @@ public interface ParticleRenderType {
             RenderSystem.disableBlend();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
-            Lighting.turnOff();
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
         }
 

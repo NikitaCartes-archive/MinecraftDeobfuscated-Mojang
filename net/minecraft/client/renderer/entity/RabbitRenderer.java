@@ -29,7 +29,7 @@ extends MobRenderer<Rabbit, RabbitModel<Rabbit>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Rabbit rabbit) {
+    public ResourceLocation getTextureLocation(Rabbit rabbit) {
         String string = ChatFormatting.stripFormatting(rabbit.getName().getString());
         if (string != null && "Toast".equals(string)) {
             return RABBIT_TOAST_LOCATION;

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
@@ -22,9 +22,9 @@ extends MobRenderer<T, M> {
     }
 
     @Override
-    protected void scale(T abstractHorse, float f) {
-        RenderSystem.scalef(this.scale, this.scale, this.scale);
-        super.scale(abstractHorse, f);
+    protected void scale(T abstractHorse, PoseStack poseStack, float f) {
+        poseStack.scale(this.scale, this.scale, this.scale);
+        super.scale(abstractHorse, poseStack, f);
     }
 }
 

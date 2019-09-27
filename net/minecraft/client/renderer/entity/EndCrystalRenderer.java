@@ -3,15 +3,20 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.dragon.EndCrystalModel;
-import net.minecraft.client.renderer.culling.Culler;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -21,58 +26,82 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 public class EndCrystalRenderer
 extends EntityRenderer<EndCrystal> {
     private static final ResourceLocation END_CRYSTAL_LOCATION = new ResourceLocation("textures/entity/end_crystal/end_crystal.png");
-    private final EntityModel<EndCrystal> model = new EndCrystalModel<EndCrystal>(0.0f, true);
-    private final EntityModel<EndCrystal> modelWithoutBottom = new EndCrystalModel<EndCrystal>(0.0f, false);
+    public static final float SIN_45 = (float)Math.sin(0.7853981633974483);
+    private final ModelPart cube;
+    private final ModelPart glass;
+    private final ModelPart base;
 
     public EndCrystalRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher);
         this.shadowRadius = 0.5f;
+        this.glass = new ModelPart(64, 32, 0, 0);
+        this.glass.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
+        this.cube = new ModelPart(64, 32, 32, 0);
+        this.cube.addBox(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f);
+        this.base = new ModelPart(64, 32, 0, 16);
+        this.base.addBox(-6.0f, 0.0f, -6.0f, 12.0f, 4.0f, 12.0f);
     }
 
     @Override
-    public void render(EndCrystal endCrystal, double d, double e, double f, float g, float h) {
-        float i = (float)endCrystal.time + h;
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)d, (float)e, (float)f);
-        this.bindTexture(END_CRYSTAL_LOCATION);
-        float j = Mth.sin(i * 0.2f) / 2.0f + 0.5f;
-        j = j * j + j;
-        if (this.solidRender) {
-            RenderSystem.enableColorMaterial();
-            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(endCrystal));
-        }
+    public void render(EndCrystal endCrystal, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        poseStack.pushPose();
+        float i = EndCrystalRenderer.getY(endCrystal, h);
+        float j = 0.0625f;
+        float k = ((float)endCrystal.time + h) * 3.0f;
+        int l = endCrystal.getLightColor();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(endCrystal)));
+        OverlayTexture.setDefault(vertexConsumer);
+        poseStack.pushPose();
+        poseStack.scale(2.0f, 2.0f, 2.0f);
+        poseStack.translate(0.0, -0.5, 0.0);
         if (endCrystal.showsBottom()) {
-            this.model.render(endCrystal, 0.0f, i * 3.0f, j * 0.2f, 0.0f, 0.0f, 0.0625f);
-        } else {
-            this.modelWithoutBottom.render(endCrystal, 0.0f, i * 3.0f, j * 0.2f, 0.0f, 0.0f, 0.0625f);
+            this.base.render(poseStack, vertexConsumer, 0.0625f, l, null);
         }
-        if (this.solidRender) {
-            RenderSystem.tearDownSolidRenderingTextureCombine();
-            RenderSystem.disableColorMaterial();
-        }
-        RenderSystem.popMatrix();
+        poseStack.mulPose(Vector3f.YP.rotation(k, true));
+        poseStack.translate(0.0, 1.5f + i / 2.0f, 0.0);
+        poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
+        this.glass.render(poseStack, vertexConsumer, 0.0625f, l, null);
+        float m = 0.875f;
+        poseStack.scale(0.875f, 0.875f, 0.875f);
+        poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotation(k, true));
+        this.glass.render(poseStack, vertexConsumer, 0.0625f, l, null);
+        poseStack.scale(0.875f, 0.875f, 0.875f);
+        poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotation(k, true));
+        this.cube.render(poseStack, vertexConsumer, 0.0625f, l, null);
+        poseStack.popPose();
+        poseStack.popPose();
+        vertexConsumer.unsetDefaultOverlayCoords();
         BlockPos blockPos = endCrystal.getBeamTarget();
         if (blockPos != null) {
-            this.bindTexture(EnderDragonRenderer.CRYSTAL_BEAM_LOCATION);
-            float k = (float)blockPos.getX() + 0.5f;
-            float l = (float)blockPos.getY() + 0.5f;
-            float m = (float)blockPos.getZ() + 0.5f;
-            double n = (double)k - endCrystal.x;
-            double o = (double)l - endCrystal.y;
-            double p = (double)m - endCrystal.z;
-            EnderDragonRenderer.renderCrystalBeams(d + n, e - 0.3 + (double)(j * 0.4f) + o, f + p, h, k, l, m, endCrystal.time, endCrystal.x, endCrystal.y, endCrystal.z);
+            float n = (float)blockPos.getX() + 0.5f;
+            float o = (float)blockPos.getY() + 0.5f;
+            float p = (float)blockPos.getZ() + 0.5f;
+            float q = (float)((double)n - endCrystal.x);
+            float r = (float)((double)o - endCrystal.y);
+            float s = (float)((double)p - endCrystal.z);
+            poseStack.translate(q, r, s);
+            EnderDragonRenderer.renderCrystalBeams(-q, -r + i, -s, h, endCrystal.time, poseStack, multiBufferSource, l);
         }
-        super.render(endCrystal, d, e, f, g, h);
+        super.render(endCrystal, d, e, f, g, h, poseStack, multiBufferSource);
+    }
+
+    public static float getY(EndCrystal endCrystal, float f) {
+        float g = (float)endCrystal.time + f;
+        float h = Mth.sin(g * 0.2f) / 2.0f + 0.5f;
+        h = (h * h + h) * 0.4f;
+        return h - 1.4f;
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(EndCrystal endCrystal) {
+    public ResourceLocation getTextureLocation(EndCrystal endCrystal) {
         return END_CRYSTAL_LOCATION;
     }
 
     @Override
-    public boolean shouldRender(EndCrystal endCrystal, Culler culler, double d, double e, double f) {
-        return super.shouldRender(endCrystal, culler, d, e, f) || endCrystal.getBeamTarget() != null;
+    public boolean shouldRender(EndCrystal endCrystal, Frustum frustum, double d, double e, double f) {
+        return super.shouldRender(endCrystal, frustum, d, e, f) || endCrystal.getBeamTarget() != null;
     }
 }
 

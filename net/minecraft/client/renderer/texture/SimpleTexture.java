@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.texture;
 
-import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,6 +10,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -63,8 +63,11 @@ extends AbstractTexture {
     @Environment(value=EnvType.CLIENT)
     public static class TextureImage
     implements Closeable {
+        @Nullable
         private final TextureMetadataSection metadata;
+        @Nullable
         private final NativeImage image;
+        @Nullable
         private final IOException exception;
 
         public TextureImage(IOException iOException) {

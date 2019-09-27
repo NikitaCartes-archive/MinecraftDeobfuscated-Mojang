@@ -3,17 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Ravager;
 
 @Environment(value=EnvType.CLIENT)
 public class RavagerModel
-extends EntityModel<Ravager> {
+extends ListModel<Ravager> {
     private final ModelPart head;
     private final ModelPart mouth;
     private final ModelPart body;
@@ -72,14 +72,8 @@ extends EntityModel<Ravager> {
     }
 
     @Override
-    public void render(Ravager ravager, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(ravager, f, g, h, i, j, k);
-        this.neck.render(k);
-        this.body.render(k);
-        this.leg0.render(k);
-        this.leg1.render(k);
-        this.leg2.render(k);
-        this.leg3.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.neck, this.body, this.leg0, this.leg1, this.leg2, this.leg3);
     }
 
     @Override
@@ -133,16 +127,6 @@ extends EntityModel<Ravager> {
 
     private float triangleWave(float f, float g) {
         return (Math.abs(f % g - g * 0.5f) - g * 0.25f) / (g * 0.25f);
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Ravager)entity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((Ravager)entity, f, g, h, i, j, k);
     }
 }
 

@@ -28,7 +28,7 @@ extends MobRenderer<Endermite, EndermiteModel<Endermite>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Endermite endermite) {
+    public ResourceLocation getTextureLocation(Endermite endermite) {
         return ENDERMITE_LOCATION;
     }
 
@@ -38,7 +38,7 @@ extends MobRenderer<Endermite, EndermiteModel<Endermite>> {
     }
 
     @Override
-    protected /* synthetic */ ResourceLocation getTextureLocation(Entity entity) {
+    public /* synthetic */ ResourceLocation getTextureLocation(Entity entity) {
         return this.getTextureLocation((Endermite)entity);
     }
 }

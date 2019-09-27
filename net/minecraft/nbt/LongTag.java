@@ -9,18 +9,51 @@ import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class LongTag
 extends NumericTag {
-    private long data;
+    public static final TagType<LongTag> TYPE = new TagType<LongTag>(){
 
-    LongTag() {
+        @Override
+        public LongTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(128L);
+            return LongTag.valueOf(dataInput.readLong());
+        }
+
+        @Override
+        public String getName() {
+            return "LONG";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Long";
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private final long data;
+
+    private LongTag(long l) {
+        this.data = l;
     }
 
-    public LongTag(long l) {
-        this.data = l;
+    public static LongTag valueOf(long l) {
+        if (l >= -128L && l <= 1024L) {
+            return Cache.cache[(int)l + 128];
+        }
+        return new LongTag(l);
     }
 
     @Override
@@ -29,14 +62,12 @@ extends NumericTag {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(128L);
-        this.data = dataInput.readLong();
-    }
-
-    @Override
     public byte getId() {
         return 4;
+    }
+
+    public TagType<LongTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -46,7 +77,7 @@ extends NumericTag {
 
     @Override
     public LongTag copy() {
-        return new LongTag(this.data);
+        return this;
     }
 
     public boolean equals(Object object) {
@@ -104,6 +135,16 @@ extends NumericTag {
     @Override
     public /* synthetic */ Tag copy() {
         return this.copy();
+    }
+
+    static class Cache {
+        static final LongTag[] cache = new LongTag[1153];
+
+        static {
+            for (int i = 0; i < cache.length; ++i) {
+                Cache.cache[i] = new LongTag(-128 + i);
+            }
+        }
     }
 }
 

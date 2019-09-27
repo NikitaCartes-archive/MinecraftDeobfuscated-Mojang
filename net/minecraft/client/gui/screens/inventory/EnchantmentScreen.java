@@ -4,9 +4,12 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -17,6 +20,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentNames;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -79,7 +85,6 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         int k = (this.width - this.imageWidth) / 2;
         int l = (this.height - this.imageHeight) / 2;
         this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-        RenderSystem.pushMatrix();
         RenderSystem.matrixMode(5889);
         RenderSystem.pushMatrix();
         RenderSystem.loadIdentity();
@@ -87,87 +92,87 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
         RenderSystem.translatef(-0.34f, 0.23f, 0.0f);
         RenderSystem.multMatrix(Matrix4f.perspective(90.0, 1.3333334f, 9.0f, 80.0f));
-        float g = 1.0f;
         RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        Lighting.turnOn();
-        RenderSystem.translatef(0.0f, 3.3f, -16.0f);
-        RenderSystem.scalef(1.0f, 1.0f, 1.0f);
-        float h = 5.0f;
-        RenderSystem.scalef(5.0f, 5.0f, 5.0f);
-        RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(ENCHANTING_BOOK_LOCATION);
-        RenderSystem.rotatef(20.0f, 1.0f, 0.0f, 0.0f);
-        float n = Mth.lerp(f, this.oOpen, this.open);
-        RenderSystem.translatef((1.0f - n) * 0.2f, (1.0f - n) * 0.1f, (1.0f - n) * 0.25f);
-        RenderSystem.rotatef(-(1.0f - n) * 90.0f - 90.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
-        float o = Mth.lerp(f, this.oFlip, this.flip) + 0.25f;
-        float p = Mth.lerp(f, this.oFlip, this.flip) + 0.75f;
+        PoseStack poseStack = new PoseStack();
+        poseStack.pushPose();
+        poseStack.getPose().setIdentity();
+        poseStack.translate(0.0, 3.3f, 1984.0);
+        float g = 5.0f;
+        poseStack.scale(5.0f, 5.0f, 5.0f);
+        poseStack.mulPose(Vector3f.ZP.rotation(180.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotation(20.0f, true));
+        float h = Mth.lerp(f, this.oOpen, this.open);
+        poseStack.translate((1.0f - h) * 0.2f, (1.0f - h) * 0.1f, (1.0f - h) * 0.25f);
+        poseStack.mulPose(Vector3f.YP.rotation(-(1.0f - h) * 90.0f - 90.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotation(180.0f, true));
+        float n = Mth.lerp(f, this.oFlip, this.flip) + 0.25f;
+        float o = Mth.lerp(f, this.oFlip, this.flip) + 0.75f;
+        n = (n - (float)Mth.fastFloor(n)) * 1.6f - 0.3f;
         o = (o - (float)Mth.fastFloor(o)) * 1.6f - 0.3f;
-        p = (p - (float)Mth.fastFloor(p)) * 1.6f - 0.3f;
+        if (n < 0.0f) {
+            n = 0.0f;
+        }
         if (o < 0.0f) {
             o = 0.0f;
         }
-        if (p < 0.0f) {
-            p = 0.0f;
+        if (n > 1.0f) {
+            n = 1.0f;
         }
         if (o > 1.0f) {
             o = 1.0f;
         }
-        if (p > 1.0f) {
-            p = 1.0f;
-        }
         RenderSystem.enableRescaleNormal();
-        BOOK_MODEL.setupAnim(0.0f, o, p, n);
-        BOOK_MODEL.render(0.0625f);
-        RenderSystem.disableRescaleNormal();
-        Lighting.turnOff();
+        BOOK_MODEL.setupAnim(0.0f, n, o, h);
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.NEW_ENTITY(ENCHANTING_BOOK_LOCATION));
+        OverlayTexture.setDefault(vertexConsumer);
+        BOOK_MODEL.render(poseStack, vertexConsumer, 0.0625f, 0xF000F0, null);
+        vertexConsumer.unsetDefaultOverlayCoords();
+        bufferSource.endBatch();
+        poseStack.popPose();
         RenderSystem.matrixMode(5889);
         RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
         RenderSystem.popMatrix();
         RenderSystem.matrixMode(5888);
-        RenderSystem.popMatrix();
-        Lighting.turnOff();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         EnchantmentNames.getInstance().initSeed(((EnchantmentMenu)this.menu).getEnchantmentSeed());
-        int q = ((EnchantmentMenu)this.menu).getGoldCount();
-        for (int r = 0; r < 3; ++r) {
-            int s = k + 60;
-            int t = s + 20;
+        int p = ((EnchantmentMenu)this.menu).getGoldCount();
+        for (int q = 0; q < 3; ++q) {
+            int r = k + 60;
+            int s = r + 20;
             this.setBlitOffset(0);
             this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
-            int u = ((EnchantmentMenu)this.menu).costs[r];
+            int t = ((EnchantmentMenu)this.menu).costs[q];
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            if (u == 0) {
-                this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
+            if (t == 0) {
+                this.blit(r, l + 14 + 19 * q, 0, 185, 108, 19);
                 continue;
             }
-            String string = "" + u;
-            int v = 86 - this.font.width(string);
-            String string2 = EnchantmentNames.getInstance().getRandomName(this.font, v);
+            String string = "" + t;
+            int u = 86 - this.font.width(string);
+            String string2 = EnchantmentNames.getInstance().getRandomName(this.font, u);
             Font font = this.minecraft.getFontManager().get(Minecraft.ALT_FONT);
-            int w = 6839882;
-            if (!(q >= r + 1 && this.minecraft.player.experienceLevel >= u || this.minecraft.player.abilities.instabuild)) {
-                this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
-                this.blit(s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-                font.drawWordWrap(string2, t, l + 16 + 19 * r, v, (w & 0xFEFEFE) >> 1);
-                w = 4226832;
+            int v = 6839882;
+            if (!(p >= q + 1 && this.minecraft.player.experienceLevel >= t || this.minecraft.player.abilities.instabuild)) {
+                this.blit(r, l + 14 + 19 * q, 0, 185, 108, 19);
+                this.blit(r + 1, l + 15 + 19 * q, 16 * q, 239, 16, 16);
+                font.drawWordWrap(string2, s, l + 16 + 19 * q, u, (v & 0xFEFEFE) >> 1);
+                v = 4226832;
             } else {
-                int x = i - (k + 60);
-                int y = j - (l + 14 + 19 * r);
-                if (x >= 0 && y >= 0 && x < 108 && y < 19) {
-                    this.blit(s, l + 14 + 19 * r, 0, 204, 108, 19);
-                    w = 0xFFFF80;
+                int w = i - (k + 60);
+                int x = j - (l + 14 + 19 * q);
+                if (w >= 0 && x >= 0 && w < 108 && x < 19) {
+                    this.blit(r, l + 14 + 19 * q, 0, 204, 108, 19);
+                    v = 0xFFFF80;
                 } else {
-                    this.blit(s, l + 14 + 19 * r, 0, 166, 108, 19);
+                    this.blit(r, l + 14 + 19 * q, 0, 166, 108, 19);
                 }
-                this.blit(s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-                font.drawWordWrap(string2, t, l + 16 + 19 * r, v, w);
-                w = 8453920;
+                this.blit(r + 1, l + 15 + 19 * q, 16 * q, 223, 16, 16);
+                font.drawWordWrap(string2, s, l + 16 + 19 * q, u, v);
+                v = 8453920;
             }
             font = this.minecraft.font;
-            font.drawShadow(string, t + 86 - font.width(string), l + 16 + 19 * r + 7, w);
+            font.drawShadow(string, s + 86 - font.width(string), l + 16 + 19 * q + 7, v);
         }
     }
 

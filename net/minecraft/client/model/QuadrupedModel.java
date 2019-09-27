@@ -3,27 +3,26 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class QuadrupedModel<T extends Entity>
-extends EntityModel<T> {
+extends AgeableListModel<T> {
     protected ModelPart head = new ModelPart(this, 0, 0);
     protected ModelPart body;
     protected ModelPart leg0;
     protected ModelPart leg1;
     protected ModelPart leg2;
     protected ModelPart leg3;
-    protected float yHeadOffs = 8.0f;
-    protected float zHeadOffs = 4.0f;
 
-    public QuadrupedModel(int i, float f) {
+    public QuadrupedModel(int i, float f, boolean bl, float g, float h, float j, float k, int l) {
+        super(bl, g, h, j, k, l);
         this.head.addBox(-4.0f, -4.0f, -8.0f, 8.0f, 8.0f, 8.0f, f);
         this.head.setPos(0.0f, 18 - i, -6.0f);
         this.body = new ModelPart(this, 28, 8);
@@ -44,31 +43,13 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        if (this.young) {
-            float l = 2.0f;
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-        }
+    protected Iterable<ModelPart> headParts() {
+        return ImmutableList.of(this.head);
+    }
+
+    @Override
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.body, this.leg0, this.leg1, this.leg2, this.leg3);
     }
 
     @Override

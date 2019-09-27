@@ -25,7 +25,7 @@ extends HumanoidMobRenderer<AbstractSkeleton, SkeletonModel<AbstractSkeleton>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
+    public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
         return SKELETON_LOCATION;
     }
 }

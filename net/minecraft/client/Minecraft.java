@@ -97,6 +97,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.VirtualScreen;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -226,6 +227,7 @@ WindowEventHandler {
     private final Window window;
     private final Timer timer = new Timer(20.0f, 0L);
     private final Snooper snooper = new Snooper("client", this, Util.getMillis());
+    private final RenderBuffers renderBuffers;
     public final LevelRenderer levelRenderer;
     private final EntityRenderDispatcher entityRenderDispatcher;
     private final ItemRenderer itemRenderer;
@@ -311,6 +313,8 @@ WindowEventHandler {
     private CrashReport delayedCrash;
     private static int fps;
     public String fpsString = "";
+    public boolean chunkPath;
+    public boolean chunkVisibility;
     public boolean smartCull = true;
     private boolean windowActive;
     private final Queue<Runnable> progressTasks = Queues.newConcurrentLinkedQueue();
@@ -424,14 +428,15 @@ WindowEventHandler {
         this.modelManager = new ModelManager(this.textureAtlas, this.blockColors);
         this.resourceManager.registerReloadListener(this.modelManager);
         this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
-        this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager);
+        this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
         this.itemInHandRenderer = new ItemInHandRenderer(this);
         this.resourceManager.registerReloadListener(this.itemRenderer);
-        this.gameRenderer = new GameRenderer(this, this.resourceManager);
+        this.renderBuffers = new RenderBuffers();
+        this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.gameRenderer);
         this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
         this.resourceManager.registerReloadListener(this.blockRenderer);
-        this.levelRenderer = new LevelRenderer(this);
+        this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.levelRenderer);
         this.createSearchTrees();
         this.resourceManager.registerReloadListener(this.searchRegistry);
@@ -725,6 +730,7 @@ WindowEventHandler {
 
     private void runTick(boolean bl) {
         boolean bl2;
+        int i;
         Runnable runnable;
         this.window.setErrorSection("Pre render");
         long l = Util.getNanos();
@@ -749,14 +755,12 @@ WindowEventHandler {
         long m = Util.getNanos();
         this.profiler.push("tick");
         if (bl) {
-            for (int i = 0; i < Math.min(10, this.timer.ticks); ++i) {
+            for (i = 0; i < Math.min(10, this.timer.ticks); ++i) {
                 this.tick();
             }
         }
         this.mouseHandler.turnPlayer();
         this.window.setErrorSection("Render");
-        RenderSystem.pollEvents();
-        long n = Util.getNanos() - m;
         this.profiler.popPush("sound");
         this.soundManager.updateSource(this.gameRenderer.getMainCamera());
         this.profiler.pop();
@@ -787,7 +791,11 @@ WindowEventHandler {
         this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
         RenderSystem.popMatrix();
         this.profiler.startTick();
-        this.updateDisplay(true);
+        this.window.updateDisplay();
+        i = this.getFramerateLimit();
+        if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
+            RenderSystem.limitDisplayFPS(i);
+        }
         Thread.yield();
         this.window.setErrorSection("Post render");
         ++this.frames;
@@ -800,9 +808,9 @@ WindowEventHandler {
             }
             this.pause = bl2;
         }
-        long o = Util.getNanos();
-        this.frameTimer.logFrameDuration(o - this.lastNanoTime);
-        this.lastNanoTime = o;
+        long n = Util.getNanos();
+        this.frameTimer.logFrameDuration(n - this.lastNanoTime);
+        this.lastNanoTime = n;
         while (Util.getMillis() >= this.lastTime + 1000L) {
             fps = this.frames;
             Object[] objectArray = new Object[5];
@@ -819,19 +827,6 @@ WindowEventHandler {
             this.snooper.start();
         }
         this.profiler.endTick();
-    }
-
-    @Override
-    public void updateDisplay(boolean bl) {
-        RenderSystem.flipFrame();
-        this.profiler.push("display_update");
-        this.window.updateDisplay(this.options.fullscreen);
-        this.profiler.pop();
-        if (bl && this.isFramerateLimited()) {
-            this.profiler.push("fpslimit_wait");
-            this.window.limitDisplayFPS();
-            this.profiler.pop();
-        }
     }
 
     @Override
@@ -852,10 +847,6 @@ WindowEventHandler {
             return 60;
         }
         return this.window.getFramerateLimit();
-    }
-
-    private boolean isFramerateLimited() {
-        return (double)this.getFramerateLimit() < Option.FRAMERATE_LIMIT.getMaxValue();
     }
 
     public void emergencySave() {
@@ -907,7 +898,6 @@ WindowEventHandler {
         ResultField resultField = list.remove(0);
         RenderSystem.clear(256, ON_OSX);
         RenderSystem.matrixMode(5889);
-        RenderSystem.enableColorMaterial();
         RenderSystem.loadIdentity();
         RenderSystem.ortho(0.0, this.window.getWidth(), this.window.getHeight(), 0.0, 1000.0, 3000.0);
         RenderSystem.matrixMode(5888);
@@ -1158,8 +1148,7 @@ WindowEventHandler {
             this.gui.clearCache();
         }
         if (this.overlay == null && (this.screen == null || this.screen.passEvents)) {
-            this.profiler.popPush("GLFW events");
-            RenderSystem.pollEvents();
+            this.profiler.popPush("Keybindings");
             this.handleKeybinds();
             if (this.missTime > 0) {
                 --this.missTime;
@@ -1181,7 +1170,7 @@ WindowEventHandler {
                 }
                 this.level.tickEntities();
             }
-        } else if (this.gameRenderer.postEffectActive()) {
+        } else if (this.gameRenderer.currentEffect() != null) {
             this.gameRenderer.shutdownEffect();
         }
         if (!this.pause) {
@@ -1568,7 +1557,7 @@ WindowEventHandler {
         itemStack.addTagElement("BlockEntityTag", compoundTag);
         CompoundTag compoundTag2 = new CompoundTag();
         ListTag listTag = new ListTag();
-        listTag.add(new StringTag("\"(+NBT)\""));
+        listTag.add(StringTag.valueOf("\"(+NBT)\""));
         compoundTag2.put("Lore", listTag);
         itemStack.addTagElement("display", compoundTag2);
         return itemStack;
@@ -1925,6 +1914,10 @@ WindowEventHandler {
 
     public Window getWindow() {
         return this.window;
+    }
+
+    public RenderBuffers renderBuffers() {
+        return this.renderBuffers;
     }
 
     private static /* synthetic */ Pack method_1528(Supplier supplier) {

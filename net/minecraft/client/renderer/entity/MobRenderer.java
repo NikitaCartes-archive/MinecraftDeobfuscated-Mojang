@@ -3,14 +3,15 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.culling.Culler;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.util.Mth;
@@ -32,101 +33,92 @@ extends LivingEntityRenderer<T, M> {
     }
 
     @Override
-    public boolean shouldRender(T mob, Culler culler, double d, double e, double f) {
-        if (super.shouldRender(mob, culler, d, e, f)) {
+    public boolean shouldRender(T mob, Frustum frustum, double d, double e, double f) {
+        if (super.shouldRender(mob, frustum, d, e, f)) {
             return true;
         }
         Entity entity = ((Mob)mob).getLeashHolder();
         if (entity != null) {
-            return culler.isVisible(entity.getBoundingBoxForCulling());
+            return frustum.isVisible(entity.getBoundingBoxForCulling());
         }
         return false;
     }
 
     @Override
-    public void render(T mob, double d, double e, double f, float g, float h) {
-        super.render(mob, d, e, f, g, h);
-        if (!this.solidRender) {
-            this.renderLeash(mob, d, e, f, g, h);
-        }
-    }
-
-    protected void renderLeash(T mob, double d, double e, double f, float g, float h) {
-        float ae;
-        float ad;
-        float ac;
-        float ab;
-        int aa;
+    public void render(T mob, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        super.render(mob, d, e, f, g, h, poseStack, multiBufferSource);
         Entity entity = ((Mob)mob).getLeashHolder();
         if (entity == null) {
             return;
         }
-        e -= (1.6 - (double)((Entity)mob).getBbHeight()) * 0.5;
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        double i = Mth.lerp(h * 0.5f, entity.yRot, entity.yRotO) * ((float)Math.PI / 180);
-        double j = Mth.lerp(h * 0.5f, entity.xRot, entity.xRotO) * ((float)Math.PI / 180);
-        double k = Math.cos(i);
-        double l = Math.sin(i);
-        double m = Math.sin(j);
+        MobRenderer.renderLeash(mob, h, poseStack, multiBufferSource, entity);
+    }
+
+    public static void renderLeash(Mob mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
+        poseStack.pushPose();
+        double d = Mth.lerp(f * 0.5f, entity.yRot, entity.yRotO) * ((float)Math.PI / 180);
+        double e = Mth.lerp(f * 0.5f, entity.xRot, entity.xRotO) * ((float)Math.PI / 180);
+        double g = Math.cos(d);
+        double h = Math.sin(d);
+        double i = Math.sin(e);
         if (entity instanceof HangingEntity) {
-            k = 0.0;
-            l = 0.0;
-            m = -1.0;
+            g = 0.0;
+            h = 0.0;
+            i = -1.0;
         }
-        double n = Math.cos(j);
-        double o = Mth.lerp((double)h, entity.xo, entity.x) - k * 0.7 - l * 0.5 * n;
-        double p = Mth.lerp((double)h, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.y + (double)entity.getEyeHeight() * 0.7) - m * 0.5 - 0.25;
-        double q = Mth.lerp((double)h, entity.zo, entity.z) - l * 0.7 + k * 0.5 * n;
-        double r = (double)(Mth.lerp(h, ((Mob)mob).yBodyRot, ((Mob)mob).yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
-        k = Math.cos(r) * (double)((Entity)mob).getBbWidth() * 0.4;
-        l = Math.sin(r) * (double)((Entity)mob).getBbWidth() * 0.4;
-        double s = Mth.lerp((double)h, ((Mob)mob).xo, ((Mob)mob).x) + k;
-        double t = Mth.lerp((double)h, ((Mob)mob).yo, ((Mob)mob).y);
-        double u = Mth.lerp((double)h, ((Mob)mob).zo, ((Mob)mob).z) + l;
-        d += k;
-        f += l;
-        double v = (float)(o - s);
-        double w = (float)(p - t);
-        double x = (float)(q - u);
-        RenderSystem.disableTexture();
-        RenderSystem.disableLighting();
-        RenderSystem.disableCull();
-        int y = 24;
-        double z = 0.025;
-        bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
-        for (aa = 0; aa <= 24; ++aa) {
-            ab = 0.5f;
-            ac = 0.4f;
-            ad = 0.3f;
-            if (aa % 2 == 0) {
-                ab *= 0.7f;
-                ac *= 0.7f;
-                ad *= 0.7f;
-            }
-            ae = (float)aa / 24.0f;
-            bufferBuilder.vertex(d + v * (double)ae + 0.0, e + w * (double)(ae * ae + ae) * 0.5 + (double)((24.0f - (float)aa) / 18.0f + 0.125f), f + x * (double)ae).color(ab, ac, ad, 1.0f).endVertex();
-            bufferBuilder.vertex(d + v * (double)ae + 0.025, e + w * (double)(ae * ae + ae) * 0.5 + (double)((24.0f - (float)aa) / 18.0f + 0.125f) + 0.025, f + x * (double)ae).color(ab, ac, ad, 1.0f).endVertex();
+        double j = Math.cos(e);
+        double k = Mth.lerp((double)f, entity.xo, entity.x) - g * 0.7 - h * 0.5 * j;
+        double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.y + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
+        double m = Mth.lerp((double)f, entity.zo, entity.z) - h * 0.7 + g * 0.5 * j;
+        double n = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
+        g = Math.cos(n) * (double)mob.getBbWidth() * 0.4;
+        h = Math.sin(n) * (double)mob.getBbWidth() * 0.4;
+        double o = Mth.lerp((double)f, mob.xo, mob.x) + g;
+        double p = Mth.lerp((double)f, mob.yo, mob.y);
+        double q = Mth.lerp((double)f, mob.zo, mob.z) + h;
+        poseStack.translate(g, -(1.6 - (double)mob.getBbHeight()) * 0.5, h);
+        float r = (float)(k - o);
+        float s = (float)(l - p);
+        float t = (float)(m - q);
+        float u = 0.025f;
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LEASH);
+        Matrix4f matrix4f = poseStack.getPose();
+        float v = Mth.fastInvSqrt(r * r + t * t) * 0.025f / 2.0f;
+        float w = t * v;
+        float x = r * v;
+        MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, 0.025f, 0.025f, w, x);
+        MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, 0.025f, 0.0f, w, x);
+        poseStack.popPose();
+    }
+
+    public static void renderSide(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, float i, float j, float k, float l) {
+        int m = 24;
+        for (int n = 0; n < 24; ++n) {
+            MobRenderer.addVertexPair(vertexConsumer, matrix4f, f, g, h, i, j, 24, n, false, k, l);
+            MobRenderer.addVertexPair(vertexConsumer, matrix4f, f, g, h, i, j, 24, n + 1, true, k, l);
         }
-        tesselator.end();
-        bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
-        for (aa = 0; aa <= 24; ++aa) {
-            ab = 0.5f;
-            ac = 0.4f;
-            ad = 0.3f;
-            if (aa % 2 == 0) {
-                ab *= 0.7f;
-                ac *= 0.7f;
-                ad *= 0.7f;
-            }
-            ae = (float)aa / 24.0f;
-            bufferBuilder.vertex(d + v * (double)ae + 0.0, e + w * (double)(ae * ae + ae) * 0.5 + (double)((24.0f - (float)aa) / 18.0f + 0.125f) + 0.025, f + x * (double)ae).color(ab, ac, ad, 1.0f).endVertex();
-            bufferBuilder.vertex(d + v * (double)ae + 0.025, e + w * (double)(ae * ae + ae) * 0.5 + (double)((24.0f - (float)aa) / 18.0f + 0.125f), f + x * (double)ae + 0.025).color(ab, ac, ad, 1.0f).endVertex();
+    }
+
+    public static void addVertexPair(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, float i, float j, int k, int l, boolean bl, float m, float n) {
+        float o = 0.5f;
+        float p = 0.4f;
+        float q = 0.3f;
+        if (l % 2 == 0) {
+            o *= 0.7f;
+            p *= 0.7f;
+            q *= 0.7f;
         }
-        tesselator.end();
-        RenderSystem.enableLighting();
-        RenderSystem.enableTexture();
-        RenderSystem.enableCull();
+        float r = (float)l / (float)k;
+        float s = f * r;
+        float t = g * (r * r + r) * 0.5f + ((float)k - (float)l) / ((float)k * 0.75f) + 0.125f;
+        float u = h * r;
+        if (!bl) {
+            vertexConsumer.vertex(matrix4f, s + m, t + i - j, u - n).color(o, p, q, 1.0f).endVertex();
+        }
+        vertexConsumer.vertex(matrix4f, s - m, t + j, u + n).color(o, p, q, 1.0f).endVertex();
+        if (bl) {
+            vertexConsumer.vertex(matrix4f, s + m, t + i - j, u - n).color(o, p, q, 1.0f).endVertex();
+        }
     }
 
     @Override

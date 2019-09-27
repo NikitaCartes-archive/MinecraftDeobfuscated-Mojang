@@ -3,19 +3,21 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(value=EnvType.CLIENT)
 public class WitherBossModel<T extends WitherBoss>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart[] upperBodyParts;
     private final ModelPart[] heads;
+    private final ImmutableList<ModelPart> parts;
 
     public WitherBossModel(float f) {
         this.texWidth = 64;
@@ -42,17 +44,14 @@ extends EntityModel<T> {
         this.heads[2].addBox(-4.0f, -4.0f, -4.0f, 6.0f, 6.0f, 6.0f, f);
         this.heads[2].x = 10.0f;
         this.heads[2].y = 4.0f;
+        ImmutableList.Builder builder = ImmutableList.builder();
+        builder.addAll(Arrays.asList(this.heads));
+        builder.addAll(Arrays.asList(this.upperBodyParts));
+        this.parts = builder.build();
     }
 
-    @Override
-    public void render(T witherBoss, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(witherBoss, f, g, h, i, j, k);
-        for (ModelPart modelPart : this.heads) {
-            modelPart.render(k);
-        }
-        for (ModelPart modelPart : this.upperBodyParts) {
-            modelPart.render(k);
-        }
+    public ImmutableList<ModelPart> parts() {
+        return this.parts;
     }
 
     @Override
@@ -74,13 +73,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((WitherBoss)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((WitherBoss)entity), f, g, h, i, j, k);
+    public /* synthetic */ Iterable parts() {
+        return this.parts();
     }
 }
 

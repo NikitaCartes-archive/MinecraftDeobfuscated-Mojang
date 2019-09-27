@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -29,14 +30,8 @@ extends EntityRenderer<ExperienceOrb> {
     }
 
     @Override
-    public void render(ExperienceOrb experienceOrb, double d, double e, double f, float g, float h) {
-        if (this.solidRender || Minecraft.getInstance().getEntityRenderDispatcher().options == null) {
-            return;
-        }
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)d, (float)e, (float)f);
-        this.bindTexture(experienceOrb);
-        Lighting.turnOn();
+    public void render(ExperienceOrb experienceOrb, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        poseStack.pushPose();
         int i = experienceOrb.getIcon();
         float j = (float)(i % 4 * 16 + 0) / 64.0f;
         float k = (float)(i % 4 * 16 + 16) / 64.0f;
@@ -45,37 +40,35 @@ extends EntityRenderer<ExperienceOrb> {
         float n = 1.0f;
         float o = 0.5f;
         float p = 0.25f;
-        int q = experienceOrb.getLightColor();
-        int r = q % 65536;
-        int s = q / 65536;
-        RenderSystem.glMultiTexCoord2f(33985, r, s);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        float t = 255.0f;
-        float u = ((float)experienceOrb.tickCount + h) / 2.0f;
-        int v = (int)((Mth.sin(u + 0.0f) + 1.0f) * 0.5f * 255.0f);
-        int w = 255;
-        int x = (int)((Mth.sin(u + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
-        RenderSystem.translatef(0.0f, 0.1f, 0.0f);
-        RenderSystem.rotatef(180.0f - this.entityRenderDispatcher.playerRotY, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0f, 0.0f, 0.0f);
-        float y = 0.3f;
-        RenderSystem.scalef(0.3f, 0.3f, 0.3f);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-        bufferBuilder.vertex(-0.5, -0.25, 0.0).uv(j, m).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(0.5, -0.25, 0.0).uv(k, m).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(0.5, 0.75, 0.0).uv(k, l).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(-0.5, 0.75, 0.0).uv(j, l).color(v, 255, x, 128).normal(0.0f, 1.0f, 0.0f).endVertex();
-        tesselator.end();
-        RenderSystem.disableBlend();
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.popMatrix();
-        super.render(experienceOrb, d, e, f, g, h);
+        float q = 255.0f;
+        float r = ((float)experienceOrb.tickCount + h) / 2.0f;
+        int s = (int)((Mth.sin(r + 0.0f) + 1.0f) * 0.5f * 255.0f);
+        int t = 255;
+        int u = (int)((Mth.sin(r + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
+        poseStack.translate(0.0, 0.1f, 0.0);
+        poseStack.mulPose(Vector3f.YP.rotation(180.0f - this.entityRenderDispatcher.playerRotY, true));
+        poseStack.mulPose(Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, true));
+        float v = 0.3f;
+        poseStack.scale(0.3f, 0.3f, 0.3f);
+        int w = experienceOrb.getLightColor();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(EXPERIENCE_ORB_LOCATION));
+        OverlayTexture.setDefault(vertexConsumer);
+        Matrix4f matrix4f = poseStack.getPose();
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, -0.5f, -0.25f, s, 255, u, j, m, w);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, 0.5f, -0.25f, s, 255, u, k, m, w);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, 0.5f, 0.75f, s, 255, u, k, l, w);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, -0.5f, 0.75f, s, 255, u, j, l, w);
+        vertexConsumer.unsetDefaultOverlayCoords();
+        poseStack.popPose();
+        super.render(experienceOrb, d, e, f, g, h, poseStack, multiBufferSource);
+    }
+
+    private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, int i, int j, int k, float h, float l, int m) {
+        vertexConsumer.vertex(matrix4f, f, g, 0.0f).color(i, j, k, 128).uv(h, l).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(ExperienceOrb experienceOrb) {
+    public ResourceLocation getTextureLocation(ExperienceOrb experienceOrb) {
         return EXPERIENCE_ORB_LOCATION;
     }
 }

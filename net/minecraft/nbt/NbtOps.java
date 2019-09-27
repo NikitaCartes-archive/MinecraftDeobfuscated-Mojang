@@ -47,7 +47,7 @@ implements DynamicOps<Tag> {
 
     @Override
     public Tag empty() {
-        return new EndTag();
+        return EndTag.INSTANCE;
     }
 
     @Override
@@ -106,37 +106,42 @@ implements DynamicOps<Tag> {
 
     @Override
     public Tag createNumeric(Number number) {
-        return new DoubleTag(number.doubleValue());
+        return DoubleTag.valueOf(number.doubleValue());
     }
 
     @Override
     public Tag createByte(byte b) {
-        return new ByteTag(b);
+        return ByteTag.valueOf(b);
     }
 
     @Override
     public Tag createShort(short s) {
-        return new ShortTag(s);
+        return ShortTag.valueOf(s);
     }
 
     @Override
     public Tag createInt(int i) {
-        return new IntTag(i);
+        return IntTag.valueOf(i);
     }
 
     @Override
     public Tag createLong(long l) {
-        return new LongTag(l);
+        return LongTag.valueOf(l);
     }
 
     @Override
     public Tag createFloat(float f) {
-        return new FloatTag(f);
+        return FloatTag.valueOf(f);
     }
 
     @Override
     public Tag createDouble(double d) {
-        return new DoubleTag(d);
+        return DoubleTag.valueOf(d);
+    }
+
+    @Override
+    public Tag createBoolean(boolean bl) {
+        return ByteTag.valueOf(bl);
     }
 
     @Override
@@ -149,7 +154,7 @@ implements DynamicOps<Tag> {
 
     @Override
     public Tag createString(String string) {
-        return new StringTag(string);
+        return StringTag.valueOf(string);
     }
 
     @Override
@@ -411,6 +416,11 @@ implements DynamicOps<Tag> {
     @Override
     public /* synthetic */ Optional getStringValue(Object object) {
         return this.getStringValue((Tag)object);
+    }
+
+    @Override
+    public /* synthetic */ Object createBoolean(boolean bl) {
+        return this.createBoolean(bl);
     }
 
     @Override

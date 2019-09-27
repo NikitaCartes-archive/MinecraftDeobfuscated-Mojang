@@ -3,12 +3,18 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -25,63 +31,39 @@ extends EntityRenderer<Boat> {
     }
 
     @Override
-    public void render(Boat boat, double d, double e, double f, float g, float h) {
-        RenderSystem.pushMatrix();
-        this.setupTranslation(d, e, f);
-        this.setupRotation(boat, g, h);
-        this.bindTexture(boat);
-        if (this.solidRender) {
-            RenderSystem.enableColorMaterial();
-            RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(boat));
+    public void render(Boat boat, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        float k;
+        poseStack.pushPose();
+        poseStack.translate(0.0, 0.375, 0.0);
+        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
+        float i = (float)boat.getHurtTime() - h;
+        float j = boat.getDamage() - h;
+        if (j < 0.0f) {
+            j = 0.0f;
         }
-        this.model.render(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        if (this.solidRender) {
-            RenderSystem.tearDownSolidRenderingTextureCombine();
-            RenderSystem.disableColorMaterial();
+        if (i > 0.0f) {
+            poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(i) * i * j / 10.0f * (float)boat.getHurtDir(), true));
         }
-        RenderSystem.popMatrix();
-        super.render(boat, d, e, f, g, h);
-    }
-
-    public void setupRotation(Boat boat, float f, float g) {
-        float j;
-        RenderSystem.rotatef(180.0f - f, 0.0f, 1.0f, 0.0f);
-        float h = (float)boat.getHurtTime() - g;
-        float i = boat.getDamage() - g;
-        if (i < 0.0f) {
-            i = 0.0f;
+        if (!Mth.equal(k = boat.getBubbleAngle(h), 0.0f)) {
+            poseStack.mulPose(new Quaternion(new Vector3f(1.0f, 0.0f, 1.0f), boat.getBubbleAngle(h), true));
         }
-        if (h > 0.0f) {
-            RenderSystem.rotatef(Mth.sin(h) * h * i / 10.0f * (float)boat.getHurtDir(), 1.0f, 0.0f, 0.0f);
-        }
-        if (!Mth.equal(j = boat.getBubbleAngle(g), 0.0f)) {
-            RenderSystem.rotatef(boat.getBubbleAngle(g), 1.0f, 0.0f, 1.0f);
-        }
-        RenderSystem.scalef(-1.0f, -1.0f, 1.0f);
-    }
-
-    public void setupTranslation(double d, double e, double f) {
-        RenderSystem.translatef((float)d, (float)e + 0.375f, (float)f);
+        poseStack.scale(-1.0f, -1.0f, 1.0f);
+        int l = boat.getLightColor();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(boat)));
+        OverlayTexture.setDefault(vertexConsumer);
+        poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
+        this.model.setupAnim(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, l);
+        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.WATER_MASK);
+        this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625f, l, null);
+        poseStack.popPose();
+        vertexConsumer.unsetDefaultOverlayCoords();
+        super.render(boat, d, e, f, g, h, poseStack, multiBufferSource);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Boat boat) {
+    public ResourceLocation getTextureLocation(Boat boat) {
         return BOAT_TEXTURE_LOCATIONS[boat.getBoatType().ordinal()];
-    }
-
-    @Override
-    public boolean hasSecondPass() {
-        return true;
-    }
-
-    @Override
-    public void renderSecondPass(Boat boat, double d, double e, double f, float g, float h) {
-        RenderSystem.pushMatrix();
-        this.setupTranslation(d, e, f);
-        this.setupRotation(boat, g, h);
-        this.bindTexture(boat);
-        this.model.renderSecondPass(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        RenderSystem.popMatrix();
     }
 }
 

@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Parrot;
 
 @Environment(value=EnvType.CLIENT)
@@ -23,7 +22,7 @@ extends MobRenderer<Parrot, ParrotModel> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Parrot parrot) {
+    public ResourceLocation getTextureLocation(Parrot parrot) {
         return PARROT_LOCATIONS[parrot.getVariant()];
     }
 
@@ -32,11 +31,6 @@ extends MobRenderer<Parrot, ParrotModel> {
         float g = Mth.lerp(f, parrot.oFlap, parrot.flap);
         float h = Mth.lerp(f, parrot.oFlapSpeed, parrot.flapSpeed);
         return (Mth.sin(g) + 1.0f) * h;
-    }
-
-    @Override
-    public /* synthetic */ float getBob(LivingEntity livingEntity, float f) {
-        return this.getBob((Parrot)livingEntity, f);
     }
 }
 

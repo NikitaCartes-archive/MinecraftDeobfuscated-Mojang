@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
@@ -13,7 +14,6 @@ import net.minecraft.client.renderer.entity.layers.FoxHeldItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Fox;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class FoxRenderer
@@ -29,16 +29,15 @@ extends MobRenderer<Fox, FoxModel<Fox>> {
     }
 
     @Override
-    protected void setupRotations(Fox fox, float f, float g, float h) {
-        super.setupRotations(fox, f, g, h);
+    protected void setupRotations(Fox fox, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(fox, poseStack, f, g, h);
         if (fox.isPouncing() || fox.isFaceplanted()) {
-            RenderSystem.rotatef(-Mth.lerp(h, fox.xRotO, fox.xRot), 1.0f, 0.0f, 0.0f);
+            poseStack.mulPose(Vector3f.XP.rotation(-Mth.lerp(h, fox.xRotO, fox.xRot), true));
         }
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Fox fox) {
+    public ResourceLocation getTextureLocation(Fox fox) {
         if (fox.getFoxType() == Fox.Type.RED) {
             return fox.isSleeping() ? RED_FOX_SLEEP_TEXTURE : RED_FOX_TEXTURE;
         }

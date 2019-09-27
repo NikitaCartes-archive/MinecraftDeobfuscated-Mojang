@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.JumpGoal;
 import net.minecraft.world.entity.animal.Dolphin;
@@ -85,7 +86,7 @@ extends JumpGoal {
         }
         Vec3 vec3 = this.dolphin.getDeltaMovement();
         if (vec3.y * vec3.y < (double)0.03f && this.dolphin.xRot != 0.0f) {
-            this.dolphin.xRot = this.rotlerp(this.dolphin.xRot, 0.0f, 0.2f);
+            this.dolphin.xRot = Mth.rotlerp(this.dolphin.xRot, 0.0f, 0.2f);
         } else {
             double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
             double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;

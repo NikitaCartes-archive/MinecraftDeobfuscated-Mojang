@@ -6,7 +6,10 @@ package com.mojang.blaze3d.vertex;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
@@ -16,11 +19,8 @@ import org.apache.logging.log4j.Logger;
 public class VertexFormat {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<VertexFormatElement> elements = Lists.newArrayList();
-    private final List<Integer> offsets = Lists.newArrayList();
+    private final IntList offsets = new IntArrayList();
     private int vertexSize;
-    private int colorOffset = -1;
-    private final List<Integer> texOffset = Lists.newArrayList();
-    private int normalOffset = -1;
 
     public VertexFormat(VertexFormat vertexFormat) {
         this();
@@ -36,9 +36,6 @@ public class VertexFormat {
     public void clear() {
         this.elements.clear();
         this.offsets.clear();
-        this.colorOffset = -1;
-        this.texOffset.clear();
-        this.normalOffset = -1;
         this.vertexSize = 0;
     }
 
@@ -49,66 +46,16 @@ public class VertexFormat {
         }
         this.elements.add(vertexFormatElement);
         this.offsets.add(this.vertexSize);
-        switch (vertexFormatElement.getUsage()) {
-            case NORMAL: {
-                this.normalOffset = this.vertexSize;
-                break;
-            }
-            case COLOR: {
-                this.colorOffset = this.vertexSize;
-                break;
-            }
-            case UV: {
-                this.texOffset.add(vertexFormatElement.getIndex(), this.vertexSize);
-                break;
-            }
-        }
         this.vertexSize += vertexFormatElement.getByteSize();
         return this;
     }
 
-    public boolean hasNormal() {
-        return this.normalOffset >= 0;
-    }
-
-    public int getNormalOffset() {
-        return this.normalOffset;
-    }
-
-    public boolean hasColor() {
-        return this.colorOffset >= 0;
-    }
-
-    public int getColorOffset() {
-        return this.colorOffset;
-    }
-
-    public boolean hasUv(int i) {
-        return this.texOffset.size() - 1 >= i;
-    }
-
-    public int getUvOffset(int i) {
-        return this.texOffset.get(i);
-    }
-
     public String toString() {
-        String string = "format: " + this.elements.size() + " elements: ";
-        for (int i = 0; i < this.elements.size(); ++i) {
-            string = string + this.elements.get(i).toString();
-            if (i == this.elements.size() - 1) continue;
-            string = string + " ";
-        }
-        return string;
+        return "format: " + this.elements.size() + " elements: " + this.elements.stream().map(Object::toString).collect(Collectors.joining(" "));
     }
 
     private boolean hasPositionElement() {
-        int j = this.elements.size();
-        for (int i = 0; i < j; ++i) {
-            VertexFormatElement vertexFormatElement = this.elements.get(i);
-            if (!vertexFormatElement.isPosition()) continue;
-            return true;
-        }
-        return false;
+        return this.elements.stream().anyMatch(VertexFormatElement::isPosition);
     }
 
     public int getIntegerSize() {
@@ -129,10 +76,6 @@ public class VertexFormat {
 
     public VertexFormatElement getElement(int i) {
         return this.elements.get(i);
-    }
-
-    public int getOffset(int i) {
-        return this.offsets.get(i);
     }
 
     public boolean equals(Object object) {
@@ -167,7 +110,7 @@ public class VertexFormat {
         int i = this.getVertexSize();
         List<VertexFormatElement> list = this.getElements();
         for (int j = 0; j < list.size(); ++j) {
-            list.get(j).setupBufferState(l + (long)this.getOffset(j), i);
+            list.get(j).setupBufferState(l + (long)this.offsets.getInt(j), i);
         }
     }
 

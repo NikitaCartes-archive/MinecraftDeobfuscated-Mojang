@@ -8,14 +8,43 @@ import java.io.DataOutput;
 import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class EndTag
 implements Tag {
-    @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(64L);
+    public static final TagType<EndTag> TYPE = new TagType<EndTag>(){
+
+        @Override
+        public EndTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) {
+            nbtAccounter.accountBits(64L);
+            return INSTANCE;
+        }
+
+        @Override
+        public String getName() {
+            return "END";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_End";
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    public static final EndTag INSTANCE = new EndTag();
+
+    private EndTag() {
     }
 
     @Override
@@ -27,6 +56,10 @@ implements Tag {
         return 0;
     }
 
+    public TagType<EndTag> getType() {
+        return TYPE;
+    }
+
     @Override
     public String toString() {
         return "END";
@@ -34,20 +67,12 @@ implements Tag {
 
     @Override
     public EndTag copy() {
-        return new EndTag();
+        return this;
     }
 
     @Override
     public Component getPrettyDisplay(String string, int i) {
         return new TextComponent("");
-    }
-
-    public boolean equals(Object object) {
-        return object instanceof EndTag;
-    }
-
-    public int hashCode() {
-        return this.getId();
     }
 
     @Override

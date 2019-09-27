@@ -3,10 +3,11 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -24,30 +25,29 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
     }
 
     @Override
-    public void render(Horse horse, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l, float m) {
+        float q;
+        float p;
+        float o;
         ItemStack itemStack = horse.getArmor();
-        if (itemStack.getItem() instanceof HorseArmorItem) {
-            HorseArmorItem horseArmorItem = (HorseArmorItem)itemStack.getItem();
-            ((HorseModel)this.getParentModel()).copyPropertiesTo(this.model);
-            this.model.prepareMobModel(horse, f, g, h);
-            this.bindTexture(horseArmorItem.getTexture());
-            if (horseArmorItem instanceof DyeableHorseArmorItem) {
-                int m = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
-                float n = (float)(m >> 16 & 0xFF) / 255.0f;
-                float o = (float)(m >> 8 & 0xFF) / 255.0f;
-                float p = (float)(m & 0xFF) / 255.0f;
-                RenderSystem.color4f(n, o, p, 1.0f);
-                this.model.render(horse, f, g, i, j, k, l);
-                return;
-            }
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            this.model.render(horse, f, g, i, j, k, l);
+        if (!(itemStack.getItem() instanceof HorseArmorItem)) {
+            return;
         }
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        HorseArmorItem horseArmorItem = (HorseArmorItem)itemStack.getItem();
+        ((HorseModel)this.getParentModel()).copyPropertiesTo(this.model);
+        this.model.prepareMobModel(horse, f, g, h);
+        this.model.setupAnim(horse, f, g, j, k, l, m);
+        if (horseArmorItem instanceof DyeableHorseArmorItem) {
+            int n = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
+            o = (float)(n >> 16 & 0xFF) / 255.0f;
+            p = (float)(n >> 8 & 0xFF) / 255.0f;
+            q = (float)(n & 0xFF) / 255.0f;
+        } else {
+            o = 1.0f;
+            p = 1.0f;
+            q = 1.0f;
+        }
+        HorseArmorLayer.renderModel(this.model, horseArmorItem.getTexture(), poseStack, multiBufferSource, i, o, p, q);
     }
 }
 

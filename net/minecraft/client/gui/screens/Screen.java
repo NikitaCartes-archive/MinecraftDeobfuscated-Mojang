@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -138,8 +137,6 @@ implements Widget {
             return;
         }
         RenderSystem.disableRescaleNormal();
-        Lighting.turnOff();
-        RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         int k = 0;
         for (String string : list) {
@@ -184,9 +181,7 @@ implements Widget {
         }
         this.setBlitOffset(0);
         this.itemRenderer.blitOffset = 0.0f;
-        RenderSystem.enableLighting();
         RenderSystem.enableDepthTest();
-        Lighting.turnOn();
         RenderSystem.enableRescaleNormal();
     }
 
@@ -232,7 +227,6 @@ implements Widget {
         } else if (hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
             this.renderTooltip(this.minecraft.font.split(hoverEvent.getValue().getColoredString(), Math.max(this.width / 2, 200)), i, j);
         }
-        RenderSystem.disableLighting();
     }
 
     protected void insertText(String string, boolean bl) {
@@ -342,7 +336,6 @@ implements Widget {
     }
 
     public void renderDirtBackground(int i) {
-        RenderSystem.disableLighting();
         RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -350,10 +343,10 @@ implements Widget {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float f = 32.0f;
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.vertex(0.0, this.height, 0.0).uv(0.0, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();
+        bufferBuilder.vertex(0.0, this.height, 0.0).uv(0.0f, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();
         bufferBuilder.vertex(this.width, this.height, 0.0).uv((float)this.width / 32.0f, (float)this.height / 32.0f + (float)i).color(64, 64, 64, 255).endVertex();
         bufferBuilder.vertex(this.width, 0.0, 0.0).uv((float)this.width / 32.0f, i).color(64, 64, 64, 255).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0, i).color(64, 64, 64, 255).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0f, i).color(64, 64, 64, 255).endVertex();
         tesselator.end();
     }
 

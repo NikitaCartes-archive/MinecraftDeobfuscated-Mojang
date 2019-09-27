@@ -4,10 +4,16 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
 
@@ -33,6 +39,30 @@ implements DebugRenderer.SimpleDebugRenderer {
         this.reds.add(Float.valueOf(g));
         this.greens.add(Float.valueOf(h));
         this.blues.add(Float.valueOf(i));
+    }
+
+    @Override
+    public void render(long l) {
+        Camera camera = this.minecraft.gameRenderer.getMainCamera();
+        double d = camera.getPosition().x;
+        double e = camera.getPosition().y;
+        double f = camera.getPosition().z;
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableTexture();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
+        for (int i = 0; i < this.toRender.size(); ++i) {
+            BlockPos blockPos = this.toRender.get(i);
+            Float float_ = this.scales.get(i);
+            float g = float_.floatValue() / 2.0f;
+            LevelRenderer.addChainedFilledBoxVertices(bufferBuilder, (double)((float)blockPos.getX() + 0.5f - g) - d, (double)((float)blockPos.getY() + 0.5f - g) - e, (double)((float)blockPos.getZ() + 0.5f - g) - f, (double)((float)blockPos.getX() + 0.5f + g) - d, (double)((float)blockPos.getY() + 0.5f + g) - e, (double)((float)blockPos.getZ() + 0.5f + g) - f, this.reds.get(i).floatValue(), this.greens.get(i).floatValue(), this.blues.get(i).floatValue(), this.alphas.get(i).floatValue());
+        }
+        tesselator.end();
+        RenderSystem.enableTexture();
+        RenderSystem.popMatrix();
     }
 }
 

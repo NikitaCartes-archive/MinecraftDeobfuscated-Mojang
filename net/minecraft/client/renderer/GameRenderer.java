@@ -6,11 +6,12 @@ package net.minecraft.client.renderer;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Random;
@@ -23,13 +24,16 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -71,6 +75,7 @@ ResourceManagerReloadListener {
     private float renderDistance;
     public final ItemInHandRenderer itemInHandRenderer;
     private final MapRenderer mapRenderer;
+    private final RenderBuffers renderBuffers;
     private int tick;
     private float fov;
     private float oldFov;
@@ -81,14 +86,17 @@ ResourceManagerReloadListener {
     private long lastScreenshotAttempt;
     private long lastActiveTime = Util.getMillis();
     private final LightTexture lightTexture;
+    private final OverlayTexture overlayTexture = new OverlayTexture();
     private boolean panoramicMode;
-    private double zoom = 1.0;
-    private double zoomX;
-    private double zoomY;
+    private float zoom = 1.0f;
+    private float zoomX;
+    private float zoomY;
+    @Nullable
     private ItemStack itemActivationItem;
     private int itemActivationTicks;
     private float itemActivationOffX;
     private float itemActivationOffY;
+    @Nullable
     private PostChain postEffect;
     private static final ResourceLocation[] EFFECTS = new ResourceLocation[]{new ResourceLocation("shaders/post/notch.json"), new ResourceLocation("shaders/post/fxaa.json"), new ResourceLocation("shaders/post/art.json"), new ResourceLocation("shaders/post/bumpy.json"), new ResourceLocation("shaders/post/blobs2.json"), new ResourceLocation("shaders/post/pencil.json"), new ResourceLocation("shaders/post/color_convolve.json"), new ResourceLocation("shaders/post/deconverge.json"), new ResourceLocation("shaders/post/flip.json"), new ResourceLocation("shaders/post/invert.json"), new ResourceLocation("shaders/post/ntsc.json"), new ResourceLocation("shaders/post/outline.json"), new ResourceLocation("shaders/post/phosphor.json"), new ResourceLocation("shaders/post/scan_pincushion.json"), new ResourceLocation("shaders/post/sobel.json"), new ResourceLocation("shaders/post/bits.json"), new ResourceLocation("shaders/post/desaturate.json"), new ResourceLocation("shaders/post/green.json"), new ResourceLocation("shaders/post/blur.json"), new ResourceLocation("shaders/post/wobble.json"), new ResourceLocation("shaders/post/blobs.json"), new ResourceLocation("shaders/post/antialias.json"), new ResourceLocation("shaders/post/creeper.json"), new ResourceLocation("shaders/post/spider.json")};
     public static final int EFFECT_NONE = EFFECTS.length;
@@ -96,12 +104,13 @@ ResourceManagerReloadListener {
     private boolean effectActive;
     private final Camera mainCamera = new Camera();
 
-    public GameRenderer(Minecraft minecraft, ResourceManager resourceManager) {
+    public GameRenderer(Minecraft minecraft, ResourceManager resourceManager, RenderBuffers renderBuffers) {
         this.minecraft = minecraft;
         this.resourceManager = resourceManager;
         this.itemInHandRenderer = minecraft.getItemInHandRenderer();
         this.mapRenderer = new MapRenderer(minecraft.getTextureManager());
-        this.lightTexture = new LightTexture(this);
+        this.lightTexture = new LightTexture(this, minecraft);
+        this.renderBuffers = renderBuffers;
         this.postEffect = null;
     }
 
@@ -110,10 +119,6 @@ ResourceManagerReloadListener {
         this.lightTexture.close();
         this.mapRenderer.close();
         this.shutdownEffect();
-    }
-
-    public boolean postEffectActive() {
-        return this.postEffect != null;
     }
 
     public void shutdownEffect() {
@@ -201,6 +206,7 @@ ResourceManagerReloadListener {
         }
     }
 
+    @Nullable
     public PostChain currentEffect() {
         return this.postEffect;
     }
@@ -297,14 +303,14 @@ ResourceManagerReloadListener {
         return d;
     }
 
-    private void bobHurt(float f) {
+    private void bobHurt(PoseStack poseStack, float f) {
         if (this.minecraft.getCameraEntity() instanceof LivingEntity) {
             float h;
             LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
             float g = (float)livingEntity.hurtTime - f;
             if (livingEntity.getHealth() <= 0.0f) {
                 h = Math.min((float)livingEntity.deathTime + f, 20.0f);
-                RenderSystem.rotatef(40.0f - 8000.0f / (h + 200.0f), 0.0f, 0.0f, 1.0f);
+                poseStack.mulPose(Vector3f.ZP.rotation(40.0f - 8000.0f / (h + 200.0f), true));
             }
             if (g < 0.0f) {
                 return;
@@ -312,13 +318,13 @@ ResourceManagerReloadListener {
             g /= (float)livingEntity.hurtDuration;
             g = Mth.sin(g * g * g * g * (float)Math.PI);
             h = livingEntity.hurtDir;
-            RenderSystem.rotatef(-h, 0.0f, 1.0f, 0.0f);
-            RenderSystem.rotatef(-g * 14.0f, 0.0f, 0.0f, 1.0f);
-            RenderSystem.rotatef(h, 0.0f, 1.0f, 0.0f);
+            poseStack.mulPose(Vector3f.YP.rotation(-h, true));
+            poseStack.mulPose(Vector3f.ZP.rotation(-g * 14.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotation(h, true));
         }
     }
 
-    private void bobView(float f) {
+    private void bobView(PoseStack poseStack, float f) {
         if (!(this.minecraft.getCameraEntity() instanceof Player)) {
             return;
         }
@@ -326,48 +332,55 @@ ResourceManagerReloadListener {
         float g = player.walkDist - player.walkDistO;
         float h = -(player.walkDist + g * f);
         float i = Mth.lerp(f, player.oBob, player.bob);
-        RenderSystem.translatef(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0f);
-        RenderSystem.rotatef(Mth.sin(h * (float)Math.PI) * i * 3.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.rotatef(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f, 1.0f, 0.0f, 0.0f);
+        poseStack.translate(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0);
+        poseStack.mulPose(Vector3f.ZP.rotation(Mth.sin(h * (float)Math.PI) * i * 3.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotation(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f, true));
     }
 
-    private void renderItemInHand(Camera camera, float f) {
+    private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
         boolean bl;
         if (this.panoramicMode) {
             return;
         }
         this.resetProjectionMatrix(camera, f, false, false, 2.0f);
-        RenderSystem.loadIdentity();
-        RenderSystem.pushMatrix();
-        this.bobHurt(f);
+        poseStack.getPose().setIdentity();
+        poseStack.pushPose();
+        this.bobHurt(poseStack, f);
         if (this.minecraft.options.bobView) {
-            this.bobView(f);
+            this.bobView(poseStack, f);
         }
         boolean bl2 = bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
         if (this.minecraft.options.thirdPersonView == 0 && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
             this.lightTexture.turnOnLightLayer();
-            this.itemInHandRenderer.render(f);
+            this.itemInHandRenderer.renderHandsWithItems(f, poseStack, this.renderBuffers.bufferSource());
             this.lightTexture.turnOffLightLayer();
         }
-        RenderSystem.popMatrix();
+        poseStack.popPose();
         if (this.minecraft.options.thirdPersonView == 0 && !bl) {
-            this.itemInHandRenderer.renderScreenEffect(f);
-            this.bobHurt(f);
+            ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
+            this.bobHurt(poseStack, f);
         }
         if (this.minecraft.options.bobView) {
-            this.bobView(f);
+            this.bobView(poseStack, f);
         }
     }
 
     public void resetProjectionMatrix(Camera camera, float f, boolean bl, boolean bl2, float g) {
         RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
-        if (bl2 && this.zoom != 1.0) {
-            RenderSystem.translated(this.zoomX, -this.zoomY, 0.0);
-            RenderSystem.scaled(this.zoom, this.zoom, 1.0);
-        }
-        RenderSystem.multMatrix(Matrix4f.perspective(this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * g));
+        RenderSystem.multMatrix(this.getProjectionMatrix(camera, f, bl, bl2, g));
         RenderSystem.matrixMode(5888);
+    }
+
+    public Matrix4f getProjectionMatrix(Camera camera, float f, boolean bl, boolean bl2, float g) {
+        PoseStack poseStack = new PoseStack();
+        poseStack.getPose().setIdentity();
+        if (bl2 && this.zoom != 1.0f) {
+            poseStack.translate(this.zoomX, -this.zoomY, 0.0);
+            poseStack.scale(this.zoom, this.zoom, 1.0f);
+        }
+        poseStack.getPose().multiply(Matrix4f.perspective(this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * g));
+        return poseStack.getPose();
     }
 
     public static float getNightVisionScale(LivingEntity livingEntity, float f) {
@@ -390,13 +403,15 @@ ResourceManagerReloadListener {
         int i = (int)(this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth());
         int j = (int)(this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight());
         int k = this.minecraft.options.framerateLimit;
+        PoseStack poseStack = new PoseStack();
+        RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
         if (bl && this.minecraft.level != null) {
             this.minecraft.getProfiler().push("level");
             int m = Math.min(Minecraft.getAverageFps(), k);
             m = Math.max(m, 60);
             long n = Util.getNanos() - l;
             long o = Math.max((long)(1000000000 / m / 4) - n, 0L);
-            this.renderLevel(f, Util.getNanos() + o);
+            this.renderLevel(f, Util.getNanos() + o, poseStack);
             if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
                 this.lastScreenshotAttempt = Util.getMillis();
                 if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -412,24 +427,27 @@ ResourceManagerReloadListener {
                 RenderSystem.popMatrix();
             }
             this.minecraft.getMainRenderTarget().bindWrite(true);
+        }
+        Window window = this.minecraft.getWindow();
+        RenderSystem.clear(256, Minecraft.ON_OSX);
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0, (double)window.getWidth() / window.getGuiScale(), (double)window.getHeight() / window.getGuiScale(), 0.0, 1000.0, 3000.0);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
+        Lighting.setupGui();
+        if (bl && this.minecraft.level != null) {
             this.minecraft.getProfiler().popPush("gui");
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
                 RenderSystem.defaultAlphaFunc();
-                this.minecraft.getWindow().setupGuiState(Minecraft.ON_OSX);
                 this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
                 this.minecraft.gui.render(f);
+                RenderSystem.clear(256, Minecraft.ON_OSX);
             }
             this.minecraft.getProfiler().pop();
-        } else {
-            RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-            RenderSystem.matrixMode(5889);
-            RenderSystem.loadIdentity();
-            RenderSystem.matrixMode(5888);
-            RenderSystem.loadIdentity();
-            this.minecraft.getWindow().setupGuiState(Minecraft.ON_OSX);
         }
         if (this.minecraft.overlay != null) {
-            RenderSystem.clear(256, Minecraft.ON_OSX);
             try {
                 this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
@@ -440,7 +458,6 @@ ResourceManagerReloadListener {
             }
         }
         if (this.minecraft.screen != null) {
-            RenderSystem.clear(256, Minecraft.ON_OSX);
             try {
                 this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
             } catch (Throwable throwable) {
@@ -505,7 +522,7 @@ ResourceManagerReloadListener {
         return bl;
     }
 
-    public void renderLevel(float f, long l) {
+    public void renderLevel(float f, long l, PoseStack poseStack) {
         float g;
         this.lightTexture.updateLightTexture(f);
         if (this.minecraft.getCameraEntity() == null) {
@@ -518,10 +535,9 @@ ResourceManagerReloadListener {
         Camera camera = this.mainCamera;
         this.renderDistance = this.minecraft.options.renderDistance * 16;
         this.resetProjectionMatrix(camera, f, true, true, Mth.SQRT_OF_TWO);
-        RenderSystem.loadIdentity();
-        this.bobHurt(f);
+        this.bobHurt(poseStack, f);
         if (this.minecraft.options.bobView) {
-            this.bobView(f);
+            this.bobView(poseStack, f);
         }
         if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
             int i = 20;
@@ -530,16 +546,19 @@ ResourceManagerReloadListener {
             }
             float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
             h *= h;
-            RenderSystem.rotatef(((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
-            RenderSystem.scalef(1.0f / h, 1.0f, 1.0f);
-            RenderSystem.rotatef(-((float)this.tick + f) * (float)i, 0.0f, 1.0f, 1.0f);
+            Vector3f vector3f = new Vector3f(0.0f, 1.0f, 1.0f);
+            poseStack.mulPose(vector3f.rotation(((float)this.tick + f) * (float)i, true));
+            poseStack.scale(1.0f / h, 1.0f, 1.0f);
+            poseStack.mulPose(vector3f.rotation(-((float)this.tick + f) * (float)i, true));
         }
         camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), this.minecraft.options.thirdPersonView > 0, this.minecraft.options.thirdPersonView == 2, f);
-        this.minecraft.levelRenderer.renderLevel(f, l, bl, camera, this, this.lightTexture);
+        poseStack.mulPose(Vector3f.XP.rotation(camera.getXRot(), true));
+        poseStack.mulPose(Vector3f.YP.rotation(camera.getYRot() + 180.0f, true));
+        this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture);
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {
             RenderSystem.clear(256, Minecraft.ON_OSX);
-            this.renderItemInHand(camera, f);
+            this.renderItemInHand(poseStack, camera, f);
         }
         this.minecraft.getProfiler().pop();
     }
@@ -552,44 +571,6 @@ ResourceManagerReloadListener {
 
     public MapRenderer getMapRenderer() {
         return this.mapRenderer;
-    }
-
-    public static void renderNameTagInWorld(Font font, String string, float f, float g, float h, int i, float j, float k, boolean bl) {
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(f, g, h);
-        RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(-j, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(k, 1.0f, 0.0f, 0.0f);
-        RenderSystem.scalef(-0.025f, -0.025f, 0.025f);
-        RenderSystem.disableLighting();
-        RenderSystem.depthMask(false);
-        if (!bl) {
-            RenderSystem.disableDepthTest();
-        }
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        int l = font.width(string) / 2;
-        RenderSystem.disableTexture();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
-        float m = Minecraft.getInstance().options.getBackgroundOpacity(0.25f);
-        bufferBuilder.vertex(-l - 1, -1 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
-        bufferBuilder.vertex(-l - 1, 8 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
-        bufferBuilder.vertex(l + 1, 8 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
-        bufferBuilder.vertex(l + 1, -1 + i, 0.0).color(0.0f, 0.0f, 0.0f, m).endVertex();
-        tesselator.end();
-        RenderSystem.enableTexture();
-        if (!bl) {
-            font.draw(string, -font.width(string) / 2, i, 0x20FFFFFF);
-            RenderSystem.enableDepthTest();
-        }
-        RenderSystem.depthMask(true);
-        font.draw(string, -font.width(string) / 2, i, bl ? 0x20FFFFFF : -1);
-        RenderSystem.enableLighting();
-        RenderSystem.disableBlend();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.popMatrix();
     }
 
     public void displayItemActivation(ItemStack itemStack) {
@@ -616,23 +597,23 @@ ResourceManagerReloadListener {
         RenderSystem.pushLightingAttributes();
         RenderSystem.enableDepthTest();
         RenderSystem.disableCull();
-        Lighting.turnOn();
-        RenderSystem.translatef((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0f)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0f)), -50.0f);
+        PoseStack poseStack = new PoseStack();
+        poseStack.pushPose();
+        poseStack.translate((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0f)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0f)), -50.0);
         float q = 50.0f + 175.0f * Mth.sin(n);
-        RenderSystem.scalef(q, -q, q);
-        RenderSystem.rotatef(900.0f * Mth.abs(Mth.sin(n)), 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(6.0f * Mth.cos(g * 8.0f), 1.0f, 0.0f, 0.0f);
-        RenderSystem.rotatef(6.0f * Mth.cos(g * 8.0f), 0.0f, 0.0f, 1.0f);
-        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED);
+        poseStack.scale(q, -q, q);
+        poseStack.scale(q, -q, q);
+        poseStack.mulPose(Vector3f.YP.rotation(900.0f * Mth.abs(Mth.sin(n)), true));
+        poseStack.mulPose(Vector3f.XP.rotation(6.0f * Mth.cos(g * 8.0f), true));
+        poseStack.mulPose(Vector3f.ZP.rotation(6.0f * Mth.cos(g * 8.0f), true));
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, poseStack, bufferSource);
+        poseStack.popPose();
+        bufferSource.endBatch();
         RenderSystem.popAttributes();
         RenderSystem.popMatrix();
-        Lighting.turnOff();
         RenderSystem.enableCull();
         RenderSystem.disableDepthTest();
-    }
-
-    public Minecraft getMinecraft() {
-        return this.minecraft;
     }
 
     public float getDarkenWorldAmount(float f) {
@@ -645,6 +626,14 @@ ResourceManagerReloadListener {
 
     public Camera getMainCamera() {
         return this.mainCamera;
+    }
+
+    public LightTexture lightTexture() {
+        return this.lightTexture;
+    }
+
+    public OverlayTexture overlayTexture() {
+        return this.overlayTexture;
     }
 }
 

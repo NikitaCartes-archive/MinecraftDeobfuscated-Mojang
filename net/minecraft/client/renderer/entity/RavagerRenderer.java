@@ -21,7 +21,7 @@ extends MobRenderer<Ravager, RavagerModel> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Ravager ravager) {
+    public ResourceLocation getTextureLocation(Ravager ravager) {
         return TEXTURE_LOCATION;
     }
 }

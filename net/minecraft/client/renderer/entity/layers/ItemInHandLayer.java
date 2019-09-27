@@ -3,13 +3,15 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.ArmedModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.HumanoidArm;
@@ -24,7 +26,7 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
         ItemStack itemStack2;
         boolean bl = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
         ItemStack itemStack = bl ? ((LivingEntity)livingEntity).getOffhandItem() : ((LivingEntity)livingEntity).getMainHandItem();
@@ -32,41 +34,32 @@ extends RenderLayer<T, M> {
         if (itemStack.isEmpty() && itemStack2.isEmpty()) {
             return;
         }
-        RenderSystem.pushMatrix();
+        poseStack.pushPose();
         if (((EntityModel)this.getParentModel()).young) {
-            float m = 0.5f;
-            RenderSystem.translatef(0.0f, 0.75f, 0.0f);
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            float n = 0.5f;
+            poseStack.translate(0.0, 0.75, 0.0);
+            poseStack.scale(0.5f, 0.5f, 0.5f);
         }
-        this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT);
-        this.renderArmWithItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT);
-        RenderSystem.popMatrix();
+        this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource);
+        this.renderArmWithItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 
-    private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm) {
+    private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         if (itemStack.isEmpty()) {
             return;
         }
-        RenderSystem.pushMatrix();
-        this.translateToHand(humanoidArm);
+        poseStack.pushPose();
+        ((ArmedModel)this.getParentModel()).translateToHand(0.0625f, humanoidArm, poseStack);
         if (livingEntity.isCrouching()) {
-            RenderSystem.translatef(0.0f, 0.2f, 0.0f);
+            poseStack.translate(0.0, 0.2f, 0.0);
         }
-        RenderSystem.rotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+        poseStack.mulPose(Vector3f.XP.rotation(-90.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
         boolean bl = humanoidArm == HumanoidArm.LEFT;
-        RenderSystem.translatef((float)(bl ? -1 : 1) / 16.0f, 0.125f, -0.625f);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl);
-        RenderSystem.popMatrix();
-    }
-
-    protected void translateToHand(HumanoidArm humanoidArm) {
-        ((ArmedModel)this.getParentModel()).translateToHand(0.0625f, humanoidArm);
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        poseStack.translate((float)(bl ? -1 : 1) / 16.0f, 0.125, -0.625);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 }
 

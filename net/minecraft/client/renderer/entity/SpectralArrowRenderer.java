@@ -20,7 +20,7 @@ extends ArrowRenderer<SpectralArrow> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(SpectralArrow spectralArrow) {
+    public ResourceLocation getTextureLocation(SpectralArrow spectralArrow) {
         return SPECTRAL_ARROW_LOCATION;
     }
 }

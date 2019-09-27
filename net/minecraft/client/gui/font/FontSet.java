@@ -23,6 +23,7 @@ import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.gui.font.glyphs.MissingGlyph;
+import net.minecraft.client.gui.font.glyphs.WhiteGlyph;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -39,6 +40,7 @@ implements AutoCloseable {
     private final TextureManager textureManager;
     private final ResourceLocation name;
     private BakedGlyph missingGlyph;
+    private BakedGlyph whiteGlyph;
     private final List<GlyphProvider> providers = Lists.newArrayList();
     private final Char2ObjectMap<BakedGlyph> glyphs = new Char2ObjectOpenHashMap<BakedGlyph>();
     private final Char2ObjectMap<GlyphInfo> glyphInfos = new Char2ObjectOpenHashMap<GlyphInfo>();
@@ -61,6 +63,7 @@ implements AutoCloseable {
         this.glyphInfos.clear();
         this.glyphsByWidth.clear();
         this.missingGlyph = this.stitch(MissingGlyph.INSTANCE);
+        this.whiteGlyph = this.stitch(WhiteGlyph.INSTANCE);
         HashSet<GlyphProvider> set = Sets.newHashSet();
         block1: for (char c = '\u0000'; c < '\uffff'; c = (char)((char)(c + 1))) {
             for (GlyphProvider glyphProvider2 : list) {
@@ -122,6 +125,10 @@ implements AutoCloseable {
             return this.getGlyph(charList.get(RANDOM.nextInt(charList.size())).charValue());
         }
         return this.missingGlyph;
+    }
+
+    public BakedGlyph whiteGlyph() {
+        return this.whiteGlyph;
     }
 }
 

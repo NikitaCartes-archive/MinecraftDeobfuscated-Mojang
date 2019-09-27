@@ -10,7 +10,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Effect;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
@@ -241,8 +241,8 @@ AutoCloseable {
             int j = -1;
             if (object instanceof RenderTarget) {
                 j = ((RenderTarget)object).colorTextureId;
-            } else if (object instanceof TextureObject) {
-                j = ((TextureObject)object).getId();
+            } else if (object instanceof AbstractTexture) {
+                j = ((AbstractTexture)object).getId();
             } else if (object instanceof Integer) {
                 j = (Integer)object;
             }

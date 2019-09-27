@@ -23,7 +23,7 @@ extends MobRenderer<Sheep, SheepModel<Sheep>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Sheep sheep) {
+    public ResourceLocation getTextureLocation(Sheep sheep) {
         return SHEEP_LOCATION;
     }
 }

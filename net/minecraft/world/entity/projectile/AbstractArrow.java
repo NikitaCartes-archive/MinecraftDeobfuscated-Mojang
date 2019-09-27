@@ -418,7 +418,7 @@ implements Projectile {
             compoundTag.put("inBlockState", NbtUtils.writeBlockState(this.lastState));
         }
         compoundTag.putByte("shake", (byte)this.shakeTime);
-        compoundTag.putByte("inGround", (byte)(this.inGround ? 1 : 0));
+        compoundTag.putBoolean("inGround", this.inGround);
         compoundTag.putByte("pickup", (byte)this.pickup.ordinal());
         compoundTag.putDouble("damage", this.baseDamage);
         compoundTag.putBoolean("crit", this.isCritArrow());
@@ -437,7 +437,7 @@ implements Projectile {
             this.lastState = NbtUtils.readBlockState(compoundTag.getCompound("inBlockState"));
         }
         this.shakeTime = compoundTag.getByte("shake") & 0xFF;
-        boolean bl = this.inGround = compoundTag.getByte("inGround") == 1;
+        this.inGround = compoundTag.getBoolean("inGround");
         if (compoundTag.contains("damage", 99)) {
             this.baseDamage = compoundTag.getDouble("damage");
         }

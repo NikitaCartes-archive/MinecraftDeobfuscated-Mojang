@@ -3,14 +3,14 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Vex;
 
 @Environment(value=EnvType.CLIENT)
@@ -38,10 +38,8 @@ extends HumanoidModel<Vex> {
     }
 
     @Override
-    public void render(Vex vex, float f, float g, float h, float i, float j, float k) {
-        super.render(vex, f, g, h, i, j, k);
-        this.rightWing.render(k);
-        this.leftWing.render(k);
+    protected Iterable<ModelPart> bodyParts() {
+        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.rightWing, this.leftWing));
     }
 
     @Override
@@ -65,26 +63,6 @@ extends HumanoidModel<Vex> {
         this.leftWing.xRot = 0.47123894f;
         this.rightWing.xRot = 0.47123894f;
         this.rightWing.zRot = 0.47123894f;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(LivingEntity livingEntity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Vex)livingEntity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(LivingEntity livingEntity, float f, float g, float h, float i, float j, float k) {
-        this.render((Vex)livingEntity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Vex)entity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((Vex)entity, f, g, h, i, j, k);
     }
 }
 

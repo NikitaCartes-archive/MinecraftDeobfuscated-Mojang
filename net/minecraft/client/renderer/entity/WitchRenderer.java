@@ -3,10 +3,11 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WitchItemLayer;
@@ -24,20 +25,20 @@ extends MobRenderer<Witch, WitchModel<Witch>> {
     }
 
     @Override
-    public void render(Witch witch, double d, double e, double f, float g, float h) {
+    public void render(Witch witch, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         ((WitchModel)this.model).setHoldingItem(!witch.getMainHandItem().isEmpty());
-        super.render(witch, d, e, f, g, h);
+        super.render(witch, d, e, f, g, h, poseStack, multiBufferSource);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Witch witch) {
+    public ResourceLocation getTextureLocation(Witch witch) {
         return WITCH_LOCATION;
     }
 
     @Override
-    protected void scale(Witch witch, float f) {
+    protected void scale(Witch witch, PoseStack poseStack, float f) {
         float g = 0.9375f;
-        RenderSystem.scalef(0.9375f, 0.9375f, 0.9375f);
+        poseStack.scale(0.9375f, 0.9375f, 0.9375f);
     }
 }
 

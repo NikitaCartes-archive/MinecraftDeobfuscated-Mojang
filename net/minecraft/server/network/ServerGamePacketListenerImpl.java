@@ -185,6 +185,9 @@ implements ServerGamePacketListener {
 
     public void tick() {
         this.resetPosition();
+        this.player.xo = this.player.x;
+        this.player.yo = this.player.y;
+        this.player.zo = this.player.z;
         this.player.doTick();
         this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.yRot, this.player.xRot);
         ++this.tickCount;
@@ -612,14 +615,14 @@ implements ServerGamePacketListener {
                 if (compoundTag != null) {
                     itemStack3.setTag(compoundTag.copy());
                 }
-                itemStack3.addTagElement("author", new StringTag(this.player.getName().getString()));
-                itemStack3.addTagElement("title", new StringTag(itemStack.getTag().getString("title")));
+                itemStack3.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
+                itemStack3.addTagElement("title", StringTag.valueOf(itemStack.getTag().getString("title")));
                 ListTag listTag = itemStack.getTag().getList("pages", 8);
                 for (int i = 0; i < listTag.size(); ++i) {
                     String string = listTag.getString(i);
                     TextComponent component = new TextComponent(string);
                     string = Component.Serializer.toJson(component);
-                    listTag.set(i, new StringTag(string));
+                    listTag.set(i, StringTag.valueOf(string));
                 }
                 itemStack3.addTagElement("pages", listTag);
                 this.player.setItemInHand(serverboundEditBookPacket.getHand(), itemStack3);

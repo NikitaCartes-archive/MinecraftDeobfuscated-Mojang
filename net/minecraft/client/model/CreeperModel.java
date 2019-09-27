@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class CreeperModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart head;
     private final ModelPart hair;
     private final ModelPart body;
@@ -51,14 +52,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.head.render(k);
-        this.body.render(k);
-        this.leg0.render(k);
-        this.leg1.render(k);
-        this.leg2.render(k);
-        this.leg3.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3);
     }
 
     @Override

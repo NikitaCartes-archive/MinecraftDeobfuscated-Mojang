@@ -23,7 +23,7 @@ extends HumanoidMobRenderer<PigZombie, ZombieModel<PigZombie>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(PigZombie pigZombie) {
+    public ResourceLocation getTextureLocation(PigZombie pigZombie) {
         return ZOMBIE_PIGMAN_LOCATION;
     }
 }

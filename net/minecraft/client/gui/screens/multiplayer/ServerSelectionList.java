@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -28,6 +27,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerList;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.LanServer;
@@ -285,7 +285,7 @@ extends ObjectSelectionList<Entry> {
                         this.icon.setPixels(nativeImage);
                         this.icon.upload();
                     }
-                    this.minecraft.getTextureManager().register(this.iconLocation, (TextureObject)this.icon);
+                    this.minecraft.getTextureManager().register(this.iconLocation, (AbstractTexture)this.icon);
                 } catch (Throwable throwable) {
                     LOGGER.error("Invalid icon for server {} ({})", (Object)this.serverData.name, (Object)this.serverData.ip, (Object)throwable);
                     this.serverData.setIconB64(null);

@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GiantZombieModel;
@@ -29,12 +29,12 @@ extends MobRenderer<Giant, HumanoidModel<Giant>> {
     }
 
     @Override
-    protected void scale(Giant giant, float f) {
-        RenderSystem.scalef(this.scale, this.scale, this.scale);
+    protected void scale(Giant giant, PoseStack poseStack, float f) {
+        poseStack.scale(this.scale, this.scale, this.scale);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Giant giant) {
+    public ResourceLocation getTextureLocation(Giant giant) {
         return ZOMBIE_LOCATION;
     }
 }

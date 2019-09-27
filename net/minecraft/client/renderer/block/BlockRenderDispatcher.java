@@ -3,7 +3,9 @@
  */
 package net.minecraft.client.renderer.block;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,16 +13,17 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.block.AnimatedEntityBlockRenderer;
+import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,13 +34,14 @@ public class BlockRenderDispatcher
 implements ResourceManagerReloadListener {
     private final BlockModelShaper blockModelShaper;
     private final ModelBlockRenderer modelRenderer;
-    private final AnimatedEntityBlockRenderer entityBlockRenderer = new AnimatedEntityBlockRenderer();
     private final LiquidBlockRenderer liquidBlockRenderer;
     private final Random random = new Random();
+    private final BlockColors blockColors;
 
     public BlockRenderDispatcher(BlockModelShaper blockModelShaper, BlockColors blockColors) {
         this.blockModelShaper = blockModelShaper;
-        this.modelRenderer = new ModelBlockRenderer(blockColors);
+        this.blockColors = blockColors;
+        this.modelRenderer = new ModelBlockRenderer(this.blockColors);
         this.liquidBlockRenderer = new LiquidBlockRenderer();
     }
 
@@ -45,42 +49,33 @@ implements ResourceManagerReloadListener {
         return this.blockModelShaper;
     }
 
-    public void a(BufferBuilder bufferBuilder, BlockState blockState, BlockPos blockPos, TextureAtlasSprite textureAtlasSprite, BlockAndBiomeGetter blockAndBiomeGetter) {
+    public void renderBreakingTexture(BlockState blockState, BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, PoseStack poseStack, VertexConsumer vertexConsumer) {
         if (blockState.getRenderShape() != RenderShape.MODEL) {
             return;
         }
         BakedModel bakedModel = this.blockModelShaper.getBlockModel(blockState);
         long l = blockState.getSeed(blockPos);
-        BakedModel bakedModel2 = new SimpleBakedModel.Builder(blockState, bakedModel, textureAtlasSprite, this.random, l).build();
-        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel2, blockState, blockPos, bufferBuilder, true, this.random, l);
+        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l);
     }
 
-    public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, BufferBuilder bufferBuilder, Random random) {
+    public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random) {
         try {
             RenderShape renderShape = blockState.getRenderShape();
-            if (renderShape == RenderShape.INVISIBLE) {
+            if (renderShape != RenderShape.MODEL) {
                 return false;
             }
-            switch (renderShape) {
-                case MODEL: {
-                    return this.modelRenderer.tesselateBlock(blockAndBiomeGetter, this.getBlockModel(blockState), blockState, blockPos, bufferBuilder, true, random, blockState.getSeed(blockPos));
-                }
-                case ENTITYBLOCK_ANIMATED: {
-                    return false;
-                }
-            }
+            return this.modelRenderer.tesselateBlock(blockAndBiomeGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos));
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
             CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
             throw new ReportedException(crashReport);
         }
-        return false;
     }
 
-    public boolean renderLiquid(BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, BufferBuilder bufferBuilder, FluidState fluidState) {
+    public boolean renderLiquid(BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, VertexConsumer vertexConsumer, FluidState fluidState) {
         try {
-            return this.liquidBlockRenderer.tesselate(blockAndBiomeGetter, blockPos, bufferBuilder, fluidState);
+            return this.liquidBlockRenderer.tesselate(blockAndBiomeGetter, blockPos, vertexConsumer, fluidState);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating liquid in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
@@ -97,7 +92,7 @@ implements ResourceManagerReloadListener {
         return this.blockModelShaper.getBlockModel(blockState);
     }
 
-    public void renderSingleBlock(BlockState blockState, float f) {
+    public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, int k) {
         RenderShape renderShape = blockState.getRenderShape();
         if (renderShape == RenderShape.INVISIBLE) {
             return;
@@ -105,11 +100,21 @@ implements ResourceManagerReloadListener {
         switch (renderShape) {
             case MODEL: {
                 BakedModel bakedModel = this.getBlockModel(blockState);
-                this.modelRenderer.renderSingleBlock(bakedModel, blockState, f, true);
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
+                int l = this.blockColors.getColor(blockState, null, null, 0);
+                float f = (float)(l >> 16 & 0xFF) / 255.0f;
+                float g = (float)(l >> 8 & 0xFF) / 255.0f;
+                float h = (float)(l & 0xFF) / 255.0f;
+                this.modelRenderer.renderModel(poseStack.getPose(), multiBufferSource.getBuffer(RenderType.getRenderLayer(blockState)), blockState, bakedModel, f, g, h, i);
+                poseStack.popPose();
                 break;
             }
             case ENTITYBLOCK_ANIMATED: {
-                this.entityBlockRenderer.renderSingleBlock(blockState.getBlock(), f);
+                poseStack.pushPose();
+                poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
+                EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i);
+                poseStack.popPose();
             }
         }
     }

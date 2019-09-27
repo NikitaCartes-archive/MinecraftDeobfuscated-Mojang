@@ -67,15 +67,12 @@ implements ContextAwareComponent {
             this.decomposedLanguageTime = l;
             this.decomposedParts.clear();
         }
+        String string = LANGUAGE.getElement(this.key);
         try {
-            this.decomposeTemplate(LANGUAGE.getElement(this.key));
+            this.decomposeTemplate(string);
         } catch (TranslatableFormatException translatableFormatException) {
             this.decomposedParts.clear();
-            try {
-                this.decomposeTemplate(DEFAULT_LANGUAGE.getElement(this.key));
-            } catch (TranslatableFormatException translatableFormatException2) {
-                throw translatableFormatException;
-            }
+            this.decomposedParts.add(new TextComponent(string));
         }
     }
 

@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.ArrayList;
@@ -216,8 +215,6 @@ PlaceRecipe<Ingredient> {
         if (!this.isVisible()) {
             return;
         }
-        Lighting.turnOnGui();
-        RenderSystem.disableLighting();
         RenderSystem.pushMatrix();
         RenderSystem.translatef(0.0f, 0.0f, 100.0f);
         this.minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
@@ -226,7 +223,6 @@ PlaceRecipe<Ingredient> {
         int l = (this.height - 166) / 2;
         this.blit(k, l, 1, 1, 147, 166);
         this.searchBox.render(i, j, f);
-        Lighting.turnOff();
         for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
             recipeBookTabButton.render(i, j, f);
         }

@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -109,7 +110,7 @@ extends Screen {
         RenderSystem.translatef(0.0f, -1.0625f, 0.0f);
         this.sign.setCursorInfo(this.line, this.signField.getCursorPos(), this.signField.getSelectionPos(), this.frame / 6 % 2 == 0);
         RenderSystem.translatef(-0.5f, -0.75f, -0.5f);
-        BlockEntityRenderDispatcher.instance.renderItem(this.sign);
+        BlockEntityRenderDispatcher.instance.renderItem(this.sign, new PoseStack(), 0xF000F0);
         this.sign.resetCursorInfo();
         RenderSystem.popMatrix();
         super.render(i, j, f);

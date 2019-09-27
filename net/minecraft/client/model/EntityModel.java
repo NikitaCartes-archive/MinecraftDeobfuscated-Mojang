@@ -3,6 +3,8 @@
  */
 package net.minecraft.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
@@ -15,11 +17,13 @@ extends Model {
     public boolean riding;
     public boolean young = true;
 
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
+        this.renderToBuffer(poseStack, vertexConsumer, i, 1.0f, 1.0f, 1.0f);
     }
 
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-    }
+    public abstract void renderToBuffer(PoseStack var1, VertexConsumer var2, int var3, float var4, float var5, float var6);
+
+    public abstract void setupAnim(T var1, float var2, float var3, float var4, float var5, float var6, float var7);
 
     public void prepareMobModel(T entity, float f, float g, float h) {
     }

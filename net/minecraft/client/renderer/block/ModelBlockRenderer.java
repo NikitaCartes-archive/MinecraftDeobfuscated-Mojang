@@ -3,10 +3,9 @@
  */
 package net.minecraft.client.renderer.block;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntLinkedOpenHashMap;
 import java.util.BitSet;
@@ -24,7 +23,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndBiomeGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,23 +39,30 @@ public class ModelBlockRenderer {
         this.blockColors = blockColors;
     }
 
-    public boolean tesselateBlock(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, BufferBuilder bufferBuilder, boolean bl, Random random, long l) {
+    public boolean tesselateBlock(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random, long l) {
         boolean bl2 = Minecraft.useAmbientOcclusion() && blockState.getLightEmission() == 0 && bakedModel.useAmbientOcclusion();
+        Vec3 vec3 = blockState.getOffset(blockAndBiomeGetter, blockPos);
+        poseStack.pushPose();
+        poseStack.translate((double)(blockPos.getX() & 0xF) + vec3.x, (double)(blockPos.getY() & 0xF) + vec3.y, (double)(blockPos.getZ() & 0xF) + vec3.z);
         try {
             if (bl2) {
-                return this.tesselateWithAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, bufferBuilder, bl, random, l);
+                boolean bl3 = this.tesselateWithAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l);
+                return bl3;
             }
-            return this.tesselateWithoutAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, bufferBuilder, bl, random, l);
+            boolean bl4 = this.tesselateWithoutAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l);
+            return bl4;
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block model");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block model being tesselated");
             CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
             crashReportCategory.setDetail("Using AO", bl2);
             throw new ReportedException(crashReport);
+        } finally {
+            poseStack.popPose();
         }
     }
 
-    public boolean tesselateWithAO(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, BufferBuilder bufferBuilder, boolean bl, Random random, long l) {
+    public boolean tesselateWithAO(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random, long l) {
         boolean bl2 = false;
         float[] fs = new float[Direction.values().length * 2];
         BitSet bitSet = new BitSet(3);
@@ -65,19 +71,19 @@ public class ModelBlockRenderer {
             random.setSeed(l);
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
             if (list.isEmpty() || bl && !Block.shouldRenderFace(blockState, blockAndBiomeGetter, blockPos, direction)) continue;
-            this.renderModelFaceAO(blockAndBiomeGetter, blockState, blockPos, bufferBuilder, list, fs, bitSet, ambientOcclusionFace);
+            this.renderModelFaceAO(blockAndBiomeGetter, blockState, blockPos, poseStack, vertexConsumer, list, fs, bitSet, ambientOcclusionFace);
             bl2 = true;
         }
         random.setSeed(l);
         List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, random);
         if (!list2.isEmpty()) {
-            this.renderModelFaceAO(blockAndBiomeGetter, blockState, blockPos, bufferBuilder, list2, fs, bitSet, ambientOcclusionFace);
+            this.renderModelFaceAO(blockAndBiomeGetter, blockState, blockPos, poseStack, vertexConsumer, list2, fs, bitSet, ambientOcclusionFace);
             bl2 = true;
         }
         return bl2;
     }
 
-    public boolean tesselateWithoutAO(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, BufferBuilder bufferBuilder, boolean bl, Random random, long l) {
+    public boolean tesselateWithoutAO(BlockAndBiomeGetter blockAndBiomeGetter, BakedModel bakedModel, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random, long l) {
         boolean bl2 = false;
         BitSet bitSet = new BitSet(3);
         for (Direction direction : Direction.values()) {
@@ -85,47 +91,41 @@ public class ModelBlockRenderer {
             List<BakedQuad> list = bakedModel.getQuads(blockState, direction, random);
             if (list.isEmpty() || bl && !Block.shouldRenderFace(blockState, blockAndBiomeGetter, blockPos, direction)) continue;
             int i = blockAndBiomeGetter.getLightColor(blockState, blockPos.relative(direction));
-            this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, i, false, bufferBuilder, list, bitSet);
+            this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, i, false, poseStack, vertexConsumer, list, bitSet);
             bl2 = true;
         }
         random.setSeed(l);
         List<BakedQuad> list2 = bakedModel.getQuads(blockState, null, random);
         if (!list2.isEmpty()) {
-            this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, -1, true, bufferBuilder, list2, bitSet);
+            this.renderModelFaceFlat(blockAndBiomeGetter, blockState, blockPos, -1, true, poseStack, vertexConsumer, list2, bitSet);
             bl2 = true;
         }
         return bl2;
     }
 
-    private void renderModelFaceAO(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, BufferBuilder bufferBuilder, List<BakedQuad> list, float[] fs, BitSet bitSet, AmbientOcclusionFace ambientOcclusionFace) {
-        Vec3 vec3 = blockState.getOffset(blockAndBiomeGetter, blockPos);
-        double d = (double)blockPos.getX() + vec3.x;
-        double e = (double)blockPos.getY() + vec3.y;
-        double f = (double)blockPos.getZ() + vec3.z;
-        int j = list.size();
-        for (int i = 0; i < j; ++i) {
-            BakedQuad bakedQuad = list.get(i);
+    private void renderModelFaceAO(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, float[] fs, BitSet bitSet, AmbientOcclusionFace ambientOcclusionFace) {
+        for (BakedQuad bakedQuad : list) {
             this.calculateShape(blockAndBiomeGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), fs, bitSet);
             ambientOcclusionFace.calculate(blockAndBiomeGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet);
-            bufferBuilder.putBulkData(bakedQuad.getVertices());
-            bufferBuilder.faceTex2(ambientOcclusionFace.lightmap[0], ambientOcclusionFace.lightmap[1], ambientOcclusionFace.lightmap[2], ambientOcclusionFace.lightmap[3]);
-            if (bakedQuad.isTinted()) {
-                int k = this.blockColors.getColor(blockState, blockAndBiomeGetter, blockPos, bakedQuad.getTintIndex());
-                float g = (float)(k >> 16 & 0xFF) / 255.0f;
-                float h = (float)(k >> 8 & 0xFF) / 255.0f;
-                float l = (float)(k & 0xFF) / 255.0f;
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[0] * g, ambientOcclusionFace.brightness[0] * h, ambientOcclusionFace.brightness[0] * l, 4);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[1] * g, ambientOcclusionFace.brightness[1] * h, ambientOcclusionFace.brightness[1] * l, 3);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[2] * g, ambientOcclusionFace.brightness[2] * h, ambientOcclusionFace.brightness[2] * l, 2);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[3] * g, ambientOcclusionFace.brightness[3] * h, ambientOcclusionFace.brightness[3] * l, 1);
-            } else {
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[0], ambientOcclusionFace.brightness[0], ambientOcclusionFace.brightness[0], 4);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[1], ambientOcclusionFace.brightness[1], ambientOcclusionFace.brightness[1], 3);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[2], ambientOcclusionFace.brightness[2], ambientOcclusionFace.brightness[2], 2);
-                bufferBuilder.faceTint(ambientOcclusionFace.brightness[3], ambientOcclusionFace.brightness[3], ambientOcclusionFace.brightness[3], 1);
-            }
-            bufferBuilder.postProcessFacePosition(d, e, f);
+            this.putQuadData(blockAndBiomeGetter, blockState, blockPos, vertexConsumer, poseStack.getPose(), bakedQuad, ambientOcclusionFace.brightness[0], ambientOcclusionFace.brightness[1], ambientOcclusionFace.brightness[2], ambientOcclusionFace.brightness[3], ambientOcclusionFace.lightmap[0], ambientOcclusionFace.lightmap[1], ambientOcclusionFace.lightmap[2], ambientOcclusionFace.lightmap[3]);
         }
+    }
+
+    private void putQuadData(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, VertexConsumer vertexConsumer, Matrix4f matrix4f, BakedQuad bakedQuad, float f, float g, float h, float i, int j, int k, int l, int m) {
+        float q;
+        float p;
+        float o;
+        if (bakedQuad.isTinted()) {
+            int n = this.blockColors.getColor(blockState, blockAndBiomeGetter, blockPos, bakedQuad.getTintIndex());
+            o = (float)(n >> 16 & 0xFF) / 255.0f;
+            p = (float)(n >> 8 & 0xFF) / 255.0f;
+            q = (float)(n & 0xFF) / 255.0f;
+        } else {
+            o = 1.0f;
+            p = 1.0f;
+            q = 1.0f;
+        }
+        vertexConsumer.putBulkData(matrix4f, bakedQuad, new float[]{f, g, h, i}, o, p, q, new int[]{j, k, l, m}, true);
     }
 
     private void calculateShape(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, int[] is, Direction direction, @Nullable float[] fs, BitSet bitSet) {
@@ -198,78 +198,43 @@ public class ModelBlockRenderer {
         }
     }
 
-    private void renderModelFaceFlat(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, int i, boolean bl, BufferBuilder bufferBuilder, List<BakedQuad> list, BitSet bitSet) {
-        Vec3 vec3 = blockState.getOffset(blockAndBiomeGetter, blockPos);
-        double d = (double)blockPos.getX() + vec3.x;
-        double e = (double)blockPos.getY() + vec3.y;
-        double f = (double)blockPos.getZ() + vec3.z;
-        int k = list.size();
-        for (int j = 0; j < k; ++j) {
-            BakedQuad bakedQuad = list.get(j);
+    private void renderModelFaceFlat(BlockAndBiomeGetter blockAndBiomeGetter, BlockState blockState, BlockPos blockPos, int i, boolean bl, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, BitSet bitSet) {
+        for (BakedQuad bakedQuad : list) {
             if (bl) {
                 this.calculateShape(blockAndBiomeGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), null, bitSet);
                 BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(bakedQuad.getDirection()) : blockPos;
                 i = blockAndBiomeGetter.getLightColor(blockState, blockPos2);
             }
-            bufferBuilder.putBulkData(bakedQuad.getVertices());
-            bufferBuilder.faceTex2(i, i, i, i);
-            if (bakedQuad.isTinted()) {
-                int l = this.blockColors.getColor(blockState, blockAndBiomeGetter, blockPos, bakedQuad.getTintIndex());
-                float g = (float)(l >> 16 & 0xFF) / 255.0f;
-                float h = (float)(l >> 8 & 0xFF) / 255.0f;
-                float m = (float)(l & 0xFF) / 255.0f;
-                bufferBuilder.faceTint(g, h, m, 4);
-                bufferBuilder.faceTint(g, h, m, 3);
-                bufferBuilder.faceTint(g, h, m, 2);
-                bufferBuilder.faceTint(g, h, m, 1);
-            }
-            bufferBuilder.postProcessFacePosition(d, e, f);
+            this.putQuadData(blockAndBiomeGetter, blockState, blockPos, vertexConsumer, poseStack.getPose(), bakedQuad, 1.0f, 1.0f, 1.0f, 1.0f, i, i, i, i);
         }
     }
 
-    public void renderModel(BakedModel bakedModel, float f, float g, float h, float i) {
-        this.renderModel(null, bakedModel, f, g, h, i);
-    }
-
-    public void renderModel(@Nullable BlockState blockState, BakedModel bakedModel, float f, float g, float h, float i) {
+    public void renderModel(Matrix4f matrix4f, VertexConsumer vertexConsumer, @Nullable BlockState blockState, BakedModel bakedModel, float f, float g, float h, int i) {
         Random random = new Random();
         long l = 42L;
         for (Direction direction : Direction.values()) {
             random.setSeed(42L);
-            this.renderQuadList(f, g, h, i, bakedModel.getQuads(blockState, direction, random));
+            ModelBlockRenderer.renderQuadList(matrix4f, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, direction, random), i);
         }
         random.setSeed(42L);
-        this.renderQuadList(f, g, h, i, bakedModel.getQuads(blockState, null, random));
+        ModelBlockRenderer.renderQuadList(matrix4f, vertexConsumer, f, g, h, bakedModel.getQuads(blockState, null, random), i);
     }
 
-    public void renderSingleBlock(BakedModel bakedModel, BlockState blockState, float f, boolean bl) {
-        RenderSystem.rotatef(90.0f, 0.0f, 1.0f, 0.0f);
-        int i = this.blockColors.getColor(blockState, null, null, 0);
-        float g = (float)(i >> 16 & 0xFF) / 255.0f;
-        float h = (float)(i >> 8 & 0xFF) / 255.0f;
-        float j = (float)(i & 0xFF) / 255.0f;
-        if (!bl) {
-            RenderSystem.color4f(f, f, f, 1.0f);
-        }
-        this.renderModel(blockState, bakedModel, f, g, h, j);
-    }
-
-    private void renderQuadList(float f, float g, float h, float i, List<BakedQuad> list) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        int k = list.size();
-        for (int j = 0; j < k; ++j) {
-            BakedQuad bakedQuad = list.get(j);
-            bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
-            bufferBuilder.putBulkData(bakedQuad.getVertices());
+    private static void renderQuadList(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, List<BakedQuad> list, int i) {
+        for (BakedQuad bakedQuad : list) {
+            float l;
+            float k;
+            float j;
             if (bakedQuad.isTinted()) {
-                bufferBuilder.fixupQuadColor(g * f, h * f, i * f);
+                j = Mth.clamp(f, 0.0f, 1.0f);
+                k = Mth.clamp(g, 0.0f, 1.0f);
+                l = Mth.clamp(h, 0.0f, 1.0f);
             } else {
-                bufferBuilder.fixupQuadColor(f, f, f);
+                j = 1.0f;
+                k = 1.0f;
+                l = 1.0f;
             }
-            Vec3i vec3i = bakedQuad.getDirection().getNormal();
-            bufferBuilder.postNormal(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-            tesselator.end();
+            vertexConsumer.putBulkData(matrix4f, bakedQuad, j, k, l, i);
         }
     }
 

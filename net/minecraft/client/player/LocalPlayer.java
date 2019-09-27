@@ -830,7 +830,7 @@ extends AbstractClientPlayer {
                 return;
             }
         }
-        float n = (float)Mth.fastInvSqrt(i);
+        float n = Mth.fastInvSqrt(i);
         Vec3 vec34 = vec33.scale(n);
         Vec3 vec35 = this.getForward();
         l = (float)(vec35.x * vec34.x + vec35.z * vec34.z);

@@ -108,9 +108,6 @@ extends Entity {
             this.remove();
             return;
         }
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
         Block block = this.blockState.getBlock();
         if (this.time++ == 0) {
             blockPos = new BlockPos(this);

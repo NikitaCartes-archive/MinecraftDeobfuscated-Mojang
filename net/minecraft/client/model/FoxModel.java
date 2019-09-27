@@ -3,18 +3,17 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Fox;
 
 @Environment(value=EnvType.CLIENT)
 public class FoxModel<T extends Fox>
-extends EntityModel<T> {
+extends AgeableListModel<T> {
     public final ModelPart head;
     private final ModelPart earL;
     private final ModelPart earR;
@@ -28,6 +27,7 @@ extends EntityModel<T> {
     private float legMotionPos;
 
     public FoxModel() {
+        super(true, 8.0f, 3.35f);
         this.texWidth = 48;
         this.texHeight = 32;
         this.head = new ModelPart(this, 1, 5);
@@ -126,42 +126,18 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T fox, float f, float g, float h, float i, float j, float k) {
-        super.render(fox, f, g, h, i, j, k);
-        this.setupAnim(fox, f, g, h, i, j, k);
-        if (this.young) {
-            RenderSystem.pushMatrix();
-            float l = 0.75f;
-            RenderSystem.scalef(0.75f, 0.75f, 0.75f);
-            RenderSystem.translatef(0.0f, 8.0f * k, 3.35f * k);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            float m = 0.5f;
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            RenderSystem.pushMatrix();
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
-        }
+    protected Iterable<ModelPart> headParts() {
+        return ImmutableList.of(this.head);
+    }
+
+    @Override
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.body, this.leg0, this.leg1, this.leg2, this.leg3);
     }
 
     @Override
     public void setupAnim(T fox, float f, float g, float h, float i, float j, float k) {
         float l;
-        super.setupAnim(fox, f, g, h, i, j, k);
         if (!(((Fox)fox).isSleeping() || ((Fox)fox).isFaceplanted() || ((Fox)fox).isCrouching())) {
             this.head.xRot = j * ((float)Math.PI / 180);
             this.head.yRot = i * ((float)Math.PI / 180);
@@ -186,16 +162,6 @@ extends EntityModel<T> {
             this.leg2.xRot = Mth.cos(this.legMotionPos * 0.4662f + (float)Math.PI) * 0.1f;
             this.leg3.xRot = Mth.cos(this.legMotionPos * 0.4662f) * 0.1f;
         }
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((Fox)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((Fox)entity), f, g, h, i, j, k);
     }
 }
 

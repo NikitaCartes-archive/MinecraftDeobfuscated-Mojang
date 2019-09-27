@@ -209,17 +209,16 @@ extends RealmsScreen {
             this.invitedObjectSelectionList.render(i, j, f);
         }
         int k = RealmsConstants.row(12) + 20;
-        RenderSystem.disableLighting();
         RenderSystem.disableFog();
         Tezzelator tezzelator = Tezzelator.instance;
         RealmsPlayerScreen.bind("textures/gui/options_background.png");
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         float g = 32.0f;
         tezzelator.begin(7, RealmsDefaultVertexFormat.POSITION_TEX_COLOR);
-        tezzelator.vertex(0.0, this.height(), 0.0).tex(0.0, (float)(this.height() - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
+        tezzelator.vertex(0.0, this.height(), 0.0).tex(0.0f, (float)(this.height() - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
         tezzelator.vertex(this.width(), this.height(), 0.0).tex((float)this.width() / 32.0f, (float)(this.height() - k) / 32.0f + 0.0f).color(64, 64, 64, 255).endVertex();
-        tezzelator.vertex(this.width(), k, 0.0).tex((float)this.width() / 32.0f, 0.0).color(64, 64, 64, 255).endVertex();
-        tezzelator.vertex(0.0, k, 0.0).tex(0.0, 0.0).color(64, 64, 64, 255).endVertex();
+        tezzelator.vertex(this.width(), k, 0.0).tex((float)this.width() / 32.0f, 0.0f).color(64, 64, 64, 255).endVertex();
+        tezzelator.vertex(0.0, k, 0.0).tex(0.0f, 0.0f).color(64, 64, 64, 255).endVertex();
         tezzelator.end();
         this.titleLabel.render(this);
         if (this.serverData != null && this.serverData.players != null) {

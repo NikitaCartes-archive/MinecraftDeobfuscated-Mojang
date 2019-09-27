@@ -9,18 +9,54 @@ import java.io.IOException;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class ByteTag
 extends NumericTag {
-    private byte data;
+    public static final TagType<ByteTag> TYPE = new TagType<ByteTag>(){
 
-    ByteTag() {
+        @Override
+        public ByteTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(72L);
+            return ByteTag.valueOf(dataInput.readByte());
+        }
+
+        @Override
+        public String getName() {
+            return "BYTE";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Byte";
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    public static final ByteTag ZERO = ByteTag.valueOf((byte)0);
+    public static final ByteTag ONE = ByteTag.valueOf((byte)1);
+    private final byte data;
+
+    private ByteTag(byte b) {
+        this.data = b;
     }
 
-    public ByteTag(byte b) {
-        this.data = b;
+    public static ByteTag valueOf(byte b) {
+        return Cache.cache[128 + b];
+    }
+
+    public static ByteTag valueOf(boolean bl) {
+        return bl ? ONE : ZERO;
     }
 
     @Override
@@ -29,14 +65,12 @@ extends NumericTag {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(72L);
-        this.data = dataInput.readByte();
-    }
-
-    @Override
     public byte getId() {
         return 1;
+    }
+
+    public TagType<ByteTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -46,7 +80,7 @@ extends NumericTag {
 
     @Override
     public ByteTag copy() {
-        return new ByteTag(this.data);
+        return this;
     }
 
     public boolean equals(Object object) {
@@ -104,6 +138,16 @@ extends NumericTag {
     @Override
     public /* synthetic */ Tag copy() {
         return this.copy();
+    }
+
+    static class Cache {
+        private static final ByteTag[] cache = new ByteTag[256];
+
+        static {
+            for (int i = 0; i < cache.length; ++i) {
+                Cache.cache[i] = new ByteTag((byte)(i - 128));
+            }
+        }
     }
 }
 

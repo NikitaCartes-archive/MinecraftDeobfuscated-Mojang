@@ -3,14 +3,14 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.VillagerProfessionLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.client.renderer.entity.layers.VillagerTradeItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -29,12 +29,12 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Villager villager) {
+    public ResourceLocation getTextureLocation(Villager villager) {
         return VILLAGER_BASE_SKIN;
     }
 
     @Override
-    protected void scale(Villager villager, float f) {
+    protected void scale(Villager villager, PoseStack poseStack, float f) {
         float g = 0.9375f;
         if (villager.isBaby()) {
             g = (float)((double)g * 0.5);
@@ -42,7 +42,7 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
         } else {
             this.shadowRadius = 0.5f;
         }
-        RenderSystem.scalef(g, g, g);
+        poseStack.scale(g, g, g);
     }
 }
 

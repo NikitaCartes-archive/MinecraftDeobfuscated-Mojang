@@ -34,6 +34,7 @@ import net.minecraft.network.chat.SelectorComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 import org.jetbrains.annotations.Nullable;
@@ -208,12 +209,12 @@ Iterable<Component> {
          */
         @Override
         public Component deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            void var5_18;
+            void var5_19;
             if (jsonElement.isJsonPrimitive()) {
                 return new TextComponent(jsonElement.getAsString());
             }
             if (jsonElement.isJsonObject()) {
-                void var5_16;
+                void var5_17;
                 String string;
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
                 if (jsonObject.has("text")) {
@@ -250,33 +251,35 @@ Iterable<Component> {
                     boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
                     if (jsonObject.has("block")) {
                         NbtComponent.BlockNbtComponent blockNbtComponent = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"));
-                    } else {
-                        if (!jsonObject.has("entity")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
+                    } else if (jsonObject.has("entity")) {
                         NbtComponent.EntityNbtComponent entityNbtComponent = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
+                    } else {
+                        if (!jsonObject.has("storage")) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
+                        NbtComponent.StorageNbtComponent storageNbtComponent = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
                     }
                 }
                 if (jsonObject.has("extra")) {
                     JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "extra");
                     if (jsonArray2.size() <= 0) throw new JsonParseException("Unexpected empty array of components");
                     for (int j = 0; j < jsonArray2.size(); ++j) {
-                        var5_16.append(this.deserialize(jsonArray2.get(j), type, jsonDeserializationContext));
+                        var5_17.append(this.deserialize(jsonArray2.get(j), type, jsonDeserializationContext));
                     }
                 }
-                var5_16.setStyle((Style)jsonDeserializationContext.deserialize(jsonElement, (Type)((Object)Style.class)));
-                return var5_16;
+                var5_17.setStyle((Style)jsonDeserializationContext.deserialize(jsonElement, (Type)((Object)Style.class)));
+                return var5_17;
             }
             if (!jsonElement.isJsonArray()) throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
             JsonArray jsonArray3 = jsonElement.getAsJsonArray();
-            Object var5_17 = null;
+            Object var5_18 = null;
             for (JsonElement jsonElement2 : jsonArray3) {
                 Component component2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
-                if (var5_18 == null) {
+                if (var5_19 == null) {
                     Component component = component2;
                     continue;
                 }
-                var5_18.append(component2);
+                var5_19.append(component2);
             }
-            return var5_18;
+            return var5_19;
         }
 
         private void serializeStyle(Style style, JsonObject jsonObject, JsonSerializationContext jsonSerializationContext) {
@@ -387,8 +390,8 @@ Iterable<Component> {
                 Component component = GSON.getAdapter(Component.class).read(jsonReader);
                 stringReader.setCursor(stringReader.getCursor() + Serializer.getPos(jsonReader));
                 return component;
-            } catch (IOException iOException) {
-                throw new JsonParseException(iOException);
+            } catch (IOException | StackOverflowError throwable) {
+                throw new JsonParseException(throwable);
             }
         }
 

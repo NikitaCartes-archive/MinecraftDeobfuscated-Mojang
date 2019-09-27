@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -21,14 +21,14 @@ extends ZombieRenderer {
     }
 
     @Override
-    protected void scale(Zombie zombie, float f) {
+    protected void scale(Zombie zombie, PoseStack poseStack, float f) {
         float g = 1.0625f;
-        RenderSystem.scalef(1.0625f, 1.0625f, 1.0625f);
-        super.scale(zombie, f);
+        poseStack.scale(1.0625f, 1.0625f, 1.0625f);
+        super.scale(zombie, poseStack, f);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Zombie zombie) {
+    public ResourceLocation getTextureLocation(Zombie zombie) {
         return HUSK_LOCATION;
     }
 }

@@ -164,19 +164,19 @@ public class FogRenderer {
         }
     }
 
-    public static void setupFog(Camera camera, int i, float f, boolean bl) {
+    public static void setupFog(Camera camera, FogMode fogMode, float f, boolean bl) {
         FogRenderer.resetFogColor(false);
         RenderSystem.normal3f(0.0f, -1.0f, 0.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         FluidState fluidState = camera.getFluidInCamera();
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
             float g = 5.0f;
-            int j = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
-            if (j < 20) {
-                g = Mth.lerp(1.0f - (float)j / 20.0f, 5.0f, f);
+            int i = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
+            if (i < 20) {
+                g = Mth.lerp(1.0f - (float)i / 20.0f, 5.0f, f);
             }
             RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
-            if (i == -1) {
+            if (fogMode == FogMode.FOG_SKY) {
                 RenderSystem.fogStart(0.0f);
                 RenderSystem.fogEnd(g * 0.8f);
             } else {
@@ -206,7 +206,7 @@ public class FogRenderer {
             RenderSystem.fogDensity(2.0f);
         } else {
             RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
-            if (i == -1) {
+            if (fogMode == FogMode.FOG_SKY) {
                 RenderSystem.fogStart(0.0f);
                 RenderSystem.fogEnd(f);
             } else {
@@ -219,13 +219,19 @@ public class FogRenderer {
                 RenderSystem.fogEnd(Math.min(f, 192.0f) * 0.5f);
             }
         }
-        RenderSystem.enableColorMaterial();
         RenderSystem.enableFog();
         RenderSystem.colorMaterial(1028, 4608);
     }
 
     public static void resetFogColor(boolean bl) {
         RenderSystem.fog(2918, bl ? BLACK_BUFFER : COLOR_BUFFER);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum FogMode {
+        FOG_SKY,
+        FOG_TERRAIN;
+
     }
 }
 

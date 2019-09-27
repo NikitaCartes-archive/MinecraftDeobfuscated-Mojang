@@ -11,6 +11,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -42,7 +43,8 @@ extends Item {
         if (!level.isClientSide) {
             ItemStack itemStack = useOnContext.getItemInHand();
             Vec3 vec3 = useOnContext.getClickLocation();
-            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, vec3.x, vec3.y, vec3.z, itemStack);
+            Direction direction = useOnContext.getClickedFace();
+            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, vec3.x + (double)direction.getStepX() * 0.15, vec3.y + (double)direction.getStepY() * 0.15, vec3.z + (double)direction.getStepZ() * 0.15, itemStack);
             level.addFreshEntity(fireworkRocketEntity);
             itemStack.shrink(1);
         }

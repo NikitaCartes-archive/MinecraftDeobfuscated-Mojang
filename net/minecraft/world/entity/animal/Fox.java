@@ -196,7 +196,6 @@ extends Animal {
             this.jumping = false;
             this.xxa = 0.0f;
             this.zza = 0.0f;
-            this.yRotA = 0.0f;
         }
         super.aiStep();
         if (this.isDefending() && this.random.nextFloat() < 0.05f) {
@@ -775,7 +774,7 @@ extends Animal {
             if (!Fox.this.isFaceplanted()) {
                 Vec3 vec3 = Fox.this.getDeltaMovement();
                 if (vec3.y * vec3.y < (double)0.03f && Fox.this.xRot != 0.0f) {
-                    Fox.this.xRot = this.rotlerp(Fox.this.xRot, 0.0f, 0.2f);
+                    Fox.this.xRot = Mth.rotlerp(Fox.this.xRot, 0.0f, 0.2f);
                 } else {
                     double d = Math.sqrt(Entity.getHorizontalDistanceSqr(vec3));
                     double e = Math.signum(-vec3.y) * Math.acos(d / vec3.length()) * 57.2957763671875;

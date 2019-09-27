@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PolarBearModel;
@@ -22,14 +22,14 @@ extends MobRenderer<PolarBear, PolarBearModel<PolarBear>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(PolarBear polarBear) {
+    public ResourceLocation getTextureLocation(PolarBear polarBear) {
         return BEAR_LOCATION;
     }
 
     @Override
-    protected void scale(PolarBear polarBear, float f) {
-        RenderSystem.scalef(1.2f, 1.2f, 1.2f);
-        super.scale(polarBear, f);
+    protected void scale(PolarBear polarBear, PoseStack poseStack, float f) {
+        poseStack.scale(1.2f, 1.2f, 1.2f);
+        super.scale(polarBear, poseStack, f);
     }
 }
 

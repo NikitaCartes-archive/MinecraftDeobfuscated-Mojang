@@ -139,7 +139,7 @@ public class GameTestRunner {
             stringBuffer.append("(optional)\n");
         }
         stringBuffer.append("-------------------\n");
-        listTag.add(new StringTag(stringBuffer.toString() + string22));
+        listTag.add(StringTag.valueOf(stringBuffer.toString() + string22));
         itemStack.addTagElement("pages", listTag);
         return itemStack;
     }

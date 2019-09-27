@@ -27,7 +27,7 @@ extends MobRenderer<T, M> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(T mob) {
+    public ResourceLocation getTextureLocation(T mob) {
         return DEFAULT_LOCATION;
     }
 }

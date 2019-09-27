@@ -78,7 +78,6 @@ implements ContainerListener {
 
     @Override
     protected void renderLabels(int i, int j) {
-        RenderSystem.disableLighting();
         RenderSystem.disableBlend();
         this.font.draw(this.title.getColoredString(), 60.0f, 6.0f, 0x404040);
         int k = ((AnvilMenu)this.menu).getCost();
@@ -101,7 +100,6 @@ implements ContainerListener {
                 this.font.drawShadow(string, m, 69.0f, l);
             }
         }
-        RenderSystem.enableLighting();
     }
 
     private void onNameChanged(String string) {
@@ -122,7 +120,6 @@ implements ContainerListener {
         this.renderBackground();
         super.render(i, j, f);
         this.renderTooltip(i, j);
-        RenderSystem.disableLighting();
         RenderSystem.disableBlend();
         this.name.render(i, j, f);
     }

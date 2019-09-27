@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -40,7 +39,6 @@ implements Toast {
         toastComponent.blit(0, 0, 0, 32, 160, 32);
         toastComponent.getMinecraft().font.draw(I18n.get("recipe.toast.title", new Object[0]), 30.0f, 7.0f, -11534256);
         toastComponent.getMinecraft().font.draw(I18n.get("recipe.toast.description", new Object[0]), 30.0f, 18.0f, -16777216);
-        Lighting.turnOnGui();
         Recipe<?> recipe = this.recipes.get((int)(l / (5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
         ItemStack itemStack = recipe.getToastSymbol();
         RenderSystem.pushMatrix();

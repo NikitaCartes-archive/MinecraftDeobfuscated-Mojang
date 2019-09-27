@@ -101,11 +101,6 @@ extends SpellcasterIllager {
     }
 
     @Override
-    public void tick() {
-        super.tick();
-    }
-
-    @Override
     public boolean isAlliedTo(Entity entity) {
         if (entity == null) {
             return false;

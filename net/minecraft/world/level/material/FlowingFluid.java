@@ -14,6 +14,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -69,9 +70,9 @@ extends Fluid {
                 float f = fluidState2.getOwnHeight();
                 float g = 0.0f;
                 if (f == 0.0f) {
-                    BlockPos blockPos2;
+                    Vec3i blockPos2;
                     FluidState fluidState3;
-                    if (!blockGetter.getBlockState(pooledMutableBlockPos).getMaterial().blocksMotion() && this.affectsFlow(fluidState3 = blockGetter.getFluidState(blockPos2 = pooledMutableBlockPos.below())) && (f = fluidState3.getOwnHeight()) > 0.0f) {
+                    if (!blockGetter.getBlockState(pooledMutableBlockPos).getMaterial().blocksMotion() && this.affectsFlow(fluidState3 = blockGetter.getFluidState((BlockPos)(blockPos2 = pooledMutableBlockPos.below()))) && (f = fluidState3.getOwnHeight()) > 0.0f) {
                         g = fluidState.getOwnHeight() - (f - 0.8888889f);
                     }
                 } else if (f > 0.0f) {

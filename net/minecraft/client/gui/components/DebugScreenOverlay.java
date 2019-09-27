@@ -26,6 +26,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -137,7 +138,6 @@ extends GuiComponent {
     }
 
     protected List<String> getGameInformation() {
-        BlockPos blockPos2;
         Level level;
         String string2;
         IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
@@ -237,15 +237,16 @@ extends GuiComponent {
         } else {
             list.add("Outside of world...");
         }
-        if (this.minecraft.gameRenderer != null && this.minecraft.gameRenderer.postEffectActive()) {
-            list.add("Shader: " + this.minecraft.gameRenderer.currentEffect().getName());
+        PostChain postChain = this.minecraft.gameRenderer.currentEffect();
+        if (postChain != null) {
+            list.add("Shader: " + postChain.getName());
         }
         if (this.block.getType() == HitResult.Type.BLOCK) {
-            blockPos2 = ((BlockHitResult)this.block).getBlockPos();
+            BlockPos blockPos2 = ((BlockHitResult)this.block).getBlockPos();
             list.add(String.format("Looking at block: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
         }
         if (this.liquid.getType() == HitResult.Type.BLOCK) {
-            blockPos2 = ((BlockHitResult)this.liquid).getBlockPos();
+            BlockPos blockPos2 = ((BlockHitResult)this.liquid).getBlockPos();
             list.add(String.format("Looking at liquid: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
         }
         list.add(this.minecraft.getSoundManager().getDebugString());

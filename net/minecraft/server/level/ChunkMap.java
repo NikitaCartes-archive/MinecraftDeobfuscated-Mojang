@@ -39,6 +39,8 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -199,6 +201,26 @@ implements ChunkHolder.PlayerProvider {
             }
             return Math.min(chunkHolder.getQueueLevel(), ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1);
         };
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public String getChunkDebugData(ChunkPos chunkPos) {
+        ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
+        if (chunkHolder == null) {
+            return "null";
+        }
+        String string = chunkHolder.getTicketLevel() + "\n";
+        ChunkStatus chunkStatus = chunkHolder.getLastAvailableStatus();
+        ChunkAccess chunkAccess = chunkHolder.getLastAvailable();
+        if (chunkStatus != null) {
+            string = string + "St: \u00a7" + chunkStatus.getIndex() + chunkStatus + '\u00a7' + "r\n";
+        }
+        if (chunkAccess != null) {
+            string = string + "Ch: \u00a7" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + '\u00a7' + "r\n";
+        }
+        ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
+        string = string + "\u00a7" + fullChunkStatus.ordinal() + (Object)((Object)fullChunkStatus);
+        return string + '\u00a7' + "r";
     }
 
     private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(ChunkPos chunkPos, final int i, IntFunction<ChunkStatus> intFunction) {

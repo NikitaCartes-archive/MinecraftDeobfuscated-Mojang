@@ -35,6 +35,7 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.Ravager;
@@ -81,12 +82,10 @@ extends AbstractIllager {
 
     @Override
     protected void customServerAiStep() {
-        if (!this.isNoAi()) {
-            if (((ServerLevel)this.level).isRaided(new BlockPos(this))) {
-                ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
-            } else {
-                ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(false);
-            }
+        PathNavigation pathNavigation;
+        if (!this.isNoAi() && (pathNavigation = this.getNavigation()) instanceof GroundPathNavigation) {
+            boolean bl = ((ServerLevel)this.level).isRaided(new BlockPos(this));
+            ((GroundPathNavigation)pathNavigation).setCanOpenDoors(bl);
         }
         super.customServerAiStep();
     }

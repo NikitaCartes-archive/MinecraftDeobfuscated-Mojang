@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LavaSlimeModel;
@@ -14,25 +14,25 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.MagmaCube;
 
 @Environment(value=EnvType.CLIENT)
-public class LavaSlimeRenderer
+public class MagmaCubeRenderer
 extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     private static final ResourceLocation MAGMACUBE_LOCATION = new ResourceLocation("textures/entity/slime/magmacube.png");
 
-    public LavaSlimeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
+    public MagmaCubeRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new LavaSlimeModel(), 0.25f);
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(MagmaCube magmaCube) {
+    public ResourceLocation getTextureLocation(MagmaCube magmaCube) {
         return MAGMACUBE_LOCATION;
     }
 
     @Override
-    protected void scale(MagmaCube magmaCube, float f) {
+    protected void scale(MagmaCube magmaCube, PoseStack poseStack, float f) {
         int i = magmaCube.getSize();
         float g = Mth.lerp(f, magmaCube.oSquish, magmaCube.squish) / ((float)i * 0.5f + 1.0f);
         float h = 1.0f / (g + 1.0f);
-        RenderSystem.scalef(h * (float)i, 1.0f / h * (float)i, h * (float)i);
+        poseStack.scale(h * (float)i, 1.0f / h * (float)i, h * (float)i);
     }
 }
 

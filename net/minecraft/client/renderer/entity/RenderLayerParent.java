@@ -13,8 +13,6 @@ import net.minecraft.world.entity.Entity;
 public interface RenderLayerParent<T extends Entity, M extends EntityModel<T>> {
     public M getModel();
 
-    public void bindTexture(ResourceLocation var1);
-
-    public void setLightColor(T var1);
+    public ResourceLocation getTextureLocation(T var1);
 }
 

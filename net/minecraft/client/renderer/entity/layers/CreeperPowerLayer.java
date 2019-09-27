@@ -3,20 +3,18 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.layers.SpinnyLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Creeper;
 
 @Environment(value=EnvType.CLIENT)
 public class CreeperPowerLayer
-extends RenderLayer<Creeper, CreeperModel<Creeper>> {
+extends SpinnyLayer<Creeper, CreeperModel<Creeper>> {
     private static final ResourceLocation POWER_LOCATION = new ResourceLocation("textures/entity/creeper/creeper_armor.png");
     private final CreeperModel<Creeper> model = new CreeperModel(2.0f);
 
@@ -25,38 +23,18 @@ extends RenderLayer<Creeper, CreeperModel<Creeper>> {
     }
 
     @Override
-    public void render(Creeper creeper, float f, float g, float h, float i, float j, float k, float l) {
-        if (!creeper.isPowered()) {
-            return;
-        }
-        boolean bl = creeper.isInvisible();
-        RenderSystem.depthMask(!bl);
-        this.bindTexture(POWER_LOCATION);
-        RenderSystem.matrixMode(5890);
-        RenderSystem.loadIdentity();
-        float m = (float)creeper.tickCount + h;
-        RenderSystem.translatef(m * 0.01f, m * 0.01f, 0.0f);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.enableBlend();
-        float n = 0.5f;
-        RenderSystem.color4f(0.5f, 0.5f, 0.5f, 1.0f);
-        RenderSystem.disableLighting();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-        ((CreeperModel)this.getParentModel()).copyPropertiesTo(this.model);
-        FogRenderer.resetFogColor(true);
-        this.model.render(creeper, f, g, i, j, k, l);
-        FogRenderer.resetFogColor(false);
-        RenderSystem.matrixMode(5890);
-        RenderSystem.loadIdentity();
-        RenderSystem.matrixMode(5888);
-        RenderSystem.enableLighting();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
+    protected float xOffset(float f) {
+        return f * 0.01f;
     }
 
     @Override
-    public boolean colorsOnDamage() {
-        return false;
+    protected ResourceLocation getTextureLocation() {
+        return POWER_LOCATION;
+    }
+
+    @Override
+    protected EntityModel<Creeper> model() {
+        return this.model;
     }
 }
 

@@ -3,7 +3,10 @@
  */
 package net.minecraft.client.renderer.block.model;
 
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import net.fabricmc.api.EnvType;
@@ -14,10 +17,11 @@ import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockElementRotation;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,40 +29,11 @@ import org.jetbrains.annotations.Nullable;
 public class FaceBakery {
     private static final float RESCALE_22_5 = 1.0f / (float)Math.cos(0.3926991f) - 1.0f;
     private static final float RESCALE_45 = 1.0f / (float)Math.cos(0.7853981852531433) - 1.0f;
-    private static final Rotation[] BY_INDEX = new Rotation[BlockModelRotation.values().length * Direction.values().length];
-    private static final Rotation ROT_0 = new Rotation(){
 
-        @Override
-        BlockFaceUV apply(float f, float g, float h, float i) {
-            return new BlockFaceUV(new float[]{f, g, h, i}, 0);
-        }
-    };
-    private static final Rotation ROT_90 = new Rotation(){
-
-        @Override
-        BlockFaceUV apply(float f, float g, float h, float i) {
-            return new BlockFaceUV(new float[]{i, 16.0f - f, g, 16.0f - h}, 270);
-        }
-    };
-    private static final Rotation ROT_180 = new Rotation(){
-
-        @Override
-        BlockFaceUV apply(float f, float g, float h, float i) {
-            return new BlockFaceUV(new float[]{16.0f - f, 16.0f - g, 16.0f - h, 16.0f - i}, 0);
-        }
-    };
-    private static final Rotation ROT_270 = new Rotation(){
-
-        @Override
-        BlockFaceUV apply(float f, float g, float h, float i) {
-            return new BlockFaceUV(new float[]{16.0f - g, h, 16.0f - i, f}, 90);
-        }
-    };
-
-    public BakedQuad bakeQuad(Vector3f vector3f, Vector3f vector3f2, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
+    public BakedQuad bakeQuad(Vector3f vector3f, Vector3f vector3f2, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState, @Nullable BlockElementRotation blockElementRotation, boolean bl, ResourceLocation resourceLocation) {
         BlockFaceUV blockFaceUV = blockElementFace.uv;
         if (modelState.isUvLocked()) {
-            blockFaceUV = this.recomputeUVs(blockElementFace.uv, direction, modelState.getRotation());
+            blockFaceUV = FaceBakery.recomputeUVs(blockElementFace.uv, direction, modelState.getRotation(), resourceLocation);
         }
         float[] fs = new float[blockFaceUV.uvs.length];
         System.arraycopy(blockFaceUV.uvs, 0, fs, 0, fs.length);
@@ -80,14 +55,50 @@ public class FaceBakery {
         return new BakedQuad(is, blockElementFace.tintIndex, direction2, textureAtlasSprite);
     }
 
-    private BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, BlockModelRotation blockModelRotation) {
-        return BY_INDEX[FaceBakery.getIndex(blockModelRotation, direction)].recompute(blockFaceUV);
+    public static BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, Transformation transformation, ResourceLocation resourceLocation) {
+        float q;
+        float p;
+        float o;
+        float n;
+        Matrix4f matrix4f = BlockMath.getUVLockTransform(transformation, direction, () -> "Unable to resolve UVLock for model: " + resourceLocation).getMatrix();
+        float f = blockFaceUV.getU(blockFaceUV.getReverseIndex(0));
+        float g = blockFaceUV.getV(blockFaceUV.getReverseIndex(0));
+        Vector4f vector4f = new Vector4f(f / 16.0f, g / 16.0f, 0.0f, 1.0f);
+        vector4f.transform(matrix4f);
+        float h = 16.0f * vector4f.x();
+        float i = 16.0f * vector4f.y();
+        float j = blockFaceUV.getU(blockFaceUV.getReverseIndex(2));
+        float k = blockFaceUV.getV(blockFaceUV.getReverseIndex(2));
+        Vector4f vector4f2 = new Vector4f(j / 16.0f, k / 16.0f, 0.0f, 1.0f);
+        vector4f2.transform(matrix4f);
+        float l = 16.0f * vector4f2.x();
+        float m = 16.0f * vector4f2.y();
+        if (Math.signum(j - f) == Math.signum(l - h)) {
+            n = h;
+            o = l;
+        } else {
+            n = l;
+            o = h;
+        }
+        if (Math.signum(k - g) == Math.signum(m - i)) {
+            p = i;
+            q = m;
+        } else {
+            p = m;
+            q = i;
+        }
+        float r = (float)Math.toRadians(blockFaceUV.rotation);
+        Vector3f vector3f = new Vector3f(Mth.cos(r), Mth.sin(r), 0.0f);
+        Matrix3f matrix3f = new Matrix3f(matrix4f);
+        vector3f.transform(matrix3f);
+        int s = Math.floorMod(-((int)Math.round(Math.toDegrees(Math.atan2(vector3f.y(), vector3f.x())) / 90.0)) * 90, 360);
+        return new BlockFaceUV(new float[]{n, p, o, q}, s);
     }
 
-    private int[] makeVertices(BlockFaceUV blockFaceUV, TextureAtlasSprite textureAtlasSprite, Direction direction, float[] fs, BlockModelRotation blockModelRotation, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
+    private int[] makeVertices(BlockFaceUV blockFaceUV, TextureAtlasSprite textureAtlasSprite, Direction direction, float[] fs, Transformation transformation, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
         int[] is = new int[32];
         for (int i = 0; i < 4; ++i) {
-            this.bakeVertex(is, i, direction, blockFaceUV, fs, textureAtlasSprite, blockModelRotation, blockElementRotation, bl);
+            this.bakeVertex(is, i, direction, blockFaceUV, fs, textureAtlasSprite, transformation, blockElementRotation, bl);
         }
         return is;
     }
@@ -129,24 +140,24 @@ public class FaceBakery {
         return fs;
     }
 
-    private void bakeVertex(int[] is, int i, Direction direction, BlockFaceUV blockFaceUV, float[] fs, TextureAtlasSprite textureAtlasSprite, BlockModelRotation blockModelRotation, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
-        Direction direction2 = blockModelRotation.rotate(direction);
+    private void bakeVertex(int[] is, int i, Direction direction, BlockFaceUV blockFaceUV, float[] fs, TextureAtlasSprite textureAtlasSprite, Transformation transformation, @Nullable BlockElementRotation blockElementRotation, boolean bl) {
+        Direction direction2 = Direction.rotate(transformation.getMatrix(), direction);
         int j = bl ? this.getShadeValue(direction2) : -1;
         FaceInfo.VertexInfo vertexInfo = FaceInfo.fromFacing(direction).getVertexInfo(i);
         Vector3f vector3f = new Vector3f(fs[vertexInfo.xFace], fs[vertexInfo.yFace], fs[vertexInfo.zFace]);
         this.applyElementRotation(vector3f, blockElementRotation);
-        int k = this.applyModelRotation(vector3f, direction, i, blockModelRotation);
-        this.fillVertex(is, k, i, vector3f, j, textureAtlasSprite, blockFaceUV);
+        this.applyModelRotation(vector3f, transformation);
+        this.fillVertex(is, i, vector3f, j, textureAtlasSprite, blockFaceUV);
     }
 
-    private void fillVertex(int[] is, int i, int j, Vector3f vector3f, int k, TextureAtlasSprite textureAtlasSprite, BlockFaceUV blockFaceUV) {
-        int l = i * 8;
-        is[l] = Float.floatToRawIntBits(vector3f.x());
-        is[l + 1] = Float.floatToRawIntBits(vector3f.y());
-        is[l + 2] = Float.floatToRawIntBits(vector3f.z());
-        is[l + 3] = k;
-        is[l + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU(blockFaceUV.getU(j)));
-        is[l + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV(blockFaceUV.getV(j)));
+    private void fillVertex(int[] is, int i, Vector3f vector3f, int j, TextureAtlasSprite textureAtlasSprite, BlockFaceUV blockFaceUV) {
+        int k = i * 8;
+        is[k] = Float.floatToRawIntBits(vector3f.x());
+        is[k + 1] = Float.floatToRawIntBits(vector3f.y());
+        is[k + 2] = Float.floatToRawIntBits(vector3f.z());
+        is[k + 3] = j;
+        is[k + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU(blockFaceUV.getU(i)));
+        is[k + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV(blockFaceUV.getV(i)));
     }
 
     private void applyElementRotation(Vector3f vector3f, @Nullable BlockElementRotation blockElementRotation) {
@@ -186,20 +197,19 @@ public class FaceBakery {
         } else {
             vector3f3.set(1.0f, 1.0f, 1.0f);
         }
-        this.rotateVertexBy(vector3f, new Vector3f(blockElementRotation.origin), quaternion, vector3f3);
+        this.rotateVertexBy(vector3f, new Vector3f(blockElementRotation.origin), new Matrix4f(quaternion), vector3f3);
     }
 
-    public int applyModelRotation(Vector3f vector3f, Direction direction, int i, BlockModelRotation blockModelRotation) {
-        if (blockModelRotation == BlockModelRotation.X0_Y0) {
-            return i;
+    public void applyModelRotation(Vector3f vector3f, Transformation transformation) {
+        if (transformation == Transformation.identity()) {
+            return;
         }
-        this.rotateVertexBy(vector3f, new Vector3f(0.5f, 0.5f, 0.5f), blockModelRotation.getRotationQuaternion(), new Vector3f(1.0f, 1.0f, 1.0f));
-        return blockModelRotation.rotateVertexIndex(direction, i);
+        this.rotateVertexBy(vector3f, new Vector3f(0.5f, 0.5f, 0.5f), transformation.getMatrix(), new Vector3f(1.0f, 1.0f, 1.0f));
     }
 
-    private void rotateVertexBy(Vector3f vector3f, Vector3f vector3f2, Quaternion quaternion, Vector3f vector3f3) {
+    private void rotateVertexBy(Vector3f vector3f, Vector3f vector3f2, Matrix4f matrix4f, Vector3f vector3f3) {
         Vector4f vector4f = new Vector4f(vector3f.x() - vector3f2.x(), vector3f.y() - vector3f2.y(), vector3f.z() - vector3f2.z(), 1.0f);
-        vector4f.transform(quaternion);
+        vector4f.transform(matrix4f);
         vector4f.mul(vector3f3);
         vector3f.set(vector4f.x() + vector3f2.x(), vector4f.y() + vector3f2.y(), vector4f.z() + vector3f2.z());
     }
@@ -286,129 +296,6 @@ public class FaceBakery {
                 is[k + 4 + 1] = js[o + 4 + 1];
             }
         }
-    }
-
-    private static void register(BlockModelRotation blockModelRotation, Direction direction, Rotation rotation) {
-        FaceBakery.BY_INDEX[FaceBakery.getIndex((BlockModelRotation)blockModelRotation, (Direction)direction)] = rotation;
-    }
-
-    private static int getIndex(BlockModelRotation blockModelRotation, Direction direction) {
-        return BlockModelRotation.values().length * direction.ordinal() + blockModelRotation.ordinal();
-    }
-
-    static {
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.EAST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y0, Direction.WEST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.EAST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.WEST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.EAST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.WEST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.EAST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.WEST, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.DOWN, ROT_0);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.SOUTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.NORTH, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.UP, ROT_0);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.UP, ROT_90);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.DOWN, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.WEST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.WEST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.WEST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.NORTH, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.SOUTH, ROT_90);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.WEST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.UP, ROT_90);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.DOWN, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.EAST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.EAST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.NORTH, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.SOUTH, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.EAST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.EAST, ROT_90);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X0_Y180, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.EAST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y0, Direction.WEST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.EAST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.WEST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.EAST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.UP, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y180, Direction.WEST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.EAST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.WEST, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.NORTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.SOUTH, ROT_180);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.DOWN, ROT_180);
-        FaceBakery.register(BlockModelRotation.X0_Y90, Direction.UP, ROT_270);
-        FaceBakery.register(BlockModelRotation.X0_Y270, Direction.DOWN, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y0, Direction.EAST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.EAST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.NORTH, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y90, Direction.SOUTH, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y180, Direction.EAST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X90_Y270, Direction.EAST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y0, Direction.WEST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X180_Y90, Direction.DOWN, ROT_270);
-        FaceBakery.register(BlockModelRotation.X180_Y270, Direction.UP, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y90, Direction.WEST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y180, Direction.WEST, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.NORTH, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.SOUTH, ROT_270);
-        FaceBakery.register(BlockModelRotation.X270_Y270, Direction.WEST, ROT_270);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static abstract class Rotation {
-        private Rotation() {
-        }
-
-        public BlockFaceUV recompute(BlockFaceUV blockFaceUV) {
-            float f = blockFaceUV.getU(blockFaceUV.getReverseIndex(0));
-            float g = blockFaceUV.getV(blockFaceUV.getReverseIndex(0));
-            float h = blockFaceUV.getU(blockFaceUV.getReverseIndex(2));
-            float i = blockFaceUV.getV(blockFaceUV.getReverseIndex(2));
-            return this.apply(f, g, h, i);
-        }
-
-        abstract BlockFaceUV apply(float var1, float var2, float var3, float var4);
     }
 }
 

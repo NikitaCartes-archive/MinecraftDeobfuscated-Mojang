@@ -21,7 +21,7 @@ extends ArrowRenderer<Arrow> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Arrow arrow) {
+    public ResourceLocation getTextureLocation(Arrow arrow) {
         return arrow.getColor() > 0 ? TIPPED_ARROW_LOCATION : NORMAL_ARROW_LOCATION;
     }
 }

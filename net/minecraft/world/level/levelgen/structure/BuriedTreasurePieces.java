@@ -42,7 +42,7 @@ public class BuriedTreasurePieces {
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.x0, i, this.boundingBox.z0);
             while (mutableBlockPos.getY() > 0) {
                 BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-                BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos.below());
+                BlockState blockState2 = levelAccessor.getBlockState((BlockPos)mutableBlockPos.below());
                 if (blockState2 == Blocks.SANDSTONE.defaultBlockState() || blockState2 == Blocks.STONE.defaultBlockState() || blockState2 == Blocks.ANDESITE.defaultBlockState() || blockState2 == Blocks.GRANITE.defaultBlockState() || blockState2 == Blocks.DIORITE.defaultBlockState()) {
                     BlockState blockState3 = blockState.isAir() || this.isLiquid(blockState) ? Blocks.SAND.defaultBlockState() : blockState;
                     for (Direction direction : Direction.values()) {

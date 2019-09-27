@@ -3,19 +3,17 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.PolarBear;
 
 @Environment(value=EnvType.CLIENT)
 public class PolarBearModel<T extends PolarBear>
 extends QuadrupedModel<T> {
     public PolarBearModel() {
-        super(12, 0.0f);
+        super(12, 0.0f, false, 16.0f, 4.0f, 2.25f, 2.0f, 24);
         this.texWidth = 128;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 0);
@@ -51,38 +49,6 @@ extends QuadrupedModel<T> {
         this.leg3.x += 1.0f;
         this.leg2.z -= 1.0f;
         this.leg3.z -= 1.0f;
-        this.zHeadOffs += 2.0f;
-    }
-
-    @Override
-    public void render(T polarBear, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(polarBear, f, g, h, i, j, k);
-        if (this.young) {
-            float l = 2.0f;
-            this.yHeadOffs = 16.0f;
-            this.zHeadOffs = 4.0f;
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.6666667f, 0.6666667f, 0.6666667f);
-            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-        }
     }
 
     @Override
@@ -108,16 +74,6 @@ extends QuadrupedModel<T> {
             this.head.z = -16.0f * n - 3.0f * m;
         }
         this.head.xRot += m * (float)Math.PI * 0.15f;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((PolarBear)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((PolarBear)entity), f, g, h, i, j, k);
     }
 }
 

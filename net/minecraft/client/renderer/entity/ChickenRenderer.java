@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Chicken;
 
 @Environment(value=EnvType.CLIENT)
@@ -23,7 +22,7 @@ extends MobRenderer<Chicken, ChickenModel<Chicken>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Chicken chicken) {
+    public ResourceLocation getTextureLocation(Chicken chicken) {
         return CHICKEN_LOCATION;
     }
 
@@ -32,11 +31,6 @@ extends MobRenderer<Chicken, ChickenModel<Chicken>> {
         float g = Mth.lerp(f, chicken.oFlap, chicken.flap);
         float h = Mth.lerp(f, chicken.oFlapSpeed, chicken.flapSpeed);
         return (Mth.sin(g) + 1.0f) * h;
-    }
-
-    @Override
-    protected /* synthetic */ float getBob(LivingEntity livingEntity, float f) {
-        return this.getBob((Chicken)livingEntity, f);
     }
 }
 

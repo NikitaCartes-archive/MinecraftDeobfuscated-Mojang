@@ -5,7 +5,6 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +34,7 @@ import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -337,7 +337,7 @@ extends ObjectSelectionList<WorldListEntry> {
                 Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide", new Object[0]);
                 Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high", new Object[0]);
                 DynamicTexture dynamicTexture2 = new DynamicTexture(nativeImage);
-                this.minecraft.getTextureManager().register(this.iconLocation, (TextureObject)dynamicTexture2);
+                this.minecraft.getTextureManager().register(this.iconLocation, (AbstractTexture)dynamicTexture2);
                 DynamicTexture dynamicTexture = dynamicTexture2;
                 return dynamicTexture;
             } catch (Throwable throwable6) {

@@ -3,14 +3,16 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.math.Quaternion;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BatchedBlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
@@ -18,24 +20,29 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value=EnvType.CLIENT)
 public class LecternRenderer
-extends BatchedBlockEntityRenderer<LecternBlockEntity> {
+extends BlockEntityRenderer<LecternBlockEntity> {
     private final BookModel bookModel = new BookModel();
 
+    public LecternRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
+        super(blockEntityRenderDispatcher);
+    }
+
     @Override
-    protected void renderToBuffer(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k) {
+    public void render(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         BlockState blockState = lecternBlockEntity.getBlockState();
         if (!blockState.getValue(LecternBlock.HAS_BOOK).booleanValue()) {
             return;
         }
-        bufferBuilder.pushPose();
-        bufferBuilder.translate(0.5, 1.0625, 0.5);
+        poseStack.pushPose();
+        poseStack.translate(0.5, 1.0625, 0.5);
         float h = blockState.getValue(LecternBlock.FACING).getClockWise().toYRot();
-        bufferBuilder.multiplyPose(new Quaternion(Vector3f.YP, -h, true));
-        bufferBuilder.multiplyPose(new Quaternion(Vector3f.ZP, 67.5f, true));
-        bufferBuilder.translate(0.0, -0.125, 0.0);
+        poseStack.mulPose(Vector3f.YP.rotation(-h, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(67.5f, true));
+        poseStack.translate(0.0, -0.125, 0.0);
         this.bookModel.setupAnim(0.0f, 0.1f, 0.9f, 1.2f);
-        this.bookModel.render(bufferBuilder, 0.0625f, j, k, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
-        bufferBuilder.popPose();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
+        this.bookModel.render(poseStack, vertexConsumer, 0.0625f, i, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
+        poseStack.popPose();
     }
 }
 

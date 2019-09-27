@@ -3,14 +3,14 @@
  */
 package net.minecraft.client.resources.model;
 
+import com.mojang.math.Transformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.model.BlockModelRotation;
 
 @Environment(value=EnvType.CLIENT)
 public interface ModelState {
-    default public BlockModelRotation getRotation() {
-        return BlockModelRotation.X0_Y0;
+    default public Transformation getRotation() {
+        return Transformation.identity();
     }
 
     default public boolean isUvLocked() {

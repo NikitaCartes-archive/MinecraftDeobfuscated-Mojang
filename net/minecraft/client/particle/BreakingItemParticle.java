@@ -39,7 +39,7 @@ extends TextureSheetParticle {
 
     protected BreakingItemParticle(Level level, double d, double e, double f, ItemStack itemStack) {
         super(level, d, e, f, 0.0, 0.0, 0.0);
-        this.setSprite(Minecraft.getInstance().getItemRenderer().getInHandModel(itemStack, level, null).getParticleIcon());
+        this.setSprite(Minecraft.getInstance().getItemRenderer().getModel(itemStack, level, null).getParticleIcon());
         this.gravity = 1.0f;
         this.quadSize /= 2.0f;
         this.uo = this.random.nextFloat() * 3.0f;

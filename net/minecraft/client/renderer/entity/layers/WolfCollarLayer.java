@@ -3,10 +3,11 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -22,19 +23,12 @@ extends RenderLayer<Wolf, WolfModel<Wolf>> {
     }
 
     @Override
-    public void render(Wolf wolf, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l, float m) {
         if (!wolf.isTame() || wolf.isInvisible()) {
             return;
         }
-        this.bindTexture(WOLF_COLLAR_LOCATION);
         float[] fs = wolf.getCollarColor().getTextureDiffuseColors();
-        RenderSystem.color3f(fs[0], fs[1], fs[2]);
-        ((WolfModel)this.getParentModel()).render(wolf, f, g, i, j, k, l);
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
+        WolfCollarLayer.renderColoredModel(this.getParentModel(), WOLF_COLLAR_LOCATION, poseStack, multiBufferSource, i, wolf, fs[0], fs[1], fs[2]);
     }
 }
 

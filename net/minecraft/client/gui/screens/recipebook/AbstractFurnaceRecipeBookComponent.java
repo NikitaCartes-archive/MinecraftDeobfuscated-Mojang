@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Iterator;
 import java.util.List;
@@ -115,8 +114,6 @@ extends RecipeBookComponent {
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
-        Lighting.turnOnGui();
-        RenderSystem.disableLighting();
         int k = this.fuelSlot.x + i;
         int l = this.fuelSlot.y + j;
         GuiComponent.fill(k, l, k + 16, l + 16, 0x30FF0000);
@@ -124,8 +121,6 @@ extends RecipeBookComponent {
         RenderSystem.depthFunc(516);
         GuiComponent.fill(k, l, k + 16, l + 16, 0x30FFFFFF);
         RenderSystem.depthFunc(515);
-        RenderSystem.enableLighting();
-        Lighting.turnOff();
     }
 
     private Item getFuel() {

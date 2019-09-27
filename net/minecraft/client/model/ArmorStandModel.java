@@ -3,7 +3,9 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
@@ -84,35 +86,16 @@ extends ArmorStandArmorModel {
     }
 
     @Override
-    public void render(ArmorStand armorStand, float f, float g, float h, float i, float j, float k) {
-        super.render(armorStand, f, g, h, i, j, k);
-        RenderSystem.pushMatrix();
-        if (this.young) {
-            float l = 2.0f;
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
-            this.bodyStick1.render(k);
-            this.bodyStick2.render(k);
-            this.shoulderStick.render(k);
-            this.basePlate.render(k);
-        } else {
-            if (armorStand.isCrouching()) {
-                RenderSystem.translatef(0.0f, 0.2f, 0.0f);
-            }
-            this.bodyStick1.render(k);
-            this.bodyStick2.render(k);
-            this.shoulderStick.render(k);
-            this.basePlate.render(k);
-        }
-        RenderSystem.popMatrix();
+    protected Iterable<ModelPart> bodyParts() {
+        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.bodyStick1, this.bodyStick2, this.shoulderStick, this.basePlate));
     }
 
     @Override
-    public void translateToHand(float f, HumanoidArm humanoidArm) {
+    public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
         ModelPart modelPart = this.getArm(humanoidArm);
         boolean bl = modelPart.visible;
         modelPart.visible = true;
-        super.translateToHand(f, humanoidArm);
+        super.translateToHand(f, humanoidArm, poseStack);
         modelPart.visible = bl;
     }
 }

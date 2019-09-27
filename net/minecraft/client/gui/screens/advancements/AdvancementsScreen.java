@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
@@ -129,7 +128,6 @@ implements ClientAdvancements.Listener {
     public void renderWindow(int i, int j) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
-        Lighting.turnOff();
         this.minecraft.getTextureManager().bind(WINDOW_LOCATION);
         this.blit(i, j, 0, 0, 252, 140);
         if (this.tabs.size() > 1) {
@@ -139,7 +137,6 @@ implements ClientAdvancements.Listener {
             }
             RenderSystem.enableRescaleNormal();
             RenderSystem.defaultBlendFunc();
-            Lighting.turnOnGui();
             for (AdvancementTab advancementTab : this.tabs.values()) {
                 advancementTab.drawIcon(i, j, this.itemRenderer);
             }

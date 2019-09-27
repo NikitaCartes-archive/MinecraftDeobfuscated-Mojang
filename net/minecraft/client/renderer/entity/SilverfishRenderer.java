@@ -28,7 +28,7 @@ extends MobRenderer<Silverfish, SilverfishModel<Silverfish>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Silverfish silverfish) {
+    public ResourceLocation getTextureLocation(Silverfish silverfish) {
         return SILVERFISH_LOCATION;
     }
 
@@ -38,7 +38,7 @@ extends MobRenderer<Silverfish, SilverfishModel<Silverfish>> {
     }
 
     @Override
-    protected /* synthetic */ ResourceLocation getTextureLocation(Entity entity) {
+    public /* synthetic */ ResourceLocation getTextureLocation(Entity entity) {
         return this.getTextureLocation((Silverfish)entity);
     }
 }

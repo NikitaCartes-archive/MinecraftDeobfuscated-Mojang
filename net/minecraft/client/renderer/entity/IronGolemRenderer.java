@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IronGolemModel;
@@ -24,20 +25,20 @@ extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(IronGolem ironGolem) {
+    public ResourceLocation getTextureLocation(IronGolem ironGolem) {
         return GOLEM_LOCATION;
     }
 
     @Override
-    protected void setupRotations(IronGolem ironGolem, float f, float g, float h) {
-        super.setupRotations(ironGolem, f, g, h);
+    protected void setupRotations(IronGolem ironGolem, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(ironGolem, poseStack, f, g, h);
         if ((double)ironGolem.animationSpeed < 0.01) {
             return;
         }
         float i = 13.0f;
         float j = ironGolem.animationPosition - ironGolem.animationSpeed * (1.0f - h) + 6.0f;
         float k = (Math.abs(j % 13.0f - 6.5f) - 3.25f) / 3.25f;
-        RenderSystem.rotatef(6.5f * k, 0.0f, 0.0f, 1.0f);
+        poseStack.mulPose(Vector3f.ZP.rotation(6.5f * k, true));
     }
 }
 

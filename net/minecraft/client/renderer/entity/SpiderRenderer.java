@@ -28,7 +28,7 @@ extends MobRenderer<T, SpiderModel<T>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(T spider) {
+    public ResourceLocation getTextureLocation(T spider) {
         return SPIDER_LOCATION;
     }
 }

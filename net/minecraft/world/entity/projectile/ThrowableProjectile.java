@@ -101,9 +101,6 @@ implements Projectile {
     @Override
     public void tick() {
         float h;
-        this.xOld = this.x;
-        this.yOld = this.y;
-        this.zOld = this.z;
         super.tick();
         if (this.shakeTime > 0) {
             --this.shakeTime;
@@ -184,7 +181,7 @@ implements Projectile {
         compoundTag.putInt("yTile", this.yBlock);
         compoundTag.putInt("zTile", this.zBlock);
         compoundTag.putByte("shake", (byte)this.shakeTime);
-        compoundTag.putByte("inGround", (byte)(this.inGround ? 1 : 0));
+        compoundTag.putBoolean("inGround", this.inGround);
         if (this.ownerId != null) {
             compoundTag.put("owner", NbtUtils.createUUIDTag(this.ownerId));
         }
@@ -196,7 +193,7 @@ implements Projectile {
         this.yBlock = compoundTag.getInt("yTile");
         this.zBlock = compoundTag.getInt("zTile");
         this.shakeTime = compoundTag.getByte("shake") & 0xFF;
-        this.inGround = compoundTag.getByte("inGround") == 1;
+        this.inGround = compoundTag.getBoolean("inGround");
         this.owner = null;
         if (compoundTag.contains("owner", 10)) {
             this.ownerId = NbtUtils.loadUUIDTag(compoundTag.getCompound("owner"));

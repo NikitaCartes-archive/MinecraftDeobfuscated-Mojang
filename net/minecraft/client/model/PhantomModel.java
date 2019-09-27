@@ -3,22 +3,22 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class PhantomModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart body;
     private final ModelPart leftWingBase;
     private final ModelPart leftWingTip;
     private final ModelPart rightWingBase;
     private final ModelPart rightWingTip;
-    private final ModelPart head;
     private final ModelPart tailBase;
     private final ModelPart tailTip;
 
@@ -56,18 +56,18 @@ extends EntityModel<T> {
         this.rightWingBase.zRot = -0.1f;
         this.rightWingTip.zRot = -0.1f;
         this.body.xRot = -0.1f;
-        this.head = new ModelPart(this, 0, 0);
-        this.head.addBox(-4.0f, -2.0f, -5.0f, 7.0f, 3.0f, 5.0f);
-        this.head.setPos(0.0f, 1.0f, -7.0f);
-        this.head.xRot = 0.2f;
-        this.body.addChild(this.head);
+        ModelPart modelPart = new ModelPart(this, 0, 0);
+        modelPart.addBox(-4.0f, -2.0f, -5.0f, 7.0f, 3.0f, 5.0f);
+        modelPart.setPos(0.0f, 1.0f, -7.0f);
+        modelPart.xRot = 0.2f;
+        this.body.addChild(modelPart);
         this.body.addChild(this.leftWingBase);
         this.body.addChild(this.rightWingBase);
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.body.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.body);
     }
 
     @Override

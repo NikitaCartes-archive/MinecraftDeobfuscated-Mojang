@@ -23,7 +23,7 @@ extends SkeletonRenderer {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
+    public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
         return STRAY_SKELETON_LOCATION;
     }
 }

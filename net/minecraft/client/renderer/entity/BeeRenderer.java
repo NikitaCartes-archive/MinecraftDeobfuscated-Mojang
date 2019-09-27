@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Bee;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BeeRenderer
@@ -25,8 +24,7 @@ extends MobRenderer<Bee, BeeModel<Bee>> {
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Bee bee) {
+    public ResourceLocation getTextureLocation(Bee bee) {
         if (bee.isAngry()) {
             if (bee.hasNectar()) {
                 return ANGRY_NECTAR_BEE_TEXTURE;

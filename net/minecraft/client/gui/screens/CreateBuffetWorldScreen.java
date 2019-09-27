@@ -90,7 +90,7 @@ extends Screen {
         compoundTag2.putString("type", Registry.BIOME_SOURCE_TYPE.getKey(BiomeSourceType.FIXED).toString());
         CompoundTag compoundTag3 = new CompoundTag();
         ListTag listTag = new ListTag();
-        listTag.add(new StringTag(((BiomeList.Entry)this.list.getSelected()).key.toString()));
+        listTag.add(StringTag.valueOf(((BiomeList.Entry)this.list.getSelected()).key.toString()));
         compoundTag3.put("biomes", listTag);
         compoundTag2.put("options", compoundTag3);
         CompoundTag compoundTag4 = new CompoundTag();

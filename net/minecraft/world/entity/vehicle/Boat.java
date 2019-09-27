@@ -253,9 +253,6 @@ extends Entity {
         if (this.getDamage() > 0.0f) {
             this.setDamage(this.getDamage() - 1.0f);
         }
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
         super.tick();
         this.tickLerp();
         if (this.isControlledByLocalInstance()) {
@@ -351,6 +348,7 @@ extends Entity {
     private void tickLerp() {
         if (this.isControlledByLocalInstance()) {
             this.lerpSteps = 0;
+            this.setPacketCoordinates(this.x, this.y, this.z);
         }
         if (this.lerpSteps <= 0) {
             return;

@@ -21,7 +21,7 @@ extends MobRenderer<Blaze, BlazeModel<Blaze>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Blaze blaze) {
+    public ResourceLocation getTextureLocation(Blaze blaze) {
         return BLAZE_LOCATION;
     }
 }

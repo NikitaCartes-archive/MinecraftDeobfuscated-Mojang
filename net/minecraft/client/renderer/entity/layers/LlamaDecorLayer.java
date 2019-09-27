@@ -3,9 +3,11 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LlamaModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -24,22 +26,19 @@ extends RenderLayer<Llama, LlamaModel<Llama>> {
     }
 
     @Override
-    public void render(Llama llama, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l, float m) {
+        ResourceLocation resourceLocation;
         DyeColor dyeColor = llama.getSwag();
         if (dyeColor != null) {
-            this.bindTexture(TEXTURE_LOCATION[dyeColor.getId()]);
+            resourceLocation = TEXTURE_LOCATION[dyeColor.getId()];
         } else if (llama.isTraderLlama()) {
-            this.bindTexture(TRADER_LLAMA);
+            resourceLocation = TRADER_LLAMA;
         } else {
             return;
         }
         ((LlamaModel)this.getParentModel()).copyPropertiesTo(this.model);
-        this.model.render(llama, f, g, i, j, k, l);
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        this.model.setupAnim(llama, f, g, j, k, l, m);
+        LlamaDecorLayer.renderModel(this.model, resourceLocation, poseStack, multiBufferSource, i, 1.0f, 1.0f, 1.0f);
     }
 }
 

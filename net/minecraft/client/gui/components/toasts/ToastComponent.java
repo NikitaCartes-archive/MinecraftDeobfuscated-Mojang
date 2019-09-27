@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Queues;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Arrays;
 import java.util.Deque;
@@ -32,7 +31,6 @@ extends GuiComponent {
         if (this.minecraft.options.hideGui) {
             return;
         }
-        Lighting.turnOff();
         for (int i = 0; i < this.visible.length; ++i) {
             ToastInstance<?> toastInstance = this.visible[i];
             if (toastInstance != null && toastInstance.render(this.minecraft.getWindow().getGuiScaledWidth(), i)) {

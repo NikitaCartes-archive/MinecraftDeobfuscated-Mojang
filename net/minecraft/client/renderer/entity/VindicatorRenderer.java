@@ -3,9 +3,11 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.IllagerRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -23,16 +25,16 @@ extends IllagerRenderer<Vindicator> {
         this.addLayer(new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>((RenderLayerParent)this){
 
             @Override
-            public void render(Vindicator vindicator, float f, float g, float h, float i, float j, float k, float l) {
+            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Vindicator vindicator, float f, float g, float h, float j, float k, float l, float m) {
                 if (vindicator.isAggressive()) {
-                    super.render(vindicator, f, g, h, i, j, k, l);
+                    super.render(poseStack, multiBufferSource, i, vindicator, f, g, h, j, k, l, m);
                 }
             }
         });
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Vindicator vindicator) {
+    public ResourceLocation getTextureLocation(Vindicator vindicator) {
         return VINDICATOR;
     }
 }

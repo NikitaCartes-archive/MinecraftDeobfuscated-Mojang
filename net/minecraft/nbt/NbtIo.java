@@ -26,6 +26,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagTypes;
 import org.jetbrains.annotations.Nullable;
 
 public class NbtIo {
@@ -105,19 +106,17 @@ public class NbtIo {
     private static Tag readUnnamedTag(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
         byte b = dataInput.readByte();
         if (b == 0) {
-            return new EndTag();
+            return EndTag.INSTANCE;
         }
         dataInput.readUTF();
-        Tag tag = Tag.newTag(b);
         try {
-            tag.load(dataInput, i, nbtAccounter);
+            return TagTypes.getType(b).load(dataInput, i, nbtAccounter);
         } catch (IOException iOException) {
             CrashReport crashReport = CrashReport.forThrowable(iOException, "Loading NBT data");
             CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
             crashReportCategory.setDetail("Tag type", b);
             throw new ReportedException(crashReport);
         }
-        return tag;
     }
 }
 

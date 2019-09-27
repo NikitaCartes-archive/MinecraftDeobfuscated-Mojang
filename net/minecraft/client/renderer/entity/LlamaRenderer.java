@@ -23,7 +23,7 @@ extends MobRenderer<Llama, LlamaModel<Llama>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Llama llama) {
+    public ResourceLocation getTextureLocation(Llama llama) {
         return LLAMA_LOCATIONS[llama.getVariant()];
     }
 }

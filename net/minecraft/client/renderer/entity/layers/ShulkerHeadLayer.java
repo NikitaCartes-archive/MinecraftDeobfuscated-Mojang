@@ -3,14 +3,20 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.ShulkerRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.DyeColor;
 
@@ -22,58 +28,52 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    public void render(Shulker shulker, float f, float g, float h, float i, float j, float k, float l) {
-        RenderSystem.pushMatrix();
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l, float m) {
+        poseStack.pushPose();
         switch (shulker.getAttachFace()) {
             case DOWN: {
                 break;
             }
             case EAST: {
-                RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.translatef(1.0f, -1.0f, 0.0f);
-                RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+                poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
+                poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+                poseStack.translate(1.0, -1.0, 0.0);
+                poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
                 break;
             }
             case WEST: {
-                RenderSystem.rotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.translatef(-1.0f, -1.0f, 0.0f);
-                RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
+                poseStack.mulPose(Vector3f.ZP.rotation(-90.0f, true));
+                poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+                poseStack.translate(-1.0, -1.0, 0.0);
+                poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
                 break;
             }
             case NORTH: {
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.translatef(0.0f, -1.0f, -1.0f);
+                poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+                poseStack.translate(0.0, -1.0, -1.0);
                 break;
             }
             case SOUTH: {
-                RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
-                RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.translatef(0.0f, -1.0f, 1.0f);
+                poseStack.mulPose(Vector3f.ZP.rotation(180.0f, true));
+                poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+                poseStack.translate(0.0, -1.0, 1.0);
                 break;
             }
             case UP: {
-                RenderSystem.rotatef(180.0f, 1.0f, 0.0f, 0.0f);
-                RenderSystem.translatef(0.0f, -2.0f, 0.0f);
+                poseStack.mulPose(Vector3f.XP.rotation(180.0f, true));
+                poseStack.translate(0.0, -2.0, 0.0);
             }
         }
         ModelPart modelPart = ((ShulkerModel)this.getParentModel()).getHead();
-        modelPart.yRot = j * ((float)Math.PI / 180);
-        modelPart.xRot = k * ((float)Math.PI / 180);
+        modelPart.yRot = k * ((float)Math.PI / 180);
+        modelPart.xRot = l * ((float)Math.PI / 180);
         DyeColor dyeColor = shulker.getColor();
-        if (dyeColor == null) {
-            this.bindTexture(ShulkerRenderer.DEFAULT_TEXTURE_LOCATION);
-        } else {
-            this.bindTexture(ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()]);
-        }
-        modelPart.render(l);
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        ResourceLocation resourceLocation = dyeColor == null ? ShulkerRenderer.DEFAULT_TEXTURE_LOCATION : ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()];
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(resourceLocation));
+        LivingEntityRenderer.setOverlayCoords(shulker, vertexConsumer, 0.0f);
+        modelPart.render(poseStack, vertexConsumer, m, i, null);
+        vertexConsumer.unsetDefaultOverlayCoords();
+        poseStack.popPose();
     }
 }
 

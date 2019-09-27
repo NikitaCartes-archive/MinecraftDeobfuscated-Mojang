@@ -3,19 +3,18 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ColorableAgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(value=EnvType.CLIENT)
 public class WolfModel<T extends Wolf>
-extends EntityModel<T> {
+extends ColorableAgeableListModel<T> {
     private final ModelPart head;
     private final ModelPart realHead;
     private final ModelPart body;
@@ -64,36 +63,13 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T wolf, float f, float g, float h, float i, float j, float k) {
-        super.render(wolf, f, g, h, i, j, k);
-        this.setupAnim(wolf, f, g, h, i, j, k);
-        if (this.young) {
-            float l = 2.0f;
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, 5.0f * k, 2.0f * k);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 24.0f * k, 0.0f);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            this.tail.render(k);
-            this.upperBody.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            this.tail.render(k);
-            this.upperBody.render(k);
-        }
+    protected Iterable<ModelPart> headParts() {
+        return ImmutableList.of(this.head);
+    }
+
+    @Override
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.tail, this.upperBody);
     }
 
     @Override
@@ -137,20 +113,9 @@ extends EntityModel<T> {
 
     @Override
     public void setupAnim(T wolf, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(wolf, f, g, h, i, j, k);
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
         this.tail.xRot = h;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((Wolf)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((Wolf)entity), f, g, h, i, j, k);
     }
 }
 

@@ -79,13 +79,11 @@ public class LocationPredicate {
             return false;
         }
         BlockPos blockPos = new BlockPos(f, g, h);
-        if (!serverLevel.isLoaded(blockPos)) {
+        boolean bl = serverLevel.isLoaded(blockPos);
+        if (!(this.biome == null || bl && this.biome == serverLevel.getBiome(blockPos))) {
             return false;
         }
-        if (this.biome != null && this.biome != serverLevel.getBiome(blockPos)) {
-            return false;
-        }
-        if (this.feature != null && !this.feature.isInsideFeature(serverLevel, blockPos)) {
+        if (!(this.feature == null || bl && this.feature.isInsideFeature(serverLevel, blockPos))) {
             return false;
         }
         if (!this.light.matches(serverLevel, blockPos)) {

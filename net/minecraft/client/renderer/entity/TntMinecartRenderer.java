@@ -3,17 +3,19 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MinecartRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,32 +26,28 @@ extends MinecartRenderer<MinecartTNT> {
     }
 
     @Override
-    protected void renderMinecartContents(MinecartTNT minecartTNT, float f, BlockState blockState) {
-        int i = minecartTNT.getFuse();
-        if (i > -1 && (float)i - f + 1.0f < 10.0f) {
-            float g = 1.0f - ((float)i - f + 1.0f) / 10.0f;
+    protected void renderMinecartContents(MinecartTNT minecartTNT, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        int j = minecartTNT.getFuse();
+        if (j > -1 && (float)j - f + 1.0f < 10.0f) {
+            float g = 1.0f - ((float)j - f + 1.0f) / 10.0f;
             g = Mth.clamp(g, 0.0f, 1.0f);
             g *= g;
             g *= g;
             float h = 1.0f + g * 0.3f;
-            RenderSystem.scalef(h, h, h);
+            poseStack.scale(h, h, h);
         }
-        super.renderMinecartContents(minecartTNT, f, blockState);
-        if (i > -1 && i / 5 % 2 == 0) {
-            BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
-            RenderSystem.disableTexture();
-            RenderSystem.disableLighting();
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.DST_ALPHA);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, (1.0f - ((float)i - f + 1.0f) / 100.0f) * 0.8f);
-            RenderSystem.pushMatrix();
-            blockRenderDispatcher.renderSingleBlock(Blocks.TNT.defaultBlockState(), 1.0f);
-            RenderSystem.popMatrix();
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.disableBlend();
-            RenderSystem.enableLighting();
-            RenderSystem.enableTexture();
+        if (j > -1 && j / 5 % 2 == 0) {
+            TntMinecartRenderer.renderWhiteSolidBlock(blockState, poseStack, multiBufferSource, i);
+        } else {
+            Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
         }
+    }
+
+    public static void renderWhiteSolidBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TextureAtlas.LOCATION_BLOCKS));
+        vertexConsumer.defaultOverlayCoords(OverlayTexture.u(1.0f), 10);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, renderType -> renderType == RenderType.SOLID ? vertexConsumer : multiBufferSource.getBuffer(renderType), i, 0, 10);
+        vertexConsumer.unsetDefaultOverlayCoords();
     }
 }
 

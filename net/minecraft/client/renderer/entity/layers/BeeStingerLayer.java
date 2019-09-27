@@ -3,16 +3,18 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.StuckInBodyLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -33,57 +35,32 @@ extends StuckInBodyLayer<T, M> {
     }
 
     @Override
-    protected void preRenderStuckItem(T livingEntity) {
-        Lighting.turnOff();
-        RenderSystem.pushMatrix();
-        this.bindTexture(BEE_STINGER_LOCATION);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableLighting();
-        RenderSystem.enableRescaleNormal();
-    }
-
-    @Override
-    protected void postRenderStuckItem() {
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.enableLighting();
-        RenderSystem.popMatrix();
-        Lighting.turnOn();
-    }
-
-    @Override
-    protected void renderStuckItem(Entity entity, float f, float g, float h, float i) {
-        RenderSystem.pushMatrix();
+    protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, float h, float i) {
         float j = Mth.sqrt(f * f + h * h);
         float k = (float)(Math.atan2(f, h) * 57.2957763671875);
         float l = (float)(Math.atan2(g, j) * 57.2957763671875);
-        RenderSystem.translatef(0.0f, 0.0f, 0.0f);
-        RenderSystem.rotatef(k - 90.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(l, 0.0f, 0.0f, 1.0f);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        poseStack.translate(0.0, 0.0, 0.0);
+        poseStack.mulPose(Vector3f.YP.rotation(k - 90.0f, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(l, true));
         float m = 0.0f;
         float n = 0.125f;
         float o = 0.0f;
         float p = 0.0625f;
         float q = 0.03125f;
-        RenderSystem.rotatef(45.0f, 1.0f, 0.0f, 0.0f);
-        RenderSystem.scalef(0.03125f, 0.03125f, 0.03125f);
-        RenderSystem.translatef(2.5f, 0.0f, 0.0f);
+        poseStack.mulPose(Vector3f.XP.rotation(45.0f, true));
+        poseStack.scale(0.03125f, 0.03125f, 0.03125f);
+        poseStack.translate(2.5, 0.0, 0.0);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(BEE_STINGER_LOCATION));
+        OverlayTexture.setDefault(vertexConsumer);
         for (int r = 0; r < 4; ++r) {
-            RenderSystem.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(-4.5, -1.0, 0.0).uv(0.0, 0.0).endVertex();
-            bufferBuilder.vertex(4.5, -1.0, 0.0).uv(0.125, 0.0).endVertex();
-            bufferBuilder.vertex(4.5, 1.0, 0.0).uv(0.125, 0.0625).endVertex();
-            bufferBuilder.vertex(-4.5, 1.0, 0.0).uv(0.0, 0.0625).endVertex();
-            tesselator.end();
+            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+            Matrix4f matrix4f = poseStack.getPose();
+            vertexConsumer.vertex(matrix4f, -4.5f, -1.0f, 0.0f).uv(0.0f, 0.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, 4.5f, -1.0f, 0.0f).uv(0.125f, 0.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, 4.5f, 1.0f, 0.0f).uv(0.125f, 0.0625f).endVertex();
+            vertexConsumer.vertex(matrix4f, -4.5f, 1.0f, 0.0f).uv(0.0f, 0.0625f).endVertex();
         }
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        vertexConsumer.unsetDefaultOverlayCoords();
     }
 }
 

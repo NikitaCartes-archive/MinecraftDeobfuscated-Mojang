@@ -3,23 +3,30 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.QuadrupedModel;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgableMob;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(value=EnvType.CLIENT)
 public class LlamaModel<T extends AbstractChestedHorse>
-extends QuadrupedModel<T> {
+extends EntityModel<T> {
+    private final ModelPart head;
+    private final ModelPart body;
+    private final ModelPart leg0;
+    private final ModelPart leg1;
+    private final ModelPart leg2;
+    private final ModelPart leg3;
     private final ModelPart chest1;
     private final ModelPart chest2;
 
     public LlamaModel(float f) {
-        super(15, f);
         this.texWidth = 128;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 0);
@@ -61,55 +68,46 @@ extends QuadrupedModel<T> {
         this.leg3.x += 1.0f;
         this.leg2.z -= 1.0f;
         this.leg3.z -= 1.0f;
-        this.zHeadOffs += 2.0f;
     }
 
     @Override
-    public void render(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
-        boolean bl = !((AgableMob)abstractChestedHorse).isBaby() && ((AbstractChestedHorse)abstractChestedHorse).hasChest();
-        this.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
+    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+        boolean bl;
+        this.head.xRot = j * ((float)Math.PI / 180);
+        this.head.yRot = i * ((float)Math.PI / 180);
+        this.body.xRot = 1.5707964f;
+        this.leg0.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+        this.leg2.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g;
+        this.leg3.xRot = Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.chest1.visible = bl = !((AgableMob)abstractChestedHorse).isBaby() && ((AbstractChestedHorse)abstractChestedHorse).hasChest();
+        this.chest2.visible = bl;
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
         if (this.young) {
-            float l = 2.0f;
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(0.0f, this.yHeadOffs * k, this.zHeadOffs * k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            float m = 0.7f;
-            RenderSystem.scalef(0.71428573f, 0.64935064f, 0.7936508f);
-            RenderSystem.translatef(0.0f, 21.0f * k, 0.22f);
-            this.head.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            float n = 1.1f;
-            RenderSystem.scalef(0.625f, 0.45454544f, 0.45454544f);
-            RenderSystem.translatef(0.0f, 33.0f * k, 0.0f);
-            this.body.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.45454544f, 0.41322312f, 0.45454544f);
-            RenderSystem.translatef(0.0f, 33.0f * k, 0.0f);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
-            RenderSystem.popMatrix();
+            float j = 2.0f;
+            poseStack.pushPose();
+            float k = 0.7f;
+            poseStack.scale(0.71428573f, 0.64935064f, 0.7936508f);
+            poseStack.translate(0.0, 1.3125, 0.22f);
+            this.head.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h);
+            poseStack.popPose();
+            poseStack.pushPose();
+            float l = 1.1f;
+            poseStack.scale(0.625f, 0.45454544f, 0.45454544f);
+            poseStack.translate(0.0, 2.0625, 0.0);
+            this.body.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h);
+            poseStack.popPose();
+            poseStack.pushPose();
+            poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
+            poseStack.translate(0.0, 2.0625, 0.0);
+            ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h));
+            poseStack.popPose();
         } else {
-            this.head.render(k);
-            this.body.render(k);
-            this.leg0.render(k);
-            this.leg1.render(k);
-            this.leg2.render(k);
-            this.leg3.render(k);
+            ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h));
         }
-        if (bl) {
-            this.chest1.render(k);
-            this.chest2.render(k);
-        }
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((AbstractChestedHorse)entity), f, g, h, i, j, k);
     }
 }
 

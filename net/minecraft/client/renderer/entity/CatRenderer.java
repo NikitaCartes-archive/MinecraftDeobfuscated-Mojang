@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,7 +18,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class CatRenderer
@@ -28,29 +28,28 @@ extends MobRenderer<Cat, CatModel<Cat>> {
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Cat cat) {
+    public ResourceLocation getTextureLocation(Cat cat) {
         return cat.getResourceLocation();
     }
 
     @Override
-    protected void scale(Cat cat, float f) {
-        super.scale(cat, f);
-        RenderSystem.scalef(0.8f, 0.8f, 0.8f);
+    protected void scale(Cat cat, PoseStack poseStack, float f) {
+        super.scale(cat, poseStack, f);
+        poseStack.scale(0.8f, 0.8f, 0.8f);
     }
 
     @Override
-    protected void setupRotations(Cat cat, float f, float g, float h) {
-        super.setupRotations(cat, f, g, h);
+    protected void setupRotations(Cat cat, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(cat, poseStack, f, g, h);
         float i = cat.getLieDownAmount(h);
         if (i > 0.0f) {
-            RenderSystem.translatef(0.4f * i, 0.15f * i, 0.1f * i);
-            RenderSystem.rotatef(Mth.rotLerp(i, 0.0f, 90.0f), 0.0f, 0.0f, 1.0f);
+            poseStack.translate(0.4f * i, 0.15f * i, 0.1f * i);
+            poseStack.mulPose(Vector3f.ZP.rotation(Mth.rotLerp(i, 0.0f, 90.0f), true));
             BlockPos blockPos = new BlockPos(cat);
             List<Player> list = cat.level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0));
             for (Player player : list) {
                 if (!player.isSleeping()) continue;
-                RenderSystem.translatef(0.15f * i, 0.0f, 0.0f);
+                poseStack.translate(0.15f * i, 0.0, 0.0);
                 break;
             }
         }

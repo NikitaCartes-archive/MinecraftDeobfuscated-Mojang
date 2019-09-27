@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -106,7 +105,6 @@ implements RecipeUpdateListener {
     }
 
     public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
-        RenderSystem.enableColorMaterial();
         RenderSystem.pushMatrix();
         RenderSystem.translatef(i, j, 50.0f);
         RenderSystem.scalef(-k, k, k);
@@ -116,9 +114,6 @@ implements RecipeUpdateListener {
         float m = livingEntity.xRot;
         float n = livingEntity.yHeadRotO;
         float o = livingEntity.yHeadRot;
-        RenderSystem.rotatef(135.0f, 0.0f, 1.0f, 0.0f);
-        Lighting.turnOn();
-        RenderSystem.rotatef(-135.0f, 0.0f, 1.0f, 0.0f);
         RenderSystem.rotatef(-((float)Math.atan(g / 40.0f)) * 20.0f, 1.0f, 0.0f, 0.0f);
         livingEntity.yBodyRot = (float)Math.atan(f / 40.0f) * 20.0f;
         livingEntity.yRot = (float)Math.atan(f / 40.0f) * 40.0f;
@@ -129,7 +124,7 @@ implements RecipeUpdateListener {
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         entityRenderDispatcher.setPlayerRotY(180.0f);
         entityRenderDispatcher.setRenderShadow(false);
-        entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, false);
+        entityRenderDispatcher.render(livingEntity, 1.0f);
         entityRenderDispatcher.setRenderShadow(true);
         livingEntity.yBodyRot = h;
         livingEntity.yRot = l;
@@ -137,11 +132,7 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRotO = n;
         livingEntity.yHeadRot = o;
         RenderSystem.popMatrix();
-        Lighting.turnOff();
         RenderSystem.disableRescaleNormal();
-        RenderSystem.activeTexture(33985);
-        RenderSystem.disableTexture();
-        RenderSystem.activeTexture(33984);
     }
 
     @Override

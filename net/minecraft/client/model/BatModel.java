@@ -3,17 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ambient.Bat;
 
 @Environment(value=EnvType.CLIENT)
 public class BatModel
-extends EntityModel<Bat> {
+extends ListModel<Bat> {
     private final ModelPart head;
     private final ModelPart body;
     private final ModelPart rightWing;
@@ -55,10 +55,8 @@ extends EntityModel<Bat> {
     }
 
     @Override
-    public void render(Bat bat, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(bat, f, g, h, i, j, k);
-        this.head.render(k);
-        this.body.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.head, this.body);
     }
 
     @Override
@@ -91,16 +89,6 @@ extends EntityModel<Bat> {
             this.rightWingTip.yRot = this.rightWing.yRot * 0.5f;
             this.leftWingTip.yRot = -this.rightWing.yRot * 0.5f;
         }
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Bat)entity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((Bat)entity, f, g, h, i, j, k);
     }
 }
 

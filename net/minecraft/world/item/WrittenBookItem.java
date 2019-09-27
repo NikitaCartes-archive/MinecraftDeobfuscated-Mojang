@@ -123,7 +123,7 @@ extends Item {
             } catch (Exception exception) {
                 component = new TextComponent(string);
             }
-            listTag.set(i, new StringTag(Component.Serializer.toJson(component)));
+            listTag.set(i, StringTag.valueOf(Component.Serializer.toJson(component)));
         }
         compoundTag.put("pages", listTag);
         return true;

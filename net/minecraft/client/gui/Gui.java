@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -309,7 +308,6 @@ extends GuiComponent {
             }
         }
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableLighting();
         RenderSystem.enableAlphaTest();
     }
 
@@ -457,7 +455,6 @@ extends GuiComponent {
         RenderSystem.enableRescaleNormal();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        Lighting.turnOnGui();
         for (m = 0; m < 9; ++m) {
             n = i - 90 + m * 20 + 2;
             o = this.screenHeight - 16 - 3;
@@ -483,7 +480,6 @@ extends GuiComponent {
             this.blit(o, n, 0, 94, 18, 18);
             this.blit(o, n + 18 - p, 18, 112 - p, 18, p);
         }
-        Lighting.turnOff();
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableBlend();
     }
@@ -844,10 +840,10 @@ extends GuiComponent {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0, 1.0).endVertex();
-        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0, 1.0).endVertex();
-        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0, 0.0).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0, 0.0).endVertex();
+        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0f, 0.0f).endVertex();
         tesselator.end();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
@@ -881,10 +877,10 @@ extends GuiComponent {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0, 1.0).endVertex();
-        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0, 1.0).endVertex();
-        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0, 0.0).endVertex();
-        bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0, 0.0).endVertex();
+        bufferBuilder.vertex(0.0, this.screenHeight, -90.0).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(this.screenWidth, 0.0, -90.0).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0f, 0.0f).endVertex();
         tesselator.end();
         RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();

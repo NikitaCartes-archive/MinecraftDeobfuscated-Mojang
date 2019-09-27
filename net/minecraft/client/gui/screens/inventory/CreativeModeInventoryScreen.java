@@ -6,7 +6,6 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.List;
@@ -550,7 +549,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             this.renderTooltip(I18n.get("inventory.binSlot", new Object[0]), i, j);
         }
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableLighting();
         this.renderTooltip(i, j);
     }
 
@@ -597,7 +595,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     @Override
     protected void renderBg(float f, int i, int j) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        Lighting.turnOnGui();
         CreativeModeTab creativeModeTab = CreativeModeTab.TABS[selectedTab];
         for (CreativeModeTab creativeModeTab2 : CreativeModeTab.TABS) {
             this.minecraft.getTextureManager().bind(CREATIVE_TABS_LOCATION);
@@ -674,17 +671,14 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             k += 64;
             m += this.imageHeight - 4;
         }
-        RenderSystem.disableLighting();
         this.blit(l, m, j, k, 28, 32);
         this.setBlitOffset(100);
         this.itemRenderer.blitOffset = 100.0f;
         int n2 = bl2 ? 1 : -1;
-        RenderSystem.enableLighting();
         RenderSystem.enableRescaleNormal();
         ItemStack itemStack = creativeModeTab.getIconItem();
         this.itemRenderer.renderAndDecorateItem(itemStack, l += 6, m += 8 + n2);
         this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, l, m);
-        RenderSystem.disableLighting();
         this.itemRenderer.blitOffset = 0.0f;
         this.setBlitOffset(0);
     }

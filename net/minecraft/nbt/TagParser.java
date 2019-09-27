@@ -27,6 +27,7 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public class TagParser {
@@ -75,7 +76,7 @@ public class TagParser {
         this.reader.skipWhitespace();
         int i = this.reader.getCursor();
         if (StringReader.isQuotedStringStart(this.reader.peek())) {
-            return new StringTag(this.reader.readQuotedString());
+            return StringTag.valueOf(this.reader.readQuotedString());
         }
         String string = this.reader.readUnquotedString();
         if (string.isEmpty()) {
@@ -88,36 +89,36 @@ public class TagParser {
     private Tag type(String string) {
         try {
             if (FLOAT_PATTERN.matcher(string).matches()) {
-                return new FloatTag(Float.parseFloat(string.substring(0, string.length() - 1)));
+                return FloatTag.valueOf(Float.parseFloat(string.substring(0, string.length() - 1)));
             }
             if (BYTE_PATTERN.matcher(string).matches()) {
-                return new ByteTag(Byte.parseByte(string.substring(0, string.length() - 1)));
+                return ByteTag.valueOf(Byte.parseByte(string.substring(0, string.length() - 1)));
             }
             if (LONG_PATTERN.matcher(string).matches()) {
-                return new LongTag(Long.parseLong(string.substring(0, string.length() - 1)));
+                return LongTag.valueOf(Long.parseLong(string.substring(0, string.length() - 1)));
             }
             if (SHORT_PATTERN.matcher(string).matches()) {
-                return new ShortTag(Short.parseShort(string.substring(0, string.length() - 1)));
+                return ShortTag.valueOf(Short.parseShort(string.substring(0, string.length() - 1)));
             }
             if (INT_PATTERN.matcher(string).matches()) {
-                return new IntTag(Integer.parseInt(string));
+                return IntTag.valueOf(Integer.parseInt(string));
             }
             if (DOUBLE_PATTERN.matcher(string).matches()) {
-                return new DoubleTag(Double.parseDouble(string.substring(0, string.length() - 1)));
+                return DoubleTag.valueOf(Double.parseDouble(string.substring(0, string.length() - 1)));
             }
             if (DOUBLE_PATTERN_NOSUFFIX.matcher(string).matches()) {
-                return new DoubleTag(Double.parseDouble(string));
+                return DoubleTag.valueOf(Double.parseDouble(string));
             }
             if ("true".equalsIgnoreCase(string)) {
-                return new ByteTag(1);
+                return ByteTag.ONE;
             }
             if ("false".equalsIgnoreCase(string)) {
-                return new ByteTag(0);
+                return ByteTag.ZERO;
             }
         } catch (NumberFormatException numberFormatException) {
             // empty catch block
         }
-        return new StringTag(string);
+        return StringTag.valueOf(string);
     }
 
     public Tag readValue() throws CommandSyntaxException {
@@ -170,16 +171,16 @@ public class TagParser {
             throw ERROR_EXPECTED_VALUE.createWithContext(this.reader);
         }
         ListTag listTag = new ListTag();
-        byte i = -1;
+        TagType<?> tagType = null;
         while (this.reader.peek() != ']') {
-            int j = this.reader.getCursor();
+            int i = this.reader.getCursor();
             Tag tag = this.readValue();
-            byte k = tag.getId();
-            if (i < 0) {
-                i = k;
-            } else if (k != i) {
-                this.reader.setCursor(j);
-                throw ERROR_INSERT_MIXED_LIST.createWithContext(this.reader, Tag.getTagTypeName(k), Tag.getTagTypeName(i));
+            TagType<?> tagType2 = tag.getType();
+            if (tagType == null) {
+                tagType = tagType2;
+            } else if (tagType2 != tagType) {
+                this.reader.setCursor(i);
+                throw ERROR_INSERT_MIXED_LIST.createWithContext(this.reader, tagType2.getPrettyName(), tagType.getPrettyName());
             }
             listTag.add(tag);
             if (!this.hasElementSeparator()) break;
@@ -200,31 +201,31 @@ public class TagParser {
             throw ERROR_EXPECTED_VALUE.createWithContext(this.reader);
         }
         if (c == 'B') {
-            return new ByteArrayTag(this.readArray((byte)7, (byte)1));
+            return new ByteArrayTag(this.readArray(ByteArrayTag.TYPE, ByteTag.TYPE));
         }
         if (c == 'L') {
-            return new LongArrayTag(this.readArray((byte)12, (byte)4));
+            return new LongArrayTag(this.readArray(LongArrayTag.TYPE, LongTag.TYPE));
         }
         if (c == 'I') {
-            return new IntArrayTag(this.readArray((byte)11, (byte)3));
+            return new IntArrayTag(this.readArray(IntArrayTag.TYPE, IntTag.TYPE));
         }
         this.reader.setCursor(i);
         throw ERROR_INVALID_ARRAY.createWithContext(this.reader, String.valueOf(c));
     }
 
-    private <T extends Number> List<T> readArray(byte b, byte c) throws CommandSyntaxException {
+    private <T extends Number> List<T> readArray(TagType<?> tagType, TagType<?> tagType2) throws CommandSyntaxException {
         ArrayList<Number> list = Lists.newArrayList();
         while (this.reader.peek() != ']') {
             int i = this.reader.getCursor();
             Tag tag = this.readValue();
-            byte j = tag.getId();
-            if (j != c) {
+            TagType<?> tagType3 = tag.getType();
+            if (tagType3 != tagType2) {
                 this.reader.setCursor(i);
-                throw ERROR_INSERT_MIXED_ARRAY.createWithContext(this.reader, Tag.getTagTypeName(j), Tag.getTagTypeName(b));
+                throw ERROR_INSERT_MIXED_ARRAY.createWithContext(this.reader, tagType3.getPrettyName(), tagType.getPrettyName());
             }
-            if (c == 1) {
+            if (tagType2 == ByteTag.TYPE) {
                 list.add(((NumericTag)tag).getAsByte());
-            } else if (c == 4) {
+            } else if (tagType2 == LongTag.TYPE) {
                 list.add(((NumericTag)tag).getAsLong());
             } else {
                 list.add(((NumericTag)tag).getAsInt());

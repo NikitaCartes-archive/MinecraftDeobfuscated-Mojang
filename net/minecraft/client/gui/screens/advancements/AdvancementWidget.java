@@ -4,7 +4,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +129,6 @@ extends GuiComponent {
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.enableBlend();
             this.blit(i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
-            Lighting.turnOnGui();
             this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
         }
         for (AdvancementWidget advancementWidget : this.children) {
@@ -213,7 +211,6 @@ extends GuiComponent {
                 this.minecraft.font.draw(this.description.get(s), q + 5, j + this.y + 9 + 17 + s * this.minecraft.font.lineHeight, -5592406);
             }
         }
-        Lighting.turnOnGui();
         this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
     }
 

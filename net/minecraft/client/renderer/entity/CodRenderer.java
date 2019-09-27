@@ -3,7 +3,8 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CodModel;
@@ -12,7 +13,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Cod;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class CodRenderer
@@ -24,19 +24,18 @@ extends MobRenderer<Cod, CodModel<Cod>> {
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(Cod cod) {
+    public ResourceLocation getTextureLocation(Cod cod) {
         return COD_LOCATION;
     }
 
     @Override
-    protected void setupRotations(Cod cod, float f, float g, float h) {
-        super.setupRotations(cod, f, g, h);
+    protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h) {
+        super.setupRotations(cod, poseStack, f, g, h);
         float i = 4.3f * Mth.sin(0.6f * f);
-        RenderSystem.rotatef(i, 0.0f, 1.0f, 0.0f);
+        poseStack.mulPose(Vector3f.YP.rotation(i, true));
         if (!cod.isInWater()) {
-            RenderSystem.translatef(0.1f, 0.1f, -0.1f);
-            RenderSystem.rotatef(90.0f, 0.0f, 0.0f, 1.0f);
+            poseStack.translate(0.1f, 0.1f, -0.1f);
+            poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
         }
     }
 }

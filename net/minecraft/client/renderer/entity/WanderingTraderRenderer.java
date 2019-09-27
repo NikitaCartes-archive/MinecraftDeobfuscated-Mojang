@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
@@ -26,14 +26,14 @@ extends MobRenderer<WanderingTrader, VillagerModel<WanderingTrader>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(WanderingTrader wanderingTrader) {
+    public ResourceLocation getTextureLocation(WanderingTrader wanderingTrader) {
         return VILLAGER_BASE_SKIN;
     }
 
     @Override
-    protected void scale(WanderingTrader wanderingTrader, float f) {
+    protected void scale(WanderingTrader wanderingTrader, PoseStack poseStack, float f) {
         float g = 0.9375f;
-        RenderSystem.scalef(0.9375f, 0.9375f, 0.9375f);
+        poseStack.scale(0.9375f, 0.9375f, 0.9375f);
     }
 }
 

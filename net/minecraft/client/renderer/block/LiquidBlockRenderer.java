@@ -3,7 +3,7 @@
  */
 package net.minecraft.client.renderer.block;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -59,14 +59,15 @@ public class LiquidBlockRenderer {
         return false;
     }
 
-    public boolean tesselate(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos, BufferBuilder bufferBuilder, FluidState fluidState) {
-        float al;
-        float ak;
+    public boolean tesselate(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos, VertexConsumer vertexConsumer, FluidState fluidState) {
         float aj;
-        float af;
+        float ai;
+        float ah;
         float aa;
         float z;
+        float y;
         float x;
+        float w;
         float v;
         float t;
         boolean bl7;
@@ -94,17 +95,15 @@ public class LiquidBlockRenderer {
         float o = this.getWaterHeight(blockAndBiomeGetter, blockPos.south(), fluidState.getType());
         float p = this.getWaterHeight(blockAndBiomeGetter, blockPos.east().south(), fluidState.getType());
         float q = this.getWaterHeight(blockAndBiomeGetter, blockPos.east(), fluidState.getType());
-        double d = blockPos.getX();
-        double e = blockPos.getY();
-        double r = blockPos.getZ();
+        double d = blockPos.getX() & 0xF;
+        double e = blockPos.getY() & 0xF;
+        double r = blockPos.getZ() & 0xF;
         float s = 0.001f;
         if (bl2 && !LiquidBlockRenderer.isFaceOccluded(blockAndBiomeGetter, blockPos, Direction.UP, Math.min(Math.min(n, o), Math.min(p, q)))) {
             float ae;
             float ad;
             float ac;
             float ab;
-            float y;
-            float w;
             float u;
             TextureAtlasSprite textureAtlasSprite;
             bl82 = true;
@@ -138,7 +137,7 @@ public class LiquidBlockRenderer {
                 z = textureAtlasSprite.getU(8.0f + (ad - ac) * 16.0f);
                 aa = textureAtlasSprite.getV(8.0f + (-ad - ac) * 16.0f);
             }
-            af = (t + v + x + z) / 4.0f;
+            float af = (t + v + x + z) / 4.0f;
             ab = (u + w + y + aa) / 4.0f;
             ac = (float)textureAtlasSprites[0].getWidth() / (textureAtlasSprites[0].getU1() - textureAtlasSprites[0].getU0());
             ad = (float)textureAtlasSprites[0].getHeight() / (textureAtlasSprites[0].getV1() - textureAtlasSprites[0].getV0());
@@ -152,20 +151,18 @@ public class LiquidBlockRenderer {
             y = Mth.lerp(ae, y, ab);
             aa = Mth.lerp(ae, aa, ab);
             int ag = this.getLightColor(blockAndBiomeGetter, blockPos);
-            int ah = ag >> 16 & 0xFFFF;
-            int ai = ag & 0xFFFF;
-            aj = 1.0f * f;
-            ak = 1.0f * g;
-            al = 1.0f * h;
-            bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+            ah = 1.0f * f;
+            ai = 1.0f * g;
+            aj = 1.0f * h;
+            this.vertex(vertexConsumer, d + 0.0, e + (double)n, r + 0.0, ah, ai, aj, t, u, ag);
+            this.vertex(vertexConsumer, d + 0.0, e + (double)o, r + 1.0, ah, ai, aj, v, w, ag);
+            this.vertex(vertexConsumer, d + 1.0, e + (double)p, r + 1.0, ah, ai, aj, x, y, ag);
+            this.vertex(vertexConsumer, d + 1.0, e + (double)q, r + 0.0, ah, ai, aj, z, aa, ag);
             if (fluidState.shouldRenderBackwardUpFace(blockAndBiomeGetter, blockPos.above())) {
-                bufferBuilder.vertex(d + 0.0, e + (double)n, r + 0.0).color(aj, ak, al, 1.0f).uv(t, u).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-                bufferBuilder.vertex(d + 1.0, e + (double)q, r + 0.0).color(aj, ak, al, 1.0f).uv(z, aa).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-                bufferBuilder.vertex(d + 1.0, e + (double)p, r + 1.0).color(aj, ak, al, 1.0f).uv(x, y).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
-                bufferBuilder.vertex(d + 0.0, e + (double)o, r + 1.0).color(aj, ak, al, 1.0f).uv(v, w).uv2(ah, ai).normal(0.0f, 1.0f, 0.0f).endVertex();
+                this.vertex(vertexConsumer, d + 0.0, e + (double)n, r + 0.0, ah, ai, aj, t, u, ag);
+                this.vertex(vertexConsumer, d + 1.0, e + (double)q, r + 0.0, ah, ai, aj, z, aa, ag);
+                this.vertex(vertexConsumer, d + 1.0, e + (double)p, r + 1.0, ah, ai, aj, x, y, ag);
+                this.vertex(vertexConsumer, d + 0.0, e + (double)o, r + 1.0, ah, ai, aj, v, w, ag);
             }
         }
         if (bl3) {
@@ -173,60 +170,58 @@ public class LiquidBlockRenderer {
             v = textureAtlasSprites[0].getU1();
             x = textureAtlasSprites[0].getV0();
             z = textureAtlasSprites[0].getV1();
-            int am = this.getLightColor(blockAndBiomeGetter, blockPos.below());
-            int an = am >> 16 & 0xFFFF;
-            int ao = am & 0xFFFF;
-            aa = 0.5f * f;
-            float ap = 0.5f * g;
-            af = 0.5f * h;
-            bufferBuilder.vertex(d, e, r + 1.0).color(aa, ap, af, 1.0f).uv(t, z).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d, e, r).color(aa, ap, af, 1.0f).uv(t, x).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d + 1.0, e, r).color(aa, ap, af, 1.0f).uv(v, x).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(d + 1.0, e, r + 1.0).color(aa, ap, af, 1.0f).uv(v, z).uv2(an, ao).normal(0.0f, 1.0f, 0.0f).endVertex();
+            int ak = this.getLightColor(blockAndBiomeGetter, blockPos.below());
+            w = 0.5f * f;
+            y = 0.5f * g;
+            aa = 0.5f * h;
+            this.vertex(vertexConsumer, d, e, r + 1.0, w, y, aa, t, z, ak);
+            this.vertex(vertexConsumer, d, e, r, w, y, aa, t, x, ak);
+            this.vertex(vertexConsumer, d + 1.0, e, r, w, y, aa, v, x, ak);
+            this.vertex(vertexConsumer, d + 1.0, e, r + 1.0, w, y, aa, v, z, ak);
             bl82 = true;
         }
-        for (int aq = 0; aq < 4; ++aq) {
+        for (int al = 0; al < 4; ++al) {
             Block block;
             boolean bl9;
             Direction direction;
-            double au;
-            double at;
-            double as;
-            double ar;
-            if (aq == 0) {
+            double ap;
+            double ao;
+            double an;
+            double am;
+            if (al == 0) {
                 v = n;
                 x = q;
-                ar = d;
-                as = d + 1.0;
-                at = r + (double)0.001f;
-                au = r + (double)0.001f;
+                am = d;
+                an = d + 1.0;
+                ao = r + (double)0.001f;
+                ap = r + (double)0.001f;
                 direction = Direction.NORTH;
                 bl9 = bl4;
-            } else if (aq == 1) {
+            } else if (al == 1) {
                 v = p;
                 x = o;
-                ar = d + 1.0;
-                as = d;
-                at = r + 1.0 - (double)0.001f;
-                au = r + 1.0 - (double)0.001f;
+                am = d + 1.0;
+                an = d;
+                ao = r + 1.0 - (double)0.001f;
+                ap = r + 1.0 - (double)0.001f;
                 direction = Direction.SOUTH;
                 bl9 = bl5;
-            } else if (aq == 2) {
+            } else if (al == 2) {
                 v = o;
                 x = n;
-                ar = d + (double)0.001f;
-                as = d + (double)0.001f;
-                at = r + 1.0;
-                au = r;
+                am = d + (double)0.001f;
+                an = d + (double)0.001f;
+                ao = r + 1.0;
+                ap = r;
                 direction = Direction.WEST;
                 bl9 = bl6;
             } else {
                 v = q;
                 x = p;
-                ar = d + 1.0 - (double)0.001f;
-                as = d + 1.0 - (double)0.001f;
-                at = r;
-                au = r + 1.0;
+                am = d + 1.0 - (double)0.001f;
+                an = d + 1.0 - (double)0.001f;
+                ao = r;
+                ap = r + 1.0;
                 direction = Direction.EAST;
                 bl9 = bl7;
             }
@@ -237,29 +232,31 @@ public class LiquidBlockRenderer {
             if (!bl && ((block = blockAndBiomeGetter.getBlockState(blockPos2).getBlock()) == Blocks.GLASS || block instanceof StainedGlassBlock)) {
                 textureAtlasSprite2 = this.waterOverlay;
             }
-            float av = textureAtlasSprite2.getU(0.0);
-            float aw = textureAtlasSprite2.getU(8.0);
+            ah = textureAtlasSprite2.getU(0.0);
+            ai = textureAtlasSprite2.getU(8.0);
             aj = textureAtlasSprite2.getV((1.0f - v) * 16.0f * 0.5f);
-            ak = textureAtlasSprite2.getV((1.0f - x) * 16.0f * 0.5f);
-            al = textureAtlasSprite2.getV(8.0);
-            int ax = this.getLightColor(blockAndBiomeGetter, blockPos2);
-            int ay = ax >> 16 & 0xFFFF;
-            int az = ax & 0xFFFF;
-            float ba = aq < 2 ? 0.8f : 0.6f;
-            float bb = 1.0f * ba * f;
-            float bc = 1.0f * ba * g;
-            float bd = 1.0f * ba * h;
-            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            float aq = textureAtlasSprite2.getV((1.0f - x) * 16.0f * 0.5f);
+            float ar = textureAtlasSprite2.getV(8.0);
+            int as = this.getLightColor(blockAndBiomeGetter, blockPos2);
+            float at = al < 2 ? 0.8f : 0.6f;
+            float au = 1.0f * at * f;
+            float av = 1.0f * at * g;
+            float aw = 1.0f * at * h;
+            this.vertex(vertexConsumer, am, e + (double)v, ao, au, av, aw, ah, aj, as);
+            this.vertex(vertexConsumer, an, e + (double)x, ap, au, av, aw, ai, aq, as);
+            this.vertex(vertexConsumer, an, e + 0.0, ap, au, av, aw, ai, ar, as);
+            this.vertex(vertexConsumer, am, e + 0.0, ao, au, av, aw, ah, ar, as);
             if (textureAtlasSprite2 == this.waterOverlay) continue;
-            bufferBuilder.vertex(ar, e + 0.0, at).color(bb, bc, bd, 1.0f).uv(av, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(as, e + 0.0, au).color(bb, bc, bd, 1.0f).uv(aw, al).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(as, e + (double)x, au).color(bb, bc, bd, 1.0f).uv(aw, ak).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
-            bufferBuilder.vertex(ar, e + (double)v, at).color(bb, bc, bd, 1.0f).uv(av, aj).uv2(ay, az).normal(0.0f, 1.0f, 0.0f).endVertex();
+            this.vertex(vertexConsumer, am, e + 0.0, ao, au, av, aw, ah, ar, as);
+            this.vertex(vertexConsumer, an, e + 0.0, ap, au, av, aw, ai, ar, as);
+            this.vertex(vertexConsumer, an, e + (double)x, ap, au, av, aw, ai, aq, as);
+            this.vertex(vertexConsumer, am, e + (double)v, ao, au, av, aw, ah, aj, as);
         }
         return bl82;
+    }
+
+    private void vertex(VertexConsumer vertexConsumer, double d, double e, double f, float g, float h, float i, float j, float k, int l) {
+        vertexConsumer.vertex(d, e, f).color(g, h, i, 1.0f).uv(j, k).uv2(l).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 
     private int getLightColor(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {

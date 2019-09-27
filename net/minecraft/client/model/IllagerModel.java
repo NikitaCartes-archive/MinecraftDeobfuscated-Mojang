@@ -3,14 +3,15 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.ArmedModel;
-import net.minecraft.client.renderer.entity.HeadedModel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -18,18 +19,17 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(value=EnvType.CLIENT)
 public class IllagerModel<T extends AbstractIllager>
-extends EntityModel<T>
+extends ListModel<T>
 implements ArmedModel,
 HeadedModel {
-    protected final ModelPart head;
+    private final ModelPart head;
     private final ModelPart hat;
-    protected final ModelPart body;
-    protected final ModelPart arms;
-    protected final ModelPart leftLeg;
-    protected final ModelPart rightLeg;
-    private final ModelPart nose;
-    protected final ModelPart rightArm;
-    protected final ModelPart leftArm;
+    private final ModelPart body;
+    private final ModelPart arms;
+    private final ModelPart leftLeg;
+    private final ModelPart rightLeg;
+    private final ModelPart rightArm;
+    private final ModelPart leftArm;
     private float itemUseTicks;
 
     public IllagerModel(float f, float g, int i, int j) {
@@ -40,10 +40,10 @@ HeadedModel {
         this.hat.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 12.0f, 8.0f, f + 0.45f);
         this.head.addChild(this.hat);
         this.hat.visible = false;
-        this.nose = new ModelPart(this).setTexSize(i, j);
-        this.nose.setPos(0.0f, g - 2.0f, 0.0f);
-        this.nose.texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
-        this.head.addChild(this.nose);
+        ModelPart modelPart = new ModelPart(this).setTexSize(i, j);
+        modelPart.setPos(0.0f, g - 2.0f, 0.0f);
+        modelPart.texOffs(24, 0).addBox(-1.0f, -1.0f, -6.0f, 2.0f, 4.0f, 2.0f, f);
+        this.head.addChild(modelPart);
         this.body = new ModelPart(this).setTexSize(i, j);
         this.body.setPos(0.0f, 0.0f + g, 0.0f);
         this.body.texOffs(16, 20).addBox(-4.0f, 0.0f, -3.0f, 8.0f, 12.0f, 6.0f, f);
@@ -51,10 +51,10 @@ HeadedModel {
         this.arms = new ModelPart(this).setTexSize(i, j);
         this.arms.setPos(0.0f, 0.0f + g + 2.0f, 0.0f);
         this.arms.texOffs(44, 22).addBox(-8.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
-        ModelPart modelPart = new ModelPart(this, 44, 22).setTexSize(i, j);
-        modelPart.mirror = true;
-        modelPart.addBox(4.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
-        this.arms.addChild(modelPart);
+        ModelPart modelPart2 = new ModelPart(this, 44, 22).setTexSize(i, j);
+        modelPart2.mirror = true;
+        modelPart2.addBox(4.0f, -2.0f, -2.0f, 4.0f, 8.0f, 4.0f, f);
+        this.arms.addChild(modelPart2);
         this.arms.texOffs(40, 38).addBox(-4.0f, 2.0f, -2.0f, 8.0f, 4.0f, 4.0f, f);
         this.leftLeg = new ModelPart(this, 0, 22).setTexSize(i, j);
         this.leftLeg.setPos(-2.0f, 12.0f + g, 0.0f);
@@ -73,22 +73,14 @@ HeadedModel {
     }
 
     @Override
-    public void render(T abstractIllager, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(abstractIllager, f, g, h, i, j, k);
-        this.head.render(k);
-        this.body.render(k);
-        this.leftLeg.render(k);
-        this.rightLeg.render(k);
-        if (((AbstractIllager)abstractIllager).getArmPose() == AbstractIllager.IllagerArmPose.CROSSED) {
-            this.arms.render(k);
-        } else {
-            this.rightArm.render(k);
-            this.leftArm.render(k);
-        }
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.head, this.body, this.leftLeg, this.rightLeg, this.arms, this.rightArm, this.leftArm);
     }
 
     @Override
     public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j, float k) {
+        boolean bl;
+        float l;
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
         this.arms.y = 3.0f;
@@ -123,7 +115,7 @@ HeadedModel {
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-            float l = Mth.sin(this.attackTime * (float)Math.PI);
+            l = Mth.sin(this.attackTime * (float)Math.PI);
             float m = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
             this.rightArm.zRot = 0.0f;
             this.leftArm.zRot = 0.0f;
@@ -170,7 +162,7 @@ HeadedModel {
             this.rightArm.yRot = -0.8f;
             this.rightArm.xRot = -0.97079635f;
             this.leftArm.xRot = -0.97079635f;
-            float l = Mth.clamp(this.itemUseTicks, 0.0f, 25.0f);
+            l = Mth.clamp(this.itemUseTicks, 0.0f, 25.0f);
             this.leftArm.yRot = Mth.lerp(l / 25.0f, 0.4f, 0.85f);
             this.leftArm.xRot = Mth.lerp(l / 25.0f, this.leftArm.xRot, -1.5707964f);
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.CELEBRATING) {
@@ -185,6 +177,9 @@ HeadedModel {
             this.leftArm.zRot = -2.3561945f;
             this.leftArm.yRot = 0.0f;
         }
+        this.arms.visible = bl = illagerArmPose == AbstractIllager.IllagerArmPose.CROSSED;
+        this.leftArm.visible = !bl;
+        this.rightArm.visible = !bl;
     }
 
     @Override
@@ -210,18 +205,8 @@ HeadedModel {
     }
 
     @Override
-    public void translateToHand(float f, HumanoidArm humanoidArm) {
-        this.getArm(humanoidArm).translateTo(0.0625f);
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((AbstractIllager)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((AbstractIllager)entity), f, g, h, i, j, k);
+    public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
+        this.getArm(humanoidArm).translateAndRotate(poseStack, 0.0625f);
     }
 }
 

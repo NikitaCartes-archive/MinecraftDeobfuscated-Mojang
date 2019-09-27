@@ -10,8 +10,6 @@ import net.fabricmc.api.Environment;
 public interface WindowEventHandler {
     public void setWindowActive(boolean var1);
 
-    public void updateDisplay(boolean var1);
-
     public void resizeDisplay();
 }
 

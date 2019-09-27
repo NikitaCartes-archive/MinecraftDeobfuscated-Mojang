@@ -9,20 +9,55 @@ import java.io.IOException;
 import java.util.Objects;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class StringTag
 implements Tag {
-    private String data;
+    public static final TagType<StringTag> TYPE = new TagType<StringTag>(){
 
-    public StringTag() {
-        this("");
-    }
+        @Override
+        public StringTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(288L);
+            String string = dataInput.readUTF();
+            nbtAccounter.accountBits(16 * string.length());
+            return StringTag.valueOf(string);
+        }
 
-    public StringTag(String string) {
+        @Override
+        public String getName() {
+            return "STRING";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_String";
+        }
+
+        @Override
+        public boolean isValue() {
+            return true;
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private static final StringTag EMPTY = new StringTag("");
+    private final String data;
+
+    private StringTag(String string) {
         Objects.requireNonNull(string, "Null string not allowed");
         this.data = string;
+    }
+
+    public static StringTag valueOf(String string) {
+        if (string.isEmpty()) {
+            return EMPTY;
+        }
+        return new StringTag(string);
     }
 
     @Override
@@ -31,15 +66,12 @@ implements Tag {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(288L);
-        this.data = dataInput.readUTF();
-        nbtAccounter.accountBits(16 * this.data.length());
-    }
-
-    @Override
     public byte getId() {
         return 8;
+    }
+
+    public TagType<StringTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -49,7 +81,7 @@ implements Tag {
 
     @Override
     public StringTag copy() {
-        return new StringTag(this.data);
+        return this;
     }
 
     public boolean equals(Object object) {

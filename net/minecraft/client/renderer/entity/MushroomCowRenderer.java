@@ -29,7 +29,7 @@ extends MobRenderer<MushroomCow, CowModel<MushroomCow>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(MushroomCow mushroomCow) {
+    public ResourceLocation getTextureLocation(MushroomCow mushroomCow) {
         return TEXTURES.get((Object)mushroomCow.getMushroomType());
     }
 }

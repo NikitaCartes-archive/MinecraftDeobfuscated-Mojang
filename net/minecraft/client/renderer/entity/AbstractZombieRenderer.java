@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieModel;
@@ -23,16 +24,16 @@ extends HumanoidMobRenderer<T, M> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Zombie zombie) {
+    public ResourceLocation getTextureLocation(Zombie zombie) {
         return ZOMBIE_LOCATION;
     }
 
     @Override
-    protected void setupRotations(T zombie, float f, float g, float h) {
+    protected void setupRotations(T zombie, PoseStack poseStack, float f, float g, float h) {
         if (((Zombie)zombie).isUnderWaterConverting()) {
             g += (float)(Math.cos((double)((Zombie)zombie).tickCount * 3.25) * Math.PI * 0.25);
         }
-        super.setupRotations(zombie, f, g, h);
+        super.setupRotations(zombie, poseStack, f, g, h);
     }
 }
 

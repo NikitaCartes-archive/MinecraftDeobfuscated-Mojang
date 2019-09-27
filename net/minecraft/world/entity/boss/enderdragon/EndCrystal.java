@@ -55,9 +55,6 @@ extends Entity {
 
     @Override
     public void tick() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
         ++this.time;
         if (!this.level.isClientSide) {
             BlockPos blockPos = new BlockPos(this);

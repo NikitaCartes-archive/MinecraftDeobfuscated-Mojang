@@ -3,11 +3,13 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.WitchModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -26,52 +28,46 @@ extends RenderLayer<T, WitchModel<T>> {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
         ItemStack itemStack = ((LivingEntity)livingEntity).getMainHandItem();
         if (itemStack.isEmpty()) {
             return;
         }
-        RenderSystem.color3f(1.0f, 1.0f, 1.0f);
-        RenderSystem.pushMatrix();
+        poseStack.pushPose();
         if (((WitchModel)this.getParentModel()).young) {
-            RenderSystem.translatef(0.0f, 0.625f, 0.0f);
-            RenderSystem.rotatef(-20.0f, -1.0f, 0.0f, 0.0f);
-            float m = 0.5f;
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
+            poseStack.translate(0.0, 0.625, 0.0);
+            poseStack.mulPose(Vector3f.XP.rotation(20.0f, true));
+            float n = 0.5f;
+            poseStack.scale(0.5f, 0.5f, 0.5f);
         }
-        ((WitchModel)this.getParentModel()).getNose().translateTo(0.0625f);
-        RenderSystem.translatef(-0.0625f, 0.53125f, 0.21875f);
+        ((WitchModel)this.getParentModel()).getNose().translateAndRotate(poseStack, 0.0625f);
+        poseStack.translate(-0.0625, 0.53125, 0.21875);
         Item item = itemStack.getItem();
         if (Block.byItem(item).defaultBlockState().getRenderShape() == RenderShape.ENTITYBLOCK_ANIMATED) {
-            RenderSystem.translatef(0.0f, 0.0625f, -0.25f);
-            RenderSystem.rotatef(30.0f, 1.0f, 0.0f, 0.0f);
-            RenderSystem.rotatef(-5.0f, 0.0f, 1.0f, 0.0f);
-            float n = 0.375f;
-            RenderSystem.scalef(0.375f, -0.375f, 0.375f);
+            poseStack.translate(0.0, 0.0625, -0.25);
+            poseStack.mulPose(Vector3f.XP.rotation(30.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotation(-5.0f, true));
+            float o = 0.375f;
+            poseStack.scale(0.375f, -0.375f, 0.375f);
         } else if (item == Items.BOW) {
-            RenderSystem.translatef(0.0f, 0.125f, -0.125f);
-            RenderSystem.rotatef(-45.0f, 0.0f, 1.0f, 0.0f);
-            float n = 0.625f;
-            RenderSystem.scalef(0.625f, -0.625f, 0.625f);
-            RenderSystem.rotatef(-100.0f, 1.0f, 0.0f, 0.0f);
-            RenderSystem.rotatef(-20.0f, 0.0f, 1.0f, 0.0f);
+            poseStack.translate(0.0, 0.125, -0.125);
+            poseStack.mulPose(Vector3f.YP.rotation(-45.0f, true));
+            float o = 0.625f;
+            poseStack.scale(0.625f, -0.625f, 0.625f);
+            poseStack.mulPose(Vector3f.XP.rotation(-100.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotation(-20.0f, true));
         } else {
-            RenderSystem.translatef(0.1875f, 0.1875f, 0.0f);
-            float n = 0.875f;
-            RenderSystem.scalef(0.875f, 0.875f, 0.875f);
-            RenderSystem.rotatef(-20.0f, 0.0f, 0.0f, 1.0f);
-            RenderSystem.rotatef(-60.0f, 1.0f, 0.0f, 0.0f);
-            RenderSystem.rotatef(-30.0f, 0.0f, 0.0f, 1.0f);
+            poseStack.translate(0.1875, 0.1875, 0.0);
+            float o = 0.875f;
+            poseStack.scale(0.875f, 0.875f, 0.875f);
+            poseStack.mulPose(Vector3f.ZP.rotation(-20.0f, true));
+            poseStack.mulPose(Vector3f.XP.rotation(-60.0f, true));
+            poseStack.mulPose(Vector3f.ZP.rotation(-30.0f, true));
         }
-        RenderSystem.rotatef(-15.0f, 1.0f, 0.0f, 0.0f);
-        RenderSystem.rotatef(40.0f, 0.0f, 0.0f, 1.0f);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND);
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        poseStack.mulPose(Vector3f.XP.rotation(-15.0f, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(40.0f, true));
+        Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, multiBufferSource);
+        poseStack.popPose();
     }
 }
 

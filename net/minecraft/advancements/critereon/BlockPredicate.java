@@ -43,6 +43,9 @@ public class BlockPredicate {
         if (this == ANY) {
             return true;
         }
+        if (!serverLevel.isLoaded(blockPos)) {
+            return false;
+        }
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
         if (this.tag != null && !this.tag.contains(block)) {

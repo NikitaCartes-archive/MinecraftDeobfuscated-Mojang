@@ -7,9 +7,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AreaEffectCloud;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class AreaEffectCloudRenderer
@@ -19,9 +19,8 @@ extends EntityRenderer<AreaEffectCloud> {
     }
 
     @Override
-    @Nullable
-    protected ResourceLocation getTextureLocation(AreaEffectCloud areaEffectCloud) {
-        return null;
+    public ResourceLocation getTextureLocation(AreaEffectCloud areaEffectCloud) {
+        return TextureAtlas.LOCATION_BLOCKS;
     }
 }
 

@@ -3,15 +3,15 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WolfModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(value=EnvType.CLIENT)
@@ -32,16 +32,19 @@ extends MobRenderer<Wolf, WolfModel<Wolf>> {
     }
 
     @Override
-    public void render(Wolf wolf, double d, double e, double f, float g, float h) {
+    public void render(Wolf wolf, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         if (wolf.isWet()) {
             float i = wolf.getBrightness() * wolf.getWetShade(h);
-            RenderSystem.color3f(i, i, i);
+            ((WolfModel)this.model).setColor(i, i, i);
         }
-        super.render(wolf, d, e, f, g, h);
+        super.render(wolf, d, e, f, g, h, poseStack, multiBufferSource);
+        if (wolf.isWet()) {
+            ((WolfModel)this.model).setColor(1.0f, 1.0f, 1.0f);
+        }
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Wolf wolf) {
+    public ResourceLocation getTextureLocation(Wolf wolf) {
         if (wolf.isTame()) {
             return WOLF_TAME_LOCATION;
         }
@@ -49,11 +52,6 @@ extends MobRenderer<Wolf, WolfModel<Wolf>> {
             return WOLF_ANGRY_LOCATION;
         }
         return WOLF_LOCATION;
-    }
-
-    @Override
-    protected /* synthetic */ float getBob(LivingEntity livingEntity, float f) {
-        return this.getBob((Wolf)livingEntity, f);
     }
 }
 

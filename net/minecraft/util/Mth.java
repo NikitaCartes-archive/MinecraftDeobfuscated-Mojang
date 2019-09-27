@@ -420,6 +420,16 @@ public class Mth {
         return o;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static float fastInvSqrt(float f) {
+        float g = 0.5f * f;
+        int i = Float.floatToIntBits(f);
+        i = 1597463007 - (i >> 1);
+        f = Float.intBitsToFloat(i);
+        f *= 1.5f - g * f * f;
+        return f;
+    }
+
     public static double fastInvSqrt(double d) {
         double e = 0.5 * d;
         long l = Double.doubleToRawLongBits(d);
@@ -545,6 +555,29 @@ public class Mth {
     @Environment(value=EnvType.CLIENT)
     public static float diffuseLight(float f, float g, float h) {
         return Math.min(f * f * 0.6f + g * g * ((3.0f + g) / 4.0f) + h * h * 0.8f, 1.0f);
+    }
+
+    @Deprecated
+    public static float rotlerp(float f, float g, float h) {
+        float i;
+        for (i = g - f; i < -180.0f; i += 360.0f) {
+        }
+        while (i >= 180.0f) {
+            i -= 360.0f;
+        }
+        return f + h * i;
+    }
+
+    @Deprecated
+    @Environment(value=EnvType.CLIENT)
+    public static float rotWrap(double d) {
+        while (d >= 180.0) {
+            d -= 360.0;
+        }
+        while (d < -180.0) {
+            d += 360.0;
+        }
+        return (float)d;
     }
 
     static {

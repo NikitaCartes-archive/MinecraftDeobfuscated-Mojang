@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.CowModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.MushroomCow;
@@ -26,45 +27,36 @@ extends RenderLayer<T, CowModel<T>> {
     }
 
     @Override
-    public void render(T mushroomCow, float f, float g, float h, float i, float j, float k, float l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mushroomCow, float f, float g, float h, float j, float k, float l, float m) {
         if (((AgableMob)mushroomCow).isBaby() || ((Entity)mushroomCow).isInvisible()) {
             return;
         }
-        BlockState blockState = ((MushroomCow)mushroomCow).getMushroomType().getBlockState();
-        this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
-        RenderSystem.enableCull();
-        RenderSystem.cullFace(GlStateManager.CullFace.FRONT);
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(1.0f, -1.0f, 1.0f);
-        RenderSystem.translatef(0.2f, 0.35f, 0.5f);
-        RenderSystem.rotatef(42.0f, 0.0f, 1.0f, 0.0f);
         BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(-0.5f, -0.5f, 0.5f);
-        blockRenderDispatcher.renderSingleBlock(blockState, 1.0f);
-        RenderSystem.popMatrix();
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(0.1f, 0.0f, -0.6f);
-        RenderSystem.rotatef(42.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.translatef(-0.5f, -0.5f, 0.5f);
-        blockRenderDispatcher.renderSingleBlock(blockState, 1.0f);
-        RenderSystem.popMatrix();
-        RenderSystem.popMatrix();
-        RenderSystem.pushMatrix();
-        ((CowModel)this.getParentModel()).getHead().translateTo(0.0625f);
-        RenderSystem.scalef(1.0f, -1.0f, 1.0f);
-        RenderSystem.translatef(0.0f, 0.7f, -0.2f);
-        RenderSystem.rotatef(12.0f, 0.0f, 1.0f, 0.0f);
-        RenderSystem.translatef(-0.5f, -0.5f, 0.5f);
-        blockRenderDispatcher.renderSingleBlock(blockState, 1.0f);
-        RenderSystem.popMatrix();
-        RenderSystem.cullFace(GlStateManager.CullFace.BACK);
-        RenderSystem.disableCull();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
+        BlockState blockState = ((MushroomCow)mushroomCow).getMushroomType().getBlockState();
+        poseStack.pushPose();
+        poseStack.scale(-1.0f, -1.0f, 1.0f);
+        poseStack.translate(-0.2f, 0.35f, 0.5);
+        poseStack.mulPose(Vector3f.YP.rotation(-42.0f, true));
+        int n = OverlayTexture.v(((MushroomCow)mushroomCow).hurtTime > 0 || ((MushroomCow)mushroomCow).deathTime > 0);
+        poseStack.pushPose();
+        poseStack.translate(-0.5, -0.5, 0.5);
+        blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+        poseStack.popPose();
+        poseStack.pushPose();
+        poseStack.translate(-0.1f, 0.0, -0.6f);
+        poseStack.mulPose(Vector3f.YP.rotation(-42.0f, true));
+        poseStack.translate(-0.5, -0.5, 0.5);
+        blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+        poseStack.popPose();
+        poseStack.popPose();
+        poseStack.pushPose();
+        ((CowModel)this.getParentModel()).getHead().translateAndRotate(poseStack, 0.0625f);
+        poseStack.scale(-1.0f, -1.0f, 1.0f);
+        poseStack.translate(0.0, 0.7f, -0.2f);
+        poseStack.mulPose(Vector3f.YP.rotation(-12.0f, true));
+        poseStack.translate(-0.5, -0.5, 0.5);
+        blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+        poseStack.popPose();
     }
 }
 

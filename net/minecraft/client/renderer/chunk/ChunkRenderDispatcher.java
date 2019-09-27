@@ -9,11 +9,13 @@ import com.google.common.collect.Sets;
 import com.google.common.primitives.Doubles;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -21,7 +23,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -61,9 +62,11 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ChunkRenderDispatcher {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final PriorityBlockingQueue<RenderChunk.ChunkCompileTask> chunksToBatch = Queues.newPriorityBlockingQueue();
-    private final Queue<ChunkBufferBuilderPack> availableChunkBuffers;
-    private final Queue<Runnable> pendingUploads = Queues.newConcurrentLinkedQueue();
+    private final PriorityQueue<RenderChunk.ChunkCompileTask> toBatch = Queues.newPriorityQueue();
+    private final Queue<ChunkBufferBuilderPack> freeBuffers;
+    private final Queue<Runnable> toUpload = Queues.newConcurrentLinkedQueue();
+    private volatile int toBatchCount;
+    private volatile int freeBufferCount;
     private final ChunkBufferBuilderPack fixedBuffers;
     private final ProcessorMailbox<Runnable> mailbox;
     private final Executor executor;
@@ -71,14 +74,14 @@ public class ChunkRenderDispatcher {
     private final LevelRenderer renderer;
     private Vec3 camera = Vec3.ZERO;
 
-    public ChunkRenderDispatcher(Level level, LevelRenderer levelRenderer, Executor executor, boolean bl) {
+    public ChunkRenderDispatcher(Level level, LevelRenderer levelRenderer, Executor executor, boolean bl, ChunkBufferBuilderPack chunkBufferBuilderPack) {
         this.level = level;
         this.renderer = levelRenderer;
         int i = Math.max(1, (int)((double)Runtime.getRuntime().maxMemory() * 0.3) / (RenderType.chunkBufferLayers().stream().mapToInt(RenderType::bufferSize).sum() * 4) - 1);
         int j = Runtime.getRuntime().availableProcessors();
         int k = bl ? j : Math.min(j, 4);
         int l = Math.max(1, Math.min(k, i));
-        this.fixedBuffers = new ChunkBufferBuilderPack();
+        this.fixedBuffers = chunkBufferBuilderPack;
         ArrayList<ChunkBufferBuilderPack> list = Lists.newArrayListWithExpectedSize(l);
         try {
             for (int m = 0; m < l; ++m) {
@@ -92,7 +95,8 @@ public class ChunkRenderDispatcher {
             }
             System.gc();
         }
-        this.availableChunkBuffers = Queues.newArrayDeque(list);
+        this.freeBuffers = Queues.newArrayDeque(list);
+        this.freeBufferCount = this.freeBuffers.size();
         this.executor = executor;
         this.mailbox = ProcessorMailbox.create(executor, "Chunk Renderer");
         this.mailbox.tell(this::runTask);
@@ -103,20 +107,23 @@ public class ChunkRenderDispatcher {
     }
 
     private void runTask() {
-        if (this.availableChunkBuffers.isEmpty()) {
+        if (this.freeBuffers.isEmpty()) {
             return;
         }
-        RenderChunk.ChunkCompileTask chunkCompileTask = this.chunksToBatch.poll();
+        RenderChunk.ChunkCompileTask chunkCompileTask = this.toBatch.poll();
         if (chunkCompileTask == null) {
             return;
         }
-        ChunkBufferBuilderPack chunkBufferBuilderPack = this.availableChunkBuffers.poll();
+        ChunkBufferBuilderPack chunkBufferBuilderPack = this.freeBuffers.poll();
+        this.toBatchCount = this.toBatch.size();
+        this.freeBufferCount = this.freeBuffers.size();
         ((CompletableFuture)CompletableFuture.runAsync(() -> {}, this.executor).thenCompose(void_ -> chunkCompileTask.doTask(chunkBufferBuilderPack))).whenComplete((unit, throwable) -> {
             this.mailbox.tell(() -> {
                 chunkBufferBuilderPack.clearAll();
-                this.availableChunkBuffers.add(chunkBufferBuilderPack);
+                this.freeBuffers.add(chunkBufferBuilderPack);
+                this.freeBufferCount = this.freeBuffers.size();
+                this.runTask();
             });
-            this.mailbox.tell(this::runTask);
             if (throwable != null) {
                 CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
                 Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
@@ -125,7 +132,7 @@ public class ChunkRenderDispatcher {
     }
 
     public String getStats() {
-        return String.format("pC: %03d, pU: %02d, aB: %02d", this.chunksToBatch.size(), this.pendingUploads.size(), this.availableChunkBuffers.size());
+        return String.format("pC: %03d, pU: %02d, aB: %02d", this.toBatchCount, this.toUpload.size(), this.freeBufferCount);
     }
 
     public void setCamera(Vec3 vec3) {
@@ -139,7 +146,7 @@ public class ChunkRenderDispatcher {
     public boolean uploadAllPendingUploads() {
         Runnable runnable;
         boolean bl = false;
-        while ((runnable = this.pendingUploads.poll()) != null) {
+        while ((runnable = this.toUpload.poll()) != null) {
             runnable.run();
             bl = true;
         }
@@ -155,12 +162,15 @@ public class ChunkRenderDispatcher {
     }
 
     public void schedule(RenderChunk.ChunkCompileTask chunkCompileTask) {
-        this.chunksToBatch.offer(chunkCompileTask);
-        this.mailbox.tell(this::runTask);
+        this.mailbox.tell(() -> {
+            this.toBatch.offer(chunkCompileTask);
+            this.toBatchCount = this.toBatch.size();
+            this.runTask();
+        });
     }
 
     public CompletableFuture<Void> uploadChunkLayer(BufferBuilder bufferBuilder, VertexBuffer vertexBuffer) {
-        return Minecraft.getInstance().submit(() -> {}).thenCompose(void_ -> this.doUploadChunkLayer(bufferBuilder, vertexBuffer));
+        return CompletableFuture.runAsync(() -> {}, this.toUpload::add).thenCompose(void_ -> this.doUploadChunkLayer(bufferBuilder, vertexBuffer));
     }
 
     private CompletableFuture<Void> doUploadChunkLayer(BufferBuilder bufferBuilder, VertexBuffer vertexBuffer) {
@@ -168,21 +178,22 @@ public class ChunkRenderDispatcher {
     }
 
     private void clearBatchQueue() {
-        while (!this.chunksToBatch.isEmpty()) {
-            RenderChunk.ChunkCompileTask chunkCompileTask = this.chunksToBatch.poll();
+        while (!this.toBatch.isEmpty()) {
+            RenderChunk.ChunkCompileTask chunkCompileTask = this.toBatch.poll();
             if (chunkCompileTask == null) continue;
             chunkCompileTask.cancel();
         }
+        this.toBatchCount = 0;
     }
 
     public boolean isQueueEmpty() {
-        return this.chunksToBatch.isEmpty() && this.pendingUploads.isEmpty();
+        return this.toBatchCount == 0 && this.toUpload.isEmpty();
     }
 
     public void dispose() {
         this.clearBatchQueue();
         this.mailbox.close();
-        this.availableChunkBuffers.clear();
+        this.freeBuffers.clear();
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -283,9 +294,8 @@ public class ChunkRenderDispatcher {
             return d * d + e * e + f * f;
         }
 
-        private void beginLayer(BufferBuilder bufferBuilder, BlockPos blockPos) {
+        private void beginLayer(BufferBuilder bufferBuilder) {
             bufferBuilder.begin(7, DefaultVertexFormat.BLOCK);
-            bufferBuilder.offset(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ());
         }
 
         public CompiledChunk getCompiledChunk() {
@@ -439,9 +449,9 @@ public class ChunkRenderDispatcher {
                     return CompletableFuture.completedFuture(Unit.INSTANCE);
                 }
                 BufferBuilder bufferBuilder = chunkBufferBuilderPack.builder(RenderType.TRANSLUCENT);
-                RenderChunk.this.beginLayer(bufferBuilder, RenderChunk.this.origin);
+                RenderChunk.this.beginLayer(bufferBuilder);
                 bufferBuilder.restoreState(state);
-                bufferBuilder.sortQuads(f, g, h);
+                bufferBuilder.sortQuads(f - (float)RenderChunk.this.origin.getX(), g - (float)RenderChunk.this.origin.getY(), h - (float)RenderChunk.this.origin.getZ());
                 this.compiledChunk.transparencyState = bufferBuilder.getState();
                 bufferBuilder.end();
                 if (this.isCancelled.get()) {
@@ -518,6 +528,7 @@ public class ChunkRenderDispatcher {
                 HashSet<BlockEntity> set = Sets.newHashSet();
                 RenderChunkRegion renderChunkRegion = this.region;
                 this.region = null;
+                PoseStack poseStack = new PoseStack();
                 if (renderChunkRegion != null) {
                     ModelBlockRenderer.enableCaching();
                     Random random = new Random();
@@ -526,24 +537,20 @@ public class ChunkRenderDispatcher {
                         BufferBuilder bufferBuilder;
                         RenderType renderType;
                         FluidState fluidState;
-                        BlockEntityRenderer<BlockEntity> blockEntityRenderer;
                         BlockEntity blockEntity;
                         BlockState blockState = renderChunkRegion.getBlockState(blockPos3);
                         Block block = blockState.getBlock();
                         if (blockState.isSolidRender(renderChunkRegion, blockPos3)) {
                             visGraph.setOpaque(blockPos3);
                         }
-                        if (block.isEntityBlock() && (blockEntity = renderChunkRegion.getBlockEntity(blockPos3, LevelChunk.EntityCreationType.CHECK)) != null && (blockEntityRenderer = BlockEntityRenderDispatcher.instance.getRenderer(blockEntity)) != null) {
-                            compiledChunk.renderableBlockEntities.add(blockEntity);
-                            if (blockEntityRenderer.shouldRenderOffScreen(blockEntity)) {
-                                set.add(blockEntity);
-                            }
+                        if (block.isEntityBlock() && (blockEntity = renderChunkRegion.getBlockEntity(blockPos3, LevelChunk.EntityCreationType.CHECK)) != null) {
+                            this.handleBlockEntity(compiledChunk, set, blockEntity);
                         }
                         if (!(fluidState = renderChunkRegion.getFluidState(blockPos3)).isEmpty()) {
                             renderType = RenderType.getRenderLayer(fluidState);
                             bufferBuilder = chunkBufferBuilderPack.builder(renderType);
                             if (compiledChunk.hasLayer.add(renderType)) {
-                                RenderChunk.this.beginLayer(bufferBuilder, blockPos);
+                                RenderChunk.this.beginLayer(bufferBuilder);
                             }
                             if (blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, fluidState)) {
                                 compiledChunk.isCompletelyEmpty = false;
@@ -554,15 +561,15 @@ public class ChunkRenderDispatcher {
                         renderType = RenderType.getRenderLayer(blockState);
                         bufferBuilder = chunkBufferBuilderPack.builder(renderType);
                         if (compiledChunk.hasLayer.add(renderType)) {
-                            RenderChunk.this.beginLayer(bufferBuilder, blockPos);
+                            RenderChunk.this.beginLayer(bufferBuilder);
                         }
-                        if (!blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, bufferBuilder, random)) continue;
+                        if (!blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, random)) continue;
                         compiledChunk.isCompletelyEmpty = false;
                         compiledChunk.hasBlocks.add(renderType);
                     }
                     if (compiledChunk.hasBlocks.contains(RenderType.TRANSLUCENT)) {
                         BufferBuilder bufferBuilder2 = chunkBufferBuilderPack.builder(RenderType.TRANSLUCENT);
-                        bufferBuilder2.sortQuads(f, g, h);
+                        bufferBuilder2.sortQuads(f - (float)blockPos.getX(), g - (float)blockPos.getY(), h - (float)blockPos.getZ());
                         compiledChunk.transparencyState = bufferBuilder2.getState();
                     }
                     compiledChunk.hasLayer.stream().map(chunkBufferBuilderPack::builder).forEach(BufferBuilder::end);
@@ -570,6 +577,16 @@ public class ChunkRenderDispatcher {
                 }
                 compiledChunk.visibilitySet = visGraph.resolve();
                 return set;
+            }
+
+            private <E extends BlockEntity> void handleBlockEntity(CompiledChunk compiledChunk, Set<BlockEntity> set, E blockEntity) {
+                BlockEntityRenderer<E> blockEntityRenderer = BlockEntityRenderDispatcher.instance.getRenderer(blockEntity);
+                if (blockEntityRenderer != null) {
+                    compiledChunk.renderableBlockEntities.add(blockEntity);
+                    if (blockEntityRenderer.shouldRenderOffScreen(blockEntity)) {
+                        set.add(blockEntity);
+                    }
+                }
             }
 
             @Override

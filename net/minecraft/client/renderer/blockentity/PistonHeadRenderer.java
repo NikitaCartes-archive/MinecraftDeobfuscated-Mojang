@@ -3,15 +3,18 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.blockentity.BatchedBlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -23,39 +26,53 @@ import net.minecraft.world.level.block.state.properties.PistonType;
 
 @Environment(value=EnvType.CLIENT)
 public class PistonHeadRenderer
-extends BatchedBlockEntityRenderer<PistonMovingBlockEntity> {
+extends BlockEntityRenderer<PistonMovingBlockEntity> {
     private final BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
 
+    public PistonHeadRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
+        super(blockEntityRenderDispatcher);
+    }
+
     @Override
-    protected void renderToBuffer(PistonMovingBlockEntity pistonMovingBlockEntity, double d, double e, double f, float g, int i, RenderType renderType, BufferBuilder bufferBuilder, int j, int k) {
+    public void render(PistonMovingBlockEntity pistonMovingBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        Level level = pistonMovingBlockEntity.getLevel();
+        if (level == null) {
+            return;
+        }
         BlockPos blockPos = pistonMovingBlockEntity.getBlockPos().relative(pistonMovingBlockEntity.getMovementDirection().getOpposite());
         BlockState blockState = pistonMovingBlockEntity.getMovedState();
         if (blockState.isAir() || pistonMovingBlockEntity.getProgress(g) >= 1.0f) {
             return;
         }
         ModelBlockRenderer.enableCaching();
-        bufferBuilder.offset(d - (double)blockPos.getX() + (double)pistonMovingBlockEntity.getXOff(g), e - (double)blockPos.getY() + (double)pistonMovingBlockEntity.getYOff(g), f - (double)blockPos.getZ() + (double)pistonMovingBlockEntity.getZOff(g));
-        Level level = this.getLevel();
+        poseStack.pushPose();
+        poseStack.translate((float)(-(blockPos.getX() & 0xF)) + pistonMovingBlockEntity.getXOff(g), (float)(-(blockPos.getY() & 0xF)) + pistonMovingBlockEntity.getYOff(g), (float)(-(blockPos.getZ() & 0xF)) + pistonMovingBlockEntity.getZOff(g));
         if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(g) <= 4.0f) {
             blockState = (BlockState)blockState.setValue(PistonHeadBlock.SHORT, true);
-            this.renderBlock(blockPos, blockState, bufferBuilder, level, false);
+            this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false);
         } else if (pistonMovingBlockEntity.isSourcePiston() && !pistonMovingBlockEntity.isExtending()) {
             PistonType pistonType = blockState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT;
             BlockState blockState2 = (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.TYPE, pistonType)).setValue(PistonHeadBlock.FACING, blockState.getValue(PistonBaseBlock.FACING));
             blockState2 = (BlockState)blockState2.setValue(PistonHeadBlock.SHORT, pistonMovingBlockEntity.getProgress(g) >= 0.5f);
-            this.renderBlock(blockPos, blockState2, bufferBuilder, level, false);
+            this.renderBlock(blockPos, blockState2, poseStack, multiBufferSource, level, false);
             BlockPos blockPos2 = blockPos.relative(pistonMovingBlockEntity.getMovementDirection());
-            bufferBuilder.offset(d - (double)blockPos2.getX(), e - (double)blockPos2.getY(), f - (double)blockPos2.getZ());
+            poseStack.popPose();
+            poseStack.translate(-(blockPos2.getX() & 0xF), -(blockPos2.getY() & 0xF), -(blockPos2.getZ() & 0xF));
             blockState = (BlockState)blockState.setValue(PistonBaseBlock.EXTENDED, true);
-            this.renderBlock(blockPos2, blockState, bufferBuilder, level, true);
+            this.renderBlock(blockPos2, blockState, poseStack, multiBufferSource, level, true);
+            poseStack.pushPose();
         } else {
-            this.renderBlock(blockPos, blockState, bufferBuilder, level, false);
+            this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false);
         }
+        poseStack.popPose();
         ModelBlockRenderer.clearCache();
     }
 
-    private boolean renderBlock(BlockPos blockPos, BlockState blockState, BufferBuilder bufferBuilder, Level level, boolean bl) {
-        return this.blockRenderer.getModelRenderer().tesselateBlock(level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, bufferBuilder, bl, new Random(), blockState.getSeed(blockPos));
+    private void renderBlock(BlockPos blockPos, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, Level level, boolean bl) {
+        RenderType renderType = RenderType.getRenderLayer(blockState);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
+        this.blockRenderer.getModelRenderer().tesselateBlock(level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, new Random(), blockState.getSeed(blockPos));
+        Minecraft.getInstance().getBlockRenderer().renderBatched(blockState, blockPos, level, poseStack, vertexConsumer, bl, new Random());
     }
 }
 

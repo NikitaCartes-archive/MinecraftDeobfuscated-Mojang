@@ -68,7 +68,7 @@ implements UnbakedModel {
 
     @Override
     @Nullable
-    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState) {
+    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
         if (this.getVariants().isEmpty()) {
             return null;
         }

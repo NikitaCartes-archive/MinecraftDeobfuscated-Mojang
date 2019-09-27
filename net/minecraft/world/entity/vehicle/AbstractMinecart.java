@@ -3,11 +3,16 @@
  */
 package net.minecraft.world.entity.vehicle;
 
+import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
@@ -54,7 +59,26 @@ extends Entity {
     private static final EntityDataAccessor<Integer> DATA_ID_DISPLAY_OFFSET = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ID_CUSTOM_DISPLAY = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.BOOLEAN);
     private boolean flipped;
-    private static final int[][][] EXITS = new int[][][]{new int[][]{{0, 0, -1}, {0, 0, 1}}, new int[][]{{-1, 0, 0}, {1, 0, 0}}, new int[][]{{-1, -1, 0}, {1, 0, 0}}, new int[][]{{-1, 0, 0}, {1, -1, 0}}, new int[][]{{0, 0, -1}, {0, -1, 1}}, new int[][]{{0, -1, -1}, {0, 0, 1}}, new int[][]{{0, 0, 1}, {1, 0, 0}}, new int[][]{{0, 0, 1}, {-1, 0, 0}}, new int[][]{{0, 0, -1}, {-1, 0, 0}}, new int[][]{{0, 0, -1}, {1, 0, 0}}};
+    private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), enumMap -> {
+        Vec3i vec3i = Direction.WEST.getNormal();
+        Vec3i vec3i2 = Direction.EAST.getNormal();
+        Vec3i vec3i3 = Direction.NORTH.getNormal();
+        Vec3i vec3i4 = Direction.SOUTH.getNormal();
+        Vec3i vec3i5 = vec3i.below();
+        Vec3i vec3i6 = vec3i2.below();
+        Vec3i vec3i7 = vec3i3.below();
+        Vec3i vec3i8 = vec3i4.below();
+        enumMap.put(RailShape.NORTH_SOUTH, Pair.of(vec3i3, vec3i4));
+        enumMap.put(RailShape.EAST_WEST, Pair.of(vec3i, vec3i2));
+        enumMap.put(RailShape.ASCENDING_EAST, Pair.of(vec3i5, vec3i2));
+        enumMap.put(RailShape.ASCENDING_WEST, Pair.of(vec3i, vec3i6));
+        enumMap.put(RailShape.ASCENDING_NORTH, Pair.of(vec3i3, vec3i8));
+        enumMap.put(RailShape.ASCENDING_SOUTH, Pair.of(vec3i7, vec3i4));
+        enumMap.put(RailShape.SOUTH_EAST, Pair.of(vec3i4, vec3i2));
+        enumMap.put(RailShape.SOUTH_WEST, Pair.of(vec3i4, vec3i));
+        enumMap.put(RailShape.NORTH_WEST, Pair.of(vec3i3, vec3i));
+        enumMap.put(RailShape.NORTH_EAST, Pair.of(vec3i3, vec3i2));
+    });
     private int lSteps;
     private double lx;
     private double ly;
@@ -187,6 +211,10 @@ extends Entity {
         return !this.removed;
     }
 
+    private static Pair<Vec3i, Vec3i> exits(RailShape railShape) {
+        return EXITS.get(railShape);
+    }
+
     @Override
     public Direction getMotionDirection() {
         return this.flipped ? this.getDirection().getOpposite().getClockWise() : this.getDirection().getClockWise();
@@ -227,9 +255,6 @@ extends Entity {
             }
             return;
         }
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
         if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
         }
@@ -342,9 +367,11 @@ extends Entity {
             }
         }
         vec32 = this.getDeltaMovement();
-        int[][] is = EXITS[railShape.getData()];
-        double e = is[1][0] - is[0][0];
-        double f = is[1][2] - is[0][2];
+        Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railShape);
+        Vec3i vec3i = pair.getFirst();
+        Vec3i vec3i2 = pair.getSecond();
+        double e = vec3i2.getX() - vec3i.getX();
+        double f = vec3i2.getZ() - vec3i.getZ();
         double g = Math.sqrt(e * e + f * f);
         double h = vec32.x * e + vec32.z * f;
         if (h < 0.0) {
@@ -372,10 +399,10 @@ extends Entity {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.0, 0.5));
             }
         }
-        double l = (double)blockPos.getX() + 0.5 + (double)is[0][0] * 0.5;
-        double m = (double)blockPos.getZ() + 0.5 + (double)is[0][2] * 0.5;
-        double n = (double)blockPos.getX() + 0.5 + (double)is[1][0] * 0.5;
-        double o = (double)blockPos.getZ() + 0.5 + (double)is[1][2] * 0.5;
+        double l = (double)blockPos.getX() + 0.5 + (double)vec3i.getX() * 0.5;
+        double m = (double)blockPos.getZ() + 0.5 + (double)vec3i.getZ() * 0.5;
+        double n = (double)blockPos.getX() + 0.5 + (double)vec3i2.getX() * 0.5;
+        double o = (double)blockPos.getZ() + 0.5 + (double)vec3i2.getZ() * 0.5;
         e = n - l;
         f = o - m;
         if (e == 0.0) {
@@ -396,10 +423,10 @@ extends Entity {
         r = this.getMaxSpeed();
         vec32 = this.getDeltaMovement();
         this.move(MoverType.SELF, new Vec3(Mth.clamp(q * vec32.x, -r, r), 0.0, Mth.clamp(q * vec32.z, -r, r)));
-        if (is[0][1] != 0 && Mth.floor(this.x) - blockPos.getX() == is[0][0] && Mth.floor(this.z) - blockPos.getZ() == is[0][2]) {
-            this.setPos(this.x, this.y + (double)is[0][1], this.z);
-        } else if (is[1][1] != 0 && Mth.floor(this.x) - blockPos.getX() == is[1][0] && Mth.floor(this.z) - blockPos.getZ() == is[1][2]) {
-            this.setPos(this.x, this.y + (double)is[1][1], this.z);
+        if (vec3i.getY() != 0 && Mth.floor(this.x) - blockPos.getX() == vec3i.getX() && Mth.floor(this.z) - blockPos.getZ() == vec3i.getZ()) {
+            this.setPos(this.x, this.y + (double)vec3i.getY(), this.z);
+        } else if (vec3i2.getY() != 0 && Mth.floor(this.x) - blockPos.getX() == vec3i2.getX() && Mth.floor(this.z) - blockPos.getZ() == vec3i2.getZ()) {
+            this.setPos(this.x, this.y + (double)vec3i2.getY(), this.z);
         }
         this.applyNaturalSlowdown();
         Vec3 vec34 = this.getPos(this.x, this.y, this.z);
@@ -474,14 +501,16 @@ extends Entity {
             if (railShape.isAscending()) {
                 e = j + 1;
             }
-            int[][] is = EXITS[railShape.getData()];
-            double h = is[1][0] - is[0][0];
-            double l = is[1][2] - is[0][2];
+            Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railShape);
+            Vec3i vec3i = pair.getFirst();
+            Vec3i vec3i2 = pair.getSecond();
+            double h = vec3i2.getX() - vec3i.getX();
+            double l = vec3i2.getZ() - vec3i.getZ();
             double m = Math.sqrt(h * h + l * l);
-            if (is[0][1] != 0 && Mth.floor(d += (h /= m) * g) - i == is[0][0] && Mth.floor(f += (l /= m) * g) - k == is[0][2]) {
-                e += (double)is[0][1];
-            } else if (is[1][1] != 0 && Mth.floor(d) - i == is[1][0] && Mth.floor(f) - k == is[1][2]) {
-                e += (double)is[1][1];
+            if (vec3i.getY() != 0 && Mth.floor(d += (h /= m) * g) - i == vec3i.getX() && Mth.floor(f += (l /= m) * g) - k == vec3i.getZ()) {
+                e += (double)vec3i.getY();
+            } else if (vec3i2.getY() != 0 && Mth.floor(d) - i == vec3i2.getX() && Mth.floor(f) - k == vec3i2.getZ()) {
+                e += (double)vec3i2.getY();
             }
             return this.getPos(d, e, f);
         }
@@ -500,13 +529,15 @@ extends Entity {
         if ((blockState = this.level.getBlockState(new BlockPos(i, j, k))).is(BlockTags.RAILS)) {
             double s;
             RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
-            int[][] is = EXITS[railShape.getData()];
-            double g = (double)i + 0.5 + (double)is[0][0] * 0.5;
-            double h = (double)j + 0.0625 + (double)is[0][1] * 0.5;
-            double l = (double)k + 0.5 + (double)is[0][2] * 0.5;
-            double m = (double)i + 0.5 + (double)is[1][0] * 0.5;
-            double n = (double)j + 0.0625 + (double)is[1][1] * 0.5;
-            double o = (double)k + 0.5 + (double)is[1][2] * 0.5;
+            Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railShape);
+            Vec3i vec3i = pair.getFirst();
+            Vec3i vec3i2 = pair.getSecond();
+            double g = (double)i + 0.5 + (double)vec3i.getX() * 0.5;
+            double h = (double)j + 0.0625 + (double)vec3i.getY() * 0.5;
+            double l = (double)k + 0.5 + (double)vec3i.getZ() * 0.5;
+            double m = (double)i + 0.5 + (double)vec3i2.getX() * 0.5;
+            double n = (double)j + 0.0625 + (double)vec3i2.getY() * 0.5;
+            double o = (double)k + 0.5 + (double)vec3i2.getZ() * 0.5;
             double p = m - g;
             double q = (n - h) * 2.0;
             double r = o - l;
@@ -524,8 +555,7 @@ extends Entity {
             f = l + r * s;
             if (q < 0.0) {
                 e += 1.0;
-            }
-            if (q > 0.0) {
+            } else if (q > 0.0) {
                 e += 0.5;
             }
             return new Vec3(d, e, f);

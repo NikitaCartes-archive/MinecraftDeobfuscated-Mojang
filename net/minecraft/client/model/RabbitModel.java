@@ -3,13 +3,14 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Rabbit;
 
 @Environment(value=EnvType.CLIENT)
@@ -98,47 +99,25 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T rabbit, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(rabbit, f, g, h, i, j, k);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
         if (this.young) {
-            float l = 1.5f;
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.56666666f, 0.56666666f, 0.56666666f);
-            RenderSystem.translatef(0.0f, 22.0f * k, 2.0f * k);
-            this.head.render(k);
-            this.earLeft.render(k);
-            this.earRight.render(k);
-            this.nose.render(k);
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.4f, 0.4f, 0.4f);
-            RenderSystem.translatef(0.0f, 36.0f * k, 0.0f);
-            this.rearFootLeft.render(k);
-            this.rearFootRight.render(k);
-            this.haunchLeft.render(k);
-            this.haunchRight.render(k);
-            this.body.render(k);
-            this.frontLegLeft.render(k);
-            this.frontLegRight.render(k);
-            this.tail.render(k);
-            RenderSystem.popMatrix();
+            float j = 1.5f;
+            poseStack.pushPose();
+            poseStack.scale(0.56666666f, 0.56666666f, 0.56666666f);
+            poseStack.translate(0.0, 1.375, 0.125);
+            ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h));
+            poseStack.popPose();
+            poseStack.pushPose();
+            poseStack.scale(0.4f, 0.4f, 0.4f);
+            poseStack.translate(0.0, 2.25, 0.0);
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h));
+            poseStack.popPose();
         } else {
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.6f, 0.6f, 0.6f);
-            RenderSystem.translatef(0.0f, 16.0f * k, 0.0f);
-            this.rearFootLeft.render(k);
-            this.rearFootRight.render(k);
-            this.haunchLeft.render(k);
-            this.haunchRight.render(k);
-            this.body.render(k);
-            this.frontLegLeft.render(k);
-            this.frontLegRight.render(k);
-            this.head.render(k);
-            this.earRight.render(k);
-            this.earLeft.render(k);
-            this.tail.render(k);
-            this.nose.render(k);
-            RenderSystem.popMatrix();
+            poseStack.pushPose();
+            poseStack.scale(0.6f, 0.6f, 0.6f);
+            poseStack.translate(0.0, 1.0, 0.0);
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.head, this.earRight, this.earLeft, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null, f, g, h));
+            poseStack.popPose();
         }
     }
 
@@ -166,16 +145,6 @@ extends EntityModel<T> {
     public void prepareMobModel(T rabbit, float f, float g, float h) {
         super.prepareMobModel(rabbit, f, g, h);
         this.jumpRotation = Mth.sin(((Rabbit)rabbit).getJumpCompletion(h) * (float)Math.PI);
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((Rabbit)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((Rabbit)entity), f, g, h, i, j, k);
     }
 }
 

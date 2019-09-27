@@ -5,8 +5,11 @@ package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
@@ -39,6 +42,10 @@ public abstract class GuiComponent {
     }
 
     public static void fill(int i, int j, int k, int l, int m) {
+        GuiComponent.fill(Transformation.identity().getMatrix(), i, j, k, l, m);
+    }
+
+    public static void fill(Matrix4f matrix4f, int i, int j, int k, int l, int m) {
         int n;
         if (i < k) {
             n = i;
@@ -54,18 +61,17 @@ public abstract class GuiComponent {
         float g = (float)(m >> 16 & 0xFF) / 255.0f;
         float h = (float)(m >> 8 & 0xFF) / 255.0f;
         float o = (float)(m & 0xFF) / 255.0f;
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.color4f(g, h, o, f);
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(i, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, j, 0.0).endVertex();
-        bufferBuilder.vertex(i, j, 0.0).endVertex();
-        tesselator.end();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.vertex(matrix4f, i, l, 0.0f).color(g, h, o, f).endVertex();
+        bufferBuilder.vertex(matrix4f, k, l, 0.0f).color(g, h, o, f).endVertex();
+        bufferBuilder.vertex(matrix4f, k, j, 0.0f).color(g, h, o, f).endVertex();
+        bufferBuilder.vertex(matrix4f, i, j, 0.0f).color(g, h, o, f).endVertex();
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }

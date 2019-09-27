@@ -86,10 +86,10 @@ implements UnbakedModel {
 
     @Override
     @Nullable
-    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState) {
+    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
         MultiPartBakedModel.Builder builder = new MultiPartBakedModel.Builder();
         for (Selector selector : this.getSelectors()) {
-            BakedModel bakedModel = selector.getVariant().bake(modelBakery, function, modelState);
+            BakedModel bakedModel = selector.getVariant().bake(modelBakery, function, modelState, resourceLocation);
             if (bakedModel == null) continue;
             builder.add(selector.getPredicate(this.definition), bakedModel);
         }

@@ -21,7 +21,7 @@ extends MobRenderer<Ocelot, OcelotModel<Ocelot>> {
     }
 
     @Override
-    protected ResourceLocation getTextureLocation(Ocelot ocelot) {
+    public ResourceLocation getTextureLocation(Ocelot ocelot) {
         return CAT_OCELOT_LOCATION;
     }
 }

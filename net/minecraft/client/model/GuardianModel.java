@@ -3,10 +3,11 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public class GuardianModel
-extends EntityModel<Guardian> {
+extends ListModel<Guardian> {
     private static final float[] SPIKE_X_ROT = new float[]{1.75f, 0.25f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f, 1.25f, 0.75f, 0.0f, 0.0f};
     private static final float[] SPIKE_Y_ROT = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.25f, 1.75f, 1.25f, 0.75f, 0.0f, 0.0f, 0.0f, 0.0f};
     private static final float[] SPIKE_Z_ROT = new float[]{0.0f, 0.0f, 0.25f, 1.75f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.75f, 1.25f};
@@ -59,9 +60,8 @@ extends EntityModel<Guardian> {
     }
 
     @Override
-    public void render(Guardian guardian, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(guardian, f, g, h, i, j, k);
-        this.head.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.head);
     }
 
     @Override
@@ -105,16 +105,6 @@ extends EntityModel<Guardian> {
         this.tailParts[2].x = 0.5f;
         this.tailParts[2].y = 0.5f;
         this.tailParts[2].z = 6.0f;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((Guardian)entity, f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((Guardian)entity, f, g, h, i, j, k);
     }
 }
 

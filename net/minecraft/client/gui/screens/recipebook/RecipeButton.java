@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -64,10 +63,8 @@ extends AbstractWidget {
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
-        Lighting.turnOnGui();
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(RECIPE_BOOK_LOCATION);
-        RenderSystem.disableLighting();
         int k = 29;
         if (!this.collection.hasCraftable()) {
             k += 25;
@@ -98,8 +95,6 @@ extends AbstractWidget {
         if (bl) {
             RenderSystem.popMatrix();
         }
-        RenderSystem.enableLighting();
-        Lighting.turnOff();
     }
 
     private List<Recipe<?>> getOrderedRecipes() {

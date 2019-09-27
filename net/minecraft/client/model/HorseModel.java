@@ -3,31 +3,35 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
 @Environment(value=EnvType.CLIENT)
 public class HorseModel<T extends AbstractHorse>
-extends EntityModel<T> {
+extends AgeableListModel<T> {
     protected final ModelPart body;
     protected final ModelPart headParts;
-    private final ModelPart leg1A;
-    private final ModelPart leg2A;
-    private final ModelPart leg3A;
-    private final ModelPart leg4A;
+    private final ModelPart leg1;
+    private final ModelPart leg2;
+    private final ModelPart leg3;
+    private final ModelPart leg4;
+    private final ModelPart babyLeg1;
+    private final ModelPart babyLeg2;
+    private final ModelPart babyLeg3;
+    private final ModelPart babyLeg4;
     private final ModelPart tail;
     private final ModelPart[] saddleParts;
     private final ModelPart[] ridingParts;
 
     public HorseModel(float f) {
+        super(true, 16.2f, 1.36f, 2.7272f, 2.0f, 20.0f);
         this.texWidth = 64;
         this.texHeight = 64;
         this.body = new ModelPart(this, 0, 32);
@@ -46,20 +50,35 @@ extends EntityModel<T> {
         this.headParts.addChild(modelPart2);
         this.headParts.addChild(modelPart3);
         this.addEarModels(this.headParts);
-        this.leg1A = new ModelPart(this, 48, 21);
-        this.leg1A.mirror = true;
-        this.leg1A.addBox(-3.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f);
-        this.leg1A.setPos(4.0f, 14.0f, 7.0f);
-        this.leg2A = new ModelPart(this, 48, 21);
-        this.leg2A.addBox(-1.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f);
-        this.leg2A.setPos(-4.0f, 14.0f, 7.0f);
-        this.leg3A = new ModelPart(this, 48, 21);
-        this.leg3A.mirror = true;
-        this.leg3A.addBox(-3.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f);
-        this.leg3A.setPos(4.0f, 6.0f, -12.0f);
-        this.leg4A = new ModelPart(this, 48, 21);
-        this.leg4A.addBox(-1.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f);
-        this.leg4A.setPos(-4.0f, 6.0f, -12.0f);
+        this.leg1 = new ModelPart(this, 48, 21);
+        this.leg1.mirror = true;
+        this.leg1.addBox(-3.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f);
+        this.leg1.setPos(4.0f, 14.0f, 7.0f);
+        this.leg2 = new ModelPart(this, 48, 21);
+        this.leg2.addBox(-1.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f);
+        this.leg2.setPos(-4.0f, 14.0f, 7.0f);
+        this.leg3 = new ModelPart(this, 48, 21);
+        this.leg3.mirror = true;
+        this.leg3.addBox(-3.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f);
+        this.leg3.setPos(4.0f, 6.0f, -12.0f);
+        this.leg4 = new ModelPart(this, 48, 21);
+        this.leg4.addBox(-1.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f);
+        this.leg4.setPos(-4.0f, 6.0f, -12.0f);
+        float g = 5.5f;
+        this.babyLeg1 = new ModelPart(this, 48, 21);
+        this.babyLeg1.mirror = true;
+        this.babyLeg1.addBox(-3.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f, f + 5.5f, f);
+        this.babyLeg1.setPos(4.0f, 14.0f, 7.0f);
+        this.babyLeg2 = new ModelPart(this, 48, 21);
+        this.babyLeg2.addBox(-1.0f, -1.01f, -1.0f, 4.0f, 11.0f, 4.0f, f, f + 5.5f, f);
+        this.babyLeg2.setPos(-4.0f, 14.0f, 7.0f);
+        this.babyLeg3 = new ModelPart(this, 48, 21);
+        this.babyLeg3.mirror = true;
+        this.babyLeg3.addBox(-3.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f, f + 5.5f, f);
+        this.babyLeg3.setPos(4.0f, 6.0f, -12.0f);
+        this.babyLeg4 = new ModelPart(this, 48, 21);
+        this.babyLeg4.addBox(-1.0f, -1.01f, -1.9f, 4.0f, 11.0f, 4.0f, f, f + 5.5f, f);
+        this.babyLeg4.setPos(-4.0f, 6.0f, -12.0f);
         this.tail = new ModelPart(this, 42, 36);
         this.tail.addBox(-1.5f, 0.0f, 0.0f, 3.0f, 14.0f, 4.0f, f);
         this.tail.setPos(0.0f, -5.0f, 2.0f);
@@ -102,51 +121,33 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T abstractHorse, float f, float g, float h, float i, float j, float k) {
-        boolean bl = ((AgableMob)abstractHorse).isBaby();
-        float l = ((LivingEntity)abstractHorse).getScale();
-        boolean bl2 = ((AbstractHorse)abstractHorse).isSaddled();
-        boolean bl3 = ((Entity)abstractHorse).isVehicle();
+    public void setupAnim(T abstractHorse, float f, float g, float h, float i, float j, float k) {
+        boolean bl = ((AbstractHorse)abstractHorse).isSaddled();
+        boolean bl2 = ((Entity)abstractHorse).isVehicle();
         for (ModelPart modelPart : this.saddleParts) {
-            modelPart.visible = bl2;
+            modelPart.visible = bl;
         }
         for (ModelPart modelPart : this.ridingParts) {
-            modelPart.visible = bl3 && bl2;
+            modelPart.visible = bl2 && bl;
         }
-        if (bl) {
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(l, 0.5f + l * 0.5f, l);
-            RenderSystem.translatef(0.0f, 0.95f * (1.0f - l), 0.0f);
-        }
-        this.leg1A.render(k);
-        this.leg2A.render(k);
-        this.leg3A.render(k);
-        this.leg4A.render(k);
-        if (bl) {
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(l, l, l);
-            RenderSystem.translatef(0.0f, 2.3f * (1.0f - l), 0.0f);
-        }
-        this.body.render(k);
-        if (bl) {
-            RenderSystem.popMatrix();
-            RenderSystem.pushMatrix();
-            float m = l + 0.1f * l;
-            RenderSystem.scalef(m, m, m);
-            RenderSystem.translatef(0.0f, 2.25f * (1.0f - m), 0.1f * (1.4f - m));
-        }
-        this.headParts.render(k);
-        if (bl) {
-            RenderSystem.popMatrix();
-        }
+        this.body.y = 11.0f;
+    }
+
+    @Override
+    public Iterable<ModelPart> headParts() {
+        return ImmutableList.of(this.headParts);
+    }
+
+    @Override
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.body, this.leg1, this.leg2, this.leg3, this.leg4, this.babyLeg1, this.babyLeg2, this.babyLeg3, this.babyLeg4);
     }
 
     @Override
     public void prepareMobModel(T abstractHorse, float f, float g, float h) {
         super.prepareMobModel(abstractHorse, f, g, h);
-        float i = this.rotlerp(((AbstractHorse)abstractHorse).yBodyRotO, ((AbstractHorse)abstractHorse).yBodyRot, h);
-        float j = this.rotlerp(((AbstractHorse)abstractHorse).yHeadRotO, ((AbstractHorse)abstractHorse).yHeadRot, h);
+        float i = Mth.rotlerp(((AbstractHorse)abstractHorse).yBodyRotO, ((AbstractHorse)abstractHorse).yBodyRot, h);
+        float j = Mth.rotlerp(((AbstractHorse)abstractHorse).yHeadRotO, ((AbstractHorse)abstractHorse).yHeadRot, h);
         float k = Mth.lerp(h, ((AbstractHorse)abstractHorse).xRotO, ((AbstractHorse)abstractHorse).xRot);
         float l = j - i;
         float m = k * ((float)Math.PI / 180);
@@ -181,35 +182,42 @@ extends EntityModel<T> {
         this.body.xRot = o * -0.7853982f + p * this.body.xRot;
         float w = 0.2617994f * o;
         float x = Mth.cos(r * 0.6f + (float)Math.PI);
-        this.leg3A.y = 2.0f * o + 14.0f * p;
-        this.leg3A.z = -6.0f * o - 10.0f * p;
-        this.leg4A.y = this.leg3A.y;
-        this.leg4A.z = this.leg3A.z;
+        this.leg3.y = 2.0f * o + 14.0f * p;
+        this.leg3.z = -6.0f * o - 10.0f * p;
+        this.leg4.y = this.leg3.y;
+        this.leg4.z = this.leg3.z;
         float y = (-1.0471976f + x) * o + u * p;
         float z = (-1.0471976f - x) * o - u * p;
-        this.leg1A.xRot = w - t * 0.5f * g * p;
-        this.leg2A.xRot = w + t * 0.5f * g * p;
-        this.leg3A.xRot = y;
-        this.leg4A.xRot = z;
+        this.leg1.xRot = w - t * 0.5f * g * p;
+        this.leg2.xRot = w + t * 0.5f * g * p;
+        this.leg3.xRot = y;
+        this.leg4.xRot = z;
         this.tail.xRot = 0.5235988f + g * 0.75f;
         this.tail.y = -5.0f + g;
         this.tail.z = 2.0f + g * 2.0f;
         this.tail.yRot = bl ? Mth.cos(r * 0.7f) : 0.0f;
-    }
-
-    private float rotlerp(float f, float g, float h) {
-        float i;
-        for (i = g - f; i < -180.0f; i += 360.0f) {
-        }
-        while (i >= 180.0f) {
-            i -= 360.0f;
-        }
-        return f + h * i;
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((AbstractHorse)entity), f, g, h, i, j, k);
+        this.babyLeg1.y = this.leg1.y;
+        this.babyLeg1.z = this.leg1.z;
+        this.babyLeg1.xRot = this.leg1.xRot;
+        this.babyLeg2.y = this.leg2.y;
+        this.babyLeg2.z = this.leg2.z;
+        this.babyLeg2.xRot = this.leg2.xRot;
+        this.babyLeg3.y = this.leg3.y;
+        this.babyLeg3.z = this.leg3.z;
+        this.babyLeg3.xRot = this.leg3.xRot;
+        this.babyLeg4.y = this.leg4.y;
+        this.babyLeg4.z = this.leg4.z;
+        this.babyLeg4.xRot = this.leg4.xRot;
+        boolean bl2 = ((AgableMob)abstractHorse).isBaby();
+        this.leg1.visible = !bl2;
+        this.leg2.visible = !bl2;
+        this.leg3.visible = !bl2;
+        this.leg4.visible = !bl2;
+        this.babyLeg1.visible = bl2;
+        this.babyLeg2.visible = bl2;
+        this.babyLeg3.visible = bl2;
+        this.babyLeg4.visible = bl2;
+        this.body.y = bl2 ? 10.8f : 0.0f;
     }
 }
 

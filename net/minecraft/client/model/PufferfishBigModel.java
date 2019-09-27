@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class PufferfishBigModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart cube;
     private final ModelPart blueFin0;
     private final ModelPart blueFin1;
@@ -81,21 +82,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.cube.render(k);
-        this.blueFin0.render(k);
-        this.blueFin1.render(k);
-        this.topFrontFin.render(k);
-        this.topMidFin.render(k);
-        this.topBackFin.render(k);
-        this.sideFrontFin0.render(k);
-        this.sideFrontFin1.render(k);
-        this.bottomFrontFin.render(k);
-        this.bottomMidFin.render(k);
-        this.bottomBackFin.render(k);
-        this.sideBackFin0.render(k);
-        this.sideBackFin1.render(k);
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.cube, this.blueFin0, this.blueFin1, this.topFrontFin, this.topMidFin, this.topBackFin, this.sideFrontFin0, this.sideBackFin1, this.bottomFrontFin, this.bottomMidFin, this.bottomBackFin, this.sideBackFin0, new ModelPart[]{this.sideBackFin1});
     }
 
     @Override

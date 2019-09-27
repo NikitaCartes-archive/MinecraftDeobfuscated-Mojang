@@ -73,7 +73,6 @@ extends ScrolledSelectionList {
         int k = this.getScrollbarPosition();
         int l = k + 6;
         this.capYPosition();
-        RenderSystem.disableLighting();
         RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -99,22 +98,22 @@ extends ScrolledSelectionList {
                 q = this.y0;
             }
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-            bufferBuilder.vertex(k, this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
+            bufferBuilder.vertex(k, this.y0, 0.0).uv(0.0f, 0.0f).color(0, 0, 0, 255).endVertex();
             tesselator.end();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, q + p, 0.0).uv(0.0, 1.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, q + p, 0.0).uv(1.0, 1.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(l, q, 0.0).uv(1.0, 0.0).color(128, 128, 128, 255).endVertex();
-            bufferBuilder.vertex(k, q, 0.0).uv(0.0, 0.0).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(k, q + p, 0.0).uv(0.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(l, q + p, 0.0).uv(1.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(l, q, 0.0).uv(1.0f, 0.0f).color(128, 128, 128, 255).endVertex();
+            bufferBuilder.vertex(k, q, 0.0).uv(0.0f, 0.0f).color(128, 128, 128, 255).endVertex();
             tesselator.end();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            bufferBuilder.vertex(k, q + p - 1, 0.0).uv(0.0, 1.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, q + p - 1, 0.0).uv(1.0, 1.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(l - 1, q, 0.0).uv(1.0, 0.0).color(192, 192, 192, 255).endVertex();
-            bufferBuilder.vertex(k, q, 0.0).uv(0.0, 0.0).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(k, q + p - 1, 0.0).uv(0.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(l - 1, q + p - 1, 0.0).uv(1.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(l - 1, q, 0.0).uv(1.0f, 0.0f).color(192, 192, 192, 255).endVertex();
+            bufferBuilder.vertex(k, q, 0.0).uv(0.0f, 0.0f).color(192, 192, 192, 255).endVertex();
             tesselator.end();
         }
         this.renderDecorations(i, j);

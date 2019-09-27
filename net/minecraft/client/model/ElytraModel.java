@@ -3,10 +3,10 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public class ElytraModel<T extends LivingEntity>
-extends EntityModel<T> {
+extends AgeableListModel<T> {
     private final ModelPart rightWing;
     private final ModelPart leftWing = new ModelPart(this, 22, 0);
 
@@ -27,25 +27,17 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.disableCull();
-        if (((LivingEntity)livingEntity).isBaby()) {
-            RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5f, 0.5f, 0.5f);
-            RenderSystem.translatef(0.0f, 1.5f, -0.1f);
-            this.leftWing.render(k);
-            this.rightWing.render(k);
-            RenderSystem.popMatrix();
-        } else {
-            this.leftWing.render(k);
-            this.rightWing.render(k);
-        }
+    protected Iterable<ModelPart> headParts() {
+        return ImmutableList.of();
+    }
+
+    @Override
+    protected Iterable<ModelPart> bodyParts() {
+        return ImmutableList.of(this.leftWing, this.rightWing);
     }
 
     @Override
     public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(livingEntity, f, g, h, i, j, k);
         float l = 0.2617994f;
         float m = -0.2617994f;
         float n = 0.0f;
@@ -85,16 +77,6 @@ extends EntityModel<T> {
         this.rightWing.y = this.leftWing.y;
         this.rightWing.xRot = this.leftWing.xRot;
         this.rightWing.zRot = -this.leftWing.zRot;
-    }
-
-    @Override
-    public /* synthetic */ void setupAnim(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim((T)((LivingEntity)entity), f, g, h, i, j, k);
-    }
-
-    @Override
-    public /* synthetic */ void render(Entity entity, float f, float g, float h, float i, float j, float k) {
-        this.render((T)((LivingEntity)entity), f, g, h, i, j, k);
     }
 }
 

@@ -3,16 +3,17 @@
  */
 package net.minecraft.client.model;
 
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class EndermiteModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private static final int[][] BODY_SIZES = new int[][]{{4, 3, 2}, {6, 4, 5}, {3, 3, 1}, {1, 2, 1}};
     private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 5}, {0, 14}, {0, 18}};
     private static final int BODY_COUNT = BODY_SIZES.length;
@@ -30,11 +31,8 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        for (ModelPart modelPart : this.bodyParts) {
-            modelPart.render(k);
-        }
+    public Iterable<ModelPart> parts() {
+        return Arrays.asList(this.bodyParts);
     }
 
     @Override

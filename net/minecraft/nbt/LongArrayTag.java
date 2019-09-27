@@ -14,16 +14,43 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class LongArrayTag
 extends CollectionTag<LongTag> {
-    private long[] data;
+    public static final TagType<LongArrayTag> TYPE = new TagType<LongArrayTag>(){
 
-    LongArrayTag() {
-    }
+        @Override
+        public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            nbtAccounter.accountBits(192L);
+            int j = dataInput.readInt();
+            nbtAccounter.accountBits(64 * j);
+            long[] ls = new long[j];
+            for (int k = 0; k < j; ++k) {
+                ls[k] = dataInput.readLong();
+            }
+            return new LongArrayTag(ls);
+        }
+
+        @Override
+        public String getName() {
+            return "LONG[]";
+        }
+
+        @Override
+        public String getPrettyName() {
+            return "TAG_Long_Array";
+        }
+
+        @Override
+        public /* synthetic */ Tag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+            return this.load(dataInput, i, nbtAccounter);
+        }
+    };
+    private long[] data;
 
     public LongArrayTag(long[] ls) {
         this.data = ls;
@@ -55,19 +82,12 @@ extends CollectionTag<LongTag> {
     }
 
     @Override
-    public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-        nbtAccounter.accountBits(192L);
-        int j = dataInput.readInt();
-        nbtAccounter.accountBits(64 * j);
-        this.data = new long[j];
-        for (int k = 0; k < j; ++k) {
-            this.data[k] = dataInput.readLong();
-        }
-    }
-
-    @Override
     public byte getId() {
         return 12;
+    }
+
+    public TagType<LongArrayTag> getType() {
+        return TYPE;
     }
 
     @Override
@@ -127,14 +147,14 @@ extends CollectionTag<LongTag> {
 
     @Override
     public LongTag get(int i) {
-        return new LongTag(this.data[i]);
+        return LongTag.valueOf(this.data[i]);
     }
 
     @Override
     public LongTag set(int i, LongTag longTag) {
         long l = this.data[i];
         this.data[i] = longTag.getAsLong();
-        return new LongTag(l);
+        return LongTag.valueOf(l);
     }
 
     @Override
@@ -164,7 +184,7 @@ extends CollectionTag<LongTag> {
     public LongTag remove(int i) {
         long l = this.data[i];
         this.data = ArrayUtils.remove(this.data, i);
-        return new LongTag(l);
+        return LongTag.valueOf(l);
     }
 
     @Override

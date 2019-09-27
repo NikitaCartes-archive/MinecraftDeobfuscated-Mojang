@@ -4,14 +4,16 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
-import net.minecraft.client.renderer.entity.HeadedModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.nbt.CompoundTag;
@@ -37,33 +39,32 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
-        float m;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+        float n;
         boolean bl;
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.HEAD);
         if (itemStack.isEmpty()) {
             return;
         }
         Item item = itemStack.getItem();
-        RenderSystem.pushMatrix();
+        poseStack.pushPose();
         if (((Entity)livingEntity).isCrouching()) {
-            RenderSystem.translatef(0.0f, 0.2f, 0.0f);
+            poseStack.translate(0.0, 0.2f, 0.0);
         }
         boolean bl2 = bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
         if (((LivingEntity)livingEntity).isBaby() && !(livingEntity instanceof Villager)) {
-            m = 2.0f;
-            float n = 1.4f;
-            RenderSystem.translatef(0.0f, 0.5f * l, 0.0f);
-            RenderSystem.scalef(0.7f, 0.7f, 0.7f);
-            RenderSystem.translatef(0.0f, 16.0f * l, 0.0f);
+            n = 2.0f;
+            float o = 1.4f;
+            poseStack.translate(0.0, 0.5f * m, 0.0);
+            poseStack.scale(0.7f, 0.7f, 0.7f);
+            poseStack.translate(0.0, 16.0f * m, 0.0);
         }
-        ((HeadedModel)this.getParentModel()).translateToHead(0.0625f);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack, 0.0625f);
         if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
-            m = 1.1875f;
-            RenderSystem.scalef(1.1875f, -1.1875f, -1.1875f);
+            n = 1.1875f;
+            poseStack.scale(1.1875f, -1.1875f, -1.1875f);
             if (bl) {
-                RenderSystem.translatef(0.0f, 0.0625f, 0.0f);
+                poseStack.translate(0.0, 0.0625, 0.0);
             }
             GameProfile gameProfile = null;
             if (itemStack.hasTag()) {
@@ -76,23 +77,19 @@ extends RenderLayer<T, M> {
                     compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
                 }
             }
-            SkullBlockRenderer.instance.renderSkull(-0.5f, 0.0f, -0.5f, null, 180.0f, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, -1, f);
+            poseStack.translate(-0.5, 0.0, -0.5);
+            SkullBlockRenderer.renderSkull(null, 180.0f, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, f, poseStack, multiBufferSource, i);
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
-            m = 0.625f;
-            RenderSystem.translatef(0.0f, -0.25f, 0.0f);
-            RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
-            RenderSystem.scalef(0.625f, -0.625f, -0.625f);
+            n = 0.625f;
+            poseStack.translate(0.0, -0.25, 0.0);
+            poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
+            poseStack.scale(0.625f, -0.625f, -0.625f);
             if (bl) {
-                RenderSystem.translatef(0.0f, 0.1875f, 0.0f);
+                poseStack.translate(0.0, 0.1875, 0.0);
             }
-            Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD);
+            Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource);
         }
-        RenderSystem.popMatrix();
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return false;
+        poseStack.popPose();
     }
 }
 

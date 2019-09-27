@@ -3,15 +3,16 @@
  */
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class LlamaSpitModel<T extends Entity>
-extends EntityModel<T> {
+extends ListModel<T> {
     private final ModelPart main = new ModelPart(this);
 
     public LlamaSpitModel() {
@@ -31,9 +32,12 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void render(T entity, float f, float g, float h, float i, float j, float k) {
-        this.setupAnim(entity, f, g, h, i, j, k);
-        this.main.render(k);
+    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+    }
+
+    @Override
+    public Iterable<ModelPart> parts() {
+        return ImmutableList.of(this.main);
     }
 }
 

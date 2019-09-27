@@ -3,14 +3,14 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DrownedModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Zombie;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,20 +24,8 @@ extends RenderLayer<T, DrownedModel<T>> {
     }
 
     @Override
-    public void render(T zombie, float f, float g, float h, float i, float j, float k, float l) {
-        if (((Entity)zombie).isInvisible()) {
-            return;
-        }
-        ((DrownedModel)this.getParentModel()).copyPropertiesTo(this.model);
-        this.model.prepareMobModel(zombie, f, g, h);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.bindTexture(DROWNED_OUTER_LAYER_LOCATION);
-        this.model.render(zombie, f, g, i, j, k, l);
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l, float m) {
+        DrownedOuterLayer.coloredModelCopyLayerRender(this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, m, h);
     }
 }
 

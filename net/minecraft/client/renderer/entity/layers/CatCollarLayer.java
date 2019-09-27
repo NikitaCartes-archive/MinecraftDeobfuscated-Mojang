@@ -3,10 +3,11 @@
  */
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
@@ -23,21 +24,12 @@ extends RenderLayer<Cat, CatModel<Cat>> {
     }
 
     @Override
-    public void render(Cat cat, float f, float g, float h, float i, float j, float k, float l) {
-        if (!cat.isTame() || cat.isInvisible()) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l, float m) {
+        if (!cat.isTame()) {
             return;
         }
-        this.bindTexture(CAT_COLLAR_LOCATION);
         float[] fs = cat.getCollarColor().getTextureDiffuseColors();
-        RenderSystem.color3f(fs[0], fs[1], fs[2]);
-        ((CatModel)this.getParentModel()).copyPropertiesTo(this.catModel);
-        this.catModel.prepareMobModel(cat, f, g, h);
-        this.catModel.render(cat, f, g, i, j, k, l);
-    }
-
-    @Override
-    public boolean colorsOnDamage() {
-        return true;
+        CatCollarLayer.coloredModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
     }
 }
 

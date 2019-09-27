@@ -219,12 +219,6 @@ implements EntityBlock {
         return EAST_SHAPE;
     }
 
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean hasCustomBreakingProgress(BlockState blockState) {
-        return true;
-    }
-
     public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos, int i) {
         Direction direction = levelReader.getBlockState(blockPos).getValue(FACING);
         int j = blockPos.getX();
