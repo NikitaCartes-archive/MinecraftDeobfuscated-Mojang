@@ -1,8 +1,6 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.Multimap;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -47,12 +45,6 @@ public class TridentItem extends Item {
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
 		return 72000;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean isFoil(ItemStack itemStack) {
-		return false;
 	}
 
 	@Override

@@ -7,13 +7,35 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class IntTag extends NumericTag {
-	private int data;
+	public static final TagType<IntTag> TYPE = new TagType<IntTag>() {
+		public IntTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(96L);
+			return IntTag.valueOf(dataInput.readInt());
+		}
 
-	IntTag() {
+		@Override
+		public String getName() {
+			return "INT";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Int";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	private final int data;
+
+	private IntTag(int i) {
+		this.data = i;
 	}
 
-	public IntTag(int i) {
-		this.data = i;
+	public static IntTag valueOf(int i) {
+		return i >= -128 && i <= 1024 ? IntTag.Cache.cache[i + 128] : new IntTag(i);
 	}
 
 	@Override
@@ -22,14 +44,13 @@ public class IntTag extends NumericTag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(96L);
-		this.data = dataInput.readInt();
+	public byte getId() {
+		return 3;
 	}
 
 	@Override
-	public byte getId() {
-		return 3;
+	public TagType<IntTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -38,7 +59,7 @@ public class IntTag extends NumericTag {
 	}
 
 	public IntTag copy() {
-		return new IntTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {
@@ -87,5 +108,15 @@ public class IntTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	static class Cache {
+		static final IntTag[] cache = new IntTag[1153];
+
+		static {
+			for (int i = 0; i < cache.length; i++) {
+				cache[i] = new IntTag(-128 + i);
+			}
+		}
 	}
 }

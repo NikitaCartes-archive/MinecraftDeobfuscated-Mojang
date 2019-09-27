@@ -22,9 +22,9 @@ public class LightTexture implements AutoCloseable {
 	private final GameRenderer renderer;
 	private final Minecraft minecraft;
 
-	public LightTexture(GameRenderer gameRenderer) {
+	public LightTexture(GameRenderer gameRenderer, Minecraft minecraft) {
 		this.renderer = gameRenderer;
-		this.minecraft = gameRenderer.getMinecraft();
+		this.minecraft = minecraft;
 		this.lightTexture = new DynamicTexture(16, 16, false);
 		this.lightTextureLocation = this.minecraft.getTextureManager().register("light_map", this.lightTexture);
 		this.lightPixels = this.lightTexture.getPixels();
@@ -42,13 +42,13 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void turnOffLightLayer() {
-		RenderSystem.activeTexture(33985);
+		RenderSystem.activeTexture(33986);
 		RenderSystem.disableTexture();
 		RenderSystem.activeTexture(33984);
 	}
 
 	public void turnOnLightLayer() {
-		RenderSystem.activeTexture(33985);
+		RenderSystem.activeTexture(33986);
 		RenderSystem.matrixMode(5890);
 		RenderSystem.loadIdentity();
 		float f = 0.00390625F;

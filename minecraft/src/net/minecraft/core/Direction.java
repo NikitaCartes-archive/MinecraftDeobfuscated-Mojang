@@ -1,6 +1,10 @@
 package net.minecraft.core;
 
 import com.google.common.collect.Iterators;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -93,6 +97,37 @@ public enum Direction implements StringRepresentable {
 		return new Direction[]{direction, direction2, direction3, direction3.getOpposite(), direction2.getOpposite(), direction.getOpposite()};
 	}
 
+	@Environment(EnvType.CLIENT)
+	public static Direction rotate(Matrix4f matrix4f, Direction direction) {
+		Vec3i vec3i = direction.getNormal();
+		Vector4f vector4f = new Vector4f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ(), 0.0F);
+		vector4f.transform(matrix4f);
+		return getNearest(vector4f.x(), vector4f.y(), vector4f.z());
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Quaternion getRotation() {
+		Quaternion quaternion = Vector3f.XP.rotation(90.0F, true);
+		switch (this) {
+			case DOWN:
+				return Vector3f.XP.rotation(180.0F, true);
+			case UP:
+				return Vector3f.YP.rotation(0.0F, true);
+			case NORTH:
+				quaternion.mul(Vector3f.ZP.rotation(180.0F, true));
+				return quaternion;
+			case SOUTH:
+				return quaternion;
+			case WEST:
+				quaternion.mul(Vector3f.ZP.rotation(-90.0F, true));
+				return quaternion;
+			case EAST:
+			default:
+				quaternion.mul(Vector3f.ZP.rotation(90.0F, true));
+				return quaternion;
+		}
+	}
+
 	public int get3DDataValue() {
 		return this.data3d;
 	}
@@ -109,79 +144,18 @@ public enum Direction implements StringRepresentable {
 		return from3DDataValue(this.oppositeIndex);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public Direction getClockWise(Direction.Axis axis) {
-		switch (axis) {
-			case X:
-				if (this != WEST && this != EAST) {
-					return this.getClockWiseX();
-				}
-
-				return this;
-			case Y:
-				if (this != UP && this != DOWN) {
-					return this.getClockWise();
-				}
-
-				return this;
-			case Z:
-				if (this != NORTH && this != SOUTH) {
-					return this.getClockWiseZ();
-				}
-
-				return this;
-			default:
-				throw new IllegalStateException("Unable to get CW facing for axis " + axis);
-		}
-	}
-
 	public Direction getClockWise() {
 		switch (this) {
 			case NORTH:
 				return EAST;
-			case EAST:
-				return SOUTH;
 			case SOUTH:
 				return WEST;
 			case WEST:
 				return NORTH;
+			case EAST:
+				return SOUTH;
 			default:
 				throw new IllegalStateException("Unable to get Y-rotated facing of " + this);
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	private Direction getClockWiseX() {
-		switch (this) {
-			case NORTH:
-				return DOWN;
-			case EAST:
-			case WEST:
-			default:
-				throw new IllegalStateException("Unable to get X-rotated facing of " + this);
-			case SOUTH:
-				return UP;
-			case UP:
-				return NORTH;
-			case DOWN:
-				return SOUTH;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	private Direction getClockWiseZ() {
-		switch (this) {
-			case EAST:
-				return DOWN;
-			case SOUTH:
-			default:
-				throw new IllegalStateException("Unable to get Z-rotated facing of " + this);
-			case WEST:
-				return UP;
-			case UP:
-				return EAST;
-			case DOWN:
-				return WEST;
 		}
 	}
 
@@ -189,12 +163,12 @@ public enum Direction implements StringRepresentable {
 		switch (this) {
 			case NORTH:
 				return WEST;
-			case EAST:
-				return NORTH;
 			case SOUTH:
 				return EAST;
 			case WEST:
 				return SOUTH;
+			case EAST:
+				return NORTH;
 			default:
 				throw new IllegalStateException("Unable to get CCW facing of " + this);
 		}

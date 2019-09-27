@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class SpiderModel<T extends Entity> extends EntityModel<T> {
+public class SpiderModel<T extends Entity> extends ListModel<T> {
 	private final ModelPart head;
 	private final ModelPart body0;
 	private final ModelPart body1;
@@ -59,19 +60,8 @@ public class SpiderModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		this.head.render(k);
-		this.body0.render(k);
-		this.body1.render(k);
-		this.leg0.render(k);
-		this.leg1.render(k);
-		this.leg2.render(k);
-		this.leg3.render(k);
-		this.leg4.render(k);
-		this.leg5.render(k);
-		this.leg6.render(k);
-		this.leg7.render(k);
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.head, this.body0, this.body1, this.leg0, this.leg1, this.leg2, this.leg3, this.leg4, this.leg5, this.leg6, this.leg7);
 	}
 
 	@Override

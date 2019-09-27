@@ -103,16 +103,19 @@ public class LocationPredicate {
 			return false;
 		} else {
 			BlockPos blockPos = new BlockPos((double)f, (double)g, (double)h);
-			if (!serverLevel.isLoaded(blockPos)) {
-				return false;
-			} else if (this.biome != null && this.biome != serverLevel.getBiome(blockPos)) {
-				return false;
-			} else if (this.feature != null && !this.feature.isInsideFeature(serverLevel, blockPos)) {
-				return false;
-			} else if (!this.light.matches(serverLevel, blockPos)) {
-				return false;
+			boolean bl = serverLevel.isLoaded(blockPos);
+			if (this.biome == null || bl && this.biome == serverLevel.getBiome(blockPos)) {
+				if (this.feature == null || bl && this.feature.isInsideFeature(serverLevel, blockPos)) {
+					if (!this.light.matches(serverLevel, blockPos)) {
+						return false;
+					} else {
+						return !this.block.matches(serverLevel, blockPos) ? false : this.fluid.matches(serverLevel, blockPos);
+					}
+				} else {
+					return false;
+				}
 			} else {
-				return !this.block.matches(serverLevel, blockPos) ? false : this.fluid.matches(serverLevel, blockPos);
+				return false;
 			}
 		}
 	}

@@ -20,7 +20,7 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel
 		this.addLayer(new HorseArmorLayer(this));
 	}
 
-	protected ResourceLocation getTextureLocation(Horse horse) {
+	public ResourceLocation getTextureLocation(Horse horse) {
 		String string = horse.getLayeredTextureHashName();
 		ResourceLocation resourceLocation = (ResourceLocation)LAYERED_LOCATION_CACHE.get(string);
 		if (resourceLocation == null) {

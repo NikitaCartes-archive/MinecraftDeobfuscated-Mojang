@@ -1,6 +1,6 @@
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -17,7 +17,7 @@ public class NoRenderParticle extends Particle {
 	}
 
 	@Override
-	public final void render(BufferBuilder bufferBuilder, Camera camera, float f, float g, float h, float i, float j, float k) {
+	public final void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
 	}
 
 	@Override

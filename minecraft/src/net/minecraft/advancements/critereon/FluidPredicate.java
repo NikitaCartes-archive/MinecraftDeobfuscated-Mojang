@@ -32,6 +32,8 @@ public class FluidPredicate {
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
 		if (this == ANY) {
 			return true;
+		} else if (!serverLevel.isLoaded(blockPos)) {
+			return false;
 		} else {
 			FluidState fluidState = serverLevel.getFluidState(blockPos);
 			Fluid fluid = fluidState.getType();

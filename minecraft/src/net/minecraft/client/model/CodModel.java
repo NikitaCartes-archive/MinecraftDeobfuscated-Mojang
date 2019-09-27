@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class CodModel<T extends Entity> extends EntityModel<T> {
+public class CodModel<T extends Entity> extends ListModel<T> {
 	private final ModelPart body;
 	private final ModelPart topFin;
 	private final ModelPart head;
@@ -46,15 +47,8 @@ public class CodModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		this.body.render(k);
-		this.head.render(k);
-		this.nose.render(k);
-		this.sideFin0.render(k);
-		this.sideFin1.render(k);
-		this.tailFin.render(k);
-		this.topFin.render(k);
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.body, this.head, this.nose, this.sideFin0, this.sideFin1, this.tailFin, this.topFin);
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class EndermiteRenderer extends MobRenderer<Endermite, EndermiteModel<End
 		return 180.0F;
 	}
 
-	protected ResourceLocation getTextureLocation(Endermite endermite) {
+	public ResourceLocation getTextureLocation(Endermite endermite) {
 		return ENDERMITE_LOCATION;
 	}
 }

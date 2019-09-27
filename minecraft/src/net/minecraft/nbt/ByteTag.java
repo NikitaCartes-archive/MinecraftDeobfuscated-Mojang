@@ -7,13 +7,41 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class ByteTag extends NumericTag {
-	private byte data;
+	public static final TagType<ByteTag> TYPE = new TagType<ByteTag>() {
+		public ByteTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(72L);
+			return ByteTag.valueOf(dataInput.readByte());
+		}
 
-	ByteTag() {
+		@Override
+		public String getName() {
+			return "BYTE";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Byte";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	public static final ByteTag ZERO = valueOf((byte)0);
+	public static final ByteTag ONE = valueOf((byte)1);
+	private final byte data;
+
+	private ByteTag(byte b) {
+		this.data = b;
 	}
 
-	public ByteTag(byte b) {
-		this.data = b;
+	public static ByteTag valueOf(byte b) {
+		return ByteTag.Cache.cache[128 + b];
+	}
+
+	public static ByteTag valueOf(boolean bl) {
+		return bl ? ONE : ZERO;
 	}
 
 	@Override
@@ -22,14 +50,13 @@ public class ByteTag extends NumericTag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(72L);
-		this.data = dataInput.readByte();
+	public byte getId() {
+		return 1;
 	}
 
 	@Override
-	public byte getId() {
-		return 1;
+	public TagType<ByteTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -38,7 +65,7 @@ public class ByteTag extends NumericTag {
 	}
 
 	public ByteTag copy() {
-		return new ByteTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {
@@ -88,5 +115,15 @@ public class ByteTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	static class Cache {
+		private static final ByteTag[] cache = new ByteTag[256];
+
+		static {
+			for (int i = 0; i < cache.length; i++) {
+				cache[i] = new ByteTag((byte)(i - 128));
+			}
+		}
 	}
 }

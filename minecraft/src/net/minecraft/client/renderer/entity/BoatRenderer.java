@@ -1,9 +1,15 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -25,65 +31,40 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		this.shadowRadius = 0.8F;
 	}
 
-	public void render(Boat boat, double d, double e, double f, float g, float h) {
-		RenderSystem.pushMatrix();
-		this.setupTranslation(d, e, f);
-		this.setupRotation(boat, g, h);
-		this.bindTexture(boat);
-		if (this.solidRender) {
-			RenderSystem.enableColorMaterial();
-			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(boat));
+	public void render(Boat boat, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		poseStack.pushPose();
+		poseStack.translate(0.0, 0.375, 0.0);
+		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
+		float i = (float)boat.getHurtTime() - h;
+		float j = boat.getDamage() - h;
+		if (j < 0.0F) {
+			j = 0.0F;
 		}
 
-		this.model.render(boat, h, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-		if (this.solidRender) {
-			RenderSystem.tearDownSolidRenderingTextureCombine();
-			RenderSystem.disableColorMaterial();
+		if (i > 0.0F) {
+			poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(i) * i * j / 10.0F * (float)boat.getHurtDir(), true));
 		}
 
-		RenderSystem.popMatrix();
-		super.render(boat, d, e, f, g, h);
+		float k = boat.getBubbleAngle(h);
+		if (!Mth.equal(k, 0.0F)) {
+			poseStack.mulPose(new Quaternion(new Vector3f(1.0F, 0.0F, 1.0F), boat.getBubbleAngle(h), true));
+		}
+
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		int l = boat.getLightColor();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(boat)));
+		OverlayTexture.setDefault(vertexConsumer);
+		poseStack.mulPose(Vector3f.YP.rotation(90.0F, true));
+		this.model.setupAnim(boat, h, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, l);
+		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.WATER_MASK);
+		this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625F, l, null);
+		poseStack.popPose();
+		vertexConsumer.unsetDefaultOverlayCoords();
+		super.render(boat, d, e, f, g, h, poseStack, multiBufferSource);
 	}
 
-	public void setupRotation(Boat boat, float f, float g) {
-		RenderSystem.rotatef(180.0F - f, 0.0F, 1.0F, 0.0F);
-		float h = (float)boat.getHurtTime() - g;
-		float i = boat.getDamage() - g;
-		if (i < 0.0F) {
-			i = 0.0F;
-		}
-
-		if (h > 0.0F) {
-			RenderSystem.rotatef(Mth.sin(h) * h * i / 10.0F * (float)boat.getHurtDir(), 1.0F, 0.0F, 0.0F);
-		}
-
-		float j = boat.getBubbleAngle(g);
-		if (!Mth.equal(j, 0.0F)) {
-			RenderSystem.rotatef(boat.getBubbleAngle(g), 1.0F, 0.0F, 1.0F);
-		}
-
-		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
-	}
-
-	public void setupTranslation(double d, double e, double f) {
-		RenderSystem.translatef((float)d, (float)e + 0.375F, (float)f);
-	}
-
-	protected ResourceLocation getTextureLocation(Boat boat) {
+	public ResourceLocation getTextureLocation(Boat boat) {
 		return BOAT_TEXTURE_LOCATIONS[boat.getBoatType().ordinal()];
-	}
-
-	@Override
-	public boolean hasSecondPass() {
-		return true;
-	}
-
-	public void renderSecondPass(Boat boat, double d, double e, double f, float g, float h) {
-		RenderSystem.pushMatrix();
-		this.setupTranslation(d, e, f);
-		this.setupRotation(boat, g, h);
-		this.bindTexture(boat);
-		this.model.renderSecondPass(boat, h, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-		RenderSystem.popMatrix();
 	}
 }

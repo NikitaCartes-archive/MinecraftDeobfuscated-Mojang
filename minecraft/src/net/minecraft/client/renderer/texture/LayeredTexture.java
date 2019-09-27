@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;

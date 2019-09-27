@@ -49,7 +49,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 			}
 
 			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, this.resolutionContext);
-			this.lore.stream().map(unaryOperator).map(Component.Serializer::toJson).map(StringTag::new).forEach(listTag::add);
+			this.lore.stream().map(unaryOperator).map(Component.Serializer::toJson).map(StringTag::valueOf).forEach(listTag::add);
 		}
 
 		return itemStack;

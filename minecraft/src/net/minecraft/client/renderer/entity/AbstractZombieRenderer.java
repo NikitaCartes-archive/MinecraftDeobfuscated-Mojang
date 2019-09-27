@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieModel;
@@ -16,15 +17,15 @@ public abstract class AbstractZombieRenderer<T extends Zombie, M extends ZombieM
 		this.addLayer(new HumanoidArmorLayer<>(this, zombieModel2, zombieModel3));
 	}
 
-	protected ResourceLocation getTextureLocation(Zombie zombie) {
+	public ResourceLocation getTextureLocation(Zombie zombie) {
 		return ZOMBIE_LOCATION;
 	}
 
-	protected void setupRotations(T zombie, float f, float g, float h) {
+	protected void setupRotations(T zombie, PoseStack poseStack, float f, float g, float h) {
 		if (zombie.isUnderWaterConverting()) {
 			g += (float)(Math.cos((double)zombie.tickCount * 3.25) * Math.PI * 0.25);
 		}
 
-		super.setupRotations(zombie, f, g, h);
+		super.setupRotations(zombie, poseStack, f, g, h);
 	}
 }

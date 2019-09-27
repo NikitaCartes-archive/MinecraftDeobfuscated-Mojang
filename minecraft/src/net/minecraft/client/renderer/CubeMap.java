@@ -56,45 +56,45 @@ public class CubeMap {
 				bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 				int o = Math.round(255.0F * h) / (j + 1);
 				if (n == 0) {
-					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				if (n == 1) {
-					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				if (n == 2) {
-					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				if (n == 3) {
-					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				if (n == 4) {
-					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, -1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, -1.0, 1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, 1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, -1.0, -1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				if (n == 5) {
-					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(0.0, 0.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(0.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(1.0, 1.0).color(255, 255, 255, o).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(1.0, 0.0).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, 1.0).uv(0.0F, 0.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(-1.0, 1.0, -1.0).uv(0.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, -1.0).uv(1.0F, 1.0F).color(255, 255, 255, o).endVertex();
+					bufferBuilder.vertex(1.0, 1.0, 1.0).uv(1.0F, 0.0F).color(255, 255, 255, o).endVertex();
 				}
 
 				tesselator.end();
@@ -104,7 +104,6 @@ public class CubeMap {
 			RenderSystem.colorMask(true, true, true, false);
 		}
 
-		bufferBuilder.offset(0.0, 0.0, 0.0);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.matrixMode(5889);
 		RenderSystem.popMatrix();

@@ -2,8 +2,6 @@ package net.minecraft.world.level.block;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -99,12 +97,6 @@ public class ChestBlock extends BaseEntityBlock implements SimpleWaterloggedBloc
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TYPE, ChestType.SINGLE).setValue(WATERLOGGED, Boolean.valueOf(false))
 		);
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean hasCustomBreakingProgress(BlockState blockState) {
-		return true;
 	}
 
 	@Override

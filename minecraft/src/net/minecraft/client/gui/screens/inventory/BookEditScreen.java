@@ -176,14 +176,14 @@ public class BookEditScreen extends Screen {
 		if (this.isModified) {
 			this.eraseEmptyTrailingPages();
 			ListTag listTag = new ListTag();
-			this.pages.stream().map(StringTag::new).forEach(listTag::add);
+			this.pages.stream().map(StringTag::valueOf).forEach(listTag::add);
 			if (!this.pages.isEmpty()) {
 				this.book.addTagElement("pages", listTag);
 			}
 
 			if (bl) {
-				this.book.addTagElement("author", new StringTag(this.owner.getGameProfile().getName()));
-				this.book.addTagElement("title", new StringTag(this.title.trim()));
+				this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
+				this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
 			}
 
 			this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, this.hand));

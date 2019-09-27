@@ -1,9 +1,10 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.item.DyeableHorseArmorItem;
@@ -18,30 +19,28 @@ public class HorseArmorLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 		super(renderLayerParent);
 	}
 
-	public void render(Horse horse, float f, float g, float h, float i, float j, float k, float l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l, float m) {
 		ItemStack itemStack = horse.getArmor();
 		if (itemStack.getItem() instanceof HorseArmorItem) {
 			HorseArmorItem horseArmorItem = (HorseArmorItem)itemStack.getItem();
 			this.getParentModel().copyPropertiesTo(this.model);
 			this.model.prepareMobModel(horse, f, g, h);
-			this.bindTexture(horseArmorItem.getTexture());
+			this.model.setupAnim(horse, f, g, j, k, l, m);
+			float o;
+			float p;
+			float q;
 			if (horseArmorItem instanceof DyeableHorseArmorItem) {
-				int m = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
-				float n = (float)(m >> 16 & 0xFF) / 255.0F;
-				float o = (float)(m >> 8 & 0xFF) / 255.0F;
-				float p = (float)(m & 0xFF) / 255.0F;
-				RenderSystem.color4f(n, o, p, 1.0F);
-				this.model.render(horse, f, g, i, j, k, l);
-				return;
+				int n = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
+				o = (float)(n >> 16 & 0xFF) / 255.0F;
+				p = (float)(n >> 8 & 0xFF) / 255.0F;
+				q = (float)(n & 0xFF) / 255.0F;
+			} else {
+				o = 1.0F;
+				p = 1.0F;
+				q = 1.0F;
 			}
 
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.model.render(horse, f, g, i, j, k, l);
+			renderModel(this.model, horseArmorItem.getTexture(), poseStack, multiBufferSource, i, o, p, q);
 		}
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return false;
 	}
 }

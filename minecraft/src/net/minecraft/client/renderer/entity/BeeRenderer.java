@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BeeModel;
@@ -18,8 +17,7 @@ public class BeeRenderer extends MobRenderer<Bee, BeeModel<Bee>> {
 		super(entityRenderDispatcher, new BeeModel<>(), 0.4F);
 	}
 
-	@Nullable
-	protected ResourceLocation getTextureLocation(Bee bee) {
+	public ResourceLocation getTextureLocation(Bee bee) {
 		if (bee.isAngry()) {
 			return bee.hasNectar() ? ANGRY_NECTAR_BEE_TEXTURE : ANGRY_BEE_TEXTURE;
 		} else {

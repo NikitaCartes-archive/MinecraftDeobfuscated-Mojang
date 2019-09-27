@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -134,8 +133,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	public void renderTooltip(List<String> list, int i, int j) {
 		if (!list.isEmpty()) {
 			RenderSystem.disableRescaleNormal();
-			Lighting.turnOff();
-			RenderSystem.disableLighting();
 			RenderSystem.disableDepthTest();
 			int k = 0;
 
@@ -188,9 +185,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 
 			this.setBlitOffset(0);
 			this.itemRenderer.blitOffset = 0.0F;
-			RenderSystem.enableLighting();
 			RenderSystem.enableDepthTest();
-			Lighting.turnOn();
 			RenderSystem.enableRescaleNormal();
 		}
 	}
@@ -238,8 +233,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 			} else if (hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
 				this.renderTooltip(this.minecraft.font.split(hoverEvent.getValue().getColoredString(), Math.max(this.width / 2, 200)), i, j);
 			}
-
-			RenderSystem.disableLighting();
 		}
 	}
 
@@ -355,7 +348,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	}
 
 	public void renderDirtBackground(int i) {
-		RenderSystem.disableLighting();
 		RenderSystem.disableFog();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -363,13 +355,13 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = 32.0F;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex(0.0, (double)this.height, 0.0).uv(0.0, (double)((float)this.height / 32.0F + (float)i)).color(64, 64, 64, 255).endVertex();
+		bufferBuilder.vertex(0.0, (double)this.height, 0.0).uv(0.0F, (float)this.height / 32.0F + (float)i).color(64, 64, 64, 255).endVertex();
 		bufferBuilder.vertex((double)this.width, (double)this.height, 0.0)
-			.uv((double)((float)this.width / 32.0F), (double)((float)this.height / 32.0F + (float)i))
+			.uv((float)this.width / 32.0F, (float)this.height / 32.0F + (float)i)
 			.color(64, 64, 64, 255)
 			.endVertex();
-		bufferBuilder.vertex((double)this.width, 0.0, 0.0).uv((double)((float)this.width / 32.0F), (double)i).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0, (double)i).color(64, 64, 64, 255).endVertex();
+		bufferBuilder.vertex((double)this.width, 0.0, 0.0).uv((float)this.width / 32.0F, (float)i).color(64, 64, 64, 255).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, 0.0).uv(0.0F, (float)i).color(64, 64, 64, 255).endVertex();
 		tesselator.end();
 	}
 

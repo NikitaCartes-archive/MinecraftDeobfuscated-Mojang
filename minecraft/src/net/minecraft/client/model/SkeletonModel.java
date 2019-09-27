@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -74,11 +75,11 @@ public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidMode
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm) {
+	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
 		float g = humanoidArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		ModelPart modelPart = this.getArm(humanoidArm);
 		modelPart.x += g;
-		modelPart.translateTo(f);
+		modelPart.translateAndRotate(poseStack, f);
 		modelPart.x -= g;
 	}
 }

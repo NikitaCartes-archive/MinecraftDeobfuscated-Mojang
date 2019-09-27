@@ -19,10 +19,6 @@ public class BakedQuad {
 		this.sprite = textureAtlasSprite;
 	}
 
-	public TextureAtlasSprite getSprite() {
-		return this.sprite;
-	}
-
 	public int[] getVertices() {
 		return this.vertices;
 	}

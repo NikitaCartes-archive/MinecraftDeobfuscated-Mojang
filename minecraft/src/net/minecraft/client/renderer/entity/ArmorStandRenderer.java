@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
@@ -25,30 +26,25 @@ public class ArmorStandRenderer extends LivingEntityRenderer<ArmorStand, ArmorSt
 		this.addLayer(new CustomHeadLayer<>(this));
 	}
 
-	protected ResourceLocation getTextureLocation(ArmorStand armorStand) {
+	public ResourceLocation getTextureLocation(ArmorStand armorStand) {
 		return DEFAULT_SKIN_LOCATION;
 	}
 
-	protected void setupRotations(ArmorStand armorStand, float f, float g, float h) {
-		RenderSystem.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
+	protected void setupRotations(ArmorStand armorStand, PoseStack poseStack, float f, float g, float h) {
+		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
 		float i = (float)(armorStand.level.getGameTime() - armorStand.lastHit) + h;
 		if (i < 5.0F) {
-			RenderSystem.rotatef(Mth.sin(i / 1.5F * (float) Math.PI) * 3.0F, 0.0F, 1.0F, 0.0F);
+			poseStack.mulPose(Vector3f.YP.rotation(Mth.sin(i / 1.5F * (float) Math.PI) * 3.0F, true));
 		}
 	}
 
 	protected boolean shouldShowName(ArmorStand armorStand) {
-		return armorStand.isCustomNameVisible();
+		double d = this.entityRenderDispatcher.distanceToSqr(armorStand);
+		float f = armorStand.isCrouching() ? 32.0F : 64.0F;
+		return d >= (double)(f * f) ? false : armorStand.isCustomNameVisible();
 	}
 
-	public void render(ArmorStand armorStand, double d, double e, double f, float g, float h) {
-		if (armorStand.isMarker()) {
-			this.onlySolidLayers = true;
-		}
-
-		super.render(armorStand, d, e, f, g, h);
-		if (armorStand.isMarker()) {
-			this.onlySolidLayers = false;
-		}
+	protected boolean isVisible(ArmorStand armorStand, boolean bl) {
+		return armorStand.isMarker() ? !armorStand.isInvisible() && !bl : !armorStand.isInvisible() || bl;
 	}
 }

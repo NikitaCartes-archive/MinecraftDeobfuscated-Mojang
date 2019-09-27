@@ -22,7 +22,7 @@ public class RabbitRenderer extends MobRenderer<Rabbit, RabbitModel<Rabbit>> {
 		super(entityRenderDispatcher, new RabbitModel<>(), 0.3F);
 	}
 
-	protected ResourceLocation getTextureLocation(Rabbit rabbit) {
+	public ResourceLocation getTextureLocation(Rabbit rabbit) {
 		String string = ChatFormatting.stripFormatting(rabbit.getName().getString());
 		if (string != null && "Toast".equals(string)) {
 			return RABBIT_TOAST_LOCATION;

@@ -1,7 +1,10 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -70,42 +73,19 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 	}
 
 	@Override
-	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		super.render(livingEntity, f, g, h, i, j, k);
-		RenderSystem.pushMatrix();
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.leftPants.render(k);
-			this.rightPants.render(k);
-			this.leftSleeve.render(k);
-			this.rightSleeve.render(k);
-			this.jacket.render(k);
-		} else {
-			if (livingEntity.isCrouching()) {
-				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
-			}
-
-			this.leftPants.render(k);
-			this.rightPants.render(k);
-			this.leftSleeve.render(k);
-			this.rightSleeve.render(k);
-			this.jacket.render(k);
-		}
-
-		RenderSystem.popMatrix();
+	protected Iterable<ModelPart> bodyParts() {
+		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket));
 	}
 
-	public void renderEars(float f) {
+	public void renderEars(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i) {
 		this.ear.copyFrom(this.head);
 		this.ear.x = 0.0F;
 		this.ear.y = 0.0F;
-		this.ear.render(f);
+		this.ear.render(poseStack, vertexConsumer, f, i, null);
 	}
 
-	public void renderCloak(float f) {
-		this.cloak.render(f);
+	public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i) {
+		this.cloak.render(poseStack, vertexConsumer, f, i, null);
 	}
 
 	@Override
@@ -136,15 +116,15 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm) {
+	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
 		ModelPart modelPart = this.getArm(humanoidArm);
 		if (this.slim) {
 			float g = 0.5F * (float)(humanoidArm == HumanoidArm.RIGHT ? 1 : -1);
 			modelPart.x += g;
-			modelPart.translateTo(f);
+			modelPart.translateAndRotate(poseStack, f);
 			modelPart.x -= g;
 		} else {
-			modelPart.translateTo(f);
+			modelPart.translateAndRotate(poseStack, f);
 		}
 	}
 

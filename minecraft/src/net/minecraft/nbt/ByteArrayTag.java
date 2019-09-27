@@ -10,10 +10,27 @@ import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class ByteArrayTag extends CollectionTag<ByteTag> {
-	private byte[] data;
+	public static final TagType<ByteArrayTag> TYPE = new TagType<ByteArrayTag>() {
+		public ByteArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(192L);
+			int j = dataInput.readInt();
+			nbtAccounter.accountBits((long)(8 * j));
+			byte[] bs = new byte[j];
+			dataInput.readFully(bs);
+			return new ByteArrayTag(bs);
+		}
 
-	ByteArrayTag() {
-	}
+		@Override
+		public String getName() {
+			return "BYTE[]";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Byte_Array";
+		}
+	};
+	private byte[] data;
 
 	public ByteArrayTag(byte[] bs) {
 		this.data = bs;
@@ -41,17 +58,13 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(192L);
-		int j = dataInput.readInt();
-		nbtAccounter.accountBits((long)(8 * j));
-		this.data = new byte[j];
-		dataInput.readFully(this.data);
+	public byte getId() {
+		return 7;
 	}
 
 	@Override
-	public byte getId() {
-		return 7;
+	public TagType<ByteArrayTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -110,13 +123,13 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 	}
 
 	public ByteTag get(int i) {
-		return new ByteTag(this.data[i]);
+		return ByteTag.valueOf(this.data[i]);
 	}
 
 	public ByteTag set(int i, ByteTag byteTag) {
 		byte b = this.data[i];
 		this.data[i] = byteTag.getAsByte();
-		return new ByteTag(b);
+		return ByteTag.valueOf(b);
 	}
 
 	public void add(int i, ByteTag byteTag) {
@@ -146,7 +159,7 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 	public ByteTag remove(int i) {
 		byte b = this.data[i];
 		this.data = ArrayUtils.remove(this.data, i);
-		return new ByteTag(b);
+		return ByteTag.valueOf(b);
 	}
 
 	public void clear() {

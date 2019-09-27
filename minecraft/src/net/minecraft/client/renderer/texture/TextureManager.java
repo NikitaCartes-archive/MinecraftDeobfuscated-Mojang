@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
@@ -33,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 public class TextureManager implements Tickable, PreparableReloadListener {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final ResourceLocation INTENTIONAL_MISSING_TEXTURE = new ResourceLocation("");
-	private final Map<ResourceLocation, TextureObject> byPath = Maps.<ResourceLocation, TextureObject>newHashMap();
+	private final Map<ResourceLocation, AbstractTexture> byPath = Maps.<ResourceLocation, AbstractTexture>newHashMap();
 	private final List<Tickable> tickableTextures = Lists.<Tickable>newArrayList();
 	private final Map<String, Integer> prefixRegister = Maps.<String, Integer>newHashMap();
 	private final ResourceManager resourceManager;
@@ -51,52 +50,47 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 	}
 
 	private void _bind(ResourceLocation resourceLocation) {
-		TextureObject textureObject = (TextureObject)this.byPath.get(resourceLocation);
-		if (textureObject == null) {
-			textureObject = new SimpleTexture(resourceLocation);
-			this.register(resourceLocation, textureObject);
+		AbstractTexture abstractTexture = (AbstractTexture)this.byPath.get(resourceLocation);
+		if (abstractTexture == null) {
+			abstractTexture = new SimpleTexture(resourceLocation);
+			this.register(resourceLocation, abstractTexture);
 		}
 
-		textureObject.bind();
+		abstractTexture.bind();
 	}
 
-	public boolean register(ResourceLocation resourceLocation, TickableTextureObject tickableTextureObject) {
-		if (this.register(resourceLocation, (TextureObject)tickableTextureObject)) {
-			this.tickableTextures.add(tickableTextureObject);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public boolean register(ResourceLocation resourceLocation, TextureObject textureObject) {
+	public boolean register(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
 		boolean bl = true;
 
 		try {
-			textureObject.load(this.resourceManager);
+			abstractTexture.load(this.resourceManager);
 		} catch (IOException var8) {
 			if (resourceLocation != INTENTIONAL_MISSING_TEXTURE) {
 				LOGGER.warn("Failed to load texture: {}", resourceLocation, var8);
 			}
 
-			textureObject = MissingTextureAtlasSprite.getTexture();
-			this.byPath.put(resourceLocation, textureObject);
+			abstractTexture = MissingTextureAtlasSprite.getTexture();
+			this.byPath.put(resourceLocation, abstractTexture);
 			bl = false;
 		} catch (Throwable var9) {
 			CrashReport crashReport = CrashReport.forThrowable(var9, "Registering texture");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Resource location being registered");
 			crashReportCategory.setDetail("Resource location", resourceLocation);
-			crashReportCategory.setDetail("Texture object class", (CrashReportDetail<String>)(() -> textureObject.getClass().getName()));
+			crashReportCategory.setDetail("Texture object class", (CrashReportDetail<String>)(() -> abstractTexture.getClass().getName()));
 			throw new ReportedException(crashReport);
 		}
 
-		this.byPath.put(resourceLocation, textureObject);
+		this.byPath.put(resourceLocation, abstractTexture);
+		if (bl && abstractTexture instanceof Tickable) {
+			this.tickableTextures.add((Tickable)abstractTexture);
+		}
+
 		return bl;
 	}
 
 	@Nullable
-	public TextureObject getTexture(ResourceLocation resourceLocation) {
-		return (TextureObject)this.byPath.get(resourceLocation);
+	public AbstractTexture getTexture(ResourceLocation resourceLocation) {
+		return (AbstractTexture)this.byPath.get(resourceLocation);
 	}
 
 	public ResourceLocation register(String string, DynamicTexture dynamicTexture) {
@@ -135,9 +129,9 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 	}
 
 	public void release(ResourceLocation resourceLocation) {
-		TextureObject textureObject = this.getTexture(resourceLocation);
-		if (textureObject != null) {
-			TextureUtil.releaseTextureId(textureObject.getId());
+		AbstractTexture abstractTexture = this.getTexture(resourceLocation);
+		if (abstractTexture != null) {
+			TextureUtil.releaseTextureId(abstractTexture.getId());
 		}
 	}
 
@@ -154,16 +148,16 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(void_ -> {
 				MissingTextureAtlasSprite.getTexture();
-				Iterator<Entry<ResourceLocation, TextureObject>> iterator = this.byPath.entrySet().iterator();
+				Iterator<Entry<ResourceLocation, AbstractTexture>> iterator = this.byPath.entrySet().iterator();
 
 				while (iterator.hasNext()) {
-					Entry<ResourceLocation, TextureObject> entry = (Entry<ResourceLocation, TextureObject>)iterator.next();
+					Entry<ResourceLocation, AbstractTexture> entry = (Entry<ResourceLocation, AbstractTexture>)iterator.next();
 					ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-					TextureObject textureObject = (TextureObject)entry.getValue();
-					if (textureObject == MissingTextureAtlasSprite.getTexture() && !resourceLocation.equals(MissingTextureAtlasSprite.getLocation())) {
+					AbstractTexture abstractTexture = (AbstractTexture)entry.getValue();
+					if (abstractTexture == MissingTextureAtlasSprite.getTexture() && !resourceLocation.equals(MissingTextureAtlasSprite.getLocation())) {
 						iterator.remove();
 					} else {
-						textureObject.reset(this, resourceManager, resourceLocation, executor2);
+						abstractTexture.reset(this, resourceManager, resourceLocation, executor2);
 					}
 				}
 			}, runnable -> RenderSystem.recordRenderCall(runnable::run));

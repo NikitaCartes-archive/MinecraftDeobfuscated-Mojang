@@ -19,6 +19,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.gui.font.glyphs.MissingGlyph;
+import net.minecraft.client.gui.font.glyphs.WhiteGlyph;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -34,6 +35,7 @@ public class FontSet implements AutoCloseable {
 	private final TextureManager textureManager;
 	private final ResourceLocation name;
 	private BakedGlyph missingGlyph;
+	private BakedGlyph whiteGlyph;
 	private final List<GlyphProvider> providers = Lists.<GlyphProvider>newArrayList();
 	private final Char2ObjectMap<BakedGlyph> glyphs = new Char2ObjectOpenHashMap<>();
 	private final Char2ObjectMap<GlyphInfo> glyphInfos = new Char2ObjectOpenHashMap<>();
@@ -57,6 +59,7 @@ public class FontSet implements AutoCloseable {
 		this.glyphInfos.clear();
 		this.glyphsByWidth.clear();
 		this.missingGlyph = this.stitch(MissingGlyph.INSTANCE);
+		this.whiteGlyph = this.stitch(WhiteGlyph.INSTANCE);
 		Set<GlyphProvider> set = Sets.<GlyphProvider>newHashSet();
 
 		for (char c = 0; c < '\uffff'; c++) {
@@ -124,5 +127,9 @@ public class FontSet implements AutoCloseable {
 	public BakedGlyph getRandomGlyph(GlyphInfo glyphInfo) {
 		CharList charList = this.glyphsByWidth.get(Mth.ceil(glyphInfo.getAdvance(false)));
 		return charList != null && !charList.isEmpty() ? this.getGlyph(charList.get(RANDOM.nextInt(charList.size()))) : this.missingGlyph;
+	}
+
+	public BakedGlyph whiteGlyph() {
+		return this.whiteGlyph;
 	}
 }

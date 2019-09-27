@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -86,7 +87,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 			RenderSystem.translatef((float)(k + 139), (float)(l + 52), 0.0F);
 			RenderSystem.scalef(24.0F, -24.0F, 1.0F);
 			this.resultBanner.setOnlyRenderPattern(true);
-			BlockEntityRenderDispatcher.instance.renderItem(this.resultBanner);
+			BlockEntityRenderDispatcher.instance.renderItem(this.resultBanner, new PoseStack(), 15728880);
 			this.resultBanner.setOnlyRenderPattern(false);
 			RenderSystem.popMatrix();
 		} else if (this.hasMaxPatterns) {
@@ -137,7 +138,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		RenderSystem.translatef((float)j + 0.5F, (float)(k + 16), 0.0F);
 		RenderSystem.scalef(6.0F, -6.0F, 1.0F);
 		RenderSystem.translatef(0.5F, 0.5F, 0.0F);
-		BlockEntityRenderDispatcher.instance.renderItem(bannerBlockEntity);
+		BlockEntityRenderDispatcher.instance.renderItem(bannerBlockEntity, new PoseStack(), 15728880);
 		RenderSystem.popMatrix();
 		this.minecraft.getTextureAtlas().bind();
 	}

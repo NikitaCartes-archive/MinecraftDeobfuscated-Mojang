@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
-public class ElytraModel<T extends LivingEntity> extends EntityModel<T> {
+public class ElytraModel<T extends LivingEntity> extends AgeableListModel<T> {
 	private final ModelPart rightWing;
 	private final ModelPart leftWing = new ModelPart(this, 22, 0);
 
@@ -20,24 +20,17 @@ public class ElytraModel<T extends LivingEntity> extends EntityModel<T> {
 		this.rightWing.addBox(0.0F, 0.0F, 0.0F, 10.0F, 20.0F, 2.0F, 1.0F);
 	}
 
-	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		RenderSystem.disableRescaleNormal();
-		RenderSystem.disableCull();
-		if (livingEntity.isBaby()) {
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 1.5F, -0.1F);
-			this.leftWing.render(k);
-			this.rightWing.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.leftWing.render(k);
-			this.rightWing.render(k);
-		}
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of();
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.leftWing, this.rightWing);
 	}
 
 	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(livingEntity, f, g, h, i, j, k);
 		float l = (float) (Math.PI / 12);
 		float m = (float) (-Math.PI / 12);
 		float n = 0.0F;

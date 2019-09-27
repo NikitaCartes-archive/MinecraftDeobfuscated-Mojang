@@ -5,9 +5,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Quaternion;
 import java.lang.reflect.Type;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,15 +12,6 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class ItemTransforms {
 	public static final ItemTransforms NO_TRANSFORMS = new ItemTransforms();
-	public static float transX;
-	public static float transY;
-	public static float transZ;
-	public static float rotX;
-	public static float rotY;
-	public static float rotZ;
-	public static float scaleX;
-	public static float scaleY;
-	public static float scaleZ;
 	public final ItemTransform thirdPersonLeftHand;
 	public final ItemTransform thirdPersonRightHand;
 	public final ItemTransform firstPersonLeftHand;
@@ -75,27 +63,6 @@ public class ItemTransforms {
 		this.gui = itemTransform6;
 		this.ground = itemTransform7;
 		this.fixed = itemTransform8;
-	}
-
-	public void apply(ItemTransforms.TransformType transformType) {
-		apply(this.getTransform(transformType), false);
-	}
-
-	public static void apply(ItemTransform itemTransform, boolean bl) {
-		if (itemTransform != ItemTransform.NO_TRANSFORM) {
-			int i = bl ? -1 : 1;
-			RenderSystem.translatef((float)i * (transX + itemTransform.translation.x()), transY + itemTransform.translation.y(), transZ + itemTransform.translation.z());
-			float f = rotX + itemTransform.rotation.x();
-			float g = rotY + itemTransform.rotation.y();
-			float h = rotZ + itemTransform.rotation.z();
-			if (bl) {
-				g = -g;
-				h = -h;
-			}
-
-			RenderSystem.multMatrix(new Matrix4f(new Quaternion(f, g, h, true)));
-			RenderSystem.scalef(scaleX + itemTransform.scale.x(), scaleY + itemTransform.scale.y(), scaleZ + itemTransform.scale.z());
-		}
 	}
 
 	public ItemTransform getTransform(ItemTransforms.TransformType transformType) {

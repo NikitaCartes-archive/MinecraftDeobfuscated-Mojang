@@ -18,7 +18,7 @@ public class SkeletonRenderer extends HumanoidMobRenderer<AbstractSkeleton, Skel
 		this.addLayer(new HumanoidArmorLayer<>(this, new SkeletonModel(0.5F, true), new SkeletonModel(1.0F, true)));
 	}
 
-	protected ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
+	public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
 		return SKELETON_LOCATION;
 	}
 }

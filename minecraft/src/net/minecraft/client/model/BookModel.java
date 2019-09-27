@@ -1,7 +1,8 @@
 package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,12 +32,8 @@ public class BookModel extends Model {
 		this.seam.yRot = (float) (Math.PI / 2);
 	}
 
-	public void render(float f) {
-		this.parts.forEach(modelPart -> modelPart.render(f));
-	}
-
-	public void render(BufferBuilder bufferBuilder, float f, int i, int j, TextureAtlasSprite textureAtlasSprite) {
-		this.parts.forEach(modelPart -> modelPart.render(bufferBuilder, f, i, j, textureAtlasSprite));
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, TextureAtlasSprite textureAtlasSprite) {
+		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, f, i, textureAtlasSprite));
 	}
 
 	public void setupAnim(float f, float g, float h, float i) {

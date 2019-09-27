@@ -57,9 +57,6 @@ public class PrimedTnt extends Entity {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
 		if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 		}

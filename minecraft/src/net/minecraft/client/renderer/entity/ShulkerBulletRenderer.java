@@ -1,9 +1,14 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerBulletModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -17,44 +22,33 @@ public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet> {
 		super(entityRenderDispatcher);
 	}
 
-	private float rotlerp(float f, float g, float h) {
-		float i = g - f;
-
-		while (i < -180.0F) {
-			i += 360.0F;
-		}
-
-		while (i >= 180.0F) {
-			i -= 360.0F;
-		}
-
-		return f + h * i;
-	}
-
-	public void render(ShulkerBullet shulkerBullet, double d, double e, double f, float g, float h) {
-		RenderSystem.pushMatrix();
-		float i = this.rotlerp(shulkerBullet.yRotO, shulkerBullet.yRot, h);
+	public void render(ShulkerBullet shulkerBullet, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		poseStack.pushPose();
+		float i = Mth.rotlerp(shulkerBullet.yRotO, shulkerBullet.yRot, h);
 		float j = Mth.lerp(h, shulkerBullet.xRotO, shulkerBullet.xRot);
 		float k = (float)shulkerBullet.tickCount + h;
-		RenderSystem.translatef((float)d, (float)e + 0.15F, (float)f);
-		RenderSystem.rotatef(Mth.sin(k * 0.1F) * 180.0F, 0.0F, 1.0F, 0.0F);
-		RenderSystem.rotatef(Mth.cos(k * 0.1F) * 180.0F, 1.0F, 0.0F, 0.0F);
-		RenderSystem.rotatef(Mth.sin(k * 0.15F) * 360.0F, 0.0F, 0.0F, 1.0F);
+		poseStack.translate(0.0, 0.15F, 0.0);
+		poseStack.mulPose(Vector3f.YP.rotation(Mth.sin(k * 0.1F) * 180.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotation(Mth.cos(k * 0.1F) * 180.0F, true));
+		poseStack.mulPose(Vector3f.ZP.rotation(Mth.sin(k * 0.15F) * 360.0F, true));
 		float l = 0.03125F;
-		RenderSystem.enableRescaleNormal();
-		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
-		this.bindTexture(shulkerBullet);
-		this.model.render(shulkerBullet, 0.0F, 0.0F, 0.0F, i, j, 0.03125F);
-		RenderSystem.enableBlend();
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.5F);
-		RenderSystem.scalef(1.5F, 1.5F, 1.5F);
-		this.model.render(shulkerBullet, 0.0F, 0.0F, 0.0F, i, j, 0.03125F);
-		RenderSystem.disableBlend();
-		RenderSystem.popMatrix();
-		super.render(shulkerBullet, d, e, f, g, h);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		int m = shulkerBullet.getLightColor();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION));
+		OverlayTexture.setDefault(vertexConsumer);
+		this.model.setupAnim(shulkerBullet, 0.0F, 0.0F, 0.0F, i, j, 0.03125F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, m);
+		vertexConsumer.unsetDefaultOverlayCoords();
+		poseStack.scale(1.5F, 1.5F, 1.5F);
+		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION, true, true, false));
+		OverlayTexture.setDefault(vertexConsumer);
+		this.model.renderToBuffer(poseStack, vertexConsumer2, m);
+		vertexConsumer.unsetDefaultOverlayCoords();
+		poseStack.popPose();
+		super.render(shulkerBullet, d, e, f, g, h, poseStack, multiBufferSource);
 	}
 
-	protected ResourceLocation getTextureLocation(ShulkerBullet shulkerBullet) {
+	public ResourceLocation getTextureLocation(ShulkerBullet shulkerBullet) {
 		return TEXTURE_LOCATION;
 	}
 }

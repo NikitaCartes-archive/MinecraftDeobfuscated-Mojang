@@ -90,9 +90,6 @@ public abstract class HangingEntity extends Entity {
 
 	@Override
 	public void tick() {
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
 		if (this.checkInterval++ == 100 && !this.level.isClientSide) {
 			this.checkInterval = 0;
 			if (!this.removed && !this.survives()) {

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.io.FileNotFoundException;
@@ -92,8 +93,17 @@ public class ModelBakery {
 		new ResourceLocation("entity/shulker/shulker_black")
 	);
 	public static final ResourceLocation BANNER_BASE = new ResourceLocation("entity/banner_base");
+	public static final ResourceLocation OAK_SIGN_TEXTURE = new ResourceLocation("entity/signs/oak");
+	public static final ResourceLocation SPRUCE_SIGN_TEXTURE = new ResourceLocation("entity/signs/spruce");
+	public static final ResourceLocation BIRCH_SIGN_TEXTURE = new ResourceLocation("entity/signs/birch");
+	public static final ResourceLocation ACACIA_SIGN_TEXTURE = new ResourceLocation("entity/signs/acacia");
+	public static final ResourceLocation JUNGLE_SIGN_TEXTURE = new ResourceLocation("entity/signs/jungle");
+	public static final ResourceLocation DARK_OAK_SIGN_TEXTURE = new ResourceLocation("entity/signs/dark_oak");
 	public static final List<ResourceLocation> DESTROY_STAGES = (List<ResourceLocation>)IntStream.range(0, 10)
 		.mapToObj(i -> new ResourceLocation("block/destroy_stage_" + i))
+		.collect(Collectors.toList());
+	public static final List<ResourceLocation> BREAKING_LOCATIONS = (List<ResourceLocation>)DESTROY_STAGES.stream()
+		.map(resourceLocation -> new ResourceLocation("textures/" + resourceLocation.getPath() + ".png"))
 		.collect(Collectors.toList());
 	private static final Set<ResourceLocation> UNREFERENCED_TEXTURES = Util.make(Sets.<ResourceLocation>newHashSet(), hashSet -> {
 		hashSet.add(WATER_FLOW);
@@ -125,6 +135,12 @@ public class ModelBakery {
 			hashSet.add(bannerPattern.location());
 		}
 
+		hashSet.add(OAK_SIGN_TEXTURE);
+		hashSet.add(SPRUCE_SIGN_TEXTURE);
+		hashSet.add(BIRCH_SIGN_TEXTURE);
+		hashSet.add(ACACIA_SIGN_TEXTURE);
+		hashSet.add(JUNGLE_SIGN_TEXTURE);
+		hashSet.add(DARK_OAK_SIGN_TEXTURE);
 		hashSet.addAll(DESTROY_STAGES);
 		hashSet.add(new ResourceLocation("item/empty_armor_slot_helmet"));
 		hashSet.add(new ResourceLocation("item/empty_armor_slot_chestplate"));
@@ -159,7 +175,7 @@ public class ModelBakery {
 	private final Set<ResourceLocation> loadingStack = Sets.<ResourceLocation>newHashSet();
 	private final BlockModelDefinition.Context context = new BlockModelDefinition.Context();
 	private final Map<ResourceLocation, UnbakedModel> unbakedCache = Maps.<ResourceLocation, UnbakedModel>newHashMap();
-	private final Map<Triple<ResourceLocation, BlockModelRotation, Boolean>, BakedModel> bakedCache = Maps.<Triple<ResourceLocation, BlockModelRotation, Boolean>, BakedModel>newHashMap();
+	private final Map<Triple<ResourceLocation, Transformation, Boolean>, BakedModel> bakedCache = Maps.<Triple<ResourceLocation, Transformation, Boolean>, BakedModel>newHashMap();
 	private final Map<ResourceLocation, UnbakedModel> topLevelModels = Maps.<ResourceLocation, UnbakedModel>newHashMap();
 	private final Map<ResourceLocation, BakedModel> bakedTopLevelModels = Maps.<ResourceLocation, BakedModel>newHashMap();
 	private final TextureAtlas.Preparations atlasPreparations;
@@ -496,7 +512,7 @@ public class ModelBakery {
 
 	@Nullable
 	public BakedModel bake(ResourceLocation resourceLocation, ModelState modelState) {
-		Triple<ResourceLocation, BlockModelRotation, Boolean> triple = Triple.of(resourceLocation, modelState.getRotation(), modelState.isUvLocked());
+		Triple<ResourceLocation, Transformation, Boolean> triple = Triple.of(resourceLocation, modelState.getRotation(), modelState.isUvLocked());
 		if (this.bakedCache.containsKey(triple)) {
 			return (BakedModel)this.bakedCache.get(triple);
 		} else {
@@ -504,11 +520,12 @@ public class ModelBakery {
 			if (unbakedModel instanceof BlockModel) {
 				BlockModel blockModel = (BlockModel)unbakedModel;
 				if (blockModel.getRootModel() == GENERATION_MARKER) {
-					return ITEM_MODEL_GENERATOR.generateBlockModel(this.blockAtlas::getSprite, blockModel).bake(this, blockModel, this.blockAtlas::getSprite, modelState);
+					return ITEM_MODEL_GENERATOR.generateBlockModel(this.blockAtlas::getSprite, blockModel)
+						.bake(this, blockModel, this.blockAtlas::getSprite, modelState, resourceLocation);
 				}
 			}
 
-			BakedModel bakedModel = unbakedModel.bake(this, this.blockAtlas::getSprite, modelState);
+			BakedModel bakedModel = unbakedModel.bake(this, this.blockAtlas::getSprite, modelState, resourceLocation);
 			this.bakedCache.put(triple, bakedModel);
 			return bakedModel;
 		}

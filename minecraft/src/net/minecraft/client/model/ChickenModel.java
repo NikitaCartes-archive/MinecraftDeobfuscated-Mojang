@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class ChickenModel<T extends Entity> extends EntityModel<T> {
+public class ChickenModel<T extends Entity> extends AgeableListModel<T> {
 	private final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart leg0;
@@ -47,35 +47,13 @@ public class ChickenModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 5.0F * k, 2.0F * k);
-			this.head.render(k);
-			this.beak.render(k);
-			this.redThing.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.wing0.render(k);
-			this.wing1.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.head.render(k);
-			this.beak.render(k);
-			this.redThing.render(k);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.wing0.render(k);
-			this.wing1.render(k);
-		}
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head, this.beak, this.redThing);
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.body, this.leg0, this.leg1, this.wing0, this.wing1);
 	}
 
 	@Override

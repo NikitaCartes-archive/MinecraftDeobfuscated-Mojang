@@ -1,6 +1,7 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,7 +13,7 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 	private final ModelPart eggBelly;
 
 	public TurtleModel(float f) {
-		super(12, f);
+		super(12, f, true, 120.0F, 0.0F, 6.0F, 6.0F, 120);
 		this.texWidth = 128;
 		this.texHeight = 64;
 		this.head = new ModelPart(this, 3, 0);
@@ -40,40 +41,9 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		this.leg3.setPos(5.0F, 21.0F, -4.0F);
 	}
 
-	public void render(T turtle, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(turtle, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 6.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.16666667F, 0.16666667F, 0.16666667F);
-			RenderSystem.translatef(0.0F, 120.0F * k, 0.0F);
-			this.head.render(k);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			RenderSystem.pushMatrix();
-			if (turtle.hasEgg()) {
-				RenderSystem.translatef(0.0F, -0.08F, 0.0F);
-			}
-
-			this.head.render(k);
-			this.body.render(k);
-			RenderSystem.pushMatrix();
-			this.leg0.render(k);
-			this.leg1.render(k);
-			RenderSystem.popMatrix();
-			this.leg2.render(k);
-			this.leg3.render(k);
-			if (turtle.hasEgg()) {
-				this.eggBelly.render(k);
-			}
-
-			RenderSystem.popMatrix();
-		}
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.eggBelly));
 	}
 
 	public void setupAnim(T turtle, float f, float g, float h, float i, float j, float k) {
@@ -102,5 +72,20 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 			this.leg1.yRot = Mth.cos(f * 5.0F) * 3.0F * g;
 			this.leg1.xRot = 0.0F;
 		}
+
+		float l;
+		if (turtle.hasEgg()) {
+			l = -1.28F;
+		} else {
+			l = 0.0F;
+		}
+
+		this.head.y = l;
+		this.body.y = l;
+		this.leg0.y = l;
+		this.leg1.y = l;
+		this.leg2.y = l;
+		this.leg3.y = l;
+		this.eggBelly.visible = turtle.hasEgg();
 	}
 }

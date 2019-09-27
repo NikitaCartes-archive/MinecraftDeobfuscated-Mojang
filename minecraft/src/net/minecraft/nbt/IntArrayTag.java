@@ -10,10 +10,31 @@ import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class IntArrayTag extends CollectionTag<IntTag> {
-	private int[] data;
+	public static final TagType<IntArrayTag> TYPE = new TagType<IntArrayTag>() {
+		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(192L);
+			int j = dataInput.readInt();
+			nbtAccounter.accountBits((long)(32 * j));
+			int[] is = new int[j];
 
-	IntArrayTag() {
-	}
+			for (int k = 0; k < j; k++) {
+				is[k] = dataInput.readInt();
+			}
+
+			return new IntArrayTag(is);
+		}
+
+		@Override
+		public String getName() {
+			return "INT[]";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Int";
+		}
+	};
+	private int[] data;
 
 	public IntArrayTag(int[] is) {
 		this.data = is;
@@ -44,20 +65,13 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(192L);
-		int j = dataInput.readInt();
-		nbtAccounter.accountBits((long)(32 * j));
-		this.data = new int[j];
-
-		for (int k = 0; k < j; k++) {
-			this.data[k] = dataInput.readInt();
-		}
+	public byte getId() {
+		return 11;
 	}
 
 	@Override
-	public byte getId() {
-		return 11;
+	public TagType<IntArrayTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -114,13 +128,13 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	}
 
 	public IntTag get(int i) {
-		return new IntTag(this.data[i]);
+		return IntTag.valueOf(this.data[i]);
 	}
 
 	public IntTag set(int i, IntTag intTag) {
 		int j = this.data[i];
 		this.data[i] = intTag.getAsInt();
-		return new IntTag(j);
+		return IntTag.valueOf(j);
 	}
 
 	public void add(int i, IntTag intTag) {
@@ -150,7 +164,7 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	public IntTag remove(int i) {
 		int j = this.data[i];
 		this.data = ArrayUtils.remove(this.data, i);
-		return new IntTag(j);
+		return IntTag.valueOf(j);
 	}
 
 	public void clear() {

@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.GhastModel;
@@ -16,15 +16,14 @@ public class GhastRenderer extends MobRenderer<Ghast, GhastModel<Ghast>> {
 		super(entityRenderDispatcher, new GhastModel<>(), 1.5F);
 	}
 
-	protected ResourceLocation getTextureLocation(Ghast ghast) {
+	public ResourceLocation getTextureLocation(Ghast ghast) {
 		return ghast.isCharging() ? GHAST_SHOOTING_LOCATION : GHAST_LOCATION;
 	}
 
-	protected void scale(Ghast ghast, float f) {
+	protected void scale(Ghast ghast, PoseStack poseStack, float f) {
 		float g = 1.0F;
 		float h = 4.5F;
 		float i = 4.5F;
-		RenderSystem.scalef(4.5F, 4.5F, 4.5F);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		poseStack.scale(4.5F, 4.5F, 4.5F);
 	}
 }

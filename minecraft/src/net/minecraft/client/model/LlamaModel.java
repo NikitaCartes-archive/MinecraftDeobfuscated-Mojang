@@ -1,18 +1,26 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(EnvType.CLIENT)
-public class LlamaModel<T extends AbstractChestedHorse> extends QuadrupedModel<T> {
+public class LlamaModel<T extends AbstractChestedHorse> extends EntityModel<T> {
+	private final ModelPart head;
+	private final ModelPart body;
+	private final ModelPart leg0;
+	private final ModelPart leg1;
+	private final ModelPart leg2;
+	private final ModelPart leg3;
 	private final ModelPart chest1;
 	private final ModelPart chest2;
 
 	public LlamaModel(float f) {
-		super(15, f);
 		this.texWidth = 128;
 		this.texHeight = 64;
 		this.head = new ModelPart(this, 0, 0);
@@ -54,49 +62,46 @@ public class LlamaModel<T extends AbstractChestedHorse> extends QuadrupedModel<T
 		this.leg3.x++;
 		this.leg2.z--;
 		this.leg3.z--;
-		this.zHeadOffs += 2.0F;
 	}
 
-	public void render(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+		this.head.xRot = j * (float) (Math.PI / 180.0);
+		this.head.yRot = i * (float) (Math.PI / 180.0);
+		this.body.xRot = (float) (Math.PI / 2);
+		this.leg0.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+		this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+		this.leg2.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+		this.leg3.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
 		boolean bl = !abstractChestedHorse.isBaby() && abstractChestedHorse.hasChest();
-		this.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, this.yHeadOffs * k, this.zHeadOffs * k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			float m = 0.7F;
-			RenderSystem.scalef(0.71428573F, 0.64935064F, 0.7936508F);
-			RenderSystem.translatef(0.0F, 21.0F * k, 0.22F);
-			this.head.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			float n = 1.1F;
-			RenderSystem.scalef(0.625F, 0.45454544F, 0.45454544F);
-			RenderSystem.translatef(0.0F, 33.0F * k, 0.0F);
-			this.body.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.45454544F, 0.41322312F, 0.45454544F);
-			RenderSystem.translatef(0.0F, 33.0F * k, 0.0F);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.head.render(k);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-		}
+		this.chest1.visible = bl;
+		this.chest2.visible = bl;
+	}
 
-		if (bl) {
-			this.chest1.render(k);
-			this.chest2.render(k);
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
+		if (this.young) {
+			float j = 2.0F;
+			poseStack.pushPose();
+			float k = 0.7F;
+			poseStack.scale(0.71428573F, 0.64935064F, 0.7936508F);
+			poseStack.translate(0.0, 1.3125, 0.22F);
+			this.head.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h);
+			poseStack.popPose();
+			poseStack.pushPose();
+			float l = 1.1F;
+			poseStack.scale(0.625F, 0.45454544F, 0.45454544F);
+			poseStack.translate(0.0, 2.0625, 0.0);
+			this.body.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h);
+			poseStack.popPose();
+			poseStack.pushPose();
+			poseStack.scale(0.45454544F, 0.41322312F, 0.45454544F);
+			poseStack.translate(0.0, 2.0625, 0.0);
+			ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2)
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+			poseStack.popPose();
+		} else {
+			ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2)
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
 		}
 	}
 }

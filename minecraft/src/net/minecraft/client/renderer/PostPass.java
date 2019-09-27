@@ -48,8 +48,6 @@ public class PostPass implements AutoCloseable {
 		RenderSystem.disableDepthTest();
 		RenderSystem.disableAlphaTest();
 		RenderSystem.disableFog();
-		RenderSystem.disableLighting();
-		RenderSystem.disableColorMaterial();
 		RenderSystem.enableTexture();
 		RenderSystem.bindTexture(0);
 	}

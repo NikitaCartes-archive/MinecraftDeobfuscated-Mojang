@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Fox;
 
 @Environment(EnvType.CLIENT)
-public class FoxModel<T extends Fox> extends EntityModel<T> {
+public class FoxModel<T extends Fox> extends AgeableListModel<T> {
 	public final ModelPart head;
 	private final ModelPart earL;
 	private final ModelPart earR;
@@ -22,6 +22,7 @@ public class FoxModel<T extends Fox> extends EntityModel<T> {
 	private float legMotionPos;
 
 	public FoxModel() {
+		super(true, 8.0F, 3.35F);
 		this.texWidth = 48;
 		this.texHeight = 32;
 		this.head = new ModelPart(this, 1, 5);
@@ -120,40 +121,17 @@ public class FoxModel<T extends Fox> extends EntityModel<T> {
 		}
 	}
 
-	public void render(T fox, float f, float g, float h, float i, float j, float k) {
-		super.render(fox, f, g, h, i, j, k);
-		this.setupAnim(fox, f, g, h, i, j, k);
-		if (this.young) {
-			RenderSystem.pushMatrix();
-			float l = 0.75F;
-			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
-			RenderSystem.translatef(0.0F, 8.0F * k, 3.35F * k);
-			this.head.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			float m = 0.5F;
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			RenderSystem.pushMatrix();
-			this.head.render(k);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			RenderSystem.popMatrix();
-		}
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head);
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.body, this.leg0, this.leg1, this.leg2, this.leg3);
 	}
 
 	public void setupAnim(T fox, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(fox, f, g, h, i, j, k);
 		if (!fox.isSleeping() && !fox.isFaceplanted() && !fox.isCrouching()) {
 			this.head.xRot = j * (float) (Math.PI / 180.0);
 			this.head.yRot = i * (float) (Math.PI / 180.0);

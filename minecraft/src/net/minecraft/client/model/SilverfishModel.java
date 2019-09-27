@@ -1,5 +1,8 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,9 +10,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class SilverfishModel<T extends Entity> extends EntityModel<T> {
+public class SilverfishModel<T extends Entity> extends ListModel<T> {
 	private final ModelPart[] bodyParts;
 	private final ModelPart[] bodyLayers;
+	private final ImmutableList<ModelPart> parts;
 	private final float[] zPlacement = new float[7];
 	private static final int[][] BODY_SIZES = new int[][]{{3, 2, 2}, {4, 3, 2}, {6, 4, 3}, {3, 3, 3}, {2, 2, 3}, {2, 1, 2}, {1, 1, 2}};
 	private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 4}, {0, 9}, {0, 16}, {0, 22}, {11, 0}, {13, 4}};
@@ -39,19 +43,14 @@ public class SilverfishModel<T extends Entity> extends EntityModel<T> {
 		this.bodyLayers[2] = new ModelPart(this, 20, 18);
 		this.bodyLayers[2].addBox(-3.0F, 0.0F, (float)BODY_SIZES[4][2] * -0.5F, 6.0F, 5.0F, (float)BODY_SIZES[1][2]);
 		this.bodyLayers[2].setPos(0.0F, 19.0F, this.zPlacement[1]);
+		Builder<ModelPart> builder = ImmutableList.builder();
+		builder.addAll(Arrays.asList(this.bodyParts));
+		builder.addAll(Arrays.asList(this.bodyLayers));
+		this.parts = builder.build();
 	}
 
-	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-
-		for (ModelPart modelPart : this.bodyParts) {
-			modelPart.render(k);
-		}
-
-		for (ModelPart modelPart : this.bodyLayers) {
-			modelPart.render(k);
-		}
+	public ImmutableList<ModelPart> parts() {
+		return this.parts;
 	}
 
 	@Override

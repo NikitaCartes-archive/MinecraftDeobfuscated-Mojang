@@ -1,5 +1,8 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,9 +10,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(EnvType.CLIENT)
-public class WitherBossModel<T extends WitherBoss> extends EntityModel<T> {
+public class WitherBossModel<T extends WitherBoss> extends ListModel<T> {
 	private final ModelPart[] upperBodyParts;
 	private final ModelPart[] heads;
+	private final ImmutableList<ModelPart> parts;
 
 	public WitherBossModel(float f) {
 		this.texWidth = 64;
@@ -36,18 +40,14 @@ public class WitherBossModel<T extends WitherBoss> extends EntityModel<T> {
 		this.heads[2].addBox(-4.0F, -4.0F, -4.0F, 6.0F, 6.0F, 6.0F, f);
 		this.heads[2].x = 10.0F;
 		this.heads[2].y = 4.0F;
+		Builder<ModelPart> builder = ImmutableList.builder();
+		builder.addAll(Arrays.asList(this.heads));
+		builder.addAll(Arrays.asList(this.upperBodyParts));
+		this.parts = builder.build();
 	}
 
-	public void render(T witherBoss, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(witherBoss, f, g, h, i, j, k);
-
-		for (ModelPart modelPart : this.heads) {
-			modelPart.render(k);
-		}
-
-		for (ModelPart modelPart : this.upperBodyParts) {
-			modelPart.render(k);
-		}
+	public ImmutableList<ModelPart> parts() {
+		return this.parts;
 	}
 
 	public void setupAnim(T witherBoss, float f, float g, float h, float i, float j, float k) {

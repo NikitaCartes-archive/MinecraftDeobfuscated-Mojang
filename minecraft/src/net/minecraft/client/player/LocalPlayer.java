@@ -876,7 +876,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 				}
 			}
 
-			float n = (float)Mth.fastInvSqrt((double)i);
+			float n = Mth.fastInvSqrt(i);
 			Vec3 vec34 = vec33.scale((double)n);
 			Vec3 vec35 = this.getForward();
 			float l = (float)(vec35.x * vec34.x + vec35.z * vec34.z);

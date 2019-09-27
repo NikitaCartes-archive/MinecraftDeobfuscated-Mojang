@@ -1,5 +1,7 @@
 package net.minecraft.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -18,8 +20,8 @@ public class ShieldModel extends Model {
 		this.handle.addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, 0.0F);
 	}
 
-	public void render() {
-		this.plate.render(0.0625F);
-		this.handle.render(0.0625F);
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
+		this.plate.render(poseStack, vertexConsumer, 0.0625F, i, null);
+		this.handle.render(poseStack, vertexConsumer, 0.0625F, i, null);
 	}
 }

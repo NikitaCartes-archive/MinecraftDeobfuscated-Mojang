@@ -1,13 +1,14 @@
 package net.minecraft.client.model;
 
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class MinecartModel<T extends Entity> extends EntityModel<T> {
-	private final ModelPart[] cubes = new ModelPart[7];
+public class MinecartModel<T extends Entity> extends ListModel<T> {
+	private final ModelPart[] cubes = new ModelPart[6];
 
 	public MinecartModel() {
 		this.cubes[0] = new ModelPart(this, 0, 10);
@@ -40,11 +41,12 @@ public class MinecartModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
 		this.cubes[5].y = 4.0F - h;
+	}
 
-		for (int l = 0; l < 6; l++) {
-			this.cubes[l].render(k);
-		}
+	@Override
+	public Iterable<ModelPart> parts() {
+		return Arrays.asList(this.cubes);
 	}
 }

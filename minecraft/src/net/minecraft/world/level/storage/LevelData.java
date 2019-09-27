@@ -362,14 +362,14 @@ public class LevelData {
 		ListTag listTag = new ListTag();
 
 		for (String string : this.enabledDataPacks) {
-			listTag.add(new StringTag(string));
+			listTag.add(StringTag.valueOf(string));
 		}
 
 		compoundTag5.put("Enabled", listTag);
 		ListTag listTag2 = new ListTag();
 
 		for (String string2 : this.disabledDataPacks) {
-			listTag2.add(new StringTag(string2));
+			listTag2.add(StringTag.valueOf(string2));
 		}
 
 		compoundTag5.put("Disabled", listTag2);

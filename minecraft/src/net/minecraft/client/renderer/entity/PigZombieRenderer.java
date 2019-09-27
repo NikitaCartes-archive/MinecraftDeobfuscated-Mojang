@@ -16,7 +16,7 @@ public class PigZombieRenderer extends HumanoidMobRenderer<PigZombie, ZombieMode
 		this.addLayer(new HumanoidArmorLayer<>(this, new ZombieModel(0.5F, true), new ZombieModel(1.0F, true)));
 	}
 
-	protected ResourceLocation getTextureLocation(PigZombie pigZombie) {
+	public ResourceLocation getTextureLocation(PigZombie pigZombie) {
 		return ZOMBIE_PIGMAN_LOCATION;
 	}
 }

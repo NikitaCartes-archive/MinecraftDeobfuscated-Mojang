@@ -21,7 +21,7 @@ public class ParrotRenderer extends MobRenderer<Parrot, ParrotModel> {
 		super(entityRenderDispatcher, new ParrotModel(), 0.3F);
 	}
 
-	protected ResourceLocation getTextureLocation(Parrot parrot) {
+	public ResourceLocation getTextureLocation(Parrot parrot) {
 		return PARROT_LOCATIONS[parrot.getVariant()];
 	}
 

@@ -7,13 +7,35 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class ShortTag extends NumericTag {
-	private short data;
+	public static final TagType<ShortTag> TYPE = new TagType<ShortTag>() {
+		public ShortTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(80L);
+			return ShortTag.valueOf(dataInput.readShort());
+		}
 
-	public ShortTag() {
+		@Override
+		public String getName() {
+			return "SHORT";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Short";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	private final short data;
+
+	private ShortTag(short s) {
+		this.data = s;
 	}
 
-	public ShortTag(short s) {
-		this.data = s;
+	public static ShortTag valueOf(short s) {
+		return s >= -128 && s <= 1024 ? ShortTag.Cache.cache[s + 128] : new ShortTag(s);
 	}
 
 	@Override
@@ -22,14 +44,13 @@ public class ShortTag extends NumericTag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(80L);
-		this.data = dataInput.readShort();
+	public byte getId() {
+		return 2;
 	}
 
 	@Override
-	public byte getId() {
-		return 2;
+	public TagType<ShortTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -38,7 +59,7 @@ public class ShortTag extends NumericTag {
 	}
 
 	public ShortTag copy() {
-		return new ShortTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {
@@ -88,5 +109,15 @@ public class ShortTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	static class Cache {
+		static final ShortTag[] cache = new ShortTag[1153];
+
+		static {
+			for (int i = 0; i < cache.length; i++) {
+				cache[i] = new ShortTag((short)(-128 + i));
+			}
+		}
 	}
 }

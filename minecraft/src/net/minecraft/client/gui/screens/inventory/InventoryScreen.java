@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -99,7 +98,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
-		RenderSystem.enableColorMaterial();
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef((float)i, (float)j, 50.0F);
 		RenderSystem.scalef((float)(-k), (float)k, (float)k);
@@ -109,9 +107,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		float m = livingEntity.xRot;
 		float n = livingEntity.yHeadRotO;
 		float o = livingEntity.yHeadRot;
-		RenderSystem.rotatef(135.0F, 0.0F, 1.0F, 0.0F);
-		Lighting.turnOn();
-		RenderSystem.rotatef(-135.0F, 0.0F, 1.0F, 0.0F);
 		RenderSystem.rotatef(-((float)Math.atan((double)(g / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 		livingEntity.yBodyRot = (float)Math.atan((double)(f / 40.0F)) * 20.0F;
 		livingEntity.yRot = (float)Math.atan((double)(f / 40.0F)) * 40.0F;
@@ -122,7 +117,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		entityRenderDispatcher.setPlayerRotY(180.0F);
 		entityRenderDispatcher.setRenderShadow(false);
-		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, false);
+		entityRenderDispatcher.render(livingEntity, 1.0F);
 		entityRenderDispatcher.setRenderShadow(true);
 		livingEntity.yBodyRot = h;
 		livingEntity.yRot = l;
@@ -130,11 +125,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.yHeadRotO = n;
 		livingEntity.yHeadRot = o;
 		RenderSystem.popMatrix();
-		Lighting.turnOff();
 		RenderSystem.disableRescaleNormal();
-		RenderSystem.activeTexture(33985);
-		RenderSystem.disableTexture();
-		RenderSystem.activeTexture(33984);
 	}
 
 	@Override

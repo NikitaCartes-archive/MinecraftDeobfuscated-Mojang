@@ -9,6 +9,8 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -102,6 +104,20 @@ public class ChunkHolder {
 		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getTickingChunkFuture();
 		Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)completableFuture.getNow(null);
 		return either == null ? null : (LevelChunk)either.left().orElse(null);
+	}
+
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	public ChunkStatus getLastAvailableStatus() {
+		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
+			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
+			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
+			if (((Either)completableFuture.getNow(UNLOADED_CHUNK)).left().isPresent()) {
+				return chunkStatus;
+			}
+		}
+
+		return null;
 	}
 
 	@Nullable
@@ -250,6 +266,11 @@ public class ChunkHolder {
 	private void updateChunkToSave(CompletableFuture<? extends Either<? extends ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture) {
 		this.chunkToSave = this.chunkToSave
 			.thenCombine(completableFuture, (chunkAccess, either) -> either.map(chunkAccessx -> chunkAccessx, chunkLoadingFailure -> chunkAccess));
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ChunkHolder.FullChunkStatus getFullStatus() {
+		return getFullChunkStatus(this.ticketLevel);
 	}
 
 	public ChunkPos getPos() {

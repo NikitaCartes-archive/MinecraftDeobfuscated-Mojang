@@ -2,8 +2,11 @@ package net.minecraft.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -37,6 +40,10 @@ public abstract class GuiComponent {
 	}
 
 	public static void fill(int i, int j, int k, int l, int m) {
+		fill(Transformation.identity().getMatrix(), i, j, k, l, m);
+	}
+
+	public static void fill(Matrix4f matrix4f, int i, int j, int k, int l, int m) {
 		if (i < k) {
 			int n = i;
 			i = k;
@@ -53,18 +60,17 @@ public abstract class GuiComponent {
 		float g = (float)(m >> 16 & 0xFF) / 255.0F;
 		float h = (float)(m >> 8 & 0xFF) / 255.0F;
 		float o = (float)(m & 0xFF) / 255.0F;
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
-		RenderSystem.color4f(g, h, o, f);
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
-		bufferBuilder.vertex((double)i, (double)l, 0.0).endVertex();
-		bufferBuilder.vertex((double)k, (double)l, 0.0).endVertex();
-		bufferBuilder.vertex((double)k, (double)j, 0.0).endVertex();
-		bufferBuilder.vertex((double)i, (double)j, 0.0).endVertex();
-		tesselator.end();
+		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.vertex(matrix4f, (float)i, (float)l, 0.0F).color(g, h, o, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)k, (float)l, 0.0F).color(g, h, o, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)k, (float)j, 0.0F).color(g, h, o, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)j, 0.0F).color(g, h, o, f).endVertex();
+		bufferBuilder.end();
+		BufferUploader.end(bufferBuilder);
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 	}
@@ -137,10 +143,10 @@ public abstract class GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex((double)i, (double)l, (double)m).uv((double)f, (double)n).endVertex();
-		bufferBuilder.vertex((double)j, (double)l, (double)m).uv((double)g, (double)n).endVertex();
-		bufferBuilder.vertex((double)j, (double)k, (double)m).uv((double)g, (double)h).endVertex();
-		bufferBuilder.vertex((double)i, (double)k, (double)m).uv((double)f, (double)h).endVertex();
+		bufferBuilder.vertex((double)i, (double)l, (double)m).uv(f, n).endVertex();
+		bufferBuilder.vertex((double)j, (double)l, (double)m).uv(g, n).endVertex();
+		bufferBuilder.vertex((double)j, (double)k, (double)m).uv(g, h).endVertex();
+		bufferBuilder.vertex((double)i, (double)k, (double)m).uv(f, h).endVertex();
 		tesselator.end();
 	}
 

@@ -1,12 +1,13 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.animal.IronGolem;
 
 @Environment(EnvType.CLIENT)
-public class IronGolemModel<T extends IronGolem> extends EntityModel<T> {
+public class IronGolemModel<T extends IronGolem> extends ListModel<T> {
 	private final ModelPart head;
 	private final ModelPart body;
 	public final ModelPart arm0;
@@ -48,14 +49,9 @@ public class IronGolemModel<T extends IronGolem> extends EntityModel<T> {
 		this.leg1.addBox(-3.5F, -3.0F, -3.0F, 6.0F, 16.0F, 5.0F, f);
 	}
 
-	public void render(T ironGolem, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(ironGolem, f, g, h, i, j, k);
-		this.head.render(k);
-		this.body.render(k);
-		this.leg0.render(k);
-		this.leg1.render(k);
-		this.arm0.render(k);
-		this.arm1.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.head, this.body, this.leg0, this.leg1, this.arm0, this.arm1);
 	}
 
 	public void setupAnim(T ironGolem, float f, float g, float h, float i, float j, float k) {
@@ -89,6 +85,6 @@ public class IronGolemModel<T extends IronGolem> extends EntityModel<T> {
 	}
 
 	public ModelPart getFlowerHoldingArm() {
-		return this.arm0;
+		return this.arm1;
 	}
 }

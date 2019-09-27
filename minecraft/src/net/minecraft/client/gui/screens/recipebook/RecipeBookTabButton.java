@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -71,11 +70,7 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.blit(m, this.y, k, l, this.width, this.height);
 		RenderSystem.enableDepthTest();
-		Lighting.turnOnGui();
-		RenderSystem.disableLighting();
 		this.renderIcon(minecraft.getItemRenderer());
-		RenderSystem.enableLighting();
-		Lighting.turnOff();
 		if (this.animationTime > 0.0F) {
 			RenderSystem.popMatrix();
 			this.animationTime -= f;

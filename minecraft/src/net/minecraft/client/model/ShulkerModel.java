@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Shulker;
 
 @Environment(EnvType.CLIENT)
-public class ShulkerModel<T extends Shulker> extends EntityModel<T> {
+public class ShulkerModel<T extends Shulker> extends ListModel<T> {
 	private final ModelPart base;
 	private final ModelPart lid = new ModelPart(64, 64, 0, 0);
 	private final ModelPart head;
@@ -43,9 +44,9 @@ public class ShulkerModel<T extends Shulker> extends EntityModel<T> {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 	}
 
-	public void render(T shulker, float f, float g, float h, float i, float j, float k) {
-		this.base.render(k);
-		this.lid.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.base, this.lid);
 	}
 
 	public ModelPart getBase() {

@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -10,7 +11,7 @@ import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
-public class GuardianModel extends EntityModel<Guardian> {
+public class GuardianModel extends ListModel<Guardian> {
 	private static final float[] SPIKE_X_ROT = new float[]{1.75F, 0.25F, 0.0F, 0.0F, 0.5F, 0.5F, 0.5F, 0.5F, 1.25F, 0.75F, 0.0F, 0.0F};
 	private static final float[] SPIKE_Y_ROT = new float[]{0.0F, 0.0F, 0.0F, 0.0F, 0.25F, 1.75F, 1.25F, 0.75F, 0.0F, 0.0F, 0.0F, 0.0F};
 	private static final float[] SPIKE_Z_ROT = new float[]{0.0F, 0.0F, 0.25F, 1.75F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.75F, 1.25F};
@@ -55,9 +56,9 @@ public class GuardianModel extends EntityModel<Guardian> {
 		this.tailParts[1].addChild(this.tailParts[2]);
 	}
 
-	public void render(Guardian guardian, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(guardian, f, g, h, i, j, k);
-		this.head.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.head);
 	}
 
 	public void setupAnim(Guardian guardian, float f, float g, float h, float i, float j, float k) {

@@ -180,20 +180,20 @@ public class FogRenderer {
 		}
 	}
 
-	public static void setupFog(Camera camera, int i, float f, boolean bl) {
+	public static void setupFog(Camera camera, FogRenderer.FogMode fogMode, float f, boolean bl) {
 		resetFogColor(false);
 		RenderSystem.normal3f(0.0F, -1.0F, 0.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		FluidState fluidState = camera.getFluidInCamera();
 		if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
 			float g = 5.0F;
-			int j = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
-			if (j < 20) {
-				g = Mth.lerp(1.0F - (float)j / 20.0F, 5.0F, f);
+			int i = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
+			if (i < 20) {
+				g = Mth.lerp(1.0F - (float)i / 20.0F, 5.0F, f);
 			}
 
 			RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
-			if (i == -1) {
+			if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 				RenderSystem.fogStart(0.0F);
 				RenderSystem.fogEnd(g * 0.8F);
 			} else {
@@ -225,7 +225,7 @@ public class FogRenderer {
 			RenderSystem.fogDensity(2.0F);
 		} else {
 			RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
-			if (i == -1) {
+			if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 				RenderSystem.fogStart(0.0F);
 				RenderSystem.fogEnd(f);
 			} else {
@@ -240,12 +240,17 @@ public class FogRenderer {
 			}
 		}
 
-		RenderSystem.enableColorMaterial();
 		RenderSystem.enableFog();
 		RenderSystem.colorMaterial(1028, 4608);
 	}
 
 	public static void resetFogColor(boolean bl) {
 		RenderSystem.fog(2918, bl ? BLACK_BUFFER : COLOR_BUFFER);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum FogMode {
+		FOG_SKY,
+		FOG_TERRAIN;
 	}
 }

@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(EnvType.CLIENT)
-public class WolfModel<T extends Wolf> extends EntityModel<T> {
+public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 	private final ModelPart head;
 	private final ModelPart realHead;
 	private final ModelPart body;
@@ -56,36 +56,14 @@ public class WolfModel<T extends Wolf> extends EntityModel<T> {
 		this.realHead.texOffs(0, 10).addBox(-0.5F, 0.0F, -5.0F, 3.0F, 3.0F, 4.0F, 0.0F);
 	}
 
-	public void render(T wolf, float f, float g, float h, float i, float j, float k) {
-		super.render(wolf, f, g, h, i, j, k);
-		this.setupAnim(wolf, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 5.0F * k, 2.0F * k);
-			this.head.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			this.tail.render(k);
-			this.upperBody.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.head.render(k);
-			this.body.render(k);
-			this.leg0.render(k);
-			this.leg1.render(k);
-			this.leg2.render(k);
-			this.leg3.render(k);
-			this.tail.render(k);
-			this.upperBody.render(k);
-		}
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head);
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.tail, this.upperBody);
 	}
 
 	public void prepareMobModel(T wolf, float f, float g, float h) {
@@ -133,7 +111,6 @@ public class WolfModel<T extends Wolf> extends EntityModel<T> {
 	}
 
 	public void setupAnim(T wolf, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(wolf, f, g, h, i, j, k);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.tail.xRot = h;

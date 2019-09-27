@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -91,7 +90,6 @@ public class RecipeBookPage {
 			this.minecraft.font.draw(string, (float)(i - m / 2 + 73), (float)(j + 141), -1);
 		}
 
-		Lighting.turnOff();
 		this.hoveredButton = null;
 
 		for (RecipeButton recipeButton : this.buttons) {

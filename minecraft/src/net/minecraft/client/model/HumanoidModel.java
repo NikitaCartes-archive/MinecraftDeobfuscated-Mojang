@@ -1,11 +1,10 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.ArmedModel;
-import net.minecraft.client.renderer.entity.HeadedModel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -13,7 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CrossbowItem;
 
 @Environment(EnvType.CLIENT)
-public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implements ArmedModel, HeadedModel {
+public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
 	public ModelPart head;
 	public ModelPart hat;
 	public ModelPart body;
@@ -36,6 +35,7 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 	}
 
 	public HumanoidModel(float f, float g, int i, int j) {
+		super(true, 16.0F, 0.0F);
 		this.texWidth = i;
 		this.texHeight = j;
 		this.head = new ModelPart(this, 0, 0);
@@ -63,39 +63,14 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 		this.leftLeg.setPos(1.9F, 12.0F + g, 0.0F);
 	}
 
-	public void render(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(livingEntity, f, g, h, i, j, k);
-		RenderSystem.pushMatrix();
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
-			RenderSystem.translatef(0.0F, 16.0F * k, 0.0F);
-			this.head.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.body.render(k);
-			this.rightArm.render(k);
-			this.leftArm.render(k);
-			this.rightLeg.render(k);
-			this.leftLeg.render(k);
-			this.hat.render(k);
-		} else {
-			if (livingEntity.isCrouching()) {
-				RenderSystem.translatef(0.0F, 0.2F, 0.0F);
-			}
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head);
+	}
 
-			this.head.render(k);
-			this.body.render(k);
-			this.rightArm.render(k);
-			this.leftArm.render(k);
-			this.rightLeg.render(k);
-			this.leftLeg.render(k);
-			this.hat.render(k);
-		}
-
-		RenderSystem.popMatrix();
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.body, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg, this.hat);
 	}
 
 	public void prepareMobModel(T livingEntity, float f, float g, float h) {
@@ -230,9 +205,12 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 			this.leftArm.xRot += 0.4F;
 			this.rightLeg.z = 4.0F;
 			this.leftLeg.z = 4.0F;
-			this.rightLeg.y = 9.0F;
-			this.leftLeg.y = 9.0F;
-			this.head.y = 1.0F;
+			this.rightLeg.y = 12.2F;
+			this.leftLeg.y = 12.2F;
+			this.head.y = 4.2F;
+			this.body.y = 3.2F;
+			this.leftArm.y = 5.2F;
+			this.rightArm.y = 5.2F;
 		} else {
 			this.body.xRot = 0.0F;
 			this.rightLeg.z = 0.1F;
@@ -240,6 +218,9 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 			this.rightLeg.y = 12.0F;
 			this.leftLeg.y = 12.0F;
 			this.head.y = 0.0F;
+			this.body.y = 0.0F;
+			this.leftArm.y = 2.0F;
+			this.rightArm.y = 2.0F;
 		}
 
 		this.rightArm.zRot = this.rightArm.zRot + Mth.cos(h * 0.09F) * 0.05F + 0.05F;
@@ -363,8 +344,8 @@ public class HumanoidModel<T extends LivingEntity> extends EntityModel<T> implem
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm) {
-		this.getArm(humanoidArm).translateTo(f);
+	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
+		this.getArm(humanoidArm).translateAndRotate(poseStack, f);
 	}
 
 	protected ModelPart getArm(HumanoidArm humanoidArm) {

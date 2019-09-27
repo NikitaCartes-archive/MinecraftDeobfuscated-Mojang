@@ -39,7 +39,8 @@ public class ChestedHorseModel<T extends AbstractChestedHorse> extends HorseMode
 		modelPart.addChild(modelPart3);
 	}
 
-	public void render(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+		super.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
 		if (abstractChestedHorse.hasChest()) {
 			this.boxL.visible = true;
 			this.boxR.visible = true;
@@ -47,7 +48,5 @@ public class ChestedHorseModel<T extends AbstractChestedHorse> extends HorseMode
 			this.boxL.visible = false;
 			this.boxR.visible = false;
 		}
-
-		super.render(abstractChestedHorse, f, g, h, i, j, k);
 	}
 }

@@ -1,12 +1,13 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,31 +17,20 @@ public class CarriedBlockLayer extends RenderLayer<EnderMan, EndermanModel<Ender
 		super(renderLayerParent);
 	}
 
-	public void render(EnderMan enderMan, float f, float g, float h, float i, float j, float k, float l) {
+	public void render(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, EnderMan enderMan, float f, float g, float h, float j, float k, float l, float m
+	) {
 		BlockState blockState = enderMan.getCarriedBlock();
 		if (blockState != null) {
-			RenderSystem.enableRescaleNormal();
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 0.6875F, -0.75F);
-			RenderSystem.rotatef(20.0F, 1.0F, 0.0F, 0.0F);
-			RenderSystem.rotatef(45.0F, 0.0F, 1.0F, 0.0F);
-			RenderSystem.translatef(0.25F, 0.1875F, 0.25F);
-			float m = 0.5F;
-			RenderSystem.scalef(-0.5F, -0.5F, 0.5F);
-			int n = enderMan.getLightColor();
-			int o = n % 65536;
-			int p = n / 65536;
-			RenderSystem.glMultiTexCoord2f(33985, (float)o, (float)p);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
-			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, 1.0F);
-			RenderSystem.popMatrix();
-			RenderSystem.disableRescaleNormal();
+			poseStack.pushPose();
+			poseStack.translate(0.0, 0.6875, -0.75);
+			poseStack.mulPose(Vector3f.XP.rotation(20.0F, true));
+			poseStack.mulPose(Vector3f.YP.rotation(45.0F, true));
+			poseStack.translate(0.25, 0.1875, 0.25);
+			float n = 0.5F;
+			poseStack.scale(-0.5F, -0.5F, 0.5F);
+			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
+			poseStack.popPose();
 		}
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return false;
 	}
 }

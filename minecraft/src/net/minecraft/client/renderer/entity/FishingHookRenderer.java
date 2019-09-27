@@ -1,12 +1,15 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
@@ -24,99 +27,90 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 		super(entityRenderDispatcher);
 	}
 
-	public void render(FishingHook fishingHook, double d, double e, double f, float g, float h) {
+	public void render(FishingHook fishingHook, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
 		Player player = fishingHook.getOwner();
-		if (player != null && !this.solidRender) {
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef((float)d, (float)e, (float)f);
-			RenderSystem.enableRescaleNormal();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			this.bindTexture(fishingHook);
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder bufferBuilder = tesselator.getBuilder();
+		if (player != null) {
+			poseStack.pushPose();
+			poseStack.pushPose();
+			poseStack.scale(0.5F, 0.5F, 0.5F);
 			float i = 1.0F;
 			float j = 0.5F;
 			float k = 0.5F;
-			RenderSystem.rotatef(180.0F - this.entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
-			RenderSystem.rotatef((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F);
-			if (this.solidRender) {
-				RenderSystem.enableColorMaterial();
-				RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(fishingHook));
-			}
-
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_NORMAL);
-			bufferBuilder.vertex(-0.5, -0.5, 0.0).uv(0.0, 1.0).normal(0.0F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(0.5, -0.5, 0.0).uv(1.0, 1.0).normal(0.0F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(0.5, 0.5, 0.0).uv(1.0, 0.0).normal(0.0F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(-0.5, 0.5, 0.0).uv(0.0, 0.0).normal(0.0F, 1.0F, 0.0F).endVertex();
-			tesselator.end();
-			if (this.solidRender) {
-				RenderSystem.tearDownSolidRenderingTextureCombine();
-				RenderSystem.disableColorMaterial();
-			}
-
-			RenderSystem.disableRescaleNormal();
-			RenderSystem.popMatrix();
-			int l = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+			poseStack.mulPose(Vector3f.YP.rotation(180.0F - this.entityRenderDispatcher.playerRotY, true));
+			poseStack.mulPose(
+				Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, true)
+			);
+			Matrix4f matrix4f = poseStack.getPose();
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION));
+			OverlayTexture.setDefault(vertexConsumer);
+			int l = fishingHook.getLightColor();
+			vertexConsumer.vertex(matrix4f, -0.5F, -0.5F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+			vertexConsumer.vertex(matrix4f, 0.5F, -0.5F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+			vertexConsumer.vertex(matrix4f, 0.5F, 0.5F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+			vertexConsumer.vertex(matrix4f, -0.5F, 0.5F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+			poseStack.popPose();
+			vertexConsumer.unsetDefaultOverlayCoords();
+			int m = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			ItemStack itemStack = player.getMainHandItem();
 			if (itemStack.getItem() != Items.FISHING_ROD) {
-				l = -l;
+				m = -m;
 			}
 
-			float m = player.getAttackAnim(h);
-			float n = Mth.sin(Mth.sqrt(m) * (float) Math.PI);
-			float o = Mth.lerp(h, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
-			double p = (double)Mth.sin(o);
-			double q = (double)Mth.cos(o);
-			double r = (double)l * 0.35;
-			double s = 0.8;
-			double t;
+			float n = player.getAttackAnim(h);
+			float o = Mth.sin(Mth.sqrt(n) * (float) Math.PI);
+			float p = Mth.lerp(h, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
+			double q = (double)Mth.sin(p);
+			double r = (double)Mth.cos(p);
+			double s = (double)m * 0.35;
+			double t = 0.8;
 			double u;
 			double v;
 			double w;
+			float x;
 			if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.thirdPersonView <= 0) && player == Minecraft.getInstance().player) {
-				double x = this.entityRenderDispatcher.options.fov;
-				x /= 100.0;
-				Vec3 vec3 = new Vec3((double)l * -0.36 * x, -0.045 * x, 0.4);
+				double y = this.entityRenderDispatcher.options.fov;
+				y /= 100.0;
+				Vec3 vec3 = new Vec3((double)m * -0.36 * y, -0.045 * y, 0.4);
 				vec3 = vec3.xRot(-Mth.lerp(h, player.xRotO, player.xRot) * (float) (Math.PI / 180.0));
 				vec3 = vec3.yRot(-Mth.lerp(h, player.yRotO, player.yRot) * (float) (Math.PI / 180.0));
-				vec3 = vec3.yRot(n * 0.5F);
-				vec3 = vec3.xRot(-n * 0.7F);
-				t = Mth.lerp((double)h, player.xo, player.x) + vec3.x;
-				u = Mth.lerp((double)h, player.yo, player.y) + vec3.y;
-				v = Mth.lerp((double)h, player.zo, player.z) + vec3.z;
-				w = (double)player.getEyeHeight();
+				vec3 = vec3.yRot(o * 0.5F);
+				vec3 = vec3.xRot(-o * 0.7F);
+				u = Mth.lerp((double)h, player.xo, player.x) + vec3.x;
+				v = Mth.lerp((double)h, player.yo, player.y) + vec3.y;
+				w = Mth.lerp((double)h, player.zo, player.z) + vec3.z;
+				x = player.getEyeHeight();
 			} else {
-				t = Mth.lerp((double)h, player.xo, player.x) - q * r - p * 0.8;
-				u = player.yo + (double)player.getEyeHeight() + (player.y - player.yo) * (double)h - 0.45;
-				v = Mth.lerp((double)h, player.zo, player.z) - p * r + q * 0.8;
-				w = player.isCrouching() ? -0.1875 : 0.0;
+				u = Mth.lerp((double)h, player.xo, player.x) - r * s - q * 0.8;
+				v = player.yo + (double)player.getEyeHeight() + (player.y - player.yo) * (double)h - 0.45;
+				w = Mth.lerp((double)h, player.zo, player.z) - q * s + r * 0.8;
+				x = player.isCrouching() ? -0.1875F : 0.0F;
 			}
 
-			double x = Mth.lerp((double)h, fishingHook.xo, fishingHook.x);
-			double y = Mth.lerp((double)h, fishingHook.yo, fishingHook.y) + 0.25;
-			double z = Mth.lerp((double)h, fishingHook.zo, fishingHook.z);
-			double aa = (double)((float)(t - x));
-			double ab = (double)((float)(u - y)) + w;
-			double ac = (double)((float)(v - z));
-			RenderSystem.disableTexture();
-			RenderSystem.disableLighting();
-			bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
-			int ad = 16;
+			double y = Mth.lerp((double)h, fishingHook.xo, fishingHook.x);
+			double z = Mth.lerp((double)h, fishingHook.yo, fishingHook.y) + 0.25;
+			double aa = Mth.lerp((double)h, fishingHook.zo, fishingHook.z);
+			float ab = (float)(u - y);
+			float ac = (float)(v - z) + x;
+			float ad = (float)(w - aa);
+			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.LINES);
+			Matrix4f matrix4f2 = poseStack.getPose();
+			int ae = 16;
 
-			for (int ae = 0; ae <= 16; ae++) {
-				float af = (float)ae / 16.0F;
-				bufferBuilder.vertex(d + aa * (double)af, e + ab * (double)(af * af + af) * 0.5 + 0.25, f + ac * (double)af).color(0, 0, 0, 255).endVertex();
+			for (int af = 0; af < 16; af++) {
+				stringVertex(ab, ac, ad, vertexConsumer2, matrix4f2, (float)(af / 16));
+				stringVertex(ab, ac, ad, vertexConsumer2, matrix4f2, (float)((af + 1) / 16));
 			}
 
-			tesselator.end();
-			RenderSystem.enableLighting();
-			RenderSystem.enableTexture();
-			super.render(fishingHook, d, e, f, g, h);
+			poseStack.popPose();
+			super.render(fishingHook, d, e, f, g, h, poseStack, multiBufferSource);
 		}
 	}
 
-	protected ResourceLocation getTextureLocation(FishingHook fishingHook) {
+	private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, Matrix4f matrix4f, float i) {
+		vertexConsumer.vertex(matrix4f, f * i, g * (i * i + i) * 0.5F + 0.25F, h * i).color(0, 0, 0, 255).endVertex();
+	}
+
+	public ResourceLocation getTextureLocation(FishingHook fishingHook) {
 		return TEXTURE_LOCATION;
 	}
 }

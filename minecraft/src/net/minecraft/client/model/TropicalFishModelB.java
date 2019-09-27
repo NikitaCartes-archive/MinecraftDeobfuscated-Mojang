@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class TropicalFishModelB<T extends Entity> extends EntityModel<T> {
+public class TropicalFishModelB<T extends Entity> extends ColorableListModel<T> {
 	private final ModelPart body;
 	private final ModelPart tail;
 	private final ModelPart leftFin;
@@ -46,14 +47,8 @@ public class TropicalFishModelB<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		this.body.render(k);
-		this.tail.render(k);
-		this.leftFin.render(k);
-		this.rightFin.render(k);
-		this.topFin.render(k);
-		this.bottomFin.render(k);
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.body, this.tail, this.leftFin, this.rightFin, this.topFin, this.bottomFin);
 	}
 
 	@Override

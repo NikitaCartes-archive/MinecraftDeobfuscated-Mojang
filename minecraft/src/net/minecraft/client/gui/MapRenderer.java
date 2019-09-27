@@ -4,13 +4,18 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -33,8 +38,8 @@ public class MapRenderer implements AutoCloseable {
 		this.getMapInstance(mapItemSavedData).updateTexture();
 	}
 
-	public void render(MapItemSavedData mapItemSavedData, boolean bl) {
-		this.getMapInstance(mapItemSavedData).draw(bl);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, MapItemSavedData mapItemSavedData, boolean bl) {
+		this.getMapInstance(mapItemSavedData).draw(poseStack, multiBufferSource, bl);
 	}
 
 	private MapRenderer.MapInstance getMapInstance(MapItemSavedData mapItemSavedData) {
@@ -97,12 +102,13 @@ public class MapRenderer implements AutoCloseable {
 			this.texture.upload();
 		}
 
-		private void draw(boolean bl) {
+		private void draw(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl) {
 			int i = 0;
 			int j = 0;
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			float f = 0.0F;
+			Matrix4f matrix4f = poseStack.getPose();
 			MapRenderer.this.textureManager.bind(this.location);
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(
@@ -110,10 +116,10 @@ public class MapRenderer implements AutoCloseable {
 			);
 			RenderSystem.disableAlphaTest();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-			bufferBuilder.vertex(0.0, 128.0, -0.01F).uv(0.0, 1.0).endVertex();
-			bufferBuilder.vertex(128.0, 128.0, -0.01F).uv(1.0, 1.0).endVertex();
-			bufferBuilder.vertex(128.0, 0.0, -0.01F).uv(1.0, 0.0).endVertex();
-			bufferBuilder.vertex(0.0, 0.0, -0.01F).uv(0.0, 0.0).endVertex();
+			bufferBuilder.vertex(matrix4f, 0.0F, 128.0F, -0.01F).uv(0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(matrix4f, 128.0F, 128.0F, -0.01F).uv(1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(matrix4f, 128.0F, 0.0F, -0.01F).uv(1.0F, 0.0F).endVertex();
+			bufferBuilder.vertex(matrix4f, 0.0F, 0.0F, -0.01F).uv(0.0F, 0.0F).endVertex();
 			tesselator.end();
 			RenderSystem.enableAlphaTest();
 			RenderSystem.disableBlend();
@@ -122,49 +128,46 @@ public class MapRenderer implements AutoCloseable {
 			for (MapDecoration mapDecoration : this.data.decorations.values()) {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					MapRenderer.this.textureManager.bind(MapRenderer.MAP_ICONS_LOCATION);
-					RenderSystem.pushMatrix();
-					RenderSystem.translatef(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F, -0.02F);
-					RenderSystem.rotatef((float)(mapDecoration.getRot() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
-					RenderSystem.scalef(4.0F, 4.0F, 3.0F);
-					RenderSystem.translatef(-0.125F, 0.125F, 0.0F);
+					poseStack.pushPose();
+					poseStack.translate((double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F), -0.02F);
+					poseStack.mulPose(Vector3f.ZP.rotation((float)(mapDecoration.getRot() * 360) / 16.0F, true));
+					poseStack.scale(4.0F, 4.0F, 3.0F);
+					poseStack.translate(-0.125, 0.125, 0.0);
 					byte b = mapDecoration.getImage();
 					float g = (float)(b % 16 + 0) / 16.0F;
 					float h = (float)(b / 16 + 0) / 16.0F;
 					float l = (float)(b % 16 + 1) / 16.0F;
 					float m = (float)(b / 16 + 1) / 16.0F;
-					bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+					Matrix4f matrix4f2 = poseStack.getPose();
+					bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 					float n = -0.001F;
-					bufferBuilder.vertex(-1.0, 1.0, (double)((float)k * -0.001F)).uv((double)g, (double)h).endVertex();
-					bufferBuilder.vertex(1.0, 1.0, (double)((float)k * -0.001F)).uv((double)l, (double)h).endVertex();
-					bufferBuilder.vertex(1.0, -1.0, (double)((float)k * -0.001F)).uv((double)l, (double)m).endVertex();
-					bufferBuilder.vertex(-1.0, -1.0, (double)((float)k * -0.001F)).uv((double)g, (double)m).endVertex();
-					tesselator.end();
-					RenderSystem.popMatrix();
+					bufferBuilder.vertex(matrix4f2, -1.0F, 1.0F, (float)k * -0.001F).uv(g, h).color(255, 255, 255, 255).endVertex();
+					bufferBuilder.vertex(matrix4f2, 1.0F, 1.0F, (float)k * -0.001F).uv(l, h).color(255, 255, 255, 255).endVertex();
+					bufferBuilder.vertex(matrix4f2, 1.0F, -1.0F, (float)k * -0.001F).uv(l, m).color(255, 255, 255, 255).endVertex();
+					bufferBuilder.vertex(matrix4f2, -1.0F, -1.0F, (float)k * -0.001F).uv(g, m).color(255, 255, 255, 255).endVertex();
+					bufferBuilder.end();
+					BufferUploader.end(bufferBuilder);
+					poseStack.popPose();
 					if (mapDecoration.getName() != null) {
 						Font font = Minecraft.getInstance().font;
 						String string = mapDecoration.getName().getColoredString();
 						float o = (float)font.width(string);
 						float p = Mth.clamp(25.0F / o, 0.0F, 6.0F / 9.0F);
-						RenderSystem.pushMatrix();
-						RenderSystem.translatef(
-							0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - o * p / 2.0F, 0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F, -0.025F
+						poseStack.pushPose();
+						poseStack.translate(
+							(double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F - o * p / 2.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F + 4.0F), -0.025F
 						);
-						RenderSystem.scalef(p, p, 1.0F);
-						GuiComponent.fill(-1, -1, (int)o, 9 - 1, Integer.MIN_VALUE);
-						RenderSystem.translatef(0.0F, 0.0F, -0.1F);
-						font.draw(string, 0.0F, 0.0F, -1);
-						RenderSystem.popMatrix();
+						poseStack.scale(p, p, 1.0F);
+						GuiComponent.fill(poseStack.getPose(), -1, -1, (int)o, 9 - 1, Integer.MIN_VALUE);
+						poseStack.translate(0.0, 0.0, -0.1F);
+						RenderSystem.enableAlphaTest();
+						font.drawInBatch(string, 0.0F, 0.0F, -1, false, poseStack.getPose(), multiBufferSource, false, 0, 15728880);
+						poseStack.popPose();
 					}
 
 					k++;
 				}
 			}
-
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.0F, 0.0F, -0.04F);
-			RenderSystem.scalef(1.0F, 1.0F, 1.0F);
-			RenderSystem.popMatrix();
 		}
 
 		public void close() {

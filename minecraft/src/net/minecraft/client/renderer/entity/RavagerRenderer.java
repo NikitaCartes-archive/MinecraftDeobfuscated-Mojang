@@ -14,7 +14,7 @@ public class RavagerRenderer extends MobRenderer<Ravager, RavagerModel> {
 		super(entityRenderDispatcher, new RavagerModel(), 1.1F);
 	}
 
-	protected ResourceLocation getTextureLocation(Ravager ravager) {
+	public ResourceLocation getTextureLocation(Ravager ravager) {
 		return TEXTURE_LOCATION;
 	}
 }

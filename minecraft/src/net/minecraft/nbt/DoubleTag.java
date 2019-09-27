@@ -8,13 +8,36 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 
 public class DoubleTag extends NumericTag {
-	private double data;
+	public static final DoubleTag ZERO = new DoubleTag(0.0);
+	public static final TagType<DoubleTag> TYPE = new TagType<DoubleTag>() {
+		public DoubleTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(128L);
+			return DoubleTag.valueOf(dataInput.readDouble());
+		}
 
-	DoubleTag() {
+		@Override
+		public String getName() {
+			return "DOUBLE";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Double";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	private final double data;
+
+	private DoubleTag(double d) {
+		this.data = d;
 	}
 
-	public DoubleTag(double d) {
-		this.data = d;
+	public static DoubleTag valueOf(double d) {
+		return d == 0.0 ? ZERO : new DoubleTag(d);
 	}
 
 	@Override
@@ -23,14 +46,13 @@ public class DoubleTag extends NumericTag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(128L);
-		this.data = dataInput.readDouble();
+	public byte getId() {
+		return 6;
 	}
 
 	@Override
-	public byte getId() {
-		return 6;
+	public TagType<DoubleTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -39,7 +61,7 @@ public class DoubleTag extends NumericTag {
 	}
 
 	public DoubleTag copy() {
-		return new DoubleTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {

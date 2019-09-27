@@ -64,12 +64,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		return true;
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean hasCustomBreakingProgress(BlockState blockState) {
-		return true;
-	}
-
 	@Override
 	public RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.ENTITYBLOCK_ANIMATED;

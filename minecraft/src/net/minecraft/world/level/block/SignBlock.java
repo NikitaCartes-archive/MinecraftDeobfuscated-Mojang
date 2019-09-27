@@ -1,7 +1,5 @@
 package net.minecraft.world.level.block;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -44,12 +42,6 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean hasCustomBreakingProgress(BlockState blockState) {
-		return true;
 	}
 
 	@Override

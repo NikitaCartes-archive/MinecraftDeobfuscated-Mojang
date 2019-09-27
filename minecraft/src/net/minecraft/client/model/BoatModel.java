@@ -1,44 +1,47 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.Boat;
 
 @Environment(EnvType.CLIENT)
-public class BoatModel extends EntityModel<Boat> {
-	private final ModelPart[] cubes = new ModelPart[5];
+public class BoatModel extends ListModel<Boat> {
 	private final ModelPart[] paddles = new ModelPart[2];
 	private final ModelPart waterPatch;
+	private final ImmutableList<ModelPart> parts;
 
 	public BoatModel() {
-		this.cubes[0] = new ModelPart(this, 0, 0).setTexSize(128, 64);
-		this.cubes[1] = new ModelPart(this, 0, 19).setTexSize(128, 64);
-		this.cubes[2] = new ModelPart(this, 0, 27).setTexSize(128, 64);
-		this.cubes[3] = new ModelPart(this, 0, 35).setTexSize(128, 64);
-		this.cubes[4] = new ModelPart(this, 0, 43).setTexSize(128, 64);
+		ModelPart[] modelParts = new ModelPart[]{
+			new ModelPart(this, 0, 0).setTexSize(128, 64),
+			new ModelPart(this, 0, 19).setTexSize(128, 64),
+			new ModelPart(this, 0, 27).setTexSize(128, 64),
+			new ModelPart(this, 0, 35).setTexSize(128, 64),
+			new ModelPart(this, 0, 43).setTexSize(128, 64)
+		};
 		int i = 32;
 		int j = 6;
 		int k = 20;
 		int l = 4;
 		int m = 28;
-		this.cubes[0].addBox(-14.0F, -9.0F, -3.0F, 28.0F, 16.0F, 3.0F, 0.0F);
-		this.cubes[0].setPos(0.0F, 3.0F, 1.0F);
-		this.cubes[1].addBox(-13.0F, -7.0F, -1.0F, 18.0F, 6.0F, 2.0F, 0.0F);
-		this.cubes[1].setPos(-15.0F, 4.0F, 4.0F);
-		this.cubes[2].addBox(-8.0F, -7.0F, -1.0F, 16.0F, 6.0F, 2.0F, 0.0F);
-		this.cubes[2].setPos(15.0F, 4.0F, 0.0F);
-		this.cubes[3].addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F, 0.0F);
-		this.cubes[3].setPos(0.0F, 4.0F, -9.0F);
-		this.cubes[4].addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F, 0.0F);
-		this.cubes[4].setPos(0.0F, 4.0F, 9.0F);
-		this.cubes[0].xRot = (float) (Math.PI / 2);
-		this.cubes[1].yRot = (float) (Math.PI * 3.0 / 2.0);
-		this.cubes[2].yRot = (float) (Math.PI / 2);
-		this.cubes[3].yRot = (float) Math.PI;
+		modelParts[0].addBox(-14.0F, -9.0F, -3.0F, 28.0F, 16.0F, 3.0F, 0.0F);
+		modelParts[0].setPos(0.0F, 3.0F, 1.0F);
+		modelParts[1].addBox(-13.0F, -7.0F, -1.0F, 18.0F, 6.0F, 2.0F, 0.0F);
+		modelParts[1].setPos(-15.0F, 4.0F, 4.0F);
+		modelParts[2].addBox(-8.0F, -7.0F, -1.0F, 16.0F, 6.0F, 2.0F, 0.0F);
+		modelParts[2].setPos(15.0F, 4.0F, 0.0F);
+		modelParts[3].addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F, 0.0F);
+		modelParts[3].setPos(0.0F, 4.0F, -9.0F);
+		modelParts[4].addBox(-14.0F, -7.0F, -1.0F, 28.0F, 6.0F, 2.0F, 0.0F);
+		modelParts[4].setPos(0.0F, 4.0F, 9.0F);
+		modelParts[0].xRot = (float) (Math.PI / 2);
+		modelParts[1].yRot = (float) (Math.PI * 3.0 / 2.0);
+		modelParts[2].yRot = (float) (Math.PI / 2);
+		modelParts[3].yRot = (float) Math.PI;
 		this.paddles[0] = this.makePaddle(true);
 		this.paddles[0].setPos(3.0F, -5.0F, 9.0F);
 		this.paddles[1] = this.makePaddle(false);
@@ -50,25 +53,23 @@ public class BoatModel extends EntityModel<Boat> {
 		this.waterPatch.addBox(-14.0F, -9.0F, -3.0F, 28.0F, 16.0F, 3.0F, 0.0F);
 		this.waterPatch.setPos(0.0F, -3.0F, 1.0F);
 		this.waterPatch.xRot = (float) (Math.PI / 2);
+		Builder<ModelPart> builder = ImmutableList.builder();
+		builder.addAll(Arrays.asList(modelParts));
+		builder.addAll(Arrays.asList(this.paddles));
+		this.parts = builder.build();
 	}
 
-	public void render(Boat boat, float f, float g, float h, float i, float j, float k) {
-		RenderSystem.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
-		this.setupAnim(boat, f, g, h, i, j, k);
-
-		for (int l = 0; l < 5; l++) {
-			this.cubes[l].render(k);
-		}
-
+	public void setupAnim(Boat boat, float f, float g, float h, float i, float j, float k) {
 		this.animatePaddle(boat, 0, k, f);
 		this.animatePaddle(boat, 1, k, f);
 	}
 
-	public void renderSecondPass(Entity entity, float f, float g, float h, float i, float j, float k) {
-		RenderSystem.rotatef(90.0F, 0.0F, 1.0F, 0.0F);
-		RenderSystem.colorMask(false, false, false, false);
-		this.waterPatch.render(k);
-		RenderSystem.colorMask(true, true, true, true);
+	public ImmutableList<ModelPart> parts() {
+		return this.parts;
+	}
+
+	public ModelPart waterPatch() {
+		return this.waterPatch;
 	}
 
 	protected ModelPart makePaddle(boolean bl) {
@@ -90,7 +91,5 @@ public class BoatModel extends EntityModel<Boat> {
 		if (i == 1) {
 			modelPart.yRot = (float) Math.PI - modelPart.yRot;
 		}
-
-		modelPart.render(f);
 	}
 }

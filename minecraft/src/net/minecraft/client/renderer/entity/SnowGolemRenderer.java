@@ -16,7 +16,7 @@ public class SnowGolemRenderer extends MobRenderer<SnowGolem, SnowGolemModel<Sno
 		this.addLayer(new SnowGolemHeadLayer(this));
 	}
 
-	protected ResourceLocation getTextureLocation(SnowGolem snowGolem) {
+	public ResourceLocation getTextureLocation(SnowGolem snowGolem) {
 		return SNOW_GOLEM_LOCATION;
 	}
 }

@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SquidModel;
@@ -16,18 +17,18 @@ public class SquidRenderer extends MobRenderer<Squid, SquidModel<Squid>> {
 		super(entityRenderDispatcher, new SquidModel<>(), 0.7F);
 	}
 
-	protected ResourceLocation getTextureLocation(Squid squid) {
+	public ResourceLocation getTextureLocation(Squid squid) {
 		return SQUID_LOCATION;
 	}
 
-	protected void setupRotations(Squid squid, float f, float g, float h) {
+	protected void setupRotations(Squid squid, PoseStack poseStack, float f, float g, float h) {
 		float i = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
 		float j = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
-		RenderSystem.translatef(0.0F, 0.5F, 0.0F);
-		RenderSystem.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
-		RenderSystem.rotatef(i, 1.0F, 0.0F, 0.0F);
-		RenderSystem.rotatef(j, 0.0F, 1.0F, 0.0F);
-		RenderSystem.translatef(0.0F, -1.2F, 0.0F);
+		poseStack.translate(0.0, 0.5, 0.0);
+		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
+		poseStack.mulPose(Vector3f.XP.rotation(i, true));
+		poseStack.mulPose(Vector3f.YP.rotation(j, true));
+		poseStack.translate(0.0, -1.2F, 0.0);
 	}
 
 	protected float getBob(Squid squid, float f) {

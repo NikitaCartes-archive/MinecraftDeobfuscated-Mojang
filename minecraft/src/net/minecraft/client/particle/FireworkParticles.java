@@ -1,6 +1,6 @@
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,9 +48,9 @@ public class FireworkParticles {
 		}
 
 		@Override
-		public void render(BufferBuilder bufferBuilder, Camera camera, float f, float g, float h, float i, float j, float k) {
+		public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
 			this.setAlpha(0.6F - ((float)this.age + f - 1.0F) * 0.25F * 0.5F);
-			super.render(bufferBuilder, camera, f, g, h, i, j, k);
+			super.render(vertexConsumer, camera, f, g, h, i, j, k);
 		}
 
 		@Override
@@ -89,9 +89,9 @@ public class FireworkParticles {
 		}
 
 		@Override
-		public void render(BufferBuilder bufferBuilder, Camera camera, float f, float g, float h, float i, float j, float k) {
+		public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
 			if (!this.flicker || this.age < this.lifetime / 3 || (this.age + this.lifetime) / 3 % 2 == 0) {
-				super.render(bufferBuilder, camera, f, g, h, i, j, k);
+				super.render(vertexConsumer, camera, f, g, h, i, j, k);
 			}
 		}
 

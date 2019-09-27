@@ -6,15 +6,21 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class Lighting {
+	public static void turnBackOn() {
+		RenderSystem.enableLighting();
+		RenderSystem.enableColorMaterial();
+	}
+
 	public static void turnOff() {
-		RenderSystem.disableDiffuseLighting();
+		RenderSystem.disableLighting();
+		RenderSystem.disableColorMaterial();
 	}
 
-	public static void turnOn() {
-		RenderSystem.enableUsualDiffuseLighting();
+	public static void setupLevel() {
+		RenderSystem.setupLevelDiffuseLighting();
 	}
 
-	public static void turnOnGui() {
-		RenderSystem.enableGuiDiffuseLighting();
+	public static void setupGui() {
+		RenderSystem.setupGuiDiffuseLighting();
 	}
 }

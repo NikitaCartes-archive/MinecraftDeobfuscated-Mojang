@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.BreakingQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -92,25 +91,6 @@ public class SimpleBakedModel implements BakedModel {
 
 		public Builder(BlockModel blockModel, ItemOverrides itemOverrides) {
 			this(blockModel.hasAmbientOcclusion(), blockModel.isGui3d(), blockModel.getTransforms(), itemOverrides);
-		}
-
-		public Builder(BlockState blockState, BakedModel bakedModel, TextureAtlasSprite textureAtlasSprite, Random random, long l) {
-			this(bakedModel.useAmbientOcclusion(), bakedModel.isGui3d(), bakedModel.getTransforms(), bakedModel.getOverrides());
-			this.particleIcon = bakedModel.getParticleIcon();
-
-			for (Direction direction : Direction.values()) {
-				random.setSeed(l);
-
-				for (BakedQuad bakedQuad : bakedModel.getQuads(blockState, direction, random)) {
-					this.addCulledFace(direction, new BreakingQuad(bakedQuad, textureAtlasSprite));
-				}
-			}
-
-			random.setSeed(l);
-
-			for (BakedQuad bakedQuad2 : bakedModel.getQuads(blockState, null, random)) {
-				this.addUnculledFace(new BreakingQuad(bakedQuad2, textureAtlasSprite));
-			}
 		}
 
 		private Builder(boolean bl, boolean bl2, ItemTransforms itemTransforms, ItemOverrides itemOverrides) {

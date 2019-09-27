@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.texture;
 
-import com.mojang.blaze3d.platform.AbstractTexture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -59,8 +58,11 @@ public class SimpleTexture extends AbstractTexture {
 
 	@Environment(EnvType.CLIENT)
 	public static class TextureImage implements Closeable {
+		@Nullable
 		private final TextureMetadataSection metadata;
+		@Nullable
 		private final NativeImage image;
+		@Nullable
 		private final IOException exception;
 
 		public TextureImage(IOException iOException) {

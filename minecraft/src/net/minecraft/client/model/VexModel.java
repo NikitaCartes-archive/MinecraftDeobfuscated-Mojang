@@ -1,5 +1,7 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -30,10 +32,9 @@ public class VexModel extends HumanoidModel<Vex> {
 		this.leftWing.addBox(0.0F, 0.0F, 0.0F, 20.0F, 12.0F, 1.0F);
 	}
 
-	public void render(Vex vex, float f, float g, float h, float i, float j, float k) {
-		super.render(vex, f, g, h, i, j, k);
-		this.rightWing.render(k);
-		this.leftWing.render(k);
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.rightWing, this.leftWing));
 	}
 
 	public void setupAnim(Vex vex, float f, float g, float h, float i, float j, float k) {

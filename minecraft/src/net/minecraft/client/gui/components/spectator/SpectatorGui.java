@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components.spectator;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -68,13 +67,10 @@ public class SpectatorGui extends GuiComponent implements SpectatorMenuListener 
 			this.blit(i - 91 - 1 + spectatorPage.getSelectedSlot() * 20, j - 1, 0, 22, 24, 22);
 		}
 
-		Lighting.turnOnGui();
-
 		for (int k = 0; k < 9; k++) {
 			this.renderSlot(k, this.minecraft.getWindow().getGuiScaledWidth() / 2 - 90 + k * 20 + 2, (float)(j + 3), f, spectatorPage.getItem(k));
 		}
 
-		Lighting.turnOff();
 		RenderSystem.disableRescaleNormal();
 		RenderSystem.disableBlend();
 	}

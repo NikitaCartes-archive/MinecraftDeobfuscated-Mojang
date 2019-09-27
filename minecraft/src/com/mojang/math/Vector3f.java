@@ -114,17 +114,23 @@ public final class Vector3f {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public void normalize() {
+	public boolean normalize() {
 		float f = 0.0F;
 
 		for (int i = 0; i < 3; i++) {
 			f += this.values[i] * this.values[i];
 		}
 
-		float g = (float)Mth.fastInvSqrt((double)f);
+		if ((double)f < 1.0E-5) {
+			return false;
+		} else {
+			float g = Mth.fastInvSqrt(f);
 
-		for (int j = 0; j < 3; j++) {
-			this.values[j] = this.values[j] * g;
+			for (int j = 0; j < 3; j++) {
+				this.values[j] = this.values[j] * g;
+			}
+
+			return true;
 		}
 	}
 
@@ -141,6 +147,19 @@ public final class Vector3f {
 		this.values[2] = f * j - g * i;
 	}
 
+	@Environment(EnvType.CLIENT)
+	public void transform(Matrix3f matrix3f) {
+		float[] fs = Arrays.copyOf(this.values, 3);
+
+		for (int i = 0; i < 3; i++) {
+			this.values[i] = 0.0F;
+
+			for (int j = 0; j < 3; j++) {
+				this.values[i] = this.values[i] + matrix3f.get(i, j) * fs[j];
+			}
+		}
+	}
+
 	public void transform(Quaternion quaternion) {
 		Quaternion quaternion2 = new Quaternion(quaternion);
 		quaternion2.mul(new Quaternion(this.x(), this.y(), this.z(), 0.0F));
@@ -148,5 +167,10 @@ public final class Vector3f {
 		quaternion3.conj();
 		quaternion2.mul(quaternion3);
 		this.set(quaternion2.i(), quaternion2.j(), quaternion2.k());
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Quaternion rotation(float f, boolean bl) {
+		return new Quaternion(this, f, bl);
 	}
 }

@@ -1,11 +1,17 @@
-package com.mojang.blaze3d.platform;
+package net.minecraft.client.renderer.texture;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.io.IOException;
+import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractTexture implements TextureObject {
+public abstract class AbstractTexture {
 	protected int id = -1;
 	protected boolean blur;
 	protected boolean mipmap;
@@ -30,7 +36,6 @@ public abstract class AbstractTexture implements TextureObject {
 		GlStateManager._texParameter(3553, 10240, j);
 	}
 
-	@Override
 	public void pushFilter(boolean bl, boolean bl2) {
 		if (!RenderSystem.isOnRenderThread()) {
 			RenderSystem.recordRenderCall(() -> this._pushFilter(bl, bl2));
@@ -45,7 +50,6 @@ public abstract class AbstractTexture implements TextureObject {
 		this.setFilter(bl, bl2);
 	}
 
-	@Override
 	public void popFilter() {
 		if (!RenderSystem.isOnRenderThread()) {
 			RenderSystem.recordRenderCall(this::_popFilter);
@@ -58,7 +62,6 @@ public abstract class AbstractTexture implements TextureObject {
 		this.setFilter(this.oldBlur, this.oldMipmap);
 	}
 
-	@Override
 	public int getId() {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		if (this.id == -1) {
@@ -80,5 +83,19 @@ public abstract class AbstractTexture implements TextureObject {
 			TextureUtil.releaseTextureId(this.id);
 			this.id = -1;
 		}
+	}
+
+	public abstract void load(ResourceManager resourceManager) throws IOException;
+
+	public void bind() {
+		if (!RenderSystem.isOnRenderThreadOrInit()) {
+			RenderSystem.recordRenderCall(() -> GlStateManager._bindTexture(this.getId()));
+		} else {
+			GlStateManager._bindTexture(this.getId());
+		}
+	}
+
+	public void reset(TextureManager textureManager, ResourceManager resourceManager, ResourceLocation resourceLocation, Executor executor) {
+		textureManager.register(resourceLocation, this);
 	}
 }

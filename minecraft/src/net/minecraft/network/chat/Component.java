@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 
@@ -266,12 +267,14 @@ public interface Component extends Message, Iterable<Component> {
 					boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
 					if (jsonObject.has("block")) {
 						component = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"));
+					} else if (jsonObject.has("entity")) {
+						component = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
 					} else {
-						if (!jsonObject.has("entity")) {
+						if (!jsonObject.has("storage")) {
 							throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
 						}
 
-						component = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
+						component = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
 					}
 				}
 
@@ -403,7 +406,7 @@ public interface Component extends Message, Iterable<Component> {
 				Component component = GSON.<Component>getAdapter(Component.class).read(jsonReader);
 				stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
 				return component;
-			} catch (IOException var3) {
+			} catch (StackOverflowError | IOException var3) {
 				throw new JsonParseException(var3);
 			}
 		}

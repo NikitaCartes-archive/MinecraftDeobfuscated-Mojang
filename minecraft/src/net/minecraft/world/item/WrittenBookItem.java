@@ -118,7 +118,7 @@ public class WrittenBookItem extends Item {
 						component = new TextComponent(string);
 					}
 
-					listTag.set(i, (Tag)(new StringTag(Component.Serializer.toJson(component))));
+					listTag.set(i, (Tag)StringTag.valueOf(Component.Serializer.toJson(component)));
 				}
 
 				compoundTag.put("pages", listTag);

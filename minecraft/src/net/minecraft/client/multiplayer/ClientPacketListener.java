@@ -569,12 +569,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		int i = clientboundAddPlayerPacket.getEntityId();
 		RemotePlayer remotePlayer = new RemotePlayer(this.minecraft.level, this.getPlayerInfo(clientboundAddPlayerPacket.getPlayerId()).getProfile());
 		remotePlayer.setId(i);
-		remotePlayer.xo = d;
-		remotePlayer.xOld = d;
-		remotePlayer.yo = e;
-		remotePlayer.yOld = e;
-		remotePlayer.zo = f;
-		remotePlayer.zOld = f;
+		remotePlayer.setPosAndOldPos(d, e, f);
 		remotePlayer.setPacketCoordinates(d, e, f);
 		remotePlayer.absMoveTo(d, e, f, g, h);
 		this.level.addPlayer(i, remotePlayer);
@@ -660,55 +655,73 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	public void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerPositionPacket, this, this.minecraft);
 		Player player = this.minecraft.player;
-		double d = clientboundPlayerPositionPacket.getX();
-		double e = clientboundPlayerPositionPacket.getY();
-		double f = clientboundPlayerPositionPacket.getZ();
-		float g = clientboundPlayerPositionPacket.getYRot();
-		float h = clientboundPlayerPositionPacket.getXRot();
 		Vec3 vec3 = player.getDeltaMovement();
-		double i = vec3.x;
-		double j = vec3.y;
-		double k = vec3.z;
-		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.X)) {
-			player.xOld += d;
-			d += player.x;
+		boolean bl = clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.X);
+		boolean bl2 = clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Y);
+		boolean bl3 = clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Z);
+		double d;
+		double e;
+		if (bl) {
+			d = vec3.x();
+			e = player.x + clientboundPlayerPositionPacket.getX();
+			player.xOld = player.xOld + clientboundPlayerPositionPacket.getX();
+			player.x = e;
+			player.xo = e;
 		} else {
-			player.xOld = d;
-			i = 0.0;
+			d = 0.0;
+			e = clientboundPlayerPositionPacket.getX();
+			player.xOld = e;
+			player.x = e;
+			player.xo = e;
 		}
 
-		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Y)) {
-			player.yOld += e;
-			e += player.y;
+		double f;
+		double g;
+		if (bl2) {
+			f = vec3.y();
+			g = player.y + clientboundPlayerPositionPacket.getY();
+			player.yOld = player.yOld + clientboundPlayerPositionPacket.getY();
+			player.y = g;
+			player.yo = g;
 		} else {
-			player.yOld = e;
-			j = 0.0;
+			f = 0.0;
+			g = clientboundPlayerPositionPacket.getY();
+			player.yOld = g;
+			player.y = g;
+			player.yo = g;
 		}
 
-		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Z)) {
-			player.zOld += f;
-			f += player.z;
+		double h;
+		double i;
+		if (bl3) {
+			h = vec3.z();
+			i = player.z + clientboundPlayerPositionPacket.getZ();
+			player.zOld = player.zOld + clientboundPlayerPositionPacket.getZ();
+			player.z = i;
+			player.zo = i;
 		} else {
-			player.zOld = f;
-			k = 0.0;
+			h = 0.0;
+			i = clientboundPlayerPositionPacket.getZ();
+			player.zOld = i;
+			player.z = i;
+			player.zo = i;
 		}
 
-		player.setDeltaMovement(i, j, k);
+		player.setDeltaMovement(d, f, h);
+		float j = clientboundPlayerPositionPacket.getYRot();
+		float k = clientboundPlayerPositionPacket.getXRot();
 		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT)) {
-			h += player.xRot;
+			k += player.xRot;
 		}
 
 		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT)) {
-			g += player.yRot;
+			j += player.yRot;
 		}
 
-		player.absMoveTo(d, e, f, g, h);
+		player.absMoveTo(e, g, i, j, k);
 		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.getId()));
 		this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.x, player.getBoundingBox().minY, player.z, player.yRot, player.xRot, false));
 		if (!this.started) {
-			this.minecraft.player.xo = this.minecraft.player.x;
-			this.minecraft.player.yo = this.minecraft.player.y;
-			this.minecraft.player.zo = this.minecraft.player.z;
 			this.started = true;
 			this.minecraft.setScreen(null);
 		}
@@ -842,7 +855,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				((ItemEntity)entity).getItem().setCount(clientboundTakeItemEntityPacket.getAmount());
 			}
 
-			this.minecraft.particleEngine.add(new ItemPickupParticle(this.level, entity, livingEntity, 0.5F));
+			this.minecraft
+				.particleEngine
+				.add(new ItemPickupParticle(this.minecraft.getEntityRenderDispatcher(), this.minecraft.renderBuffers(), this.level, entity, livingEntity));
 			this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
 		}
 	}

@@ -1,6 +1,8 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -91,47 +93,42 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 		modelPart.zRot = h;
 	}
 
-	public void render(T rabbit, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(rabbit, f, g, h, i, j, k);
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
 		if (this.young) {
-			float l = 1.5F;
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.56666666F, 0.56666666F, 0.56666666F);
-			RenderSystem.translatef(0.0F, 22.0F * k, 2.0F * k);
-			this.head.render(k);
-			this.earLeft.render(k);
-			this.earRight.render(k);
-			this.nose.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.4F, 0.4F, 0.4F);
-			RenderSystem.translatef(0.0F, 36.0F * k, 0.0F);
-			this.rearFootLeft.render(k);
-			this.rearFootRight.render(k);
-			this.haunchLeft.render(k);
-			this.haunchRight.render(k);
-			this.body.render(k);
-			this.frontLegLeft.render(k);
-			this.frontLegRight.render(k);
-			this.tail.render(k);
-			RenderSystem.popMatrix();
+			float j = 1.5F;
+			poseStack.pushPose();
+			poseStack.scale(0.56666666F, 0.56666666F, 0.56666666F);
+			poseStack.translate(0.0, 1.375, 0.125);
+			ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose)
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+			poseStack.popPose();
+			poseStack.pushPose();
+			poseStack.scale(0.4F, 0.4F, 0.4F);
+			poseStack.translate(0.0, 2.25, 0.0);
+			ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail)
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+			poseStack.popPose();
 		} else {
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.6F, 0.6F, 0.6F);
-			RenderSystem.translatef(0.0F, 16.0F * k, 0.0F);
-			this.rearFootLeft.render(k);
-			this.rearFootRight.render(k);
-			this.haunchLeft.render(k);
-			this.haunchRight.render(k);
-			this.body.render(k);
-			this.frontLegLeft.render(k);
-			this.frontLegRight.render(k);
-			this.head.render(k);
-			this.earRight.render(k);
-			this.earLeft.render(k);
-			this.tail.render(k);
-			this.nose.render(k);
-			RenderSystem.popMatrix();
+			poseStack.pushPose();
+			poseStack.scale(0.6F, 0.6F, 0.6F);
+			poseStack.translate(0.0, 1.0, 0.0);
+			ImmutableList.of(
+					this.rearFootLeft,
+					this.rearFootRight,
+					this.haunchLeft,
+					this.haunchRight,
+					this.body,
+					this.frontLegLeft,
+					this.frontLegRight,
+					this.head,
+					this.earRight,
+					this.earLeft,
+					this.tail,
+					this.nose
+				)
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+			poseStack.popPose();
 		}
 	}
 

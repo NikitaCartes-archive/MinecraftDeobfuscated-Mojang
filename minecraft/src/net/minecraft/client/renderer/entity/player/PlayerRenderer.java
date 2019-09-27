@@ -1,11 +1,16 @@
 package net.minecraft.client.renderer.entity.player;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
@@ -18,6 +23,7 @@ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -53,18 +59,15 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(new BeeStingerLayer<>(this));
 	}
 
-	public void render(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g, float h) {
-		if (!abstractClientPlayer.isLocalPlayer() || this.entityRenderDispatcher.camera.getEntity() == abstractClientPlayer) {
-			double i = e;
-			if (abstractClientPlayer.isCrouching()) {
-				i = e - 0.125;
-			}
+	public void render(
+		AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource
+	) {
+		this.setModelProperties(abstractClientPlayer);
+		super.render(abstractClientPlayer, d, e, f, g, h, poseStack, multiBufferSource);
+	}
 
-			this.setModelProperties(abstractClientPlayer);
-			RenderSystem.setProfile(RenderSystem.Profile.PLAYER_SKIN);
-			super.render(abstractClientPlayer, d, i, f, g, h);
-			RenderSystem.unsetProfile(RenderSystem.Profile.PLAYER_SKIN);
-		}
+	public Vec3 getRenderOffset(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g) {
+		return abstractClientPlayer.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(abstractClientPlayer, d, e, f, g);
 	}
 
 	private void setModelProperties(AbstractClientPlayer abstractClientPlayer) {
@@ -134,69 +137,64 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		return abstractClientPlayer.getSkinTextureLocation();
 	}
 
-	protected void scale(AbstractClientPlayer abstractClientPlayer, float f) {
+	protected void scale(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, float f) {
 		float g = 0.9375F;
-		RenderSystem.scalef(0.9375F, 0.9375F, 0.9375F);
+		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
-	protected void renderNameTags(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, String string, double g) {
-		if (g < 100.0) {
+	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
+		poseStack.pushPose();
+		if (d < 100.0) {
 			Scoreboard scoreboard = abstractClientPlayer.getScoreboard();
 			Objective objective = scoreboard.getDisplayObjective(2);
 			if (objective != null) {
 				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
-				this.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), d, e, f, 64);
-				e += (double)(9.0F * 1.15F * 0.025F);
+				super.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), poseStack, multiBufferSource);
+				poseStack.translate(0.0, (double)(9.0F * 1.15F * 0.025F), 0.0);
 			}
 		}
 
-		super.renderNameTags(abstractClientPlayer, d, e, f, string, g);
+		super.renderNameTag(abstractClientPlayer, string, poseStack, multiBufferSource);
+		poseStack.popPose();
 	}
 
-	public void renderRightHand(AbstractClientPlayer abstractClientPlayer) {
-		float f = 1.0F;
-		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-		float g = 0.0625F;
+	public void renderRightHand(PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer) {
+		this.renderHand(poseStack, multiBufferSource, abstractClientPlayer, this.model.rightArm, this.model.rightSleeve);
+	}
+
+	public void renderLeftHand(PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer) {
+		this.renderHand(poseStack, multiBufferSource, abstractClientPlayer, this.model.leftArm, this.model.leftSleeve);
+	}
+
+	private void renderHand(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer, ModelPart modelPart, ModelPart modelPart2
+	) {
+		float f = 0.0625F;
 		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
 		this.setModelProperties(abstractClientPlayer);
-		RenderSystem.enableBlend();
+		int i = abstractClientPlayer.getLightColor();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getSkinTextureLocation()));
+		OverlayTexture.setDefault(vertexConsumer);
 		playerModel.attackTime = 0.0F;
 		playerModel.crouching = false;
 		playerModel.swimAmount = 0.0F;
 		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-		playerModel.rightArm.xRot = 0.0F;
-		playerModel.rightArm.render(0.0625F);
-		playerModel.rightSleeve.xRot = 0.0F;
-		playerModel.rightSleeve.render(0.0625F);
-		RenderSystem.disableBlend();
+		modelPart.xRot = 0.0F;
+		modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null);
+		modelPart2.xRot = 0.0F;
+		modelPart2.render(poseStack, vertexConsumer, 0.0625F, i, null);
+		vertexConsumer.unsetDefaultOverlayCoords();
 	}
 
-	public void renderLeftHand(AbstractClientPlayer abstractClientPlayer) {
-		float f = 1.0F;
-		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-		float g = 0.0625F;
-		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
-		this.setModelProperties(abstractClientPlayer);
-		RenderSystem.enableBlend();
-		playerModel.crouching = false;
-		playerModel.attackTime = 0.0F;
-		playerModel.swimAmount = 0.0F;
-		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-		playerModel.leftArm.xRot = 0.0F;
-		playerModel.leftArm.render(0.0625F);
-		playerModel.leftSleeve.xRot = 0.0F;
-		playerModel.leftSleeve.render(0.0625F);
-		RenderSystem.disableBlend();
-	}
-
-	protected void setupRotations(AbstractClientPlayer abstractClientPlayer, float f, float g, float h) {
+	protected void setupRotations(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, float f, float g, float h) {
 		float i = abstractClientPlayer.getSwimAmount(h);
 		if (abstractClientPlayer.isFallFlying()) {
-			super.setupRotations(abstractClientPlayer, f, g, h);
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
 			float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
 			float k = Mth.clamp(j * j / 100.0F, 0.0F, 1.0F);
 			if (!abstractClientPlayer.isAutoSpinAttack()) {
-				RenderSystem.rotatef(k * (-90.0F - abstractClientPlayer.xRot), 1.0F, 0.0F, 0.0F);
+				poseStack.mulPose(Vector3f.XP.rotation(k * (-90.0F - abstractClientPlayer.xRot), true));
 			}
 
 			Vec3 vec3 = abstractClientPlayer.getViewVector(h);
@@ -206,18 +204,18 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			if (d > 0.0 && e > 0.0) {
 				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / (Math.sqrt(d) * Math.sqrt(e));
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;
-				RenderSystem.rotatef((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float) Math.PI, 0.0F, 1.0F, 0.0F);
+				poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l)), false));
 			}
 		} else if (i > 0.0F) {
-			super.setupRotations(abstractClientPlayer, f, g, h);
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
 			float jx = abstractClientPlayer.isInWater() ? -90.0F - abstractClientPlayer.xRot : -90.0F;
 			float kx = Mth.lerp(i, 0.0F, jx);
-			RenderSystem.rotatef(kx, 1.0F, 0.0F, 0.0F);
+			poseStack.mulPose(Vector3f.XP.rotation(kx, true));
 			if (abstractClientPlayer.isVisuallySwimming()) {
-				RenderSystem.translatef(0.0F, -1.0F, 0.3F);
+				poseStack.translate(0.0, -1.0, 0.3F);
 			}
 		} else {
-			super.setupRotations(abstractClientPlayer, f, g, h);
+			super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
 		}
 	}
 }

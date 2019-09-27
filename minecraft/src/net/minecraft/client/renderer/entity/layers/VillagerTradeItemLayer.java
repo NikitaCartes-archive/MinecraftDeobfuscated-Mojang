@@ -1,52 +1,32 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.VillagerModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 
 @Environment(EnvType.CLIENT)
 public class VillagerTradeItemLayer<T extends LivingEntity> extends RenderLayer<T, VillagerModel<T>> {
-	private final ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-
 	public VillagerTradeItemLayer(RenderLayerParent<T, VillagerModel<T>> renderLayerParent) {
 		super(renderLayerParent);
 	}
 
-	public void render(T livingEntity, float f, float g, float h, float i, float j, float k, float l) {
+	public void render(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
+	) {
+		poseStack.pushPose();
+		poseStack.translate(0.0, 0.4F, -0.4F);
+		poseStack.mulPose(Vector3f.XP.rotation(180.0F, true));
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.MAINHAND);
-		if (!itemStack.isEmpty()) {
-			Item item = itemStack.getItem();
-			Block block = Block.byItem(item);
-			RenderSystem.pushMatrix();
-			boolean bl = this.itemRenderer.isGui3d(itemStack) && RenderType.getRenderLayer(block.defaultBlockState()) == RenderType.TRANSLUCENT;
-			if (bl) {
-				RenderSystem.depthMask(false);
-			}
-
-			RenderSystem.translatef(0.0F, 0.4F, -0.4F);
-			RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-			this.itemRenderer.renderWithMobState(itemStack, livingEntity, ItemTransforms.TransformType.GROUND, false);
-			if (bl) {
-				RenderSystem.depthMask(true);
-			}
-
-			RenderSystem.popMatrix();
-		}
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return false;
+		Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+		poseStack.popPose();
 	}
 }

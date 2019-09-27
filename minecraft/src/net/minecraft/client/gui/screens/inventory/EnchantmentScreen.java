@@ -1,9 +1,12 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -12,6 +15,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.BookModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -76,7 +82,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-		RenderSystem.pushMatrix();
 		RenderSystem.matrixMode(5889);
 		RenderSystem.pushMatrix();
 		RenderSystem.loadIdentity();
@@ -84,93 +89,93 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		RenderSystem.viewport((this.width - 320) / 2 * m, (this.height - 240) / 2 * m, 320 * m, 240 * m);
 		RenderSystem.translatef(-0.34F, 0.23F, 0.0F);
 		RenderSystem.multMatrix(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
-		float g = 1.0F;
 		RenderSystem.matrixMode(5888);
-		RenderSystem.loadIdentity();
-		Lighting.turnOn();
-		RenderSystem.translatef(0.0F, 3.3F, -16.0F);
-		RenderSystem.scalef(1.0F, 1.0F, 1.0F);
-		float h = 5.0F;
-		RenderSystem.scalef(5.0F, 5.0F, 5.0F);
-		RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-		this.minecraft.getTextureManager().bind(ENCHANTING_BOOK_LOCATION);
-		RenderSystem.rotatef(20.0F, 1.0F, 0.0F, 0.0F);
-		float n = Mth.lerp(f, this.oOpen, this.open);
-		RenderSystem.translatef((1.0F - n) * 0.2F, (1.0F - n) * 0.1F, (1.0F - n) * 0.25F);
-		RenderSystem.rotatef(-(1.0F - n) * 90.0F - 90.0F, 0.0F, 1.0F, 0.0F);
-		RenderSystem.rotatef(180.0F, 1.0F, 0.0F, 0.0F);
-		float o = Mth.lerp(f, this.oFlip, this.flip) + 0.25F;
-		float p = Mth.lerp(f, this.oFlip, this.flip) + 0.75F;
+		PoseStack poseStack = new PoseStack();
+		poseStack.pushPose();
+		poseStack.getPose().setIdentity();
+		poseStack.translate(0.0, 3.3F, 1984.0);
+		float g = 5.0F;
+		poseStack.scale(5.0F, 5.0F, 5.0F);
+		poseStack.mulPose(Vector3f.ZP.rotation(180.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotation(20.0F, true));
+		float h = Mth.lerp(f, this.oOpen, this.open);
+		poseStack.translate((double)((1.0F - h) * 0.2F), (double)((1.0F - h) * 0.1F), (double)((1.0F - h) * 0.25F));
+		poseStack.mulPose(Vector3f.YP.rotation(-(1.0F - h) * 90.0F - 90.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotation(180.0F, true));
+		float n = Mth.lerp(f, this.oFlip, this.flip) + 0.25F;
+		float o = Mth.lerp(f, this.oFlip, this.flip) + 0.75F;
+		n = (n - (float)Mth.fastFloor((double)n)) * 1.6F - 0.3F;
 		o = (o - (float)Mth.fastFloor((double)o)) * 1.6F - 0.3F;
-		p = (p - (float)Mth.fastFloor((double)p)) * 1.6F - 0.3F;
+		if (n < 0.0F) {
+			n = 0.0F;
+		}
+
 		if (o < 0.0F) {
 			o = 0.0F;
 		}
 
-		if (p < 0.0F) {
-			p = 0.0F;
+		if (n > 1.0F) {
+			n = 1.0F;
 		}
 
 		if (o > 1.0F) {
 			o = 1.0F;
 		}
 
-		if (p > 1.0F) {
-			p = 1.0F;
-		}
-
 		RenderSystem.enableRescaleNormal();
-		BOOK_MODEL.setupAnim(0.0F, o, p, n);
-		BOOK_MODEL.render(0.0625F);
-		RenderSystem.disableRescaleNormal();
-		Lighting.turnOff();
+		BOOK_MODEL.setupAnim(0.0F, n, o, h);
+		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+		VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.NEW_ENTITY(ENCHANTING_BOOK_LOCATION));
+		OverlayTexture.setDefault(vertexConsumer);
+		BOOK_MODEL.render(poseStack, vertexConsumer, 0.0625F, 15728880, null);
+		vertexConsumer.unsetDefaultOverlayCoords();
+		bufferSource.endBatch();
+		poseStack.popPose();
 		RenderSystem.matrixMode(5889);
 		RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 		RenderSystem.popMatrix();
 		RenderSystem.matrixMode(5888);
-		RenderSystem.popMatrix();
-		Lighting.turnOff();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
-		int q = this.menu.getGoldCount();
+		int p = this.menu.getGoldCount();
 
-		for (int r = 0; r < 3; r++) {
-			int s = k + 60;
-			int t = s + 20;
+		for (int q = 0; q < 3; q++) {
+			int r = k + 60;
+			int s = r + 20;
 			this.setBlitOffset(0);
 			this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
-			int u = this.menu.costs[r];
+			int t = this.menu.costs[q];
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			if (u == 0) {
-				this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
+			if (t == 0) {
+				this.blit(r, l + 14 + 19 * q, 0, 185, 108, 19);
 			} else {
-				String string = "" + u;
-				int v = 86 - this.font.width(string);
-				String string2 = EnchantmentNames.getInstance().getRandomName(this.font, v);
+				String string = "" + t;
+				int u = 86 - this.font.width(string);
+				String string2 = EnchantmentNames.getInstance().getRandomName(this.font, u);
 				Font font = this.minecraft.getFontManager().get(Minecraft.ALT_FONT);
-				int w = 6839882;
-				if ((q < r + 1 || this.minecraft.player.experienceLevel < u) && !this.minecraft.player.abilities.instabuild) {
-					this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
-					this.blit(s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-					font.drawWordWrap(string2, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
-					w = 4226832;
+				int v = 6839882;
+				if ((p < q + 1 || this.minecraft.player.experienceLevel < t) && !this.minecraft.player.abilities.instabuild) {
+					this.blit(r, l + 14 + 19 * q, 0, 185, 108, 19);
+					this.blit(r + 1, l + 15 + 19 * q, 16 * q, 239, 16, 16);
+					font.drawWordWrap(string2, s, l + 16 + 19 * q, u, (v & 16711422) >> 1);
+					v = 4226832;
 				} else {
-					int x = i - (k + 60);
-					int y = j - (l + 14 + 19 * r);
-					if (x >= 0 && y >= 0 && x < 108 && y < 19) {
-						this.blit(s, l + 14 + 19 * r, 0, 204, 108, 19);
-						w = 16777088;
+					int w = i - (k + 60);
+					int x = j - (l + 14 + 19 * q);
+					if (w >= 0 && x >= 0 && w < 108 && x < 19) {
+						this.blit(r, l + 14 + 19 * q, 0, 204, 108, 19);
+						v = 16777088;
 					} else {
-						this.blit(s, l + 14 + 19 * r, 0, 166, 108, 19);
+						this.blit(r, l + 14 + 19 * q, 0, 166, 108, 19);
 					}
 
-					this.blit(s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-					font.drawWordWrap(string2, t, l + 16 + 19 * r, v, w);
-					w = 8453920;
+					this.blit(r + 1, l + 15 + 19 * q, 16 * q, 223, 16, 16);
+					font.drawWordWrap(string2, s, l + 16 + 19 * q, u, v);
+					v = 8453920;
 				}
 
 				font = this.minecraft.font;
-				font.drawShadow(string, (float)(t + 86 - font.width(string)), (float)(l + 16 + 19 * r + 7), w);
+				font.drawShadow(string, (float)(s + 86 - font.width(string)), (float)(l + 16 + 19 * q + 7), v);
 			}
 		}
 	}

@@ -1,9 +1,11 @@
 package net.minecraft.client.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieVillagerModel;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.monster.ZombieVillager;
@@ -18,15 +20,15 @@ public class ZombieVillagerRenderer extends HumanoidMobRenderer<ZombieVillager, 
 		this.addLayer(new VillagerProfessionLayer<>(this, reloadableResourceManager, "zombie_villager"));
 	}
 
-	protected ResourceLocation getTextureLocation(ZombieVillager zombieVillager) {
+	public ResourceLocation getTextureLocation(ZombieVillager zombieVillager) {
 		return ZOMBIE_VILLAGER_LOCATION;
 	}
 
-	protected void setupRotations(ZombieVillager zombieVillager, float f, float g, float h) {
+	protected void setupRotations(ZombieVillager zombieVillager, PoseStack poseStack, float f, float g, float h) {
 		if (zombieVillager.isConverting()) {
 			g += (float)(Math.cos((double)zombieVillager.tickCount * 3.25) * Math.PI * 0.25);
 		}
 
-		super.setupRotations(zombieVillager, f, g, h);
+		super.setupRotations(zombieVillager, poseStack, f, g, h);
 	}
 }

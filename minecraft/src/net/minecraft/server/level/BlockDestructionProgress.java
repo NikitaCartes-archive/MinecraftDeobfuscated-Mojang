@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 
 @Environment(EnvType.CLIENT)
-public class BlockDestructionProgress {
+public class BlockDestructionProgress implements Comparable<BlockDestructionProgress> {
 	private final int id;
 	private final BlockPos pos;
 	private int progress;
@@ -38,5 +38,26 @@ public class BlockDestructionProgress {
 
 	public int getUpdatedRenderTick() {
 		return this.updatedRenderTick;
+	}
+
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		} else if (object != null && this.getClass() == object.getClass()) {
+			BlockDestructionProgress blockDestructionProgress = (BlockDestructionProgress)object;
+			return this.id == blockDestructionProgress.id;
+		} else {
+			return false;
+		}
+	}
+
+	public int hashCode() {
+		return Integer.hashCode(this.id);
+	}
+
+	public int compareTo(BlockDestructionProgress blockDestructionProgress) {
+		return this.progress != blockDestructionProgress.progress
+			? Integer.compare(this.progress, blockDestructionProgress.progress)
+			: Integer.compare(this.id, blockDestructionProgress.id);
 	}
 }

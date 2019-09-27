@@ -28,32 +28,8 @@ public class RealmsVertexFormat {
 		this.v.clear();
 	}
 
-	public int getUvOffset(int i) {
-		return this.v.getUvOffset(i);
-	}
-
-	public int getElementCount() {
-		return this.v.getElementCount();
-	}
-
-	public boolean hasColor() {
-		return this.v.hasColor();
-	}
-
-	public boolean hasUv(int i) {
-		return this.v.hasUv(i);
-	}
-
-	public RealmsVertexFormatElement getElement(int i) {
-		return new RealmsVertexFormatElement(this.v.getElement(i));
-	}
-
 	public RealmsVertexFormat addElement(RealmsVertexFormatElement realmsVertexFormatElement) {
 		return this.from(this.v.addElement(realmsVertexFormatElement.getVertexFormatElement()));
-	}
-
-	public int getColorOffset() {
-		return this.v.getColorOffset();
 	}
 
 	public List<RealmsVertexFormatElement> getElements() {
@@ -64,26 +40,6 @@ public class RealmsVertexFormat {
 		}
 
 		return list;
-	}
-
-	public boolean hasNormal() {
-		return this.v.hasNormal();
-	}
-
-	public int getVertexSize() {
-		return this.v.getVertexSize();
-	}
-
-	public int getOffset(int i) {
-		return this.v.getOffset(i);
-	}
-
-	public int getNormalOffset() {
-		return this.v.getNormalOffset();
-	}
-
-	public int getIntegerSize() {
-		return this.v.getIntegerSize();
 	}
 
 	public boolean equals(Object object) {

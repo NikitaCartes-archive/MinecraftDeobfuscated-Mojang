@@ -1,23 +1,25 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import javax.annotation.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
@@ -32,97 +34,73 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		this.itemRenderer = itemRenderer;
 	}
 
-	public void render(ItemFrame itemFrame, double d, double e, double f, float g, float h) {
-		RenderSystem.pushMatrix();
-		BlockPos blockPos = itemFrame.getPos();
-		double i = (double)blockPos.getX() - itemFrame.x + d;
-		double j = (double)blockPos.getY() - itemFrame.y + e;
-		double k = (double)blockPos.getZ() - itemFrame.z + f;
-		RenderSystem.translated(i + 0.5, j + 0.5, k + 0.5);
-		RenderSystem.rotatef(itemFrame.xRot, 1.0F, 0.0F, 0.0F);
-		RenderSystem.rotatef(180.0F - itemFrame.yRot, 0.0F, 1.0F, 0.0F);
-		this.entityRenderDispatcher.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
+	public void render(ItemFrame itemFrame, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		super.render(itemFrame, d, e, f, g, h, poseStack, multiBufferSource);
+		poseStack.pushPose();
+		Direction direction = itemFrame.getDirection();
+		Vec3 vec3 = this.getRenderOffset(itemFrame, d, e, f, h);
+		poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
+		double i = 0.46875;
+		poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
+		poseStack.mulPose(Vector3f.XP.rotation(itemFrame.xRot, true));
+		poseStack.mulPose(Vector3f.YP.rotation(180.0F - itemFrame.yRot, true));
 		BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
 		ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
 		ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
-		RenderSystem.pushMatrix();
-		RenderSystem.translatef(-0.5F, -0.5F, -0.5F);
-		if (this.solidRender) {
-			RenderSystem.enableColorMaterial();
-			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(itemFrame));
-		}
-
-		blockRenderDispatcher.getModelRenderer().renderModel(modelManager.getModel(modelResourceLocation), 1.0F, 1.0F, 1.0F, 1.0F);
-		if (this.solidRender) {
-			RenderSystem.tearDownSolidRenderingTextureCombine();
-			RenderSystem.disableColorMaterial();
-		}
-
-		RenderSystem.popMatrix();
-		RenderSystem.enableLighting();
-		if (itemFrame.getItem().getItem() == Items.FILLED_MAP) {
-			RenderSystem.pushLightingAttributes();
-			Lighting.turnOn();
-		}
-
-		RenderSystem.translatef(0.0F, 0.0F, 0.4375F);
-		this.drawItem(itemFrame);
-		if (itemFrame.getItem().getItem() == Items.FILLED_MAP) {
-			Lighting.turnOff();
-			RenderSystem.popAttributes();
-		}
-
-		RenderSystem.enableLighting();
-		RenderSystem.popMatrix();
-		this.renderName(
-			itemFrame, d + (double)((float)itemFrame.getDirection().getStepX() * 0.3F), e - 0.25, f + (double)((float)itemFrame.getDirection().getStepZ() * 0.3F)
-		);
-	}
-
-	@Nullable
-	protected ResourceLocation getTextureLocation(ItemFrame itemFrame) {
-		return null;
-	}
-
-	private void drawItem(ItemFrame itemFrame) {
+		poseStack.pushPose();
+		poseStack.translate(-0.5, -0.5, -0.5);
+		int j = itemFrame.getLightColor();
+		blockRenderDispatcher.getModelRenderer()
+			.renderModel(poseStack.getPose(), multiBufferSource.getBuffer(RenderType.SOLID), null, modelManager.getModel(modelResourceLocation), 1.0F, 1.0F, 1.0F, j);
+		poseStack.popPose();
 		ItemStack itemStack = itemFrame.getItem();
 		if (!itemStack.isEmpty()) {
-			RenderSystem.pushMatrix();
 			boolean bl = itemStack.getItem() == Items.FILLED_MAP;
-			int i = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-			RenderSystem.rotatef((float)i * 360.0F / 8.0F, 0.0F, 0.0F, 1.0F);
+			poseStack.translate(0.0, 0.0, 0.4375);
+			int k = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+			poseStack.mulPose(Vector3f.ZP.rotation((float)k * 360.0F / 8.0F, true));
 			if (bl) {
-				RenderSystem.disableLighting();
 				this.entityRenderDispatcher.textureManager.bind(MAP_BACKGROUND_LOCATION);
-				RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
-				float f = 0.0078125F;
-				RenderSystem.scalef(0.0078125F, 0.0078125F, 0.0078125F);
-				RenderSystem.translatef(-64.0F, -64.0F, 0.0F);
+				poseStack.mulPose(Vector3f.ZP.rotation(180.0F, true));
+				float l = 0.0078125F;
+				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
+				poseStack.translate(-64.0, -64.0, 0.0);
 				MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, itemFrame.level);
-				RenderSystem.translatef(0.0F, 0.0F, -1.0F);
+				poseStack.translate(0.0, 0.0, -1.0);
 				if (mapItemSavedData != null) {
-					this.minecraft.gameRenderer.getMapRenderer().render(mapItemSavedData, true);
+					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true);
 				}
 			} else {
-				RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED);
+				poseStack.scale(0.5F, 0.5F, 0.5F);
+				this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, j, poseStack, multiBufferSource);
 			}
-
-			RenderSystem.popMatrix();
 		}
+
+		poseStack.popPose();
 	}
 
-	protected void renderName(ItemFrame itemFrame, double d, double e, double f) {
+	public Vec3 getRenderOffset(ItemFrame itemFrame, double d, double e, double f, float g) {
+		return new Vec3((double)((float)itemFrame.getDirection().getStepX() * 0.3F), -0.25, (double)((float)itemFrame.getDirection().getStepZ() * 0.3F));
+	}
+
+	public ResourceLocation getTextureLocation(ItemFrame itemFrame) {
+		return TextureAtlas.LOCATION_BLOCKS;
+	}
+
+	protected boolean shouldShowName(ItemFrame itemFrame) {
 		if (Minecraft.renderNames()
 			&& !itemFrame.getItem().isEmpty()
 			&& itemFrame.getItem().hasCustomHoverName()
 			&& this.entityRenderDispatcher.crosshairPickEntity == itemFrame) {
-			double g = itemFrame.distanceToSqr(this.entityRenderDispatcher.camera.getPosition());
-			float h = itemFrame.isDiscrete() ? 32.0F : 64.0F;
-			if (!(g >= (double)(h * h))) {
-				String string = itemFrame.getItem().getHoverName().getColoredString();
-				this.renderNameTag(itemFrame, string, d, e, f, 64);
-			}
+			double d = this.entityRenderDispatcher.distanceToSqr(itemFrame);
+			float f = itemFrame.isDiscrete() ? 32.0F : 64.0F;
+			return d < (double)(f * f);
+		} else {
+			return false;
 		}
+	}
+
+	protected void renderNameTag(ItemFrame itemFrame, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName().getColoredString(), poseStack, multiBufferSource);
 	}
 }

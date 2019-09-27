@@ -60,6 +60,18 @@ public class Vec3i implements Comparable<Vec3i> {
 		return this.z;
 	}
 
+	public Vec3i below() {
+		return this.below(1);
+	}
+
+	public Vec3i below(int i) {
+		return this.relative(Direction.DOWN, i);
+	}
+
+	public Vec3i relative(Direction direction, int i) {
+		return i == 0 ? this : new Vec3i(this.getX() + direction.getStepX() * i, this.getY() + direction.getStepY() * i, this.getZ() + direction.getStepZ() * i);
+	}
+
 	public Vec3i cross(Vec3i vec3i) {
 		return new Vec3i(
 			this.getY() * vec3i.getZ() - this.getZ() * vec3i.getY(),

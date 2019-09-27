@@ -1,6 +1,6 @@
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Random;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -119,7 +119,7 @@ public abstract class Particle {
 		}
 	}
 
-	public abstract void render(BufferBuilder bufferBuilder, Camera camera, float f, float g, float h, float i, float j, float k);
+	public abstract void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k);
 
 	public abstract ParticleRenderType getRenderType();
 

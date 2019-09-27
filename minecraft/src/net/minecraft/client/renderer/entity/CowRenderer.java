@@ -14,7 +14,7 @@ public class CowRenderer extends MobRenderer<Cow, CowModel<Cow>> {
 		super(entityRenderDispatcher, new CowModel<>(), 0.7F);
 	}
 
-	protected ResourceLocation getTextureLocation(Cow cow) {
+	public ResourceLocation getTextureLocation(Cow cow) {
 		return COW_LOCATION;
 	}
 }

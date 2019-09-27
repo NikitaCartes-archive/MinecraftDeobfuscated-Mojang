@@ -24,14 +24,6 @@ public class BufferUploader {
 		}
 	}
 
-	public static void end(ByteBuffer byteBuffer, int i, VertexFormat vertexFormat, int j) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> _end(byteBuffer, i, vertexFormat, j));
-		} else {
-			_end(byteBuffer, i, vertexFormat, j);
-		}
-	}
-
 	private static void _end(ByteBuffer byteBuffer, int i, VertexFormat vertexFormat, int j) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
 		byteBuffer.clear();

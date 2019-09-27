@@ -3,27 +3,21 @@ package net.minecraft.world.level.block.state.properties;
 import net.minecraft.util.StringRepresentable;
 
 public enum RailShape implements StringRepresentable {
-	NORTH_SOUTH(0, "north_south"),
-	EAST_WEST(1, "east_west"),
-	ASCENDING_EAST(2, "ascending_east"),
-	ASCENDING_WEST(3, "ascending_west"),
-	ASCENDING_NORTH(4, "ascending_north"),
-	ASCENDING_SOUTH(5, "ascending_south"),
-	SOUTH_EAST(6, "south_east"),
-	SOUTH_WEST(7, "south_west"),
-	NORTH_WEST(8, "north_west"),
-	NORTH_EAST(9, "north_east");
+	NORTH_SOUTH("north_south"),
+	EAST_WEST("east_west"),
+	ASCENDING_EAST("ascending_east"),
+	ASCENDING_WEST("ascending_west"),
+	ASCENDING_NORTH("ascending_north"),
+	ASCENDING_SOUTH("ascending_south"),
+	SOUTH_EAST("south_east"),
+	SOUTH_WEST("south_west"),
+	NORTH_WEST("north_west"),
+	NORTH_EAST("north_east");
 
-	private final int data;
 	private final String name;
 
-	private RailShape(int j, String string2) {
-		this.data = j;
+	private RailShape(String string2) {
 		this.name = string2;
-	}
-
-	public int getData() {
-		return this.data;
 	}
 
 	public String toString() {

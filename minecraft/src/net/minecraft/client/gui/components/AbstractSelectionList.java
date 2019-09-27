@@ -160,7 +160,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.renderBackground();
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
-		RenderSystem.disableLighting();
 		RenderSystem.disableFog();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -169,19 +168,19 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		float g = 32.0F;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
 		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
-			.uv((double)((float)this.x0 / 32.0F), (double)((float)(this.y1 + (int)this.getScrollAmount()) / 32.0F))
+			.uv((float)this.x0 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
 			.color(32, 32, 32, 255)
 			.endVertex();
 		bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0)
-			.uv((double)((float)this.x1 / 32.0F), (double)((float)(this.y1 + (int)this.getScrollAmount()) / 32.0F))
+			.uv((float)this.x1 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
 			.color(32, 32, 32, 255)
 			.endVertex();
 		bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0)
-			.uv((double)((float)this.x1 / 32.0F), (double)((float)(this.y0 + (int)this.getScrollAmount()) / 32.0F))
+			.uv((float)this.x1 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
 			.color(32, 32, 32, 255)
 			.endVertex();
 		bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0)
-			.uv((double)((float)this.x0 / 32.0F), (double)((float)(this.y0 + (int)this.getScrollAmount()) / 32.0F))
+			.uv((float)this.x0 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
 			.color(32, 32, 32, 255)
 			.endVertex();
 		tesselator.end();
@@ -204,16 +203,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		RenderSystem.disableTexture();
 		int o = 4;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0, 1.0).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0, 1.0).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+		bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+		bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
 		tesselator.end();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).uv(1.0, 0.0).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).uv(0.0, 0.0).color(0, 0, 0, 0).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+		bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
 		tesselator.end();
 		int p = this.getMaxScroll();
 		if (p > 0) {
@@ -225,22 +224,22 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			}
 
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
 			tesselator.end();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)k, (double)(r + q), 0.0).uv(0.0, 1.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)(r + q), 0.0).uv(1.0, 1.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)r, 0.0).uv(1.0, 0.0).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)r, 0.0).uv(0.0, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(r + q), 0.0).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)(r + q), 0.0).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)r, 0.0).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)r, 0.0).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
 			tesselator.end();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferBuilder.vertex((double)k, (double)(r + q - 1), 0.0).uv(0.0, 1.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)(r + q - 1), 0.0).uv(1.0, 1.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)r, 0.0).uv(1.0, 0.0).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)r, 0.0).uv(0.0, 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(r + q - 1), 0.0).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)(r + q - 1), 0.0).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)r, 0.0).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)r, 0.0).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
 			tesselator.end();
 		}
 
@@ -451,16 +450,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = 32.0F;
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)j, 0.0).uv(0.0, (double)((float)j / 32.0F)).color(64, 64, 64, l).endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), (double)j, 0.0)
-			.uv((double)((float)this.width / 32.0F), (double)((float)j / 32.0F))
-			.color(64, 64, 64, l)
-			.endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), (double)i, 0.0)
-			.uv((double)((float)this.width / 32.0F), (double)((float)i / 32.0F))
-			.color(64, 64, 64, k)
-			.endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)i, 0.0).uv(0.0, (double)((float)i / 32.0F)).color(64, 64, 64, k).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)j, 0.0).uv(0.0F, (float)j / 32.0F).color(64, 64, 64, l).endVertex();
+		bufferBuilder.vertex((double)(this.x0 + this.width), (double)j, 0.0).uv((float)this.width / 32.0F, (float)j / 32.0F).color(64, 64, 64, l).endVertex();
+		bufferBuilder.vertex((double)(this.x0 + this.width), (double)i, 0.0).uv((float)this.width / 32.0F, (float)i / 32.0F).color(64, 64, 64, k).endVertex();
+		bufferBuilder.vertex((double)this.x0, (double)i, 0.0).uv(0.0F, (float)i / 32.0F).color(64, 64, 64, k).endVertex();
 		tesselator.end();
 	}
 

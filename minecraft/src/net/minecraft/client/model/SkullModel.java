@@ -1,5 +1,7 @@
 package net.minecraft.client.model;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -20,9 +22,9 @@ public class SkullModel extends Model {
 		this.head.setPos(0.0F, 0.0F, 0.0F);
 	}
 
-	public void render(float f, float g, float h, float i, float j, float k) {
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.render(k);
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j) {
+		this.head.yRot = g * (float) (Math.PI / 180.0);
+		this.head.xRot = h * (float) (Math.PI / 180.0);
+		this.head.render(poseStack, vertexConsumer, i, j, null);
 	}
 }

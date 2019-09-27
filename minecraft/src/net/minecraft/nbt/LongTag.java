@@ -7,13 +7,35 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class LongTag extends NumericTag {
-	private long data;
+	public static final TagType<LongTag> TYPE = new TagType<LongTag>() {
+		public LongTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(128L);
+			return LongTag.valueOf(dataInput.readLong());
+		}
 
-	LongTag() {
+		@Override
+		public String getName() {
+			return "LONG";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Long";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	private final long data;
+
+	private LongTag(long l) {
+		this.data = l;
 	}
 
-	public LongTag(long l) {
-		this.data = l;
+	public static LongTag valueOf(long l) {
+		return l >= -128L && l <= 1024L ? LongTag.Cache.cache[(int)l + 128] : new LongTag(l);
 	}
 
 	@Override
@@ -22,14 +44,13 @@ public class LongTag extends NumericTag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(128L);
-		this.data = dataInput.readLong();
+	public byte getId() {
+		return 4;
 	}
 
 	@Override
-	public byte getId() {
-		return 4;
+	public TagType<LongTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -38,7 +59,7 @@ public class LongTag extends NumericTag {
 	}
 
 	public LongTag copy() {
-		return new LongTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {
@@ -88,5 +109,15 @@ public class LongTag extends NumericTag {
 	@Override
 	public Number getAsNumber() {
 		return this.data;
+	}
+
+	static class Cache {
+		static final LongTag[] cache = new LongTag[1153];
+
+		static {
+			for (int i = 0; i < cache.length; i++) {
+				cache[i] = new LongTag((long)(-128 + i));
+			}
+		}
 	}
 }

@@ -13,7 +13,7 @@ public class SpectralArrowRenderer extends ArrowRenderer<SpectralArrow> {
 		super(entityRenderDispatcher);
 	}
 
-	protected ResourceLocation getTextureLocation(SpectralArrow spectralArrow) {
+	public ResourceLocation getTextureLocation(SpectralArrow spectralArrow) {
 		return SPECTRAL_ARROW_LOCATION;
 	}
 }

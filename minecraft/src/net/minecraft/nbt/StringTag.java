@@ -8,15 +8,39 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
 public class StringTag implements Tag {
-	private String data;
+	public static final TagType<StringTag> TYPE = new TagType<StringTag>() {
+		public StringTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(288L);
+			String string = dataInput.readUTF();
+			nbtAccounter.accountBits((long)(16 * string.length()));
+			return StringTag.valueOf(string);
+		}
 
-	public StringTag() {
-		this("");
-	}
+		@Override
+		public String getName() {
+			return "STRING";
+		}
 
-	public StringTag(String string) {
+		@Override
+		public String getPrettyName() {
+			return "TAG_String";
+		}
+
+		@Override
+		public boolean isValue() {
+			return true;
+		}
+	};
+	private static final StringTag EMPTY = new StringTag("");
+	private final String data;
+
+	private StringTag(String string) {
 		Objects.requireNonNull(string, "Null string not allowed");
 		this.data = string;
+	}
+
+	public static StringTag valueOf(String string) {
+		return string.isEmpty() ? EMPTY : new StringTag(string);
 	}
 
 	@Override
@@ -25,15 +49,13 @@ public class StringTag implements Tag {
 	}
 
 	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(288L);
-		this.data = dataInput.readUTF();
-		nbtAccounter.accountBits((long)(16 * this.data.length()));
+	public byte getId() {
+		return 8;
 	}
 
 	@Override
-	public byte getId() {
-		return 8;
+	public TagType<StringTag> getType() {
+		return TYPE;
 	}
 
 	@Override
@@ -42,7 +64,7 @@ public class StringTag implements Tag {
 	}
 
 	public StringTag copy() {
-		return new StringTag(this.data);
+		return this;
 	}
 
 	public boolean equals(Object object) {

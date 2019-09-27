@@ -7,17 +7,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
-import net.minecraft.world.entity.animal.horse.ZombieHorse;
 
 @Environment(EnvType.CLIENT)
 public class UndeadHorseRenderer extends AbstractHorseRenderer<AbstractHorse, HorseModel<AbstractHorse>> {
-	private static final Map<Class<?>, ResourceLocation> MAP = Maps.<Class<?>, ResourceLocation>newHashMap(
+	private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.<EntityType<?>, ResourceLocation>newHashMap(
 		ImmutableMap.of(
-			ZombieHorse.class,
+			EntityType.ZOMBIE_HORSE,
 			new ResourceLocation("textures/entity/horse/horse_zombie.png"),
-			SkeletonHorse.class,
+			EntityType.SKELETON_HORSE,
 			new ResourceLocation("textures/entity/horse/horse_skeleton.png")
 		)
 	);
@@ -26,7 +25,7 @@ public class UndeadHorseRenderer extends AbstractHorseRenderer<AbstractHorse, Ho
 		super(entityRenderDispatcher, new HorseModel<>(0.0F), 1.0F);
 	}
 
-	protected ResourceLocation getTextureLocation(AbstractHorse abstractHorse) {
-		return (ResourceLocation)MAP.get(abstractHorse.getClass());
+	public ResourceLocation getTextureLocation(AbstractHorse abstractHorse) {
+		return (ResourceLocation)MAP.get(abstractHorse.getType());
 	}
 }

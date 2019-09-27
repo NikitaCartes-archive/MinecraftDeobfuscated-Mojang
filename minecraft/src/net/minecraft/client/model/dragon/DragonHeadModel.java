@@ -1,6 +1,7 @@
 package net.minecraft.client.model.dragon;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SkullModel;
@@ -31,12 +32,14 @@ public class DragonHeadModel extends SkullModel {
 	}
 
 	@Override
-	public void render(float f, float g, float h, float i, float j, float k) {
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j) {
 		this.jaw.xRot = (float)(Math.sin((double)(f * (float) Math.PI * 0.2F)) + 1.0) * 0.2F;
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		RenderSystem.translatef(0.0F, -0.374375F, 0.0F);
-		RenderSystem.scalef(0.75F, 0.75F, 0.75F);
-		this.head.render(k);
+		this.head.yRot = g * (float) (Math.PI / 180.0);
+		this.head.xRot = h * (float) (Math.PI / 180.0);
+		poseStack.pushPose();
+		poseStack.translate(0.0, -0.374375F, 0.0);
+		poseStack.scale(0.75F, 0.75F, 0.75F);
+		this.head.render(poseStack, vertexConsumer, i, j, null);
+		poseStack.popPose();
 	}
 }

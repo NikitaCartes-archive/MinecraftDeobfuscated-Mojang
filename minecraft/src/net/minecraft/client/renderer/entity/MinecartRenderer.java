@@ -1,12 +1,16 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.MinecartModel;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -24,15 +28,15 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		this.shadowRadius = 0.7F;
 	}
 
-	public void render(T abstractMinecart, double d, double e, double f, float g, float h) {
-		RenderSystem.pushMatrix();
-		this.bindTexture(abstractMinecart);
+	public void render(T abstractMinecart, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		super.render(abstractMinecart, d, e, f, g, h, poseStack, multiBufferSource);
+		poseStack.pushPose();
 		long l = (long)abstractMinecart.getId() * 493286711L;
 		l = l * l * 4392167121L + l * 98761L;
 		float i = (((float)(l >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float j = (((float)(l >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
 		float k = (((float)(l >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
-		RenderSystem.translatef(i, j, k);
+		poseStack.translate((double)i, (double)j, (double)k);
 		double m = Mth.lerp((double)h, abstractMinecart.xOld, abstractMinecart.x);
 		double n = Mth.lerp((double)h, abstractMinecart.yOld, abstractMinecart.y);
 		double o = Mth.lerp((double)h, abstractMinecart.zOld, abstractMinecart.z);
@@ -50,9 +54,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 				vec33 = vec3;
 			}
 
-			d += vec3.x - m;
-			e += (vec32.y + vec33.y) / 2.0 - n;
-			f += vec3.z - o;
+			poseStack.translate(vec3.x - m, (vec32.y + vec33.y) / 2.0 - n, vec3.z - o);
 			Vec3 vec34 = vec33.add(-vec32.x, -vec32.y, -vec32.z);
 			if (vec34.length() != 0.0) {
 				vec34 = vec34.normalize();
@@ -61,9 +63,9 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 			}
 		}
 
-		RenderSystem.translatef((float)d, (float)e + 0.375F, (float)f);
-		RenderSystem.rotatef(180.0F - g, 0.0F, 1.0F, 0.0F);
-		RenderSystem.rotatef(-q, 0.0F, 0.0F, 1.0F);
+		poseStack.translate(0.0, 0.375, 0.0);
+		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
+		poseStack.mulPose(Vector3f.ZP.rotation(-q, true));
 		float r = (float)abstractMinecart.getHurtTime() - h;
 		float s = abstractMinecart.getDamage() - h;
 		if (s < 0.0F) {
@@ -71,46 +73,35 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		}
 
 		if (r > 0.0F) {
-			RenderSystem.rotatef(Mth.sin(r) * r * s / 10.0F * (float)abstractMinecart.getHurtDir(), 1.0F, 0.0F, 0.0F);
+			poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(r) * r * s / 10.0F * (float)abstractMinecart.getHurtDir(), true));
 		}
 
 		int t = abstractMinecart.getDisplayOffset();
-		if (this.solidRender) {
-			RenderSystem.enableColorMaterial();
-			RenderSystem.setupSolidRenderingTextureCombine(this.getTeamColor(abstractMinecart));
-		}
-
+		int u = abstractMinecart.getLightColor();
 		BlockState blockState = abstractMinecart.getDisplayBlockState();
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
-			RenderSystem.pushMatrix();
-			this.bindTexture(TextureAtlas.LOCATION_BLOCKS);
-			float u = 0.75F;
-			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
-			RenderSystem.translatef(-0.5F, (float)(t - 8) / 16.0F, 0.5F);
-			this.renderMinecartContents(abstractMinecart, h, blockState);
-			RenderSystem.popMatrix();
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			this.bindTexture(abstractMinecart);
+			poseStack.pushPose();
+			float v = 0.75F;
+			poseStack.scale(0.75F, 0.75F, 0.75F);
+			poseStack.translate(-0.5, (double)((float)(t - 8) / 16.0F), 0.5);
+			this.renderMinecartContents(abstractMinecart, h, blockState, poseStack, multiBufferSource, u);
+			poseStack.popPose();
 		}
 
-		RenderSystem.scalef(-1.0F, -1.0F, 1.0F);
-		this.model.render(abstractMinecart, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-		RenderSystem.popMatrix();
-		if (this.solidRender) {
-			RenderSystem.tearDownSolidRenderingTextureCombine();
-			RenderSystem.disableColorMaterial();
-		}
-
-		super.render(abstractMinecart, d, e, f, g, h);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		this.model.setupAnim(abstractMinecart, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(abstractMinecart)));
+		OverlayTexture.setDefault(vertexConsumer);
+		this.model.renderToBuffer(poseStack, vertexConsumer, u);
+		vertexConsumer.unsetDefaultOverlayCoords();
+		poseStack.popPose();
 	}
 
-	protected ResourceLocation getTextureLocation(T abstractMinecart) {
+	public ResourceLocation getTextureLocation(T abstractMinecart) {
 		return MINECART_LOCATION;
 	}
 
-	protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState) {
-		RenderSystem.pushMatrix();
-		Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, abstractMinecart.getBrightness());
-		RenderSystem.popMatrix();
+	protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
 	}
 }

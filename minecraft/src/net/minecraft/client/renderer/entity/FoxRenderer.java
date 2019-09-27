@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import javax.annotation.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.FoxModel;
@@ -22,15 +22,14 @@ public class FoxRenderer extends MobRenderer<Fox, FoxModel<Fox>> {
 		this.addLayer(new FoxHeldItemLayer(this));
 	}
 
-	protected void setupRotations(Fox fox, float f, float g, float h) {
-		super.setupRotations(fox, f, g, h);
+	protected void setupRotations(Fox fox, PoseStack poseStack, float f, float g, float h) {
+		super.setupRotations(fox, poseStack, f, g, h);
 		if (fox.isPouncing() || fox.isFaceplanted()) {
-			RenderSystem.rotatef(-Mth.lerp(h, fox.xRotO, fox.xRot), 1.0F, 0.0F, 0.0F);
+			poseStack.mulPose(Vector3f.XP.rotation(-Mth.lerp(h, fox.xRotO, fox.xRot), true));
 		}
 	}
 
-	@Nullable
-	protected ResourceLocation getTextureLocation(Fox fox) {
+	public ResourceLocation getTextureLocation(Fox fox) {
 		if (fox.getFoxType() == Fox.Type.RED) {
 			return fox.isSleeping() ? RED_FOX_SLEEP_TEXTURE : RED_FOX_TEXTURE;
 		} else {

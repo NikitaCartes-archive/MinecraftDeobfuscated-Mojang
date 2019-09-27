@@ -85,6 +85,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.VirtualScreen;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -95,7 +96,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TickableTextureObject;
 import net.minecraft.client.resources.ClientPackSource;
 import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
@@ -211,6 +211,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final Window window;
 	private final Timer timer = new Timer(20.0F, 0L);
 	private final Snooper snooper = new Snooper("client", this, Util.getMillis());
+	private final RenderBuffers renderBuffers;
 	public final LevelRenderer levelRenderer;
 	private final EntityRenderDispatcher entityRenderDispatcher;
 	private final ItemRenderer itemRenderer;
@@ -296,6 +297,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private CrashReport delayedCrash;
 	private static int fps;
 	public String fpsString = "";
+	public boolean chunkPath;
+	public boolean chunkVisibility;
 	public boolean smartCull = true;
 	private boolean windowActive;
 	private final Queue<Runnable> progressTasks = Queues.<Runnable>newConcurrentLinkedQueue();
@@ -424,7 +427,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.window.setErrorSection("Post startup");
 			this.textureAtlas = new TextureAtlas("textures");
 			this.textureAtlas.setMaxMipLevel(this.options.mipmapLevels);
-			this.textureManager.register(TextureAtlas.LOCATION_BLOCKS, (TickableTextureObject)this.textureAtlas);
+			this.textureManager.register(TextureAtlas.LOCATION_BLOCKS, this.textureAtlas);
 			this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
 			this.textureAtlas.setFilter(false, this.options.mipmapLevels > 0);
 			this.blockColors = BlockColors.createDefault();
@@ -432,14 +435,15 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.modelManager = new ModelManager(this.textureAtlas, this.blockColors);
 			this.resourceManager.registerReloadListener(this.modelManager);
 			this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
-			this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager);
+			this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
 			this.itemInHandRenderer = new ItemInHandRenderer(this);
 			this.resourceManager.registerReloadListener(this.itemRenderer);
-			this.gameRenderer = new GameRenderer(this, this.resourceManager);
+			this.renderBuffers = new RenderBuffers();
+			this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
 			this.resourceManager.registerReloadListener(this.gameRenderer);
 			this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
 			this.resourceManager.registerReloadListener(this.blockRenderer);
-			this.levelRenderer = new LevelRenderer(this);
+			this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
 			this.resourceManager.registerReloadListener(this.levelRenderer);
 			this.createSearchTrees();
 			this.resourceManager.registerReloadListener(this.searchRegistry);
@@ -816,8 +820,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		this.mouseHandler.turnPlayer();
 		this.window.setErrorSection("Render");
-		RenderSystem.pollEvents();
-		long n = Util.getNanos() - m;
 		this.profiler.popPush("sound");
 		this.soundManager.updateSource(this.gameRenderer.getMainCamera());
 		this.profiler.pop();
@@ -850,7 +852,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
 		RenderSystem.popMatrix();
 		this.profiler.startTick();
-		this.updateDisplay(true);
+		this.window.updateDisplay();
+		int i = this.getFramerateLimit();
+		if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
+			RenderSystem.limitDisplayFPS(i);
+		}
+
 		Thread.yield();
 		this.window.setErrorSection("Post render");
 		this.frames++;
@@ -867,9 +874,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.pause = bl2;
 		}
 
-		long o = Util.getNanos();
-		this.frameTimer.logFrameDuration(o - this.lastNanoTime);
-		this.lastNanoTime = o;
+		long n = Util.getNanos();
+		this.frameTimer.logFrameDuration(n - this.lastNanoTime);
+		this.lastNanoTime = n;
 
 		while (Util.getMillis() >= this.lastTime + 1000L) {
 			fps = this.frames;
@@ -893,19 +900,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	@Override
-	public void updateDisplay(boolean bl) {
-		RenderSystem.flipFrame();
-		this.profiler.push("display_update");
-		this.window.updateDisplay(this.options.fullscreen);
-		this.profiler.pop();
-		if (bl && this.isFramerateLimited()) {
-			this.profiler.push("fpslimit_wait");
-			this.window.limitDisplayFPS();
-			this.profiler.pop();
-		}
-	}
-
-	@Override
 	public void resizeDisplay() {
 		int i = this.window.calculateScale(this.options.guiScale, this.isEnforceUnicode());
 		this.window.setGuiScale((double)i);
@@ -921,10 +915,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private int getFramerateLimit() {
 		return this.level != null || this.screen == null && this.overlay == null ? this.window.getFramerateLimit() : 60;
-	}
-
-	private boolean isFramerateLimited() {
-		return (double)this.getFramerateLimit() < Option.FRAMERATE_LIMIT.getMaxValue();
 	}
 
 	public void emergencySave() {
@@ -979,7 +969,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			ResultField resultField = (ResultField)list.remove(0);
 			RenderSystem.clear(256, ON_OSX);
 			RenderSystem.matrixMode(5889);
-			RenderSystem.enableColorMaterial();
 			RenderSystem.loadIdentity();
 			RenderSystem.ortho(0.0, (double)this.window.getWidth(), (double)this.window.getHeight(), 0.0, 1000.0, 3000.0);
 			RenderSystem.matrixMode(5888);
@@ -1251,8 +1240,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		if (this.overlay == null && (this.screen == null || this.screen.passEvents)) {
-			this.profiler.popPush("GLFW events");
-			RenderSystem.pollEvents();
+			this.profiler.popPush("Keybindings");
 			this.handleKeybinds();
 			if (this.missTime > 0) {
 				this.missTime--;
@@ -1278,7 +1266,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 				this.level.tickEntities();
 			}
-		} else if (this.gameRenderer.postEffectActive()) {
+		} else if (this.gameRenderer.currentEffect() != null) {
 			this.gameRenderer.shutdownEffect();
 		}
 
@@ -1711,7 +1699,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			itemStack.addTagElement("BlockEntityTag", compoundTag);
 			CompoundTag compoundTag2 = new CompoundTag();
 			ListTag listTag = new ListTag();
-			listTag.add(new StringTag("\"(+NBT)\""));
+			listTag.add(StringTag.valueOf("\"(+NBT)\""));
 			compoundTag2.put("Lore", listTag);
 			itemStack.addTagElement("display", compoundTag2);
 			return itemStack;
@@ -2075,5 +2063,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public Window getWindow() {
 		return this.window;
+	}
+
+	public RenderBuffers renderBuffers() {
+		return this.renderBuffers;
 	}
 }

@@ -35,7 +35,6 @@ import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TickableTextureObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -76,7 +75,7 @@ public class ParticleEngine implements PreparableReloadListener {
 	private final TextureAtlas textureAtlas = new TextureAtlas("textures/particle");
 
 	public ParticleEngine(Level level, TextureManager textureManager) {
-		textureManager.register(TextureAtlas.LOCATION_PARTICLES, (TickableTextureObject)this.textureAtlas);
+		textureManager.register(TextureAtlas.LOCATION_PARTICLES, this.textureAtlas);
 		this.level = level;
 		this.textureManager = textureManager;
 		this.registerProviders();

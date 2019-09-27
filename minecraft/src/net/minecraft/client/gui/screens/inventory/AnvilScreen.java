@@ -70,7 +70,6 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 
 	@Override
 	protected void renderLabels(int i, int j) {
-		RenderSystem.disableLighting();
 		RenderSystem.disableBlend();
 		this.font.draw(this.title.getColoredString(), 60.0F, 6.0F, 4210752);
 		int k = this.menu.getCost();
@@ -94,8 +93,6 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 				this.font.drawShadow(string, (float)m, 69.0F, l);
 			}
 		}
-
-		RenderSystem.enableLighting();
 	}
 
 	private void onNameChanged(String string) {
@@ -116,7 +113,6 @@ public class AnvilScreen extends AbstractContainerScreen<AnvilMenu> implements C
 		this.renderBackground();
 		super.render(i, j, f);
 		this.renderTooltip(i, j);
-		RenderSystem.disableLighting();
 		RenderSystem.disableBlend();
 		this.name.render(i, j, f);
 	}

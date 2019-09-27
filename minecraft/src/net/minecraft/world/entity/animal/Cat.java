@@ -100,7 +100,7 @@ public class Cat extends TamableAnimal {
 	}
 
 	public ResourceLocation getResourceLocation() {
-		return (ResourceLocation)TEXTURE_BY_TYPE.get(this.getCatType());
+		return (ResourceLocation)TEXTURE_BY_TYPE.getOrDefault(this.getCatType(), TEXTURE_BY_TYPE.get(0));
 	}
 
 	@Override

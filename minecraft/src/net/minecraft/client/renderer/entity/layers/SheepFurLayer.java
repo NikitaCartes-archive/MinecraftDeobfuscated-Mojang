@@ -1,10 +1,11 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SheepFurModel;
 import net.minecraft.client.model.SheepModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Sheep;
@@ -19,32 +20,31 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 		super(renderLayerParent);
 	}
 
-	public void render(Sheep sheep, float f, float g, float h, float i, float j, float k, float l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Sheep sheep, float f, float g, float h, float j, float k, float l, float m) {
 		if (!sheep.isSheared() && !sheep.isInvisible()) {
-			this.bindTexture(SHEEP_FUR_LOCATION);
+			float t;
+			float u;
+			float v;
 			if (sheep.hasCustomName() && "jeb_".equals(sheep.getName().getContents())) {
-				int m = 25;
-				int n = sheep.tickCount / 25 + sheep.getId();
-				int o = DyeColor.values().length;
-				int p = n % o;
-				int q = (n + 1) % o;
-				float r = ((float)(sheep.tickCount % 25) + h) / 25.0F;
-				float[] fs = Sheep.getColorArray(DyeColor.byId(p));
-				float[] gs = Sheep.getColorArray(DyeColor.byId(q));
-				RenderSystem.color3f(fs[0] * (1.0F - r) + gs[0] * r, fs[1] * (1.0F - r) + gs[1] * r, fs[2] * (1.0F - r) + gs[2] * r);
+				int n = 25;
+				int o = sheep.tickCount / 25 + sheep.getId();
+				int p = DyeColor.values().length;
+				int q = o % p;
+				int r = (o + 1) % p;
+				float s = ((float)(sheep.tickCount % 25) + h) / 25.0F;
+				float[] fs = Sheep.getColorArray(DyeColor.byId(q));
+				float[] gs = Sheep.getColorArray(DyeColor.byId(r));
+				t = fs[0] * (1.0F - s) + gs[0] * s;
+				u = fs[1] * (1.0F - s) + gs[1] * s;
+				v = fs[2] * (1.0F - s) + gs[2] * s;
 			} else {
 				float[] hs = Sheep.getColorArray(sheep.getColor());
-				RenderSystem.color3f(hs[0], hs[1], hs[2]);
+				t = hs[0];
+				u = hs[1];
+				v = hs[2];
 			}
 
-			this.getParentModel().copyPropertiesTo(this.model);
-			this.model.prepareMobModel(sheep, f, g, h);
-			this.model.render(sheep, f, g, i, j, k, l);
+			coloredModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, m, h, t, u, v);
 		}
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return true;
 	}
 }

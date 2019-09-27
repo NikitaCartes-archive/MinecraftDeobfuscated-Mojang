@@ -7,7 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.TextureObject;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
@@ -20,6 +19,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
@@ -154,7 +154,7 @@ public class PostChain implements AutoCloseable {
 							}
 
 							textureManager.bind(resourceLocation);
-							TextureObject textureObject = textureManager.getTexture(resourceLocation);
+							AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
 							int j = GsonHelper.getAsInt(jsonObject2, "width");
 							int k = GsonHelper.getAsInt(jsonObject2, "height");
 							boolean bl = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
@@ -166,7 +166,7 @@ public class PostChain implements AutoCloseable {
 								RenderSystem.texParameter(3553, 10240, 9728);
 							}
 
-							postPass.addAuxAsset(string4, textureObject.getId(), j, k);
+							postPass.addAuxAsset(string4, abstractTexture.getId(), j, k);
 						} else {
 							postPass.addAuxAsset(string4, renderTarget3, renderTarget3.width, renderTarget3.height);
 						}

@@ -20,7 +20,7 @@ public class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel<T>> exte
 		this.addLayer(new ItemInHandLayer<>(this));
 	}
 
-	protected ResourceLocation getTextureLocation(T mob) {
+	public ResourceLocation getTextureLocation(T mob) {
 		return DEFAULT_LOCATION;
 	}
 }

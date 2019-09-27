@@ -57,33 +57,26 @@ public class ViewArea {
 	}
 
 	public void repositionCamera(double d, double e) {
-		int i = Mth.floor(d) - 8;
-		int j = Mth.floor(e) - 8;
-		int k = this.chunkGridSizeX * 16;
+		int i = Mth.floor(d);
+		int j = Mth.floor(e);
 
-		for (int l = 0; l < this.chunkGridSizeX; l++) {
-			int m = this.getCoordinate(i, k, l);
+		for (int k = 0; k < this.chunkGridSizeX; k++) {
+			int l = this.chunkGridSizeX * 16;
+			int m = i - 8 - l / 2;
+			int n = m + Math.floorMod(k * 16 - m, l);
 
-			for (int n = 0; n < this.chunkGridSizeZ; n++) {
-				int o = this.getCoordinate(j, k, n);
+			for (int o = 0; o < this.chunkGridSizeZ; o++) {
+				int p = this.chunkGridSizeZ * 16;
+				int q = j - 8 - p / 2;
+				int r = q + Math.floorMod(o * 16 - q, p);
 
-				for (int p = 0; p < this.chunkGridSizeY; p++) {
-					int q = p * 16;
-					ChunkRenderDispatcher.RenderChunk renderChunk = this.chunks[this.getChunkIndex(l, p, n)];
-					renderChunk.setOrigin(m, q, o);
+				for (int s = 0; s < this.chunkGridSizeY; s++) {
+					int t = s * 16;
+					ChunkRenderDispatcher.RenderChunk renderChunk = this.chunks[this.getChunkIndex(k, s, o)];
+					renderChunk.setOrigin(n, t, r);
 				}
 			}
 		}
-	}
-
-	private int getCoordinate(int i, int j, int k) {
-		int l = k * 16;
-		int m = l - i + j / 2;
-		if (m < 0) {
-			m -= j - 1;
-		}
-
-		return l - m / j * j;
 	}
 
 	public void setDirty(int i, int j, int k, boolean bl) {

@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class OcelotModel<T extends Entity> extends EntityModel<T> {
+public class OcelotModel<T extends Entity> extends AgeableListModel<T> {
 	protected final ModelPart backLegL;
 	protected final ModelPart backLegR;
 	protected final ModelPart frontLegL;
@@ -20,6 +20,7 @@ public class OcelotModel<T extends Entity> extends EntityModel<T> {
 	protected int state = 1;
 
 	public OcelotModel(float f) {
+		super(true, 10.0F, 4.0F);
 		this.head = new ModelPart(this);
 		this.head.addBox("main", -2.5F, -2.0F, -3.0F, 5, 4, 5, f, 0, 0);
 		this.head.addBox("nose", -1.5F, 0.0F, -4.0F, 3, 2, 2, f, 0, 24);
@@ -51,36 +52,13 @@ public class OcelotModel<T extends Entity> extends EntityModel<T> {
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.75F, 0.75F, 0.75F);
-			RenderSystem.translatef(0.0F, 10.0F * k, 4.0F * k);
-			this.head.render(k);
-			RenderSystem.popMatrix();
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 24.0F * k, 0.0F);
-			this.body.render(k);
-			this.backLegL.render(k);
-			this.backLegR.render(k);
-			this.frontLegL.render(k);
-			this.frontLegR.render(k);
-			this.tail1.render(k);
-			this.tail2.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.head.render(k);
-			this.body.render(k);
-			this.tail1.render(k);
-			this.tail2.render(k);
-			this.backLegL.render(k);
-			this.backLegR.render(k);
-			this.frontLegL.render(k);
-			this.frontLegR.render(k);
-		}
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of(this.head);
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.body, this.backLegL, this.backLegR, this.frontLegL, this.frontLegR, this.tail1, this.tail2);
 	}
 
 	@Override

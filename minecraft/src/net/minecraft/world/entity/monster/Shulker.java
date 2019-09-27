@@ -267,15 +267,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 				}
 			}
 
-			this.x = (double)blockPos.getX() + 0.5;
-			this.y = (double)blockPos.getY();
-			this.z = (double)blockPos.getZ() + 0.5;
-			this.xo = this.x;
-			this.yo = this.y;
-			this.zo = this.z;
-			this.xOld = this.x;
-			this.yOld = this.y;
-			this.zOld = this.z;
+			this.setPosAndOldPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 			double d = 0.5 - (double)Mth.sin((0.5F + this.currentPeekAmount) * (float) Math.PI) * 0.5;
 			double e = 0.5 - (double)Mth.sin((0.5F + this.currentPeekAmountO) * (float) Math.PI) * 0.5;
 			Direction direction3 = this.getAttachFace().getOpposite();
@@ -376,15 +368,7 @@ public class Shulker extends AbstractGolem implements Enemy {
 					this.clientSideTeleportInterpolation = 6;
 				}
 
-				this.x = (double)blockPos.getX() + 0.5;
-				this.y = (double)blockPos.getY();
-				this.z = (double)blockPos.getZ() + 0.5;
-				this.xo = this.x;
-				this.yo = this.y;
-				this.zo = this.z;
-				this.xOld = this.x;
-				this.yOld = this.y;
-				this.zOld = this.z;
+				this.setPosAndOldPos((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 			}
 		}
 

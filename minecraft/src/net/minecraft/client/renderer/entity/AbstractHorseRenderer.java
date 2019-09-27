@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
@@ -15,8 +15,8 @@ public abstract class AbstractHorseRenderer<T extends AbstractHorse, M extends H
 		this.scale = f;
 	}
 
-	protected void scale(T abstractHorse, float f) {
-		RenderSystem.scalef(this.scale, this.scale, this.scale);
-		super.scale(abstractHorse, f);
+	protected void scale(T abstractHorse, PoseStack poseStack, float f) {
+		poseStack.scale(this.scale, this.scale, this.scale);
+		super.scale(abstractHorse, poseStack, f);
 	}
 }

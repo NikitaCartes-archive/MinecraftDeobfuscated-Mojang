@@ -6,6 +6,8 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.lang.reflect.Type;
 import net.fabricmc.api.EnvType;
@@ -23,6 +25,23 @@ public class ItemTransform {
 		this.rotation = new Vector3f(vector3f);
 		this.translation = new Vector3f(vector3f2);
 		this.scale = new Vector3f(vector3f3);
+	}
+
+	public void apply(boolean bl, PoseStack poseStack) {
+		if (this != NO_TRANSFORM) {
+			float f = this.rotation.x();
+			float g = this.rotation.y();
+			float h = this.rotation.z();
+			if (bl) {
+				g = -g;
+				h = -h;
+			}
+
+			int i = bl ? -1 : 1;
+			poseStack.translate((double)((float)i * this.translation.x()), (double)this.translation.y(), (double)this.translation.z());
+			poseStack.mulPose(new Quaternion(f, g, h, true));
+			poseStack.scale(this.scale.x(), this.scale.y(), this.scale.z());
+		}
 	}
 
 	public boolean equals(Object object) {

@@ -28,7 +28,47 @@ import org.apache.logging.log4j.Logger;
 public class CompoundTag implements Tag {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
-	private final Map<String, Tag> tags = Maps.<String, Tag>newHashMap();
+	public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>() {
+		public CompoundTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
+			nbtAccounter.accountBits(384L);
+			if (i > 512) {
+				throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
+			} else {
+				Map<String, Tag> map = Maps.<String, Tag>newHashMap();
+
+				byte b;
+				while ((b = CompoundTag.readNamedTagType(dataInput, nbtAccounter)) != 0) {
+					String string = CompoundTag.readNamedTagName(dataInput, nbtAccounter);
+					nbtAccounter.accountBits((long)(224 + 16 * string.length()));
+					Tag tag = CompoundTag.readNamedTagData(TagTypes.getType(b), string, dataInput, i + 1, nbtAccounter);
+					if (map.put(string, tag) != null) {
+						nbtAccounter.accountBits(288L);
+					}
+				}
+
+				return new CompoundTag(map);
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "COMPOUND";
+		}
+
+		@Override
+		public String getPrettyName() {
+			return "TAG_Compound";
+		}
+	};
+	private final Map<String, Tag> tags;
+
+	private CompoundTag(Map<String, Tag> map) {
+		this.tags = map;
+	}
+
+	public CompoundTag() {
+		this(Maps.<String, Tag>newHashMap());
+	}
 
 	@Override
 	public void write(DataOutput dataOutput) throws IOException {
@@ -40,26 +80,6 @@ public class CompoundTag implements Tag {
 		dataOutput.writeByte(0);
 	}
 
-	@Override
-	public void load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		nbtAccounter.accountBits(384L);
-		if (i > 512) {
-			throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
-		} else {
-			this.tags.clear();
-
-			byte b;
-			while ((b = readNamedTagType(dataInput, nbtAccounter)) != 0) {
-				String string = readNamedTagName(dataInput, nbtAccounter);
-				nbtAccounter.accountBits((long)(224 + 16 * string.length()));
-				Tag tag = readNamedTagData(b, string, dataInput, i + 1, nbtAccounter);
-				if (this.tags.put(string, tag) != null) {
-					nbtAccounter.accountBits(288L);
-				}
-			}
-		}
-	}
-
 	public Set<String> getAllKeys() {
 		return this.tags.keySet();
 	}
@@ -67,6 +87,11 @@ public class CompoundTag implements Tag {
 	@Override
 	public byte getId() {
 		return 10;
+	}
+
+	@Override
+	public TagType<CompoundTag> getType() {
+		return TYPE;
 	}
 
 	public int size() {
@@ -79,19 +104,19 @@ public class CompoundTag implements Tag {
 	}
 
 	public void putByte(String string, byte b) {
-		this.tags.put(string, new ByteTag(b));
+		this.tags.put(string, ByteTag.valueOf(b));
 	}
 
 	public void putShort(String string, short s) {
-		this.tags.put(string, new ShortTag(s));
+		this.tags.put(string, ShortTag.valueOf(s));
 	}
 
 	public void putInt(String string, int i) {
-		this.tags.put(string, new IntTag(i));
+		this.tags.put(string, IntTag.valueOf(i));
 	}
 
 	public void putLong(String string, long l) {
-		this.tags.put(string, new LongTag(l));
+		this.tags.put(string, LongTag.valueOf(l));
 	}
 
 	public void putUUID(String string, UUID uUID) {
@@ -113,15 +138,15 @@ public class CompoundTag implements Tag {
 	}
 
 	public void putFloat(String string, float f) {
-		this.tags.put(string, new FloatTag(f));
+		this.tags.put(string, FloatTag.valueOf(f));
 	}
 
 	public void putDouble(String string, double d) {
-		this.tags.put(string, new DoubleTag(d));
+		this.tags.put(string, DoubleTag.valueOf(d));
 	}
 
 	public void putString(String string, String string2) {
-		this.tags.put(string, new StringTag(string2));
+		this.tags.put(string, StringTag.valueOf(string2));
 	}
 
 	public void putByteArray(String string, byte[] bs) {
@@ -145,7 +170,7 @@ public class CompoundTag implements Tag {
 	}
 
 	public void putBoolean(String string, boolean bl) {
-		this.putByte(string, (byte)(bl ? 1 : 0));
+		this.tags.put(string, ByteTag.valueOf(bl));
 	}
 
 	@Nullable
@@ -254,7 +279,7 @@ public class CompoundTag implements Tag {
 				return ((ByteArrayTag)this.tags.get(string)).getAsByteArray();
 			}
 		} catch (ClassCastException var3) {
-			throw new ReportedException(this.createReport(string, 7, var3));
+			throw new ReportedException(this.createReport(string, ByteArrayTag.TYPE, var3));
 		}
 
 		return new byte[0];
@@ -266,7 +291,7 @@ public class CompoundTag implements Tag {
 				return ((IntArrayTag)this.tags.get(string)).getAsIntArray();
 			}
 		} catch (ClassCastException var3) {
-			throw new ReportedException(this.createReport(string, 11, var3));
+			throw new ReportedException(this.createReport(string, IntArrayTag.TYPE, var3));
 		}
 
 		return new int[0];
@@ -278,7 +303,7 @@ public class CompoundTag implements Tag {
 				return ((LongArrayTag)this.tags.get(string)).getAsLongArray();
 			}
 		} catch (ClassCastException var3) {
-			throw new ReportedException(this.createReport(string, 12, var3));
+			throw new ReportedException(this.createReport(string, LongArrayTag.TYPE, var3));
 		}
 
 		return new long[0];
@@ -290,7 +315,7 @@ public class CompoundTag implements Tag {
 				return (CompoundTag)this.tags.get(string);
 			}
 		} catch (ClassCastException var3) {
-			throw new ReportedException(this.createReport(string, 10, var3));
+			throw new ReportedException(this.createReport(string, TYPE, var3));
 		}
 
 		return new CompoundTag();
@@ -307,7 +332,7 @@ public class CompoundTag implements Tag {
 				return listTag;
 			}
 		} catch (ClassCastException var4) {
-			throw new ReportedException(this.createReport(string, 9, var4));
+			throw new ReportedException(this.createReport(string, ListTag.TYPE, var4));
 		}
 
 		return new ListTag();
@@ -346,23 +371,18 @@ public class CompoundTag implements Tag {
 		return this.tags.isEmpty();
 	}
 
-	private CrashReport createReport(String string, int i, ClassCastException classCastException) {
+	private CrashReport createReport(String string, TagType<?> tagType, ClassCastException classCastException) {
 		CrashReport crashReport = CrashReport.forThrowable(classCastException, "Reading NBT data");
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Corrupt NBT tag", 1);
-		crashReportCategory.setDetail("Tag type found", (CrashReportDetail<String>)(() -> TAG_NAMES[((Tag)this.tags.get(string)).getId()]));
-		crashReportCategory.setDetail("Tag type expected", (CrashReportDetail<String>)(() -> TAG_NAMES[i]));
+		crashReportCategory.setDetail("Tag type found", (CrashReportDetail<String>)(() -> ((Tag)this.tags.get(string)).getType().getName()));
+		crashReportCategory.setDetail("Tag type expected", tagType::getName);
 		crashReportCategory.setDetail("Tag name", string);
 		return crashReport;
 	}
 
 	public CompoundTag copy() {
-		CompoundTag compoundTag = new CompoundTag();
-
-		for (String string : this.tags.keySet()) {
-			compoundTag.put(string, ((Tag)this.tags.get(string)).copy());
-		}
-
-		return compoundTag;
+		Map<String, Tag> map = Maps.<String, Tag>newHashMap(Maps.transformValues(this.tags, Tag::copy));
+		return new CompoundTag(map);
 	}
 
 	public boolean equals(Object object) {
@@ -389,17 +409,14 @@ public class CompoundTag implements Tag {
 		return dataInput.readUTF();
 	}
 
-	static Tag readNamedTagData(byte b, String string, DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
-		Tag tag = Tag.newTag(b);
-
+	private static Tag readNamedTagData(TagType<?> tagType, String string, DataInput dataInput, int i, NbtAccounter nbtAccounter) {
 		try {
-			tag.load(dataInput, i, nbtAccounter);
-			return tag;
-		} catch (IOException var9) {
-			CrashReport crashReport = CrashReport.forThrowable(var9, "Loading NBT data");
+			return tagType.load(dataInput, i, nbtAccounter);
+		} catch (IOException var8) {
+			CrashReport crashReport = CrashReport.forThrowable(var8, "Loading NBT data");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
 			crashReportCategory.setDetail("Tag name", string);
-			crashReportCategory.setDetail("Tag type", b);
+			crashReportCategory.setDetail("Tag type", tagType.getName());
 			throw new ReportedException(crashReport);
 		}
 	}

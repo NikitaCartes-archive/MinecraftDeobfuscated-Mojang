@@ -480,7 +480,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 		}
 
 		compoundTag.putByte("shake", (byte)this.shakeTime);
-		compoundTag.putByte("inGround", (byte)(this.inGround ? 1 : 0));
+		compoundTag.putBoolean("inGround", this.inGround);
 		compoundTag.putByte("pickup", (byte)this.pickup.ordinal());
 		compoundTag.putDouble("damage", this.baseDamage);
 		compoundTag.putBoolean("crit", this.isCritArrow());
@@ -501,7 +501,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 		}
 
 		this.shakeTime = compoundTag.getByte("shake") & 255;
-		this.inGround = compoundTag.getByte("inGround") == 1;
+		this.inGround = compoundTag.getBoolean("inGround");
 		if (compoundTag.contains("damage", 99)) {
 			this.baseDamage = compoundTag.getDouble("damage");
 		}

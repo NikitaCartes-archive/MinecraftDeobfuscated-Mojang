@@ -2,6 +2,7 @@ package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Matrix4f;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
@@ -48,8 +49,12 @@ public class VertexBuffer {
 		unbind();
 	}
 
-	public void draw(int i) {
+	public void draw(Matrix4f matrix4f, int i) {
+		RenderSystem.pushMatrix();
+		RenderSystem.loadIdentity();
+		RenderSystem.multMatrix(matrix4f);
 		RenderSystem.drawArrays(i, 0, this.vertexCount);
+		RenderSystem.popMatrix();
 	}
 
 	public static void unbind() {

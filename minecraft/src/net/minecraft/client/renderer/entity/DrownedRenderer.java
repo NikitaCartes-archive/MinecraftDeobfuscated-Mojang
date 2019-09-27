@@ -1,7 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import javax.annotation.Nullable;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.DrownedModel;
@@ -20,17 +20,16 @@ public class DrownedRenderer extends AbstractZombieRenderer<Drowned, DrownedMode
 		this.addLayer(new DrownedOuterLayer<>(this));
 	}
 
-	@Nullable
 	@Override
-	protected ResourceLocation getTextureLocation(Zombie zombie) {
+	public ResourceLocation getTextureLocation(Zombie zombie) {
 		return DROWNED_LOCATION;
 	}
 
-	protected void setupRotations(Drowned drowned, float f, float g, float h) {
+	protected void setupRotations(Drowned drowned, PoseStack poseStack, float f, float g, float h) {
+		super.setupRotations(drowned, poseStack, f, g, h);
 		float i = drowned.getSwimAmount(h);
-		super.setupRotations(drowned, f, g, h);
 		if (i > 0.0F) {
-			RenderSystem.rotatef(Mth.lerp(i, drowned.xRot, -10.0F - drowned.xRot), 1.0F, 0.0F, 0.0F);
+			poseStack.mulPose(Vector3f.XP.rotation(Mth.lerp(i, drowned.xRot, -10.0F - drowned.xRot), true));
 		}
 	}
 }

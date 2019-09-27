@@ -1818,19 +1818,6 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean isInvisibleTo(Player player) {
-		if (!this.isInvisible()) {
-			return false;
-		} else if (player.isSpectator()) {
-			return false;
-		} else {
-			Team team = this.getTeam();
-			return team == null || player == null || player.getTeam() != team || !team.canSeeFriendlyInvisibles();
-		}
-	}
-
 	@Override
 	public abstract boolean isSpectator();
 

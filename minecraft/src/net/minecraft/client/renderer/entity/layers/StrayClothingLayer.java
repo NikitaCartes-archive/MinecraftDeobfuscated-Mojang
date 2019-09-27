@@ -1,10 +1,11 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SkeletonModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
@@ -19,16 +20,9 @@ public class StrayClothingLayer<T extends Mob & RangedAttackMob, M extends Entit
 		super(renderLayerParent);
 	}
 
-	public void render(T mob, float f, float g, float h, float i, float j, float k, float l) {
-		this.getParentModel().copyPropertiesTo(this.layerModel);
-		this.layerModel.prepareMobModel(mob, f, g, h);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.bindTexture(STRAY_CLOTHES_LOCATION);
-		this.layerModel.render(mob, f, g, i, j, k, l);
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return true;
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l, float m) {
+		RenderLayer.coloredModelCopyLayerRender(
+			this.getParentModel(), this.layerModel, STRAY_CLOTHES_LOCATION, poseStack, multiBufferSource, i, mob, f, g, j, k, l, m, h
+		);
 	}
 }

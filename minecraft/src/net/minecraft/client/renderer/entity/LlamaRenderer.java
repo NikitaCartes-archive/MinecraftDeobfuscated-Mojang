@@ -21,7 +21,7 @@ public class LlamaRenderer extends MobRenderer<Llama, LlamaModel<Llama>> {
 		this.addLayer(new LlamaDecorLayer(this));
 	}
 
-	protected ResourceLocation getTextureLocation(Llama llama) {
+	public ResourceLocation getTextureLocation(Llama llama) {
 		return LLAMA_LOCATIONS[llama.getVariant()];
 	}
 }

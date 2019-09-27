@@ -1,16 +1,15 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.entity.HeadedModel;
-import net.minecraft.client.renderer.entity.VillagerHeadModel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 
 @Environment(EnvType.CLIENT)
-public class VillagerModel<T extends Entity> extends EntityModel<T> implements HeadedModel, VillagerHeadModel {
+public class VillagerModel<T extends Entity> extends ListModel<T> implements HeadedModel, VillagerHeadModel {
 	protected ModelPart head;
 	protected ModelPart hat;
 	protected final ModelPart hatRim;
@@ -65,13 +64,8 @@ public class VillagerModel<T extends Entity> extends EntityModel<T> implements H
 	}
 
 	@Override
-	public void render(T entity, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(entity, f, g, h, i, j, k);
-		this.head.render(k);
-		this.body.render(k);
-		this.leg0.render(k);
-		this.leg1.render(k);
-		this.arms.render(k);
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.head, this.body, this.leg0, this.leg1, this.arms);
 	}
 
 	@Override

@@ -1,14 +1,14 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.global.LightningBolt;
 
@@ -18,25 +18,22 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 		super(entityRenderDispatcher);
 	}
 
-	public void render(LightningBolt lightningBolt, double d, double e, double f, float g, float h) {
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.disableTexture();
-		RenderSystem.disableLighting();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-		double[] ds = new double[8];
-		double[] es = new double[8];
-		double i = 0.0;
-		double j = 0.0;
+	public void render(LightningBolt lightningBolt, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+		float[] fs = new float[8];
+		float[] gs = new float[8];
+		float i = 0.0F;
+		float j = 0.0F;
 		Random random = new Random(lightningBolt.seed);
 
 		for (int k = 7; k >= 0; k--) {
-			ds[k] = i;
-			es[k] = j;
-			i += (double)(random.nextInt(11) - 5);
-			j += (double)(random.nextInt(11) - 5);
+			fs[k] = i;
+			gs[k] = j;
+			i += (float)(random.nextInt(11) - 5);
+			j += (float)(random.nextInt(11) - 5);
 		}
+
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LIGHTNING);
+		Matrix4f matrix4f = poseStack.getPose();
 
 		for (int l = 0; l < 4; l++) {
 			Random random2 = new Random(lightningBolt.seed);
@@ -52,72 +49,68 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 					o = n - 2;
 				}
 
-				double p = ds[n] - i;
-				double q = es[n] - j;
+				float p = fs[n] - i;
+				float q = gs[n] - j;
 
 				for (int r = n; r >= o; r--) {
-					double s = p;
-					double t = q;
+					float s = p;
+					float t = q;
 					if (m == 0) {
-						p += (double)(random2.nextInt(11) - 5);
-						q += (double)(random2.nextInt(11) - 5);
+						p += (float)(random2.nextInt(11) - 5);
+						q += (float)(random2.nextInt(11) - 5);
 					} else {
-						p += (double)(random2.nextInt(31) - 15);
-						q += (double)(random2.nextInt(31) - 15);
+						p += (float)(random2.nextInt(31) - 15);
+						q += (float)(random2.nextInt(31) - 15);
 					}
 
-					bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
 					float u = 0.5F;
 					float v = 0.45F;
 					float w = 0.45F;
 					float x = 0.5F;
-					double y = 0.1 + (double)l * 0.2;
+					float y = 0.1F + (float)l * 0.2F;
 					if (m == 0) {
-						y *= (double)r * 0.1 + 1.0;
+						y = (float)((double)y * ((double)r * 0.1 + 1.0));
 					}
 
-					double z = 0.1 + (double)l * 0.2;
+					float z = 0.1F + (float)l * 0.2F;
 					if (m == 0) {
-						z *= (double)(r - 1) * 0.1 + 1.0;
+						z *= (float)(r - 1) * 0.1F + 1.0F;
 					}
 
-					for (int aa = 0; aa < 5; aa++) {
-						double ab = d - y;
-						double ac = f - y;
-						if (aa == 1 || aa == 2) {
-							ab += y * 2.0;
-						}
-
-						if (aa == 2 || aa == 3) {
-							ac += y * 2.0;
-						}
-
-						double ad = d - z;
-						double ae = f - z;
-						if (aa == 1 || aa == 2) {
-							ad += z * 2.0;
-						}
-
-						if (aa == 2 || aa == 3) {
-							ae += z * 2.0;
-						}
-
-						bufferBuilder.vertex(ad + p, e + (double)(r * 16), ae + q).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
-						bufferBuilder.vertex(ab + s, e + (double)((r + 1) * 16), ac + t).color(0.45F, 0.45F, 0.5F, 0.3F).endVertex();
-					}
-
-					tesselator.end();
+					quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45F, 0.45F, 0.5F, y, z, false, false, true, false);
+					quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45F, 0.45F, 0.5F, y, z, true, false, true, true);
+					quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45F, 0.45F, 0.5F, y, z, true, true, false, true);
+					quad(matrix4f, vertexConsumer, p, q, r, s, t, 0.45F, 0.45F, 0.5F, y, z, false, true, false, false);
 				}
 			}
 		}
-
-		RenderSystem.disableBlend();
-		RenderSystem.enableLighting();
-		RenderSystem.enableTexture();
 	}
 
-	@Nullable
-	protected ResourceLocation getTextureLocation(LightningBolt lightningBolt) {
-		return null;
+	private static void quad(
+		Matrix4f matrix4f,
+		VertexConsumer vertexConsumer,
+		float f,
+		float g,
+		int i,
+		float h,
+		float j,
+		float k,
+		float l,
+		float m,
+		float n,
+		float o,
+		boolean bl,
+		boolean bl2,
+		boolean bl3,
+		boolean bl4
+	) {
+		vertexConsumer.vertex(matrix4f, f + (bl ? o : -o), (float)(i * 16), g + (bl2 ? o : -o)).color(k, l, m, 0.3F).endVertex();
+		vertexConsumer.vertex(matrix4f, h + (bl ? n : -n), (float)((i + 1) * 16), j + (bl2 ? n : -n)).color(k, l, m, 0.3F).endVertex();
+		vertexConsumer.vertex(matrix4f, h + (bl3 ? n : -n), (float)((i + 1) * 16), j + (bl4 ? n : -n)).color(k, l, m, 0.3F).endVertex();
+		vertexConsumer.vertex(matrix4f, f + (bl3 ? o : -o), (float)(i * 16), g + (bl4 ? o : -o)).color(k, l, m, 0.3F).endVertex();
+	}
+
+	public ResourceLocation getTextureLocation(LightningBolt lightningBolt) {
+		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

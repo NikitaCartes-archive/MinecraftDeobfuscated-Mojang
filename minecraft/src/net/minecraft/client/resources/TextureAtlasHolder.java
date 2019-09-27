@@ -5,7 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TickableTextureObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -17,7 +16,7 @@ public abstract class TextureAtlasHolder extends SimplePreparableReloadListener<
 
 	public TextureAtlasHolder(TextureManager textureManager, ResourceLocation resourceLocation, String string) {
 		this.textureAtlas = new TextureAtlas(string);
-		textureManager.register(resourceLocation, (TickableTextureObject)this.textureAtlas);
+		textureManager.register(resourceLocation, this.textureAtlas);
 	}
 
 	protected abstract Iterable<ResourceLocation> getResourcesToLoad();

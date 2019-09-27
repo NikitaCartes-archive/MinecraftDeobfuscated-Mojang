@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ambient.Bat;
 
 @Environment(EnvType.CLIENT)
-public class BatModel extends EntityModel<Bat> {
+public class BatModel extends ListModel<Bat> {
 	private final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart rightWing;
@@ -48,10 +49,9 @@ public class BatModel extends EntityModel<Bat> {
 		this.leftWing.addChild(this.leftWingTip);
 	}
 
-	public void render(Bat bat, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(bat, f, g, h, i, j, k);
-		this.head.render(k);
-		this.body.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.head, this.body);
 	}
 
 	public void setupAnim(Bat bat, float f, float g, float h, float i, float j, float k) {

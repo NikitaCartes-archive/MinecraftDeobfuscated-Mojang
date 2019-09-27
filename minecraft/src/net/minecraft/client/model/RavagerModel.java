@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Ravager;
 
 @Environment(EnvType.CLIENT)
-public class RavagerModel extends EntityModel<Ravager> {
+public class RavagerModel extends ListModel<Ravager> {
 	private final ModelPart head;
 	private final ModelPart mouth;
 	private final ModelPart body;
@@ -65,14 +66,9 @@ public class RavagerModel extends EntityModel<Ravager> {
 		this.leg3.setPos(8.0F, -13.0F, -5.0F);
 	}
 
-	public void render(Ravager ravager, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(ravager, f, g, h, i, j, k);
-		this.neck.render(k);
-		this.body.render(k);
-		this.leg0.render(k);
-		this.leg1.render(k);
-		this.leg2.render(k);
-		this.leg3.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.neck, this.body, this.leg0, this.leg1, this.leg2, this.leg3);
 	}
 
 	public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j, float k) {

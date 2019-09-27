@@ -81,14 +81,14 @@ public class ServerRecipeBook extends RecipeBook {
 		ListTag listTag = new ListTag();
 
 		for (ResourceLocation resourceLocation : this.known) {
-			listTag.add(new StringTag(resourceLocation.toString()));
+			listTag.add(StringTag.valueOf(resourceLocation.toString()));
 		}
 
 		compoundTag.put("recipes", listTag);
 		ListTag listTag2 = new ListTag();
 
 		for (ResourceLocation resourceLocation2 : this.highlight) {
-			listTag2.add(new StringTag(resourceLocation2.toString()));
+			listTag2.add(StringTag.valueOf(resourceLocation2.toString()));
 		}
 
 		compoundTag.put("toBeDisplayed", listTag2);

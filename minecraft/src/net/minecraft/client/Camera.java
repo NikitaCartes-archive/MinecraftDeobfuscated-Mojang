@@ -1,6 +1,5 @@
 package net.minecraft.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -57,9 +56,6 @@ public class Camera {
 			this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
 			this.move(0.0, 0.3, 0.0);
 		}
-
-		RenderSystem.rotatef(this.xRot, 1.0F, 0.0F, 0.0F);
-		RenderSystem.rotatef(this.yRot + 180.0F, 0.0F, 1.0F, 0.0F);
 	}
 
 	public void tick() {

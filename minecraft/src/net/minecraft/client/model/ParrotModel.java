@@ -1,5 +1,8 @@
 package net.minecraft.client.model;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Parrot;
 
 @Environment(EnvType.CLIENT)
-public class ParrotModel extends EntityModel<Parrot> {
+public class ParrotModel extends ListModel<Parrot> {
 	private final ModelPart body;
 	private final ModelPart tail;
 	private final ModelPart wingLeft;
@@ -62,8 +65,9 @@ public class ParrotModel extends EntityModel<Parrot> {
 		this.legRight.setPos(-1.0F, 22.0F, -1.05F);
 	}
 
-	public void render(Parrot parrot, float f, float g, float h, float i, float j, float k) {
-		this.render(k);
+	@Override
+	public Iterable<ModelPart> parts() {
+		return ImmutableList.<ModelPart>of(this.body, this.wingLeft, this.wingRight, this.tail, this.head, this.legLeft, this.legRight);
 	}
 
 	public void setupAnim(Parrot parrot, float f, float g, float h, float i, float j, float k) {
@@ -74,20 +78,10 @@ public class ParrotModel extends EntityModel<Parrot> {
 		this.prepare(getState(parrot));
 	}
 
-	public void renderOnShoulder(float f, float g, float h, float i, float j, int k) {
+	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h, float j, float k, int l) {
 		this.prepare(ParrotModel.State.ON_SHOULDER);
-		this.setupAnim(ParrotModel.State.ON_SHOULDER, k, f, g, 0.0F, h, i);
-		this.render(j);
-	}
-
-	private void render(float f) {
-		this.body.render(f);
-		this.wingLeft.render(f);
-		this.wingRight.render(f);
-		this.tail.render(f);
-		this.head.render(f);
-		this.legLeft.render(f);
-		this.legRight.render(f);
+		this.setupAnim(ParrotModel.State.ON_SHOULDER, l, f, g, 0.0F, h, j);
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, k, i, null));
 	}
 
 	private void setupAnim(ParrotModel.State state, int i, float f, float g, float h, float j, float k) {

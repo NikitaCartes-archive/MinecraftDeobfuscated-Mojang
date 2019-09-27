@@ -171,11 +171,8 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int xChunk;
 	public int yChunk;
 	public int zChunk;
-	@Environment(EnvType.CLIENT)
 	public long xp;
-	@Environment(EnvType.CLIENT)
 	public long yp;
-	@Environment(EnvType.CLIENT)
 	public long zp;
 	public boolean noCulling;
 	public boolean hasImpulse;
@@ -218,6 +215,12 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.eyeHeight = this.getEyeHeight(Pose.STANDING, this.dimensions);
 	}
 
+	@Environment(EnvType.CLIENT)
+	public int getTeamColor() {
+		Team team = this.getTeam();
+		return team != null && team.getColor().getColor() != null ? team.getColor().getColor() : 16777215;
+	}
+
 	public boolean isSpectator() {
 		return false;
 	}
@@ -232,7 +235,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public void setPacketCoordinates(double d, double e, double f) {
 		this.xp = ClientboundMoveEntityPacket.entityToPacket(d);
 		this.yp = ClientboundMoveEntityPacket.entityToPacket(e);
@@ -358,9 +360,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 
 		this.walkDistO = this.walkDist;
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
 		this.xRotO = this.xRot;
 		this.yRotO = this.yRot;
 		this.handleNetherPortal();
@@ -1080,22 +1079,11 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.xo = this.x;
 		this.yo = this.y;
 		this.zo = this.z;
-		h = Mth.clamp(h, -90.0F, 90.0F);
-		this.yRot = g;
-		this.xRot = h;
+		this.setPos(this.x, this.y, this.z);
+		this.yRot = g % 360.0F;
+		this.xRot = Mth.clamp(h, -90.0F, 90.0F) % 360.0F;
 		this.yRotO = this.yRot;
 		this.xRotO = this.xRot;
-		double i = (double)(this.yRotO - g);
-		if (i < -180.0) {
-			this.yRotO += 360.0F;
-		}
-
-		if (i >= 180.0) {
-			this.yRotO -= 360.0F;
-		}
-
-		this.setPos(this.x, this.y, this.z);
-		this.setRot(g, h);
 	}
 
 	public void moveTo(BlockPos blockPos, float f, float g) {
@@ -1103,6 +1091,13 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public void moveTo(double d, double e, double f, float g, float h) {
+		this.setPosAndOldPos(d, e, f);
+		this.yRot = g;
+		this.xRot = h;
+		this.setPos(this.x, this.y, this.z);
+	}
+
+	public void setPosAndOldPos(double d, double e, double f) {
 		this.x = d;
 		this.y = e;
 		this.z = f;
@@ -1112,9 +1107,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.xOld = this.x;
 		this.yOld = this.y;
 		this.zOld = this.z;
-		this.yRot = g;
-		this.xRot = h;
-		this.setPos(this.x, this.y, this.z);
 	}
 
 	public float distanceTo(Entity entity) {
@@ -1332,7 +1324,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				ListTag listTag = new ListTag();
 
 				for (String string : this.tags) {
-					listTag.add(new StringTag(string));
+					listTag.add(StringTag.valueOf(string));
 				}
 
 				compoundTag.put("Tags", listTag);
@@ -1372,15 +1364,7 @@ public abstract class Entity implements Nameable, CommandSource {
 			double e = listTag2.getDouble(1);
 			double f = listTag2.getDouble(2);
 			this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
-			this.x = listTag.getDouble(0);
-			this.y = listTag.getDouble(1);
-			this.z = listTag.getDouble(2);
-			this.xOld = this.x;
-			this.yOld = this.y;
-			this.zOld = this.z;
-			this.xo = this.x;
-			this.yo = this.y;
-			this.zo = this.z;
+			this.setPosAndOldPos(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
 			this.yRot = listTag3.getFloat(0);
 			this.xRot = listTag3.getFloat(1);
 			this.yRotO = this.yRot;
@@ -1459,7 +1443,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		ListTag listTag = new ListTag();
 
 		for (double d : ds) {
-			listTag.add(new DoubleTag(d));
+			listTag.add(DoubleTag.valueOf(d));
 		}
 
 		return listTag;
@@ -1469,7 +1453,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		ListTag listTag = new ListTag();
 
 		for (float f : fs) {
-			listTag.add(new FloatTag(f));
+			listTag.add(FloatTag.valueOf(f));
 		}
 
 		return listTag;
@@ -2160,7 +2144,7 @@ public abstract class Entity implements Nameable, CommandSource {
 
 	@Environment(EnvType.CLIENT)
 	public boolean displayFireAnimation() {
-		return this.isOnFire();
+		return this.isOnFire() && !this.isSpectator();
 	}
 
 	public void setUUID(UUID uUID) {

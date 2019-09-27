@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IllagerModel;
@@ -14,13 +14,8 @@ public abstract class IllagerRenderer<T extends AbstractIllager> extends MobRend
 		this.addLayer(new CustomHeadLayer<>(this));
 	}
 
-	public IllagerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new IllagerModel<>(0.0F, 0.0F, 64, 64), 0.5F);
-		this.addLayer(new CustomHeadLayer<>(this));
-	}
-
-	protected void scale(T abstractIllager, float f) {
+	protected void scale(T abstractIllager, PoseStack poseStack, float f) {
 		float g = 0.9375F;
-		RenderSystem.scalef(0.9375F, 0.9375F, 0.9375F);
+		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 }

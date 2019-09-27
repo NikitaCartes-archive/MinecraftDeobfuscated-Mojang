@@ -10,7 +10,7 @@ public class SheepModel<T extends Sheep> extends QuadrupedModel<T> {
 	private float headXRot;
 
 	public SheepModel() {
-		super(12, 0.0F);
+		super(12, 0.0F, false, 8.0F, 4.0F, 2.0F, 2.0F, 24);
 		this.head = new ModelPart(this, 0, 0);
 		this.head.addBox(-3.0F, -4.0F, -6.0F, 6.0F, 6.0F, 8.0F, 0.0F);
 		this.head.setPos(0.0F, 6.0F, -8.0F);

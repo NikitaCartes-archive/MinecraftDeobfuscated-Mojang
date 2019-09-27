@@ -1,7 +1,8 @@
 package net.minecraft.client.renderer;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
@@ -13,15 +14,17 @@ import net.minecraft.client.renderer.banner.BannerTextures;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.world.item.BannerItem;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.level.block.AbstractBannerBlock;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -50,90 +53,78 @@ public class EntityBlockRenderer {
 	private final EnderChestBlockEntity enderChest = new EnderChestBlockEntity();
 	private final BannerBlockEntity banner = new BannerBlockEntity();
 	private final BedBlockEntity bed = new BedBlockEntity();
-	private final SkullBlockEntity skull = new SkullBlockEntity();
 	private final ConduitBlockEntity conduit = new ConduitBlockEntity();
 	private final ShieldModel shieldModel = new ShieldModel();
 	private final TridentModel tridentModel = new TridentModel();
 
-	public void renderByItem(ItemStack itemStack) {
+	public void renderByItem(ItemStack itemStack, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		Item item = itemStack.getItem();
-		if (item instanceof BannerItem) {
-			this.banner.fromItem(itemStack, ((BannerItem)item).getColor());
-			BlockEntityRenderDispatcher.instance.renderItem(this.banner);
-		} else if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof BedBlock) {
-			this.bed.setColor(((BedBlock)((BlockItem)item).getBlock()).getColor());
-			BlockEntityRenderDispatcher.instance.renderItem(this.bed);
-		} else if (item == Items.SHIELD) {
-			if (itemStack.getTagElement("BlockEntityTag") != null) {
-				this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
-				Minecraft.getInstance()
-					.getTextureManager()
-					.bind(BannerTextures.SHIELD_CACHE.getTextureLocation(this.banner.getTextureHashName(), this.banner.getPatterns(), this.banner.getColors()));
-			} else {
-				Minecraft.getInstance().getTextureManager().bind(BannerTextures.NO_PATTERN_SHIELD);
-			}
+		if (item instanceof BlockItem) {
+			Block block = ((BlockItem)item).getBlock();
+			if (block instanceof AbstractBannerBlock) {
+				this.banner.fromItem(itemStack, ((AbstractBannerBlock)block).getColor());
+				BlockEntityRenderDispatcher.instance.renderItem(this.banner, poseStack, multiBufferSource, i);
+			} else if (block instanceof BedBlock) {
+				this.bed.setColor(((BedBlock)block).getColor());
+				BlockEntityRenderDispatcher.instance.renderItem(this.bed, poseStack, multiBufferSource, i);
+			} else if (block instanceof AbstractSkullBlock) {
+				GameProfile gameProfile = null;
+				if (itemStack.hasTag()) {
+					CompoundTag compoundTag = itemStack.getTag();
+					if (compoundTag.contains("SkullOwner", 10)) {
+						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
+					} else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
+						GameProfile var12 = new GameProfile(null, compoundTag.getString("SkullOwner"));
+						gameProfile = SkullBlockEntity.updateGameprofile(var12);
+						compoundTag.remove("SkullOwner");
+						compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+					}
+				}
 
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(1.0F, -1.0F, -1.0F);
-			this.shieldModel.render();
-			if (itemStack.hasFoil()) {
-				this.renderFoil(this.shieldModel::render);
-			}
-
-			RenderSystem.popMatrix();
-		} else if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
-			GameProfile gameProfile = null;
-			if (itemStack.hasTag()) {
-				CompoundTag compoundTag = itemStack.getTag();
-				if (compoundTag.contains("SkullOwner", 10)) {
-					gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-				} else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
-					GameProfile var6 = new GameProfile(null, compoundTag.getString("SkullOwner"));
-					gameProfile = SkullBlockEntity.updateGameprofile(var6);
-					compoundTag.remove("SkullOwner");
-					compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+				SkullBlockRenderer.renderSkull(null, 180.0F, ((AbstractSkullBlock)block).getType(), gameProfile, 0.0F, poseStack, multiBufferSource, i);
+			} else if (block == Blocks.CONDUIT) {
+				BlockEntityRenderDispatcher.instance.renderItem(this.conduit, poseStack, multiBufferSource, i);
+			} else if (block == Blocks.CHEST) {
+				BlockEntityRenderDispatcher.instance.renderItem(this.chest, poseStack, multiBufferSource, i);
+			} else if (block == Blocks.ENDER_CHEST) {
+				BlockEntityRenderDispatcher.instance.renderItem(this.enderChest, poseStack, multiBufferSource, i);
+			} else if (block == Blocks.TRAPPED_CHEST) {
+				BlockEntityRenderDispatcher.instance.renderItem(this.trappedChest, poseStack, multiBufferSource, i);
+			} else if (block instanceof ShulkerBoxBlock) {
+				DyeColor dyeColor = ShulkerBoxBlock.getColorFromItem(item);
+				if (dyeColor == null) {
+					BlockEntityRenderDispatcher.instance.renderItem(DEFAULT_SHULKER_BOX, poseStack, multiBufferSource, i);
+				} else {
+					BlockEntityRenderDispatcher.instance.renderItem(SHULKER_BOXES[dyeColor.getId()], poseStack, multiBufferSource, i);
 				}
 			}
-
-			if (SkullBlockRenderer.instance != null) {
-				RenderSystem.pushMatrix();
-				RenderSystem.disableCull();
-				SkullBlockRenderer.instance
-					.renderSkull(0.0F, 0.0F, 0.0F, null, 180.0F, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, -1, 0.0F);
-				RenderSystem.enableCull();
-				RenderSystem.popMatrix();
-			}
-		} else if (item == Items.TRIDENT) {
-			Minecraft.getInstance().getTextureManager().bind(TridentModel.TEXTURE);
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(1.0F, -1.0F, -1.0F);
-			this.tridentModel.render();
-			if (itemStack.hasFoil()) {
-				this.renderFoil(this.tridentModel::render);
-			}
-
-			RenderSystem.popMatrix();
-		} else if (item instanceof BlockItem && ((BlockItem)item).getBlock() == Blocks.CONDUIT) {
-			BlockEntityRenderDispatcher.instance.renderItem(this.conduit);
-		} else if (item == Blocks.ENDER_CHEST.asItem()) {
-			BlockEntityRenderDispatcher.instance.renderItem(this.enderChest);
-		} else if (item == Blocks.TRAPPED_CHEST.asItem()) {
-			BlockEntityRenderDispatcher.instance.renderItem(this.trappedChest);
-		} else if (Block.byItem(item) instanceof ShulkerBoxBlock) {
-			DyeColor dyeColor = ShulkerBoxBlock.getColorFromItem(item);
-			if (dyeColor == null) {
-				BlockEntityRenderDispatcher.instance.renderItem(DEFAULT_SHULKER_BOX);
-			} else {
-				BlockEntityRenderDispatcher.instance.renderItem(SHULKER_BOXES[dyeColor.getId()]);
-			}
 		} else {
-			BlockEntityRenderDispatcher.instance.renderItem(this.chest);
-		}
-	}
+			if (item == Items.SHIELD) {
+				ResourceLocation resourceLocation;
+				if (itemStack.getTagElement("BlockEntityTag") != null) {
+					this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
+					resourceLocation = BannerTextures.SHIELD_CACHE.getTextureLocation(this.banner.getTextureHashName(), this.banner.getPatterns(), this.banner.getColors());
+				} else {
+					resourceLocation = BannerTextures.NO_PATTERN_SHIELD;
+				}
 
-	private void renderFoil(Runnable runnable) {
-		RenderSystem.color3f(0.5019608F, 0.2509804F, 0.8F);
-		Minecraft.getInstance().getTextureManager().bind(ItemRenderer.ENCHANT_GLINT_LOCATION);
-		ItemRenderer.renderFoilLayer(Minecraft.getInstance().getTextureManager(), runnable, 1);
+				poseStack.pushPose();
+				poseStack.scale(1.0F, -1.0F, -1.0F);
+				VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, resourceLocation, false, itemStack.hasFoil(), false);
+				OverlayTexture.setDefault(vertexConsumer);
+				this.shieldModel.render(poseStack, vertexConsumer, i);
+				vertexConsumer.unsetDefaultOverlayCoords();
+				poseStack.popPose();
+			} else if (item == Items.TRIDENT) {
+				Minecraft.getInstance().getTextureManager().bind(TridentModel.TEXTURE);
+				poseStack.pushPose();
+				poseStack.scale(1.0F, -1.0F, -1.0F);
+				VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBuffer(multiBufferSource, TridentModel.TEXTURE, false, itemStack.hasFoil(), false);
+				OverlayTexture.setDefault(vertexConsumer2);
+				this.tridentModel.render(poseStack, vertexConsumer2, i);
+				vertexConsumer2.unsetDefaultOverlayCoords();
+				poseStack.popPose();
+			}
+		}
 	}
 }

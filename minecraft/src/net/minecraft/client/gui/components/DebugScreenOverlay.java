@@ -25,6 +25,7 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -326,8 +327,9 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add("Outside of world...");
 			}
 
-			if (this.minecraft.gameRenderer != null && this.minecraft.gameRenderer.postEffectActive()) {
-				list.add("Shader: " + this.minecraft.gameRenderer.currentEffect().getName());
+			PostChain postChain = this.minecraft.gameRenderer.currentEffect();
+			if (postChain != null) {
+				list.add("Shader: " + postChain.getName());
 			}
 
 			if (this.block.getType() == HitResult.Type.BLOCK) {

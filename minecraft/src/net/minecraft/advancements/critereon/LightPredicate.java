@@ -17,7 +17,11 @@ public class LightPredicate {
 	}
 
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
-		return this.composite.matches(serverLevel.getMaxLocalRawBrightness(blockPos));
+		if (this == ANY) {
+			return true;
+		} else {
+			return !serverLevel.isLoaded(blockPos) ? false : this.composite.matches(serverLevel.getMaxLocalRawBrightness(blockPos));
+		}
 	}
 
 	public JsonElement serializeToJson() {

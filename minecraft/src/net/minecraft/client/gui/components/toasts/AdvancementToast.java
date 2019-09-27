@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components.toasts;
 
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -58,7 +57,6 @@ public class AdvancementToast implements Toast {
 				}
 			}
 
-			Lighting.turnOnGui();
 			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, displayInfo.getIcon(), 8, 8);
 			return l >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
 		} else {

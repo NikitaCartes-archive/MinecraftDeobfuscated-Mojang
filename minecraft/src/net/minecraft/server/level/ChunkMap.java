@@ -35,6 +35,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -197,6 +199,29 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				? ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1
 				: Math.min(chunkHolder.getQueueLevel(), ChunkTaskPriorityQueue.PRIORITY_LEVEL_COUNT - 1);
 		};
+	}
+
+	@Environment(EnvType.CLIENT)
+	public String getChunkDebugData(ChunkPos chunkPos) {
+		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(chunkPos.toLong());
+		if (chunkHolder == null) {
+			return "null";
+		} else {
+			String string = chunkHolder.getTicketLevel() + "\n";
+			ChunkStatus chunkStatus = chunkHolder.getLastAvailableStatus();
+			ChunkAccess chunkAccess = chunkHolder.getLastAvailable();
+			if (chunkStatus != null) {
+				string = string + "St: §" + chunkStatus.getIndex() + chunkStatus + '§' + "r\n";
+			}
+
+			if (chunkAccess != null) {
+				string = string + "Ch: §" + chunkAccess.getStatus().getIndex() + chunkAccess.getStatus() + '§' + "r\n";
+			}
+
+			ChunkHolder.FullChunkStatus fullChunkStatus = chunkHolder.getFullStatus();
+			string = string + "§" + fullChunkStatus.ordinal() + fullChunkStatus;
+			return string + '§' + "r";
+		}
 	}
 
 	private CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> getChunkRangeFuture(

@@ -18,7 +18,7 @@ public class SilverfishRenderer extends MobRenderer<Silverfish, SilverfishModel<
 		return 180.0F;
 	}
 
-	protected ResourceLocation getTextureLocation(Silverfish silverfish) {
+	public ResourceLocation getTextureLocation(Silverfish silverfish) {
 		return SILVERFISH_LOCATION;
 	}
 }

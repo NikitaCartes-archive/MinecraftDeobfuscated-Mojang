@@ -107,7 +107,7 @@ public class DoorBlock extends Block {
 			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
 			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
 			ItemStack itemStack = player.getMainHandItem();
-			if (!level.isClientSide && !player.isCreative()) {
+			if (!level.isClientSide && !player.isCreative() && player.canDestroy(blockState2)) {
 				Block.dropResources(blockState, level, blockPos, null, player, itemStack);
 				Block.dropResources(blockState2, level, blockPos2, null, player, itemStack);
 			}

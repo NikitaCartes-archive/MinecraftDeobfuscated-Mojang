@@ -1,10 +1,11 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PandaModel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.util.Mth;
@@ -18,25 +19,20 @@ public class PandaHoldsItemLayer extends RenderLayer<Panda, PandaModel<Panda>> {
 		super(renderLayerParent);
 	}
 
-	public void render(Panda panda, float f, float g, float h, float i, float j, float k, float l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Panda panda, float f, float g, float h, float j, float k, float l, float m) {
 		ItemStack itemStack = panda.getItemBySlot(EquipmentSlot.MAINHAND);
-		if (panda.isSitting() && !itemStack.isEmpty() && !panda.isScared()) {
-			float m = -0.6F;
-			float n = 1.4F;
+		if (panda.isSitting() && !panda.isScared()) {
+			float n = -0.6F;
+			float o = 1.4F;
 			if (panda.isEating()) {
-				m -= 0.2F * Mth.sin(i * 0.6F) + 0.2F;
-				n -= 0.09F * Mth.sin(i * 0.6F);
+				n -= 0.2F * Mth.sin(j * 0.6F) + 0.2F;
+				o -= 0.09F * Mth.sin(j * 0.6F);
 			}
 
-			RenderSystem.pushMatrix();
-			RenderSystem.translatef(0.1F, n, m);
-			Minecraft.getInstance().getItemRenderer().renderWithMobState(itemStack, panda, ItemTransforms.TransformType.GROUND, false);
-			RenderSystem.popMatrix();
+			poseStack.pushPose();
+			poseStack.translate(0.1F, (double)o, (double)n);
+			Minecraft.getInstance().getItemInHandRenderer().renderItem(panda, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+			poseStack.popPose();
 		}
-	}
-
-	@Override
-	public boolean colorsOnDamage() {
-		return false;
 	}
 }

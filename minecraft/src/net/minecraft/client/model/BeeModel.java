@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,7 +8,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Bee;
 
 @Environment(EnvType.CLIENT)
-public class BeeModel<T extends Bee> extends EntityModel<T> {
+public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 	private final ModelPart bone;
 	private final ModelPart body;
 	private final ModelPart rightWing;
@@ -22,6 +22,7 @@ public class BeeModel<T extends Bee> extends EntityModel<T> {
 	private float rollAmount;
 
 	public BeeModel() {
+		super(false, 24.0F, 0.0F);
 		this.texWidth = 64;
 		this.texHeight = 64;
 		this.bone = new ModelPart(this);
@@ -127,17 +128,13 @@ public class BeeModel<T extends Bee> extends EntityModel<T> {
 		}
 	}
 
-	public void render(T bee, float f, float g, float h, float i, float j, float k) {
-		this.setupAnim(bee, f, g, h, i, j, k);
-		if (this.young) {
-			float l = 2.0F;
-			RenderSystem.pushMatrix();
-			RenderSystem.scalef(0.5F, 0.5F, 0.5F);
-			RenderSystem.translatef(0.0F, 1.5F, 0.0F);
-			this.bone.render(k);
-			RenderSystem.popMatrix();
-		} else {
-			this.bone.render(k);
-		}
+	@Override
+	protected Iterable<ModelPart> headParts() {
+		return ImmutableList.<ModelPart>of();
+	}
+
+	@Override
+	protected Iterable<ModelPart> bodyParts() {
+		return ImmutableList.<ModelPart>of(this.bone);
 	}
 }

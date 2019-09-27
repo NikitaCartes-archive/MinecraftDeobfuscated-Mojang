@@ -36,6 +36,8 @@ public class BlockPredicate {
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
 		if (this == ANY) {
 			return true;
+		} else if (!serverLevel.isLoaded(blockPos)) {
+			return false;
 		} else {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
 			Block block = blockState.getBlock();

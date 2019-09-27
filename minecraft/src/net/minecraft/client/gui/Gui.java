@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -331,7 +330,6 @@ public class Gui extends GuiComponent {
 		}
 
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.disableLighting();
 		RenderSystem.enableAlphaTest();
 	}
 
@@ -485,7 +483,6 @@ public class Gui extends GuiComponent {
 			RenderSystem.enableRescaleNormal();
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
-			Lighting.turnOnGui();
 
 			for (int m = 0; m < 9; m++) {
 				int n = i - 90 + m * 20 + 2;
@@ -519,7 +516,6 @@ public class Gui extends GuiComponent {
 				}
 			}
 
-			Lighting.turnOff();
 			RenderSystem.disableRescaleNormal();
 			RenderSystem.disableBlend();
 		}
@@ -928,10 +924,10 @@ public class Gui extends GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv(0.0, 1.0).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv(1.0, 1.0).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(1.0, 0.0).endVertex();
-		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0, 0.0).endVertex();
+		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0F, 0.0F).endVertex();
 		tesselator.end();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
@@ -972,10 +968,10 @@ public class Gui extends GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv(0.0, 1.0).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv(1.0, 1.0).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(1.0, 0.0).endVertex();
-		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0, 0.0).endVertex();
+		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(0.0F, 0.0F).endVertex();
 		tesselator.end();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();
@@ -1004,10 +1000,10 @@ public class Gui extends GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv((double)g, (double)j).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv((double)i, (double)j).endVertex();
-		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv((double)i, (double)h).endVertex();
-		bufferBuilder.vertex(0.0, 0.0, -90.0).uv((double)g, (double)h).endVertex();
+		bufferBuilder.vertex(0.0, (double)this.screenHeight, -90.0).uv(g, j).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, (double)this.screenHeight, -90.0).uv(i, j).endVertex();
+		bufferBuilder.vertex((double)this.screenWidth, 0.0, -90.0).uv(i, h).endVertex();
+		bufferBuilder.vertex(0.0, 0.0, -90.0).uv(g, h).endVertex();
 		tesselator.end();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableDepthTest();

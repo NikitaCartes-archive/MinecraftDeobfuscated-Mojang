@@ -150,16 +150,14 @@ public class NbtIo {
 	private static Tag readUnnamedTag(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 		byte b = dataInput.readByte();
 		if (b == 0) {
-			return new EndTag();
+			return EndTag.INSTANCE;
 		} else {
 			dataInput.readUTF();
-			Tag tag = Tag.newTag(b);
 
 			try {
-				tag.load(dataInput, i, nbtAccounter);
-				return tag;
-			} catch (IOException var8) {
-				CrashReport crashReport = CrashReport.forThrowable(var8, "Loading NBT data");
+				return TagTypes.getType(b).load(dataInput, i, nbtAccounter);
+			} catch (IOException var7) {
+				CrashReport crashReport = CrashReport.forThrowable(var7, "Loading NBT data");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("NBT Tag");
 				crashReportCategory.setDetail("Tag type", b);
 				throw new ReportedException(crashReport);

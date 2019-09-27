@@ -53,16 +53,13 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 			this.decomposedParts.clear();
 		}
 
-		try {
-			this.decomposeTemplate(LANGUAGE.getElement(this.key));
-		} catch (TranslatableFormatException var6) {
-			this.decomposedParts.clear();
+		String string = LANGUAGE.getElement(this.key);
 
-			try {
-				this.decomposeTemplate(DEFAULT_LANGUAGE.getElement(this.key));
-			} catch (TranslatableFormatException var5) {
-				throw var6;
-			}
+		try {
+			this.decomposeTemplate(string);
+		} catch (TranslatableFormatException var5) {
+			this.decomposedParts.clear();
+			this.decomposedParts.add(new TextComponent(string));
 		}
 	}
 

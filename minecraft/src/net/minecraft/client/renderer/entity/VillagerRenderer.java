@@ -1,10 +1,11 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.client.renderer.entity.layers.VillagerTradeItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -21,11 +22,11 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 		this.addLayer(new VillagerTradeItemLayer<>(this));
 	}
 
-	protected ResourceLocation getTextureLocation(Villager villager) {
+	public ResourceLocation getTextureLocation(Villager villager) {
 		return VILLAGER_BASE_SKIN;
 	}
 
-	protected void scale(Villager villager, float f) {
+	protected void scale(Villager villager, PoseStack poseStack, float f) {
 		float g = 0.9375F;
 		if (villager.isBaby()) {
 			g = (float)((double)g * 0.5);
@@ -34,6 +35,6 @@ public class VillagerRenderer extends MobRenderer<Villager, VillagerModel<Villag
 			this.shadowRadius = 0.5F;
 		}
 
-		RenderSystem.scalef(g, g, g);
+		poseStack.scale(g, g, g);
 	}
 }

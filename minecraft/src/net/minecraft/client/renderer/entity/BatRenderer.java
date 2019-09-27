@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BatModel;
@@ -16,21 +16,21 @@ public class BatRenderer extends MobRenderer<Bat, BatModel> {
 		super(entityRenderDispatcher, new BatModel(), 0.25F);
 	}
 
-	protected ResourceLocation getTextureLocation(Bat bat) {
+	public ResourceLocation getTextureLocation(Bat bat) {
 		return BAT_LOCATION;
 	}
 
-	protected void scale(Bat bat, float f) {
-		RenderSystem.scalef(0.35F, 0.35F, 0.35F);
+	protected void scale(Bat bat, PoseStack poseStack, float f) {
+		poseStack.scale(0.35F, 0.35F, 0.35F);
 	}
 
-	protected void setupRotations(Bat bat, float f, float g, float h) {
+	protected void setupRotations(Bat bat, PoseStack poseStack, float f, float g, float h) {
 		if (bat.isResting()) {
-			RenderSystem.translatef(0.0F, -0.1F, 0.0F);
+			poseStack.translate(0.0, -0.1F, 0.0);
 		} else {
-			RenderSystem.translatef(0.0F, Mth.cos(f * 0.3F) * 0.1F, 0.0F);
+			poseStack.translate(0.0, (double)(Mth.cos(f * 0.3F) * 0.1F), 0.0);
 		}
 
-		super.setupRotations(bat, f, g, h);
+		super.setupRotations(bat, poseStack, f, g, h);
 	}
 }

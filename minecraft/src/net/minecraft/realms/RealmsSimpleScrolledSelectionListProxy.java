@@ -66,7 +66,6 @@ public class RealmsSimpleScrolledSelectionListProxy extends ScrolledSelectionLis
 			int k = this.getScrollbarPosition();
 			int l = k + 6;
 			this.capYPosition();
-			RenderSystem.disableLighting();
 			RenderSystem.disableFog();
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -97,22 +96,22 @@ public class RealmsSimpleScrolledSelectionListProxy extends ScrolledSelectionLis
 				}
 
 				bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-				bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0, 1.0).color(0, 0, 0, 255).endVertex();
-				bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0, 1.0).color(0, 0, 0, 255).endVertex();
-				bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0, 0.0).color(0, 0, 0, 255).endVertex();
-				bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0, 0.0).color(0, 0, 0, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+				bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+				bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
 				tesselator.end();
 				bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-				bufferBuilder.vertex((double)k, (double)(q + p), 0.0).uv(0.0, 1.0).color(128, 128, 128, 255).endVertex();
-				bufferBuilder.vertex((double)l, (double)(q + p), 0.0).uv(1.0, 1.0).color(128, 128, 128, 255).endVertex();
-				bufferBuilder.vertex((double)l, (double)q, 0.0).uv(1.0, 0.0).color(128, 128, 128, 255).endVertex();
-				bufferBuilder.vertex((double)k, (double)q, 0.0).uv(0.0, 0.0).color(128, 128, 128, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)(q + p), 0.0).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+				bufferBuilder.vertex((double)l, (double)(q + p), 0.0).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+				bufferBuilder.vertex((double)l, (double)q, 0.0).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)q, 0.0).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
 				tesselator.end();
 				bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-				bufferBuilder.vertex((double)k, (double)(q + p - 1), 0.0).uv(0.0, 1.0).color(192, 192, 192, 255).endVertex();
-				bufferBuilder.vertex((double)(l - 1), (double)(q + p - 1), 0.0).uv(1.0, 1.0).color(192, 192, 192, 255).endVertex();
-				bufferBuilder.vertex((double)(l - 1), (double)q, 0.0).uv(1.0, 0.0).color(192, 192, 192, 255).endVertex();
-				bufferBuilder.vertex((double)k, (double)q, 0.0).uv(0.0, 0.0).color(192, 192, 192, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)(q + p - 1), 0.0).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+				bufferBuilder.vertex((double)(l - 1), (double)(q + p - 1), 0.0).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+				bufferBuilder.vertex((double)(l - 1), (double)q, 0.0).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+				bufferBuilder.vertex((double)k, (double)q, 0.0).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
 				tesselator.end();
 			}
 

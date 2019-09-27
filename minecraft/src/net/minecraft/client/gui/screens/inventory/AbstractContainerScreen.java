@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -74,11 +73,8 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		int l = this.topPos;
 		this.renderBg(f, i, j);
 		RenderSystem.disableRescaleNormal();
-		Lighting.turnOff();
-		RenderSystem.disableLighting();
 		RenderSystem.disableDepthTest();
 		super.render(i, j, f);
-		Lighting.turnOnGui();
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef((float)k, (float)l, 0.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -86,7 +82,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		this.hoveredSlot = null;
 		int m = 240;
 		int n = 240;
-		RenderSystem.glMultiTexCoord2f(33985, 240.0F, 240.0F);
+		RenderSystem.glMultiTexCoord2f(33986, 240.0F, 240.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
 		for (int o = 0; o < this.menu.slots.size(); o++) {
@@ -97,21 +93,17 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 			if (this.isHovering(slot, (double)i, (double)j) && slot.isActive()) {
 				this.hoveredSlot = slot;
-				RenderSystem.disableLighting();
 				RenderSystem.disableDepthTest();
 				int p = slot.x;
 				int q = slot.y;
 				RenderSystem.colorMask(true, true, true, false);
 				this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
 				RenderSystem.colorMask(true, true, true, true);
-				RenderSystem.enableLighting();
 				RenderSystem.enableDepthTest();
 			}
 		}
 
-		Lighting.turnOff();
 		this.renderLabels(i, j);
-		Lighting.turnOnGui();
 		Inventory inventory = this.minecraft.player.inventory;
 		ItemStack itemStack = this.draggingItem.isEmpty() ? inventory.getCarried() : this.draggingItem;
 		if (!itemStack.isEmpty()) {
@@ -147,9 +139,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 
 		RenderSystem.popMatrix();
-		RenderSystem.enableLighting();
 		RenderSystem.enableDepthTest();
-		Lighting.turnOn();
 	}
 
 	protected void renderTooltip(int i, int j) {
@@ -212,10 +202,8 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			String string2 = slot.getNoItemIcon();
 			if (string2 != null) {
 				TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-				RenderSystem.disableLighting();
 				this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
 				blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
-				RenderSystem.enableLighting();
 				bl2 = true;
 			}
 		}

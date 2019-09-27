@@ -1,17 +1,11 @@
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.MemoryTracker;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import java.nio.FloatBuffer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -19,126 +13,59 @@ import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends BlockEntityRenderer<T> {
-	private static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
-	private static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
+	public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
+	public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
 	private static final Random RANDOM = new Random(31100L);
-	private static final FloatBuffer MODELVIEW = MemoryTracker.createFloatBuffer(16);
-	private static final FloatBuffer PROJECTION = MemoryTracker.createFloatBuffer(16);
-	private final FloatBuffer buffer = MemoryTracker.createFloatBuffer(16);
 
-	public void render(T theEndPortalBlockEntity, double d, double e, double f, float g, int i, RenderType renderType) {
-		RenderSystem.disableLighting();
+	public TheEndPortalRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
+		super(blockEntityRenderDispatcher);
+	}
+
+	public void render(T theEndPortalBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		RANDOM.setSeed(31100L);
-		RenderSystem.getMatrix(2982, MODELVIEW);
-		RenderSystem.getMatrix(2983, PROJECTION);
 		double h = d * d + e * e + f * f;
 		int j = this.getPasses(h);
 		float k = this.getOffset();
-		boolean bl = false;
+		this.renderCube(theEndPortalBlockEntity, d, e, f, k, 0.15F, multiBufferSource.getBuffer(RenderType.PORTAL(1)));
 
-		for (int l = 0; l < j; l++) {
-			RenderSystem.pushMatrix();
-			float m = 2.0F / (float)(18 - l);
-			if (l == 0) {
-				this.bindTexture(END_SKY_LOCATION);
-				m = 0.15F;
-				RenderSystem.enableBlend();
-				RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-			}
-
-			if (l >= 1) {
-				this.bindTexture(END_PORTAL_LOCATION);
-				bl = true;
-				FogRenderer.resetFogColor(true);
-			}
-
-			if (l == 1) {
-				RenderSystem.enableBlend();
-				RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-			}
-
-			RenderSystem.texGenMode(GlStateManager.TexGen.S, 9216);
-			RenderSystem.texGenMode(GlStateManager.TexGen.T, 9216);
-			RenderSystem.texGenMode(GlStateManager.TexGen.R, 9216);
-			RenderSystem.texGenParam(GlStateManager.TexGen.S, 9474, this.getBuffer(1.0F, 0.0F, 0.0F, 0.0F));
-			RenderSystem.texGenParam(GlStateManager.TexGen.T, 9474, this.getBuffer(0.0F, 1.0F, 0.0F, 0.0F));
-			RenderSystem.texGenParam(GlStateManager.TexGen.R, 9474, this.getBuffer(0.0F, 0.0F, 1.0F, 0.0F));
-			RenderSystem.enableTexGen(GlStateManager.TexGen.S);
-			RenderSystem.enableTexGen(GlStateManager.TexGen.T);
-			RenderSystem.enableTexGen(GlStateManager.TexGen.R);
-			RenderSystem.popMatrix();
-			RenderSystem.matrixMode(5890);
-			RenderSystem.pushMatrix();
-			RenderSystem.loadIdentity();
-			RenderSystem.translatef(0.5F, 0.5F, 0.0F);
-			RenderSystem.scalef(0.5F, 0.5F, 1.0F);
-			float n = (float)(l + 1);
-			RenderSystem.translatef(17.0F / n, (2.0F + n / 1.5F) * ((float)(Util.getMillis() % 800000L) / 800000.0F), 0.0F);
-			RenderSystem.rotatef((n * n * 4321.0F + n * 9.0F) * 2.0F, 0.0F, 0.0F, 1.0F);
-			RenderSystem.scalef(4.5F - n / 4.0F, 4.5F - n / 4.0F, 1.0F);
-			RenderSystem.multMatrix(PROJECTION);
-			RenderSystem.multMatrix(MODELVIEW);
-			Tesselator tesselator = Tesselator.getInstance();
-			BufferBuilder bufferBuilder = tesselator.getBuilder();
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
-			float o = (RANDOM.nextFloat() * 0.5F + 0.1F) * m;
-			float p = (RANDOM.nextFloat() * 0.5F + 0.4F) * m;
-			float q = (RANDOM.nextFloat() * 0.5F + 0.5F) * m;
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.SOUTH)) {
-				bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e + 1.0, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e + 1.0, f + 1.0).color(o, p, q, 1.0F).endVertex();
-			}
-
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.NORTH)) {
-				bufferBuilder.vertex(d, e + 1.0, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e + 1.0, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0F).endVertex();
-			}
-
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.EAST)) {
-				bufferBuilder.vertex(d + 1.0, e + 1.0, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e + 1.0, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0F).endVertex();
-			}
-
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.WEST)) {
-				bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e + 1.0, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e + 1.0, f).color(o, p, q, 1.0F).endVertex();
-			}
-
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.DOWN)) {
-				bufferBuilder.vertex(d, e, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e, f + 1.0).color(o, p, q, 1.0F).endVertex();
-			}
-
-			if (theEndPortalBlockEntity.shouldRenderFace(Direction.UP)) {
-				bufferBuilder.vertex(d, e + (double)k, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e + (double)k, f + 1.0).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d + 1.0, e + (double)k, f).color(o, p, q, 1.0F).endVertex();
-				bufferBuilder.vertex(d, e + (double)k, f).color(o, p, q, 1.0F).endVertex();
-			}
-
-			tesselator.end();
-			RenderSystem.popMatrix();
-			RenderSystem.matrixMode(5888);
-			this.bindTexture(END_SKY_LOCATION);
+		for (int l = 1; l < j; l++) {
+			this.renderCube(theEndPortalBlockEntity, d, e, f, k, 2.0F / (float)(18 - l), multiBufferSource.getBuffer(RenderType.PORTAL(l + 1)));
 		}
+	}
 
-		RenderSystem.disableBlend();
-		RenderSystem.disableTexGen(GlStateManager.TexGen.S);
-		RenderSystem.disableTexGen(GlStateManager.TexGen.T);
-		RenderSystem.disableTexGen(GlStateManager.TexGen.R);
-		RenderSystem.enableLighting();
-		if (bl) {
-			FogRenderer.resetFogColor(false);
+	private void renderCube(T theEndPortalBlockEntity, double d, double e, double f, float g, float h, VertexConsumer vertexConsumer) {
+		float i = (RANDOM.nextFloat() * 0.5F + 0.1F) * h;
+		float j = (RANDOM.nextFloat() * 0.5F + 0.4F) * h;
+		float k = (RANDOM.nextFloat() * 0.5F + 0.5F) * h;
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.SOUTH, d, d + 1.0, e, e + 1.0, f + 1.0, f + 1.0, f + 1.0, f + 1.0, i, j, k);
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.NORTH, d, d + 1.0, e + 1.0, e, f, f, f, f, i, j, k);
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.EAST, d + 1.0, d + 1.0, e + 1.0, e, f, f + 1.0, f + 1.0, f, i, j, k);
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.WEST, d, d, e, e + 1.0, f, f + 1.0, f + 1.0, f, i, j, k);
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.DOWN, d, d + 1.0, e, e, f, f, f + 1.0, f + 1.0, i, j, k);
+		this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.UP, d, d + 1.0, e + (double)g, e + (double)g, f + 1.0, f + 1.0, f, f, i, j, k);
+	}
+
+	private void renderFace(
+		T theEndPortalBlockEntity,
+		VertexConsumer vertexConsumer,
+		Direction direction,
+		double d,
+		double e,
+		double f,
+		double g,
+		double h,
+		double i,
+		double j,
+		double k,
+		float l,
+		float m,
+		float n
+	) {
+		if (theEndPortalBlockEntity.shouldRenderFace(direction)) {
+			vertexConsumer.vertex(d, f, h).color(l, m, n, 1.0F).endVertex();
+			vertexConsumer.vertex(e, f, i).color(l, m, n, 1.0F).endVertex();
+			vertexConsumer.vertex(e, g, j).color(l, m, n, 1.0F).endVertex();
+			vertexConsumer.vertex(d, g, k).color(l, m, n, 1.0F).endVertex();
 		}
 	}
 
@@ -169,12 +96,5 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 
 	protected float getOffset() {
 		return 0.75F;
-	}
-
-	private FloatBuffer getBuffer(float f, float g, float h, float i) {
-		this.buffer.clear();
-		this.buffer.put(f).put(g).put(h).put(i);
-		this.buffer.flip();
-		return this.buffer;
 	}
 }

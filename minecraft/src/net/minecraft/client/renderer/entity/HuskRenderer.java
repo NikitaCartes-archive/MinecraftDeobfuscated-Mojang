@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -14,14 +14,14 @@ public class HuskRenderer extends ZombieRenderer {
 		super(entityRenderDispatcher);
 	}
 
-	protected void scale(Zombie zombie, float f) {
+	protected void scale(Zombie zombie, PoseStack poseStack, float f) {
 		float g = 1.0625F;
-		RenderSystem.scalef(1.0625F, 1.0625F, 1.0625F);
-		super.scale(zombie, f);
+		poseStack.scale(1.0625F, 1.0625F, 1.0625F);
+		super.scale(zombie, poseStack, f);
 	}
 
 	@Override
-	protected ResourceLocation getTextureLocation(Zombie zombie) {
+	public ResourceLocation getTextureLocation(Zombie zombie) {
 		return HUSK_LOCATION;
 	}
 }

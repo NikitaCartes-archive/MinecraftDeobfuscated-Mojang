@@ -408,6 +408,18 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 			);
 	}
 
+	private static LootTable.Builder createAttachedStemDrops(Block block, Item item) {
+		return LootTable.lootTable()
+			.withPool(
+				applyExplosionDecay(
+					block,
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(LootItem.lootTableItem(item).apply(SetItemCountFunction.setCount(BinomialDistributionGenerator.binomial(3, 0.53333336F))))
+				)
+			);
+	}
+
 	private static LootTable.Builder createShearsOnlyDrop(ItemLike itemLike) {
 		return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).when(HAS_SHEARS).add(LootItem.lootTableItem(itemLike)));
 	}
@@ -1198,7 +1210,9 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 			)
 		);
 		this.add(Blocks.MELON_STEM, blockx -> createStemDrops(blockx, Items.MELON_SEEDS));
+		this.add(Blocks.ATTACHED_MELON_STEM, blockx -> createAttachedStemDrops(blockx, Items.MELON_SEEDS));
 		this.add(Blocks.PUMPKIN_STEM, blockx -> createStemDrops(blockx, Items.PUMPKIN_SEEDS));
+		this.add(Blocks.ATTACHED_PUMPKIN_STEM, blockx -> createAttachedStemDrops(blockx, Items.PUMPKIN_SEEDS));
 		this.add(
 			Blocks.CHORUS_FLOWER,
 			blockx -> LootTable.lootTable()
@@ -1480,8 +1494,6 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.otherWhenSilkTouch(Blocks.INFESTED_CRACKED_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS);
 		this.otherWhenSilkTouch(Blocks.INFESTED_CHISELED_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS);
 		this.add(Blocks.CAKE, noDrop());
-		this.add(Blocks.ATTACHED_PUMPKIN_STEM, noDrop());
-		this.add(Blocks.ATTACHED_MELON_STEM, noDrop());
 		this.add(Blocks.FROSTED_ICE, noDrop());
 		this.add(Blocks.SPAWNER, noDrop());
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
