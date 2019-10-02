@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,30 +34,31 @@ extends BlockEntityRenderer<T> {
         double h = d * d + e * e + f * f;
         int j = this.getPasses(h);
         float k = this.getOffset();
-        this.renderCube(theEndPortalBlockEntity, d, e, f, k, 0.15f, multiBufferSource.getBuffer(RenderType.PORTAL(1)));
+        Matrix4f matrix4f = poseStack.getPose();
+        this.renderCube(theEndPortalBlockEntity, k, 0.15f, matrix4f, multiBufferSource.getBuffer(RenderType.PORTAL(1)));
         for (int l = 1; l < j; ++l) {
-            this.renderCube(theEndPortalBlockEntity, d, e, f, k, 2.0f / (float)(18 - l), multiBufferSource.getBuffer(RenderType.PORTAL(l + 1)));
+            this.renderCube(theEndPortalBlockEntity, k, 2.0f / (float)(18 - l), matrix4f, multiBufferSource.getBuffer(RenderType.PORTAL(l + 1)));
         }
     }
 
-    private void renderCube(T theEndPortalBlockEntity, double d, double e, double f, float g, float h, VertexConsumer vertexConsumer) {
-        float i = (RANDOM.nextFloat() * 0.5f + 0.1f) * h;
-        float j = (RANDOM.nextFloat() * 0.5f + 0.4f) * h;
-        float k = (RANDOM.nextFloat() * 0.5f + 0.5f) * h;
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.SOUTH, d, d + 1.0, e, e + 1.0, f + 1.0, f + 1.0, f + 1.0, f + 1.0, i, j, k);
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.NORTH, d, d + 1.0, e + 1.0, e, f, f, f, f, i, j, k);
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.EAST, d + 1.0, d + 1.0, e + 1.0, e, f, f + 1.0, f + 1.0, f, i, j, k);
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.WEST, d, d, e, e + 1.0, f, f + 1.0, f + 1.0, f, i, j, k);
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.DOWN, d, d + 1.0, e, e, f, f, f + 1.0, f + 1.0, i, j, k);
-        this.renderFace(theEndPortalBlockEntity, vertexConsumer, Direction.UP, d, d + 1.0, e + (double)g, e + (double)g, f + 1.0, f + 1.0, f, f, i, j, k);
+    private void renderCube(T theEndPortalBlockEntity, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer) {
+        float h = (RANDOM.nextFloat() * 0.5f + 0.1f) * g;
+        float i = (RANDOM.nextFloat() * 0.5f + 0.4f) * g;
+        float j = (RANDOM.nextFloat() * 0.5f + 0.5f) * g;
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, h, i, j, Direction.SOUTH);
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, h, i, j, Direction.NORTH);
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, h, i, j, Direction.EAST);
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, h, i, j, Direction.WEST);
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, h, i, j, Direction.DOWN);
+        this.renderFace(theEndPortalBlockEntity, matrix4f, vertexConsumer, 0.0f, 1.0f, f, f, 1.0f, 1.0f, 0.0f, 0.0f, h, i, j, Direction.UP);
     }
 
-    private void renderFace(T theEndPortalBlockEntity, VertexConsumer vertexConsumer, Direction direction, double d, double e, double f, double g, double h, double i, double j, double k, float l, float m, float n) {
+    private void renderFace(T theEndPortalBlockEntity, Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k, float l, float m, float n, float o, float p, Direction direction) {
         if (((TheEndPortalBlockEntity)theEndPortalBlockEntity).shouldRenderFace(direction)) {
-            vertexConsumer.vertex(d, f, h).color(l, m, n, 1.0f).endVertex();
-            vertexConsumer.vertex(e, f, i).color(l, m, n, 1.0f).endVertex();
-            vertexConsumer.vertex(e, g, j).color(l, m, n, 1.0f).endVertex();
-            vertexConsumer.vertex(d, g, k).color(l, m, n, 1.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, f, h, j).color(n, o, p, 1.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, g, h, k).color(n, o, p, 1.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, g, i, l).color(n, o, p, 1.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, f, i, m).color(n, o, p, 1.0f).endVertex();
         }
     }
 

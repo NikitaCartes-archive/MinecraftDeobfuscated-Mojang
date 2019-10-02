@@ -6,6 +6,7 @@ package net.minecraft.world.entity.animal.horse;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.level.Level;
@@ -37,6 +38,11 @@ extends AbstractChestedHorse {
     @Override
     protected void playChestEquipsSound() {
         this.playSound(SoundEvents.MULE_CHEST, 1.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
+    }
+
+    @Override
+    public AgableMob getBreedOffspring(AgableMob agableMob) {
+        return EntityType.MULE.create(this.level);
     }
 }
 

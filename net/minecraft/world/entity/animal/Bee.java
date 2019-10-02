@@ -219,7 +219,12 @@ implements FlyingAnimal {
         if (!this.hasHive()) {
             return false;
         }
-        return this.hasNectar() || !this.level.isDay() || this.level.isRainingAt(this.getCommandSenderBlockPosition()) || this.ticksSincePollination > 3600;
+        boolean bl = false;
+        BlockEntity blockEntity = this.level.getBlockEntity(this.hivePos);
+        if (blockEntity instanceof BeehiveBlockEntity) {
+            bl = ((BeehiveBlockEntity)blockEntity).isFireNearby();
+        }
+        return !bl && (this.hasNectar() || !this.level.isDay() || this.level.isRainingAt(this.getCommandSenderBlockPosition()) || this.ticksSincePollination > 3600);
     }
 
     public void setCannotEnterHiveTicks(int i) {
@@ -439,7 +444,7 @@ implements FlyingAnimal {
     @Override
     protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
         if (this.isBaby()) {
-            return entityDimensions.height * 0.95f;
+            return entityDimensions.height * 0.5f;
         }
         return entityDimensions.height * 0.5f;
     }

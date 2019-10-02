@@ -13,7 +13,7 @@ import net.minecraft.world.entity.animal.PolarBear;
 public class PolarBearModel<T extends PolarBear>
 extends QuadrupedModel<T> {
     public PolarBearModel() {
-        super(12, 0.0f, false, 16.0f, 4.0f, 2.25f, 2.0f, 24);
+        super(12, 0.0f, true, 16.0f, 4.0f, 2.25f, 2.0f, 24);
         this.texWidth = 128;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 0);

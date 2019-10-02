@@ -462,7 +462,7 @@ public class EntityRenderDispatcher {
         int o = Mth.floor(j - (double)i);
         int p = Mth.floor(j + (double)i);
         Matrix4f matrix4f = poseStack.getPose();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(SHADOW_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(SHADOW_LOCATION, false, true, false, 0.1f, false, false));
         OverlayTexture.setDefault(vertexConsumer);
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
             EntityRenderDispatcher.renderBlockShadow(matrix4f, vertexConsumer, levelReader, blockPos, d, e, j, i, f);

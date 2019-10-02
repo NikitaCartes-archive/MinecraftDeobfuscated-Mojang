@@ -112,7 +112,7 @@ extends AbstractContainerScreen<CartographyTableMenu> {
             RenderSystem.translatef(i, j, 1.0f);
             RenderSystem.scalef(f, f, 1.0f);
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            this.minecraft.gameRenderer.getMapRenderer().render(new PoseStack(), bufferSource, mapItemSavedData, true);
+            this.minecraft.gameRenderer.getMapRenderer().render(new PoseStack(), bufferSource, mapItemSavedData, true, 0xF000F0);
             bufferSource.endBatch();
             RenderSystem.popMatrix();
         }

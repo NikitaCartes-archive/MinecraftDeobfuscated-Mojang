@@ -679,6 +679,16 @@ public class RenderSystem {
         GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
     }
 
+    public static void setupOutline() {
+        RenderSystem.assertThread(RenderSystem::isOnGameThread);
+        GlStateManager.setupOutline();
+    }
+
+    public static void teardownOutline() {
+        RenderSystem.assertThread(RenderSystem::isOnGameThread);
+        GlStateManager.teardownOutline();
+    }
+
     public static void setupOverlayColor(IntSupplier intSupplier, int i) {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
         GlStateManager.setupOverlayColor(intSupplier.getAsInt(), i);
@@ -747,10 +757,6 @@ public class RenderSystem {
 
     public static void defaultAlphaFunc() {
         RenderSystem.alphaFunc(516, 0.1f);
-    }
-
-    private static /* synthetic */ void lambda$teardownOverlayColor$70() {
-        GlStateManager.teardownOverlayColor();
     }
 
     private static /* synthetic */ void lambda$setupOverlayColor$69(IntSupplier intSupplier, int i) {

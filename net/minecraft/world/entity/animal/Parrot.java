@@ -124,7 +124,7 @@ implements FlyingAnimal {
     public float flapSpeed;
     public float oFlapSpeed;
     public float oFlap;
-    public float flapping = 1.0f;
+    private float flapping = 1.0f;
     private boolean partyParrot;
     private BlockPos jukebox;
 
@@ -325,7 +325,7 @@ implements FlyingAnimal {
         return SoundEvents.PARROT_AMBIENT;
     }
 
-    public static SoundEvent getImitatedSound(EntityType<?> entityType) {
+    private static SoundEvent getImitatedSound(EntityType<?> entityType) {
         return MOB_SOUND_MAP.getOrDefault(entityType, SoundEvents.PARROT_AMBIENT);
     }
 
@@ -387,9 +387,7 @@ implements FlyingAnimal {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
-        if (this.sitGoal != null) {
-            this.sitGoal.wantToSit(false);
-        }
+        this.sitGoal.wantToSit(false);
         return super.hurt(damageSource, f);
     }
 

@@ -52,11 +52,11 @@ extends EntityRenderer<EnderDragon> {
         int l = enderDragon.getLightColor();
         if (enderDragon.dragonDeathTime > 0) {
             float m = (float)enderDragon.dragonDeathTime / 200.0f;
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(DRAGON_EXPLODING_LOCATION, false, true, true, m, false));
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(DRAGON_EXPLODING_LOCATION, false, true, true, m, false, true));
             OverlayTexture.setDefault(vertexConsumer);
             this.model.render(poseStack, vertexConsumer, enderDragon, 0.0625f, h, l);
             vertexConsumer.unsetDefaultOverlayCoords();
-            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(DRAGON_LOCATION, false, true, true, 0.1f, true));
+            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(DRAGON_LOCATION, false, true, true, 0.1f, true, true));
             vertexConsumer2.defaultOverlayCoords(OverlayTexture.u(0.0f), OverlayTexture.v(bl));
             this.model.render(poseStack, vertexConsumer2, enderDragon, 0.0625f, h, l);
             vertexConsumer2.unsetDefaultOverlayCoords();

@@ -12,7 +12,9 @@ import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 @Environment(value=EnvType.CLIENT)
@@ -33,6 +35,12 @@ implements AutoCloseable {
         this.lightTexture = new DynamicTexture(16, 16, false);
         this.lightTextureLocation = this.minecraft.getTextureManager().register("light_map", this.lightTexture);
         this.lightPixels = this.lightTexture.getPixels();
+        for (int i = 0; i < 16; ++i) {
+            for (int j = 0; j < 16; ++j) {
+                this.lightPixels.setPixelRGBA(j, i, -1);
+            }
+        }
+        this.lightTexture.upload();
     }
 
     @Override
@@ -87,10 +95,10 @@ implements AutoCloseable {
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
                 float x;
-                float m = level.dimension.getBrightnessRamp()[k] * h;
-                float n = level.dimension.getBrightnessRamp()[l] * (this.blockLightRed * 0.1f + 1.5f);
+                float m = this.getBrightness(level, k) * h;
+                float n = this.getBrightness(level, l) * (this.blockLightRed * 0.1f + 1.5f);
                 if (level.getSkyFlashTime() > 0) {
-                    m = level.dimension.getBrightnessRamp()[k];
+                    m = this.getBrightness(level, k);
                 }
                 float o = m * (g * 0.65f + 0.35f);
                 float p = m * (g * 0.65f + 0.35f);
@@ -116,26 +124,14 @@ implements AutoCloseable {
                     w = 0.25f + t * 0.75f;
                 }
                 if (j > 0.0f) {
-                    x = 1.0f / u;
-                    if (x > 1.0f / v) {
-                        x = 1.0f / v;
-                    }
-                    if (x > 1.0f / w) {
-                        x = 1.0f / w;
-                    }
+                    x = Math.min(1.0f / u, Math.min(1.0f / v, 1.0f / w));
                     u = u * (1.0f - j) + u * x * j;
                     v = v * (1.0f - j) + v * x * j;
                     w = w * (1.0f - j) + w * x * j;
                 }
-                if (u > 1.0f) {
-                    u = 1.0f;
-                }
-                if (v > 1.0f) {
-                    v = 1.0f;
-                }
-                if (w > 1.0f) {
-                    w = 1.0f;
-                }
+                u = Mth.clamp(u, 0.0f, 1.0f);
+                v = Mth.clamp(v, 0.0f, 1.0f);
+                w = Mth.clamp(w, 0.0f, 1.0f);
                 x = (float)this.minecraft.options.gamma;
                 float y = 1.0f - u;
                 float z = 1.0f - v;
@@ -149,24 +145,9 @@ implements AutoCloseable {
                 u = u * 0.96f + 0.03f;
                 v = v * 0.96f + 0.03f;
                 w = w * 0.96f + 0.03f;
-                if (u > 1.0f) {
-                    u = 1.0f;
-                }
-                if (v > 1.0f) {
-                    v = 1.0f;
-                }
-                if (w > 1.0f) {
-                    w = 1.0f;
-                }
-                if (u < 0.0f) {
-                    u = 0.0f;
-                }
-                if (v < 0.0f) {
-                    v = 0.0f;
-                }
-                if (w < 0.0f) {
-                    w = 0.0f;
-                }
+                u = Mth.clamp(u, 0.0f, 1.0f);
+                v = Mth.clamp(v, 0.0f, 1.0f);
+                w = Mth.clamp(w, 0.0f, 1.0f);
                 int ab = 255;
                 int ac = (int)(u * 255.0f);
                 int ad = (int)(v * 255.0f);
@@ -177,6 +158,10 @@ implements AutoCloseable {
         this.lightTexture.upload();
         this.updateLightTexture = false;
         this.minecraft.getProfiler().pop();
+    }
+
+    private float getBrightness(Level level, int i) {
+        return level.dimension.getBrightnessRamp()[i];
     }
 }
 

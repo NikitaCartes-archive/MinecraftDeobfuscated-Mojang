@@ -153,6 +153,9 @@ public abstract class PathNavigation {
         if (!path.sameAs(this.path)) {
             this.path = path;
         }
+        if (this.isDone()) {
+            return false;
+        }
         this.trimPath();
         if (this.path.getSize() <= 0) {
             return false;

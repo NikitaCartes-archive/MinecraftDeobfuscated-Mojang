@@ -3,11 +3,7 @@
  */
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.EntityOutlineGenerator;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import java.util.SortedMap;
 import net.fabricmc.api.EnvType;
@@ -15,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderType;
 
 @Environment(value=EnvType.CLIENT)
@@ -27,18 +24,11 @@ public class RenderBuffers {
         object2ObjectLinkedOpenHashMap.put(RenderType.TRANSLUCENT_NO_CRUMBLING, new BufferBuilder(RenderType.TRANSLUCENT_NO_CRUMBLING.bufferSize()));
         object2ObjectLinkedOpenHashMap.put(RenderType.GLINT, new BufferBuilder(RenderType.GLINT.bufferSize()));
         object2ObjectLinkedOpenHashMap.put(RenderType.ENTITY_GLINT, new BufferBuilder(RenderType.ENTITY_GLINT.bufferSize()));
+        object2ObjectLinkedOpenHashMap.put(RenderType.WATER_MASK, new BufferBuilder(RenderType.WATER_MASK.bufferSize()));
     });
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediateWithBuffers(this.fixedBuffers, new BufferBuilder(256));
     private final MultiBufferSource.BufferSource effectBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));
-    private final BufferBuilder outlineBuilder = new BufferBuilder(RenderType.OUTLINE.bufferSize());
-    private final EntityOutlineGenerator outlineBuffer = new EntityOutlineGenerator(this.outlineBuilder);
-    private final MultiBufferSource outlineBufferSource = renderType -> {
-        VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
-        if (renderType.affectsEntityOutline()) {
-            return new VertexMultiConsumer(ImmutableList.of(this.outlineBuffer, vertexConsumer));
-        }
-        return vertexConsumer;
-    };
+    private final OutlineBufferSource outlineBufferSource = new OutlineBufferSource(this.bufferSource);
 
     public ChunkBufferBuilderPack fixedBufferPack() {
         return this.fixedBufferPack;
@@ -52,15 +42,7 @@ public class RenderBuffers {
         return this.effectBufferSource;
     }
 
-    public BufferBuilder outlineBuilder() {
-        return this.outlineBuilder;
-    }
-
-    public EntityOutlineGenerator outlineBuffer() {
-        return this.outlineBuffer;
-    }
-
-    public MultiBufferSource outlineBufferSource() {
+    public OutlineBufferSource outlineBufferSource() {
         return this.outlineBufferSource;
     }
 }

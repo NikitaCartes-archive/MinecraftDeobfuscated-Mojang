@@ -44,17 +44,17 @@ public class BakedGlyph {
         float s = g + q;
         float t = bl ? 1.0f - 0.25f * p : 0.0f;
         float u = bl ? 1.0f - 0.25f * q : 0.0f;
-        vertexConsumer.vertex(matrix4f, n + t, r, 0.0f).uv(this.u0, this.v0).uv2(l).color(h, i, j, k).endVertex();
-        vertexConsumer.vertex(matrix4f, n + u, s, 0.0f).uv(this.u0, this.v1).uv2(l).color(h, i, j, k).endVertex();
-        vertexConsumer.vertex(matrix4f, o + u, s, 0.0f).uv(this.u1, this.v1).uv2(l).color(h, i, j, k).endVertex();
-        vertexConsumer.vertex(matrix4f, o + t, r, 0.0f).uv(this.u1, this.v0).uv2(l).color(h, i, j, k).endVertex();
+        vertexConsumer.vertex(matrix4f, n + t, r, 0.0f).color(h, i, j, k).uv(this.u0, this.v0).uv2(l).endVertex();
+        vertexConsumer.vertex(matrix4f, n + u, s, 0.0f).color(h, i, j, k).uv(this.u0, this.v1).uv2(l).endVertex();
+        vertexConsumer.vertex(matrix4f, o + u, s, 0.0f).color(h, i, j, k).uv(this.u1, this.v1).uv2(l).endVertex();
+        vertexConsumer.vertex(matrix4f, o + t, r, 0.0f).color(h, i, j, k).uv(this.u1, this.v0).uv2(l).endVertex();
     }
 
     public void renderEffect(Effect effect, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i) {
-        vertexConsumer.vertex(matrix4f, effect.x0, effect.y0, effect.depth).uv(this.u0, this.v0).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
-        vertexConsumer.vertex(matrix4f, effect.x1, effect.y0, effect.depth).uv(this.u0, this.v1).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
-        vertexConsumer.vertex(matrix4f, effect.x1, effect.y1, effect.depth).uv(this.u1, this.v1).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
-        vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).uv(this.u1, this.v0).uv2(i).color(effect.r, effect.g, effect.b, effect.a).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x0, effect.y0, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u0, this.v0).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x1, effect.y0, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u0, this.v1).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x1, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v1).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v0).uv2(i).endVertex();
     }
 
     @Nullable

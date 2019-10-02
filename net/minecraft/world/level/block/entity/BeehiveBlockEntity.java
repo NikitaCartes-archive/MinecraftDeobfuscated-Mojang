@@ -24,6 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
@@ -38,6 +39,25 @@ implements TickableBlockEntity {
 
     public BeehiveBlockEntity() {
         super(BlockEntityType.BEEHIVE);
+    }
+
+    @Override
+    public void setChanged() {
+        if (this.isFireNearby()) {
+            this.emptyAllLivingFromHive(null, BeeReleaseStatus.EMERGENCY);
+        }
+        super.setChanged();
+    }
+
+    public boolean isFireNearby() {
+        if (this.level == null) {
+            return false;
+        }
+        for (BlockPos blockPos : BlockPos.betweenClosed(this.worldPosition.offset(-1, -1, -1), this.worldPosition.offset(1, 1, 1))) {
+            if (!(this.level.getBlockState(blockPos).getBlock() instanceof FireBlock)) continue;
+            return true;
+        }
+        return false;
     }
 
     public boolean isEmpty() {
@@ -107,7 +127,7 @@ implements TickableBlockEntity {
     private boolean releaseOccupant(CompoundTag compoundTag, @Nullable List<Entity> list, BeeReleaseStatus beeReleaseStatus) {
         BlockPos blockPos3;
         BlockPos blockPos = this.getBlockPos();
-        if (!this.level.isDay() || this.level.isRainingAt(blockPos)) {
+        if ((!this.level.isDay() || this.level.isRainingAt(blockPos)) && beeReleaseStatus != BeeReleaseStatus.EMERGENCY) {
             return false;
         }
         compoundTag.remove("Passengers");
@@ -259,7 +279,8 @@ implements TickableBlockEntity {
 
     public static enum BeeReleaseStatus {
         HONEY_DELIVERED,
-        BEE_RELEASED;
+        BEE_RELEASED,
+        EMERGENCY;
 
     }
 }

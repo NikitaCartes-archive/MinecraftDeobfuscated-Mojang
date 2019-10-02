@@ -20,7 +20,7 @@ extends QuadrupedModel<T> {
     private float rollAmount;
 
     public PandaModel(int i, float f) {
-        super(i, f, true, 23.0f, 0.3f, 1.2f, 3.0f, 49);
+        super(i, f, true, 23.0f, 4.8f, 2.7f, 3.0f, 49);
         this.texWidth = 64;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 6);

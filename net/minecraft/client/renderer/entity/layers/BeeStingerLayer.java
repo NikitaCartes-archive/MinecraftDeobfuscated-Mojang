@@ -50,17 +50,22 @@ extends StuckInBodyLayer<T, M> {
         poseStack.mulPose(Vector3f.XP.rotation(45.0f, true));
         poseStack.scale(0.03125f, 0.03125f, 0.03125f);
         poseStack.translate(2.5, 0.0, 0.0);
+        int r = entity.getLightColor();
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(BEE_STINGER_LOCATION));
         OverlayTexture.setDefault(vertexConsumer);
-        for (int r = 0; r < 4; ++r) {
+        for (int s = 0; s < 4; ++s) {
             poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
             Matrix4f matrix4f = poseStack.getPose();
-            vertexConsumer.vertex(matrix4f, -4.5f, -1.0f, 0.0f).uv(0.0f, 0.0f).endVertex();
-            vertexConsumer.vertex(matrix4f, 4.5f, -1.0f, 0.0f).uv(0.125f, 0.0f).endVertex();
-            vertexConsumer.vertex(matrix4f, 4.5f, 1.0f, 0.0f).uv(0.125f, 0.0625f).endVertex();
-            vertexConsumer.vertex(matrix4f, -4.5f, 1.0f, 0.0f).uv(0.0f, 0.0625f).endVertex();
+            BeeStingerLayer.vertex(vertexConsumer, matrix4f, -4.5f, -1, 0.0f, 0.0f, r);
+            BeeStingerLayer.vertex(vertexConsumer, matrix4f, 4.5f, -1, 0.125f, 0.0f, r);
+            BeeStingerLayer.vertex(vertexConsumer, matrix4f, 4.5f, 1, 0.125f, 0.0625f, r);
+            BeeStingerLayer.vertex(vertexConsumer, matrix4f, -4.5f, 1, 0.0f, 0.0625f, r);
         }
         vertexConsumer.unsetDefaultOverlayCoords();
+    }
+
+    private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, int i, float g, float h, int j) {
+        vertexConsumer.vertex(matrix4f, f, i, 0.0f).color(255, 255, 255, 255).uv(g, h).uv2(j).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 }
 

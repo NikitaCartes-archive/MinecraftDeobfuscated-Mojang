@@ -167,10 +167,10 @@ implements AutoCloseable {
             v = glyphInfo.getAdvance(bl4);
             float f2 = w = bl ? 1.0f : 0.0f;
             if (bl7) {
-                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 4.5f, o + w + v, g + w + 4.5f - 1.0f, 0.001f, p, q, r, s));
+                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 4.5f, o + w + v, g + w + 4.5f - 1.0f, -0.01f, p, q, r, s));
             }
             if (bl6) {
-                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 9.0f, o + w + v, g + w + 9.0f - 1.0f, 0.001f, p, q, r, s));
+                list.add(new BakedGlyph.Effect(o + w - 1.0f, g + w + 9.0f, o + w + v, g + w + 9.0f - 1.0f, -0.01f, p, q, r, s));
             }
             o += v;
         }
@@ -179,7 +179,7 @@ implements AutoCloseable {
             float y = (float)(j >> 16 & 0xFF) / 255.0f;
             float z = (float)(j >> 8 & 0xFF) / 255.0f;
             float aa = (float)(j & 0xFF) / 255.0f;
-            list.add(new BakedGlyph.Effect(f - 1.0f, g + 9.0f, o + 1.0f, g - 1.0f, -0.001f, y, z, aa, x));
+            list.add(new BakedGlyph.Effect(f - 1.0f, g + 9.0f, o + 1.0f, g - 1.0f, 0.01f, y, z, aa, x));
         }
         if (!list.isEmpty() && (resourceLocation2 = (bakedGlyph2 = this.fonts.whiteGlyph()).getTexture()) != null) {
             VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation2) : RenderType.TEXT(resourceLocation2));

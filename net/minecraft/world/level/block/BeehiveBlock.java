@@ -16,9 +16,15 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,8 +32,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
@@ -37,6 +45,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -69,7 +79,7 @@ extends BaseEntityBlock {
         if (!level.isClientSide) {
             List<Bee> list;
             if (blockEntity instanceof BeehiveBlockEntity && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-                ((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+                ((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
                 level.updateNeighbourForOutputSignal(blockPos, this);
             }
             if (!(list = level.getEntitiesOfClass(Bee.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0))).isEmpty()) {
@@ -211,6 +221,27 @@ extends BaseEntityBlock {
             level.addFreshEntity(itemEntity);
         }
         super.playerWillDestroy(level, blockPos, blockState, player);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
+        BlockEntity blockEntity;
+        Entity entity = builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+        if ((entity instanceof PrimedTnt || entity instanceof Creeper || entity instanceof WitherSkull || entity instanceof WitherBoss || entity instanceof MinecartTNT) && (blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)) instanceof BeehiveBlockEntity) {
+            BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+            beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+        }
+        return super.getDrops(blockState, builder);
+    }
+
+    @Override
+    public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
+        BlockEntity blockEntity;
+        if (levelAccessor.getBlockState(blockPos2).getBlock() instanceof FireBlock && (blockEntity = levelAccessor.getBlockEntity(blockPos)) instanceof BeehiveBlockEntity) {
+            BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+            beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+        }
+        return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
 }
 

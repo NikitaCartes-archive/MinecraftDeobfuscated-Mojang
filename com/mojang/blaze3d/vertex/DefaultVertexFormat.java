@@ -19,7 +19,6 @@ public class DefaultVertexFormat {
     public static final VertexFormatElement ELEMENT_PADDING = new VertexFormatElement(0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.PADDING, 1);
     public static final VertexFormat BLOCK = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_UV2).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
     public static final VertexFormat NEW_ENTITY = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_UV1).addElement(ELEMENT_UV2).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
-    public static final VertexFormat ENTITY = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_NORMAL).addElement(ELEMENT_PADDING);
     @Deprecated
     public static final VertexFormat PARTICLE = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV2);
     public static final VertexFormat POSITION = new VertexFormat().addElement(ELEMENT_POSITION);
@@ -28,6 +27,7 @@ public class DefaultVertexFormat {
     public static final VertexFormat POSITION_COLOR_TEX = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0);
     @Deprecated
     public static final VertexFormat POSITION_TEX_COLOR = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_COLOR);
+    public static final VertexFormat POSITION_COLOR_TEX_LIGHTMAP = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_COLOR).addElement(ELEMENT_UV0).addElement(ELEMENT_UV2);
     @Deprecated
     public static final VertexFormat POSITION_TEX_LIGHTMAP_COLOR = new VertexFormat().addElement(ELEMENT_POSITION).addElement(ELEMENT_UV0).addElement(ELEMENT_UV2).addElement(ELEMENT_COLOR);
     @Deprecated
