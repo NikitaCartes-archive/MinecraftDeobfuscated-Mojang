@@ -45,18 +45,23 @@ public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> e
 		poseStack.mulPose(Vector3f.XP.rotation(45.0F, true));
 		poseStack.scale(0.03125F, 0.03125F, 0.03125F);
 		poseStack.translate(2.5, 0.0, 0.0);
+		int r = entity.getLightColor();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(BEE_STINGER_LOCATION));
 		OverlayTexture.setDefault(vertexConsumer);
 
-		for (int r = 0; r < 4; r++) {
+		for (int s = 0; s < 4; s++) {
 			poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
 			Matrix4f matrix4f = poseStack.getPose();
-			vertexConsumer.vertex(matrix4f, -4.5F, -1.0F, 0.0F).uv(0.0F, 0.0F).endVertex();
-			vertexConsumer.vertex(matrix4f, 4.5F, -1.0F, 0.0F).uv(0.125F, 0.0F).endVertex();
-			vertexConsumer.vertex(matrix4f, 4.5F, 1.0F, 0.0F).uv(0.125F, 0.0625F).endVertex();
-			vertexConsumer.vertex(matrix4f, -4.5F, 1.0F, 0.0F).uv(0.0F, 0.0625F).endVertex();
+			vertex(vertexConsumer, matrix4f, -4.5F, -1, 0.0F, 0.0F, r);
+			vertex(vertexConsumer, matrix4f, 4.5F, -1, 0.125F, 0.0F, r);
+			vertex(vertexConsumer, matrix4f, 4.5F, 1, 0.125F, 0.0625F, r);
+			vertex(vertexConsumer, matrix4f, -4.5F, 1, 0.0F, 0.0625F, r);
 		}
 
 		vertexConsumer.unsetDefaultOverlayCoords();
+	}
+
+	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, int i, float g, float h, int j) {
+		vertexConsumer.vertex(matrix4f, f, (float)i, 0.0F).color(255, 255, 255, 255).uv(g, h).uv2(j).normal(0.0F, 1.0F, 0.0F).endVertex();
 	}
 }

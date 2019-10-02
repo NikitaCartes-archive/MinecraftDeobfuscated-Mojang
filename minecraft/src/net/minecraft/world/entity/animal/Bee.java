@@ -214,10 +214,16 @@ public class Bee extends Animal implements FlyingAnimal {
 	private boolean canEnterHive() {
 		if (this.cannotEnterHiveTicks > 0) {
 			return false;
+		} else if (!this.hasHive()) {
+			return false;
 		} else {
-			return !this.hasHive()
-				? false
-				: this.hasNectar() || !this.level.isDay() || this.level.isRainingAt(this.getCommandSenderBlockPosition()) || this.ticksSincePollination > 3600;
+			boolean bl = false;
+			BlockEntity blockEntity = this.level.getBlockEntity(this.hivePos);
+			if (blockEntity instanceof BeehiveBlockEntity) {
+				bl = ((BeehiveBlockEntity)blockEntity).isFireNearby();
+			}
+
+			return !bl && (this.hasNectar() || !this.level.isDay() || this.level.isRainingAt(this.getCommandSenderBlockPosition()) || this.ticksSincePollination > 3600);
 		}
 	}
 
@@ -444,7 +450,7 @@ public class Bee extends Animal implements FlyingAnimal {
 
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return this.isBaby() ? entityDimensions.height * 0.95F : entityDimensions.height * 0.5F;
+		return this.isBaby() ? entityDimensions.height * 0.5F : entityDimensions.height * 0.5F;
 	}
 
 	@Override

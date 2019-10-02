@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEntity {
@@ -29,6 +30,29 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	public BeehiveBlockEntity() {
 		super(BlockEntityType.BEEHIVE);
+	}
+
+	@Override
+	public void setChanged() {
+		if (this.isFireNearby()) {
+			this.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+		}
+
+		super.setChanged();
+	}
+
+	public boolean isFireNearby() {
+		if (this.level == null) {
+			return false;
+		} else {
+			for (BlockPos blockPos : BlockPos.betweenClosed(this.worldPosition.offset(-1, -1, -1), this.worldPosition.offset(1, 1, 1))) {
+				if (this.level.getBlockState(blockPos).getBlock() instanceof FireBlock) {
+					return true;
+				}
+			}
+
+			return false;
+		}
 	}
 
 	public boolean isEmpty() {
@@ -103,7 +127,9 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	private boolean releaseOccupant(CompoundTag compoundTag, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
 		BlockPos blockPos = this.getBlockPos();
-		if (this.level.isDay() && !this.level.isRainingAt(blockPos)) {
+		if ((!this.level.isDay() || this.level.isRainingAt(blockPos)) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
+			return false;
+		} else {
 			compoundTag.remove("Passengers");
 			compoundTag.remove("Leash");
 			compoundTag.removeUUID("UUID");
@@ -182,8 +208,6 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 					return false;
 				}
 			}
-		} else {
-			return false;
 		}
 	}
 
@@ -279,6 +303,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	public static enum BeeReleaseStatus {
 		HONEY_DELIVERED,
-		BEE_RELEASED;
+		BEE_RELEASED,
+		EMERGENCY;
 	}
 }

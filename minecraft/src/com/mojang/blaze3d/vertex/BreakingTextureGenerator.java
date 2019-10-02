@@ -1,19 +1,21 @@
 package com.mojang.blaze3d.vertex;
 
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
+import com.mojang.math.Vector4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 	private final VertexConsumer delegate;
-	private final double camX;
-	private final double camY;
-	private final double camZ;
-	private double x;
-	private double y;
-	private double z;
+	private final Matrix4f cameraInversePose;
+	private final Matrix3f normalPose;
+	private float x;
+	private float y;
+	private float z;
 	private int r;
 	private int g;
 	private int b;
@@ -25,18 +27,19 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 	private float ny;
 	private float nz;
 
-	public BreakingTextureGenerator(VertexConsumer vertexConsumer, double d, double e, double f) {
+	public BreakingTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f) {
 		this.delegate = vertexConsumer;
-		this.camX = d;
-		this.camY = e;
-		this.camZ = f;
+		this.cameraInversePose = matrix4f.copy();
+		this.cameraInversePose.invert();
+		this.normalPose = new Matrix3f(matrix4f);
+		this.normalPose.transpose();
 		this.resetState();
 	}
 
 	private void resetState() {
-		this.x = 0.0;
-		this.y = 0.0;
-		this.z = 0.0;
+		this.x = 0.0F;
+		this.y = 0.0F;
+		this.z = 0.0F;
 		this.r = this.defaultR;
 		this.g = this.defaultG;
 		this.b = this.defaultB;
@@ -51,33 +54,32 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 
 	@Override
 	public void endVertex() {
-		Direction direction = Direction.getNearest(this.nx, this.ny, this.nz);
-		double d = this.x + this.camX;
-		double e = this.y + this.camY;
-		double f = this.z + this.camZ;
-		double g;
-		double h;
+		Vector3f vector3f = new Vector3f(this.nx, this.ny, this.nz);
+		vector3f.transform(this.normalPose);
+		Direction direction = Direction.getNearest(vector3f.x(), vector3f.y(), vector3f.z());
+		Vector4f vector4f = new Vector4f(this.x, this.y, this.z, 1.0F);
+		vector4f.transform(this.cameraInversePose);
+		float f;
+		float g;
 		switch (direction.getAxis()) {
 			case X:
-				g = f;
-				h = e;
+				f = vector4f.z();
+				g = vector4f.y();
 				break;
 			case Y:
-				g = d;
-				h = f;
+				f = vector4f.x();
+				g = vector4f.z();
 				break;
 			case Z:
 			default:
-				g = d;
-				h = e;
+				f = vector4f.x();
+				g = vector4f.y();
 		}
 
-		float i = (float)(Mth.frac(g / 256.0) * 256.0);
-		float j = (float)(Mth.frac(h / 256.0) * 256.0);
 		this.delegate
-			.vertex(this.x, this.y, this.z)
+			.vertex((double)this.x, (double)this.y, (double)this.z)
 			.color(this.r, this.g, this.b, this.a)
-			.uv(i, j)
+			.uv(f, g)
 			.overlayCoords(this.overlayU, this.overlayV)
 			.uv2(this.lightCoords)
 			.normal(this.nx, this.ny, this.nz)
@@ -87,9 +89,9 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 
 	@Override
 	public VertexConsumer vertex(double d, double e, double f) {
-		this.x = d;
-		this.y = e;
-		this.z = f;
+		this.x = (float)d;
+		this.y = (float)e;
+		this.z = (float)f;
 		return this;
 	}
 

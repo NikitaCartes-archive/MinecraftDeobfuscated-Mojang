@@ -164,11 +164,11 @@ public class Font implements AutoCloseable {
 				float v = glyphInfo.getAdvance(bl4);
 				float w = bl ? 1.0F : 0.0F;
 				if (bl7) {
-					list.add(new BakedGlyph.Effect(o + w - 1.0F, g + w + 4.5F, o + w + v, g + w + 4.5F - 1.0F, 0.001F, p, q, r, s));
+					list.add(new BakedGlyph.Effect(o + w - 1.0F, g + w + 4.5F, o + w + v, g + w + 4.5F - 1.0F, -0.01F, p, q, r, s));
 				}
 
 				if (bl6) {
-					list.add(new BakedGlyph.Effect(o + w - 1.0F, g + w + 9.0F, o + w + v, g + w + 9.0F - 1.0F, 0.001F, p, q, r, s));
+					list.add(new BakedGlyph.Effect(o + w - 1.0F, g + w + 9.0F, o + w + v, g + w + 9.0F - 1.0F, -0.01F, p, q, r, s));
 				}
 
 				o += v;
@@ -180,7 +180,7 @@ public class Font implements AutoCloseable {
 			float y = (float)(j >> 16 & 0xFF) / 255.0F;
 			float z = (float)(j >> 8 & 0xFF) / 255.0F;
 			float aa = (float)(j & 0xFF) / 255.0F;
-			list.add(new BakedGlyph.Effect(f - 1.0F, g + 9.0F, o + 1.0F, g - 1.0F, -0.001F, y, z, aa, x));
+			list.add(new BakedGlyph.Effect(f - 1.0F, g + 9.0F, o + 1.0F, g - 1.0F, 0.01F, y, z, aa, x));
 		}
 
 		if (!list.isEmpty()) {

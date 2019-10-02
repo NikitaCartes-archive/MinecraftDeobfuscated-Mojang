@@ -688,6 +688,16 @@ public class RenderSystem {
 		GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
 	}
 
+	public static void setupOutline() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.setupOutline();
+	}
+
+	public static void teardownOutline() {
+		assertThread(RenderSystem::isOnGameThread);
+		GlStateManager.teardownOutline();
+	}
+
 	public static void setupOverlayColor(IntSupplier intSupplier, int i) {
 		assertThread(RenderSystem::isOnGameThread);
 		GlStateManager.setupOverlayColor(intSupplier.getAsInt(), i);

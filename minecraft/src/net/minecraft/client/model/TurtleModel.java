@@ -2,6 +2,8 @@ package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -11,9 +13,10 @@ import net.minecraft.world.entity.animal.Turtle;
 @Environment(EnvType.CLIENT)
 public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 	private final ModelPart eggBelly;
+	private float yOffset;
 
 	public TurtleModel(float f) {
-		super(12, f, true, 120.0F, 0.0F, 6.0F, 6.0F, 120);
+		super(12, f, true, 120.0F, 0.0F, 9.0F, 6.0F, 120);
 		this.texWidth = 128;
 		this.texHeight = 64;
 		this.head = new ModelPart(this, 3, 0);
@@ -73,19 +76,19 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 			this.leg1.xRot = 0.0F;
 		}
 
-		float l;
-		if (turtle.hasEgg()) {
-			l = -1.28F;
+		this.eggBelly.visible = !this.young && turtle.hasEgg();
+		if (this.eggBelly.visible) {
+			this.yOffset = -0.08F;
 		} else {
-			l = 0.0F;
+			this.yOffset = 0.0F;
 		}
+	}
 
-		this.head.y = l;
-		this.body.y = l;
-		this.leg0.y = l;
-		this.leg1.y = l;
-		this.leg2.y = l;
-		this.leg3.y = l;
-		this.eggBelly.visible = turtle.hasEgg();
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
+		poseStack.pushPose();
+		poseStack.translate(0.0, (double)this.yOffset, 0.0);
+		super.renderToBuffer(poseStack, vertexConsumer, i, f, g, h);
+		poseStack.popPose();
 	}
 }

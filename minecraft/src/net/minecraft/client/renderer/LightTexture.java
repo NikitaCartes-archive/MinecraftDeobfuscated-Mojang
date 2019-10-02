@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -28,6 +29,14 @@ public class LightTexture implements AutoCloseable {
 		this.lightTexture = new DynamicTexture(16, 16, false);
 		this.lightTextureLocation = this.minecraft.getTextureManager().register("light_map", this.lightTexture);
 		this.lightPixels = this.lightTexture.getPixels();
+
+		for (int i = 0; i < 16; i++) {
+			for (int j = 0; j < 16; j++) {
+				this.lightPixels.setPixelRGBA(j, i, -1);
+			}
+		}
+
+		this.lightTexture.upload();
 	}
 
 	public void close() {
@@ -84,10 +93,10 @@ public class LightTexture implements AutoCloseable {
 
 				for (int k = 0; k < 16; k++) {
 					for (int l = 0; l < 16; l++) {
-						float m = level.dimension.getBrightnessRamp()[k] * h;
-						float n = level.dimension.getBrightnessRamp()[l] * (this.blockLightRed * 0.1F + 1.5F);
+						float m = this.getBrightness(level, k) * h;
+						float n = this.getBrightness(level, l) * (this.blockLightRed * 0.1F + 1.5F);
 						if (level.getSkyFlashTime() > 0) {
-							m = level.dimension.getBrightnessRamp()[k];
+							m = this.getBrightness(level, k);
 						}
 
 						float o = m * (g * 0.65F + 0.35F);
@@ -114,69 +123,31 @@ public class LightTexture implements AutoCloseable {
 						}
 
 						if (j > 0.0F) {
-							float x = 1.0F / u;
-							if (x > 1.0F / v) {
-								x = 1.0F / v;
-							}
-
-							if (x > 1.0F / w) {
-								x = 1.0F / w;
-							}
-
+							float x = Math.min(1.0F / u, Math.min(1.0F / v, 1.0F / w));
 							u = u * (1.0F - j) + u * x * j;
 							v = v * (1.0F - j) + v * x * j;
 							w = w * (1.0F - j) + w * x * j;
 						}
 
-						if (u > 1.0F) {
-							u = 1.0F;
-						}
-
-						if (v > 1.0F) {
-							v = 1.0F;
-						}
-
-						if (w > 1.0F) {
-							w = 1.0F;
-						}
-
-						float xx = (float)this.minecraft.options.gamma;
+						u = Mth.clamp(u, 0.0F, 1.0F);
+						v = Mth.clamp(v, 0.0F, 1.0F);
+						w = Mth.clamp(w, 0.0F, 1.0F);
+						float x = (float)this.minecraft.options.gamma;
 						float y = 1.0F - u;
 						float z = 1.0F - v;
 						float aa = 1.0F - w;
 						y = 1.0F - y * y * y * y;
 						z = 1.0F - z * z * z * z;
 						aa = 1.0F - aa * aa * aa * aa;
-						u = u * (1.0F - xx) + y * xx;
-						v = v * (1.0F - xx) + z * xx;
-						w = w * (1.0F - xx) + aa * xx;
+						u = u * (1.0F - x) + y * x;
+						v = v * (1.0F - x) + z * x;
+						w = w * (1.0F - x) + aa * x;
 						u = u * 0.96F + 0.03F;
 						v = v * 0.96F + 0.03F;
 						w = w * 0.96F + 0.03F;
-						if (u > 1.0F) {
-							u = 1.0F;
-						}
-
-						if (v > 1.0F) {
-							v = 1.0F;
-						}
-
-						if (w > 1.0F) {
-							w = 1.0F;
-						}
-
-						if (u < 0.0F) {
-							u = 0.0F;
-						}
-
-						if (v < 0.0F) {
-							v = 0.0F;
-						}
-
-						if (w < 0.0F) {
-							w = 0.0F;
-						}
-
+						u = Mth.clamp(u, 0.0F, 1.0F);
+						v = Mth.clamp(v, 0.0F, 1.0F);
+						w = Mth.clamp(w, 0.0F, 1.0F);
 						int ab = 255;
 						int ac = (int)(u * 255.0F);
 						int ad = (int)(v * 255.0F);
@@ -190,5 +161,9 @@ public class LightTexture implements AutoCloseable {
 				this.minecraft.getProfiler().pop();
 			}
 		}
+	}
+
+	private float getBrightness(Level level, int i) {
+		return level.dimension.getBrightnessRamp()[i];
 	}
 }

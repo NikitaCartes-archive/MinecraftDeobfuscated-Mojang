@@ -978,18 +978,15 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					&& (entity.isGlowing() || entity instanceof Player && this.minecraft.player.isSpectator() && this.minecraft.options.keySpectatorOutlines.isDown());
 				MultiBufferSource multiBufferSource;
 				if (bl5) {
-					if (!bl4) {
-						this.renderBuffers.outlineBuilder().begin(RenderType.OUTLINE.mode(), RenderType.OUTLINE.format());
-						bl4 = true;
-					}
-
-					multiBufferSource = this.renderBuffers.outlineBufferSource();
+					bl4 = true;
+					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
+					multiBufferSource = outlineBufferSource;
 					int i = entity.getTeamColor();
 					int j = 255;
 					int k = i >> 16 & 0xFF;
 					int m = i >> 8 & 0xFF;
 					int n = i & 0xFF;
-					this.renderBuffers.outlineBuffer().setColor(k, m, n, 255);
+					outlineBufferSource.setColor(k, m, n, 255);
 				} else {
 					multiBufferSource = bufferSource;
 				}
@@ -999,7 +996,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		}
 
 		this.checkPoseStack(poseStack);
-		RenderType.OUTLINE.end(this.renderBuffers.outlineBuilder());
+		this.renderBuffers.outlineBufferSource().endOutlineBatch();
 		RenderSystem.depthMask(false);
 		if (bl4) {
 			this.entityEffect.process(f);
@@ -1021,11 +1018,15 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 				for (BlockEntity blockEntity : list) {
 					BlockPos blockPos = blockEntity.getBlockPos();
 					MultiBufferSource multiBufferSource2 = bufferSource;
+					poseStack.pushPose();
+					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos.asLong());
 					if (sortedSet != null && !sortedSet.isEmpty()) {
-						int n = ((BlockDestructionProgress)sortedSet.last()).getProgress();
-						if (n >= 0) {
-							VertexConsumer vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.effectBufferSource().getBuffer(RenderType.CRUMBLING(n)), d, e, g);
+						int m = ((BlockDestructionProgress)sortedSet.last()).getProgress();
+						if (m >= 0) {
+							VertexConsumer vertexConsumer = new BreakingTextureGenerator(
+								this.renderBuffers.effectBufferSource().getBuffer(RenderType.CRUMBLING(m)), poseStack.getPose()
+							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
 								return (VertexConsumer)(renderType.affectsCrumbling() ? new VertexMultiConsumer(ImmutableList.of(vertexConsumer, vertexConsumer2x)) : vertexConsumer2x);
@@ -1033,8 +1034,6 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 						}
 					}
 
-					poseStack.pushPose();
-					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					BlockEntityRenderDispatcher.instance.render(blockEntity, f, poseStack, multiBufferSource2, d, e, g);
 					poseStack.popPose();
 				}
@@ -1065,7 +1064,9 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
 					int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
-					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.effectBufferSource().getBuffer(RenderType.CRUMBLING(r)), d, e, g);
+					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(
+						this.renderBuffers.effectBufferSource().getBuffer(RenderType.CRUMBLING(r)), poseStack.getPose()
+					);
 					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
 				}

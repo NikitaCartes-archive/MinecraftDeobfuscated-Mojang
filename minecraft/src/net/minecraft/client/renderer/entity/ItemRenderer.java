@@ -189,7 +189,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
 		RenderSystem.pushMatrix();
 		this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
-		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).pushFilter(false, false);
+		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
 		RenderSystem.enableRescaleNormal();
 		RenderSystem.enableAlphaTest();
 		RenderSystem.defaultAlphaFunc();
@@ -207,8 +207,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		RenderSystem.disableAlphaTest();
 		RenderSystem.disableRescaleNormal();
 		RenderSystem.popMatrix();
-		this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
-		this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).popFilter();
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {

@@ -195,9 +195,8 @@ public abstract class PatrollingMonster extends Monster {
 					BlockPos blockPos = new BlockPos(vec34);
 					blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 					if (!pathNavigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), bl ? this.leaderSpeedModifier : this.speedModifier)) {
-						if (!this.moveRandomly()) {
-							this.cooldownUntil = this.mob.level.getGameTime() + 200L;
-						}
+						this.moveRandomly();
+						this.cooldownUntil = this.mob.level.getGameTime() + 200L;
 					} else if (bl) {
 						for (PatrollingMonster patrollingMonster : list) {
 							patrollingMonster.setPatrolTarget(blockPos);

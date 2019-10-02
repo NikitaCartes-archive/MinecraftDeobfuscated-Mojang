@@ -427,6 +427,15 @@ public class Mth {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static float fastInvCubeRoot(float f) {
+		int i = Float.floatToIntBits(f);
+		i = 1419967116 - i / 3;
+		float g = Float.intBitsToFloat(i);
+		g = 0.6666667F * g + 1.0F / (3.0F * g * g * f);
+		return 0.6666667F * g + 1.0F / (3.0F * g * g * f);
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static int hsvToRgb(float f, float g, float h) {
 		int i = (int)(f * 6.0F) % 6;
 		float j = f * 6.0F - (float)i;

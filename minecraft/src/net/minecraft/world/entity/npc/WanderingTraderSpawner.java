@@ -75,7 +75,7 @@ public class WanderingTraderSpawner {
 			Optional<BlockPos> optional = poiManager.find(PoiType.MEETING.getPredicate(), blockPosx -> true, blockPos, 48, PoiManager.Occupancy.ANY);
 			BlockPos blockPos2 = (BlockPos)optional.orElse(blockPos);
 			BlockPos blockPos3 = this.findSpawnPositionNear(blockPos2, 48);
-			if (blockPos3 != null) {
+			if (blockPos3 != null && this.hasEnoughSpace(blockPos3)) {
 				if (this.level.getBiome(blockPos3) == Biomes.THE_VOID) {
 					return false;
 				}
@@ -124,5 +124,15 @@ public class WanderingTraderSpawner {
 		}
 
 		return blockPos2;
+	}
+
+	private boolean hasEnoughSpace(BlockPos blockPos) {
+		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos, blockPos.offset(1, 2, 1))) {
+			if (!this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

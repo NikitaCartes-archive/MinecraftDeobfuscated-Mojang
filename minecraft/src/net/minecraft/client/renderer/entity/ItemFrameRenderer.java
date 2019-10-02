@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -23,7 +24,6 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
-	private static final ResourceLocation MAP_BACKGROUND_LOCATION = new ResourceLocation("textures/map/map_background.png");
 	private static final ModelResourceLocation FRAME_LOCATION = new ModelResourceLocation("item_frame", "map=false");
 	private static final ModelResourceLocation MAP_FRAME_LOCATION = new ModelResourceLocation("item_frame", "map=true");
 	private final Minecraft minecraft = Minecraft.getInstance();
@@ -60,7 +60,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 			int k = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
 			poseStack.mulPose(Vector3f.ZP.rotation((float)k * 360.0F / 8.0F, true));
 			if (bl) {
-				this.entityRenderDispatcher.textureManager.bind(MAP_BACKGROUND_LOCATION);
+				this.entityRenderDispatcher.textureManager.bind(MapRenderer.MAP_BACKGROUND_LOCATION);
 				poseStack.mulPose(Vector3f.ZP.rotation(180.0F, true));
 				float l = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
@@ -68,7 +68,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 				MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, itemFrame.level);
 				poseStack.translate(0.0, 0.0, -1.0);
 				if (mapItemSavedData != null) {
-					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true);
+					this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true, j);
 				}
 			} else {
 				poseStack.scale(0.5F, 0.5F, 0.5F);

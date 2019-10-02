@@ -1,13 +1,13 @@
 package net.minecraft.client.renderer.texture;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -33,7 +33,7 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final ResourceLocation INTENTIONAL_MISSING_TEXTURE = new ResourceLocation("");
 	private final Map<ResourceLocation, AbstractTexture> byPath = Maps.<ResourceLocation, AbstractTexture>newHashMap();
-	private final List<Tickable> tickableTextures = Lists.<Tickable>newArrayList();
+	private final Set<Tickable> tickableTextures = Sets.<Tickable>newHashSet();
 	private final Map<String, Integer> prefixRegister = Maps.<String, Integer>newHashMap();
 	private final ResourceManager resourceManager;
 

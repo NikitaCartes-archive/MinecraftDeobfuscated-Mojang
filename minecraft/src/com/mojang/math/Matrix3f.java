@@ -304,6 +304,40 @@ public final class Matrix3f {
 		this.values[8] = 1.0F;
 	}
 
+	public float adjugateAndDet() {
+		float f = this.det2(1, 2, 1, 2);
+		float g = -this.det2(1, 2, 0, 2);
+		float h = this.det2(1, 2, 0, 1);
+		float i = -this.det2(0, 2, 1, 2);
+		float j = this.det2(0, 2, 0, 2);
+		float k = -this.det2(0, 2, 0, 1);
+		float l = this.det2(0, 1, 1, 2);
+		float m = -this.det2(0, 1, 0, 2);
+		float n = this.det2(0, 1, 0, 1);
+		float o = this.get(0, 0) * f + this.get(0, 1) * g + this.get(0, 2) * h;
+		this.set(0, 0, f);
+		this.set(1, 0, g);
+		this.set(2, 0, h);
+		this.set(0, 1, i);
+		this.set(1, 1, j);
+		this.set(2, 1, k);
+		this.set(0, 2, l);
+		this.set(1, 2, m);
+		this.set(2, 2, n);
+		return o;
+	}
+
+	public float determinant() {
+		float f = this.det2(1, 2, 1, 2);
+		float g = -this.det2(1, 2, 0, 2);
+		float h = this.det2(1, 2, 0, 1);
+		return this.get(0, 0) * f + this.get(0, 1) * g + this.get(0, 2) * h;
+	}
+
+	private float det2(int i, int j, int k, int l) {
+		return this.get(i, k) * this.get(j, l) - this.get(i, l) * this.get(j, k);
+	}
+
 	public float get(int i, int j) {
 		return this.values[3 * j + i];
 	}
@@ -323,6 +357,12 @@ public final class Matrix3f {
 					this.values[i + j * 3] = this.values[i + j * 3] + fs[i + k * 3] * matrix3f.values[k + j * 3];
 				}
 			}
+		}
+	}
+
+	public void mul(float f) {
+		for (int i = 0; i < 9; i++) {
+			this.values[i] = this.values[i] * f;
 		}
 	}
 }

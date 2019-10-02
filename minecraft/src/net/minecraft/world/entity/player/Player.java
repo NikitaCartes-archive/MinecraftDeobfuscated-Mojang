@@ -562,7 +562,7 @@ public abstract class Player extends LivingEntity {
 
 		this.playShoulderEntityAmbientSound(this.getShoulderEntityLeft());
 		this.playShoulderEntityAmbientSound(this.getShoulderEntityRight());
-		if (!this.level.isClientSide && (this.fallDistance > 0.5F || this.isInWater() || this.isPassenger()) || this.abilities.flying || this.isSleeping()) {
+		if (!this.level.isClientSide && (this.fallDistance > 0.5F || this.isInWater()) || this.abilities.flying || this.isSleeping()) {
 			this.removeEntitiesOnShoulder();
 		}
 	}

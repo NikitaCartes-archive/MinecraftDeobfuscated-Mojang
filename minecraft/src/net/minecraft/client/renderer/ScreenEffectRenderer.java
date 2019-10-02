@@ -75,10 +75,10 @@ public class ScreenEffectRenderer {
 		float o = textureAtlasSprite.getV1();
 		Matrix4f matrix4f = poseStack.getPose();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
-		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 0.5F).uv(m, o).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 0.5F).uv(l, o).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 0.5F).uv(l, n).endVertex();
-		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 0.5F).uv(m, n).endVertex();
+		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(m, o).endVertex();
+		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(l, o).endVertex();
+		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(l, n).endVertex();
+		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(m, n).endVertex();
 		bufferBuilder.end();
 		BufferUploader.end(bufferBuilder);
 	}
