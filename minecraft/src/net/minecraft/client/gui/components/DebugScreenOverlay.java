@@ -157,9 +157,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			string = String.format("\"%s\" server, %.0f tx, %.0f rx", this.minecraft.player.getServerBrand(), f, g);
 		}
 
-		BlockPos blockPos = new BlockPos(
-			this.minecraft.getCameraEntity().x, this.minecraft.getCameraEntity().getBoundingBox().minY, this.minecraft.getCameraEntity().z
-		);
+		BlockPos blockPos = new BlockPos(this.minecraft.getCameraEntity());
 		if (this.minecraft.showOnlyReducedInfo()) {
 			return Lists.<String>newArrayList(
 				"Minecraft "
@@ -234,9 +232,9 @@ public class DebugScreenOverlay extends GuiComponent {
 				String.format(
 					Locale.ROOT,
 					"XYZ: %.3f / %.5f / %.3f",
-					this.minecraft.getCameraEntity().x,
-					this.minecraft.getCameraEntity().getBoundingBox().minY,
-					this.minecraft.getCameraEntity().z
+					this.minecraft.getCameraEntity().getX(),
+					this.minecraft.getCameraEntity().getY(),
+					this.minecraft.getCameraEntity().getZ()
 				)
 			);
 			list.add(String.format("Block: %d %d %d", blockPos.getX(), blockPos.getY(), blockPos.getZ()));

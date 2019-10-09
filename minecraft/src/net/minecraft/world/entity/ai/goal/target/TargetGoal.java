@@ -128,8 +128,8 @@ public abstract class TargetGoal extends Goal {
 			if (node == null) {
 				return false;
 			} else {
-				int i = node.x - Mth.floor(livingEntity.x);
-				int j = node.z - Mth.floor(livingEntity.z);
+				int i = node.x - Mth.floor(livingEntity.getX());
+				int j = node.z - Mth.floor(livingEntity.getZ());
 				return (double)(i * i + j * j) <= 2.25;
 			}
 		}

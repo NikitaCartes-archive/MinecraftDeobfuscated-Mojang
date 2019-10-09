@@ -48,6 +48,15 @@ public class SoundType {
 		SoundEvents.SLIME_BLOCK_HIT,
 		SoundEvents.SLIME_BLOCK_FALL
 	);
+	public static final SoundType HONEY_BLOCK = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.HONEY_BLOCK_BREAK,
+		SoundEvents.HONEY_BLOCK_STEP,
+		SoundEvents.HONEY_BLOCK_PLACE,
+		SoundEvents.HONEY_BLOCK_HIT,
+		SoundEvents.HONEY_BLOCK_FALL
+	);
 	public static final SoundType WET_GRASS = new SoundType(
 		1.0F, 1.0F, SoundEvents.WET_GRASS_BREAK, SoundEvents.WET_GRASS_STEP, SoundEvents.WET_GRASS_PLACE, SoundEvents.WET_GRASS_HIT, SoundEvents.WET_GRASS_FALL
 	);

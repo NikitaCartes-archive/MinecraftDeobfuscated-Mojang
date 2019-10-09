@@ -54,7 +54,6 @@ public class BlockTags {
 	public static final Tag<Block> CORAL_PLANTS = bind("coral_plants");
 	public static final Tag<Block> CORALS = bind("corals");
 	public static final Tag<Block> BAMBOO_PLANTABLE_ON = bind("bamboo_plantable_on");
-	public static final Tag<Block> DIRT_LIKE = bind("dirt_like");
 	public static final Tag<Block> STANDING_SIGNS = bind("standing_signs");
 	public static final Tag<Block> WALL_SIGNS = bind("wall_signs");
 	public static final Tag<Block> SIGNS = bind("signs");

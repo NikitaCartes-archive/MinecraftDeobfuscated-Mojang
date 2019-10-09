@@ -129,9 +129,9 @@ public class Endermite extends Monster {
 				this.level
 					.addParticle(
 						ParticleTypes.PORTAL,
-						this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-						this.y + this.random.nextDouble() * (double)this.getBbHeight(),
-						this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
+						this.getRandomX(0.5),
+						this.getRandomY(),
+						this.getRandomZ(0.5),
 						(this.random.nextDouble() - 0.5) * 2.0,
 						-this.random.nextDouble(),
 						(this.random.nextDouble() - 0.5) * 2.0

@@ -146,7 +146,7 @@ public class ShulkerBullet extends Entity {
 			blockPos = new BlockPos(this).below();
 		} else {
 			d = (double)this.finalTarget.getBbHeight() * 0.5;
-			blockPos = new BlockPos(this.finalTarget.x, this.finalTarget.y + d, this.finalTarget.z);
+			blockPos = new BlockPos(this.finalTarget.getX(), this.finalTarget.getY() + d, this.finalTarget.getZ());
 		}
 
 		double e = (double)blockPos.getX() + 0.5;
@@ -189,15 +189,15 @@ public class ShulkerBullet extends Entity {
 				direction = (Direction)list.get(this.random.nextInt(list.size()));
 			}
 
-			e = this.x + (double)direction.getStepX();
-			f = this.y + (double)direction.getStepY();
-			g = this.z + (double)direction.getStepZ();
+			e = this.getX() + (double)direction.getStepX();
+			f = this.getY() + (double)direction.getStepY();
+			g = this.getZ() + (double)direction.getStepZ();
 		}
 
 		this.setMoveDirection(direction);
-		double h = e - this.x;
-		double j = f - this.y;
-		double k = g - this.z;
+		double h = e - this.getX();
+		double j = f - this.getY();
+		double k = g - this.getZ();
 		double l = (double)Mth.sqrt(h * h + j * j + k * k);
 		if (l == 0.0) {
 			this.targetDeltaX = 0.0;
@@ -263,10 +263,10 @@ public class ShulkerBullet extends Entity {
 			}
 
 			Vec3 vec3 = this.getDeltaMovement();
-			this.setPos(this.x + vec3.x, this.y + vec3.y, this.z + vec3.z);
+			this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
 			ProjectileUtil.rotateTowardsMovement(this, 0.5F);
 			if (this.level.isClientSide) {
-				this.level.addParticle(ParticleTypes.END_ROD, this.x - vec3.x, this.y - vec3.y + 0.15, this.z - vec3.z, 0.0, 0.0, 0.0);
+				this.level.addParticle(ParticleTypes.END_ROD, this.getX() - vec3.x, this.getY() - vec3.y + 0.15, this.getZ() - vec3.z, 0.0, 0.0, 0.0);
 			} else if (this.finalTarget != null && !this.finalTarget.removed) {
 				if (this.flightSteps > 0) {
 					this.flightSteps--;
@@ -326,7 +326,7 @@ public class ShulkerBullet extends Entity {
 				}
 			}
 		} else {
-			((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.x, this.y, this.z, 2, 0.2, 0.2, 0.2, 0.0);
+			((ServerLevel)this.level).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 2, 0.2, 0.2, 0.2, 0.0);
 			this.playSound(SoundEvents.SHULKER_BULLET_HIT, 1.0F, 1.0F);
 		}
 
@@ -342,7 +342,7 @@ public class ShulkerBullet extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (!this.level.isClientSide) {
 			this.playSound(SoundEvents.SHULKER_BULLET_HURT, 1.0F, 1.0F);
-			((ServerLevel)this.level).sendParticles(ParticleTypes.CRIT, this.x, this.y, this.z, 15, 0.2, 0.2, 0.2, 0.0);
+			((ServerLevel)this.level).sendParticles(ParticleTypes.CRIT, this.getX(), this.getY(), this.getZ(), 15, 0.2, 0.2, 0.2, 0.0);
 			this.remove();
 		}
 

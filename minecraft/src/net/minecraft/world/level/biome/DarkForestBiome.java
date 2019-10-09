@@ -1,18 +1,18 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.HugeMushroomFeatureConfig;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RandomFeatureConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -31,29 +31,28 @@ public final class DarkForestBiome extends Biome {
 				.waterFogColor(329011)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.WOODLAND_MANSION, FeatureConfiguration.NONE);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+		this.addStructureStart(Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE));
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
 		BiomeDefaultFeatures.addDefaultCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.RANDOM_SELECTOR,
-				new RandomFeatureConfig(
-					new Feature[]{Feature.HUGE_BROWN_MUSHROOM, Feature.HUGE_RED_MUSHROOM, Feature.DARK_OAK_TREE, Feature.FANCY_TREE},
-					new FeatureConfiguration[]{
-						new HugeMushroomFeatureConfig(false), new HugeMushroomFeatureConfig(false), FeatureConfiguration.NONE, FeatureConfiguration.NONE
-					},
-					new float[]{0.025F, 0.05F, 0.6666667F, 0.1F},
-					Feature.NORMAL_TREE,
-					FeatureConfiguration.NONE
-				),
-				FeatureDecorator.DARK_OAK_TREE,
-				DecoratorConfiguration.NONE
-			)
+			Feature.RANDOM_SELECTOR
+				.configured(
+					new RandomFeatureConfiguration(
+						ImmutableList.of(
+							Feature.HUGE_BROWN_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_BROWN_MUSHROOM_CONFIG).weighted(0.025F),
+							Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG).weighted(0.05F),
+							Feature.DARK_OAK_TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG).weighted(0.6666667F),
+							Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_CONFIG).weighted(0.1F)
+						),
+						Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_CONFIG)
+					)
+				)
+				.decorated(FeatureDecorator.DARK_OAK_TREE.configured(DecoratorConfiguration.NONE))
 		);
 		BiomeDefaultFeatures.addForestFlowers(this);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);

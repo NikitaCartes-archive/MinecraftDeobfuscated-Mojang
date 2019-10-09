@@ -29,14 +29,14 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	public Node getStart() {
 		int i;
 		if (this.canFloat() && this.mob.isInWater()) {
-			i = Mth.floor(this.mob.getBoundingBox().minY);
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.x, (double)i, this.mob.z);
+			i = Mth.floor(this.mob.getY());
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
 
 			for (Block block = this.level.getBlockState(mutableBlockPos).getBlock(); block == Blocks.WATER; block = this.level.getBlockState(mutableBlockPos).getBlock()) {
-				mutableBlockPos.set(this.mob.x, (double)(++i), this.mob.z);
+				mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
 			}
 		} else {
-			i = Mth.floor(this.mob.getBoundingBox().minY + 0.5);
+			i = Mth.floor(this.mob.getY() + 0.5);
 		}
 
 		BlockPos blockPos = new BlockPos(this.mob);
@@ -253,10 +253,10 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 
 	@Override
 	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-		BlockPathTypes blockPathTypes = this.getBlockPathTypeRaw(blockGetter, i, j, k);
+		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, i, j, k);
 		if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
 			Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-			BlockPathTypes blockPathTypes2 = this.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, i, j - 1, k);
 			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block == Blocks.CAMPFIRE) {
 				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
 			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
@@ -270,7 +270,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			}
 		}
 
-		return this.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+		return checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
 	}
 
 	private BlockPathTypes getBlockPathType(Mob mob, BlockPos blockPos) {

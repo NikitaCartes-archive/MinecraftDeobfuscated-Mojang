@@ -60,7 +60,7 @@ public class Slime extends Mob implements Enemy {
 		this.goalSelector.addGoal(3, new Slime.SlimeRandomDirectionGoal(this));
 		this.goalSelector.addGoal(5, new Slime.SlimeKeepOnJumpingGoal(this));
 		this.targetSelector
-			.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.y - this.y) <= 4.0));
+			.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));
 	}
 
@@ -78,7 +78,7 @@ public class Slime extends Mob implements Enemy {
 
 	protected void setSize(int i, boolean bl) {
 		this.entityData.set(ID_SIZE, i);
-		this.setPos(this.x, this.y, this.z);
+		this.refreshBoundingBox();
 		this.refreshDimensions();
 		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)(i * i));
 		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)i));
@@ -138,11 +138,7 @@ public class Slime extends Mob implements Enemy {
 				float g = this.random.nextFloat() * 0.5F + 0.5F;
 				float h = Mth.sin(f) * (float)i * 0.5F * g;
 				float k = Mth.cos(f) * (float)i * 0.5F * g;
-				Level var10000 = this.level;
-				ParticleOptions var10001 = this.getParticleType();
-				double var10002 = this.x + (double)h;
-				double var10004 = this.z + (double)k;
-				var10000.addParticle(var10001, var10002, this.getBoundingBox().minY, var10004, 0.0, 0.0, 0.0);
+				this.level.addParticle(this.getParticleType(), this.getX() + (double)h, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
 			}
 
 			this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) / 0.8F);
@@ -165,9 +161,9 @@ public class Slime extends Mob implements Enemy {
 
 	@Override
 	public void refreshDimensions() {
-		double d = this.x;
-		double e = this.y;
-		double f = this.z;
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
 		super.refreshDimensions();
 		this.setPos(d, e, f);
 	}
@@ -209,8 +205,9 @@ public class Slime extends Mob implements Enemy {
 					slime.setPersistenceRequired();
 				}
 
+				slime.setInvulnerable(this.isInvulnerable());
 				slime.setSize(i / 2, true);
-				slime.moveTo(this.x + (double)f, this.y + 0.5, this.z + (double)g, this.random.nextFloat() * 360.0F, 0.0F);
+				slime.moveTo(this.getX() + (double)f, this.getY() + 0.5, this.getZ() + (double)g, this.random.nextFloat() * 360.0F, 0.0F);
 				this.level.addFreshEntity(slime);
 			}
 		}

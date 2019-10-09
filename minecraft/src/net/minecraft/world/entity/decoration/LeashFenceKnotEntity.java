@@ -33,7 +33,9 @@ public class LeashFenceKnotEntity extends HangingEntity {
 		float f = 0.125F;
 		float g = 0.1875F;
 		float h = 0.25F;
-		this.setBoundingBox(new AABB(this.x - 0.1875, this.y - 0.25 + 0.125, this.z - 0.1875, this.x + 0.1875, this.y + 0.25 + 0.125, this.z + 0.1875));
+		this.setBoundingBox(
+			new AABB(this.getX() - 0.1875, this.getY() - 0.25 + 0.125, this.getZ() - 0.1875, this.getX() + 0.1875, this.getY() + 0.25 + 0.125, this.getZ() + 0.1875)
+		);
 		this.forcedLoading = true;
 	}
 
@@ -44,9 +46,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 
 	@Override
 	protected void recalculateBoundingBox() {
-		this.x = (double)this.pos.getX() + 0.5;
-		this.y = (double)this.pos.getY() + 0.5;
-		this.z = (double)this.pos.getZ() + 0.5;
+		this.setPosRaw((double)this.pos.getX() + 0.5, (double)this.pos.getY() + 0.5, (double)this.pos.getZ() + 0.5);
 	}
 
 	@Override
@@ -94,7 +94,8 @@ public class LeashFenceKnotEntity extends HangingEntity {
 		} else {
 			boolean bl = false;
 			double d = 7.0;
-			List<Mob> list = this.level.getEntitiesOfClass(Mob.class, new AABB(this.x - 7.0, this.y - 7.0, this.z - 7.0, this.x + 7.0, this.y + 7.0, this.z + 7.0));
+			List<Mob> list = this.level
+				.getEntitiesOfClass(Mob.class, new AABB(this.getX() - 7.0, this.getY() - 7.0, this.getZ() - 7.0, this.getX() + 7.0, this.getY() + 7.0, this.getZ() + 7.0));
 
 			for (Mob mob : list) {
 				if (mob.getLeashHolder() == player) {

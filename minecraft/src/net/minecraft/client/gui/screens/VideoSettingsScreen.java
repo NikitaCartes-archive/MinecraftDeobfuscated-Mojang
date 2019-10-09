@@ -12,9 +12,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
-public class VideoSettingsScreen extends Screen {
-	private final Screen lastScreen;
-	private final Options options;
+public class VideoSettingsScreen extends OptionsSubScreen {
 	private OptionsList list;
 	private static final Option[] OPTIONS = new Option[]{
 		Option.GRAPHICS,
@@ -36,9 +34,7 @@ public class VideoSettingsScreen extends Screen {
 	private int oldMipmaps;
 
 	public VideoSettingsScreen(Screen screen, Options options) {
-		super(new TranslatableComponent("options.videoTitle"));
-		this.lastScreen = screen;
-		this.options = options;
+		super(screen, options, new TranslatableComponent("options.videoTitle"));
 	}
 
 	@Override
@@ -64,7 +60,7 @@ public class VideoSettingsScreen extends Screen {
 			this.minecraft.delayTextureReload();
 		}
 
-		this.minecraft.options.save();
+		super.removed();
 	}
 
 	@Override

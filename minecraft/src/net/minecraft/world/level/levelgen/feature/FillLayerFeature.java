@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 
 public class FillLayerFeature extends Feature<LayerConfiguration> {
 	public FillLayerFeature(Function<Dynamic<?>, ? extends LayerConfiguration> function) {

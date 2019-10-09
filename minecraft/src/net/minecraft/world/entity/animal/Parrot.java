@@ -38,7 +38,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowMobGoal;
-import net.minecraft.world.entity.ai.goal.FollowOwnerFlyingGoal;
+import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LandOnOwnersShoulderGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
@@ -84,7 +84,6 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		hashMap.put(EntityType.ILLUSIONER, SoundEvents.PARROT_IMITATE_ILLUSIONER);
 		hashMap.put(EntityType.MAGMA_CUBE, SoundEvents.PARROT_IMITATE_MAGMA_CUBE);
 		hashMap.put(EntityType.ZOMBIE_PIGMAN, SoundEvents.PARROT_IMITATE_ZOMBIE_PIGMAN);
-		hashMap.put(EntityType.PANDA, SoundEvents.PARROT_IMITATE_PANDA);
 		hashMap.put(EntityType.PHANTOM, SoundEvents.PARROT_IMITATE_PHANTOM);
 		hashMap.put(EntityType.PILLAGER, SoundEvents.PARROT_IMITATE_PILLAGER);
 		hashMap.put(EntityType.POLAR_BEAR, SoundEvents.PARROT_IMITATE_POLAR_BEAR);
@@ -142,7 +141,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(2, this.sitGoal);
-		this.goalSelector.addGoal(2, new FollowOwnerFlyingGoal(this, 1.0, 5.0F, 1.0F));
+		this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F, true));
 		this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
 		this.goalSelector.addGoal(3, new LandOnOwnersShoulderGoal(this));
 		this.goalSelector.addGoal(3, new FollowMobGoal(this, 1.0, 3.0F, 7.0F));
@@ -220,7 +219,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 				Mob mob = (Mob)list.get(level.random.nextInt(list.size()));
 				if (!mob.isSilent()) {
 					SoundEvent soundEvent = getImitatedSound(mob.getType());
-					level.playSound(null, entity.x, entity.y, entity.z, soundEvent, entity.getSoundSource(), 0.7F, getPitch(level.random));
+					level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), soundEvent, entity.getSoundSource(), 0.7F, getPitch(level.random));
 					return true;
 				}
 			}
@@ -242,7 +241,14 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 			if (!this.isSilent()) {
 				this.level
 					.playSound(
-						null, this.x, this.y, this.z, SoundEvents.PARROT_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+						null,
+						this.getX(),
+						this.getY(),
+						this.getZ(),
+						SoundEvents.PARROT_EAT,
+						this.getSoundSource(),
+						1.0F,
+						1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
 					);
 			}
 
@@ -292,7 +298,8 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g) {
+		return false;
 	}
 
 	@Override
@@ -312,7 +319,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 
 	public static void playAmbientSound(Level level, Entity entity) {
 		if (!entity.isSilent() && !imitateNearbyMobs(level, entity) && level.random.nextInt(200) == 0) {
-			level.playSound(null, entity.x, entity.y, entity.z, getAmbient(level.random), entity.getSoundSource(), 1.0F, getPitch(level.random));
+			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), getAmbient(level.random), entity.getSoundSource(), 1.0F, getPitch(level.random));
 		}
 	}
 
@@ -397,7 +404,10 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			this.sitGoal.wantToSit(false);
+			if (this.sitGoal != null) {
+				this.sitGoal.wantToSit(false);
+			}
+
 			return super.hurt(damageSource, f);
 		}
 	}

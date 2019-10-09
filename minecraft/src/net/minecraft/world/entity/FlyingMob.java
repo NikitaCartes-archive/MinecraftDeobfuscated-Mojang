@@ -12,7 +12,8 @@ public abstract class FlyingMob extends Mob {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g) {
+		return false;
 	}
 
 	@Override
@@ -32,13 +33,13 @@ public abstract class FlyingMob extends Mob {
 		} else {
 			float f = 0.91F;
 			if (this.onGround) {
-				f = this.level.getBlockState(new BlockPos(this.x, this.getBoundingBox().minY - 1.0, this.z)).getBlock().getFriction() * 0.91F;
+				f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
 			}
 
 			float g = 0.16277137F / (f * f * f);
 			f = 0.91F;
 			if (this.onGround) {
-				f = this.level.getBlockState(new BlockPos(this.x, this.getBoundingBox().minY - 1.0, this.z)).getBlock().getFriction() * 0.91F;
+				f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.91F;
 			}
 
 			this.moveRelative(this.onGround ? 0.1F * g : 0.02F, vec3);
@@ -47,8 +48,8 @@ public abstract class FlyingMob extends Mob {
 		}
 
 		this.animationSpeedOld = this.animationSpeed;
-		double d = this.x - this.xo;
-		double e = this.z - this.zo;
+		double d = this.getX() - this.xo;
+		double e = this.getZ() - this.zo;
 		float h = Mth.sqrt(d * d + e * e) * 4.0F;
 		if (h > 1.0F) {
 			h = 1.0F;

@@ -31,6 +31,6 @@ public class PhantomRenderer extends MobRenderer<Phantom, PhantomModel<Phantom>>
 
 	protected void setupRotations(Phantom phantom, PoseStack poseStack, float f, float g, float h) {
 		super.setupRotations(phantom, poseStack, f, g, h);
-		poseStack.mulPose(Vector3f.XP.rotation(phantom.xRot, true));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(phantom.xRot));
 	}
 }

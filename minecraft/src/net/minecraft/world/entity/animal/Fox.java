@@ -77,7 +77,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -257,9 +256,9 @@ public class Fox extends Animal {
 					this.level
 						.addParticle(
 							new ItemParticleOption(ParticleTypes.ITEM, itemStack),
-							this.x + this.getLookAngle().x / 2.0,
-							this.y,
-							this.z + this.getLookAngle().z / 2.0,
+							this.getX() + this.getLookAngle().x / 2.0,
+							this.getY(),
+							this.getZ() + this.getLookAngle().z / 2.0,
 							vec3.x,
 							vec3.y + 0.05,
 							vec3.z
@@ -461,7 +460,7 @@ public class Fox extends Animal {
 
 	private void spitOutItem(ItemStack itemStack) {
 		if (!itemStack.isEmpty() && !this.level.isClientSide) {
-			ItemEntity itemEntity = new ItemEntity(this.level, this.x + this.getLookAngle().x, this.y + 1.0, this.z + this.getLookAngle().z, itemStack);
+			ItemEntity itemEntity = new ItemEntity(this.level, this.getX() + this.getLookAngle().x, this.getY() + 1.0, this.getZ() + this.getLookAngle().z, itemStack);
 			itemEntity.setPickUpDelay(40);
 			itemEntity.setThrower(this.getUUID());
 			this.playSound(SoundEvents.FOX_SPIT, 1.0F, 1.0F);
@@ -470,7 +469,7 @@ public class Fox extends Animal {
 	}
 
 	private void dropItemStack(ItemStack itemStack) {
-		ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y, this.z, itemStack);
+		ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack);
 		this.level.addFreshEntity(itemEntity);
 	}
 
@@ -506,7 +505,7 @@ public class Fox extends Animal {
 			}
 
 			if (this.isFaceplanted() && this.level.random.nextFloat() < 0.2F) {
-				BlockPos blockPos = new BlockPos(this.x, this.y, this.z);
+				BlockPos blockPos = new BlockPos(this);
 				BlockState blockState = this.level.getBlockState(blockPos);
 				this.level.levelEvent(2001, blockPos, Block.getId(blockState));
 			}
@@ -589,23 +588,8 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
-		int i = Mth.ceil((f - 5.0F) * g);
-		if (i > 0) {
-			this.hurt(DamageSource.FALL, (float)i);
-			if (this.isVehicle()) {
-				for (Entity entity : this.getIndirectPassengers()) {
-					entity.hurt(DamageSource.FALL, (float)i);
-				}
-			}
-
-			BlockState blockState = this.level.getBlockState(new BlockPos(this.x, this.y - 0.2 - (double)this.yRotO, this.z));
-			if (!blockState.isAir() && !this.isSilent()) {
-				SoundType soundType = blockState.getSoundType();
-				this.level
-					.playSound(null, this.x, this.y, this.z, soundType.getStepSound(), this.getSoundSource(), soundType.getVolume() * 0.5F, soundType.getPitch() * 0.75F);
-			}
-		}
+	protected int calculateFallDamage(float f, float g) {
+		return Mth.ceil((f - 5.0F) * g);
 	}
 
 	private void wakeUp() {
@@ -680,8 +664,8 @@ public class Fox extends Animal {
 	}
 
 	public static boolean isPathClear(Fox fox, LivingEntity livingEntity) {
-		double d = livingEntity.z - fox.z;
-		double e = livingEntity.x - fox.x;
+		double d = livingEntity.getZ() - fox.getZ();
+		double e = livingEntity.getX() - fox.getX();
 		double f = d / e;
 		int i = 6;
 
@@ -690,7 +674,7 @@ public class Fox extends Animal {
 			double h = f == 0.0 ? e * (double)((float)j / 6.0F) : g / f;
 
 			for (int k = 1; k < 4; k++) {
-				if (!fox.level.getBlockState(new BlockPos(fox.x + h, fox.y + (double)k, fox.z + g)).getMaterial().isReplaceable()) {
+				if (!fox.level.getBlockState(new BlockPos(fox.getX() + h, fox.getY() + (double)k, fox.getZ() + g)).getMaterial().isReplaceable()) {
 					return false;
 				}
 			}
@@ -856,11 +840,12 @@ public class Fox extends Animal {
 				this.animal.resetLove();
 				this.partner.resetLove();
 				fox.setAge(-24000);
-				fox.moveTo(this.animal.x, this.animal.y, this.animal.z, 0.0F, 0.0F);
+				fox.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0F, 0.0F);
 				this.level.addFreshEntity(fox);
 				this.level.broadcastEntityEvent(this.animal, (byte)18);
 				if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-					this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.x, this.animal.y, this.animal.z, this.animal.getRandom().nextInt(7) + 1));
+					this.level
+						.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
 				}
 			}
 		}
@@ -1125,7 +1110,7 @@ public class Fox extends Animal {
 			Fox.this.setIsInterested(false);
 			LivingEntity livingEntity = Fox.this.getTarget();
 			Fox.this.getLookControl().setLookAt(livingEntity, 60.0F, 30.0F);
-			Vec3 vec3 = new Vec3(livingEntity.x - Fox.this.x, livingEntity.y - Fox.this.y, livingEntity.z - Fox.this.z).normalize();
+			Vec3 vec3 = new Vec3(livingEntity.getX() - Fox.this.getX(), livingEntity.getY() - Fox.this.getY(), livingEntity.getZ() - Fox.this.getZ()).normalize();
 			Fox.this.setDeltaMovement(Fox.this.getDeltaMovement().add(vec3.x * 0.8, 0.9, vec3.z * 0.8));
 			Fox.this.getNavigation().stop();
 		}
@@ -1284,13 +1269,7 @@ public class Fox extends Animal {
 			}
 
 			Fox.this.getLookControl()
-				.setLookAt(
-					Fox.this.x + this.relX,
-					Fox.this.y + (double)Fox.this.getEyeHeight(),
-					Fox.this.z + this.relZ,
-					(float)Fox.this.getMaxHeadYRot(),
-					(float)Fox.this.getMaxHeadXRot()
-				);
+				.setLookAt(Fox.this.getX() + this.relX, Fox.this.getEyeY(), Fox.this.getZ() + this.relZ, (float)Fox.this.getMaxHeadYRot(), (float)Fox.this.getMaxHeadXRot());
 		}
 
 		private void resetLook() {
@@ -1371,7 +1350,7 @@ public class Fox extends Animal {
 			Fox.this.setJumping(false);
 			Fox.this.setSleeping(true);
 			Fox.this.getNavigation().stop();
-			Fox.this.getMoveControl().setWantedPosition(Fox.this.x, Fox.this.y, Fox.this.z, 0.0);
+			Fox.this.getMoveControl().setWantedPosition(Fox.this.getX(), Fox.this.getY(), Fox.this.getZ(), 0.0);
 		}
 	}
 

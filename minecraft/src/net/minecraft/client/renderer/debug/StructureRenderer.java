@@ -45,7 +45,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.disableDepthTest();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.LINES);
+		VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
 		if (this.postMainBoxes.containsKey(dimensionType)) {
 			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(dimensionType)).values()) {
 				if (blockPos.closerThan(boundingBox.getCenter(), 500.0)) {

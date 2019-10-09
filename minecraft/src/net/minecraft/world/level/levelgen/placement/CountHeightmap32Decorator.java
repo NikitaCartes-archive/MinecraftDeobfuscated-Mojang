@@ -12,8 +12,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class CountHeightmap32Decorator extends FeatureDecorator<DecoratorFrequency> {
-	public CountHeightmap32Decorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class CountHeightmap32Decorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+	public CountHeightmap32Decorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -21,19 +21,14 @@ public class CountHeightmap32Decorator extends FeatureDecorator<DecoratorFrequen
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequency decoratorFrequency,
+		FrequencyDecoratorConfiguration frequencyDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		return IntStream.range(0, decoratorFrequency.count).mapToObj(i -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k)).getY() + 32;
-			if (l <= 0) {
-				return null;
-			} else {
-				int m = random.nextInt(l);
-				return blockPos.offset(j, m, k);
-			}
+		return IntStream.range(0, frequencyDecoratorConfiguration.count).mapToObj(i -> {
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k) + 32;
+			return l <= 0 ? null : new BlockPos(j, random.nextInt(l), k);
 		}).filter(Objects::nonNull);
 	}
 }

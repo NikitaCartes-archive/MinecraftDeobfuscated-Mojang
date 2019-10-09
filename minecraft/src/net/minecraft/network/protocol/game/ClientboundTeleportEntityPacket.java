@@ -21,9 +21,9 @@ public class ClientboundTeleportEntityPacket implements Packet<ClientGamePacketL
 
 	public ClientboundTeleportEntityPacket(Entity entity) {
 		this.id = entity.getId();
-		this.x = entity.x;
-		this.y = entity.y;
-		this.z = entity.z;
+		this.x = entity.getX();
+		this.y = entity.getY();
+		this.z = entity.getZ();
 		this.yRot = (byte)((int)(entity.yRot * 256.0F / 360.0F));
 		this.xRot = (byte)((int)(entity.xRot * 256.0F / 360.0F));
 		this.onGround = entity.onGround;

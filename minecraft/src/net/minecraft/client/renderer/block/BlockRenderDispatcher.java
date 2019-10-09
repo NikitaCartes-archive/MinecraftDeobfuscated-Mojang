@@ -13,6 +13,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.EntityBlockRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -48,7 +49,8 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		if (blockState.getRenderShape() == RenderShape.MODEL) {
 			BakedModel bakedModel = this.blockModelShaper.getBlockModel(blockState);
 			long l = blockState.getSeed(blockPos);
-			this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l);
+			this.modelRenderer
+				.tesselateBlock(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l, OverlayTexture.NO_OVERLAY);
 		}
 	}
 
@@ -67,7 +69,16 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 				? false
 				: this.modelRenderer
 					.tesselateBlock(
-						blockAndBiomeGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos)
+						blockAndBiomeGetter,
+						this.getBlockModel(blockState),
+						blockState,
+						blockPos,
+						poseStack,
+						vertexConsumer,
+						bl,
+						random,
+						blockState.getSeed(blockPos),
+						OverlayTexture.NO_OVERLAY
 					);
 		} catch (Throwable var11) {
 			CrashReport crashReport = CrashReport.forThrowable(var11, "Tesselating block in world");
@@ -96,26 +107,28 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		return this.blockModelShaper.getBlockModel(blockState);
 	}
 
-	public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, int k) {
+	public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		RenderShape renderShape = blockState.getRenderShape();
 		if (renderShape != RenderShape.INVISIBLE) {
 			switch (renderShape) {
 				case MODEL:
 					BakedModel bakedModel = this.getBlockModel(blockState);
 					poseStack.pushPose();
-					poseStack.mulPose(Vector3f.YP.rotation(90.0F, true));
-					int l = this.blockColors.getColor(blockState, null, null, 0);
-					float f = (float)(l >> 16 & 0xFF) / 255.0F;
-					float g = (float)(l >> 8 & 0xFF) / 255.0F;
-					float h = (float)(l & 0xFF) / 255.0F;
+					poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+					int k = this.blockColors.getColor(blockState, null, null, 0);
+					float f = (float)(k >> 16 & 0xFF) / 255.0F;
+					float g = (float)(k >> 8 & 0xFF) / 255.0F;
+					float h = (float)(k & 0xFF) / 255.0F;
 					this.modelRenderer
-						.renderModel(poseStack.getPose(), multiBufferSource.getBuffer(RenderType.getRenderLayer(blockState)), blockState, bakedModel, f, g, h, i);
+						.renderModel(
+							poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j
+						);
 					poseStack.popPose();
 					break;
 				case ENTITYBLOCK_ANIMATED:
 					poseStack.pushPose();
-					poseStack.mulPose(Vector3f.YP.rotation(90.0F, true));
-					EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i);
+					poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
+					EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);
 					poseStack.popPose();
 			}
 		}

@@ -55,8 +55,8 @@ public class ItemInHandLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				poseStack.translate(0.0, 0.2F, 0.0);
 			}
 
-			poseStack.mulPose(Vector3f.XP.rotation(-90.0F, true));
-			poseStack.mulPose(Vector3f.YP.rotation(180.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 			boolean bl = humanoidArm == HumanoidArm.LEFT;
 			poseStack.translate((double)((float)(bl ? -1 : 1) / 16.0F), 0.125, -0.625);
 			Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource);

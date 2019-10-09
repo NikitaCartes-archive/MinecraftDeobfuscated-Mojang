@@ -161,9 +161,10 @@ public class DripParticle extends TextureSheetParticle {
 			if (this.onGround) {
 				this.remove();
 				this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
-				if (this.level.random.nextFloat() < 0.3F) {
-					this.level.playLocalSound(this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 1.0F, 1.0F, false);
-				}
+				this.level
+					.playLocalSound(
+						this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 0.3F + this.level.random.nextFloat() * 2.0F / 3.0F, 1.0F, false
+					);
 			}
 		}
 	}

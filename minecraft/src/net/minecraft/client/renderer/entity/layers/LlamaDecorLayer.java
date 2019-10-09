@@ -1,11 +1,14 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LlamaModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.item.DyeColor;
@@ -52,6 +55,7 @@ public class LlamaDecorLayer extends RenderLayer<Llama, LlamaModel<Llama>> {
 
 		this.getParentModel().copyPropertiesTo(this.model);
 		this.model.setupAnim(llama, f, g, j, k, l, m);
-		renderModel(this.model, resourceLocation, poseStack, multiBufferSource, i, 1.0F, 1.0F, 1.0F);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 	}
 }

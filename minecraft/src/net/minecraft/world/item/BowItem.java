@@ -76,7 +76,14 @@ public class BowItem extends ProjectileWeaponItem {
 					}
 
 					level.playSound(
-						null, player.x, player.y, player.z, SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 1.2F) + f * 0.5F
+						null,
+						player.getX(),
+						player.getY(),
+						player.getZ(),
+						SoundEvents.ARROW_SHOOT,
+						SoundSource.PLAYERS,
+						1.0F,
+						1.0F / (random.nextFloat() * 0.4F + 1.2F) + f * 0.5F
 					);
 					if (!bl2 && !player.abilities.instabuild) {
 						itemStack2.shrink(1);

@@ -74,9 +74,9 @@ public class FollowMobGoal extends Goal {
 			this.mob.getLookControl().setLookAt(this.followingMob, 10.0F, (float)this.mob.getMaxHeadXRot());
 			if (--this.timeToRecalcPath <= 0) {
 				this.timeToRecalcPath = 10;
-				double d = this.mob.x - this.followingMob.x;
-				double e = this.mob.y - this.followingMob.y;
-				double f = this.mob.z - this.followingMob.z;
+				double d = this.mob.getX() - this.followingMob.getX();
+				double e = this.mob.getY() - this.followingMob.getY();
+				double f = this.mob.getZ() - this.followingMob.getZ();
 				double g = d * d + e * e + f * f;
 				if (!(g <= (double)(this.stopDistance * this.stopDistance))) {
 					this.navigation.moveTo(this.followingMob, this.speedModifier);
@@ -84,10 +84,10 @@ public class FollowMobGoal extends Goal {
 					this.navigation.stop();
 					LookControl lookControl = this.followingMob.getLookControl();
 					if (g <= (double)this.stopDistance
-						|| lookControl.getWantedX() == this.mob.x && lookControl.getWantedY() == this.mob.y && lookControl.getWantedZ() == this.mob.z) {
-						double h = this.followingMob.x - this.mob.x;
-						double i = this.followingMob.z - this.mob.z;
-						this.navigation.moveTo(this.mob.x - h, this.mob.y, this.mob.z - i, this.speedModifier);
+						|| lookControl.getWantedX() == this.mob.getX() && lookControl.getWantedY() == this.mob.getY() && lookControl.getWantedZ() == this.mob.getZ()) {
+						double h = this.followingMob.getX() - this.mob.getX();
+						double i = this.followingMob.getZ() - this.mob.getZ();
+						this.navigation.moveTo(this.mob.getX() - h, this.mob.getY(), this.mob.getZ() - i, this.speedModifier);
 					}
 				}
 			}

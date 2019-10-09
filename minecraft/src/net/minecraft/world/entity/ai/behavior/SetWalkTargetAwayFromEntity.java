@@ -32,10 +32,9 @@ public class SetWalkTargetAwayFromEntity extends Behavior<PathfinderMob> {
 
 	public static void moveAwayFromMob(PathfinderMob pathfinderMob, Entity entity, float f) {
 		for (int i = 0; i < 10; i++) {
-			Vec3 vec3 = new Vec3(entity.x, entity.y, entity.z);
-			Vec3 vec32 = RandomPos.getLandPosAvoid(pathfinderMob, 16, 7, vec3);
-			if (vec32 != null) {
-				pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec32, f, 0));
+			Vec3 vec3 = RandomPos.getLandPosAvoid(pathfinderMob, 16, 7, entity.position());
+			if (vec3 != null) {
+				pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, f, 0));
 				return;
 			}
 		}

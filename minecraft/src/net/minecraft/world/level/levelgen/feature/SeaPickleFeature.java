@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.configurations.CountFeatureConfiguration;
 
 public class SeaPickleFeature extends Feature<CountFeatureConfiguration> {
 	public SeaPickleFeature(Function<Dynamic<?>, ? extends CountFeatureConfiguration> function) {

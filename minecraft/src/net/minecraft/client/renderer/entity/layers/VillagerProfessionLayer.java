@@ -63,16 +63,16 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 			M entityModel = this.getParentModel();
 			entityModel.hatVisible(hat2 == VillagerMetaDataSection.Hat.NONE || hat2 == VillagerMetaDataSection.Hat.PARTIAL && hat != VillagerMetaDataSection.Hat.FULL);
 			ResourceLocation resourceLocation = this.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerType));
-			renderColoredModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity);
+			renderColoredCutoutModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
 			entityModel.hatVisible(true);
 			if (villagerProfession != VillagerProfession.NONE && !livingEntity.isBaby()) {
 				ResourceLocation resourceLocation2 = this.getResourceLocation("profession", Registry.VILLAGER_PROFESSION.getKey(villagerProfession));
-				renderColoredModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity);
+				renderColoredCutoutModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
 				if (villagerProfession != VillagerProfession.NITWIT) {
 					ResourceLocation resourceLocation3 = this.getResourceLocation(
 						"profession_level", LEVEL_LOCATIONS.get(Mth.clamp(villagerData.getLevel(), 1, LEVEL_LOCATIONS.size()))
 					);
-					renderColoredModel(entityModel, resourceLocation3, poseStack, multiBufferSource, i, livingEntity);
+					renderColoredCutoutModel(entityModel, resourceLocation3, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
 				}
 			}
 		}

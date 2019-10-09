@@ -1,65 +1,102 @@
 package net.minecraft.gametest.framework;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.Object2LongMap.Entry;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
 public class GameTestInfo {
 	private final TestFunction testFunction;
-	private final BlockPos testPos;
+	private BlockPos testPos;
 	private final ServerLevel level;
 	private final Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
-	private int remainingTicksUntilTimeout;
-	private Runnable succeedWhenThisAssertPasses;
-	private Map<Runnable, Long> assertAtTickTimeMap = Maps.<Runnable, Long>newHashMap();
+	private final int timeoutTicks;
+	private final Collection<GameTestSequence> sequences = Lists.<GameTestSequence>newCopyOnWriteArrayList();
+	private Object2LongMap<Runnable> runAtTickTimeMap = new Object2LongOpenHashMap<>();
+	private long startTick;
+	private long tickCount;
 	private boolean started = false;
-	private long startTime = -1L;
+	private final Stopwatch timer = Stopwatch.createUnstarted();
 	private boolean done = false;
-	private long doneTime = -1L;
 	@Nullable
 	private Throwable error;
 
-	public GameTestInfo(TestFunction testFunction, BlockPos blockPos, ServerLevel serverLevel) {
+	public GameTestInfo(TestFunction testFunction, ServerLevel serverLevel) {
 		this.testFunction = testFunction;
-		this.testPos = blockPos;
 		this.level = serverLevel;
-		this.remainingTicksUntilTimeout = testFunction.getMaxTicks();
+		this.timeoutTicks = testFunction.getMaxTicks();
+	}
+
+	public GameTestInfo(TestFunction testFunction, BlockPos blockPos, ServerLevel serverLevel) {
+		this(testFunction, serverLevel);
+		this.assignPosition(blockPos);
+	}
+
+	void assignPosition(BlockPos blockPos) {
+		this.testPos = blockPos;
+	}
+
+	void startExecution() {
+		this.startTick = this.level.getGameTime() + 1L + this.testFunction.getSetupTicks();
+		this.timer.start();
 	}
 
 	public void tick() {
 		if (!this.isDone()) {
-			Iterator<Entry<Runnable, Long>> iterator = this.assertAtTickTimeMap.entrySet().iterator();
+			this.tickCount = this.level.getGameTime() - this.startTick;
+			if (this.tickCount >= 0L) {
+				if (this.tickCount == 0L) {
+					this.startTest();
+				}
 
-			while (iterator.hasNext()) {
-				Entry<Runnable, Long> entry = (Entry<Runnable, Long>)iterator.next();
-				if ((Long)entry.getValue() <= this.level.getGameTime()) {
-					try {
-						((Runnable)entry.getKey()).run();
-					} catch (Exception var4) {
-						this.fail(var4);
+				ObjectIterator<Entry<Runnable>> objectIterator = this.runAtTickTimeMap.object2LongEntrySet().iterator();
+
+				while (objectIterator.hasNext()) {
+					Entry<Runnable> entry = (Entry<Runnable>)objectIterator.next();
+					if (entry.getLongValue() <= this.tickCount) {
+						try {
+							((Runnable)entry.getKey()).run();
+						} catch (Exception var4) {
+							this.fail(var4);
+						}
+
+						objectIterator.remove();
 					}
+				}
 
-					iterator.remove();
+				if (this.tickCount > (long)this.timeoutTicks) {
+					if (this.sequences.isEmpty()) {
+						this.fail(new GameTestTimeoutException("Didn't succeed or fail within " + this.testFunction.getMaxTicks() + " ticks"));
+					} else {
+						this.sequences.forEach(gameTestSequence -> gameTestSequence.tickAndFailIfNotComplete(this.tickCount));
+						if (this.error == null) {
+							this.fail(new GameTestTimeoutException("No sequences finished"));
+						}
+					}
+				} else {
+					this.sequences.forEach(gameTestSequence -> gameTestSequence.tickAndContinue(this.tickCount));
 				}
 			}
+		}
+	}
 
-			this.remainingTicksUntilTimeout--;
-			if (this.remainingTicksUntilTimeout <= 0) {
-				if (this.succeedWhenThisAssertPasses == null) {
-					this.fail(new GameTestTimeoutException("Didn't succeed or fail within " + this.testFunction.getMaxTicks() + " ticks"));
-				} else {
-					this.tryAssertAndEndTest();
-				}
-			} else if (this.succeedWhenThisAssertPasses != null) {
-				this.tryAssertAndEndTestIfSuccessful();
+	private void startTest() {
+		if (this.started) {
+			throw new IllegalStateException("Test already started");
+		} else {
+			this.started = true;
+
+			try {
+				this.testFunction.run(new GameTestHelper(this));
+			} catch (Exception var2) {
+				this.fail(var2);
 			}
 		}
 	}
@@ -70,18 +107,6 @@ public class GameTestInfo {
 
 	public BlockPos getTestPos() {
 		return this.testPos;
-	}
-
-	public void spawnStructureAndRunTest(int i) {
-		try {
-			StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
-			structureBlockEntity.setStructureName(this.getTestName());
-			StructureUtils.addCommandBlockAndButtonToStartTest(this.testPos.offset(1, 0, -1), this.level);
-			this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
-			this.testFunction.run(new GameTestHelper(this));
-		} catch (RuntimeException var3) {
-			this.fail(var3);
-		}
 	}
 
 	@Nullable
@@ -115,19 +140,16 @@ public class GameTestInfo {
 		return this.done;
 	}
 
-	public void succeed() {
-		this.done = true;
-		this.doneTime = Util.getMillis();
-		this.error = null;
-		this.succeedWhenThisAssertPasses = null;
-		this.listeners.forEach(gameTestListener -> gameTestListener.testPassed(this));
+	private void finish() {
+		if (!this.done) {
+			this.done = true;
+			this.timer.stop();
+		}
 	}
 
 	public void fail(Throwable throwable) {
-		this.done = true;
-		this.doneTime = Util.getMillis();
+		this.finish();
 		this.error = throwable;
-		this.succeedWhenThisAssertPasses = null;
 		this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this));
 	}
 
@@ -144,27 +166,11 @@ public class GameTestInfo {
 		this.listeners.add(gameTestListener);
 	}
 
-	private void tryAssertAndEndTest() {
-		try {
-			this.succeedWhenThisAssertPasses.run();
-			this.succeed();
-		} catch (Exception var2) {
-			this.fail(var2);
-		}
-	}
-
-	private void tryAssertAndEndTestIfSuccessful() {
-		try {
-			this.succeedWhenThisAssertPasses.run();
-			this.succeed();
-		} catch (Exception var2) {
-		}
-	}
-
 	public void spawnStructure(int i) {
-		StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
-		this.started = true;
-		this.startTime = Util.getMillis();
+		StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
+		structureBlockEntity.setStructureName(this.getTestName());
+		StructureUtils.addCommandBlockAndButtonToStartTest(this.testPos.offset(1, 0, -1), this.level);
+		this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
 	}
 
 	public boolean isRequired() {
@@ -173,5 +179,9 @@ public class GameTestInfo {
 
 	public boolean isOptional() {
 		return !this.testFunction.isRequired();
+	}
+
+	public String getStructureName() {
+		return this.testFunction.getStructureName();
 	}
 }

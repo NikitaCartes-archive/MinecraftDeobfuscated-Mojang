@@ -49,7 +49,7 @@ public class LookAtPlayerGoal extends Goal {
 			}
 
 			if (this.lookAtType == Player.class) {
-				this.lookAt = this.mob.level.getNearestPlayer(this.lookAtContext, this.mob, this.mob.x, this.mob.y + (double)this.mob.getEyeHeight(), this.mob.z);
+				this.lookAt = this.mob.level.getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 			} else {
 				this.lookAt = this.mob
 					.level
@@ -57,9 +57,9 @@ public class LookAtPlayerGoal extends Goal {
 						this.lookAtType,
 						this.lookAtContext,
 						this.mob,
-						this.mob.x,
-						this.mob.y + (double)this.mob.getEyeHeight(),
-						this.mob.z,
+						this.mob.getX(),
+						this.mob.getEyeY(),
+						this.mob.getZ(),
 						this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance)
 					);
 			}
@@ -89,7 +89,7 @@ public class LookAtPlayerGoal extends Goal {
 
 	@Override
 	public void tick() {
-		this.mob.getLookControl().setLookAt(this.lookAt.x, this.lookAt.y + (double)this.lookAt.getEyeHeight(), this.lookAt.z);
+		this.mob.getLookControl().setLookAt(this.lookAt.getX(), this.lookAt.getEyeY(), this.lookAt.getZ());
 		this.lookTime--;
 	}
 }

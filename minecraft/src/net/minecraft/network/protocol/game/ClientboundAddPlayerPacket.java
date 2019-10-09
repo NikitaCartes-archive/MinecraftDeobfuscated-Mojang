@@ -23,9 +23,9 @@ public class ClientboundAddPlayerPacket implements Packet<ClientGamePacketListen
 	public ClientboundAddPlayerPacket(Player player) {
 		this.entityId = player.getId();
 		this.playerId = player.getGameProfile().getId();
-		this.x = player.x;
-		this.y = player.y;
-		this.z = player.z;
+		this.x = player.getX();
+		this.y = player.getY();
+		this.z = player.getZ();
 		this.yRot = (byte)((int)(player.yRot * 256.0F / 360.0F));
 		this.xRot = (byte)((int)(player.xRot * 256.0F / 360.0F));
 	}

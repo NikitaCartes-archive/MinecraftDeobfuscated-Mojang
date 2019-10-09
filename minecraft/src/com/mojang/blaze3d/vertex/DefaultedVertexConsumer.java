@@ -10,9 +10,6 @@ public abstract class DefaultedVertexConsumer implements VertexConsumer {
 	protected int defaultG = 255;
 	protected int defaultB = 255;
 	protected int defaultA = 255;
-	protected boolean defaultOverlayCoordsSet = false;
-	protected int defaultOverlayU = 0;
-	protected int defaultOverlayV = 10;
 
 	public void defaultColor(int i, int j, int k, int l) {
 		this.defaultR = i;
@@ -20,17 +17,5 @@ public abstract class DefaultedVertexConsumer implements VertexConsumer {
 		this.defaultB = k;
 		this.defaultA = l;
 		this.defaultColorSet = true;
-	}
-
-	@Override
-	public void defaultOverlayCoords(int i, int j) {
-		this.defaultOverlayU = i;
-		this.defaultOverlayV = j;
-		this.defaultOverlayCoordsSet = true;
-	}
-
-	@Override
-	public void unsetDefaultOverlayCoords() {
-		this.defaultOverlayCoordsSet = false;
 	}
 }

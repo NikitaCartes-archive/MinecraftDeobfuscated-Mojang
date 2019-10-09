@@ -281,6 +281,16 @@ public abstract class Option {
 
 		return false;
 	}, (options, boolean_) -> options.snooperEnabled = boolean_);
+	public static final CycleOption TOGGLE_CROUCH = new CycleOption(
+		"key.sneak",
+		(options, integer) -> options.toggleCrouch = !options.toggleCrouch,
+		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.toggleCrouch ? "options.key.toggle" : "options.key.hold")
+	);
+	public static final CycleOption TOGGLE_SPRINT = new CycleOption(
+		"key.sprint",
+		(options, integer) -> options.toggleSprint = !options.toggleSprint,
+		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.toggleSprint ? "options.key.toggle" : "options.key.hold")
+	);
 	public static final BooleanOption TOUCHSCREEN = new BooleanOption(
 		"options.touchscreen", options -> options.touchscreen, (options, boolean_) -> options.touchscreen = boolean_
 	);

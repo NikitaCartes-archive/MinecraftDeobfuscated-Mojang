@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.SnowGolemModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.item.ItemStack;
@@ -27,12 +28,22 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
 			float n = 0.625F;
 			poseStack.translate(0.0, -0.34375, 0.0);
-			poseStack.mulPose(Vector3f.YP.rotation(180.0F, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 			poseStack.scale(0.625F, -0.625F, -0.625F);
 			ItemStack itemStack = new ItemStack(Blocks.CARVED_PUMPKIN);
 			Minecraft.getInstance()
 				.getItemRenderer()
-				.renderStatic(snowGolem, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, snowGolem.level, snowGolem.getLightColor());
+				.renderStatic(
+					snowGolem,
+					itemStack,
+					ItemTransforms.TransformType.HEAD,
+					false,
+					poseStack,
+					multiBufferSource,
+					snowGolem.level,
+					snowGolem.getLightColor(),
+					LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0F)
+				);
 			poseStack.popPose();
 		}
 	}

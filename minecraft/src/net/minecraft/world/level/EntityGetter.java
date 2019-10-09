@@ -86,7 +86,7 @@ public interface EntityGetter {
 
 	@Nullable
 	default Player getNearestPlayer(Entity entity, double d) {
-		return this.getNearestPlayer(entity.x, entity.y, entity.z, d, false);
+		return this.getNearestPlayer(entity.getX(), entity.getY(), entity.getZ(), d, false);
 	}
 
 	@Nullable
@@ -102,7 +102,7 @@ public interface EntityGetter {
 
 		for (Player player2 : this.players()) {
 			if (EntitySelector.NO_SPECTATORS.test(player2)) {
-				double h = player2.distanceToSqr(d, player2.y, e);
+				double h = player2.distanceToSqr(d, player2.getY(), e);
 				if ((f < 0.0 || h < f * f) && (g == -1.0 || h < g)) {
 					g = h;
 					player = player2;
@@ -128,7 +128,7 @@ public interface EntityGetter {
 
 	@Nullable
 	default Player getNearestPlayer(TargetingConditions targetingConditions, LivingEntity livingEntity) {
-		return this.getNearestEntity(this.players(), targetingConditions, livingEntity, livingEntity.x, livingEntity.y, livingEntity.z);
+		return this.getNearestEntity(this.players(), targetingConditions, livingEntity, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
 	}
 
 	@Nullable
@@ -179,7 +179,7 @@ public interface EntityGetter {
 		List<Player> list = Lists.<Player>newArrayList();
 
 		for (Player player : this.players()) {
-			if (aABB.contains(player.x, player.y, player.z) && targetingConditions.test(livingEntity, player)) {
+			if (aABB.contains(player.getX(), player.getY(), player.getZ()) && targetingConditions.test(livingEntity, player)) {
 				list.add(player);
 			}
 		}

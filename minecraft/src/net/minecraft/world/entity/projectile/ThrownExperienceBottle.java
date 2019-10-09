@@ -43,7 +43,7 @@ public class ThrownExperienceBottle extends ThrowableItemProjectile {
 			while (i > 0) {
 				int j = ExperienceOrb.getExperienceValue(i);
 				i -= j;
-				this.level.addFreshEntity(new ExperienceOrb(this.level, this.x, this.y, this.z, j));
+				this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
 			}
 
 			this.remove();

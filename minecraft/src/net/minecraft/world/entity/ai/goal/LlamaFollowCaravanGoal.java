@@ -105,8 +105,10 @@ public class LlamaFollowCaravanGoal extends Goal {
 			Llama llama = this.llama.getCaravanHead();
 			double d = (double)this.llama.distanceTo(llama);
 			float f = 2.0F;
-			Vec3 vec3 = new Vec3(llama.x - this.llama.x, llama.y - this.llama.y, llama.z - this.llama.z).normalize().scale(Math.max(d - 2.0, 0.0));
-			this.llama.getNavigation().moveTo(this.llama.x + vec3.x, this.llama.y + vec3.y, this.llama.z + vec3.z, this.speedModifier);
+			Vec3 vec3 = new Vec3(llama.getX() - this.llama.getX(), llama.getY() - this.llama.getY(), llama.getZ() - this.llama.getZ())
+				.normalize()
+				.scale(Math.max(d - 2.0, 0.0));
+			this.llama.getNavigation().moveTo(this.llama.getX() + vec3.x, this.llama.getY() + vec3.y, this.llama.getZ() + vec3.z, this.speedModifier);
 		}
 	}
 

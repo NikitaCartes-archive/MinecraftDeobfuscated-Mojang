@@ -18,20 +18,28 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlo
 	}
 
 	public void render(
-		TheEndGatewayBlockEntity theEndGatewayBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
+		TheEndGatewayBlockEntity theEndGatewayBlockEntity,
+		double d,
+		double e,
+		double f,
+		float g,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		int i,
+		int j
 	) {
 		if (theEndGatewayBlockEntity.isSpawning() || theEndGatewayBlockEntity.isCoolingDown()) {
 			float h = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(g) : theEndGatewayBlockEntity.getCooldownPercent(g);
-			double j = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
+			double k = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
 			h = Mth.sin(h * (float) Math.PI);
-			int k = Mth.floor((double)h * j);
+			int l = Mth.floor((double)h * k);
 			float[] fs = theEndGatewayBlockEntity.isSpawning() ? DyeColor.MAGENTA.getTextureDiffuseColors() : DyeColor.PURPLE.getTextureDiffuseColors();
-			long l = theEndGatewayBlockEntity.getLevel().getGameTime();
-			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, l, 0, k, fs, 0.15F, 0.175F);
-			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, l, 0, -k, fs, 0.15F, 0.175F);
+			long m = theEndGatewayBlockEntity.getLevel().getGameTime();
+			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, m, 0, l, fs, 0.15F, 0.175F);
+			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, m, 0, -l, fs, 0.15F, 0.175F);
 		}
 
-		super.render(theEndGatewayBlockEntity, d, e, f, g, poseStack, multiBufferSource, i);
+		super.render(theEndGatewayBlockEntity, d, e, f, g, poseStack, multiBufferSource, i, j);
 	}
 
 	@Override

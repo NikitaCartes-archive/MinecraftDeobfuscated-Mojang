@@ -158,24 +158,24 @@ public class Evoker extends SpellcasterIllager {
 		@Override
 		protected void performSpellCasting() {
 			LivingEntity livingEntity = Evoker.this.getTarget();
-			double d = Math.min(livingEntity.y, Evoker.this.y);
-			double e = Math.max(livingEntity.y, Evoker.this.y) + 1.0;
-			float f = (float)Mth.atan2(livingEntity.z - Evoker.this.z, livingEntity.x - Evoker.this.x);
+			double d = Math.min(livingEntity.getY(), Evoker.this.getY());
+			double e = Math.max(livingEntity.getY(), Evoker.this.getY()) + 1.0;
+			float f = (float)Mth.atan2(livingEntity.getZ() - Evoker.this.getZ(), livingEntity.getX() - Evoker.this.getX());
 			if (Evoker.this.distanceToSqr(livingEntity) < 9.0) {
 				for (int i = 0; i < 5; i++) {
 					float g = f + (float)i * (float) Math.PI * 0.4F;
-					this.createSpellEntity(Evoker.this.x + (double)Mth.cos(g) * 1.5, Evoker.this.z + (double)Mth.sin(g) * 1.5, d, e, g, 0);
+					this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(g) * 1.5, Evoker.this.getZ() + (double)Mth.sin(g) * 1.5, d, e, g, 0);
 				}
 
 				for (int i = 0; i < 8; i++) {
 					float g = f + (float)i * (float) Math.PI * 2.0F / 8.0F + (float) (Math.PI * 2.0 / 5.0);
-					this.createSpellEntity(Evoker.this.x + (double)Mth.cos(g) * 2.5, Evoker.this.z + (double)Mth.sin(g) * 2.5, d, e, g, 3);
+					this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(g) * 2.5, Evoker.this.getZ() + (double)Mth.sin(g) * 2.5, d, e, g, 3);
 				}
 			} else {
 				for (int i = 0; i < 16; i++) {
 					double h = 1.25 * (double)(i + 1);
 					int j = 1 * i;
-					this.createSpellEntity(Evoker.this.x + (double)Mth.cos(f) * h, Evoker.this.z + (double)Mth.sin(f) * h, d, e, f, j);
+					this.createSpellEntity(Evoker.this.getX() + (double)Mth.cos(f) * h, Evoker.this.getZ() + (double)Mth.sin(f) * h, d, e, f, j);
 				}
 			}
 		}

@@ -154,7 +154,7 @@ public class MultiPlayerLevel extends Level {
 
 	public void tickNonPassenger(Entity entity) {
 		if (entity instanceof Player || this.getChunkSource().isEntityTickingChunk(entity)) {
-			entity.setPosAndOldPos(entity.x, entity.y, entity.z);
+			entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
 			entity.yRotO = entity.yRot;
 			entity.xRotO = entity.xRot;
 			if (entity.inChunk || entity.isSpectator()) {
@@ -177,7 +177,7 @@ public class MultiPlayerLevel extends Level {
 		if (entity2.removed || entity2.getVehicle() != entity) {
 			entity2.stopRiding();
 		} else if (entity2 instanceof Player || this.getChunkSource().isEntityTickingChunk(entity2)) {
-			entity2.setPosAndOldPos(entity2.x, entity2.y, entity2.z);
+			entity2.setPosAndOldPos(entity2.getX(), entity2.getY(), entity2.getZ());
 			entity2.yRotO = entity2.yRot;
 			entity2.xRotO = entity2.xRot;
 			if (entity2.inChunk) {
@@ -196,9 +196,9 @@ public class MultiPlayerLevel extends Level {
 
 	public void updateChunkPos(Entity entity) {
 		this.getProfiler().push("chunkCheck");
-		int i = Mth.floor(entity.x / 16.0);
-		int j = Mth.floor(entity.y / 16.0);
-		int k = Mth.floor(entity.z / 16.0);
+		int i = Mth.floor(entity.getX() / 16.0);
+		int j = Mth.floor(entity.getY() / 16.0);
+		int k = Mth.floor(entity.getZ() / 16.0);
 		if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
 			if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
 				this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
@@ -272,7 +272,7 @@ public class MultiPlayerLevel extends Level {
 	private void addEntity(int i, Entity entity) {
 		this.removeEntity(i);
 		this.entitiesById.put(i, entity);
-		this.getChunkSource().getChunk(Mth.floor(entity.x / 16.0), Mth.floor(entity.z / 16.0), ChunkStatus.FULL, true).addEntity(entity);
+		this.getChunkSource().getChunk(Mth.floor(entity.getX() / 16.0), Mth.floor(entity.getZ() / 16.0), ChunkStatus.FULL, true).addEntity(entity);
 	}
 
 	public void removeEntity(int i) {
@@ -295,8 +295,8 @@ public class MultiPlayerLevel extends Level {
 	public void reAddEntitiesToChunk(LevelChunk levelChunk) {
 		for (Entry<Entity> entry : this.entitiesById.int2ObjectEntrySet()) {
 			Entity entity = (Entity)entry.getValue();
-			int i = Mth.floor(entity.x / 16.0);
-			int j = Mth.floor(entity.z / 16.0);
+			int i = Mth.floor(entity.getX() / 16.0);
+			int j = Mth.floor(entity.getZ() / 16.0);
 			if (i == levelChunk.getPos().x && j == levelChunk.getPos().z) {
 				levelChunk.addEntity(entity);
 			}

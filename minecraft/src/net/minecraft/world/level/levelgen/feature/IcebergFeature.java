@@ -12,10 +12,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
-public class IcebergFeature extends Feature<IcebergConfiguration> {
-	public IcebergFeature(Function<Dynamic<?>, ? extends IcebergConfiguration> function) {
+public class IcebergFeature extends Feature<BlockStateConfiguration> {
+	public IcebergFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
 		super(function);
 	}
 
@@ -24,11 +25,11 @@ public class IcebergFeature extends Feature<IcebergConfiguration> {
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
-		IcebergConfiguration icebergConfiguration
+		BlockStateConfiguration blockStateConfiguration
 	) {
 		blockPos = new BlockPos(blockPos.getX(), levelAccessor.getSeaLevel(), blockPos.getZ());
 		boolean bl = random.nextDouble() > 0.7;
-		BlockState blockState = icebergConfiguration.state;
+		BlockState blockState = blockStateConfiguration.state;
 		double d = random.nextDouble() * 2.0 * Math.PI;
 		int i = 11 - random.nextInt(5);
 		int j = 3 + random.nextInt(3);

@@ -6,20 +6,20 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
-public class LightGemChanceDecorator extends SimpleFeatureDecorator<DecoratorFrequency> {
-	public LightGemChanceDecorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class LightGemChanceDecorator extends SimpleFeatureDecorator<FrequencyDecoratorConfiguration> {
+	public LightGemChanceDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
-	public Stream<BlockPos> place(Random random, DecoratorFrequency decoratorFrequency, BlockPos blockPos) {
-		return IntStream.range(0, random.nextInt(random.nextInt(decoratorFrequency.count) + 1)).mapToObj(i -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(120) + 4;
-			int l = random.nextInt(16);
-			return blockPos.offset(j, k, l);
+	public Stream<BlockPos> place(Random random, FrequencyDecoratorConfiguration frequencyDecoratorConfiguration, BlockPos blockPos) {
+		return IntStream.range(0, random.nextInt(random.nextInt(frequencyDecoratorConfiguration.count) + 1)).mapToObj(i -> {
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = random.nextInt(120) + 4;
+			return new BlockPos(j, l, k);
 		});
 	}
 }

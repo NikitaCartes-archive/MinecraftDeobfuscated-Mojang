@@ -1,19 +1,18 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DoublePlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RandomFeatureConfig;
-import net.minecraft.world.level.levelgen.feature.RandomRandomFeatureConfig;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequencyWithExtraChance;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.placement.FrequencyWithExtraChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class ForestFlowerBiome extends Biome {
@@ -31,51 +30,50 @@ public final class ForestFlowerBiome extends Biome {
 				.waterFogColor(329011)
 				.parent("forest")
 		);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
 		BiomeDefaultFeatures.addDefaultCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.RANDOM_RANDOM_SELECTOR,
-				new RandomRandomFeatureConfig(
-					new Feature[]{Feature.DOUBLE_PLANT, Feature.DOUBLE_PLANT, Feature.DOUBLE_PLANT, Feature.GENERAL_FOREST_FLOWER},
-					new FeatureConfiguration[]{
-						new DoublePlantConfiguration(Blocks.LILAC.defaultBlockState()),
-						new DoublePlantConfiguration(Blocks.ROSE_BUSH.defaultBlockState()),
-						new DoublePlantConfiguration(Blocks.PEONY.defaultBlockState()),
-						FeatureConfiguration.NONE
-					},
-					2
-				),
-				FeatureDecorator.COUNT_HEIGHTMAP_32,
-				new DecoratorFrequency(5)
-			)
+			Feature.RANDOM_RANDOM_SELECTOR
+				.configured(
+					new RandomRandomFeatureConfiguration(
+						ImmutableList.of(
+							Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.DOUBLE_LILAC_CONFIG),
+							Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.DOUBLE_ROSE_BUSH_CONFIG),
+							Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.DOUBLE_PEONY_CONFIG),
+							Feature.FLOWER.configured(BiomeDefaultFeatures.GENERAL_FOREST_FLOWER_CONFIG)
+						),
+						2
+					)
+				)
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(5)))
 		);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
 		BiomeDefaultFeatures.addDefaultOres(this);
 		BiomeDefaultFeatures.addDefaultSoftDisks(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.RANDOM_SELECTOR,
-				new RandomFeatureConfig(
-					new Feature[]{Feature.BIRCH_TREE, Feature.FANCY_TREE},
-					new FeatureConfiguration[]{FeatureConfiguration.NONE, FeatureConfiguration.NONE},
-					new float[]{0.2F, 0.1F},
-					Feature.NORMAL_TREE,
-					FeatureConfiguration.NONE
-				),
-				FeatureDecorator.COUNT_EXTRA_HEIGHTMAP,
-				new DecoratorFrequencyWithExtraChance(6, 0.1F, 1)
-			)
+			Feature.RANDOM_SELECTOR
+				.configured(
+					new RandomFeatureConfiguration(
+						ImmutableList.of(
+							Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_001_CONFIG).weighted(0.2F),
+							Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_001_CONFIG).weighted(0.1F)
+						),
+						Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_001_CONFIG)
+					)
+				)
+				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(6, 0.1F, 1)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(Feature.FOREST_FLOWER, FeatureConfiguration.NONE, FeatureDecorator.COUNT_HEIGHTMAP_32, new DecoratorFrequency(100))
+			Feature.FLOWER
+				.configured(BiomeDefaultFeatures.FOREST_FLOWER_CONFIG)
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(100)))
 		);
 		BiomeDefaultFeatures.addDefaultGrass(this);
 		BiomeDefaultFeatures.addDefaultMushrooms(this);

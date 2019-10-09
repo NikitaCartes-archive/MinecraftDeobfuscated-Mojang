@@ -11,8 +11,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class ForestRockPlacementDecorator extends FeatureDecorator<DecoratorFrequency> {
-	public ForestRockPlacementDecorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class ForestRockPlacementDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+	public ForestRockPlacementDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -20,14 +20,15 @@ public class ForestRockPlacementDecorator extends FeatureDecorator<DecoratorFreq
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequency decoratorFrequency,
+		FrequencyDecoratorConfiguration frequencyDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		int i = random.nextInt(decoratorFrequency.count);
+		int i = random.nextInt(frequencyDecoratorConfiguration.count);
 		return IntStream.range(0, i).mapToObj(ix -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			return levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k));
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k);
+			return new BlockPos(j, l, k);
 		});
 	}
 }

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Rabbit;
 
@@ -26,6 +27,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 	private float jumpRotation;
 
 	public RabbitModel() {
+		super(RenderType::entitySolid);
 		this.rearFootLeft.addBox(-1.0F, 5.5F, -3.7F, 2.0F, 1.0F, 7.0F);
 		this.rearFootLeft.setPos(3.0F, 17.5F, 3.7F);
 		this.rearFootLeft.mirror = true;
@@ -94,20 +96,20 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
 		if (this.young) {
-			float j = 1.5F;
+			float k = 1.5F;
 			poseStack.pushPose();
 			poseStack.scale(0.56666666F, 0.56666666F, 0.56666666F);
 			poseStack.translate(0.0, 1.375, 0.125);
 			ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
 			poseStack.popPose();
 			poseStack.pushPose();
 			poseStack.scale(0.4F, 0.4F, 0.4F);
 			poseStack.translate(0.0, 2.25, 0.0);
 			ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
 			poseStack.popPose();
 		} else {
 			poseStack.pushPose();
@@ -127,7 +129,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 					this.tail,
 					this.nose
 				)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
 			poseStack.popPose();
 		}
 	}

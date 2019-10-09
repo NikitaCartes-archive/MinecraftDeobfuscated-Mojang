@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
@@ -249,7 +250,7 @@ public class SnowyVillagePools {
 				new StructureTemplatePool(
 					new ResourceLocation("village/snowy/trees"),
 					new ResourceLocation("empty"),
-					ImmutableList.of(new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SPRUCE_TREE, FeatureConfiguration.NONE)), 1)),
+					ImmutableList.of(new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG)), 1)),
 					StructureTemplatePool.Projection.RIGID
 				)
 			);
@@ -262,9 +263,9 @@ public class SnowyVillagePools {
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_01"), 4),
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_02"), 4),
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_03"), 1),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SPRUCE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SNOW_PILE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.ICE_PILE, FeatureConfiguration.NONE)), 1),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.SNOW_PILE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.ICE_PILE_CONFIG)), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 9)
 					),
 					StructureTemplatePool.Projection.RIGID
@@ -279,9 +280,9 @@ public class SnowyVillagePools {
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_01", immutableList), 1),
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_02", immutableList), 1),
 						new Pair<>(new SinglePoolElement("village/snowy/snowy_lamp_post_03", immutableList), 1),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SPRUCE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SNOW_PILE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.ICE_PILE, FeatureConfiguration.NONE)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.SNOW_PILE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.ICE_PILE_CONFIG)), 4),
 						Pair.of(EmptyPoolElement.INSTANCE, 7)
 					),
 					StructureTemplatePool.Projection.RIGID

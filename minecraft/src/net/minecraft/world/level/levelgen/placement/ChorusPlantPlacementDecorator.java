@@ -11,7 +11,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.NoneDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 
 public class ChorusPlantPlacementDecorator extends FeatureDecorator<NoneDecoratorConfiguration> {
 	public ChorusPlantPlacementDecorator(Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function) {
@@ -27,12 +27,12 @@ public class ChorusPlantPlacementDecorator extends FeatureDecorator<NoneDecorato
 	) {
 		int i = random.nextInt(5);
 		return IntStream.range(0, i).mapToObj(ix -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k)).getY();
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k);
 			if (l > 0) {
 				int m = l - 1;
-				return new BlockPos(blockPos.getX() + j, m, blockPos.getZ() + k);
+				return new BlockPos(j, m, k);
 			} else {
 				return null;
 			}

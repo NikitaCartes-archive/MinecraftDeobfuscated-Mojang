@@ -80,7 +80,7 @@ public class TargetingConditions {
 				if (this.range > 0.0) {
 					double d = this.testInvisible ? livingEntity2.getVisibilityPercent(livingEntity) : 1.0;
 					double e = this.range * d;
-					double f = livingEntity.distanceToSqr(livingEntity2.x, livingEntity2.y, livingEntity2.z);
+					double f = livingEntity.distanceToSqr(livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ());
 					if (f > e * e) {
 						return false;
 					}

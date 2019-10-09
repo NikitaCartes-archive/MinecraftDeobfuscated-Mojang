@@ -2,26 +2,23 @@ package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.MegaJungleTreeFeature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 
 public class JungleTreeGrower extends AbstractMegaTreeGrower {
 	@Nullable
 	@Override
-	protected AbstractTreeFeature<NoneFeatureConfiguration> getFeature(Random random) {
-		return new TreeFeature(
-			NoneFeatureConfiguration::deserialize, true, 4 + random.nextInt(7), Blocks.JUNGLE_LOG.defaultBlockState(), Blocks.JUNGLE_LEAVES.defaultBlockState(), false
-		);
+	protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+		return new TreeFeature(SmallTreeConfiguration::deserialize).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
 	}
 
 	@Nullable
 	@Override
-	protected AbstractTreeFeature<NoneFeatureConfiguration> getMegaFeature(Random random) {
-		return new MegaJungleTreeFeature(
-			NoneFeatureConfiguration::deserialize, true, 10, 20, Blocks.JUNGLE_LOG.defaultBlockState(), Blocks.JUNGLE_LEAVES.defaultBlockState()
-		);
+	protected ConfiguredFeature<MegaTreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
+		return Feature.MEGA_JUNGLE_TREE.configured(BiomeDefaultFeatures.MEGA_JUNGLE_TREE_CONFIG);
 	}
 }

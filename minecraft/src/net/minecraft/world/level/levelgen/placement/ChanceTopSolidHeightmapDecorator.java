@@ -10,8 +10,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class ChanceTopSolidHeightmapDecorator extends FeatureDecorator<DecoratorChance> {
-	public ChanceTopSolidHeightmapDecorator(Function<Dynamic<?>, ? extends DecoratorChance> function) {
+public class ChanceTopSolidHeightmapDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
+	public ChanceTopSolidHeightmapDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -19,14 +19,14 @@ public class ChanceTopSolidHeightmapDecorator extends FeatureDecorator<Decorator
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorChance decoratorChance,
+		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		if (random.nextFloat() < 1.0F / (float)decoratorChance.chance) {
-			int i = random.nextInt(16);
-			int j = random.nextInt(16);
-			int k = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + i, blockPos.getZ() + j);
-			return Stream.of(new BlockPos(blockPos.getX() + i, k, blockPos.getZ() + j));
+		if (random.nextFloat() < 1.0F / (float)chanceDecoratorConfiguration.chance) {
+			int i = random.nextInt(16) + blockPos.getX();
+			int j = random.nextInt(16) + blockPos.getZ();
+			int k = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, i, j);
+			return Stream.of(new BlockPos(i, k, j));
 		} else {
 			return Stream.empty();
 		}

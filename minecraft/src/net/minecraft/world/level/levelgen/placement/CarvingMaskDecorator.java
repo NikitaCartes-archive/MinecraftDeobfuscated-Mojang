@@ -13,8 +13,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
-public class CarvingMaskDecorator extends FeatureDecorator<DecoratorCarvingMaskConfig> {
-	public CarvingMaskDecorator(Function<Dynamic<?>, ? extends DecoratorCarvingMaskConfig> function) {
+public class CarvingMaskDecorator extends FeatureDecorator<CarvingMaskDecoratorConfiguration> {
+	public CarvingMaskDecorator(Function<Dynamic<?>, ? extends CarvingMaskDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -22,13 +22,13 @@ public class CarvingMaskDecorator extends FeatureDecorator<DecoratorCarvingMaskC
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorCarvingMaskConfig decoratorCarvingMaskConfig,
+		CarvingMaskDecoratorConfiguration carvingMaskDecoratorConfiguration,
 		BlockPos blockPos
 	) {
 		ChunkAccess chunkAccess = levelAccessor.getChunk(blockPos);
 		ChunkPos chunkPos = chunkAccess.getPos();
-		BitSet bitSet = chunkAccess.getCarvingMask(decoratorCarvingMaskConfig.step);
-		return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < decoratorCarvingMaskConfig.probability).mapToObj(i -> {
+		BitSet bitSet = chunkAccess.getCarvingMask(carvingMaskDecoratorConfiguration.step);
+		return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < carvingMaskDecoratorConfiguration.probability).mapToObj(i -> {
 			int j = i & 15;
 			int k = i >> 4 & 15;
 			int l = i >> 8;

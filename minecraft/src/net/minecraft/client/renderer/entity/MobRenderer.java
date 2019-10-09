@@ -55,21 +55,21 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		}
 
 		double j = Math.cos(e);
-		double k = Mth.lerp((double)f, entity.xo, entity.x) - g * 0.7 - h * 0.5 * j;
-		double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.y + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
-		double m = Mth.lerp((double)f, entity.zo, entity.z) - h * 0.7 + g * 0.5 * j;
+		double k = Mth.lerp((double)f, entity.xo, entity.getX()) - g * 0.7 - h * 0.5 * j;
+		double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.getY() + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
+		double m = Mth.lerp((double)f, entity.zo, entity.getZ()) - h * 0.7 + g * 0.5 * j;
 		double n = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
 		g = Math.cos(n) * (double)mob.getBbWidth() * 0.4;
 		h = Math.sin(n) * (double)mob.getBbWidth() * 0.4;
-		double o = Mth.lerp((double)f, mob.xo, mob.x) + g;
-		double p = Mth.lerp((double)f, mob.yo, mob.y);
-		double q = Mth.lerp((double)f, mob.zo, mob.z) + h;
+		double o = Mth.lerp((double)f, mob.xo, mob.getX()) + g;
+		double p = Mth.lerp((double)f, mob.yo, mob.getY());
+		double q = Mth.lerp((double)f, mob.zo, mob.getZ()) + h;
 		poseStack.translate(g, -(1.6 - (double)mob.getBbHeight()) * 0.5, h);
 		float r = (float)(k - o);
 		float s = (float)(l - p);
 		float t = (float)(m - q);
 		float u = 0.025F;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LEASH);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.leash());
 		Matrix4f matrix4f = poseStack.getPose();
 		float v = Mth.fastInvSqrt(r * r + t * t) * 0.025F / 2.0F;
 		float w = t * v;

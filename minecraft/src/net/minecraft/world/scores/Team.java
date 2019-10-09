@@ -28,6 +28,7 @@ public abstract class Team {
 	@Environment(EnvType.CLIENT)
 	public abstract Team.Visibility getNameTagVisibility();
 
+	@Environment(EnvType.CLIENT)
 	public abstract ChatFormatting getColor();
 
 	public abstract Collection<String> getPlayers();

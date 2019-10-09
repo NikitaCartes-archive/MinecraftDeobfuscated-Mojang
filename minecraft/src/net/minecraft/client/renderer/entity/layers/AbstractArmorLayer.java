@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -92,10 +93,10 @@ public abstract class AbstractArmorLayer<T extends LivingEntity, M extends Human
 		float h,
 		@Nullable String string
 	) {
-		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.getArmorLocation(armorItem, bl2, string), false, bl, false);
-		OverlayTexture.setDefault(vertexConsumer);
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, f, g, h);
-		vertexConsumer.unsetDefaultOverlayCoords();
+		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(
+			multiBufferSource, RenderType.entityCutoutNoCull(this.getArmorLocation(armorItem, bl2, string)), false, bl
+		);
+		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h);
 	}
 
 	public A getArmorModel(EquipmentSlot equipmentSlot) {

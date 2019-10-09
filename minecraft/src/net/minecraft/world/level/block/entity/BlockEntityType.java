@@ -194,7 +194,7 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<JigsawBlockEntity> JIGSAW = register("jigsaw", BlockEntityType.Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW));
 	public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = register("campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE));
 	public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
-		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEE_HIVE)
+		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE)
 	);
 	private final Supplier<? extends T> factory;
 	private final Set<Block> validBlocks;

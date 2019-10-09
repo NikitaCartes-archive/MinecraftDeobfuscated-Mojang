@@ -254,16 +254,7 @@ public abstract class Mob extends LivingEntity {
 				double e = this.random.nextGaussian() * 0.02;
 				double f = this.random.nextGaussian() * 0.02;
 				double g = 10.0;
-				this.level
-					.addParticle(
-						ParticleTypes.POOF,
-						this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth() - d * 10.0,
-						this.y + (double)(this.random.nextFloat() * this.getBbHeight()) - e * 10.0,
-						this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth() - f * 10.0,
-						d,
-						e,
-						f
-					);
+				this.level.addParticle(ParticleTypes.POOF, this.getX(1.0) - d * 10.0, this.getRandomY() - e * 10.0, this.getRandomZ(1.0) - f * 10.0, d, e, f);
 			}
 		} else {
 			this.level.broadcastEntityEvent(this, (byte)20);
@@ -637,14 +628,14 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	public void lookAt(Entity entity, float f, float g) {
-		double d = entity.x - this.x;
-		double e = entity.z - this.z;
+		double d = entity.getX() - this.getX();
+		double e = entity.getZ() - this.getZ();
 		double h;
 		if (entity instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity)entity;
-			h = livingEntity.y + (double)livingEntity.getEyeHeight() - (this.y + (double)this.getEyeHeight());
+			h = livingEntity.getEyeY() - this.getEyeY();
 		} else {
-			h = (entity.getBoundingBox().minY + entity.getBoundingBox().maxY) / 2.0 - (this.y + (double)this.getEyeHeight());
+			h = (entity.getBoundingBox().minY + entity.getBoundingBox().maxY) / 2.0 - this.getEyeY();
 		}
 
 		double i = (double)Mth.sqrt(d * d + e * e);
@@ -1229,8 +1220,8 @@ public abstract class Mob extends LivingEntity {
 		if (this.level.isDay() && !this.level.isClientSide) {
 			float f = this.getBrightness();
 			BlockPos blockPos = this.getVehicle() instanceof Boat
-				? new BlockPos(this.x, (double)Math.round(this.y), this.z).above()
-				: new BlockPos(this.x, (double)Math.round(this.y), this.z);
+				? new BlockPos(this.getX(), (double)Math.round(this.getY()), this.getZ()).above()
+				: new BlockPos(this.getX(), (double)Math.round(this.getY()), this.getZ());
 			if (f > 0.5F && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F && this.level.canSeeSky(blockPos)) {
 				return true;
 			}

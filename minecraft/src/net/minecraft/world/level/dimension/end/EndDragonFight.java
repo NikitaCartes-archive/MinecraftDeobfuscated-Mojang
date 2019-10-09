@@ -49,11 +49,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -378,13 +378,8 @@ public class EndDragonFight {
 	private void spawnNewGateway(BlockPos blockPos) {
 		this.level.levelEvent(3000, blockPos, 0);
 		Feature.END_GATEWAY
-			.place(
-				this.level,
-				(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
-				new Random(),
-				blockPos,
-				EndGatewayConfiguration.delayedExitSearch()
-			);
+			.configured(EndGatewayConfiguration.delayedExitSearch())
+			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	private void spawnExitPortal(boolean bl) {
@@ -397,13 +392,8 @@ public class EndDragonFight {
 			}
 		}
 
-		endPodiumFeature.place(
-			this.level,
-			(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
-			new Random(),
-			this.portalLocation,
-			FeatureConfiguration.NONE
-		);
+		endPodiumFeature.configured(FeatureConfiguration.NONE)
+			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
 	}
 
 	private EnderDragon createNewDragon() {

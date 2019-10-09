@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -31,7 +32,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 			Level level = fallingBlockEntity.getLevel();
 			if (blockState != level.getBlockState(new BlockPos(fallingBlockEntity)) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				poseStack.pushPose();
-				BlockPos blockPos = new BlockPos(fallingBlockEntity.x, fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.z);
+				BlockPos blockPos = new BlockPos(fallingBlockEntity.getX(), fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.getZ());
 				poseStack.translate((double)(-(blockPos.getX() & 15)) - 0.5, (double)(-(blockPos.getY() & 15)), (double)(-(blockPos.getZ() & 15)) - 0.5);
 				BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
 				blockRenderDispatcher.getModelRenderer()
@@ -41,10 +42,11 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 						blockState,
 						blockPos,
 						poseStack,
-						multiBufferSource.getBuffer(RenderType.getRenderLayer(blockState)),
+						multiBufferSource.getBuffer(RenderType.getChunkRenderType(blockState)),
 						false,
 						new Random(),
-						blockState.getSeed(fallingBlockEntity.getStartPos())
+						blockState.getSeed(fallingBlockEntity.getStartPos()),
+						OverlayTexture.NO_OVERLAY
 					);
 				poseStack.popPose();
 				super.render(fallingBlockEntity, d, e, f, g, h, poseStack, multiBufferSource);

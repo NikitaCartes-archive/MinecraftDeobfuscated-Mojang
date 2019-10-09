@@ -10,8 +10,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
-public class MonsterRoomPlacementDecorator extends FeatureDecorator<MonsterRoomPlacementConfiguration> {
-	public MonsterRoomPlacementDecorator(Function<Dynamic<?>, ? extends MonsterRoomPlacementConfiguration> function) {
+public class MonsterRoomPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
+	public MonsterRoomPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -19,15 +19,15 @@ public class MonsterRoomPlacementDecorator extends FeatureDecorator<MonsterRoomP
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		MonsterRoomPlacementConfiguration monsterRoomPlacementConfiguration,
+		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		int i = monsterRoomPlacementConfiguration.chance;
+		int i = chanceDecoratorConfiguration.chance;
 		return IntStream.range(0, i).mapToObj(ix -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(chunkGenerator.getGenDepth());
-			int l = random.nextInt(16);
-			return blockPos.offset(j, k, l);
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = random.nextInt(chunkGenerator.getGenDepth());
+			return new BlockPos(j, l, k);
 		});
 	}
 }

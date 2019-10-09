@@ -109,9 +109,9 @@ public class ServerPlayerGameMode {
 	}
 
 	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i) {
-		double d = this.player.x - ((double)blockPos.getX() + 0.5);
-		double e = this.player.y - ((double)blockPos.getY() + 0.5) + 1.5;
-		double f = this.player.z - ((double)blockPos.getZ() + 0.5);
+		double d = this.player.getX() - ((double)blockPos.getX() + 0.5);
+		double e = this.player.getY() - ((double)blockPos.getY() + 0.5) + 1.5;
+		double f = this.player.getZ() - ((double)blockPos.getZ() + 0.5);
 		double g = d * d + e * e + f * f;
 		if (g > 36.0) {
 			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too far"));

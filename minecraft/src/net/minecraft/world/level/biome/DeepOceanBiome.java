@@ -3,14 +3,14 @@ package net.minecraft.world.level.biome;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.feature.SeagrassFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.ShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -30,10 +30,10 @@ public final class DeepOceanBiome extends Biome {
 				.waterFogColor(329011)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.OCEAN_MONUMENT, FeatureConfiguration.NONE);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.SHIPWRECK, new ShipwreckConfiguration(false));
-		this.addStructureStart(Feature.OCEAN_RUIN, new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F));
+		this.addStructureStart(Feature.OCEAN_MONUMENT.configured(FeatureConfiguration.NONE));
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));
+		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F)));
 		BiomeDefaultFeatures.addOceanCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
@@ -49,7 +49,9 @@ public final class DeepOceanBiome extends Biome {
 		BiomeDefaultFeatures.addDefaultSprings(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(Feature.SEAGRASS, new SeagrassFeatureConfiguration(48, 0.8), FeatureDecorator.TOP_SOLID_HEIGHTMAP, DecoratorConfiguration.NONE)
+			Feature.SEAGRASS
+				.configured(new SeagrassFeatureConfiguration(48, 0.8))
+				.decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP.configured(DecoratorConfiguration.NONE))
 		);
 		BiomeDefaultFeatures.addDefaultSeagrass(this);
 		BiomeDefaultFeatures.addColdOceanExtraVegetation(this);

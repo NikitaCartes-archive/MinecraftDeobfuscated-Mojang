@@ -13,25 +13,25 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 
 	public DragonSittingScanningPhase(EnderDragon enderDragon) {
 		super(enderDragon);
-		this.scanTargeting = new TargetingConditions().range(20.0).selector(livingEntity -> Math.abs(livingEntity.y - enderDragon.y) <= 10.0);
+		this.scanTargeting = new TargetingConditions().range(20.0).selector(livingEntity -> Math.abs(livingEntity.getY() - enderDragon.getY()) <= 10.0);
 	}
 
 	@Override
 	public void doServerTick() {
 		this.scanningTime++;
-		LivingEntity livingEntity = this.dragon.level.getNearestPlayer(this.scanTargeting, this.dragon, this.dragon.x, this.dragon.y, this.dragon.z);
+		LivingEntity livingEntity = this.dragon.level.getNearestPlayer(this.scanTargeting, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		if (livingEntity != null) {
 			if (this.scanningTime > 25) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_ATTACKING);
 			} else {
-				Vec3 vec3 = new Vec3(livingEntity.x - this.dragon.x, 0.0, livingEntity.z - this.dragon.z).normalize();
+				Vec3 vec3 = new Vec3(livingEntity.getX() - this.dragon.getX(), 0.0, livingEntity.getZ() - this.dragon.getZ()).normalize();
 				Vec3 vec32 = new Vec3((double)Mth.sin(this.dragon.yRot * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.yRot * (float) (Math.PI / 180.0))))
 					.normalize();
 				float f = (float)vec32.dot(vec3);
 				float g = (float)(Math.acos((double)f) * 180.0F / (float)Math.PI) + 0.5F;
 				if (g < 0.0F || g > 10.0F) {
-					double d = livingEntity.x - this.dragon.head.x;
-					double e = livingEntity.z - this.dragon.head.z;
+					double d = livingEntity.getX() - this.dragon.head.getX();
+					double e = livingEntity.getZ() - this.dragon.head.getZ();
 					double h = Mth.clamp(Mth.wrapDegrees(180.0 - Mth.atan2(d, e) * 180.0F / (float)Math.PI - (double)this.dragon.yRot), -100.0, 100.0);
 					this.dragon.yRotA *= 0.8F;
 					float i = Mth.sqrt(d * d + e * e) + 1.0F;
@@ -45,11 +45,11 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 				}
 			}
 		} else if (this.scanningTime >= 100) {
-			livingEntity = this.dragon.level.getNearestPlayer(CHARGE_TARGETING, this.dragon, this.dragon.x, this.dragon.y, this.dragon.z);
+			livingEntity = this.dragon.level.getNearestPlayer(CHARGE_TARGETING, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.TAKEOFF);
 			if (livingEntity != null) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.CHARGING_PLAYER);
-				this.dragon.getPhaseManager().getPhase(EnderDragonPhase.CHARGING_PLAYER).setTarget(new Vec3(livingEntity.x, livingEntity.y, livingEntity.z));
+				this.dragon.getPhaseManager().getPhase(EnderDragonPhase.CHARGING_PLAYER).setTarget(new Vec3(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ()));
 			}
 		}
 	}

@@ -3,9 +3,12 @@ package net.minecraft.nbt;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
+import it.unimi.dsi.fastutil.bytes.ByteSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.network.chat.Component;
@@ -46,6 +49,7 @@ public class ListTag extends CollectionTag<Tag> {
 			return "TAG_List";
 		}
 	};
+	private static final ByteSet INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
 	private final List<Tag> list;
 	private byte type;
 
@@ -276,28 +280,44 @@ public class ListTag extends CollectionTag<Tag> {
 	public Component getPrettyDisplay(String string, int i) {
 		if (this.isEmpty()) {
 			return new TextComponent("[]");
-		} else {
+		} else if (INLINE_ELEMENT_TYPES.contains(this.type) && this.size() <= 8) {
+			String string2 = ", ";
 			Component component = new TextComponent("[");
-			if (!string.isEmpty()) {
-				component.append("\n");
-			}
 
 			for (int j = 0; j < this.list.size(); j++) {
-				Component component2 = new TextComponent(Strings.repeat(string, i + 1));
-				component2.append(((Tag)this.list.get(j)).getPrettyDisplay(string, i + 1));
-				if (j != this.list.size() - 1) {
-					component2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
+				if (j != 0) {
+					component.append(", ");
 				}
 
-				component.append(component2);
-			}
-
-			if (!string.isEmpty()) {
-				component.append("\n").append(Strings.repeat(string, i));
+				component.append(((Tag)this.list.get(j)).getPrettyDisplay());
 			}
 
 			component.append("]");
 			return component;
+		} else {
+			Component component2 = new TextComponent("[");
+			if (!string.isEmpty()) {
+				component2.append("\n");
+			}
+
+			String string3 = String.valueOf(',');
+
+			for (int j = 0; j < this.list.size(); j++) {
+				Component component3 = new TextComponent(Strings.repeat(string, i + 1));
+				component3.append(((Tag)this.list.get(j)).getPrettyDisplay(string, i + 1));
+				if (j != this.list.size() - 1) {
+					component3.append(string3).append(string.isEmpty() ? " " : "\n");
+				}
+
+				component2.append(component3);
+			}
+
+			if (!string.isEmpty()) {
+				component2.append("\n").append(Strings.repeat(string, i));
+			}
+
+			component2.append("]");
+			return component2;
 		}
 	}
 

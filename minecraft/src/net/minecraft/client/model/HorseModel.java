@@ -1,9 +1,12 @@
 package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 
@@ -23,8 +26,8 @@ public class HorseModel<T extends AbstractHorse> extends AgeableListModel<T> {
 	private final ModelPart[] saddleParts;
 	private final ModelPart[] ridingParts;
 
-	public HorseModel(float f) {
-		super(true, 16.2F, 1.36F, 2.7272F, 2.0F, 20.0F);
+	public HorseModel(Function<ResourceLocation, RenderType> function, float f) {
+		super(function, true, 16.2F, 1.36F, 2.7272F, 2.0F, 20.0F);
 		this.texWidth = 64;
 		this.texHeight = 64;
 		this.body = new ModelPart(this, 0, 32);

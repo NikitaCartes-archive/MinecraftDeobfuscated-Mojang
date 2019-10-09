@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Parrot;
 
@@ -24,6 +25,7 @@ public class ParrotModel extends ListModel<Parrot> {
 	private final ModelPart legRight;
 
 	public ParrotModel() {
+		super(RenderType::entityCutoutNoCull);
 		this.texWidth = 32;
 		this.texHeight = 32;
 		this.body = new ModelPart(this, 2, 8);
@@ -78,10 +80,10 @@ public class ParrotModel extends ListModel<Parrot> {
 		this.prepare(getState(parrot));
 	}
 
-	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h, float j, float k, int l) {
+	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, float l, int m) {
 		this.prepare(ParrotModel.State.ON_SHOULDER);
-		this.setupAnim(ParrotModel.State.ON_SHOULDER, l, f, g, 0.0F, h, j);
-		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, k, i, null));
+		this.setupAnim(ParrotModel.State.ON_SHOULDER, m, f, g, 0.0F, h, k);
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, l, i, j, null));
 	}
 
 	private void setupAnim(ParrotModel.State state, int i, float f, float g, float h, float j, float k) {

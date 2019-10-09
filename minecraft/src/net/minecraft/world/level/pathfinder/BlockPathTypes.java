@@ -20,7 +20,8 @@ public enum BlockPathTypes {
 	DOOR_WOOD_CLOSED(-1.0F),
 	DOOR_IRON_CLOSED(-1.0F),
 	BREACH(4.0F),
-	LEAVES(-1.0F);
+	LEAVES(-1.0F),
+	STICKY_HONEY(8.0F);
 
 	private final float malus;
 

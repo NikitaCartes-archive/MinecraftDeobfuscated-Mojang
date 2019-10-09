@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> {
 	private static final BlockPos PLATFORM_ORIGIN = new BlockPos(8, 3, 8);

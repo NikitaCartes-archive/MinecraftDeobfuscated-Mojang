@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
 
@@ -22,6 +24,7 @@ public class BookModel extends Model {
 	private final List<ModelPart> parts;
 
 	public BookModel() {
+		super(RenderType::entitySolid);
 		this.leftPages = new ModelPart(64, 32, 0, 10).addBox(0.0F, -4.0F, -0.99F, 5.0F, 8.0F, 1.0F);
 		this.rightPages = new ModelPart(64, 32, 12, 10).addBox(0.0F, -4.0F, -0.01F, 5.0F, 8.0F, 1.0F);
 		this.flipPage1 = new ModelPart(64, 32, 24, 10).addBox(0.0F, -4.0F, 0.0F, 5.0F, 8.0F, 0.005F);
@@ -32,8 +35,15 @@ public class BookModel extends Model {
 		this.seam.yRot = (float) (Math.PI / 2);
 	}
 
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, TextureAtlasSprite textureAtlasSprite) {
-		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, f, i, textureAtlasSprite));
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+		this.render(poseStack, vertexConsumer, i, j, f, g, h, null);
+	}
+
+	public void render(
+		PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, @Nullable TextureAtlasSprite textureAtlasSprite
+	) {
+		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite, f, g, h));
 	}
 
 	public void setupAnim(float f, float g, float h, float i) {

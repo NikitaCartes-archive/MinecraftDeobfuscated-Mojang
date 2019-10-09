@@ -128,9 +128,9 @@ public class PlaySoundCommand {
 		int i = 0;
 
 		for (ServerPlayer serverPlayer : collection) {
-			double e = vec3.x - serverPlayer.x;
-			double j = vec3.y - serverPlayer.y;
-			double k = vec3.z - serverPlayer.z;
+			double e = vec3.x - serverPlayer.getX();
+			double j = vec3.y - serverPlayer.getY();
+			double k = vec3.z - serverPlayer.getZ();
 			double l = e * e + j * j + k * k;
 			Vec3 vec32 = vec3;
 			float m = f;
@@ -140,7 +140,7 @@ public class PlaySoundCommand {
 				}
 
 				double n = (double)Mth.sqrt(l);
-				vec32 = new Vec3(serverPlayer.x + e / n * 2.0, serverPlayer.y + j / n * 2.0, serverPlayer.z + k / n * 2.0);
+				vec32 = new Vec3(serverPlayer.getX() + e / n * 2.0, serverPlayer.getY() + j / n * 2.0, serverPlayer.getZ() + k / n * 2.0);
 				m = h;
 			}
 

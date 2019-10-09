@@ -39,27 +39,24 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 		int t = 255;
 		int u = (int)((Mth.sin(r + (float) (Math.PI * 4.0 / 3.0)) + 1.0F) * 0.1F * 255.0F);
 		poseStack.translate(0.0, 0.1F, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotation(180.0F - this.entityRenderDispatcher.playerRotY, true));
-		poseStack.mulPose(
-			Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, true)
-		);
-		float v = 0.3F;
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - this.entityRenderDispatcher.playerRotY));
+		float v = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX;
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(v));
+		float w = 0.3F;
 		poseStack.scale(0.3F, 0.3F, 0.3F);
-		int w = experienceOrb.getLightColor();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(EXPERIENCE_ORB_LOCATION));
-		OverlayTexture.setDefault(vertexConsumer);
+		int x = experienceOrb.getLightColor();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(EXPERIENCE_ORB_LOCATION));
 		Matrix4f matrix4f = poseStack.getPose();
-		vertex(vertexConsumer, matrix4f, -0.5F, -0.25F, s, 255, u, j, m, w);
-		vertex(vertexConsumer, matrix4f, 0.5F, -0.25F, s, 255, u, k, m, w);
-		vertex(vertexConsumer, matrix4f, 0.5F, 0.75F, s, 255, u, k, l, w);
-		vertex(vertexConsumer, matrix4f, -0.5F, 0.75F, s, 255, u, j, l, w);
-		vertexConsumer.unsetDefaultOverlayCoords();
+		vertex(vertexConsumer, matrix4f, -0.5F, -0.25F, s, 255, u, j, m, x);
+		vertex(vertexConsumer, matrix4f, 0.5F, -0.25F, s, 255, u, k, m, x);
+		vertex(vertexConsumer, matrix4f, 0.5F, 0.75F, s, 255, u, k, l, x);
+		vertex(vertexConsumer, matrix4f, -0.5F, 0.75F, s, 255, u, j, l, x);
 		poseStack.popPose();
 		super.render(experienceOrb, d, e, f, g, h, poseStack, multiBufferSource);
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, int i, int j, int k, float h, float l, int m) {
-		vertexConsumer.vertex(matrix4f, f, g, 0.0F).color(i, j, k, 128).uv(h, l).uv2(m).normal(0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, 0.0F).color(i, j, k, 128).uv(h, l).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0F, 1.0F, 0.0F).endVertex();
 	}
 
 	public ResourceLocation getTextureLocation(ExperienceOrb experienceOrb) {

@@ -115,7 +115,7 @@ public class SignEditScreen extends Screen {
 		RenderSystem.translatef(0.0F, -1.0625F, 0.0F);
 		this.sign.setCursorInfo(this.line, this.signField.getCursorPos(), this.signField.getSelectionPos(), this.frame / 6 % 2 == 0);
 		RenderSystem.translatef(-0.5F, -0.75F, -0.5F);
-		BlockEntityRenderDispatcher.instance.renderItem(this.sign, new PoseStack(), 15728880);
+		BlockEntityRenderDispatcher.instance.renderItem(this.sign, new PoseStack());
 		this.sign.resetCursorInfo();
 		RenderSystem.popMatrix();
 		super.render(i, j, f);

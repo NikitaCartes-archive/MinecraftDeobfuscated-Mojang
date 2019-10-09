@@ -55,15 +55,15 @@ public class AvoidEntityGoal<T extends LivingEntity> extends Goal {
 				this.avoidClass,
 				this.avoidEntityTargeting,
 				this.mob,
-				this.mob.x,
-				this.mob.y,
-				this.mob.z,
+				this.mob.getX(),
+				this.mob.getY(),
+				this.mob.getZ(),
 				this.mob.getBoundingBox().inflate((double)this.maxDist, 3.0, (double)this.maxDist)
 			);
 		if (this.toAvoid == null) {
 			return false;
 		} else {
-			Vec3 vec3 = RandomPos.getPosAvoid(this.mob, 16, 7, new Vec3(this.toAvoid.x, this.toAvoid.y, this.toAvoid.z));
+			Vec3 vec3 = RandomPos.getPosAvoid(this.mob, 16, 7, this.toAvoid.position());
 			if (vec3 == null) {
 				return false;
 			} else if (this.toAvoid.distanceToSqr(vec3.x, vec3.y, vec3.z) < this.toAvoid.distanceToSqr(this.mob)) {

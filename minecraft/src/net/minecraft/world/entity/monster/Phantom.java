@@ -114,9 +114,9 @@ public class Phantom extends FlyingMob implements Enemy {
 			if (f > 0.0F && g <= 0.0F) {
 				this.level
 					.playLocalSound(
-						this.x,
-						this.y,
-						this.z,
+						this.getX(),
+						this.getY(),
+						this.getZ(),
 						SoundEvents.PHANTOM_FLAP,
 						this.getSoundSource(),
 						0.95F + this.random.nextFloat() * 0.05F,
@@ -129,8 +129,8 @@ public class Phantom extends FlyingMob implements Enemy {
 			float h = Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * (1.3F + 0.21F * (float)i);
 			float j = Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * (1.3F + 0.21F * (float)i);
 			float k = (0.3F + f * 0.45F) * ((float)i * 0.2F + 1.0F);
-			this.level.addParticle(ParticleTypes.MYCELIUM, this.x + (double)h, this.y + (double)k, this.z + (double)j, 0.0, 0.0, 0.0);
-			this.level.addParticle(ParticleTypes.MYCELIUM, this.x - (double)h, this.y + (double)k, this.z - (double)j, 0.0, 0.0, 0.0);
+			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
+			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
 		}
 
 		if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
@@ -254,7 +254,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				this.nextScanTick = 60;
 				List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
 				if (!list.isEmpty()) {
-					list.sort((playerx, player2) -> playerx.y > player2.y ? -1 : 1);
+					list.sort((playerx, player2) -> playerx.getY() > player2.getY() ? -1 : 1);
 
 					for (Player player : list) {
 						if (Phantom.this.canAttack(player, TargetingConditions.DEFAULT)) {
@@ -379,12 +379,12 @@ public class Phantom extends FlyingMob implements Enemy {
 				this.selectNext();
 			}
 
-			if (Phantom.this.moveTargetPoint.y < Phantom.this.y && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).below(1))) {
+			if (Phantom.this.moveTargetPoint.y < Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).below(1))) {
 				this.height = Math.max(1.0F, this.height);
 				this.selectNext();
 			}
 
-			if (Phantom.this.moveTargetPoint.y > Phantom.this.y && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).above(1))) {
+			if (Phantom.this.moveTargetPoint.y > Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).above(1))) {
 				this.height = Math.min(-1.0F, this.height);
 				this.selectNext();
 			}
@@ -425,9 +425,9 @@ public class Phantom extends FlyingMob implements Enemy {
 				this.speed = 0.1F;
 			}
 
-			float f = (float)(Phantom.this.moveTargetPoint.x - Phantom.this.x);
-			float g = (float)(Phantom.this.moveTargetPoint.y - Phantom.this.y);
-			float h = (float)(Phantom.this.moveTargetPoint.z - Phantom.this.z);
+			float f = (float)(Phantom.this.moveTargetPoint.x - Phantom.this.getX());
+			float g = (float)(Phantom.this.moveTargetPoint.y - Phantom.this.getY());
+			float h = (float)(Phantom.this.moveTargetPoint.z - Phantom.this.getZ());
 			double d = (double)Mth.sqrt(f * f + h * h);
 			double e = 1.0 - (double)Mth.abs(g * 0.7F) / d;
 			f = (float)((double)f * e);
@@ -463,7 +463,7 @@ public class Phantom extends FlyingMob implements Enemy {
 		}
 
 		protected boolean touchingTarget() {
-			return Phantom.this.moveTargetPoint.distanceToSqr(Phantom.this.x, Phantom.this.y, Phantom.this.z) < 4.0;
+			return Phantom.this.moveTargetPoint.distanceToSqr(Phantom.this.getX(), Phantom.this.getY(), Phantom.this.getZ()) < 4.0;
 		}
 	}
 
@@ -518,7 +518,7 @@ public class Phantom extends FlyingMob implements Enemy {
 		@Override
 		public void tick() {
 			LivingEntity livingEntity = Phantom.this.getTarget();
-			Phantom.this.moveTargetPoint = new Vec3(livingEntity.x, livingEntity.y + (double)livingEntity.getBbHeight() * 0.5, livingEntity.z);
+			Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
 			if (Phantom.this.getBoundingBox().inflate(0.2F).intersects(livingEntity.getBoundingBox())) {
 				Phantom.this.doHurtTarget(livingEntity);
 				Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;

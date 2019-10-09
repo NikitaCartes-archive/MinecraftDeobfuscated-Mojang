@@ -16,11 +16,11 @@ import net.minecraft.world.entity.animal.TropicalFish;
 
 @Environment(EnvType.CLIENT)
 public class TropicalFishRenderer extends MobRenderer<TropicalFish, EntityModel<TropicalFish>> {
-	private final TropicalFishModelA<TropicalFish> modelA = new TropicalFishModelA<>();
-	private final TropicalFishModelB<TropicalFish> modelB = new TropicalFishModelB<>();
+	private final TropicalFishModelA<TropicalFish> modelA = new TropicalFishModelA<>(0.0F);
+	private final TropicalFishModelB<TropicalFish> modelB = new TropicalFishModelB<>(0.0F);
 
 	public TropicalFishRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new TropicalFishModelA<>(), 0.15F);
+		super(entityRenderDispatcher, new TropicalFishModelA<>(0.0F), 0.15F);
 		this.addLayer(new TropicalFishPatternLayer(this));
 	}
 
@@ -40,10 +40,10 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFish, EntityModel<
 	protected void setupRotations(TropicalFish tropicalFish, PoseStack poseStack, float f, float g, float h) {
 		super.setupRotations(tropicalFish, poseStack, f, g, h);
 		float i = 4.3F * Mth.sin(0.6F * f);
-		poseStack.mulPose(Vector3f.YP.rotation(i, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(i));
 		if (!tropicalFish.isInWater()) {
 			poseStack.translate(0.2F, 0.1F, 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotation(90.0F, true));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
 		}
 	}
 }

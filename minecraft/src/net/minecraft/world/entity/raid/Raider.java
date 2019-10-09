@@ -507,20 +507,18 @@ public abstract class Raider extends PatrollingMonster {
 		@Override
 		public void tick() {
 			if (this.raider.getNavigation().isDone()) {
-				int i = this.poiPos.getX();
-				int j = this.poiPos.getY();
-				int k = this.poiPos.getZ();
-				Vec3 vec3 = RandomPos.getPosTowards(this.raider, 16, 7, new Vec3((double)i, (double)j, (double)k), (float) (Math.PI / 10));
-				if (vec3 == null) {
-					vec3 = RandomPos.getPosTowards(this.raider, 8, 7, new Vec3((double)i, (double)j, (double)k));
+				Vec3 vec3 = new Vec3(this.poiPos);
+				Vec3 vec32 = RandomPos.getPosTowards(this.raider, 16, 7, vec3, (float) (Math.PI / 10));
+				if (vec32 == null) {
+					vec32 = RandomPos.getPosTowards(this.raider, 8, 7, vec3);
 				}
 
-				if (vec3 == null) {
+				if (vec32 == null) {
 					this.stuck = true;
 					return;
 				}
 
-				this.raider.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, this.speedModifier);
+				this.raider.getNavigation().moveTo(vec32.x, vec32.y, vec32.z, this.speedModifier);
 			}
 		}
 

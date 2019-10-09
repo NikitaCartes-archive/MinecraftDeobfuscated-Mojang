@@ -12,14 +12,9 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundSource;
 
 @Environment(EnvType.CLIENT)
-public class SoundOptionsScreen extends Screen {
-	private final Screen lastScreen;
-	private final Options options;
-
+public class SoundOptionsScreen extends OptionsSubScreen {
 	public SoundOptionsScreen(Screen screen, Options options) {
-		super(new TranslatableComponent("options.sounds.title"));
-		this.lastScreen = screen;
-		this.options = options;
+		super(screen, options, new TranslatableComponent("options.sounds.title"));
 	}
 
 	@Override
@@ -45,11 +40,6 @@ public class SoundOptionsScreen extends Screen {
 			)
 		);
 		this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.get("gui.done"), button -> this.minecraft.setScreen(this.lastScreen)));
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.options.save();
 	}
 
 	@Override

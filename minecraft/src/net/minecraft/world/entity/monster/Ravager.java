@@ -192,9 +192,9 @@ public class Ravager extends Raider {
 
 	private void stunEffect() {
 		if (this.random.nextInt(6) == 0) {
-			double d = this.x - (double)this.getBbWidth() * Math.sin((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
-			double e = this.y + (double)this.getBbHeight() - 0.3;
-			double f = this.z + (double)this.getBbWidth() * Math.cos((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
+			double d = this.getX() - (double)this.getBbWidth() * Math.sin((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
+			double e = this.getY() + (double)this.getBbHeight() - 0.3;
+			double f = this.getZ() + (double)this.getBbWidth() * Math.cos((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
 			this.level.addParticle(ParticleTypes.ENTITY_EFFECT, d, e, f, 0.4980392156862745, 0.5137254901960784, 0.5725490196078431);
 		}
 	}
@@ -247,8 +247,8 @@ public class Ravager extends Raider {
 	}
 
 	private void strongKnockback(Entity entity) {
-		double d = entity.x - this.x;
-		double e = entity.z - this.z;
+		double d = entity.getX() - this.getX();
+		double e = entity.getZ() - this.getZ();
 		double f = Math.max(d * d + e * e, 0.001);
 		entity.push(d / f * 4.0, 0.2, e / f * 4.0);
 	}

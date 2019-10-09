@@ -36,69 +36,90 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			float i = 1.0F;
 			float j = 0.5F;
 			float k = 0.5F;
-			poseStack.mulPose(Vector3f.YP.rotation(180.0F - this.entityRenderDispatcher.playerRotY, true));
-			poseStack.mulPose(
-				Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, true)
-			);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - this.entityRenderDispatcher.playerRotY));
+			float l = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX;
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
 			Matrix4f matrix4f = poseStack.getPose();
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION));
-			OverlayTexture.setDefault(vertexConsumer);
-			int l = fishingHook.getLightColor();
-			vertexConsumer.vertex(matrix4f, -0.5F, -0.5F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
-			vertexConsumer.vertex(matrix4f, 0.5F, -0.5F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
-			vertexConsumer.vertex(matrix4f, 0.5F, 0.5F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
-			vertexConsumer.vertex(matrix4f, -0.5F, 0.5F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TEXTURE_LOCATION));
+			int m = fishingHook.getLightColor();
+			vertexConsumer.vertex(matrix4f, -0.5F, -0.5F, 0.0F)
+				.color(255, 255, 255, 255)
+				.uv(0.0F, 1.0F)
+				.overlayCoords(OverlayTexture.NO_OVERLAY)
+				.uv2(m)
+				.normal(0.0F, 1.0F, 0.0F)
+				.endVertex();
+			vertexConsumer.vertex(matrix4f, 0.5F, -0.5F, 0.0F)
+				.color(255, 255, 255, 255)
+				.uv(1.0F, 1.0F)
+				.overlayCoords(OverlayTexture.NO_OVERLAY)
+				.uv2(m)
+				.normal(0.0F, 1.0F, 0.0F)
+				.endVertex();
+			vertexConsumer.vertex(matrix4f, 0.5F, 0.5F, 0.0F)
+				.color(255, 255, 255, 255)
+				.uv(1.0F, 0.0F)
+				.overlayCoords(OverlayTexture.NO_OVERLAY)
+				.uv2(m)
+				.normal(0.0F, 1.0F, 0.0F)
+				.endVertex();
+			vertexConsumer.vertex(matrix4f, -0.5F, 0.5F, 0.0F)
+				.color(255, 255, 255, 255)
+				.uv(0.0F, 0.0F)
+				.overlayCoords(OverlayTexture.NO_OVERLAY)
+				.uv2(m)
+				.normal(0.0F, 1.0F, 0.0F)
+				.endVertex();
 			poseStack.popPose();
-			vertexConsumer.unsetDefaultOverlayCoords();
-			int m = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+			int n = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			ItemStack itemStack = player.getMainHandItem();
 			if (itemStack.getItem() != Items.FISHING_ROD) {
-				m = -m;
+				n = -n;
 			}
 
-			float n = player.getAttackAnim(h);
-			float o = Mth.sin(Mth.sqrt(n) * (float) Math.PI);
-			float p = Mth.lerp(h, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
-			double q = (double)Mth.sin(p);
-			double r = (double)Mth.cos(p);
-			double s = (double)m * 0.35;
-			double t = 0.8;
-			double u;
+			float o = player.getAttackAnim(h);
+			float p = Mth.sin(Mth.sqrt(o) * (float) Math.PI);
+			float q = Mth.lerp(h, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
+			double r = (double)Mth.sin(q);
+			double s = (double)Mth.cos(q);
+			double t = (double)n * 0.35;
+			double u = 0.8;
 			double v;
 			double w;
-			float x;
+			double x;
+			float y;
 			if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.thirdPersonView <= 0) && player == Minecraft.getInstance().player) {
-				double y = this.entityRenderDispatcher.options.fov;
-				y /= 100.0;
-				Vec3 vec3 = new Vec3((double)m * -0.36 * y, -0.045 * y, 0.4);
+				double z = this.entityRenderDispatcher.options.fov;
+				z /= 100.0;
+				Vec3 vec3 = new Vec3((double)n * -0.36 * z, -0.045 * z, 0.4);
 				vec3 = vec3.xRot(-Mth.lerp(h, player.xRotO, player.xRot) * (float) (Math.PI / 180.0));
 				vec3 = vec3.yRot(-Mth.lerp(h, player.yRotO, player.yRot) * (float) (Math.PI / 180.0));
-				vec3 = vec3.yRot(o * 0.5F);
-				vec3 = vec3.xRot(-o * 0.7F);
-				u = Mth.lerp((double)h, player.xo, player.x) + vec3.x;
-				v = Mth.lerp((double)h, player.yo, player.y) + vec3.y;
-				w = Mth.lerp((double)h, player.zo, player.z) + vec3.z;
-				x = player.getEyeHeight();
+				vec3 = vec3.yRot(p * 0.5F);
+				vec3 = vec3.xRot(-p * 0.7F);
+				v = Mth.lerp((double)h, player.xo, player.getX()) + vec3.x;
+				w = Mth.lerp((double)h, player.yo, player.getY()) + vec3.y;
+				x = Mth.lerp((double)h, player.zo, player.getZ()) + vec3.z;
+				y = player.getEyeHeight();
 			} else {
-				u = Mth.lerp((double)h, player.xo, player.x) - r * s - q * 0.8;
-				v = player.yo + (double)player.getEyeHeight() + (player.y - player.yo) * (double)h - 0.45;
-				w = Mth.lerp((double)h, player.zo, player.z) - q * s + r * 0.8;
-				x = player.isCrouching() ? -0.1875F : 0.0F;
+				v = Mth.lerp((double)h, player.xo, player.getX()) - s * t - r * 0.8;
+				w = player.yo + (double)player.getEyeHeight() + (player.getY() - player.yo) * (double)h - 0.45;
+				x = Mth.lerp((double)h, player.zo, player.getZ()) - r * t + s * 0.8;
+				y = player.isCrouching() ? -0.1875F : 0.0F;
 			}
 
-			double y = Mth.lerp((double)h, fishingHook.xo, fishingHook.x);
-			double z = Mth.lerp((double)h, fishingHook.yo, fishingHook.y) + 0.25;
-			double aa = Mth.lerp((double)h, fishingHook.zo, fishingHook.z);
-			float ab = (float)(u - y);
-			float ac = (float)(v - z) + x;
-			float ad = (float)(w - aa);
-			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.LINES);
+			double z = Mth.lerp((double)h, fishingHook.xo, fishingHook.getX());
+			double aa = Mth.lerp((double)h, fishingHook.yo, fishingHook.getY()) + 0.25;
+			double ab = Mth.lerp((double)h, fishingHook.zo, fishingHook.getZ());
+			float ac = (float)(v - z);
+			float ad = (float)(w - aa) + y;
+			float ae = (float)(x - ab);
+			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lines());
 			Matrix4f matrix4f2 = poseStack.getPose();
-			int ae = 16;
+			int af = 16;
 
-			for (int af = 0; af < 16; af++) {
-				stringVertex(ab, ac, ad, vertexConsumer2, matrix4f2, (float)(af / 16));
-				stringVertex(ab, ac, ad, vertexConsumer2, matrix4f2, (float)((af + 1) / 16));
+			for (int ag = 0; ag < 16; ag++) {
+				stringVertex(ac, ad, ae, vertexConsumer2, matrix4f2, (float)(ag / 16));
+				stringVertex(ac, ad, ae, vertexConsumer2, matrix4f2, (float)((ag + 1) / 16));
 			}
 
 			poseStack.popPose();

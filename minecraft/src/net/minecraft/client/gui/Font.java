@@ -157,7 +157,7 @@ public class Font implements AutoCloseable {
 				if (resourceLocation != null) {
 					float v = bl4 ? glyphInfo.getBoldOffset() : 0.0F;
 					float w = bl ? glyphInfo.getShadowOffset() : 0.0F;
-					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation) : RenderType.TEXT(resourceLocation));
+					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation) : RenderType.text(resourceLocation));
 					this.renderChar(bakedGlyph, bl4, bl5, v, o + w, g + w, matrix4f, vertexConsumer, p, q, r, s, k);
 				}
 
@@ -187,7 +187,7 @@ public class Font implements AutoCloseable {
 			BakedGlyph bakedGlyph2 = this.fonts.whiteGlyph();
 			ResourceLocation resourceLocation2 = bakedGlyph2.getTexture();
 			if (resourceLocation2 != null) {
-				VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation2) : RenderType.TEXT(resourceLocation2));
+				VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation2) : RenderType.text(resourceLocation2));
 
 				for (BakedGlyph.Effect effect : list) {
 					bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);

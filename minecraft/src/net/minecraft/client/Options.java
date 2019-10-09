@@ -112,13 +112,15 @@ public class Options {
 	public boolean touchscreen;
 	public boolean fullscreen;
 	public boolean bobView = true;
+	public boolean toggleCrouch;
+	public boolean toggleSprint;
 	public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
 	public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
 	public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
 	public final KeyMapping keyRight = new KeyMapping("key.right", 68, "key.categories.movement");
 	public final KeyMapping keyJump = new KeyMapping("key.jump", 32, "key.categories.movement");
-	public final KeyMapping keyShift = new KeyMapping("key.sneak", 340, "key.categories.movement");
-	public final KeyMapping keySprint = new KeyMapping("key.sprint", 341, "key.categories.movement");
+	public final KeyMapping keyShift = new ToggleKeyMapping("key.sneak", 340, "key.categories.movement", () -> this.toggleCrouch);
+	public final KeyMapping keySprint = new ToggleKeyMapping("key.sprint", 341, "key.categories.movement", () -> this.toggleSprint);
 	public final KeyMapping keyInventory = new KeyMapping("key.inventory", 69, "key.categories.inventory");
 	public final KeyMapping keySwapHands = new KeyMapping("key.swapHands", 70, "key.categories.inventory");
 	public final KeyMapping keyDrop = new KeyMapping("key.drop", 81, "key.categories.inventory");
@@ -314,6 +316,14 @@ public class Options {
 
 					if ("bobView".equals(string)) {
 						Option.VIEW_BOBBING.set(this, string2);
+					}
+
+					if ("toggleCrouch".equals(string)) {
+						this.toggleCrouch = "true".equals(string2);
+					}
+
+					if ("toggleSprint".equals(string)) {
+						this.toggleSprint = "true".equals(string2);
 					}
 
 					if ("mouseSensitivity".equals(string)) {
@@ -568,6 +578,8 @@ public class Options {
 				printWriter.println("touchscreen:" + Option.TOUCHSCREEN.get(this));
 				printWriter.println("fullscreen:" + Option.USE_FULLSCREEN.get(this));
 				printWriter.println("bobView:" + Option.VIEW_BOBBING.get(this));
+				printWriter.println("toggleCrouch:" + this.toggleCrouch);
+				printWriter.println("toggleSprint:" + this.toggleSprint);
 				printWriter.println("mouseSensitivity:" + this.sensitivity);
 				printWriter.println("fov:" + (this.fov - 70.0) / 40.0);
 				printWriter.println("gamma:" + this.gamma);

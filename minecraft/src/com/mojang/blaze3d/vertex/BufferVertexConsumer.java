@@ -30,9 +30,10 @@ public interface BufferVertexConsumer extends VertexConsumer {
 
 	@Override
 	default VertexConsumer color(int i, int j, int k, int l) {
-		if (this.currentElement().getUsage() != VertexFormatElement.Usage.COLOR) {
+		VertexFormatElement vertexFormatElement = this.currentElement();
+		if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.COLOR) {
 			return this;
-		} else if (this.currentElement().getType() != VertexFormatElement.Type.UBYTE) {
+		} else if (vertexFormatElement.getType() != VertexFormatElement.Type.UBYTE) {
 			throw new IllegalStateException();
 		} else {
 			this.putByte(0, (byte)i);
@@ -46,8 +47,9 @@ public interface BufferVertexConsumer extends VertexConsumer {
 
 	@Override
 	default VertexConsumer uv(float f, float g) {
-		if (this.currentElement().getUsage() == VertexFormatElement.Usage.UV && this.currentElement().getIndex() == 0) {
-			if (this.currentElement().getType() != VertexFormatElement.Type.FLOAT) {
+		VertexFormatElement vertexFormatElement = this.currentElement();
+		if (vertexFormatElement.getUsage() == VertexFormatElement.Usage.UV && vertexFormatElement.getIndex() == 0) {
+			if (vertexFormatElement.getType() != VertexFormatElement.Type.FLOAT) {
 				throw new IllegalStateException();
 			} else {
 				this.putFloat(0, f);
@@ -71,9 +73,10 @@ public interface BufferVertexConsumer extends VertexConsumer {
 	}
 
 	default VertexConsumer uvShort(short s, short t, int i) {
-		if (this.currentElement().getUsage() != VertexFormatElement.Usage.UV || this.currentElement().getIndex() != i) {
+		VertexFormatElement vertexFormatElement = this.currentElement();
+		if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.UV || vertexFormatElement.getIndex() != i) {
 			return this;
-		} else if (this.currentElement().getType() != VertexFormatElement.Type.SHORT) {
+		} else if (vertexFormatElement.getType() != VertexFormatElement.Type.SHORT) {
 			throw new IllegalStateException();
 		} else {
 			this.putShort(0, s);
@@ -85,9 +88,10 @@ public interface BufferVertexConsumer extends VertexConsumer {
 
 	@Override
 	default VertexConsumer normal(float f, float g, float h) {
-		if (this.currentElement().getUsage() != VertexFormatElement.Usage.NORMAL) {
+		VertexFormatElement vertexFormatElement = this.currentElement();
+		if (vertexFormatElement.getUsage() != VertexFormatElement.Usage.NORMAL) {
 			return this;
-		} else if (this.currentElement().getType() != VertexFormatElement.Type.BYTE) {
+		} else if (vertexFormatElement.getType() != VertexFormatElement.Type.BYTE) {
 			throw new IllegalStateException();
 		} else {
 			this.putByte(0, (byte)((int)(f * 127.0F) & 0xFF));

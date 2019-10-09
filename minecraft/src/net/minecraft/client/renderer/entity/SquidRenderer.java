@@ -25,9 +25,9 @@ public class SquidRenderer extends MobRenderer<Squid, SquidModel<Squid>> {
 		float i = Mth.lerp(h, squid.xBodyRotO, squid.xBodyRot);
 		float j = Mth.lerp(h, squid.zBodyRotO, squid.zBodyRot);
 		poseStack.translate(0.0, 0.5, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
-		poseStack.mulPose(Vector3f.XP.rotation(i, true));
-		poseStack.mulPose(Vector3f.YP.rotation(j, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
 		poseStack.translate(0.0, -1.2F, 0.0);
 	}
 

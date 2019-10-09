@@ -19,4 +19,8 @@ public class ChunkBufferBuilderPack {
 	public void clearAll() {
 		this.builders.values().forEach(BufferBuilder::clear);
 	}
+
+	public void discardAll() {
+		this.builders.values().forEach(BufferBuilder::discard);
+	}
 }

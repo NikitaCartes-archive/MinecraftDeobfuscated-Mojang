@@ -2,11 +2,11 @@ package net.minecraft.world.level.biome;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.levelgen.feature.BuriedTreasureConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.ShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BuriedTreasureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class SnowyBeachBiome extends Biome {
@@ -24,9 +24,9 @@ public final class SnowyBeachBiome extends Biome {
 				.waterFogColor(329011)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.BURIED_TREASURE, new BuriedTreasureConfiguration(0.01F));
-		this.addStructureStart(Feature.SHIPWRECK, new ShipwreckConfiguration(true));
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01F)));
+		this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(true)));
 		BiomeDefaultFeatures.addDefaultCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);

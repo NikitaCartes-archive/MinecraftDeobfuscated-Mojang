@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -257,11 +258,11 @@ public class TaigaVillagePools {
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_4"), 1),
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_5"), 2),
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_6"), 1),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SPRUCE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.PINE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.PUMPKIN_PILE, FeatureConfiguration.NONE)), 2),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.TAIGA_GRASS, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SWEET_BERRY_BUSH, FeatureConfiguration.NONE)), 1),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.PINE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.PUMPKIN_PILE_CONFIG)), 2),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.TAIGA_GRASS_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.SWEET_BERRY_BUSH_CONFIG)), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 4)
 					),
 					StructureTemplatePool.Projection.RIGID
@@ -277,11 +278,11 @@ public class TaigaVillagePools {
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_2"), 1),
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_3"), 1),
 						new Pair<>(new SinglePoolElement("village/taiga/taiga_decoration_4"), 1),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SPRUCE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.PINE_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.PUMPKIN_PILE, FeatureConfiguration.NONE)), 2),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.TAIGA_GRASS, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SWEET_BERRY_BUSH, FeatureConfiguration.NONE)), 1),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.PINE_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.PUMPKIN_PILE_CONFIG)), 2),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.TAIGA_GRASS_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.SWEET_BERRY_BUSH_CONFIG)), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 4)
 					),
 					StructureTemplatePool.Projection.RIGID

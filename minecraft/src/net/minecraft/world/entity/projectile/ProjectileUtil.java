@@ -51,12 +51,9 @@ public final class ProjectileUtil {
 	private static HitResult forwardsRaycast(
 		Entity entity, boolean bl, boolean bl2, @Nullable Entity entity2, ClipContext.Block block, boolean bl3, Predicate<Entity> predicate, AABB aABB
 	) {
-		double d = entity.x;
-		double e = entity.y;
-		double f = entity.z;
 		Vec3 vec3 = entity.getDeltaMovement();
 		Level level = entity.level;
-		Vec3 vec32 = new Vec3(d, e, f);
+		Vec3 vec32 = entity.position();
 		if (bl3 && !level.noCollision(entity, entity.getBoundingBox(), (Set<Entity>)(!bl2 && entity2 != null ? getIgnoredEntities(entity2) : ImmutableSet.of()))) {
 			return new BlockHitResult(vec32, Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(entity), false);
 		} else {

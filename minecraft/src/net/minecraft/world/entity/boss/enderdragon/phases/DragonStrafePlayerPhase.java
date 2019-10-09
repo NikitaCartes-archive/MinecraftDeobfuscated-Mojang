@@ -31,16 +31,16 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 		} else {
 			if (this.currentPath != null && this.currentPath.isDone()) {
-				double d = this.attackTarget.x;
-				double e = this.attackTarget.z;
-				double f = d - this.dragon.x;
-				double g = e - this.dragon.z;
+				double d = this.attackTarget.getX();
+				double e = this.attackTarget.getZ();
+				double f = d - this.dragon.getX();
+				double g = e - this.dragon.getZ();
 				double h = (double)Mth.sqrt(f * f + g * g);
 				double i = Math.min(0.4F + h / 80.0 - 1.0, 10.0);
-				this.targetLocation = new Vec3(d, this.attackTarget.y + i, e);
+				this.targetLocation = new Vec3(d, this.attackTarget.getY() + i, e);
 			}
 
-			double d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.x, this.dragon.y, this.dragon.z);
+			double d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 			if (d < 100.0 || d > 22500.0) {
 				this.findNewTarget();
 			}
@@ -49,7 +49,7 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 			if (this.attackTarget.distanceToSqr(this.dragon) < 4096.0) {
 				if (this.dragon.canSee(this.attackTarget)) {
 					this.fireballCharge++;
-					Vec3 vec3 = new Vec3(this.attackTarget.x - this.dragon.x, 0.0, this.attackTarget.z - this.dragon.z).normalize();
+					Vec3 vec3 = new Vec3(this.attackTarget.getX() - this.dragon.getX(), 0.0, this.attackTarget.getZ() - this.dragon.getZ()).normalize();
 					Vec3 vec32 = new Vec3((double)Mth.sin(this.dragon.yRot * (float) (Math.PI / 180.0)), 0.0, (double)(-Mth.cos(this.dragon.yRot * (float) (Math.PI / 180.0))))
 						.normalize();
 					float j = (float)vec32.dot(vec3);
@@ -58,12 +58,12 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 					if (this.fireballCharge >= 5 && k >= 0.0F && k < 10.0F) {
 						double h = 1.0;
 						Vec3 vec33 = this.dragon.getViewVector(1.0F);
-						double l = this.dragon.head.x - vec33.x * 1.0;
-						double m = this.dragon.head.y + (double)(this.dragon.head.getBbHeight() / 2.0F) + 0.5;
-						double n = this.dragon.head.z - vec33.z * 1.0;
-						double o = this.attackTarget.x - l;
-						double p = this.attackTarget.y + (double)(this.attackTarget.getBbHeight() / 2.0F) - (m + (double)(this.dragon.head.getBbHeight() / 2.0F));
-						double q = this.attackTarget.z - n;
+						double l = this.dragon.head.getX() - vec33.x * 1.0;
+						double m = this.dragon.head.getY(0.5) + 0.5;
+						double n = this.dragon.head.getZ() - vec33.z * 1.0;
+						double o = this.attackTarget.getX() - l;
+						double p = this.attackTarget.getY(0.5) - m;
+						double q = this.attackTarget.getZ() - n;
 						this.dragon.level.levelEvent(null, 1017, new BlockPos(this.dragon), 0);
 						DragonFireball dragonFireball = new DragonFireball(this.dragon.level, this.dragon, o, p, q);
 						dragonFireball.moveTo(l, m, n, 0.0F, 0.0F);
@@ -148,14 +148,14 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 	public void setTarget(LivingEntity livingEntity) {
 		this.attackTarget = livingEntity;
 		int i = this.dragon.findClosestNode();
-		int j = this.dragon.findClosestNode(this.attackTarget.x, this.attackTarget.y, this.attackTarget.z);
-		int k = Mth.floor(this.attackTarget.x);
-		int l = Mth.floor(this.attackTarget.z);
-		double d = (double)k - this.dragon.x;
-		double e = (double)l - this.dragon.z;
+		int j = this.dragon.findClosestNode(this.attackTarget.getX(), this.attackTarget.getY(), this.attackTarget.getZ());
+		int k = Mth.floor(this.attackTarget.getX());
+		int l = Mth.floor(this.attackTarget.getZ());
+		double d = (double)k - this.dragon.getX();
+		double e = (double)l - this.dragon.getZ();
 		double f = (double)Mth.sqrt(d * d + e * e);
 		double g = Math.min(0.4F + f / 80.0 - 1.0, 10.0);
-		int m = Mth.floor(this.attackTarget.y + g);
+		int m = Mth.floor(this.attackTarget.getY() + g);
 		Node node = new Node(k, m, l);
 		this.currentPath = this.dragon.findPath(i, j, node);
 		if (this.currentPath != null) {

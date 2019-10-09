@@ -90,7 +90,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 			Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
 				? Explosion.BlockInteraction.DESTROY
 				: Explosion.BlockInteraction.NONE;
-			this.level.explode(this, this.x, this.y, this.z, 1.0F, false, blockInteraction);
+			this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, blockInteraction);
 			this.remove();
 		}
 	}

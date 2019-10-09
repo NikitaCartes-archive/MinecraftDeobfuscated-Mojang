@@ -305,6 +305,12 @@ public class SoundEvents {
 	public static final SoundEvent GUARDIAN_HURT = register("entity.guardian.hurt");
 	public static final SoundEvent GUARDIAN_HURT_LAND = register("entity.guardian.hurt_land");
 	public static final SoundEvent HOE_TILL = register("item.hoe.till");
+	public static final SoundEvent HONEY_BLOCK_BREAK = register("block.honey_block.break");
+	public static final SoundEvent HONEY_BLOCK_FALL = register("block.honey_block.fall");
+	public static final SoundEvent HONEY_BLOCK_HIT = register("block.honey_block.hit");
+	public static final SoundEvent HONEY_BLOCK_PLACE = register("block.honey_block.place");
+	public static final SoundEvent HONEY_BLOCK_SLIDE = register("block.honey_block.slide");
+	public static final SoundEvent HONEY_BLOCK_STEP = register("block.honey_block.step");
 	public static final SoundEvent HONEY_DRINK = register("item.honey_bottle.drink");
 	public static final SoundEvent HORSE_AMBIENT = register("entity.horse.ambient");
 	public static final SoundEvent HORSE_ANGRY = register("entity.horse.angry");
@@ -348,8 +354,10 @@ public class SoundEvents {
 	public static final SoundEvent IRON_DOOR_CLOSE = register("block.iron_door.close");
 	public static final SoundEvent IRON_DOOR_OPEN = register("block.iron_door.open");
 	public static final SoundEvent IRON_GOLEM_ATTACK = register("entity.iron_golem.attack");
+	public static final SoundEvent IRON_GOLEM_DAMAGE = register("entity.iron_golem.damage");
 	public static final SoundEvent IRON_GOLEM_DEATH = register("entity.iron_golem.death");
 	public static final SoundEvent IRON_GOLEM_HURT = register("entity.iron_golem.hurt");
+	public static final SoundEvent IRON_GOLEM_REPAIR = register("entity.iron_golem.repair");
 	public static final SoundEvent IRON_GOLEM_STEP = register("entity.iron_golem.step");
 	public static final SoundEvent IRON_TRAPDOOR_CLOSE = register("block.iron_trapdoor.close");
 	public static final SoundEvent IRON_TRAPDOOR_OPEN = register("block.iron_trapdoor.open");
@@ -470,7 +478,6 @@ public class SoundEvents {
 	public static final SoundEvent PARROT_IMITATE_HUSK = register("entity.parrot.imitate.husk");
 	public static final SoundEvent PARROT_IMITATE_ILLUSIONER = register("entity.parrot.imitate.illusioner");
 	public static final SoundEvent PARROT_IMITATE_MAGMA_CUBE = register("entity.parrot.imitate.magma_cube");
-	public static final SoundEvent PARROT_IMITATE_PANDA = register("entity.parrot.imitate.panda");
 	public static final SoundEvent PARROT_IMITATE_PHANTOM = register("entity.parrot.imitate.phantom");
 	public static final SoundEvent PARROT_IMITATE_PILLAGER = register("entity.parrot.imitate.pillager");
 	public static final SoundEvent PARROT_IMITATE_POLAR_BEAR = register("entity.parrot.imitate.polar_bear");

@@ -52,10 +52,8 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 			poseStack.translate(0.0, 0.0, 0.125);
 			this.getParentModel().copyPropertiesTo(this.elytraModel);
 			this.elytraModel.setupAnim(livingEntity, f, g, j, k, l, m);
-			VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, resourceLocation, false, itemStack.hasFoil(), false);
-			OverlayTexture.setDefault(vertexConsumer);
-			this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i);
-			vertexConsumer.unsetDefaultOverlayCoords();
+			VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.elytraModel.renderType(resourceLocation), false, itemStack.hasFoil());
+			this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 			poseStack.popPose();
 		}
 	}

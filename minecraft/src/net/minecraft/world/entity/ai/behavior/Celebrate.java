@@ -26,8 +26,9 @@ public class Celebrate extends Behavior<Villager> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-		this.currentRaid = serverLevel.getRaidAt(new BlockPos(villager));
-		return this.currentRaid != null && this.currentRaid.isVictory() && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager);
+		BlockPos blockPos = new BlockPos(villager);
+		this.currentRaid = serverLevel.getRaidAt(blockPos);
+		return this.currentRaid != null && this.currentRaid.isVictory() && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, blockPos);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Villager villager, long l) {
@@ -45,13 +46,11 @@ public class Celebrate extends Behavior<Villager> {
 			villager.playCelebrateSound();
 		}
 
-		if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager)) {
+		if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, new BlockPos(villager))) {
 			DyeColor dyeColor = DyeColor.values()[random.nextInt(DyeColor.values().length)];
 			int i = random.nextInt(3);
 			ItemStack itemStack = this.getFirework(dyeColor, i);
-			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
-				villager.level, villager.x, villager.y + (double)villager.getEyeHeight(), villager.z, itemStack
-			);
+			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(villager.level, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack);
 			villager.level.addFreshEntity(fireworkRocketEntity);
 		}
 	}

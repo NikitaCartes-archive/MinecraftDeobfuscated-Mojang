@@ -6,7 +6,9 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.resourcepacks.lists.AvailableResourcePackList;
 import net.minecraft.client.gui.screens.resourcepacks.lists.ResourcePackList;
@@ -17,15 +19,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.PackRepository;
 
 @Environment(EnvType.CLIENT)
-public class ResourcePackSelectScreen extends Screen {
-	private final Screen parentScreen;
+public class ResourcePackSelectScreen extends OptionsSubScreen {
 	private AvailableResourcePackList availableResourcePackList;
 	private SelectedResourcePackList selectedResourcePackList;
 	private boolean changed;
 
-	public ResourcePackSelectScreen(Screen screen) {
-		super(new TranslatableComponent("resourcePack.title"));
-		this.parentScreen = screen;
+	public ResourcePackSelectScreen(Screen screen, Options options) {
+		super(screen, options, new TranslatableComponent("resourcePack.title"));
 	}
 
 	@Override
@@ -50,23 +50,23 @@ public class ResourcePackSelectScreen extends Screen {
 
 				Collections.reverse(listx);
 				this.minecraft.getResourcePackRepository().setSelected(listx);
-				this.minecraft.options.resourcePacks.clear();
-				this.minecraft.options.incompatibleResourcePacks.clear();
+				this.options.resourcePacks.clear();
+				this.options.incompatibleResourcePacks.clear();
 
 				for (UnopenedResourcePack unopenedResourcePackx : listx) {
 					if (!unopenedResourcePackx.isFixedPosition()) {
-						this.minecraft.options.resourcePacks.add(unopenedResourcePackx.getId());
+						this.options.resourcePacks.add(unopenedResourcePackx.getId());
 						if (!unopenedResourcePackx.getCompatibility().isCompatible()) {
-							this.minecraft.options.incompatibleResourcePacks.add(unopenedResourcePackx.getId());
+							this.options.incompatibleResourcePacks.add(unopenedResourcePackx.getId());
 						}
 					}
 				}
 
-				this.minecraft.options.save();
-				this.minecraft.setScreen(this.parentScreen);
+				this.options.save();
+				this.minecraft.setScreen(this.lastScreen);
 				this.minecraft.reloadResourcePacks();
 			} else {
-				this.minecraft.setScreen(this.parentScreen);
+				this.minecraft.setScreen(this.lastScreen);
 			}
 		}));
 		AvailableResourcePackList availableResourcePackList = this.availableResourcePackList;

@@ -238,9 +238,9 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		ThrownTrident thrownTrident = new ThrownTrident(this.level, this, new ItemStack(Items.TRIDENT));
-		double d = livingEntity.x - this.x;
-		double e = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0F) - thrownTrident.y;
-		double g = livingEntity.z - this.z;
+		double d = livingEntity.getX() - this.getX();
+		double e = livingEntity.getY(0.3333333333333333) - thrownTrident.getY();
+		double g = livingEntity.getZ() - this.getZ();
 		double h = (double)Mth.sqrt(d * d + g * g);
 		thrownTrident.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
 		this.playSound(SoundEvents.DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
@@ -280,7 +280,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 		@Override
 		public boolean canUse() {
-			return super.canUse() && !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.y >= (double)(this.drowned.level.getSeaLevel() - 3);
+			return super.canUse() && !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.getY() >= (double)(this.drowned.level.getSeaLevel() - 3);
 		}
 
 		@Override
@@ -356,12 +356,12 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		@Nullable
 		private Vec3 getWaterPos() {
 			Random random = this.mob.getRandom();
-			BlockPos blockPos = new BlockPos(this.mob.x, this.mob.getBoundingBox().minY, this.mob.z);
+			BlockPos blockPos = new BlockPos(this.mob);
 
 			for (int i = 0; i < 10; i++) {
 				BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, 2 - random.nextInt(8), random.nextInt(20) - 10);
 				if (this.level.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
-					return new Vec3((double)blockPos2.getX(), (double)blockPos2.getY(), (double)blockPos2.getZ());
+					return new Vec3(blockPos2);
 				}
 			}
 
@@ -381,7 +381,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 		public void tick() {
 			LivingEntity livingEntity = this.drowned.getTarget();
 			if (this.drowned.wantsToSwim() && this.drowned.isInWater()) {
-				if (livingEntity != null && livingEntity.y > this.drowned.y || this.drowned.searchingForLand) {
+				if (livingEntity != null && livingEntity.getY() > this.drowned.getY() || this.drowned.searchingForLand) {
 					this.drowned.setDeltaMovement(this.drowned.getDeltaMovement().add(0.0, 0.002, 0.0));
 				}
 
@@ -390,9 +390,9 @@ public class Drowned extends Zombie implements RangedAttackMob {
 					return;
 				}
 
-				double d = this.wantedX - this.drowned.x;
-				double e = this.wantedY - this.drowned.y;
-				double f = this.wantedZ - this.drowned.z;
+				double d = this.wantedX - this.drowned.getX();
+				double e = this.wantedY - this.drowned.getY();
+				double f = this.wantedZ - this.drowned.getZ();
 				double g = (double)Mth.sqrt(d * d + e * e + f * f);
 				e /= g;
 				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
@@ -426,7 +426,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 		@Override
 		public boolean canUse() {
-			return !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.y < (double)(this.seaLevel - 2);
+			return !this.drowned.level.isDay() && this.drowned.isInWater() && this.drowned.getY() < (double)(this.seaLevel - 2);
 		}
 
 		@Override
@@ -436,8 +436,8 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 		@Override
 		public void tick() {
-			if (this.drowned.y < (double)(this.seaLevel - 1) && (this.drowned.getNavigation().isDone() || this.drowned.closeToNextPos())) {
-				Vec3 vec3 = RandomPos.getPosTowards(this.drowned, 4, 8, new Vec3(this.drowned.x, (double)(this.seaLevel - 1), this.drowned.z));
+			if (this.drowned.getY() < (double)(this.seaLevel - 1) && (this.drowned.getNavigation().isDone() || this.drowned.closeToNextPos())) {
+				Vec3 vec3 = RandomPos.getPosTowards(this.drowned, 4, 8, new Vec3(this.drowned.getX(), (double)(this.seaLevel - 1), this.drowned.getZ()));
 				if (vec3 == null) {
 					this.stuck = true;
 					return;

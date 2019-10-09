@@ -17,10 +17,15 @@ public class HumanoidHeadModel extends SkullModel {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j) {
-		super.render(poseStack, vertexConsumer, f, g, h, i, j);
+	public void setupAnim(float f, float g, float h) {
+		super.setupAnim(f, g, h);
 		this.hat.yRot = this.head.yRot;
 		this.hat.xRot = this.head.xRot;
-		this.hat.render(poseStack, vertexConsumer, i, j, null);
+	}
+
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+		super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h);
+		this.hat.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h);
 	}
 }

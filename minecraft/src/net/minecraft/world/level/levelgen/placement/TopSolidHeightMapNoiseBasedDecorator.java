@@ -11,8 +11,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
-public class TopSolidHeightMapNoiseBasedDecorator extends FeatureDecorator<DecoratorNoiseCountFactor> {
-	public TopSolidHeightMapNoiseBasedDecorator(Function<Dynamic<?>, ? extends DecoratorNoiseCountFactor> function) {
+public class TopSolidHeightMapNoiseBasedDecorator extends FeatureDecorator<NoiseCountFactorDecoratorConfiguration> {
+	public TopSolidHeightMapNoiseBasedDecorator(Function<Dynamic<?>, ? extends NoiseCountFactorDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -20,17 +20,21 @@ public class TopSolidHeightMapNoiseBasedDecorator extends FeatureDecorator<Decor
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorNoiseCountFactor decoratorNoiseCountFactor,
+		NoiseCountFactorDecoratorConfiguration noiseCountFactorDecoratorConfiguration,
 		BlockPos blockPos
 	) {
 		double d = Biome.BIOME_INFO_NOISE
-			.getValue((double)blockPos.getX() / decoratorNoiseCountFactor.noiseFactor, (double)blockPos.getZ() / decoratorNoiseCountFactor.noiseFactor, false);
-		int i = (int)Math.ceil((d + decoratorNoiseCountFactor.noiseOffset) * (double)decoratorNoiseCountFactor.noiseToCountRatio);
+			.getValue(
+				(double)blockPos.getX() / noiseCountFactorDecoratorConfiguration.noiseFactor,
+				(double)blockPos.getZ() / noiseCountFactorDecoratorConfiguration.noiseFactor,
+				false
+			);
+		int i = (int)Math.ceil((d + noiseCountFactorDecoratorConfiguration.noiseOffset) * (double)noiseCountFactorDecoratorConfiguration.noiseToCountRatio);
 		return IntStream.range(0, i).mapToObj(ix -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			int l = levelAccessor.getHeight(decoratorNoiseCountFactor.heightmap, blockPos.getX() + j, blockPos.getZ() + k);
-			return new BlockPos(blockPos.getX() + j, l, blockPos.getZ() + k);
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = levelAccessor.getHeight(noiseCountFactorDecoratorConfiguration.heightmap, j, k);
+			return new BlockPos(j, l, k);
 		});
 	}
 }

@@ -81,9 +81,9 @@ public class EvokerFangs extends Entity {
 				this.lifeTicks--;
 				if (this.lifeTicks == 14) {
 					for (int i = 0; i < 12; i++) {
-						double d = this.x + (this.random.nextDouble() * 2.0 - 1.0) * (double)this.getBbWidth() * 0.5;
-						double e = this.y + 0.05 + this.random.nextDouble();
-						double f = this.z + (this.random.nextDouble() * 2.0 - 1.0) * (double)this.getBbWidth() * 0.5;
+						double d = this.getX() + (this.random.nextDouble() * 2.0 - 1.0) * (double)this.getBbWidth() * 0.5;
+						double e = this.getY() + 0.05 + this.random.nextDouble();
+						double f = this.getZ() + (this.random.nextDouble() * 2.0 - 1.0) * (double)this.getBbWidth() * 0.5;
 						double g = (this.random.nextDouble() * 2.0 - 1.0) * 0.3;
 						double h = 0.3 + this.random.nextDouble() * 0.3;
 						double j = (this.random.nextDouble() * 2.0 - 1.0) * 0.3;
@@ -132,7 +132,9 @@ public class EvokerFangs extends Entity {
 			this.clientSideAttackStarted = true;
 			if (!this.isSilent()) {
 				this.level
-					.playLocalSound(this.x, this.y, this.z, SoundEvents.EVOKER_FANGS_ATTACK, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.2F + 0.85F, false);
+					.playLocalSound(
+						this.getX(), this.getY(), this.getZ(), SoundEvents.EVOKER_FANGS_ATTACK, this.getSoundSource(), 1.0F, this.random.nextFloat() * 0.2F + 0.85F, false
+					);
 			}
 		}
 	}

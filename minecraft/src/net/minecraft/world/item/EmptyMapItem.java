@@ -14,7 +14,7 @@ public class EmptyMapItem extends ComplexItem {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = MapItem.create(level, Mth.floor(player.x), Mth.floor(player.z), (byte)0, true, false);
+		ItemStack itemStack = MapItem.create(level, Mth.floor(player.getX()), Mth.floor(player.getZ()), (byte)0, true, false);
 		ItemStack itemStack2 = player.getItemInHand(interactionHand);
 		if (!player.abilities.instabuild) {
 			itemStack2.shrink(1);

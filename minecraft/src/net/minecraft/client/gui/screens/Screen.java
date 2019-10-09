@@ -7,8 +7,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.math.Matrix4f;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,6 +33,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -172,10 +175,17 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 			this.fillGradient(m + k + 2, n - 3 + 1, m + k + 3, n + o + 3 - 1, 1347420415, 1344798847);
 			this.fillGradient(m - 3, n - 3, m + k + 3, n - 3 + 1, 1347420415, 1347420415);
 			this.fillGradient(m - 3, n + o + 2, m + k + 3, n + o + 3, 1344798847, 1344798847);
+			PoseStack poseStack = new PoseStack();
+			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+			poseStack.translate(0.0, 0.0, (double)this.itemRenderer.blitOffset);
+			Matrix4f matrix4f = poseStack.getPose();
 
 			for (int s = 0; s < list.size(); s++) {
 				String string2 = (String)list.get(s);
-				this.font.drawShadow(string2, (float)m, (float)n, -1);
+				if (string2 != null) {
+					this.font.drawInBatch(string2, (float)m, (float)n, -1, true, matrix4f, bufferSource, false, 0, 15728880);
+				}
+
 				if (s == 0) {
 					n += 2;
 				}
@@ -183,6 +193,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 				n += 10;
 			}
 
+			bufferSource.endBatch();
 			this.setBlitOffset(0);
 			this.itemRenderer.blitOffset = 0.0F;
 			RenderSystem.enableDepthTest();
@@ -281,6 +292,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 					this.insertText(clickEvent.getValue(), true);
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
 					this.sendMessage(clickEvent.getValue(), false);
+				} else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
+					this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
 				} else {
 					LOGGER.error("Don't know how to handle {}", clickEvent);
 				}

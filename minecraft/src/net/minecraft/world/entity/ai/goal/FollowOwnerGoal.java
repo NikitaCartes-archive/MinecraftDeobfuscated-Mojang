@@ -2,34 +2,37 @@ package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class FollowOwnerGoal extends Goal {
-	protected final TamableAnimal tamable;
+	private final TamableAnimal tamable;
 	private LivingEntity owner;
-	protected final LevelReader level;
+	private final LevelReader level;
 	private final double speedModifier;
 	private final PathNavigation navigation;
 	private int timeToRecalcPath;
 	private final float stopDistance;
 	private final float startDistance;
 	private float oldWaterCost;
+	private final boolean canFly;
 
-	public FollowOwnerGoal(TamableAnimal tamableAnimal, double d, float f, float g) {
+	public FollowOwnerGoal(TamableAnimal tamableAnimal, double d, float f, float g, boolean bl) {
 		this.tamable = tamableAnimal;
 		this.level = tamableAnimal.level;
 		this.speedModifier = d;
 		this.navigation = tamableAnimal.getNavigation();
 		this.startDistance = f;
 		this.stopDistance = g;
+		this.canFly = bl;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
 		if (!(tamableAnimal.getNavigation() instanceof GroundPathNavigation) && !(tamableAnimal.getNavigation() instanceof FlyingPathNavigation)) {
 			throw new IllegalArgumentException("Unsupported mob type for FollowOwnerGoal");
@@ -55,7 +58,11 @@ public class FollowOwnerGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return !this.navigation.isDone() && !this.tamable.isSitting() && this.tamable.distanceToSqr(this.owner) > (double)(this.stopDistance * this.stopDistance);
+		if (this.navigation.isDone()) {
+			return false;
+		} else {
+			return this.tamable.isSitting() ? false : !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
+		}
 	}
 
 	@Override
@@ -79,19 +86,7 @@ public class FollowOwnerGoal extends Goal {
 			this.timeToRecalcPath = 10;
 			if (!this.tamable.isLeashed() && !this.tamable.isPassenger()) {
 				if (this.tamable.distanceToSqr(this.owner) >= 144.0) {
-					int i = Mth.floor(this.owner.x) - 2;
-					int j = Mth.floor(this.owner.z) - 2;
-					int k = Mth.floor(this.owner.getBoundingBox().minY);
-
-					for (int l = 0; l <= 4; l++) {
-						for (int m = 0; m <= 4; m++) {
-							if ((l < 1 || m < 1 || l > 3 || m > 3) && this.isTeleportFriendlyBlock(new BlockPos(i + l, k - 1, j + m))) {
-								this.tamable.moveTo((double)((float)(i + l) + 0.5F), (double)k, (double)((float)(j + m) + 0.5F), this.tamable.yRot, this.tamable.xRot);
-								this.navigation.stop();
-								return;
-							}
-						}
-					}
+					this.teleportToOwner();
 				} else {
 					this.navigation.moveTo(this.owner, this.speedModifier);
 				}
@@ -99,10 +94,48 @@ public class FollowOwnerGoal extends Goal {
 		}
 	}
 
-	protected boolean isTeleportFriendlyBlock(BlockPos blockPos) {
-		BlockState blockState = this.level.getBlockState(blockPos);
-		return blockState.isValidSpawn(this.level, blockPos, this.tamable.getType())
-			&& this.level.isEmptyBlock(blockPos.above())
-			&& this.level.isEmptyBlock(blockPos.above(2));
+	private void teleportToOwner() {
+		BlockPos blockPos = new BlockPos(this.owner);
+
+		for (int i = 0; i < 10; i++) {
+			int j = this.randomIntInclusive(-3, 3);
+			int k = this.randomIntInclusive(-1, 1);
+			int l = this.randomIntInclusive(-3, 3);
+			boolean bl = this.maybeTeleportTo(blockPos.getX() + j, blockPos.getY() + k, blockPos.getZ() + l);
+			if (bl) {
+				return;
+			}
+		}
+	}
+
+	private boolean maybeTeleportTo(int i, int j, int k) {
+		if (Math.abs((double)i - this.owner.getX()) < 2.0 && Math.abs((double)k - this.owner.getZ()) < 2.0) {
+			return false;
+		} else if (!this.canTeleportTo(new BlockPos(i, j, k))) {
+			return false;
+		} else {
+			this.tamable.moveTo((double)((float)i + 0.5F), (double)j, (double)((float)k + 0.5F), this.tamable.yRot, this.tamable.xRot);
+			this.navigation.stop();
+			return true;
+		}
+	}
+
+	private boolean canTeleportTo(BlockPos blockPos) {
+		BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(this.level, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+		if (blockPathTypes != BlockPathTypes.WALKABLE) {
+			return false;
+		} else {
+			BlockState blockState = this.level.getBlockState(blockPos.below());
+			if (!this.canFly && blockState.getBlock() instanceof LeavesBlock) {
+				return false;
+			} else {
+				BlockPos blockPos2 = blockPos.subtract(new BlockPos(this.tamable));
+				return this.level.noCollision(this.tamable, this.tamable.getBoundingBox().move(blockPos2));
+			}
+		}
+	}
+
+	private int randomIntInclusive(int i, int j) {
+		return this.tamable.getRandom().nextInt(j - i + 1) + i;
 	}
 }

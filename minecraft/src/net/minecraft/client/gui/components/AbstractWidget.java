@@ -66,9 +66,9 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 			if (this.wasHovered != this.isHovered()) {
 				if (this.isHovered()) {
 					if (this.focused) {
-						this.nextNarration = Util.getMillis() + 200L;
+						this.queueNarration(200);
 					} else {
-						this.nextNarration = Util.getMillis() + 750L;
+						this.queueNarration(750);
 					}
 				} else {
 					this.nextNarration = Long.MAX_VALUE;
@@ -95,7 +95,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 	}
 
 	protected String getNarrationMessage() {
-		return this.message.isEmpty() ? "" : I18n.get("gui.narrate.button", this.getMessage());
+		return this.getMessage().isEmpty() ? "" : I18n.get("gui.narrate.button", this.getMessage());
 	}
 
 	public void renderButton(int i, int j, float f) {
@@ -117,7 +117,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 			l = 16777120;
 		}
 
-		this.drawCenteredString(font, this.message, this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0F) << 24);
+		this.drawCenteredString(font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0F) << 24);
 	}
 
 	protected void renderBg(Minecraft minecraft, int i, int j) {
@@ -222,10 +222,14 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 
 	public void setMessage(String string) {
 		if (!Objects.equals(string, this.message)) {
-			this.nextNarration = Util.getMillis() + 250L;
+			this.queueNarration(250);
 		}
 
 		this.message = string;
+	}
+
+	public void queueNarration(int i) {
+		this.nextNarration = Util.getMillis() + (long)i;
 	}
 
 	public String getMessage() {

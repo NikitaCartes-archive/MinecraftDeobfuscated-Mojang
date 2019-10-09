@@ -5,20 +5,16 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import net.minecraft.world.level.levelgen.feature.BushConfiguration;
-import net.minecraft.world.level.levelgen.feature.DecoratorChanceRange;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.DecoratorCountRange;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.HellSpringConfiguration;
-import net.minecraft.world.level.levelgen.feature.OreConfiguration;
-import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.SpringConfiguration;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
+import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
-import net.minecraft.world.level.material.Fluids;
 
 public final class NetherBiome extends Biome {
 	protected NetherBiome() {
@@ -35,68 +31,72 @@ public final class NetherBiome extends Biome {
 				.waterFogColor(329011)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.NETHER_BRIDGE, FeatureConfiguration.NONE);
+		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.HELL_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.SPRING, new SpringConfiguration(Fluids.LAVA.defaultFluidState()), FeatureDecorator.COUNT_VERY_BIASED_RANGE, new DecoratorCountRange(20, 8, 16, 256)
-			)
+			Feature.SPRING
+				.configured(BiomeDefaultFeatures.LAVA_SPRING_CONFIG)
+				.decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256)))
 		);
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.NETHER_BRIDGE, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE)
+			Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.NETHER_SPRING, new HellSpringConfiguration(false), FeatureDecorator.COUNT_RANGE, new DecoratorCountRange(8, 4, 8, 128))
+			Feature.SPRING
+				.configured(BiomeDefaultFeatures.OPEN_NETHER_SPRING_CONFIG)
+				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(8, 4, 8, 128)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.HELL_FIRE, FeatureConfiguration.NONE, FeatureDecorator.HELL_FIRE, new DecoratorFrequency(10))
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.HELL_FIRE_CONFIG)
+				.decorated(FeatureDecorator.HELL_FIRE.configured(new FrequencyDecoratorConfiguration(10)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.GLOWSTONE_BLOB, FeatureConfiguration.NONE, FeatureDecorator.LIGHT_GEM_CHANCE, new DecoratorFrequency(10))
+			Feature.GLOWSTONE_BLOB
+				.configured(FeatureConfiguration.NONE)
+				.decorated(FeatureDecorator.LIGHT_GEM_CHANCE.configured(new FrequencyDecoratorConfiguration(10)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.GLOWSTONE_BLOB, FeatureConfiguration.NONE, FeatureDecorator.COUNT_RANGE, new DecoratorCountRange(10, 0, 0, 128))
+			Feature.GLOWSTONE_BLOB
+				.configured(FeatureConfiguration.NONE)
+				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(
-				Feature.BUSH, new BushConfiguration(Blocks.BROWN_MUSHROOM.defaultBlockState()), FeatureDecorator.CHANCE_RANGE, new DecoratorChanceRange(0.5F, 0, 0, 128)
-			)
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.BROWN_MUSHROOM_CONFIG)
+				.decorated(FeatureDecorator.CHANCE_RANGE.configured(new ChanceRangeDecoratorConfiguration(0.5F, 0, 0, 128)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(
-				Feature.BUSH, new BushConfiguration(Blocks.RED_MUSHROOM.defaultBlockState()), FeatureDecorator.CHANCE_RANGE, new DecoratorChanceRange(0.5F, 0, 0, 128)
-			)
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.RED_MUSHROOM_CONFIG)
+				.decorated(FeatureDecorator.CHANCE_RANGE.configured(new ChanceRangeDecoratorConfiguration(0.5F, 0, 0, 128)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(
-				Feature.ORE,
-				new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14),
-				FeatureDecorator.COUNT_RANGE,
-				new DecoratorCountRange(16, 10, 20, 128)
-			)
+			Feature.ORE
+				.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.NETHER_QUARTZ_ORE.defaultBlockState(), 14))
+				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(
-				Feature.ORE,
-				new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.MAGMA_BLOCK.defaultBlockState(), 33),
-				FeatureDecorator.MAGMA,
-				new DecoratorFrequency(4)
-			)
+			Feature.ORE
+				.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.MAGMA_BLOCK.defaultBlockState(), 33))
+				.decorated(FeatureDecorator.MAGMA.configured(new FrequencyDecoratorConfiguration(4)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			makeComposite(Feature.NETHER_SPRING, new HellSpringConfiguration(true), FeatureDecorator.COUNT_RANGE, new DecoratorCountRange(16, 10, 20, 128))
+			Feature.SPRING
+				.configured(BiomeDefaultFeatures.CLOSED_NETHER_SPRING_CONFIG)
+				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128)))
 		);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 50, 4, 4));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ZOMBIE_PIGMAN, 100, 4, 4));

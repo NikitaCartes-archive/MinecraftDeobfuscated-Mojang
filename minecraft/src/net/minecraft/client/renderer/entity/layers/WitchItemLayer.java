@@ -30,7 +30,7 @@ public class WitchItemLayer<T extends LivingEntity> extends RenderLayer<T, Witch
 			poseStack.pushPose();
 			if (this.getParentModel().young) {
 				poseStack.translate(0.0, 0.625, 0.0);
-				poseStack.mulPose(Vector3f.XP.rotation(20.0F, true));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
 				float n = 0.5F;
 				poseStack.scale(0.5F, 0.5F, 0.5F);
 			}
@@ -40,28 +40,28 @@ public class WitchItemLayer<T extends LivingEntity> extends RenderLayer<T, Witch
 			Item item = itemStack.getItem();
 			if (Block.byItem(item).defaultBlockState().getRenderShape() == RenderShape.ENTITYBLOCK_ANIMATED) {
 				poseStack.translate(0.0, 0.0625, -0.25);
-				poseStack.mulPose(Vector3f.XP.rotation(30.0F, true));
-				poseStack.mulPose(Vector3f.YP.rotation(-5.0F, true));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(30.0F));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(-5.0F));
 				float o = 0.375F;
 				poseStack.scale(0.375F, -0.375F, 0.375F);
 			} else if (item == Items.BOW) {
 				poseStack.translate(0.0, 0.125, -0.125);
-				poseStack.mulPose(Vector3f.YP.rotation(-45.0F, true));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(-45.0F));
 				float o = 0.625F;
 				poseStack.scale(0.625F, -0.625F, 0.625F);
-				poseStack.mulPose(Vector3f.XP.rotation(-100.0F, true));
-				poseStack.mulPose(Vector3f.YP.rotation(-20.0F, true));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(-100.0F));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(-20.0F));
 			} else {
 				poseStack.translate(0.1875, 0.1875, 0.0);
 				float o = 0.875F;
 				poseStack.scale(0.875F, 0.875F, 0.875F);
-				poseStack.mulPose(Vector3f.ZP.rotation(-20.0F, true));
-				poseStack.mulPose(Vector3f.XP.rotation(-60.0F, true));
-				poseStack.mulPose(Vector3f.ZP.rotation(-30.0F, true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(-60.0F));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-30.0F));
 			}
 
-			poseStack.mulPose(Vector3f.XP.rotation(-15.0F, true));
-			poseStack.mulPose(Vector3f.ZP.rotation(40.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(-15.0F));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F));
 			Minecraft.getInstance()
 				.getItemInHandRenderer()
 				.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, multiBufferSource);

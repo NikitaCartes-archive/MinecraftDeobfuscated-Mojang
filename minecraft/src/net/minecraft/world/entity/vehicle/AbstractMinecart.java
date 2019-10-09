@@ -211,16 +211,16 @@ public abstract class AbstractMinecart extends Entity {
 			this.setDamage(this.getDamage() - 1.0F);
 		}
 
-		if (this.y < -64.0) {
+		if (this.getY() < -64.0) {
 			this.outOfWorld();
 		}
 
 		this.handleNetherPortal();
 		if (this.level.isClientSide) {
 			if (this.lSteps > 0) {
-				double d = this.x + (this.lx - this.x) / (double)this.lSteps;
-				double e = this.y + (this.ly - this.y) / (double)this.lSteps;
-				double f = this.z + (this.lz - this.z) / (double)this.lSteps;
+				double d = this.getX() + (this.lx - this.getX()) / (double)this.lSteps;
+				double e = this.getY() + (this.ly - this.getY()) / (double)this.lSteps;
+				double f = this.getZ() + (this.lz - this.getZ()) / (double)this.lSteps;
 				double g = Mth.wrapDegrees(this.lyr - (double)this.yRot);
 				this.yRot = (float)((double)this.yRot + g / (double)this.lSteps);
 				this.xRot = (float)((double)this.xRot + (this.lxr - (double)this.xRot) / (double)this.lSteps);
@@ -228,7 +228,7 @@ public abstract class AbstractMinecart extends Entity {
 				this.setPos(d, e, f);
 				this.setRot(this.yRot, this.xRot);
 			} else {
-				this.setPos(this.x, this.y, this.z);
+				this.refreshBoundingBox();
 				this.setRot(this.yRot, this.xRot);
 			}
 		} else {
@@ -236,9 +236,9 @@ public abstract class AbstractMinecart extends Entity {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 			}
 
-			int i = Mth.floor(this.x);
-			int j = Mth.floor(this.y);
-			int k = Mth.floor(this.z);
+			int i = Mth.floor(this.getX());
+			int j = Mth.floor(this.getY());
+			int k = Mth.floor(this.getZ());
 			if (this.level.getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
 				j--;
 			}
@@ -256,8 +256,8 @@ public abstract class AbstractMinecart extends Entity {
 
 			this.checkInsideBlocks();
 			this.xRot = 0.0F;
-			double h = this.xo - this.x;
-			double l = this.zo - this.z;
+			double h = this.xo - this.getX();
+			double l = this.zo - this.getZ();
 			if (h * h + l * l > 0.001) {
 				this.yRot = (float)(Mth.atan2(l, h) * 180.0 / Math.PI);
 				if (this.flipped) {
@@ -319,8 +319,11 @@ public abstract class AbstractMinecart extends Entity {
 
 	protected void moveAlongTrack(BlockPos blockPos, BlockState blockState) {
 		this.fallDistance = 0.0F;
-		Vec3 vec3 = this.getPos(this.x, this.y, this.z);
-		this.y = (double)blockPos.getY();
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
+		Vec3 vec3 = this.getPos(d, e, f);
+		e = (double)blockPos.getY();
 		boolean bl = false;
 		boolean bl2 = false;
 		BaseRailBlock baseRailBlock = (BaseRailBlock)blockState.getBlock();
@@ -329,131 +332,129 @@ public abstract class AbstractMinecart extends Entity {
 			bl2 = !bl;
 		}
 
-		double d = 0.0078125;
+		double g = 0.0078125;
 		Vec3 vec32 = this.getDeltaMovement();
 		RailShape railShape = blockState.getValue(baseRailBlock.getShapeProperty());
 		switch (railShape) {
 			case ASCENDING_EAST:
 				this.setDeltaMovement(vec32.add(-0.0078125, 0.0, 0.0));
-				this.y++;
+				e++;
 				break;
 			case ASCENDING_WEST:
 				this.setDeltaMovement(vec32.add(0.0078125, 0.0, 0.0));
-				this.y++;
+				e++;
 				break;
 			case ASCENDING_NORTH:
 				this.setDeltaMovement(vec32.add(0.0, 0.0, 0.0078125));
-				this.y++;
+				e++;
 				break;
 			case ASCENDING_SOUTH:
 				this.setDeltaMovement(vec32.add(0.0, 0.0, -0.0078125));
-				this.y++;
+				e++;
 		}
 
 		vec32 = this.getDeltaMovement();
 		Pair<Vec3i, Vec3i> pair = exits(railShape);
 		Vec3i vec3i = pair.getFirst();
 		Vec3i vec3i2 = pair.getSecond();
-		double e = (double)(vec3i2.getX() - vec3i.getX());
-		double f = (double)(vec3i2.getZ() - vec3i.getZ());
-		double g = Math.sqrt(e * e + f * f);
-		double h = vec32.x * e + vec32.z * f;
-		if (h < 0.0) {
-			e = -e;
-			f = -f;
+		double h = (double)(vec3i2.getX() - vec3i.getX());
+		double i = (double)(vec3i2.getZ() - vec3i.getZ());
+		double j = Math.sqrt(h * h + i * i);
+		double k = vec32.x * h + vec32.z * i;
+		if (k < 0.0) {
+			h = -h;
+			i = -i;
 		}
 
-		double i = Math.min(2.0, Math.sqrt(getHorizontalDistanceSqr(vec32)));
-		vec32 = new Vec3(i * e / g, vec32.y, i * f / g);
+		double l = Math.min(2.0, Math.sqrt(getHorizontalDistanceSqr(vec32)));
+		vec32 = new Vec3(l * h / j, vec32.y, l * i / j);
 		this.setDeltaMovement(vec32);
 		Entity entity = this.getPassengers().isEmpty() ? null : (Entity)this.getPassengers().get(0);
 		if (entity instanceof Player) {
 			Vec3 vec33 = entity.getDeltaMovement();
-			double j = getHorizontalDistanceSqr(vec33);
-			double k = getHorizontalDistanceSqr(this.getDeltaMovement());
-			if (j > 1.0E-4 && k < 0.01) {
+			double m = getHorizontalDistanceSqr(vec33);
+			double n = getHorizontalDistanceSqr(this.getDeltaMovement());
+			if (m > 1.0E-4 && n < 0.01) {
 				this.setDeltaMovement(this.getDeltaMovement().add(vec33.x * 0.1, 0.0, vec33.z * 0.1));
 				bl2 = false;
 			}
 		}
 
 		if (bl2) {
-			double l = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
-			if (l < 0.03) {
+			double o = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
+			if (o < 0.03) {
 				this.setDeltaMovement(Vec3.ZERO);
 			} else {
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.0, 0.5));
 			}
 		}
 
-		double l = (double)blockPos.getX() + 0.5 + (double)vec3i.getX() * 0.5;
-		double m = (double)blockPos.getZ() + 0.5 + (double)vec3i.getZ() * 0.5;
-		double n = (double)blockPos.getX() + 0.5 + (double)vec3i2.getX() * 0.5;
-		double o = (double)blockPos.getZ() + 0.5 + (double)vec3i2.getZ() * 0.5;
-		e = n - l;
-		f = o - m;
-		double p;
-		if (e == 0.0) {
-			this.x = (double)blockPos.getX() + 0.5;
-			p = this.z - (double)blockPos.getZ();
-		} else if (f == 0.0) {
-			this.z = (double)blockPos.getZ() + 0.5;
-			p = this.x - (double)blockPos.getX();
+		double o = (double)blockPos.getX() + 0.5 + (double)vec3i.getX() * 0.5;
+		double p = (double)blockPos.getZ() + 0.5 + (double)vec3i.getZ() * 0.5;
+		double q = (double)blockPos.getX() + 0.5 + (double)vec3i2.getX() * 0.5;
+		double r = (double)blockPos.getZ() + 0.5 + (double)vec3i2.getZ() * 0.5;
+		h = q - o;
+		i = r - p;
+		double s;
+		if (h == 0.0) {
+			s = f - (double)blockPos.getZ();
+		} else if (i == 0.0) {
+			s = d - (double)blockPos.getX();
 		} else {
-			double q = this.x - l;
-			double r = this.z - m;
-			p = (q * e + r * f) * 2.0;
+			double t = d - o;
+			double u = f - p;
+			s = (t * h + u * i) * 2.0;
 		}
 
-		this.x = l + e * p;
-		this.z = m + f * p;
-		this.setPos(this.x, this.y, this.z);
-		double q = this.isVehicle() ? 0.75 : 1.0;
-		double r = this.getMaxSpeed();
+		d = o + h * s;
+		f = p + i * s;
+		this.setPos(d, e, f);
+		double t = this.isVehicle() ? 0.75 : 1.0;
+		double u = this.getMaxSpeed();
 		vec32 = this.getDeltaMovement();
-		this.move(MoverType.SELF, new Vec3(Mth.clamp(q * vec32.x, -r, r), 0.0, Mth.clamp(q * vec32.z, -r, r)));
-		if (vec3i.getY() != 0 && Mth.floor(this.x) - blockPos.getX() == vec3i.getX() && Mth.floor(this.z) - blockPos.getZ() == vec3i.getZ()) {
-			this.setPos(this.x, this.y + (double)vec3i.getY(), this.z);
-		} else if (vec3i2.getY() != 0 && Mth.floor(this.x) - blockPos.getX() == vec3i2.getX() && Mth.floor(this.z) - blockPos.getZ() == vec3i2.getZ()) {
-			this.setPos(this.x, this.y + (double)vec3i2.getY(), this.z);
+		this.move(MoverType.SELF, new Vec3(Mth.clamp(t * vec32.x, -u, u), 0.0, Mth.clamp(t * vec32.z, -u, u)));
+		if (vec3i.getY() != 0 && Mth.floor(this.getX()) - blockPos.getX() == vec3i.getX() && Mth.floor(this.getZ()) - blockPos.getZ() == vec3i.getZ()) {
+			this.setPos(this.getX(), this.getY() + (double)vec3i.getY(), this.getZ());
+		} else if (vec3i2.getY() != 0 && Mth.floor(this.getX()) - blockPos.getX() == vec3i2.getX() && Mth.floor(this.getZ()) - blockPos.getZ() == vec3i2.getZ()) {
+			this.setPos(this.getX(), this.getY() + (double)vec3i2.getY(), this.getZ());
 		}
 
 		this.applyNaturalSlowdown();
-		Vec3 vec34 = this.getPos(this.x, this.y, this.z);
+		Vec3 vec34 = this.getPos(this.getX(), this.getY(), this.getZ());
 		if (vec34 != null && vec3 != null) {
-			double s = (vec3.y - vec34.y) * 0.05;
+			double v = (vec3.y - vec34.y) * 0.05;
 			Vec3 vec35 = this.getDeltaMovement();
-			double t = Math.sqrt(getHorizontalDistanceSqr(vec35));
-			if (t > 0.0) {
-				this.setDeltaMovement(vec35.multiply((t + s) / t, 1.0, (t + s) / t));
+			double w = Math.sqrt(getHorizontalDistanceSqr(vec35));
+			if (w > 0.0) {
+				this.setDeltaMovement(vec35.multiply((w + v) / w, 1.0, (w + v) / w));
 			}
 
-			this.setPos(this.x, vec34.y, this.z);
+			this.setPos(this.getX(), vec34.y, this.getZ());
 		}
 
-		int u = Mth.floor(this.x);
-		int v = Mth.floor(this.z);
-		if (u != blockPos.getX() || v != blockPos.getZ()) {
+		int x = Mth.floor(this.getX());
+		int y = Mth.floor(this.getZ());
+		if (x != blockPos.getX() || y != blockPos.getZ()) {
 			Vec3 vec35 = this.getDeltaMovement();
-			double t = Math.sqrt(getHorizontalDistanceSqr(vec35));
-			this.setDeltaMovement(t * (double)(u - blockPos.getX()), vec35.y, t * (double)(v - blockPos.getZ()));
+			double w = Math.sqrt(getHorizontalDistanceSqr(vec35));
+			this.setDeltaMovement(w * (double)(x - blockPos.getX()), vec35.y, w * (double)(y - blockPos.getZ()));
 		}
 
 		if (bl) {
 			Vec3 vec35 = this.getDeltaMovement();
-			double t = Math.sqrt(getHorizontalDistanceSqr(vec35));
-			if (t > 0.01) {
-				double w = 0.06;
-				this.setDeltaMovement(vec35.add(vec35.x / t * 0.06, 0.0, vec35.z / t * 0.06));
+			double w = Math.sqrt(getHorizontalDistanceSqr(vec35));
+			if (w > 0.01) {
+				double z = 0.06;
+				this.setDeltaMovement(vec35.add(vec35.x / w * 0.06, 0.0, vec35.z / w * 0.06));
 			} else {
 				Vec3 vec36 = this.getDeltaMovement();
-				double x = vec36.x;
-				double y = vec36.z;
+				double aa = vec36.x;
+				double ab = vec36.z;
 				if (railShape == RailShape.EAST_WEST) {
 					if (this.isRedstoneConductor(blockPos.west())) {
-						x = 0.02;
+						aa = 0.02;
 					} else if (this.isRedstoneConductor(blockPos.east())) {
-						x = -0.02;
+						aa = -0.02;
 					}
 				} else {
 					if (railShape != RailShape.NORTH_SOUTH) {
@@ -461,13 +462,13 @@ public abstract class AbstractMinecart extends Entity {
 					}
 
 					if (this.isRedstoneConductor(blockPos.north())) {
-						y = 0.02;
+						ab = 0.02;
 					} else if (this.isRedstoneConductor(blockPos.south())) {
-						y = -0.02;
+						ab = -0.02;
 					}
 				}
 
-				this.setDeltaMovement(x, vec36.y, y);
+				this.setDeltaMovement(aa, vec36.y, ab);
 			}
 		}
 	}
@@ -600,8 +601,8 @@ public abstract class AbstractMinecart extends Entity {
 		if (!this.level.isClientSide) {
 			if (!entity.noPhysics && !this.noPhysics) {
 				if (!this.hasPassenger(entity)) {
-					double d = entity.x - this.x;
-					double e = entity.z - this.z;
+					double d = entity.getX() - this.getX();
+					double e = entity.getZ() - this.getZ();
 					double f = d * d + e * e;
 					if (f >= 1.0E-4F) {
 						f = (double)Mth.sqrt(f);
@@ -621,8 +622,8 @@ public abstract class AbstractMinecart extends Entity {
 						d *= 0.5;
 						e *= 0.5;
 						if (entity instanceof AbstractMinecart) {
-							double h = entity.x - this.x;
-							double i = entity.z - this.z;
+							double h = entity.getX() - this.getX();
+							double i = entity.getZ() - this.getZ();
 							Vec3 vec3 = new Vec3(h, 0.0, i).normalize();
 							Vec3 vec32 = new Vec3((double)Mth.cos(this.yRot * (float) (Math.PI / 180.0)), 0.0, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0))).normalize();
 							double j = Math.abs(vec3.dot(vec32));

@@ -37,8 +37,9 @@ public abstract class BlockEntity {
 		return this.level;
 	}
 
-	public void setLevel(Level level) {
+	public void setLevelAndPosition(Level level, BlockPos blockPos) {
 		this.level = level;
+		this.worldPosition = blockPos;
 	}
 
 	public boolean hasLevel() {

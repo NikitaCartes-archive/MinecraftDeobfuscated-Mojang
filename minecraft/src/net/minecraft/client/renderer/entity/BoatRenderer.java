@@ -34,7 +34,7 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 	public void render(Boat boat, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
 		poseStack.pushPose();
 		poseStack.translate(0.0, 0.375, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
 		float i = (float)boat.getHurtTime() - h;
 		float j = boat.getDamage() - h;
 		if (j < 0.0F) {
@@ -42,7 +42,7 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		}
 
 		if (i > 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(i) * i * j / 10.0F * (float)boat.getHurtDir(), true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(i) * i * j / 10.0F * (float)boat.getHurtDir()));
 		}
 
 		float k = boat.getBubbleAngle(h);
@@ -52,15 +52,13 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		int l = boat.getLightColor();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(boat)));
-		OverlayTexture.setDefault(vertexConsumer);
-		poseStack.mulPose(Vector3f.YP.rotation(90.0F, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
 		this.model.setupAnim(boat, h, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-		this.model.renderToBuffer(poseStack, vertexConsumer, l);
-		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.WATER_MASK);
-		this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625F, l, null);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(boat)));
+		this.model.renderToBuffer(poseStack, vertexConsumer, l, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
+		this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625F, l, OverlayTexture.NO_OVERLAY, null);
 		poseStack.popPose();
-		vertexConsumer.unsetDefaultOverlayCoords();
 		super.render(boat, d, e, f, g, h, poseStack, multiBufferSource);
 	}
 

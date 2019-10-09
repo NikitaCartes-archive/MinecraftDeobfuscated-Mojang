@@ -17,7 +17,9 @@ public class EggItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		level.playSound(null, player.x, player.y, player.z, SoundEvents.EGG_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+		level.playSound(
+			null, player.getX(), player.getY(), player.getZ(), SoundEvents.EGG_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+		);
 		if (!level.isClientSide) {
 			ThrownEgg thrownEgg = new ThrownEgg(level, player);
 			thrownEgg.setItem(itemStack);

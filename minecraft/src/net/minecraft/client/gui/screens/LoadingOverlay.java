@@ -78,9 +78,9 @@ public class LoadingOverlay extends Overlay {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
 		this.blit(n, p, 0, 0, 256, 256);
 		float q = this.reload.getActualProgress();
-		this.currentProgress = this.currentProgress * 0.95F + q * 0.050000012F;
+		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + q * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
-			this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, this.currentProgress, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
+			this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
 		}
 
 		if (g >= 2.0F) {
@@ -97,16 +97,16 @@ public class LoadingOverlay extends Overlay {
 		}
 	}
 
-	private void drawProgressBar(int i, int j, int k, int l, float f, float g) {
-		int m = Mth.ceil((float)(k - i - 2) * f);
-		fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0F - g) * 255.0F) << 16 | Math.round((1.0F - g) * 255.0F) << 8 | Math.round((1.0F - g) * 255.0F));
+	private void drawProgressBar(int i, int j, int k, int l, float f) {
+		int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
+		fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0F - f) * 255.0F) << 16 | Math.round((1.0F - f) * 255.0F) << 8 | Math.round((1.0F - f) * 255.0F));
 		fill(i, j, k, l, -1);
 		fill(
 			i + 1,
 			j + 1,
 			i + m,
 			l - 1,
-			0xFF000000 | (int)Mth.lerp(1.0F - g, 226.0F, 255.0F) << 16 | (int)Mth.lerp(1.0F - g, 40.0F, 255.0F) << 8 | (int)Mth.lerp(1.0F - g, 55.0F, 255.0F)
+			0xFF000000 | (int)Mth.lerp(1.0F - f, 226.0F, 255.0F) << 16 | (int)Mth.lerp(1.0F - f, 40.0F, 255.0F) << 8 | (int)Mth.lerp(1.0F - f, 55.0F, 255.0F)
 		);
 	}
 

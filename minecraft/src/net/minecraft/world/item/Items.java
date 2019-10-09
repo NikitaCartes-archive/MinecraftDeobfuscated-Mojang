@@ -912,7 +912,7 @@ public class Items {
 		"bat_spawn_egg", new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item BEE_SPAWN_EGG = registerItem(
-		"bee_spawn_egg", new SpawnEggItem(EntityType.BEE, 16770398, 2500144, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+		"bee_spawn_egg", new SpawnEggItem(EntityType.BEE, 15582019, 4400155, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item BLAZE_SPAWN_EGG = registerItem(
 		"blaze_spawn_egg", new SpawnEggItem(EntityType.BLAZE, 16167425, 16775294, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
@@ -1362,10 +1362,12 @@ public class Items {
 	public static final Item CAMPFIRE = registerBlock(Blocks.CAMPFIRE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item HONEYCOMB = registerItem("honeycomb", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BEE_NEST = registerBlock(Blocks.BEE_NEST, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item BEE_HIVE = registerBlock(Blocks.BEE_HIVE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BEEHIVE = registerBlock(Blocks.BEEHIVE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item HONEY_BOTTLE = registerItem(
 		"honey_bottle", new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).tab(CreativeModeTab.TAB_FOOD).stacksTo(1))
 	);
+	public static final Item HONEY_BLOCK = registerBlock(Blocks.HONEY_BLOCK, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item HONEYCOMB_BLOCK = registerBlock(Blocks.HONEYCOMB_BLOCK, CreativeModeTab.TAB_DECORATIONS);
 
 	private static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

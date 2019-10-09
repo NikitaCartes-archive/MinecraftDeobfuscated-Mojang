@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class CoralClawFeature extends CoralFeature {
 	public CoralClawFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {

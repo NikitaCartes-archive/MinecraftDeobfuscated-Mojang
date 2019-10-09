@@ -223,10 +223,10 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Rang
 	@Override
 	public void shootProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
 		Entity entity = (Entity)projectile;
-		double d = livingEntity.x - this.x;
-		double e = livingEntity.z - this.z;
+		double d = livingEntity.getX() - this.getX();
+		double e = livingEntity.getZ() - this.getZ();
 		double g = (double)Mth.sqrt(d * d + e * e);
-		double h = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0F) - entity.y + g * 0.2F;
+		double h = livingEntity.getY(0.3333333333333333) - entity.getY() + g * 0.2F;
 		Vector3f vector3f = this.getProjectileShotVector(new Vec3(d, h, e), f);
 		projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
 		this.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));

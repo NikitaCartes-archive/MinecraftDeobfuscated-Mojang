@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -39,7 +40,9 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 		this.bar.addBox(-10.0F, -32.0F, -1.0F, 20.0F, 2.0F, 2.0F, 0.0F);
 	}
 
-	public void render(BannerBlockEntity bannerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public void render(
+		BannerBlockEntity bannerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
+	) {
 		float h = 0.6666667F;
 		boolean bl = bannerBlockEntity.getLevel() == null;
 		poseStack.pushPose();
@@ -53,11 +56,13 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 			BlockState blockState = bannerBlockEntity.getBlockState();
 			if (blockState.getBlock() instanceof BannerBlock) {
 				poseStack.translate(0.5, 0.5, 0.5);
-				poseStack.mulPose(Vector3f.YP.rotation((float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F, true));
+				float k = (float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F;
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
 				this.pole.visible = true;
 			} else {
 				poseStack.translate(0.5, -0.16666667F, 0.5);
-				poseStack.mulPose(Vector3f.YP.rotation(-((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot(), true));
+				float k = -((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot();
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
 				poseStack.translate(0.0, -0.3125, -0.4375);
 				this.pole.visible = false;
 			}
@@ -66,33 +71,33 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 		TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
 		poseStack.pushPose();
 		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		float j = 0.0625F;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
-		this.pole.render(poseStack, vertexConsumer, 0.0625F, i, textureAtlasSprite);
-		this.bar.render(poseStack, vertexConsumer, 0.0625F, i, textureAtlasSprite);
+		float k = 0.0625F;
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+		this.pole.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
+		this.bar.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
 		if (bannerBlockEntity.onlyRenderPattern()) {
 			this.flag.xRot = 0.0F;
 		} else {
 			BlockPos blockPos = bannerBlockEntity.getBlockPos();
-			float k = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + g;
-			this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(k * (float) Math.PI * 0.02F)) * (float) Math.PI;
+			float m = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + g;
+			this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(m * (float) Math.PI * 0.02F)) * (float) Math.PI;
 		}
 
 		this.flag.y = -32.0F;
-		this.flag.render(poseStack, vertexConsumer, 0.0625F, i, textureAtlasSprite);
+		this.flag.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
 		List<BannerPattern> list = bannerBlockEntity.getPatterns();
 		List<DyeColor> list2 = bannerBlockEntity.getColors();
-		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.TRANSLUCENT_NO_CRUMBLING);
+		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
 		if (list == null) {
 			LOGGER.error("patterns are null");
 		} else if (list2 == null) {
 			LOGGER.error("colors are null");
 		} else {
-			for (int m = 0; m < 17 && m < list.size() && m < list2.size(); m++) {
-				BannerPattern bannerPattern = (BannerPattern)list.get(m);
-				DyeColor dyeColor = (DyeColor)list2.get(m);
+			for (int n = 0; n < 17 && n < list.size() && n < list2.size(); n++) {
+				BannerPattern bannerPattern = (BannerPattern)list.get(n);
+				DyeColor dyeColor = (DyeColor)list2.get(n);
 				float[] fs = dyeColor.getTextureDiffuseColors();
-				this.flag.render(poseStack, vertexConsumer2, 0.0625F, i, this.getSprite(bannerPattern.location()), fs[0], fs[1], fs[2]);
+				this.flag.render(poseStack, vertexConsumer2, 0.0625F, i, j, this.getSprite(bannerPattern.location()), fs[0], fs[1], fs[2]);
 			}
 		}
 

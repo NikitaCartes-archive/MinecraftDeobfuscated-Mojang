@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
@@ -22,19 +23,19 @@ public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
 	}
 
 	public void render(
-		LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
+		LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
 	) {
 		BlockState blockState = lecternBlockEntity.getBlockState();
 		if ((Boolean)blockState.getValue(LecternBlock.HAS_BOOK)) {
 			poseStack.pushPose();
 			poseStack.translate(0.5, 1.0625, 0.5);
 			float h = ((Direction)blockState.getValue(LecternBlock.FACING)).getClockWise().toYRot();
-			poseStack.mulPose(Vector3f.YP.rotation(-h, true));
-			poseStack.mulPose(Vector3f.ZP.rotation(67.5F, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(67.5F));
 			poseStack.translate(0.0, -0.125, 0.0);
 			this.bookModel.setupAnim(0.0F, 0.1F, 0.9F, 1.2F);
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
-			this.bookModel.render(poseStack, vertexConsumer, 0.0625F, i, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+			this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
 			poseStack.popPose();
 		}
 	}

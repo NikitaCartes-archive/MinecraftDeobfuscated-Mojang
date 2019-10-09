@@ -118,7 +118,7 @@ public class Painting extends HangingEntity {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
-		BlockPos blockPos = this.pos.offset(d - this.x, e - this.y, f - this.z);
+		BlockPos blockPos = this.pos.offset(d - this.getX(), e - this.getY(), f - this.getZ());
 		this.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 	}
 

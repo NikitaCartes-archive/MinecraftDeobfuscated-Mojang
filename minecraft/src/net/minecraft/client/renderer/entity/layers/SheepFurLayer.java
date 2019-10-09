@@ -44,7 +44,9 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 				v = hs[2];
 			}
 
-			coloredModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, m, h, t, u, v);
+			coloredCutoutModelCopyLayerRender(
+				this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, m, h, t, u, v
+			);
 		}
 	}
 }

@@ -3,6 +3,7 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -13,7 +14,7 @@ import net.minecraft.world.item.Items;
 @Environment(EnvType.CLIENT)
 public class DrownedModel<T extends Zombie> extends ZombieModel<T> {
 	public DrownedModel(float f, float g, int i, int j) {
-		super(f, g, i, j);
+		super(RenderType::entityCutoutNoCull, f, g, i, j);
 		this.rightArm = new ModelPart(this, 32, 48);
 		this.rightArm.addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 		this.rightArm.setPos(-5.0F, 2.0F + g, 0.0F);
@@ -23,7 +24,7 @@ public class DrownedModel<T extends Zombie> extends ZombieModel<T> {
 	}
 
 	public DrownedModel(float f, boolean bl) {
-		super(f, 0.0F, 64, bl ? 32 : 64);
+		super(RenderType::entityCutoutNoCull, f, 0.0F, 64, bl ? 32 : 64);
 	}
 
 	public void prepareMobModel(T zombie, float f, float g, float h) {

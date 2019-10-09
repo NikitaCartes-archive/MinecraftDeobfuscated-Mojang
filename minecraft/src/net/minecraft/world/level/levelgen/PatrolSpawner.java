@@ -41,8 +41,7 @@ public class PatrolSpawner {
 						} else {
 							int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
 							int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-							BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-							mutableBlockPos.set(player.x, player.y, player.z).move(j, 0, k);
+							BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(player).move(j, 0, k);
 							if (!serverLevel.hasChunksAt(
 								mutableBlockPos.getX() - 10,
 								mutableBlockPos.getY() - 10,

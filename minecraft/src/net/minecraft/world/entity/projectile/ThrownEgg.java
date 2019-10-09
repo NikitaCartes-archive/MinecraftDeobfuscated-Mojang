@@ -37,9 +37,9 @@ public class ThrownEgg extends ThrowableItemProjectile {
 				this.level
 					.addParticle(
 						new ItemParticleOption(ParticleTypes.ITEM, this.getItem()),
-						this.x,
-						this.y,
-						this.z,
+						this.getX(),
+						this.getY(),
+						this.getZ(),
 						((double)this.random.nextFloat() - 0.5) * 0.08,
 						((double)this.random.nextFloat() - 0.5) * 0.08,
 						((double)this.random.nextFloat() - 0.5) * 0.08
@@ -64,7 +64,7 @@ public class ThrownEgg extends ThrowableItemProjectile {
 				for (int j = 0; j < i; j++) {
 					Chicken chicken = EntityType.CHICKEN.create(this.level);
 					chicken.setAge(-24000);
-					chicken.moveTo(this.x, this.y, this.z, this.yRot, 0.0F);
+					chicken.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
 					this.level.addFreshEntity(chicken);
 				}
 			}

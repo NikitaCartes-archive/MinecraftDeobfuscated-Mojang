@@ -24,7 +24,9 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 			float h = (this.dragon.getRandom().nextFloat() - 0.5F) * 8.0F;
 			this.dragon
 				.level
-				.addParticle(ParticleTypes.EXPLOSION_EMITTER, this.dragon.x + (double)f, this.dragon.y + 2.0 + (double)g, this.dragon.z + (double)h, 0.0, 0.0, 0.0);
+				.addParticle(
+					ParticleTypes.EXPLOSION_EMITTER, this.dragon.getX() + (double)f, this.dragon.getY() + 2.0 + (double)g, this.dragon.getZ() + (double)h, 0.0, 0.0, 0.0
+				);
 		}
 	}
 
@@ -36,7 +38,7 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 			this.targetLocation = new Vec3((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 		}
 
-		double d = this.targetLocation.distanceToSqr(this.dragon.x, this.dragon.y, this.dragon.z);
+		double d = this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		if (!(d < 100.0) && !(d > 22500.0) && !this.dragon.horizontalCollision && !this.dragon.verticalCollision) {
 			this.dragon.setHealth(1.0F);
 		} else {

@@ -187,7 +187,9 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 
 		if (this.destroyTarget != null) {
 			this.level
-				.playSound(null, this.destroyTarget.x, this.destroyTarget.y, this.destroyTarget.z, SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.BLOCKS, 1.0F, 1.0F);
+				.playSound(
+					null, this.destroyTarget.getX(), this.destroyTarget.getY(), this.destroyTarget.getZ(), SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.BLOCKS, 1.0F, 1.0F
+				);
 			this.destroyTarget.hurt(DamageSource.MAGIC, 4.0F);
 		}
 
@@ -242,7 +244,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 		}
 
 		if (this.destroyTarget != null) {
-			Vec3 vec33 = new Vec3(this.destroyTarget.x, this.destroyTarget.y + (double)this.destroyTarget.getEyeHeight(), this.destroyTarget.z);
+			Vec3 vec33 = new Vec3(this.destroyTarget.getX(), this.destroyTarget.getEyeY(), this.destroyTarget.getZ());
 			float j = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());
 			float g = -1.0F + random.nextFloat() * this.destroyTarget.getBbHeight();
 			float h = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());

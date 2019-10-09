@@ -112,7 +112,7 @@ public class Cat extends TamableAnimal {
 		this.goalSelector.addGoal(2, this.sitGoal);
 		this.goalSelector.addGoal(3, this.temptGoal);
 		this.goalSelector.addGoal(5, new CatLieOnBedGoal(this, 1.1, 8));
-		this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0, 10.0F, 5.0F));
+		this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0, 10.0F, 5.0F, false));
 		this.goalSelector.addGoal(7, new CatSitOnBlockGoal(this, 0.8));
 		this.goalSelector.addGoal(8, new LeapAtTargetGoal(this, 0.3F));
 		this.goalSelector.addGoal(9, new OcelotAttackGoal(this));
@@ -246,7 +246,8 @@ public class Cat extends TamableAnimal {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g) {
+		return false;
 	}
 
 	@Override

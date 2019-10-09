@@ -6,24 +6,26 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.levelgen.feature.DecoratorCountRange;
+import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 
-public class CountVeryBiasedRangeDecorator extends SimpleFeatureDecorator<DecoratorCountRange> {
-	public CountVeryBiasedRangeDecorator(Function<Dynamic<?>, ? extends DecoratorCountRange> function) {
+public class CountVeryBiasedRangeDecorator extends SimpleFeatureDecorator<CountRangeDecoratorConfiguration> {
+	public CountVeryBiasedRangeDecorator(Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function) {
 		super(function);
 	}
 
-	public Stream<BlockPos> place(Random random, DecoratorCountRange decoratorCountRange, BlockPos blockPos) {
-		return IntStream.range(0, decoratorCountRange.count)
+	public Stream<BlockPos> place(Random random, CountRangeDecoratorConfiguration countRangeDecoratorConfiguration, BlockPos blockPos) {
+		return IntStream.range(0, countRangeDecoratorConfiguration.count)
 			.mapToObj(
 				i -> {
-					int j = random.nextInt(16);
-					int k = random.nextInt(16);
+					int j = random.nextInt(16) + blockPos.getX();
+					int k = random.nextInt(16) + blockPos.getZ();
 					int l = random.nextInt(
-						random.nextInt(random.nextInt(decoratorCountRange.maximum - decoratorCountRange.topOffset) + decoratorCountRange.bottomOffset)
-							+ decoratorCountRange.bottomOffset
+						random.nextInt(
+								random.nextInt(countRangeDecoratorConfiguration.maximum - countRangeDecoratorConfiguration.topOffset) + countRangeDecoratorConfiguration.bottomOffset
+							)
+							+ countRangeDecoratorConfiguration.bottomOffset
 					);
-					return blockPos.offset(j, l, k);
+					return new BlockPos(j, l, k);
 				}
 			);
 	}

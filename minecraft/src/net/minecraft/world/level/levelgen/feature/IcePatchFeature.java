@@ -9,16 +9,21 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusConfiguration;
 
-public class IcePatchFeature extends Feature<FeatureRadius> {
+public class IcePatchFeature extends Feature<FeatureRadiusConfiguration> {
 	private final Block block = Blocks.PACKED_ICE;
 
-	public IcePatchFeature(Function<Dynamic<?>, ? extends FeatureRadius> function) {
+	public IcePatchFeature(Function<Dynamic<?>, ? extends FeatureRadiusConfiguration> function) {
 		super(function);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FeatureRadius featureRadius
+		LevelAccessor levelAccessor,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		BlockPos blockPos,
+		FeatureRadiusConfiguration featureRadiusConfiguration
 	) {
 		while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
 			blockPos = blockPos.below();
@@ -27,7 +32,7 @@ public class IcePatchFeature extends Feature<FeatureRadius> {
 		if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.SNOW_BLOCK) {
 			return false;
 		} else {
-			int i = random.nextInt(featureRadius.radius) + 2;
+			int i = random.nextInt(featureRadiusConfiguration.radius) + 2;
 			int j = 1;
 
 			for (int k = blockPos.getX() - i; k <= blockPos.getX() + i; k++) {
@@ -38,7 +43,7 @@ public class IcePatchFeature extends Feature<FeatureRadius> {
 						for (int o = blockPos.getY() - 1; o <= blockPos.getY() + 1; o++) {
 							BlockPos blockPos2 = new BlockPos(k, o, l);
 							Block block = levelAccessor.getBlockState(blockPos2).getBlock();
-							if (Block.equalsDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+							if (isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
 								levelAccessor.setBlock(blockPos2, this.block.defaultBlockState(), 2);
 							}
 						}

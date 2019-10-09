@@ -11,7 +11,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
-public class ChatOptionsScreen extends Screen {
+public class ChatOptionsScreen extends OptionsSubScreen {
 	private static final Option[] CHAT_OPTIONS = new Option[]{
 		Option.CHAT_VISIBILITY,
 		Option.CHAT_COLOR,
@@ -27,14 +27,10 @@ public class ChatOptionsScreen extends Screen {
 		Option.AUTO_SUGGESTIONS,
 		Option.NARRATOR
 	};
-	private final Screen lastScreen;
-	private final Options options;
 	private AbstractWidget narratorButton;
 
 	public ChatOptionsScreen(Screen screen, Options options) {
-		super(new TranslatableComponent("options.chat.title"));
-		this.lastScreen = screen;
-		this.options = options;
+		super(screen, options, new TranslatableComponent("options.chat.title"));
 	}
 
 	@Override
@@ -56,11 +52,6 @@ public class ChatOptionsScreen extends Screen {
 		this.addButton(
 			new Button(this.width / 2 - 100, this.height / 6 + 24 * (i + 1) / 2, 200, 20, I18n.get("gui.done"), button -> this.minecraft.setScreen(this.lastScreen))
 		);
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.options.save();
 	}
 
 	@Override

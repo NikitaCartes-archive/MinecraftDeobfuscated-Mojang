@@ -66,7 +66,7 @@ public class PoiType {
 	public static final PoiType WEAPONSMITH = register("weaponsmith", getBlockStates(Blocks.GRINDSTONE), 1, 1);
 	public static final PoiType HOME = register("home", BEDS, 1, 1);
 	public static final PoiType MEETING = register("meeting", getBlockStates(Blocks.BELL), 32, 6);
-	public static final PoiType BEE_HIVE = register("bee_hive", getBlockStates(Blocks.BEE_HIVE), 0, 1);
+	public static final PoiType BEEHIVE = register("beehive", getBlockStates(Blocks.BEEHIVE), 0, 1);
 	public static final PoiType BEE_NEST = register("bee_nest", getBlockStates(Blocks.BEE_NEST), 0, 1);
 	public static final PoiType NETHER_PORTAL = register("nether_portal", getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
 	private final String name;

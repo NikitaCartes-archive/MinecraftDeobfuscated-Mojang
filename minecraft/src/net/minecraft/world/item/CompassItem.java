@@ -75,7 +75,7 @@ public class CompassItem extends Item {
 			@Environment(EnvType.CLIENT)
 			private double getSpawnToAngle(LevelAccessor levelAccessor, Entity entity) {
 				BlockPos blockPos = levelAccessor.getSharedSpawnPos();
-				return Math.atan2((double)blockPos.getZ() - entity.z, (double)blockPos.getX() - entity.x);
+				return Math.atan2((double)blockPos.getZ() - entity.getZ(), (double)blockPos.getX() - entity.getX());
 			}
 		});
 	}

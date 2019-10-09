@@ -48,7 +48,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -155,7 +154,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 			float f = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 			float g = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
 			float h = 0.3F;
-			entity.setPos(this.x + (double)(0.3F * g), this.y + this.getRideHeight() + entity.getRidingHeight(), this.z - (double)(0.3F * f));
+			entity.setPos(this.getX() + (double)(0.3F * g), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ() - (double)(0.3F * f));
 		}
 	}
 
@@ -196,16 +195,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		if (this.isBaby() && i > 0) {
-			this.level
-				.addParticle(
-					ParticleTypes.HAPPY_VILLAGER,
-					this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth(),
-					this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()),
-					this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth(),
-					0.0,
-					0.0,
-					0.0
-				);
+			this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
 			if (!this.level.isClientSide) {
 				this.ageUp(i);
 			}
@@ -223,7 +213,14 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		if (bl && !this.isSilent()) {
 			this.level
 				.playSound(
-					null, this.x, this.y, this.z, SoundEvents.LLAMA_EAT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+					null,
+					this.getX(),
+					this.getY(),
+					this.getZ(),
+					SoundEvents.LLAMA_EAT,
+					this.getSoundSource(),
+					1.0F,
+					1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
 				);
 		}
 
@@ -380,14 +377,21 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 
 	private void spit(LivingEntity livingEntity) {
 		LlamaSpit llamaSpit = new LlamaSpit(this.level, this);
-		double d = livingEntity.x - this.x;
-		double e = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0F) - llamaSpit.y;
-		double f = livingEntity.z - this.z;
+		double d = livingEntity.getX() - this.getX();
+		double e = livingEntity.getY(0.3333333333333333) - llamaSpit.getY();
+		double f = livingEntity.getZ() - this.getZ();
 		float g = Mth.sqrt(d * d + f * f) * 0.2F;
 		llamaSpit.shoot(d, e + (double)g, f, 1.5F, 10.0F);
 		this.level
 			.playSound(
-				null, this.x, this.y, this.z, SoundEvents.LLAMA_SPIT, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+				null,
+				this.getX(),
+				this.getY(),
+				this.getZ(),
+				SoundEvents.LLAMA_SPIT,
+				this.getSoundSource(),
+				1.0F,
+				1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
 			);
 		this.level.addFreshEntity(llamaSpit);
 		this.didSpit = true;
@@ -398,9 +402,11 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
-		int i = Mth.ceil((f * 0.5F - 3.0F) * g);
-		if (i > 0) {
+	public boolean causeFallDamage(float f, float g) {
+		int i = this.calculateFallDamage(f, g);
+		if (i <= 0) {
+			return false;
+		} else {
 			if (f >= 6.0F) {
 				this.hurt(DamageSource.FALL, (float)i);
 				if (this.isVehicle()) {
@@ -410,12 +416,8 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 				}
 			}
 
-			BlockState blockState = this.level.getBlockState(new BlockPos(this.x, this.y - 0.2 - (double)this.yRotO, this.z));
-			if (!blockState.isAir() && !this.isSilent()) {
-				SoundType soundType = blockState.getSoundType();
-				this.level
-					.playSound(null, this.x, this.y, this.z, soundType.getStepSound(), this.getSoundSource(), soundType.getVolume() * 0.5F, soundType.getPitch() * 0.75F);
-			}
+			this.playBlockFallSound();
+			return true;
 		}
 	}
 

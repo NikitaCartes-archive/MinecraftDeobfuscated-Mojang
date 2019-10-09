@@ -6,7 +6,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
@@ -132,6 +131,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 	public void close() {
 		this.lightTexture.close();
 		this.mapRenderer.close();
+		this.overlayTexture.close();
 		this.shutdownEffect();
 	}
 
@@ -339,7 +339,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			float g = (float)livingEntity.hurtTime - f;
 			if (livingEntity.getHealth() <= 0.0F) {
 				float h = Math.min((float)livingEntity.deathTime + f, 20.0F);
-				poseStack.mulPose(Vector3f.ZP.rotation(40.0F - 8000.0F / (h + 200.0F), true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F - 8000.0F / (h + 200.0F)));
 			}
 
 			if (g < 0.0F) {
@@ -349,9 +349,9 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			g /= (float)livingEntity.hurtDuration;
 			g = Mth.sin(g * g * g * g * (float) Math.PI);
 			float h = livingEntity.hurtDir;
-			poseStack.mulPose(Vector3f.YP.rotation(-h, true));
-			poseStack.mulPose(Vector3f.ZP.rotation(-g * 14.0F, true));
-			poseStack.mulPose(Vector3f.YP.rotation(h, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(-g * 14.0F));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
 		}
 	}
 
@@ -362,8 +362,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			float h = -(player.walkDist + g * f);
 			float i = Mth.lerp(f, player.oBob, player.bob);
 			poseStack.translate((double)(Mth.sin(h * (float) Math.PI) * i * 0.5F), (double)(-Math.abs(Mth.cos(h * (float) Math.PI) * i)), 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotation(Mth.sin(h * (float) Math.PI) * i * 3.0F, true));
-			poseStack.mulPose(Vector3f.XP.rotation(Math.abs(Mth.cos(h * (float) Math.PI - 0.2F) * i) * 5.0F, true));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(h * (float) Math.PI) * i * 3.0F));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(Math.abs(Mth.cos(h * (float) Math.PI - 0.2F) * i) * 5.0F));
 		}
 	}
 
@@ -462,6 +462,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 
 				this.minecraft.levelRenderer.doEntityOutline();
 				if (this.postEffect != null && this.effectActive) {
+					RenderSystem.disableBlend();
+					RenderSystem.disableDepthTest();
+					RenderSystem.disableAlphaTest();
+					RenderSystem.disableFog();
+					RenderSystem.enableTexture();
 					RenderSystem.matrixMode(5890);
 					RenderSystem.pushMatrix();
 					RenderSystem.loadIdentity();
@@ -480,7 +485,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			RenderSystem.matrixMode(5888);
 			RenderSystem.loadIdentity();
 			RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
-			Lighting.setupGui();
+			Lighting.setupGui(poseStack.getPose());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
@@ -622,9 +627,10 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
 			h *= h;
 			Vector3f vector3f = new Vector3f(0.0F, 1.0F, 1.0F);
-			poseStack.mulPose(vector3f.rotation(((float)this.tick + f) * (float)i, true));
+			poseStack.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
 			poseStack.scale(1.0F / h, 1.0F, 1.0F);
-			poseStack.mulPose(vector3f.rotation(-((float)this.tick + f) * (float)i, true));
+			float j = -((float)this.tick + f) * (float)i;
+			poseStack.mulPose(vector3f.rotationDegrees(j));
 		}
 
 		camera.setup(
@@ -634,8 +640,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			this.minecraft.options.thirdPersonView == 2,
 			f
 		);
-		poseStack.mulPose(Vector3f.XP.rotation(camera.getXRot(), true));
-		poseStack.mulPose(Vector3f.YP.rotation(camera.getYRot() + 180.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0F));
 		this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture);
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
@@ -683,12 +689,13 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			poseStack.translate((double)((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0F))), (double)((float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0F))), -50.0);
 			float q = 50.0F + 175.0F * Mth.sin(n);
 			poseStack.scale(q, -q, q);
-			poseStack.scale(q, -q, q);
-			poseStack.mulPose(Vector3f.YP.rotation(900.0F * Mth.abs(Mth.sin(n)), true));
-			poseStack.mulPose(Vector3f.XP.rotation(6.0F * Mth.cos(g * 8.0F), true));
-			poseStack.mulPose(Vector3f.ZP.rotation(6.0F * Mth.cos(g * 8.0F), true));
-			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, poseStack, bufferSource);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(n))));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
+			MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
+			this.minecraft
+				.getItemRenderer()
+				.renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource);
 			poseStack.popPose();
 			bufferSource.endBatch();
 			RenderSystem.popAttributes();

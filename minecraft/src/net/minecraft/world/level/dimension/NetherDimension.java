@@ -16,6 +16,8 @@ import net.minecraft.world.level.levelgen.NetherGeneratorSettings;
 import net.minecraft.world.phys.Vec3;
 
 public class NetherDimension extends Dimension {
+	private static final Vec3 NETHER_FOG_COLOR = new Vec3(0.2F, 0.03F, 0.03F);
+
 	public NetherDimension(Level level, DimensionType dimensionType) {
 		super(level, dimensionType);
 		this.ultraWarm = true;
@@ -25,7 +27,7 @@ public class NetherDimension extends Dimension {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public Vec3 getFogColor(float f, float g) {
-		return new Vec3(0.2F, 0.03F, 0.03F);
+		return NETHER_FOG_COLOR;
 	}
 
 	@Override

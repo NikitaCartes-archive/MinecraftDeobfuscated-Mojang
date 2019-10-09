@@ -10,6 +10,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class OreFeature extends Feature<OreConfiguration> {
 	public OreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function) {

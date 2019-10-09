@@ -30,74 +30,73 @@ import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.LakeConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.feature.PillagerOutpostConfiguration;
-import net.minecraft.world.level.levelgen.feature.ShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.feature.VillageConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
-import net.minecraft.world.level.levelgen.placement.LakeChanceDecoratorConfig;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final ConfiguredFeature<?> MINESHAFT_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL), FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> VILLAGE_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.VILLAGE, new VillageConfiguration("village/plains/town_centers", 6), FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> STRONGHOLD_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.STRONGHOLD, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> SWAMPHUT_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.SWAMP_HUT, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> DESERT_PYRAMID_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.DESERT_PYRAMID, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> JUNGLE_PYRAMID_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.JUNGLE_TEMPLE, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> IGLOO_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.IGLOO, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> SHIPWRECK_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.SHIPWRECK, new ShipwreckConfiguration(false), FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> OCEAN_MONUMENT_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.OCEAN_MONUMENT, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> WATER_LAKE_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.LAKE, new LakeConfiguration(Blocks.WATER.defaultBlockState()), FeatureDecorator.WATER_LAKE, new LakeChanceDecoratorConfig(4)
-	);
-	private static final ConfiguredFeature<?> LAVA_LAKE_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.LAKE, new LakeConfiguration(Blocks.LAVA.defaultBlockState()), FeatureDecorator.LAVA_LAKE, new LakeChanceDecoratorConfig(80)
-	);
-	private static final ConfiguredFeature<?> ENDCITY_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.END_CITY, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> WOOLAND_MANSION_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.WOODLAND_MANSION, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> FORTRESS_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.NETHER_BRIDGE, FeatureConfiguration.NONE, FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> OCEAN_RUIN_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.OCEAN_RUIN, new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.1F), FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	private static final ConfiguredFeature<?> PILLAGER_OUTPOST_COMPOSITE_FEATURE = Biome.makeComposite(
-		Feature.PILLAGER_OUTPOST, new PillagerOutpostConfiguration(0.004), FeatureDecorator.NOPE, DecoratorConfiguration.NONE
-	);
-	public static final Map<ConfiguredFeature<?>, GenerationStep.Decoration> STRUCTURE_FEATURES_STEP = Util.make(
-		Maps.<ConfiguredFeature<?>, GenerationStep.Decoration>newHashMap(), hashMap -> {
+	private static final ConfiguredFeature<?, ?> MINESHAFT_COMPOSITE_FEATURE = Feature.MINESHAFT
+		.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL))
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> VILLAGE_COMPOSITE_FEATURE = Feature.VILLAGE
+		.configured(new VillageConfiguration("village/plains/town_centers", 6))
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> STRONGHOLD_COMPOSITE_FEATURE = Feature.STRONGHOLD
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> SWAMPHUT_COMPOSITE_FEATURE = Feature.SWAMP_HUT
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> DESERT_PYRAMID_COMPOSITE_FEATURE = Feature.DESERT_PYRAMID
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> JUNGLE_PYRAMID_COMPOSITE_FEATURE = Feature.JUNGLE_TEMPLE
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> IGLOO_COMPOSITE_FEATURE = Feature.IGLOO
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> SHIPWRECK_COMPOSITE_FEATURE = Feature.SHIPWRECK
+		.configured(new ShipwreckConfiguration(false))
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> OCEAN_MONUMENT_COMPOSITE_FEATURE = Feature.OCEAN_MONUMENT
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> WATER_LAKE_COMPOSITE_FEATURE = Feature.LAKE
+		.configured(new BlockStateConfiguration(Blocks.WATER.defaultBlockState()))
+		.decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)));
+	private static final ConfiguredFeature<?, ?> LAVA_LAKE_COMPOSITE_FEATURE = Feature.LAKE
+		.configured(new BlockStateConfiguration(Blocks.LAVA.defaultBlockState()))
+		.decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)));
+	private static final ConfiguredFeature<?, ?> ENDCITY_COMPOSITE_FEATURE = Feature.END_CITY
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> WOOLAND_MANSION_COMPOSITE_FEATURE = Feature.WOODLAND_MANSION
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> FORTRESS_COMPOSITE_FEATURE = Feature.NETHER_BRIDGE
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> OCEAN_RUIN_COMPOSITE_FEATURE = Feature.OCEAN_RUIN
+		.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.1F))
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> PILLAGER_OUTPOST_COMPOSITE_FEATURE = Feature.PILLAGER_OUTPOST
+		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	public static final Map<ConfiguredFeature<?, ?>, GenerationStep.Decoration> STRUCTURE_FEATURES_STEP = Util.make(
+		Maps.<ConfiguredFeature<?, ?>, GenerationStep.Decoration>newHashMap(), hashMap -> {
 			hashMap.put(MINESHAFT_COMPOSITE_FEATURE, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
 			hashMap.put(VILLAGE_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(STRONGHOLD_COMPOSITE_FEATURE, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
@@ -116,8 +115,8 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 			hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 		}
 	);
-	public static final Map<String, ConfiguredFeature<?>[]> STRUCTURE_FEATURES = Util.make(
-		Maps.<String, ConfiguredFeature<?>[]>newHashMap(),
+	public static final Map<String, ConfiguredFeature<?, ?>[]> STRUCTURE_FEATURES = Util.make(
+		Maps.<String, ConfiguredFeature<?, ?>[]>newHashMap(),
 		hashMap -> {
 			hashMap.put("mineshaft", new ConfiguredFeature[]{MINESHAFT_COMPOSITE_FEATURE});
 			hashMap.put("village", new ConfiguredFeature[]{VILLAGE_COMPOSITE_FEATURE});
@@ -142,8 +141,8 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 			hashMap.put("pillager_outpost", new ConfiguredFeature[]{PILLAGER_OUTPOST_COMPOSITE_FEATURE});
 		}
 	);
-	public static final Map<ConfiguredFeature<?>, FeatureConfiguration> STRUCTURE_FEATURES_DEFAULT = Util.make(
-		Maps.<ConfiguredFeature<?>, FeatureConfiguration>newHashMap(), hashMap -> {
+	public static final Map<ConfiguredFeature<?, ?>, FeatureConfiguration> STRUCTURE_FEATURES_DEFAULT = Util.make(
+		Maps.<ConfiguredFeature<?, ?>, FeatureConfiguration>newHashMap(), hashMap -> {
 			hashMap.put(MINESHAFT_COMPOSITE_FEATURE, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
 			hashMap.put(VILLAGE_COMPOSITE_FEATURE, new VillageConfiguration("village/plains/town_centers", 6));
 			hashMap.put(STRONGHOLD_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
@@ -157,7 +156,7 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 			hashMap.put(ENDCITY_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
 			hashMap.put(WOOLAND_MANSION_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
 			hashMap.put(FORTRESS_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
-			hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, new PillagerOutpostConfiguration(0.004));
+			hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
 		}
 	);
 	private final List<FlatLayerInfo> layersInfo = Lists.<FlatLayerInfo>newArrayList();

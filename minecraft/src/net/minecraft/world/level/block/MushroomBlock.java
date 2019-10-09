@@ -6,11 +6,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.HugeMushroomFeatureConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -73,21 +75,19 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
 
 	public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
 		serverLevel.removeBlock(blockPos, false);
-		Feature<HugeMushroomFeatureConfig> feature = null;
+		ConfiguredFeature<HugeMushroomFeatureConfiguration, ?> configuredFeature;
 		if (this == Blocks.BROWN_MUSHROOM) {
-			feature = Feature.HUGE_BROWN_MUSHROOM;
-		} else if (this == Blocks.RED_MUSHROOM) {
-			feature = Feature.HUGE_RED_MUSHROOM;
+			configuredFeature = Feature.HUGE_BROWN_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_BROWN_MUSHROOM_CONFIG);
+		} else {
+			if (this != Blocks.RED_MUSHROOM) {
+				serverLevel.setBlock(blockPos, blockState, 3);
+				return false;
+			}
+
+			configuredFeature = Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG);
 		}
 
-		if (feature != null
-			&& feature.place(
-				serverLevel,
-				(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
-				random,
-				blockPos,
-				new HugeMushroomFeatureConfig(true)
-			)) {
+		if (configuredFeature.place(serverLevel, (ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
 			return true;
 		} else {
 			serverLevel.setBlock(blockPos, blockState, 3);

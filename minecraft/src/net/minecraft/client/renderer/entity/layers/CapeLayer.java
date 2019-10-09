@@ -45,11 +45,11 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 				poseStack.pushPose();
 				poseStack.translate(0.0, 0.0, 0.125);
 				double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak)
-					- Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.x);
+					- Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.getX());
 				double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak)
-					- Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.y);
+					- Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.getY());
 				double n = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak)
-					- Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.z);
+					- Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.getZ());
 				float o = abstractClientPlayer.yBodyRotO + (abstractClientPlayer.yBodyRot - abstractClientPlayer.yBodyRotO);
 				double p = (double)Mth.sin(o * (float) (Math.PI / 180.0));
 				double q = (double)(-Mth.cos(o * (float) (Math.PI / 180.0)));
@@ -69,13 +69,11 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 					r += 25.0F;
 				}
 
-				poseStack.mulPose(Vector3f.XP.rotation(6.0F + s / 2.0F + r, true));
-				poseStack.mulPose(Vector3f.ZP.rotation(t / 2.0F, true));
-				poseStack.mulPose(Vector3f.YP.rotation(180.0F - t / 2.0F, true));
-				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getCloakTextureLocation()));
-				OverlayTexture.setDefault(vertexConsumer);
-				this.getParentModel().renderCloak(poseStack, vertexConsumer, 0.0625F, i);
-				vertexConsumer.unsetDefaultOverlayCoords();
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0F + s / 2.0F + r));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(t / 2.0F));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - t / 2.0F));
+				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getCloakTextureLocation()));
+				this.getParentModel().renderCloak(poseStack, vertexConsumer, 0.0625F, i, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}
 		}

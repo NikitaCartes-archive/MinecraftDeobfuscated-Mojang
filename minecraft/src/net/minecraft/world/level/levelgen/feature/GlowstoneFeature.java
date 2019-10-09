@@ -9,6 +9,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class GlowstoneFeature extends Feature<NoneFeatureConfiguration> {
 	public GlowstoneFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {

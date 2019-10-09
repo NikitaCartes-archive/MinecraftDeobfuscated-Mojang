@@ -21,9 +21,9 @@ public class GuardianAttackSoundInstance extends AbstractTickableSoundInstance {
 	@Override
 	public void tick() {
 		if (!this.guardian.removed && this.guardian.getTarget() == null) {
-			this.x = (float)this.guardian.x;
-			this.y = (float)this.guardian.y;
-			this.z = (float)this.guardian.z;
+			this.x = (float)this.guardian.getX();
+			this.y = (float)this.guardian.getY();
+			this.z = (float)this.guardian.getZ();
 			float f = this.guardian.getAttackAnimationScale(0.0F);
 			this.volume = 0.0F + 1.0F * f * f;
 			this.pitch = 0.7F + 0.5F * f;

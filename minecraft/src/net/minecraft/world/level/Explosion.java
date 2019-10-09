@@ -169,9 +169,9 @@ public class Explosion {
 			if (!entity.ignoreExplosion()) {
 				double x = (double)(Mth.sqrt(entity.distanceToSqr(new Vec3(this.x, this.y, this.z))) / r);
 				if (x <= 1.0) {
-					double y = entity.x - this.x;
-					double z = entity.y + (double)entity.getEyeHeight() - this.y;
-					double aa = entity.z - this.z;
+					double y = entity.getX() - this.x;
+					double z = entity.getEyeY() - this.y;
+					double aa = entity.getZ() - this.z;
 					double ab = (double)Mth.sqrt(y * y + z * z + aa * aa);
 					if (ab != 0.0) {
 						y /= ab;

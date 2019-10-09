@@ -35,33 +35,36 @@ public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> e
 		float k = (float)(Math.atan2((double)f, (double)h) * 180.0F / (float)Math.PI);
 		float l = (float)(Math.atan2((double)g, (double)j) * 180.0F / (float)Math.PI);
 		poseStack.translate(0.0, 0.0, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotation(k - 90.0F, true));
-		poseStack.mulPose(Vector3f.ZP.rotation(l, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(k - 90.0F));
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(l));
 		float m = 0.0F;
 		float n = 0.125F;
 		float o = 0.0F;
 		float p = 0.0625F;
 		float q = 0.03125F;
-		poseStack.mulPose(Vector3f.XP.rotation(45.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0F));
 		poseStack.scale(0.03125F, 0.03125F, 0.03125F);
 		poseStack.translate(2.5, 0.0, 0.0);
 		int r = entity.getLightColor();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(BEE_STINGER_LOCATION));
-		OverlayTexture.setDefault(vertexConsumer);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(BEE_STINGER_LOCATION));
 
 		for (int s = 0; s < 4; s++) {
-			poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 			Matrix4f matrix4f = poseStack.getPose();
 			vertex(vertexConsumer, matrix4f, -4.5F, -1, 0.0F, 0.0F, r);
 			vertex(vertexConsumer, matrix4f, 4.5F, -1, 0.125F, 0.0F, r);
 			vertex(vertexConsumer, matrix4f, 4.5F, 1, 0.125F, 0.0625F, r);
 			vertex(vertexConsumer, matrix4f, -4.5F, 1, 0.0F, 0.0625F, r);
 		}
-
-		vertexConsumer.unsetDefaultOverlayCoords();
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, int i, float g, float h, int j) {
-		vertexConsumer.vertex(matrix4f, f, (float)i, 0.0F).color(255, 255, 255, 255).uv(g, h).uv2(j).normal(0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, f, (float)i, 0.0F)
+			.color(255, 255, 255, 255)
+			.uv(g, h)
+			.overlayCoords(OverlayTexture.NO_OVERLAY)
+			.uv2(j)
+			.normal(0.0F, 1.0F, 0.0F)
+			.endVertex();
 	}
 }

@@ -38,18 +38,18 @@ public class WaterAvoidingRandomFlyingGoal extends WaterAvoidingRandomStrollGoal
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(
-			Mth.floor(this.mob.x - 3.0),
-			Mth.floor(this.mob.y - 6.0),
-			Mth.floor(this.mob.z - 3.0),
-			Mth.floor(this.mob.x + 3.0),
-			Mth.floor(this.mob.y + 6.0),
-			Mth.floor(this.mob.z + 3.0)
+			Mth.floor(this.mob.getX() - 3.0),
+			Mth.floor(this.mob.getY() - 6.0),
+			Mth.floor(this.mob.getZ() - 3.0),
+			Mth.floor(this.mob.getX() + 3.0),
+			Mth.floor(this.mob.getY() + 6.0),
+			Mth.floor(this.mob.getZ() + 3.0)
 		)) {
 			if (!blockPos.equals(blockPos2)) {
 				Block block = this.mob.level.getBlockState(mutableBlockPos2.set(blockPos2).move(Direction.DOWN)).getBlock();
 				boolean bl = block instanceof LeavesBlock || block.is(BlockTags.LOGS);
 				if (bl && this.mob.level.isEmptyBlock(blockPos2) && this.mob.level.isEmptyBlock(mutableBlockPos.set(blockPos2).move(Direction.UP))) {
-					return new Vec3((double)blockPos2.getX(), (double)blockPos2.getY(), (double)blockPos2.getZ());
+					return new Vec3(blockPos2);
 				}
 			}
 		}

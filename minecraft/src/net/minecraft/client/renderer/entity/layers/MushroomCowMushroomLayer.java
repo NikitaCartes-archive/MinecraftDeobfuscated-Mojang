@@ -8,8 +8,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.CowModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -28,26 +28,26 @@ public class MushroomCowMushroomLayer<T extends MushroomCow> extends RenderLayer
 			poseStack.pushPose();
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.translate(-0.2F, 0.35F, 0.5);
-			poseStack.mulPose(Vector3f.YP.rotation(-42.0F, true));
-			int n = OverlayTexture.v(mushroomCow.hurtTime > 0 || mushroomCow.deathTime > 0);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-42.0F));
+			int n = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0F);
 			poseStack.pushPose();
 			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
 			poseStack.popPose();
 			poseStack.pushPose();
 			poseStack.translate(-0.1F, 0.0, -0.6F);
-			poseStack.mulPose(Vector3f.YP.rotation(-42.0F, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-42.0F));
 			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
 			poseStack.popPose();
 			poseStack.popPose();
 			poseStack.pushPose();
 			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
 			poseStack.translate(0.0, 0.7F, -0.2F);
-			poseStack.mulPose(Vector3f.YP.rotation(-12.0F, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-12.0F));
 			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, n);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
 			poseStack.popPose();
 		}
 	}

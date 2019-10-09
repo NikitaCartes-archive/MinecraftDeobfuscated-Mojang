@@ -149,14 +149,16 @@ public final class Vector3f {
 
 	@Environment(EnvType.CLIENT)
 	public void transform(Matrix3f matrix3f) {
-		float[] fs = Arrays.copyOf(this.values, 3);
+		float f = this.values[0];
+		float g = this.values[1];
+		float h = this.values[2];
 
 		for (int i = 0; i < 3; i++) {
-			this.values[i] = 0.0F;
-
-			for (int j = 0; j < 3; j++) {
-				this.values[i] = this.values[i] + matrix3f.get(i, j) * fs[j];
-			}
+			float j = 0.0F;
+			j += matrix3f.get(i, 0) * f;
+			j += matrix3f.get(i, 1) * g;
+			j += matrix3f.get(i, 2) * h;
+			this.values[i] = j;
 		}
 	}
 
@@ -170,7 +172,12 @@ public final class Vector3f {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Quaternion rotation(float f, boolean bl) {
-		return new Quaternion(this, f, bl);
+	public Quaternion rotation(float f) {
+		return new Quaternion(this, f, false);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Quaternion rotationDegrees(float f) {
+		return new Quaternion(this, f, true);
 	}
 }

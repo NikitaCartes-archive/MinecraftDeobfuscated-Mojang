@@ -152,7 +152,9 @@ public class MerchantMenu extends AbstractContainerMenu {
 	private void playTradeSound() {
 		if (!this.trader.getLevel().isClientSide) {
 			Entity entity = (Entity)this.trader;
-			this.trader.getLevel().playLocalSound(entity.x, entity.y, entity.z, this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0F, 1.0F, false);
+			this.trader
+				.getLevel()
+				.playLocalSound(entity.getX(), entity.getY(), entity.getZ(), this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0F, 1.0F, false);
 		}
 	}
 

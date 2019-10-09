@@ -56,8 +56,8 @@ public class BehaviorUtils {
 	}
 
 	public static void throwItem(LivingEntity livingEntity, ItemStack itemStack, LivingEntity livingEntity2) {
-		double d = livingEntity.y - 0.3F + (double)livingEntity.getEyeHeight();
-		ItemEntity itemEntity = new ItemEntity(livingEntity.level, livingEntity.x, d, livingEntity.z, itemStack);
+		double d = livingEntity.getEyeY() - 0.3F;
+		ItemEntity itemEntity = new ItemEntity(livingEntity.level, livingEntity.getX(), d, livingEntity.getZ(), itemStack);
 		BlockPos blockPos = new BlockPos(livingEntity2);
 		BlockPos blockPos2 = new BlockPos(livingEntity);
 		float f = 0.3F;

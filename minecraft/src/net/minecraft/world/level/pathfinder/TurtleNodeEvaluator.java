@@ -227,10 +227,10 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 
 	@Override
 	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-		BlockPathTypes blockPathTypes = this.getBlockPathTypeRaw(blockGetter, i, j, k);
+		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, i, j, k);
 		if (blockPathTypes == BlockPathTypes.WATER) {
 			for (Direction direction : Direction.values()) {
-				BlockPathTypes blockPathTypes2 = this.getBlockPathTypeRaw(blockGetter, i + direction.getStepX(), j + direction.getStepY(), k + direction.getStepZ());
+				BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, i + direction.getStepX(), j + direction.getStepY(), k + direction.getStepZ());
 				if (blockPathTypes2 == BlockPathTypes.BLOCKED) {
 					return BlockPathTypes.WATER_BORDER;
 				}
@@ -240,7 +240,7 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 		} else {
 			if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
 				Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-				BlockPathTypes blockPathTypes3 = this.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+				BlockPathTypes blockPathTypes3 = getBlockPathTypeRaw(blockGetter, i, j - 1, k);
 				if (blockPathTypes3 != BlockPathTypes.WALKABLE && blockPathTypes3 != BlockPathTypes.OPEN && blockPathTypes3 != BlockPathTypes.LAVA) {
 					blockPathTypes = BlockPathTypes.WALKABLE;
 				} else {
@@ -260,7 +260,7 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 				}
 			}
 
-			return this.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+			return checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
 		}
 	}
 }

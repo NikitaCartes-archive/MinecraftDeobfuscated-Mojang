@@ -56,7 +56,7 @@ public class StrollThroughVillageGoal extends Goal {
 			PathNavigation pathNavigation = this.mob.getNavigation();
 			if (pathNavigation.isDone() && !this.wantedPos.closerThan(this.mob.position(), 10.0)) {
 				Vec3 vec3 = new Vec3(this.wantedPos);
-				Vec3 vec32 = new Vec3(this.mob.x, this.mob.y, this.mob.z);
+				Vec3 vec32 = this.mob.position();
 				Vec3 vec33 = vec32.subtract(vec3);
 				vec3 = vec33.scale(0.4).add(vec3);
 				Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);

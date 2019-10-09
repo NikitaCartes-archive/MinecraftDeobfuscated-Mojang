@@ -2,9 +2,12 @@ package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -26,16 +29,12 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	public float swimAmount;
 	private float itemUseTicks;
 
-	public HumanoidModel() {
-		this(0.0F);
-	}
-
 	public HumanoidModel(float f) {
-		this(f, 0.0F, 64, 32);
+		this(RenderType::entitySolid, f, 0.0F, 64, 32);
 	}
 
-	public HumanoidModel(float f, float g, int i, int j) {
-		super(true, 16.0F, 0.0F);
+	public HumanoidModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {
+		super(function, true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
 		this.texWidth = i;
 		this.texHeight = j;
 		this.head = new ModelPart(this, 0, 0);

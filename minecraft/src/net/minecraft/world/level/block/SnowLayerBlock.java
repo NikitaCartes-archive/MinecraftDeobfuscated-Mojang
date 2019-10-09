@@ -72,8 +72,7 @@ public class SnowLayerBlock extends Block {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
 		Block block = blockState2.getBlock();
 		return block != Blocks.ICE && block != Blocks.PACKED_ICE && block != Blocks.BARRIER
-			? Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP)
-				|| block == this && (Integer)blockState2.getValue(LAYERS) == 8
+			? Block.isFaceFull(blockState2.getShape(levelReader, blockPos.below()), Direction.UP) || block == this && (Integer)blockState2.getValue(LAYERS) == 8
 			: false;
 	}
 

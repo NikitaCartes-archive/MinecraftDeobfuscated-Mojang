@@ -257,8 +257,8 @@ public class WorldGenRegion implements LevelAccessor {
 
 	@Override
 	public boolean addFreshEntity(Entity entity) {
-		int i = Mth.floor(entity.x / 16.0);
-		int j = Mth.floor(entity.z / 16.0);
+		int i = Mth.floor(entity.getX() / 16.0);
+		int j = Mth.floor(entity.getZ() / 16.0);
 		this.getChunk(i, j).addEntity(entity);
 		return true;
 	}

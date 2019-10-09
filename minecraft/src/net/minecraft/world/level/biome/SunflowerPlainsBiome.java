@@ -2,16 +2,14 @@ package net.minecraft.world.level.biome;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DoublePlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.placement.DecoratorChance;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class SunflowerPlainsBiome extends Biome {
@@ -29,8 +27,8 @@ public final class SunflowerPlainsBiome extends Biome {
 				.waterFogColor(329011)
 				.parent("plains")
 		);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
 		BiomeDefaultFeatures.addDefaultCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
@@ -38,9 +36,9 @@ public final class SunflowerPlainsBiome extends Biome {
 		BiomeDefaultFeatures.addPlainGrass(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.DOUBLE_PLANT, new DoublePlantConfiguration(Blocks.SUNFLOWER.defaultBlockState()), FeatureDecorator.COUNT_HEIGHTMAP_32, new DecoratorFrequency(10)
-			)
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.SUNFLOWER_CONFIG)
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(10)))
 		);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
 		BiomeDefaultFeatures.addDefaultOres(this);
@@ -48,12 +46,16 @@ public final class SunflowerPlainsBiome extends Biome {
 		BiomeDefaultFeatures.addPlainVegetation(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(Feature.REED, FeatureConfiguration.NONE, FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE, new DecoratorFrequency(10))
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.SUGAR_CANE_CONFIG)
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE.configured(new FrequencyDecoratorConfiguration(10)))
 		);
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(Feature.PUMPKIN, FeatureConfiguration.NONE, FeatureDecorator.CHANCE_HEIGHTMAP_DOUBLE, new DecoratorChance(32))
+			Feature.RANDOM_PATCH
+				.configured(BiomeDefaultFeatures.PUMPKIN_CONFIG)
+				.decorated(FeatureDecorator.CHANCE_HEIGHTMAP_DOUBLE.configured(new ChanceDecoratorConfiguration(32)))
 		);
 		BiomeDefaultFeatures.addDefaultSprings(this);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);

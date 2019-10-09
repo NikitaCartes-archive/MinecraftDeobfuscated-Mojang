@@ -19,6 +19,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -29,7 +30,12 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public StructureFeature(Function<Dynamic<?>, ? extends C> function) {
-		super(function, false);
+		super(function);
+	}
+
+	@Override
+	public ConfiguredFeature<C, ? extends StructureFeature<C>> configured(C featureConfiguration) {
+		return new ConfiguredFeature<>(this, featureConfiguration);
 	}
 
 	@Override

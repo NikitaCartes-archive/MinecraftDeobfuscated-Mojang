@@ -817,6 +817,8 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.DIORITE_WALL);
 		this.dropSelf(Blocks.LOOM);
 		this.dropSelf(Blocks.SCAFFOLDING);
+		this.dropSelf(Blocks.HONEY_BLOCK);
+		this.dropSelf(Blocks.HONEYCOMB_BLOCK);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
@@ -1076,7 +1078,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 					)
 		);
 		this.add(Blocks.BEE_NEST, BlockLoot::createBeeNestDrop);
-		this.add(Blocks.BEE_HIVE, BlockLoot::createBeeHiveDrop);
+		this.add(Blocks.BEEHIVE, BlockLoot::createBeeHiveDrop);
 		this.add(Blocks.BIRCH_LEAVES, blockx -> createLeavesDrops(blockx, Blocks.BIRCH_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
 		this.add(Blocks.ACACIA_LEAVES, blockx -> createLeavesDrops(blockx, Blocks.ACACIA_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
 		this.add(Blocks.JUNGLE_LEAVES, blockx -> createLeavesDrops(blockx, Blocks.JUNGLE_SAPLING, JUNGLE_LEAVES_SAPLING_CHANGES));

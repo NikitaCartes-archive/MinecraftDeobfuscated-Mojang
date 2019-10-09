@@ -102,9 +102,9 @@ public class Blaze extends Monster {
 			if (this.random.nextInt(24) == 0 && !this.isSilent()) {
 				this.level
 					.playLocalSound(
-						this.x + 0.5,
-						this.y + 0.5,
-						this.z + 0.5,
+						this.getX() + 0.5,
+						this.getY() + 0.5,
+						this.getZ() + 0.5,
 						SoundEvents.BLAZE_BURN,
 						this.getSoundSource(),
 						1.0F + this.random.nextFloat(),
@@ -114,16 +114,7 @@ public class Blaze extends Monster {
 			}
 
 			for (int i = 0; i < 2; i++) {
-				this.level
-					.addParticle(
-						ParticleTypes.LARGE_SMOKE,
-						this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-						this.y + this.random.nextDouble() * (double)this.getBbHeight(),
-						this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-						0.0,
-						0.0,
-						0.0
-					);
+				this.level.addParticle(ParticleTypes.LARGE_SMOKE, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0);
 			}
 		}
 
@@ -143,9 +134,7 @@ public class Blaze extends Monster {
 		}
 
 		LivingEntity livingEntity = this.getTarget();
-		if (livingEntity != null
-			&& livingEntity.y + (double)livingEntity.getEyeHeight() > this.y + (double)this.getEyeHeight() + (double)this.allowedHeightOffset
-			&& this.canAttack(livingEntity)) {
+		if (livingEntity != null && livingEntity.getEyeY() > this.getEyeY() + (double)this.allowedHeightOffset && this.canAttack(livingEntity)) {
 			Vec3 vec3 = this.getDeltaMovement();
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, (0.3F - vec3.y) * 0.3F, 0.0));
 			this.hasImpulse = true;
@@ -155,7 +144,8 @@ public class Blaze extends Monster {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g) {
+		return false;
 	}
 
 	@Override
@@ -229,11 +219,11 @@ public class Blaze extends Monster {
 						this.blaze.doHurtTarget(livingEntity);
 					}
 
-					this.blaze.getMoveControl().setWantedPosition(livingEntity.x, livingEntity.y, livingEntity.z, 1.0);
+					this.blaze.getMoveControl().setWantedPosition(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
 				} else if (d < this.getFollowDistance() * this.getFollowDistance() && bl) {
-					double e = livingEntity.x - this.blaze.x;
-					double f = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 2.0F) - (this.blaze.y + (double)(this.blaze.getBbHeight() / 2.0F));
-					double g = livingEntity.z - this.blaze.z;
+					double e = livingEntity.getX() - this.blaze.getX();
+					double f = livingEntity.getY(0.5) - this.blaze.getY(0.5);
+					double g = livingEntity.getZ() - this.blaze.getZ();
 					if (this.attackTime <= 0) {
 						this.attackStep++;
 						if (this.attackStep == 1) {
@@ -255,7 +245,7 @@ public class Blaze extends Monster {
 								SmallFireball smallFireball = new SmallFireball(
 									this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * (double)h, f, g + this.blaze.getRandom().nextGaussian() * (double)h
 								);
-								smallFireball.y = this.blaze.y + (double)(this.blaze.getBbHeight() / 2.0F) + 0.5;
+								smallFireball.setPos(smallFireball.getX(), this.blaze.getY(0.5) + 0.5, smallFireball.getZ());
 								this.blaze.level.addFreshEntity(smallFireball);
 							}
 						}
@@ -263,7 +253,7 @@ public class Blaze extends Monster {
 
 					this.blaze.getLookControl().setLookAt(livingEntity, 10.0F, 10.0F);
 				} else if (this.lastSeen < 5) {
-					this.blaze.getMoveControl().setWantedPosition(livingEntity.x, livingEntity.y, livingEntity.z, 1.0);
+					this.blaze.getMoveControl().setWantedPosition(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);
 				}
 
 				super.tick();

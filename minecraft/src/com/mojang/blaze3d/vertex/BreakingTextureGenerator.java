@@ -44,8 +44,8 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 		this.g = this.defaultG;
 		this.b = this.defaultB;
 		this.a = this.defaultA;
-		this.overlayU = this.defaultOverlayU;
-		this.overlayV = this.defaultOverlayV;
+		this.overlayU = 0;
+		this.overlayV = 10;
 		this.lightCoords = 15728880;
 		this.nx = 0.0F;
 		this.ny = 1.0F;
@@ -115,13 +115,9 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 
 	@Override
 	public VertexConsumer overlayCoords(int i, int j) {
-		if (this.defaultOverlayCoordsSet) {
-			throw new IllegalStateException();
-		} else {
-			this.overlayU = i;
-			this.overlayV = j;
-			return this;
-		}
+		this.overlayU = i;
+		this.overlayV = j;
+		return this;
 	}
 
 	@Override

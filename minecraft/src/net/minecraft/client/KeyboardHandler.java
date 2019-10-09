@@ -99,9 +99,9 @@ public class KeyboardHandler {
 							Locale.ROOT,
 							"/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f",
 							DimensionType.getName(this.minecraft.player.level.dimension.getType()),
-							this.minecraft.player.x,
-							this.minecraft.player.y,
-							this.minecraft.player.z,
+							this.minecraft.player.getX(),
+							this.minecraft.player.getY(),
+							this.minecraft.player.getZ(),
 							this.minecraft.player.yRot,
 							this.minecraft.player.xRot
 						)
@@ -217,20 +217,19 @@ public class KeyboardHandler {
 				case ENTITY:
 					Entity entity = ((EntityHitResult)hitResult).getEntity();
 					ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(entity.getType());
-					Vec3 vec3 = new Vec3(entity.x, entity.y, entity.z);
 					if (bl) {
 						if (bl2) {
 							this.minecraft.player.connection.getDebugQueryHandler().queryEntityTag(entity.getId(), compoundTagx -> {
-								this.copyCreateEntityCommand(resourceLocation, vec3, compoundTagx);
+								this.copyCreateEntityCommand(resourceLocation, entity.position(), compoundTagx);
 								this.debugFeedbackTranslated("debug.inspect.server.entity");
 							});
 						} else {
-							CompoundTag compoundTag = entity.saveWithoutId(new CompoundTag());
-							this.copyCreateEntityCommand(resourceLocation, vec3, compoundTag);
+							CompoundTag compoundTag2 = entity.saveWithoutId(new CompoundTag());
+							this.copyCreateEntityCommand(resourceLocation, entity.position(), compoundTag2);
 							this.debugFeedbackTranslated("debug.inspect.client.entity");
 						}
 					} else {
-						this.copyCreateEntityCommand(resourceLocation, vec3, null);
+						this.copyCreateEntityCommand(resourceLocation, entity.position(), null);
 						this.debugFeedbackTranslated("debug.inspect.client.entity");
 					}
 			}

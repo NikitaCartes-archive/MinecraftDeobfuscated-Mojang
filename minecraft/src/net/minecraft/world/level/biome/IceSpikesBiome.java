@@ -5,12 +5,12 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.FeatureRadius;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 
@@ -32,19 +32,21 @@ public final class IceSpikesBiome extends Biome {
 				.waterFogColor(329011)
 				.parent("snowy_tundra")
 		);
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
 		BiomeDefaultFeatures.addDefaultCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		this.addFeature(
 			GenerationStep.Decoration.SURFACE_STRUCTURES,
-			makeComposite(Feature.ICE_SPIKE, FeatureConfiguration.NONE, FeatureDecorator.COUNT_HEIGHTMAP, new DecoratorFrequency(3))
+			Feature.ICE_SPIKE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(3)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.SURFACE_STRUCTURES,
-			makeComposite(Feature.ICE_PATCH, new FeatureRadius(2), FeatureDecorator.COUNT_HEIGHTMAP, new DecoratorFrequency(2))
+			Feature.ICE_PATCH
+				.configured(new FeatureRadiusConfiguration(2))
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(2)))
 		);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
 		BiomeDefaultFeatures.addDefaultOres(this);

@@ -6,9 +6,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.SpikeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -29,7 +29,9 @@ public final class TheEndBiome extends Biome {
 		);
 		this.addFeature(
 			GenerationStep.Decoration.SURFACE_STRUCTURES,
-			makeComposite(Feature.END_SPIKE, new SpikeConfiguration(false, ImmutableList.of(), null), FeatureDecorator.NOPE, DecoratorConfiguration.NONE)
+			Feature.END_SPIKE
+				.configured(new SpikeConfiguration(false, ImmutableList.of(), null))
+				.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 		);
 		BiomeDefaultFeatures.addEndCity(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 10, 4, 4));

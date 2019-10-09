@@ -7,9 +7,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 
-public class RandomSelectorFeature extends Feature<RandomFeatureConfig> {
-	public RandomSelectorFeature(Function<Dynamic<?>, ? extends RandomFeatureConfig> function) {
+public class RandomSelectorFeature extends Feature<RandomFeatureConfiguration> {
+	public RandomSelectorFeature(Function<Dynamic<?>, ? extends RandomFeatureConfiguration> function) {
 		super(function);
 	}
 
@@ -18,14 +19,14 @@ public class RandomSelectorFeature extends Feature<RandomFeatureConfig> {
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
-		RandomFeatureConfig randomFeatureConfig
+		RandomFeatureConfiguration randomFeatureConfiguration
 	) {
-		for (WeightedConfiguredFeature<?> weightedConfiguredFeature : randomFeatureConfig.features) {
+		for (WeightedConfiguredFeature<?> weightedConfiguredFeature : randomFeatureConfiguration.features) {
 			if (random.nextFloat() < weightedConfiguredFeature.chance) {
 				return weightedConfiguredFeature.place(levelAccessor, chunkGenerator, random, blockPos);
 			}
 		}
 
-		return randomFeatureConfig.defaultFeature.place(levelAccessor, chunkGenerator, random, blockPos);
+		return randomFeatureConfiguration.defaultFeature.place(levelAccessor, chunkGenerator, random, blockPos);
 	}
 }

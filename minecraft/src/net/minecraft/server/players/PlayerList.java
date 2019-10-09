@@ -124,9 +124,9 @@ public abstract class PlayerList {
 			serverPlayer.getName().getString(),
 			string2,
 			serverPlayer.getId(),
-			serverPlayer.x,
-			serverPlayer.y,
-			serverPlayer.z
+			serverPlayer.getX(),
+			serverPlayer.getY(),
+			serverPlayer.getZ()
 		);
 		LevelData levelData = serverLevel.getLevelData();
 		this.updatePlayerGameMode(serverPlayer, null, serverLevel);
@@ -171,7 +171,7 @@ public abstract class PlayerList {
 		}
 
 		this.broadcastMessage(component.withStyle(ChatFormatting.YELLOW));
-		serverGamePacketListenerImpl.teleport(serverPlayer.x, serverPlayer.y, serverPlayer.z, serverPlayer.yRot, serverPlayer.xRot);
+		serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.yRot, serverPlayer.xRot);
 		this.players.add(serverPlayer);
 		this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
 		this.broadcastAll(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, serverPlayer));
@@ -436,8 +436,8 @@ public abstract class PlayerList {
 			}
 		}
 
-		while (!serverLevel.noCollision(serverPlayer2) && serverPlayer2.y < 256.0) {
-			serverPlayer2.setPos(serverPlayer2.x, serverPlayer2.y + 1.0, serverPlayer2.z);
+		while (!serverLevel.noCollision(serverPlayer2) && serverPlayer2.getY() < 256.0) {
+			serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
 		}
 
 		LevelData levelData = serverPlayer2.level.getLevelData();
@@ -448,7 +448,7 @@ public abstract class PlayerList {
 				)
 			);
 		BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
-		serverPlayer2.connection.teleport(serverPlayer2.x, serverPlayer2.y, serverPlayer2.z, serverPlayer2.yRot, serverPlayer2.xRot);
+		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
 		serverPlayer2.connection.send(new ClientboundSetSpawnPositionPacket(blockPos2));
 		serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverPlayer2.connection
@@ -593,9 +593,9 @@ public abstract class PlayerList {
 		for (int i = 0; i < this.players.size(); i++) {
 			ServerPlayer serverPlayer = (ServerPlayer)this.players.get(i);
 			if (serverPlayer != player && serverPlayer.dimension == dimensionType) {
-				double h = d - serverPlayer.x;
-				double j = e - serverPlayer.y;
-				double k = f - serverPlayer.z;
+				double h = d - serverPlayer.getX();
+				double j = e - serverPlayer.getY();
+				double k = f - serverPlayer.getZ();
 				if (h * h + j * j + k * k < g * g) {
 					serverPlayer.connection.send(packet);
 				}

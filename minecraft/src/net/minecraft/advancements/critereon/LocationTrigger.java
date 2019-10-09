@@ -27,7 +27,8 @@ public class LocationTrigger extends SimpleCriterionTrigger<LocationTrigger.Trig
 
 	public void trigger(ServerPlayer serverPlayer) {
 		this.trigger(
-			serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), serverPlayer.x, serverPlayer.y, serverPlayer.z)
+			serverPlayer.getAdvancements(),
+			triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())
 		);
 	}
 

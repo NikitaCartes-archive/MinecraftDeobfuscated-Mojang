@@ -15,21 +15,8 @@ public class RealmsVertexFormat {
 		this.v = vertexFormat;
 	}
 
-	public RealmsVertexFormat from(VertexFormat vertexFormat) {
-		this.v = vertexFormat;
-		return this;
-	}
-
 	public VertexFormat getVertexFormat() {
 		return this.v;
-	}
-
-	public void clear() {
-		this.v.clear();
-	}
-
-	public RealmsVertexFormat addElement(RealmsVertexFormatElement realmsVertexFormatElement) {
-		return this.from(this.v.addElement(realmsVertexFormatElement.getVertexFormatElement()));
 	}
 
 	public List<RealmsVertexFormatElement> getElements() {

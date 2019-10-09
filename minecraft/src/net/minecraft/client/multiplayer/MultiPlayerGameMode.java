@@ -329,7 +329,7 @@ public class MultiPlayerGameMode {
 
 	public InteractionResult interactAt(Player player, Entity entity, EntityHitResult entityHitResult, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
-		Vec3 vec3 = entityHitResult.getLocation().subtract(entity.x, entity.y, entity.z);
+		Vec3 vec3 = entityHitResult.getLocation().subtract(entity.getX(), entity.getY(), entity.getZ());
 		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3));
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
 	}

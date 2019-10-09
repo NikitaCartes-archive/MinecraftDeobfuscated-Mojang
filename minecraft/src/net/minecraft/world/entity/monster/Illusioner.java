@@ -51,8 +51,8 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 		this.clientSideIllusionOffsets = new Vec3[2][4];
 
 		for (int i = 0; i < 4; i++) {
-			this.clientSideIllusionOffsets[0][i] = new Vec3(0.0, 0.0, 0.0);
-			this.clientSideIllusionOffsets[1][i] = new Vec3(0.0, 0.0, 0.0);
+			this.clientSideIllusionOffsets[0][i] = Vec3.ZERO;
+			this.clientSideIllusionOffsets[1][i] = Vec3.ZERO;
 		}
 	}
 
@@ -128,19 +128,10 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 				}
 
 				for (int j = 0; j < 16; j++) {
-					this.level
-						.addParticle(
-							ParticleTypes.CLOUD,
-							this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-							this.y + this.random.nextDouble() * (double)this.getBbHeight(),
-							this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-							0.0,
-							0.0,
-							0.0
-						);
+					this.level.addParticle(ParticleTypes.CLOUD, this.getRandomX(0.5), this.getRandomY(), this.getZ(0.5), 0.0, 0.0, 0.0);
 				}
 
-				this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
+				this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0F, 1.0F, false);
 			} else if (this.hurtTime == this.hurtDuration - 1) {
 				this.clientSideIllusionTicks = 3;
 
@@ -211,9 +202,9 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
 		AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(this, itemStack, f);
-		double d = livingEntity.x - this.x;
-		double e = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0F) - abstractArrow.y;
-		double g = livingEntity.z - this.z;
+		double d = livingEntity.getX() - this.getX();
+		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
+		double g = livingEntity.getZ() - this.getZ();
 		double h = (double)Mth.sqrt(d * d + g * g);
 		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
 		this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));

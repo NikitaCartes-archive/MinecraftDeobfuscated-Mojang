@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -27,26 +28,28 @@ public class BellRenderer extends BlockEntityRenderer<BellBlockEntity> {
 		this.bellBody.addChild(modelPart);
 	}
 
-	public void render(BellBlockEntity bellBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public void render(
+		BellBlockEntity bellBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
+	) {
 		float h = (float)bellBlockEntity.ticks + g;
-		float j = 0.0F;
 		float k = 0.0F;
+		float l = 0.0F;
 		if (bellBlockEntity.shaking) {
-			float l = Mth.sin(h / (float) Math.PI) / (4.0F + h / 3.0F);
+			float m = Mth.sin(h / (float) Math.PI) / (4.0F + h / 3.0F);
 			if (bellBlockEntity.clickDirection == Direction.NORTH) {
-				j = -l;
+				k = -m;
 			} else if (bellBlockEntity.clickDirection == Direction.SOUTH) {
-				j = l;
+				k = m;
 			} else if (bellBlockEntity.clickDirection == Direction.EAST) {
-				k = -l;
+				l = -m;
 			} else if (bellBlockEntity.clickDirection == Direction.WEST) {
-				k = l;
+				l = m;
 			}
 		}
 
-		this.bellBody.xRot = j;
-		this.bellBody.zRot = k;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
-		this.bellBody.render(poseStack, vertexConsumer, 0.0625F, i, this.getSprite(BELL_RESOURCE_LOCATION));
+		this.bellBody.xRot = k;
+		this.bellBody.zRot = l;
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+		this.bellBody.render(poseStack, vertexConsumer, 0.0625F, i, j, this.getSprite(BELL_RESOURCE_LOCATION));
 	}
 }

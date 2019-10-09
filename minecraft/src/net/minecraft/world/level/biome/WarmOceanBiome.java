@@ -1,20 +1,21 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.CountFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.feature.ShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.feature.SimpleRandomFeatureConfig;
-import net.minecraft.world.level.levelgen.placement.DecoratorChance;
-import net.minecraft.world.level.levelgen.placement.DecoratorNoiseCountFactor;
+import net.minecraft.world.level.levelgen.feature.configurations.CountFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.NoiseCountFactorDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -33,9 +34,9 @@ public class WarmOceanBiome extends Biome {
 				.waterFogColor(270131)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.OCEAN_RUIN, new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F));
-		this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-		this.addStructureStart(Feature.SHIPWRECK, new ShipwreckConfiguration(false));
+		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F)));
+		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+		this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));
 		BiomeDefaultFeatures.addOceanCarvers(this);
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
@@ -51,20 +52,26 @@ public class WarmOceanBiome extends Biome {
 		BiomeDefaultFeatures.addDefaultSprings(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(
-				Feature.SIMPLE_RANDOM_SELECTOR,
-				new SimpleRandomFeatureConfig(
-					new Feature[]{Feature.CORAL_TREE, Feature.CORAL_CLAW, Feature.CORAL_MUSHROOM},
-					new FeatureConfiguration[]{FeatureConfiguration.NONE, FeatureConfiguration.NONE, FeatureConfiguration.NONE}
-				),
-				FeatureDecorator.TOP_SOLID_HEIGHTMAP_NOISE_BIASED,
-				new DecoratorNoiseCountFactor(20, 400.0, 0.0, Heightmap.Types.OCEAN_FLOOR_WG)
-			)
+			Feature.SIMPLE_RANDOM_SELECTOR
+				.configured(
+					new SimpleRandomFeatureConfiguration(
+						ImmutableList.of(
+							Feature.CORAL_TREE.configured(FeatureConfiguration.NONE),
+							Feature.CORAL_CLAW.configured(FeatureConfiguration.NONE),
+							Feature.CORAL_MUSHROOM.configured(FeatureConfiguration.NONE)
+						)
+					)
+				)
+				.decorated(
+					FeatureDecorator.TOP_SOLID_HEIGHTMAP_NOISE_BIASED.configured(new NoiseCountFactorDecoratorConfiguration(20, 400.0, 0.0, Heightmap.Types.OCEAN_FLOOR_WG))
+				)
 		);
 		BiomeDefaultFeatures.addWarmSeagrass(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
-			makeComposite(Feature.SEA_PICKLE, new CountFeatureConfiguration(20), FeatureDecorator.CHANCE_TOP_SOLID_HEIGHTMAP, new DecoratorChance(16))
+			Feature.SEA_PICKLE
+				.configured(new CountFeatureConfiguration(20))
+				.decorated(FeatureDecorator.CHANCE_TOP_SOLID_HEIGHTMAP.configured(new ChanceDecoratorConfiguration(16)))
 		);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.SQUID, 10, 4, 4));

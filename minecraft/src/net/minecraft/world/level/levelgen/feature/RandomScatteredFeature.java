@@ -8,6 +8,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public abstract class RandomScatteredFeature<C extends FeatureConfiguration> extends StructureFeature<C> {
 	public RandomScatteredFeature(Function<Dynamic<?>, ? extends C> function) {

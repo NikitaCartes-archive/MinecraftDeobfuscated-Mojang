@@ -32,7 +32,7 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 			j += (float)(random.nextInt(11) - 5);
 		}
 
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LIGHTNING);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lightning());
 		Matrix4f matrix4f = poseStack.getPose();
 
 		for (int l = 0; l < 4; l++) {

@@ -261,10 +261,10 @@ public abstract class Player extends LivingEntity {
 		}
 
 		int i = 29999999;
-		double d = Mth.clamp(this.x, -2.9999999E7, 2.9999999E7);
-		double e = Mth.clamp(this.z, -2.9999999E7, 2.9999999E7);
-		if (d != this.x || e != this.z) {
-			this.setPos(d, this.y, e);
+		double d = Mth.clamp(this.getX(), -2.9999999E7, 2.9999999E7);
+		double e = Mth.clamp(this.getZ(), -2.9999999E7, 2.9999999E7);
+		if (d != this.getX() || e != this.getZ()) {
+			this.setPos(d, this.getY(), e);
 		}
 
 		this.attackStrengthTicker++;
@@ -314,37 +314,37 @@ public abstract class Player extends LivingEntity {
 		this.xCloakO = this.xCloak;
 		this.yCloakO = this.yCloak;
 		this.zCloakO = this.zCloak;
-		double d = this.x - this.xCloak;
-		double e = this.y - this.yCloak;
-		double f = this.z - this.zCloak;
+		double d = this.getX() - this.xCloak;
+		double e = this.getY() - this.yCloak;
+		double f = this.getZ() - this.zCloak;
 		double g = 10.0;
 		if (d > 10.0) {
-			this.xCloak = this.x;
+			this.xCloak = this.getX();
 			this.xCloakO = this.xCloak;
 		}
 
 		if (f > 10.0) {
-			this.zCloak = this.z;
+			this.zCloak = this.getZ();
 			this.zCloakO = this.zCloak;
 		}
 
 		if (e > 10.0) {
-			this.yCloak = this.y;
+			this.yCloak = this.getY();
 			this.yCloakO = this.yCloak;
 		}
 
 		if (d < -10.0) {
-			this.xCloak = this.x;
+			this.xCloak = this.getX();
 			this.xCloakO = this.xCloak;
 		}
 
 		if (f < -10.0) {
-			this.zCloak = this.z;
+			this.zCloak = this.getZ();
 			this.zCloakO = this.zCloak;
 		}
 
 		if (e < -10.0) {
-			this.yCloak = this.y;
+			this.yCloak = this.getY();
 			this.yCloakO = this.yCloak;
 		}
 
@@ -410,7 +410,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public void playSound(SoundEvent soundEvent, float f, float g) {
-		this.level.playSound(this, this.x, this.y, this.z, soundEvent, this.getSoundSource(), f, g);
+		this.level.playSound(this, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), f, g);
 	}
 
 	public void playNotifySound(SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
@@ -448,16 +448,7 @@ public abstract class Player extends LivingEntity {
 			double d = this.random.nextGaussian() * 0.02;
 			double e = this.random.nextGaussian() * 0.02;
 			double f = this.random.nextGaussian() * 0.02;
-			this.level
-				.addParticle(
-					particleOptions,
-					this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth(),
-					this.y + 1.0 + (double)(this.random.nextFloat() * this.getBbHeight()),
-					this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0F) - (double)this.getBbWidth(),
-					d,
-					e,
-					f
-				);
+			this.level.addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d, e, f);
 		}
 	}
 
@@ -471,15 +462,15 @@ public abstract class Player extends LivingEntity {
 			this.stopRiding();
 			this.setShiftKeyDown(false);
 		} else {
-			double d = this.x;
-			double e = this.y;
-			double f = this.z;
+			double d = this.getX();
+			double e = this.getY();
+			double f = this.getZ();
 			float g = this.yRot;
 			float h = this.xRot;
 			super.rideTick();
 			this.oBob = this.bob;
 			this.bob = 0.0F;
-			this.checkRidingStatistiscs(this.x - d, this.y - e, this.z - f);
+			this.checkRidingStatistiscs(this.getX() - d, this.getY() - e, this.getZ() - f);
 			if (this.getVehicle() instanceof Pig) {
 				this.xRot = h;
 				this.yRot = g;
@@ -594,7 +585,7 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public void die(DamageSource damageSource) {
 		super.die(damageSource);
-		this.setPos(this.x, this.y, this.z);
+		this.setPos(this.getX(), this.getY(), this.getZ());
 		if (!this.isSpectator()) {
 			this.dropAllDeathLoot(damageSource);
 		}
@@ -669,8 +660,8 @@ public abstract class Player extends LivingEntity {
 		if (itemStack.isEmpty()) {
 			return null;
 		} else {
-			double d = this.y - 0.3F + (double)this.getEyeHeight();
-			ItemEntity itemEntity = new ItemEntity(this.level, this.x, d, this.z, itemStack);
+			double d = this.getEyeY() - 0.3F;
+			ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), d, this.getZ(), itemStack);
 			itemEntity.setPickUpDelay(40);
 			if (bl2) {
 				itemEntity.setThrower(this.getUUID());
@@ -1078,7 +1069,7 @@ public abstract class Player extends LivingEntity {
 					int i = 0;
 					i += EnchantmentHelper.getKnockbackBonus(this);
 					if (this.isSprinting() && bl) {
-						this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
+						this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
 						i++;
 						bl2 = true;
 					}
@@ -1150,7 +1141,7 @@ public abstract class Player extends LivingEntity {
 								}
 							}
 
-							this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
+							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
 							this.sweepAttack();
 						}
 
@@ -1161,15 +1152,15 @@ public abstract class Player extends LivingEntity {
 						}
 
 						if (bl3) {
-							this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
+							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
 							this.crit(entity);
 						}
 
 						if (!bl3 && !bl4) {
 							if (bl) {
-								this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
+								this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
 							} else {
-								this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
+								this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
 							}
 						}
 
@@ -1205,14 +1196,13 @@ public abstract class Player extends LivingEntity {
 
 							if (this.level instanceof ServerLevel && m > 2.0F) {
 								int n = (int)((double)m * 0.5);
-								((ServerLevel)this.level)
-									.sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.x, entity.y + (double)(entity.getBbHeight() * 0.5F), entity.z, n, 0.1, 0.0, 0.1, 0.2);
+								((ServerLevel)this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), n, 0.1, 0.0, 0.1, 0.2);
 							}
 						}
 
 						this.causeFoodExhaustion(0.1F);
 					} else {
-						this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
+						this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
 						if (bl5) {
 							entity.clearFire();
 						}
@@ -1250,7 +1240,7 @@ public abstract class Player extends LivingEntity {
 		double d = (double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)));
 		double e = (double)Mth.cos(this.yRot * (float) (Math.PI / 180.0));
 		if (this.level instanceof ServerLevel) {
-			((ServerLevel)this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, this.x + d, this.y + (double)this.getBbHeight() * 0.5, this.z + e, 0, d, 0.0, e, 0.0);
+			((ServerLevel)this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + d, this.getY(0.5), this.getZ() + e, 0, d, 0.0, e, 0.0);
 		}
 	}
 
@@ -1338,15 +1328,15 @@ public abstract class Player extends LivingEntity {
 	}
 
 	private boolean bedInRange(BlockPos blockPos, Direction direction) {
-		if (Math.abs(this.x - (double)blockPos.getX()) <= 3.0
-			&& Math.abs(this.y - (double)blockPos.getY()) <= 2.0
-			&& Math.abs(this.z - (double)blockPos.getZ()) <= 3.0) {
+		if (Math.abs(this.getX() - (double)blockPos.getX()) <= 3.0
+			&& Math.abs(this.getY() - (double)blockPos.getY()) <= 2.0
+			&& Math.abs(this.getZ() - (double)blockPos.getZ()) <= 3.0) {
 			return true;
 		} else {
 			BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-			return Math.abs(this.x - (double)blockPos2.getX()) <= 3.0
-				&& Math.abs(this.y - (double)blockPos2.getY()) <= 2.0
-				&& Math.abs(this.z - (double)blockPos2.getZ()) <= 3.0;
+			return Math.abs(this.getX() - (double)blockPos2.getX()) <= 3.0
+				&& Math.abs(this.getY() - (double)blockPos2.getY()) <= 2.0
+				&& Math.abs(this.getZ() - (double)blockPos2.getZ()) <= 3.0;
 		}
 	}
 
@@ -1455,13 +1445,13 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		double d = this.x;
-		double e = this.y;
-		double f = this.z;
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
 		if (this.isSwimming() && !this.isPassenger()) {
 			double g = this.getLookAngle().y;
 			double h = g < -0.2 ? 0.085 : 0.06;
-			if (g <= 0.0 || this.jumping || !this.level.getBlockState(new BlockPos(this.x, this.y + 1.0 - 0.1, this.z)).getFluidState().isEmpty()) {
+			if (g <= 0.0 || this.jumping || !this.level.getBlockState(new BlockPos(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).getFluidState().isEmpty()) {
 				Vec3 vec32 = this.getDeltaMovement();
 				this.setDeltaMovement(vec32.add(0.0, (g - vec32.y) * h, 0.0));
 			}
@@ -1481,7 +1471,7 @@ public abstract class Player extends LivingEntity {
 			super.travel(vec3);
 		}
 
-		this.checkMovementStatistics(this.x - d, this.y - e, this.z - f);
+		this.checkMovementStatistics(this.getX() - d, this.getY() - e, this.getZ() - f);
 	}
 
 	@Override
@@ -1570,13 +1560,15 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
-		if (!this.abilities.mayfly) {
+	public boolean causeFallDamage(float f, float g) {
+		if (this.abilities.mayfly) {
+			return false;
+		} else {
 			if (f >= 2.0F) {
 				this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
 			}
 
-			super.causeFallDamage(f, g);
+			return super.causeFallDamage(f, g);
 		}
 	}
 
@@ -1652,7 +1644,7 @@ public abstract class Player extends LivingEntity {
 
 		if (i > 0 && this.experienceLevel % 5 == 0 && (float)this.lastLevelUpTime < (float)this.tickCount - 100.0F) {
 			float f = this.experienceLevel > 30 ? 1.0F : (float)this.experienceLevel / 30.0F;
-			this.level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_LEVELUP, this.getSoundSource(), f * 0.75F, 1.0F);
+			this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_LEVELUP, this.getSoundSource(), f * 0.75F, 1.0F);
 			this.lastLevelUpTime = this.tickCount;
 		}
 	}
@@ -1812,7 +1804,7 @@ public abstract class Player extends LivingEntity {
 					((TamableAnimal)entity).setOwnerUUID(this.uuid);
 				}
 
-				entity.setPos(this.x, this.y + 0.7F, this.z);
+				entity.setPos(this.getX(), this.getY() + 0.7F, this.getZ());
 				((ServerLevel)this.level).addWithUUID(entity);
 			});
 		}
@@ -2055,7 +2047,7 @@ public abstract class Player extends LivingEntity {
 	public ItemStack eat(Level level, ItemStack itemStack) {
 		this.getFoodData().eat(itemStack.getItem(), itemStack);
 		this.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
-		level.playSound(null, this.x, this.y, this.z, SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
+		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
 		if (this instanceof ServerPlayer) {
 			CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)this, itemStack);
 		}

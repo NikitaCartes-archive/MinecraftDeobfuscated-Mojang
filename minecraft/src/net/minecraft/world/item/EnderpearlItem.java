@@ -17,7 +17,9 @@ public class EnderpearlItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		level.playSound(null, player.x, player.y, player.z, SoundEvents.ENDER_PEARL_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+		level.playSound(
+			null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_PEARL_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+		);
 		player.getCooldowns().addCooldown(this, 20);
 		if (!level.isClientSide) {
 			ThrownEnderpearl thrownEnderpearl = new ThrownEnderpearl(level, player);

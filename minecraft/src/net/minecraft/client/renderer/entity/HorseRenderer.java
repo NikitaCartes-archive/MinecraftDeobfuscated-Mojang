@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.HorseArmorLayer;
 import net.minecraft.client.renderer.texture.LayeredTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +17,7 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel
 	private static final Map<String, ResourceLocation> LAYERED_LOCATION_CACHE = Maps.<String, ResourceLocation>newHashMap();
 
 	public HorseRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new HorseModel<>(0.0F), 1.1F);
+		super(entityRenderDispatcher, new HorseModel<>(RenderType::entitySolid, 0.0F), 1.1F);
 		this.addLayer(new HorseArmorLayer(this));
 	}
 

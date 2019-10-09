@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -51,7 +52,8 @@ public class StructureUtils {
 	}
 
 	public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, BlockPos blockPos2, int i, ServerLevel serverLevel) {
-		clearSpaceForStructure(blockPos, blockPos2, i, serverLevel);
+		BoundingBox boundingBox = createStructureBoundingBox(blockPos, blockPos2, i);
+		clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
 		serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		structureBlockEntity.setIgnoreEntities(false);
@@ -62,9 +64,13 @@ public class StructureUtils {
 	}
 
 	public static StructureBlockEntity spawnStructure(String string, BlockPos blockPos, int i, ServerLevel serverLevel, boolean bl) {
+		BoundingBox boundingBox = createStructureBoundingBox(blockPos, getStructureTemplate(string, serverLevel).getSize(), i);
 		forceLoadChunks(blockPos, serverLevel);
-		clearSpaceForStructure(blockPos, getStructureTemplate(string, serverLevel).getSize(), i, serverLevel);
-		return createStructureBlock(string, blockPos, serverLevel, bl);
+		clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
+		StructureBlockEntity structureBlockEntity = createStructureBlock(string, blockPos, serverLevel, bl);
+		serverLevel.getBlockTicks().fetchTicksInArea(boundingBox, true, false);
+		serverLevel.clearBlockEvents(boundingBox);
+		return structureBlockEntity;
 	}
 
 	private static void forceLoadChunks(BlockPos blockPos, ServerLevel serverLevel) {
@@ -79,13 +85,21 @@ public class StructureUtils {
 		}
 	}
 
-	public static void clearSpaceForStructure(BlockPos blockPos, BlockPos blockPos2, int i, ServerLevel serverLevel) {
+	public static void clearSpaceForStructure(BoundingBox boundingBox, int i, ServerLevel serverLevel) {
+		BlockPos.betweenClosedStream(boundingBox).forEach(blockPos -> clearBlock(i, blockPos, serverLevel));
+		serverLevel.getBlockTicks().fetchTicksInArea(boundingBox, true, false);
+		serverLevel.clearBlockEvents(boundingBox);
+		AABB aABB = new AABB(
+			(double)boundingBox.x0, (double)boundingBox.y0, (double)boundingBox.z0, (double)boundingBox.x1, (double)boundingBox.y1, (double)boundingBox.z1
+		);
+		List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));
+		list.forEach(Entity::remove);
+	}
+
+	public static BoundingBox createStructureBoundingBox(BlockPos blockPos, BlockPos blockPos2, int i) {
 		BlockPos blockPos3 = blockPos.offset(-i, -3, -i);
 		BlockPos blockPos4 = blockPos.offset(blockPos2).offset(i - 1, 30, i - 1);
-		BlockPos.betweenClosedStream(blockPos3, blockPos4).forEach(blockPos2x -> clearBlock(blockPos.getY(), blockPos2x, serverLevel));
-		AABB aABB = new AABB(blockPos3, blockPos4);
-		List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));
-		list.forEach(Entity::kill);
+		return BoundingBox.createProper(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ(), blockPos4.getX(), blockPos4.getY(), blockPos4.getZ());
 	}
 
 	public static Optional<BlockPos> findStructureBlockContainingPos(BlockPos blockPos, int i, ServerLevel serverLevel) {

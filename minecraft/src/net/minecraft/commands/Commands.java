@@ -74,6 +74,7 @@ import net.minecraft.server.commands.SetBlockCommand;
 import net.minecraft.server.commands.SetPlayerIdleTimeoutCommand;
 import net.minecraft.server.commands.SetSpawnCommand;
 import net.minecraft.server.commands.SetWorldSpawnCommand;
+import net.minecraft.server.commands.SpectateCommand;
 import net.minecraft.server.commands.SpreadPlayersCommand;
 import net.minecraft.server.commands.StopCommand;
 import net.minecraft.server.commands.StopSoundCommand;
@@ -139,6 +140,7 @@ public class Commands {
 		SetBlockCommand.register(this.dispatcher);
 		SetSpawnCommand.register(this.dispatcher);
 		SetWorldSpawnCommand.register(this.dispatcher);
+		SpectateCommand.register(this.dispatcher);
 		SpreadPlayersCommand.register(this.dispatcher);
 		StopSoundCommand.register(this.dispatcher);
 		SummonCommand.register(this.dispatcher);

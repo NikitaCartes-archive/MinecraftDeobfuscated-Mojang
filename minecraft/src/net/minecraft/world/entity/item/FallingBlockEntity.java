@@ -125,9 +125,7 @@ public class FallingBlockEntity extends Entity {
 				double d = this.getDeltaMovement().lengthSqr();
 				if (bl && d > 1.0) {
 					BlockHitResult blockHitResult = this.level
-						.clip(
-							new ClipContext(new Vec3(this.xo, this.yo, this.zo), new Vec3(this.x, this.y, this.z), ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, this)
-						);
+						.clip(new ClipContext(new Vec3(this.xo, this.yo, this.zo), this.position(), ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, this));
 					if (blockHitResult.getType() != HitResult.Type.MISS && this.level.getFluidState(blockHitResult.getBlockPos()).is(FluidTags.WATER)) {
 						blockPos = blockHitResult.getBlockPos();
 						bl2 = true;
@@ -192,7 +190,7 @@ public class FallingBlockEntity extends Entity {
 	}
 
 	@Override
-	public void causeFallDamage(float f, float g) {
+	public boolean causeFallDamage(float f, float g) {
 		if (this.hurtEntities) {
 			int i = Mth.ceil(f - 1.0F);
 			if (i > 0) {
@@ -214,6 +212,8 @@ public class FallingBlockEntity extends Entity {
 				}
 			}
 		}
+
+		return false;
 	}
 
 	@Override

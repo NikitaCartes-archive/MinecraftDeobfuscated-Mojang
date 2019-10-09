@@ -76,9 +76,9 @@ public class ItemEntity extends Entity {
 				this.pickupDelay--;
 			}
 
-			this.xo = this.x;
-			this.yo = this.y;
-			this.zo = this.z;
+			this.xo = this.getX();
+			this.yo = this.getY();
+			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
 			if (this.isUnderLiquid(FluidTags.WATER)) {
 				this.setUnderwaterMovement();
@@ -91,7 +91,7 @@ public class ItemEntity extends Entity {
 			} else {
 				this.noPhysics = !this.level.noCollision(this);
 				if (this.noPhysics) {
-					this.checkInBlock(this.x, (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.z);
+					this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 				}
 			}
 
@@ -99,7 +99,7 @@ public class ItemEntity extends Entity {
 				this.move(MoverType.SELF, this.getDeltaMovement());
 				float f = 0.98F;
 				if (this.onGround) {
-					f = this.level.getBlockState(new BlockPos(this.x, this.getBoundingBox().minY - 1.0, this.z)).getBlock().getFriction() * 0.98F;
+					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
 				}
 
 				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
@@ -108,7 +108,7 @@ public class ItemEntity extends Entity {
 				}
 			}
 
-			boolean bl = Mth.floor(this.xo) != Mth.floor(this.x) || Mth.floor(this.yo) != Mth.floor(this.y) || Mth.floor(this.zo) != Mth.floor(this.z);
+			boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
 			int i = bl ? 2 : 40;
 			if (this.tickCount % i == 0) {
 				if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {

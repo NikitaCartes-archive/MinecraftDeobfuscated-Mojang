@@ -16,18 +16,14 @@ import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
-public class LanguageSelectScreen extends Screen {
-	protected final Screen lastScreen;
+public class LanguageSelectScreen extends OptionsSubScreen {
 	private LanguageSelectScreen.LanguageSelectionList packSelectionList;
-	private final Options options;
 	private final LanguageManager languageManager;
 	private OptionButton forceUnicodeButton;
 	private Button doneButton;
 
 	public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
-		super(new TranslatableComponent("options.language"));
-		this.lastScreen = screen;
-		this.options = options;
+		super(screen, options, new TranslatableComponent("options.language"));
 		this.languageManager = languageManager;
 	}
 

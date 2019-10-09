@@ -171,7 +171,7 @@ public class Squid extends WaterAnimal {
 
 	private void spawnInk() {
 		this.playSound(SoundEvents.SQUID_SQUIRT, this.getSoundVolume(), this.getVoicePitch());
-		Vec3 vec3 = this.rotateVector(new Vec3(0.0, -1.0, 0.0)).add(this.x, this.y, this.z);
+		Vec3 vec3 = this.rotateVector(new Vec3(0.0, -1.0, 0.0)).add(this.getX(), this.getY(), this.getZ());
 
 		for (int i = 0; i < 30; i++) {
 			Vec3 vec32 = this.rotateVector(new Vec3((double)this.random.nextFloat() * 0.6 - 0.3, -1.0, (double)this.random.nextFloat() * 0.6 - 0.3));
@@ -233,9 +233,9 @@ public class Squid extends WaterAnimal {
 			this.fleeTicks++;
 			LivingEntity livingEntity = Squid.this.getLastHurtByMob();
 			if (livingEntity != null) {
-				Vec3 vec3 = new Vec3(Squid.this.x - livingEntity.x, Squid.this.y - livingEntity.y, Squid.this.z - livingEntity.z);
-				BlockState blockState = Squid.this.level.getBlockState(new BlockPos(Squid.this.x + vec3.x, Squid.this.y + vec3.y, Squid.this.z + vec3.z));
-				FluidState fluidState = Squid.this.level.getFluidState(new BlockPos(Squid.this.x + vec3.x, Squid.this.y + vec3.y, Squid.this.z + vec3.z));
+				Vec3 vec3 = new Vec3(Squid.this.getX() - livingEntity.getX(), Squid.this.getY() - livingEntity.getY(), Squid.this.getZ() - livingEntity.getZ());
+				BlockState blockState = Squid.this.level.getBlockState(new BlockPos(Squid.this.getX() + vec3.x, Squid.this.getY() + vec3.y, Squid.this.getZ() + vec3.z));
+				FluidState fluidState = Squid.this.level.getFluidState(new BlockPos(Squid.this.getX() + vec3.x, Squid.this.getY() + vec3.y, Squid.this.getZ() + vec3.z));
 				if (fluidState.is(FluidTags.WATER) || blockState.isAir()) {
 					double d = vec3.length();
 					if (d > 0.0) {
@@ -258,7 +258,7 @@ public class Squid extends WaterAnimal {
 				}
 
 				if (this.fleeTicks % 10 == 5) {
-					Squid.this.level.addParticle(ParticleTypes.BUBBLE, Squid.this.x, Squid.this.y, Squid.this.z, 0.0, 0.0, 0.0);
+					Squid.this.level.addParticle(ParticleTypes.BUBBLE, Squid.this.getX(), Squid.this.getY(), Squid.this.getZ(), 0.0, 0.0, 0.0);
 				}
 			}
 		}

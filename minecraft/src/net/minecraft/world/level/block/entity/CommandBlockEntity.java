@@ -130,11 +130,22 @@ public class CommandBlockEntity extends BlockEntity {
 		boolean bl2 = this.auto;
 		this.auto = bl;
 		if (!bl2 && bl && !this.powered && this.level != null && this.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
-			Block block = this.getBlockState().getBlock();
-			if (block instanceof CommandBlock) {
-				this.markConditionMet();
-				this.level.getBlockTicks().scheduleTick(this.worldPosition, block, block.getTickDelay(this.level));
-			}
+			this.scheduleTick();
+		}
+	}
+
+	public void onModeSwitch() {
+		CommandBlockEntity.Mode mode = this.getMode();
+		if (mode == CommandBlockEntity.Mode.AUTO && (this.powered || this.auto) && this.level != null) {
+			this.scheduleTick();
+		}
+	}
+
+	private void scheduleTick() {
+		Block block = this.getBlockState().getBlock();
+		if (block instanceof CommandBlock) {
+			this.markConditionMet();
+			this.level.getBlockTicks().scheduleTick(this.worldPosition, block, block.getTickDelay(this.level));
 		}
 	}
 

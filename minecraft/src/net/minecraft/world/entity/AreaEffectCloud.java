@@ -78,9 +78,9 @@ public class AreaEffectCloud extends Entity {
 
 	@Override
 	public void refreshDimensions() {
-		double d = this.x;
-		double e = this.y;
-		double f = this.z;
+		double d = this.getX();
+		double e = this.getY();
+		double f = this.getZ();
 		super.refreshDimensions();
 		this.setPos(d, e, f);
 	}
@@ -165,10 +165,16 @@ public class AreaEffectCloud extends Entity {
 							int o = l & 0xFF;
 							this.level
 								.addAlwaysVisibleParticle(
-									particleOptions, this.x + (double)j, this.y, this.z + (double)k, (double)((float)m / 255.0F), (double)((float)n / 255.0F), (double)((float)o / 255.0F)
+									particleOptions,
+									this.getX() + (double)j,
+									this.getY(),
+									this.getZ() + (double)k,
+									(double)((float)m / 255.0F),
+									(double)((float)n / 255.0F),
+									(double)((float)o / 255.0F)
 								);
 						} else {
-							this.level.addAlwaysVisibleParticle(particleOptions, this.x + (double)j, this.y, this.z + (double)k, 0.0, 0.0, 0.0);
+							this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)j, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
 						}
 					}
 				}
@@ -187,15 +193,21 @@ public class AreaEffectCloud extends Entity {
 						int s = m & 0xFF;
 						this.level
 							.addAlwaysVisibleParticle(
-								particleOptions, this.x + (double)k, this.y, this.z + (double)r, (double)((float)n / 255.0F), (double)((float)o / 255.0F), (double)((float)s / 255.0F)
+								particleOptions,
+								this.getX() + (double)k,
+								this.getY(),
+								this.getZ() + (double)r,
+								(double)((float)n / 255.0F),
+								(double)((float)o / 255.0F),
+								(double)((float)s / 255.0F)
 							);
 					} else {
 						this.level
 							.addAlwaysVisibleParticle(
 								particleOptions,
-								this.x + (double)k,
-								this.y,
-								this.z + (double)r,
+								this.getX() + (double)k,
+								this.getY(),
+								this.getZ() + (double)r,
 								(0.5 - this.random.nextDouble()) * 0.15,
 								0.01F,
 								(0.5 - this.random.nextDouble()) * 0.15
@@ -260,8 +272,8 @@ public class AreaEffectCloud extends Entity {
 					if (!list2.isEmpty()) {
 						for (LivingEntity livingEntity : list2) {
 							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions()) {
-								double d = livingEntity.x - this.x;
-								double e = livingEntity.z - this.z;
+								double d = livingEntity.getX() - this.getX();
+								double e = livingEntity.getZ() - this.getZ();
 								double t = d * d + e * e;
 								if (t <= (double)(f * f)) {
 									this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);

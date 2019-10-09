@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
@@ -273,7 +274,7 @@ public class SavannaVillagePools {
 				new StructureTemplatePool(
 					new ResourceLocation("village/savanna/trees"),
 					new ResourceLocation("empty"),
-					ImmutableList.of(new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SAVANNA_TREE, FeatureConfiguration.NONE)), 1)),
+					ImmutableList.of(new Pair<>(new FeaturePoolElement(Feature.ACACIA_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG)), 1)),
 					StructureTemplatePool.Projection.RIGID
 				)
 			);
@@ -284,9 +285,9 @@ public class SavannaVillagePools {
 					new ResourceLocation("empty"),
 					ImmutableList.of(
 						new Pair<>(new SinglePoolElement("village/savanna/savanna_lamp_post_01"), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SAVANNA_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.HAY_PILE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.MELON_PILE, FeatureConfiguration.NONE)), 1),
+						new Pair<>(new FeaturePoolElement(Feature.ACACIA_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.HAY_PILE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.MELON_PILE_CONFIG)), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 4)
 					),
 					StructureTemplatePool.Projection.RIGID
@@ -299,9 +300,9 @@ public class SavannaVillagePools {
 					new ResourceLocation("empty"),
 					ImmutableList.of(
 						new Pair<>(new SinglePoolElement("village/savanna/savanna_lamp_post_01", immutableList), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.SAVANNA_TREE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.HAY_PILE, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.MELON_PILE, FeatureConfiguration.NONE)), 1),
+						new Pair<>(new FeaturePoolElement(Feature.ACACIA_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.HAY_PILE_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.MELON_PILE_CONFIG)), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 4)
 					),
 					StructureTemplatePool.Projection.RIGID

@@ -73,9 +73,9 @@ public class PortalForcer {
 	public boolean createPortal(Entity entity) {
 		int i = 16;
 		double d = -1.0;
-		int j = Mth.floor(entity.x);
-		int k = Mth.floor(entity.y);
-		int l = Mth.floor(entity.z);
+		int j = Mth.floor(entity.getX());
+		int k = Mth.floor(entity.getY());
+		int l = Mth.floor(entity.getZ());
 		int m = j;
 		int n = k;
 		int o = l;
@@ -84,10 +84,10 @@ public class PortalForcer {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int r = j - 16; r <= j + 16; r++) {
-			double e = (double)r + 0.5 - entity.x;
+			double e = (double)r + 0.5 - entity.getX();
 
 			for (int s = l - 16; s <= l + 16; s++) {
-				double f = (double)s + 0.5 - entity.z;
+				double f = (double)s + 0.5 - entity.getZ();
 
 				label279:
 				for (int t = this.level.getHeight() - 1; t >= 0; t--) {
@@ -118,7 +118,7 @@ public class PortalForcer {
 								}
 							}
 
-							double g = (double)t + 0.5 - entity.y;
+							double g = (double)t + 0.5 - entity.getY();
 							double h = e * e + g * g + f * f;
 							if (d < 0.0 || h < d) {
 								d = h;
@@ -135,10 +135,10 @@ public class PortalForcer {
 
 		if (d < 0.0) {
 			for (int r = j - 16; r <= j + 16; r++) {
-				double e = (double)r + 0.5 - entity.x;
+				double e = (double)r + 0.5 - entity.getX();
 
 				for (int s = l - 16; s <= l + 16; s++) {
-					double f = (double)s + 0.5 - entity.z;
+					double f = (double)s + 0.5 - entity.getZ();
 
 					label216:
 					for (int tx = this.level.getHeight() - 1; tx >= 0; tx--) {
@@ -163,7 +163,7 @@ public class PortalForcer {
 									}
 								}
 
-								double g = (double)tx + 0.5 - entity.y;
+								double g = (double)tx + 0.5 - entity.getY();
 								double h = e * e + g * g + f * f;
 								if (d < 0.0 || h < d) {
 									d = h;

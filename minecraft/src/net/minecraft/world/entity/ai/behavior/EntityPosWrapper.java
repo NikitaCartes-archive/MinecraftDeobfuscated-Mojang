@@ -22,7 +22,7 @@ public class EntityPosWrapper implements PositionWrapper {
 
 	@Override
 	public Vec3 getLookAtPos() {
-		return new Vec3(this.entity.x, this.entity.y + (double)this.entity.getEyeHeight(), this.entity.z);
+		return new Vec3(this.entity.getX(), this.entity.getEyeY(), this.entity.getZ());
 	}
 
 	@Override

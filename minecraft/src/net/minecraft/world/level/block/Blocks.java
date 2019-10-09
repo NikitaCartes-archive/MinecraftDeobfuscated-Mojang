@@ -552,7 +552,8 @@ public class Blocks {
 	);
 	public static final Block NETHERRACK = register("netherrack", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(0.4F)));
 	public static final Block SOUL_SAND = register(
-		"soul_sand", new SoulsandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5F).sound(SoundType.SAND))
+		"soul_sand",
+		new SoulsandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5F).speedFactor(0.4F).sound(SoundType.SAND))
 	);
 	public static final Block GLOWSTONE = register(
 		"glowstone", new Block(Block.Properties.of(Material.GLASS, MaterialColor.SAND).strength(0.3F).sound(SoundType.GLASS).lightLevel(15))
@@ -1971,7 +1972,14 @@ public class Blocks {
 	);
 	public static final Block COMPOSTER = register("composter", new ComposterBlock(Block.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD)));
 	public static final Block BEE_NEST = register("bee_nest", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.3F).sound(SoundType.WOOD)));
-	public static final Block BEE_HIVE = register("bee_hive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD)));
+	public static final Block BEEHIVE = register("beehive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD)));
+	public static final Block HONEY_BLOCK = register(
+		"honey_block",
+		new HoneyBlock(Block.Properties.of(Material.CLAY, MaterialColor.COLOR_ORANGE).speedFactor(0.4F).jumpFactor(0.5F).noOcclusion().sound(SoundType.HONEY_BLOCK))
+	);
+	public static final Block HONEYCOMB_BLOCK = register(
+		"honeycomb_block", new Block(Block.Properties.of(Material.CLAY, MaterialColor.COLOR_ORANGE).strength(0.6F).sound(SoundType.CORAL_BLOCK))
+	);
 
 	private static Block register(String string, Block block) {
 		return Registry.register(Registry.BLOCK, string, block);

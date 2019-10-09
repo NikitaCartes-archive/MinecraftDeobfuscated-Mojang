@@ -104,7 +104,7 @@ public class MapRenderer implements AutoCloseable {
 			int k = 0;
 			float f = 0.0F;
 			Matrix4f matrix4f = poseStack.getPose();
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.TEXT(this.location));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(this.location));
 			vertexConsumer.vertex(matrix4f, 0.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
 			vertexConsumer.vertex(matrix4f, 128.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(i).endVertex();
 			vertexConsumer.vertex(matrix4f, 128.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(i).endVertex();
@@ -115,7 +115,7 @@ public class MapRenderer implements AutoCloseable {
 				if (!bl || mapDecoration.renderOnFrame()) {
 					poseStack.pushPose();
 					poseStack.translate((double)(0.0F + (float)mapDecoration.getX() / 2.0F + 64.0F), (double)(0.0F + (float)mapDecoration.getY() / 2.0F + 64.0F), -0.02F);
-					poseStack.mulPose(Vector3f.ZP.rotation((float)(mapDecoration.getRot() * 360) / 16.0F, true));
+					poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)(mapDecoration.getRot() * 360) / 16.0F));
 					poseStack.scale(4.0F, 4.0F, 3.0F);
 					poseStack.translate(-0.125, 0.125, 0.0);
 					byte b = mapDecoration.getImage();
@@ -125,7 +125,7 @@ public class MapRenderer implements AutoCloseable {
 					float n = (float)(b / 16 + 1) / 16.0F;
 					Matrix4f matrix4f2 = poseStack.getPose();
 					float o = -0.001F;
-					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.TEXT(MapRenderer.MAP_ICONS_LOCATION));
+					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_ICONS_LOCATION));
 					vertexConsumer2.vertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, h).uv2(i).endVertex();
 					vertexConsumer2.vertex(matrix4f2, 1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, h).uv2(i).endVertex();
 					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, n).uv2(i).endVertex();

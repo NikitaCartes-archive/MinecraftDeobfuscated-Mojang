@@ -80,9 +80,9 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 	public void aiStep() {
 		super.aiStep();
 		if (!this.level.isClientSide) {
-			int i = Mth.floor(this.x);
-			int j = Mth.floor(this.y);
-			int k = Mth.floor(this.z);
+			int i = Mth.floor(this.getX());
+			int j = Mth.floor(this.getY());
+			int k = Mth.floor(this.getZ());
 			if (this.isInWaterRainOrBubble()) {
 				this.hurt(DamageSource.DROWN, 1.0F);
 			}
@@ -98,9 +98,9 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 			BlockState blockState = Blocks.SNOW.defaultBlockState();
 
 			for (int l = 0; l < 4; l++) {
-				i = Mth.floor(this.x + (double)((float)(l % 2 * 2 - 1) * 0.25F));
-				j = Mth.floor(this.y);
-				k = Mth.floor(this.z + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25F));
+				i = Mth.floor(this.getX() + (double)((float)(l % 2 * 2 - 1) * 0.25F));
+				j = Mth.floor(this.getY());
+				k = Mth.floor(this.getZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25F));
 				BlockPos blockPos = new BlockPos(i, j, k);
 				if (this.level.getBlockState(blockPos).isAir()
 					&& this.level.getBiome(blockPos).getTemperature(blockPos) < 0.8F
@@ -114,10 +114,10 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		Snowball snowball = new Snowball(this.level, this);
-		double d = livingEntity.y + (double)livingEntity.getEyeHeight() - 1.1F;
-		double e = livingEntity.x - this.x;
-		double g = d - snowball.y;
-		double h = livingEntity.z - this.z;
+		double d = livingEntity.getEyeY() - 1.1F;
+		double e = livingEntity.getX() - this.getX();
+		double g = d - snowball.getY();
+		double h = livingEntity.getZ() - this.getZ();
 		float i = Mth.sqrt(e * e + h * h) * 0.2F;
 		snowball.shoot(e, g + (double)i, h, 1.6F, 12.0F);
 		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));

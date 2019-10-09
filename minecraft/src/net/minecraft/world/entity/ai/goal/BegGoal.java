@@ -56,9 +56,7 @@ public class BegGoal extends Goal {
 
 	@Override
 	public void tick() {
-		this.wolf
-			.getLookControl()
-			.setLookAt(this.player.x, this.player.y + (double)this.player.getEyeHeight(), this.player.z, 10.0F, (float)this.wolf.getMaxHeadXRot());
+		this.wolf.getLookControl().setLookAt(this.player.getX(), this.player.getEyeY(), this.player.getZ(), 10.0F, (float)this.wolf.getMaxHeadXRot());
 		this.lookTime--;
 	}
 

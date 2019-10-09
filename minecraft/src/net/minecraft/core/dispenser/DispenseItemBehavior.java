@@ -48,6 +48,7 @@ import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.WitherSkullBlock;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -331,7 +332,7 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, null);
 				level.addFreshEntity(primedTnt);
-				level.playSound(null, primedTnt.x, primedTnt.y, primedTnt.z, SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
+				level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
 				itemStack.shrink(1);
 				return itemStack;
 			}
@@ -433,7 +434,8 @@ public interface DispenseItemBehavior {
 					BlockState blockState = levelAccessor.getBlockState(blockPos);
 					Block block = blockState.getBlock();
 					if (block.is(BlockTags.BEEHIVES) && (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
-						((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null);
+						((BeehiveBlock)blockState.getBlock())
+							.releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
 					} else {
 						return levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)
@@ -473,7 +475,7 @@ public interface DispenseItemBehavior {
 								}
 
 								BeehiveBlock.dropHoneycomb(level, blockPos);
-								((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(level, blockState, blockPos, null);
+								((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
 								this.success = true;
 							}
 						}

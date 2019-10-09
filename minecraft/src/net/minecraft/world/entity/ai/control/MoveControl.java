@@ -74,7 +74,9 @@ public class MoveControl {
 			if (pathNavigation != null) {
 				NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
 				if (nodeEvaluator != null
-					&& nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.x + (double)m), Mth.floor(this.mob.y), Mth.floor(this.mob.z + (double)n))
+					&& nodeEvaluator.getBlockPathType(
+							this.mob.level, Mth.floor(this.mob.getX() + (double)m), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)n)
+						)
 						!= BlockPathTypes.WALKABLE) {
 					this.strafeForwards = 1.0F;
 					this.strafeRight = 0.0F;
@@ -88,9 +90,9 @@ public class MoveControl {
 			this.operation = MoveControl.Operation.WAIT;
 		} else if (this.operation == MoveControl.Operation.MOVE_TO) {
 			this.operation = MoveControl.Operation.WAIT;
-			double d = this.wantedX - this.mob.x;
-			double e = this.wantedZ - this.mob.z;
-			double o = this.wantedY - this.mob.y;
+			double d = this.wantedX - this.mob.getX();
+			double e = this.wantedZ - this.mob.getZ();
+			double o = this.wantedY - this.mob.getY();
 			double p = d * d + o * o + e * e;
 			if (p < 2.5000003E-7F) {
 				this.mob.setZza(0.0F);
@@ -106,7 +108,7 @@ public class MoveControl {
 			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
 			if (o > (double)this.mob.maxUpStep && d * d + e * e < (double)Math.max(1.0F, this.mob.getBbWidth())
 				|| !voxelShape.isEmpty()
-					&& this.mob.y < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY()
+					&& this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY()
 					&& !block.is(BlockTags.DOORS)
 					&& !block.is(BlockTags.FENCES)) {
 				this.mob.getJumpControl().jump();

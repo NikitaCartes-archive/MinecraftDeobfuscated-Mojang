@@ -170,9 +170,9 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			if (!this.isSilent()) {
 				this.level
 					.playLocalSound(
-						this.x + 0.5,
-						this.y + 0.5,
-						this.z + 0.5,
+						this.getX(),
+						this.getEyeY(),
+						this.getZ(),
 						SoundEvents.ZOMBIE_VILLAGER_CURE,
 						this.getSoundSource(),
 						1.0F + this.random.nextFloat(),
@@ -210,6 +210,11 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			villager.setCustomNameVisible(this.isCustomNameVisible());
 		}
 
+		if (this.isPersistenceRequired()) {
+			villager.setPersistenceRequired();
+		}
+
+		villager.setInvulnerable(this.isInvulnerable());
 		serverLevel.addFreshEntity(villager);
 		if (this.conversionStarter != null) {
 			Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
@@ -229,9 +234,9 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			int j = 0;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			for (int k = (int)this.x - 4; k < (int)this.x + 4 && j < 14; k++) {
-				for (int l = (int)this.y - 4; l < (int)this.y + 4 && j < 14; l++) {
-					for (int m = (int)this.z - 4; m < (int)this.z + 4 && j < 14; m++) {
+			for (int k = (int)this.getX() - 4; k < (int)this.getX() + 4 && j < 14; k++) {
+				for (int l = (int)this.getY() - 4; l < (int)this.getY() + 4 && j < 14; l++) {
+					for (int m = (int)this.getZ() - 4; m < (int)this.getZ() + 4 && j < 14; m++) {
 						Block block = this.level.getBlockState(mutableBlockPos.set(k, l, m)).getBlock();
 						if (block == Blocks.IRON_BARS || block instanceof BedBlock) {
 							if (this.random.nextFloat() < 0.3F) {

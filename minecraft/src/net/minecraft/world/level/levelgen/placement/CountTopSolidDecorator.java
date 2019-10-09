@@ -11,8 +11,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class CountTopSolidDecorator extends FeatureDecorator<DecoratorFrequency> {
-	public CountTopSolidDecorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class CountTopSolidDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+	public CountTopSolidDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -20,13 +20,14 @@ public class CountTopSolidDecorator extends FeatureDecorator<DecoratorFrequency>
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequency decoratorFrequency,
+		FrequencyDecoratorConfiguration frequencyDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		return IntStream.range(0, decoratorFrequency.count).mapToObj(i -> {
+		return IntStream.range(0, frequencyDecoratorConfiguration.count).mapToObj(i -> {
 			int j = random.nextInt(16) + blockPos.getX();
 			int k = random.nextInt(16) + blockPos.getZ();
-			return new BlockPos(j, levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, j, k), k);
+			int l = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, j, k);
+			return new BlockPos(j, l, k);
 		});
 	}
 }

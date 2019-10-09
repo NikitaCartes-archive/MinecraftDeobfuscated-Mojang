@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.vertex;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -126,7 +127,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		ByteBuffer byteBuffer = ByteBuffer.allocate(this.vertices * this.format.getVertexSize());
 		byteBuffer.put(this.buffer);
 		this.buffer.clear();
-		return new BufferBuilder.State(byteBuffer, new VertexFormat(this.format));
+		return new BufferBuilder.State(byteBuffer, this.format);
 	}
 
 	private static float getQuadDistanceFromPlayer(FloatBuffer floatBuffer, float f, float g, float h, int i, int j) {
@@ -156,7 +157,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		this.buffer.position(this.totalRenderedBytes);
 		this.buffer.put(state.data);
 		this.buffer.clear();
-		this.format = new VertexFormat(state.format);
+		this.format = state.format;
 		this.vertices = i / this.format.getVertexSize();
 		this.nextElementByte = this.totalRenderedBytes + this.vertices * this.format.getVertexSize();
 	}
@@ -168,7 +169,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			this.building = true;
 			this.mode = i;
 			this.format = vertexFormat;
-			this.currentElement = vertexFormat.getElement(0);
+			this.currentElement = (VertexFormatElement)vertexFormat.getElements().get(0);
 			this.elementIndex = 0;
 			this.buffer.clear();
 		}
@@ -214,20 +215,17 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 
 	@Override
 	public void nextElement() {
-		this.elementIndex++;
-		this.nextElementByte = this.nextElementByte + this.currentElement().getByteSize();
-		this.elementIndex = this.elementIndex % this.format.getElementCount();
-		this.currentElement = this.format.getElement(this.elementIndex);
-		if (this.currentElement().getUsage() == VertexFormatElement.Usage.PADDING) {
+		ImmutableList<VertexFormatElement> immutableList = this.format.getElements();
+		this.elementIndex = (this.elementIndex + 1) % immutableList.size();
+		this.nextElementByte = this.nextElementByte + this.currentElement.getByteSize();
+		VertexFormatElement vertexFormatElement = (VertexFormatElement)immutableList.get(this.elementIndex);
+		this.currentElement = vertexFormatElement;
+		if (vertexFormatElement.getUsage() == VertexFormatElement.Usage.PADDING) {
 			this.nextElement();
 		}
 
 		if (this.defaultColorSet && this.currentElement.getUsage() == VertexFormatElement.Usage.COLOR) {
 			BufferVertexConsumer.super.color(this.defaultR, this.defaultG, this.defaultB, this.defaultA);
-		}
-
-		if (this.defaultOverlayCoordsSet && this.currentElement.getUsage() == VertexFormatElement.Usage.UV && this.currentElement.getIndex() == 1) {
-			BufferVertexConsumer.super.overlayCoords(this.defaultOverlayU, this.defaultOverlayV);
 		}
 	}
 
@@ -237,15 +235,6 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			throw new IllegalStateException();
 		} else {
 			return BufferVertexConsumer.super.color(i, j, k, l);
-		}
-	}
-
-	@Override
-	public VertexConsumer overlayCoords(int i, int j) {
-		if (this.defaultOverlayCoordsSet) {
-			throw new IllegalStateException();
-		} else {
-			return BufferVertexConsumer.super.overlayCoords(i, j);
 		}
 	}
 
@@ -268,6 +257,10 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			LOGGER.warn("Bytes mismatch " + this.totalRenderedBytes + " " + this.totalUploadedBytes);
 		}
 
+		this.discard();
+	}
+
+	public void discard() {
 		this.totalRenderedBytes = 0;
 		this.totalUploadedBytes = 0;
 		this.nextElementByte = 0;

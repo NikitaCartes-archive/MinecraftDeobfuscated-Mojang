@@ -136,11 +136,11 @@ public class BellBlockEntity extends BlockEntity implements TickableBlockEntity 
 					livingEntity -> {
 						float f = 1.0F;
 						float g = Mth.sqrt(
-							(livingEntity.x - (double)blockPos.getX()) * (livingEntity.x - (double)blockPos.getX())
-								+ (livingEntity.z - (double)blockPos.getZ()) * (livingEntity.z - (double)blockPos.getZ())
+							(livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX())
+								+ (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ())
 						);
-						double d = (double)((float)blockPos.getX() + 0.5F) + (double)(1.0F / g) * (livingEntity.x - (double)blockPos.getX());
-						double e = (double)((float)blockPos.getZ() + 0.5F) + (double)(1.0F / g) * (livingEntity.z - (double)blockPos.getZ());
+						double d = (double)((float)blockPos.getX() + 0.5F) + (double)(1.0F / g) * (livingEntity.getX() - (double)blockPos.getX());
+						double e = (double)((float)blockPos.getZ() + 0.5F) + (double)(1.0F / g) * (livingEntity.getZ() - (double)blockPos.getZ());
 						int j = Mth.clamp((i - 21) / -2, 3, 15);
 
 						for (int k = 0; k < j; k++) {

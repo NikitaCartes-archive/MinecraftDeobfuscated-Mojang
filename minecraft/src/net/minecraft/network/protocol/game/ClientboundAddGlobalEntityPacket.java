@@ -20,9 +20,9 @@ public class ClientboundAddGlobalEntityPacket implements Packet<ClientGamePacket
 
 	public ClientboundAddGlobalEntityPacket(Entity entity) {
 		this.id = entity.getId();
-		this.x = entity.x;
-		this.y = entity.y;
-		this.z = entity.z;
+		this.x = entity.getX();
+		this.y = entity.getY();
+		this.z = entity.getZ();
 		if (entity instanceof LightningBolt) {
 			this.type = 1;
 		}

@@ -31,28 +31,28 @@ public class ShulkerHeadLayer extends RenderLayer<Shulker, ShulkerModel<Shulker>
 			default:
 				break;
 			case EAST:
-				poseStack.mulPose(Vector3f.ZP.rotation(90.0F, true));
-				poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 				poseStack.translate(1.0, -1.0, 0.0);
-				poseStack.mulPose(Vector3f.YP.rotation(180.0F, true));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 				break;
 			case WEST:
-				poseStack.mulPose(Vector3f.ZP.rotation(-90.0F, true));
-				poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 				poseStack.translate(-1.0, -1.0, 0.0);
-				poseStack.mulPose(Vector3f.YP.rotation(180.0F, true));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 				break;
 			case NORTH:
-				poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 				poseStack.translate(0.0, -1.0, -1.0);
 				break;
 			case SOUTH:
-				poseStack.mulPose(Vector3f.ZP.rotation(180.0F, true));
-				poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 				poseStack.translate(0.0, -1.0, 1.0);
 				break;
 			case UP:
-				poseStack.mulPose(Vector3f.XP.rotation(180.0F, true));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
 				poseStack.translate(0.0, -2.0, 0.0);
 		}
 
@@ -67,10 +67,8 @@ public class ShulkerHeadLayer extends RenderLayer<Shulker, ShulkerModel<Shulker>
 			resourceLocation = ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()];
 		}
 
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(resourceLocation));
-		LivingEntityRenderer.setOverlayCoords(shulker, vertexConsumer, 0.0F);
-		modelPart.render(poseStack, vertexConsumer, m, i, null);
-		vertexConsumer.unsetDefaultOverlayCoords();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation));
+		modelPart.render(poseStack, vertexConsumer, m, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0F), null);
 		poseStack.popPose();
 	}
 }

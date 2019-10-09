@@ -65,9 +65,9 @@ public class GiveCommand {
 					serverPlayer.level
 						.playSound(
 							null,
-							serverPlayer.x,
-							serverPlayer.y,
-							serverPlayer.z,
+							serverPlayer.getX(),
+							serverPlayer.getY(),
+							serverPlayer.getZ(),
 							SoundEvents.ITEM_PICKUP,
 							SoundSource.PLAYERS,
 							0.2F,

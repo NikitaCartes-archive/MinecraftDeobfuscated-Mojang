@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class CoralMushroomFeature extends CoralFeature {
 	public CoralMushroomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {

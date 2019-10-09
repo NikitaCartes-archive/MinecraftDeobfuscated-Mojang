@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
@@ -108,14 +109,13 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		boolean bl = this.isVisible(livingEntity, false);
 		boolean bl2 = !bl && !livingEntity.isInvisibleTo(Minecraft.getInstance().player);
 		int q = livingEntity.getLightColor();
+		this.model.setupAnim(livingEntity, p, o, lx, k, m, 0.0625F);
 		if (bl || bl2) {
-			this.model.setupAnim(livingEntity, p, o, lx, k, m, 0.0625F);
+			ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
-				bl2 ? RenderType.NEW_ENTITY(this.getTextureLocation(livingEntity), true, true, false) : RenderType.NEW_ENTITY(this.getTextureLocation(livingEntity))
+				bl2 ? RenderType.entityForceTranslucent(resourceLocation) : this.model.renderType(resourceLocation)
 			);
-			setOverlayCoords(livingEntity, vertexConsumer, this.getWhiteOverlayProgress(livingEntity, h));
-			this.model.renderToBuffer(poseStack, vertexConsumer, q);
-			vertexConsumer.unsetDefaultOverlayCoords();
+			this.model.renderToBuffer(poseStack, vertexConsumer, q, getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, h)), 1.0F, 1.0F, 1.0F);
 		}
 
 		if (!livingEntity.isSpectator()) {
@@ -128,8 +128,8 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		super.render(livingEntity, d, e, f, g, h, poseStack, multiBufferSource);
 	}
 
-	public static void setOverlayCoords(LivingEntity livingEntity, VertexConsumer vertexConsumer, float f) {
-		vertexConsumer.defaultOverlayCoords(OverlayTexture.u(f), OverlayTexture.v(livingEntity.hurtTime > 0 || livingEntity.deathTime > 0));
+	public static int getOverlayCoords(LivingEntity livingEntity, float f) {
+		return OverlayTexture.pack(OverlayTexture.u(f), OverlayTexture.v(livingEntity.hurtTime > 0 || livingEntity.deathTime > 0));
 	}
 
 	protected boolean isVisible(T livingEntity, boolean bl) {
@@ -154,7 +154,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
 		Pose pose = livingEntity.getPose();
 		if (pose != Pose.SLEEPING) {
-			poseStack.mulPose(Vector3f.YP.rotation(180.0F - g, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));
 		}
 
 		if (livingEntity.deathTime > 0) {
@@ -164,21 +164,22 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 				i = 1.0F;
 			}
 
-			poseStack.mulPose(Vector3f.ZP.rotation(i * this.getFlipDegrees(livingEntity), true));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(i * this.getFlipDegrees(livingEntity)));
 		} else if (livingEntity.isAutoSpinAttack()) {
-			poseStack.mulPose(Vector3f.XP.rotation(-90.0F - livingEntity.xRot, true));
-			poseStack.mulPose(Vector3f.YP.rotation(((float)livingEntity.tickCount + h) * -75.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0F - livingEntity.xRot));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(((float)livingEntity.tickCount + h) * -75.0F));
 		} else if (pose == Pose.SLEEPING) {
 			Direction direction = livingEntity.getBedOrientation();
-			poseStack.mulPose(Vector3f.YP.rotation(direction != null ? sleepDirectionToRotation(direction) : g, true));
-			poseStack.mulPose(Vector3f.ZP.rotation(this.getFlipDegrees(livingEntity), true));
-			poseStack.mulPose(Vector3f.YP.rotation(270.0F, true));
+			float j = direction != null ? sleepDirectionToRotation(direction) : g;
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.getFlipDegrees(livingEntity)));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F));
 		} else if (livingEntity.hasCustomName() || livingEntity instanceof Player) {
 			String string = ChatFormatting.stripFormatting(livingEntity.getName().getString());
 			if (("Dinnerbone".equals(string) || "Grumm".equals(string))
 				&& (!(livingEntity instanceof Player) || ((Player)livingEntity).isModelPartShown(PlayerModelPart.CAPE))) {
 				poseStack.translate(0.0, (double)(livingEntity.getBbHeight() + 0.1F), 0.0);
-				poseStack.mulPose(Vector3f.ZP.rotation(180.0F, true));
+				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 			}
 		}
 	}

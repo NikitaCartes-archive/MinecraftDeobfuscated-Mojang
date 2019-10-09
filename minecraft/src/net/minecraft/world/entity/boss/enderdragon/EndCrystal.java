@@ -96,7 +96,7 @@ public class EndCrystal extends Entity {
 			if (!this.removed && !this.level.isClientSide) {
 				this.remove();
 				if (!damageSource.isExplosion()) {
-					this.level.explode(null, this.x, this.y, this.z, 6.0F, Explosion.BlockInteraction.DESTROY);
+					this.level.explode(null, this.getX(), this.getY(), this.getZ(), 6.0F, Explosion.BlockInteraction.DESTROY);
 				}
 
 				this.onDestroyedBy(damageSource);

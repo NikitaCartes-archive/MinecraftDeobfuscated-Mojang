@@ -323,14 +323,14 @@ public class LevelChunk implements ChunkAccess {
 	@Override
 	public void addEntity(Entity entity) {
 		this.lastSaveHadEntities = true;
-		int i = Mth.floor(entity.x / 16.0);
-		int j = Mth.floor(entity.z / 16.0);
+		int i = Mth.floor(entity.getX() / 16.0);
+		int j = Mth.floor(entity.getZ() / 16.0);
 		if (i != this.chunkPos.x || j != this.chunkPos.z) {
 			LOGGER.warn("Wrong location! ({}, {}) should be ({}, {}), {}", i, j, this.chunkPos.x, this.chunkPos.z, entity);
 			entity.removed = true;
 		}
 
-		int k = Mth.floor(entity.y / 16.0);
+		int k = Mth.floor(entity.getY() / 16.0);
 		if (k < 0) {
 			k = 0;
 		}
@@ -421,8 +421,7 @@ public class LevelChunk implements ChunkAccess {
 	@Override
 	public void setBlockEntity(BlockPos blockPos, BlockEntity blockEntity) {
 		if (this.getBlockState(blockPos).getBlock() instanceof EntityBlock) {
-			blockEntity.setLevel(this.level);
-			blockEntity.setPosition(blockPos);
+			blockEntity.setLevelAndPosition(this.level, blockPos);
 			blockEntity.clearRemoved();
 			BlockEntity blockEntity2 = (BlockEntity)this.blockEntities.put(blockPos.immutable(), blockEntity);
 			if (blockEntity2 != null && blockEntity2 != blockEntity) {
@@ -503,7 +502,7 @@ public class LevelChunk implements ChunkAccess {
 		}
 	}
 
-	public void getEntities(@Nullable EntityType<?> entityType, AABB aABB, List<Entity> list, Predicate<? super Entity> predicate) {
+	public <T extends Entity> void getEntities(@Nullable EntityType<?> entityType, AABB aABB, List<? super T> list, Predicate<? super T> predicate) {
 		int i = Mth.floor((aABB.minY - 2.0) / 16.0);
 		int j = Mth.floor((aABB.maxY + 2.0) / 16.0);
 		i = Mth.clamp(i, 0, this.entitySections.length - 1);
@@ -745,7 +744,7 @@ public class LevelChunk implements ChunkAccess {
 		}
 
 		if (blockEntity != null) {
-			blockEntity.setPosition(blockPos);
+			blockEntity.setLevelAndPosition(this.level, blockPos);
 			this.addBlockEntity(blockEntity);
 		} else {
 			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", this.getBlockState(blockPos), blockPos);

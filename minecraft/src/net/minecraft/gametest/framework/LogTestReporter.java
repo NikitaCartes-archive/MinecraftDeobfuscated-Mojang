@@ -15,8 +15,4 @@ public class LogTestReporter implements TestReporter {
 			LOGGER.warn("(optional) " + gameTestInfo.getTestName() + " failed. " + Util.describeError(gameTestInfo.getError()));
 		}
 	}
-
-	@Override
-	public void onTestSuccess(GameTestInfo gameTestInfo) {
-	}
 }

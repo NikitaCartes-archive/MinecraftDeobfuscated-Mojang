@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 
 public class SeagrassFeature extends Feature<SeagrassFeatureConfiguration> {
 	public SeagrassFeature(Function<Dynamic<?>, ? extends SeagrassFeatureConfiguration> function) {

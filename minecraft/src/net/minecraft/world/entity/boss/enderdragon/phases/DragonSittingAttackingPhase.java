@@ -15,9 +15,9 @@ public class DragonSittingAttackingPhase extends AbstractDragonSittingPhase {
 		this.dragon
 			.level
 			.playLocalSound(
-				this.dragon.x,
-				this.dragon.y,
-				this.dragon.z,
+				this.dragon.getX(),
+				this.dragon.getY(),
+				this.dragon.getZ(),
 				SoundEvents.ENDER_DRAGON_GROWL,
 				this.dragon.getSoundSource(),
 				2.5F,

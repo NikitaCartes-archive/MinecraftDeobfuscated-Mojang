@@ -48,8 +48,7 @@ public abstract class AbstractHurtingProjectile extends Entity {
 	) {
 		this(entityType, level);
 		this.owner = livingEntity;
-		this.moveTo(livingEntity.x, livingEntity.y, livingEntity.z, livingEntity.yRot, livingEntity.xRot);
-		this.setPos(this.x, this.y, this.z);
+		this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
 		this.setDeltaMovement(Vec3.ZERO);
 		d += this.random.nextGaussian() * 0.4;
 		e += this.random.nextGaussian() * 0.4;
@@ -91,23 +90,23 @@ public abstract class AbstractHurtingProjectile extends Entity {
 			}
 
 			Vec3 vec3 = this.getDeltaMovement();
-			this.x = this.x + vec3.x;
-			this.y = this.y + vec3.y;
-			this.z = this.z + vec3.z;
+			double d = this.getX() + vec3.x;
+			double e = this.getY() + vec3.y;
+			double f = this.getZ() + vec3.z;
 			ProjectileUtil.rotateTowardsMovement(this, 0.2F);
-			float f = this.getInertia();
+			float g = this.getInertia();
 			if (this.isInWater()) {
 				for (int i = 0; i < 4; i++) {
-					float g = 0.25F;
-					this.level.addParticle(ParticleTypes.BUBBLE, this.x - vec3.x * 0.25, this.y - vec3.y * 0.25, this.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+					float h = 0.25F;
+					this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 				}
 
-				f = 0.8F;
+				g = 0.8F;
 			}
 
-			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)f));
-			this.level.addParticle(this.getTrailParticle(), this.x, this.y + 0.5, this.z, 0.0, 0.0, 0.0);
-			this.setPos(this.x, this.y, this.z);
+			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)g));
+			this.level.addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
+			this.setPos(d, e, f);
 		} else {
 			this.remove();
 		}
@@ -203,7 +202,16 @@ public abstract class AbstractHurtingProjectile extends Entity {
 	public Packet<?> getAddEntityPacket() {
 		int i = this.owner == null ? 0 : this.owner.getId();
 		return new ClientboundAddEntityPacket(
-			this.getId(), this.getUUID(), this.x, this.y, this.z, this.xRot, this.yRot, this.getType(), i, new Vec3(this.xPower, this.yPower, this.zPower)
+			this.getId(),
+			this.getUUID(),
+			this.getX(),
+			this.getY(),
+			this.getZ(),
+			this.xRot,
+			this.yRot,
+			this.getType(),
+			i,
+			new Vec3(this.xPower, this.yPower, this.zPower)
 		);
 	}
 }

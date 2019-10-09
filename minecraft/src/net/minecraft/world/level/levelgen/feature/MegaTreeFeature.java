@@ -7,27 +7,19 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public abstract class MegaTreeFeature<T extends FeatureConfiguration> extends AbstractTreeFeature<T> {
-	protected final int baseHeight;
-	protected final BlockState trunk;
-	protected final BlockState leaf;
-	protected final int heightInterval;
-
-	public MegaTreeFeature(Function<Dynamic<?>, ? extends T> function, boolean bl, int i, int j, BlockState blockState, BlockState blockState2) {
-		super(function, bl);
-		this.baseHeight = i;
-		this.heightInterval = j;
-		this.trunk = blockState;
-		this.leaf = blockState2;
+public abstract class MegaTreeFeature<T extends TreeConfiguration> extends AbstractTreeFeature<T> {
+	public MegaTreeFeature(Function<Dynamic<?>, ? extends T> function) {
+		super(function);
 	}
 
-	protected int calcTreeHeigth(Random random) {
-		int i = random.nextInt(3) + this.baseHeight;
-		if (this.heightInterval > 1) {
-			i += random.nextInt(this.heightInterval);
+	protected int calcTreeHeigth(Random random, MegaTreeConfiguration megaTreeConfiguration) {
+		int i = random.nextInt(3) + megaTreeConfiguration.baseHeight;
+		if (megaTreeConfiguration.heightInterval > 1) {
+			i += random.nextInt(megaTreeConfiguration.heightInterval);
 		}
 
 		return i;
@@ -76,7 +68,9 @@ public abstract class MegaTreeFeature<T extends FeatureConfiguration> extends Ab
 		return this.checkIsFree(levelSimulatedRW, blockPos, i) && this.makeDirtFloor(levelSimulatedRW, blockPos);
 	}
 
-	protected void placeDoubleTrunkLeaves(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos, int i, BoundingBox boundingBox, Set<BlockPos> set) {
+	protected void placeDoubleTrunkLeaves(
+		LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, int i, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
+	) {
 		int j = i * i;
 
 		for (int k = -i; k <= i + 1; k++) {
@@ -84,25 +78,57 @@ public abstract class MegaTreeFeature<T extends FeatureConfiguration> extends Ab
 				int m = Math.min(Math.abs(k), Math.abs(k - 1));
 				int n = Math.min(Math.abs(l), Math.abs(l - 1));
 				if (m + n < 7 && m * m + n * n <= j) {
-					BlockPos blockPos2 = blockPos.offset(k, 0, l);
-					if (isAirOrLeaves(levelSimulatedRW, blockPos2)) {
-						this.setBlock(set, levelSimulatedRW, blockPos2, this.leaf, boundingBox);
-					}
+					this.placeLeaf(levelSimulatedRW, random, blockPos.offset(k, 0, l), set, boundingBox, treeConfiguration);
 				}
 			}
 		}
 	}
 
-	protected void placeSingleTrunkLeaves(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos, int i, BoundingBox boundingBox, Set<BlockPos> set) {
+	protected void placeSingleTrunkLeaves(
+		LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, int i, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration
+	) {
 		int j = i * i;
 
 		for (int k = -i; k <= i; k++) {
 			for (int l = -i; l <= i; l++) {
 				if (k * k + l * l <= j) {
-					BlockPos blockPos2 = blockPos.offset(k, 0, l);
-					if (isAirOrLeaves(levelSimulatedRW, blockPos2)) {
-						this.setBlock(set, levelSimulatedRW, blockPos2, this.leaf, boundingBox);
-					}
+					this.placeLeaf(levelSimulatedRW, random, blockPos.offset(k, 0, l), set, boundingBox, treeConfiguration);
+				}
+			}
+		}
+	}
+
+	protected void placeTrunk(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		BlockPos blockPos,
+		int i,
+		Set<BlockPos> set,
+		BoundingBox boundingBox,
+		MegaTreeConfiguration megaTreeConfiguration
+	) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int j = 0; j < i; j++) {
+			mutableBlockPos.set(blockPos).move(0, j, 0);
+			if (isFree(levelSimulatedRW, mutableBlockPos)) {
+				this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+			}
+
+			if (j < i - 1) {
+				mutableBlockPos.set(blockPos).move(1, j, 0);
+				if (isFree(levelSimulatedRW, mutableBlockPos)) {
+					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+				}
+
+				mutableBlockPos.set(blockPos).move(1, j, 1);
+				if (isFree(levelSimulatedRW, mutableBlockPos)) {
+					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+				}
+
+				mutableBlockPos.set(blockPos).move(0, j, 1);
+				if (isFree(levelSimulatedRW, mutableBlockPos)) {
+					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
 				}
 			}
 		}

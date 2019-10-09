@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 
 @Environment(EnvType.CLIENT)
 public class ShieldModel extends Model {
@@ -12,6 +13,7 @@ public class ShieldModel extends Model {
 	private final ModelPart handle;
 
 	public ShieldModel() {
+		super(RenderType::entitySolid);
 		this.texWidth = 64;
 		this.texHeight = 64;
 		this.plate = new ModelPart(this, 0, 0);
@@ -20,8 +22,9 @@ public class ShieldModel extends Model {
 		this.handle.addBox(-1.0F, -3.0F, -1.0F, 2.0F, 6.0F, 6.0F, 0.0F);
 	}
 
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
-		this.plate.render(poseStack, vertexConsumer, 0.0625F, i, null);
-		this.handle.render(poseStack, vertexConsumer, 0.0625F, i, null);
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+		this.plate.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h);
+		this.handle.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h);
 	}
 }

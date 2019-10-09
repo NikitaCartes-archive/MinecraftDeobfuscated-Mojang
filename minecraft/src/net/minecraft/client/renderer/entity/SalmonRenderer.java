@@ -31,11 +31,11 @@ public class SalmonRenderer extends MobRenderer<Salmon, SalmonModel<Salmon>> {
 		}
 
 		float k = i * 4.3F * Mth.sin(j * 0.6F * f);
-		poseStack.mulPose(Vector3f.YP.rotation(k, true));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
 		poseStack.translate(0.0, 0.0, -0.4F);
 		if (!salmon.isInWater()) {
 			poseStack.translate(0.2F, 0.1F, 0.0);
-			poseStack.mulPose(Vector3f.ZP.rotation(90.0F, true));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
 		}
 	}
 }

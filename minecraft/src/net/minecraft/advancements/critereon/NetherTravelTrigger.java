@@ -25,7 +25,8 @@ public class NetherTravelTrigger extends SimpleCriterionTrigger<NetherTravelTrig
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
 		this.trigger(
-			serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.x, serverPlayer.y, serverPlayer.z)
+			serverPlayer.getAdvancements(),
+			triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())
 		);
 	}
 

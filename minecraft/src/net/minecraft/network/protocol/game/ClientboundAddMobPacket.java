@@ -32,9 +32,9 @@ public class ClientboundAddMobPacket implements Packet<ClientGamePacketListener>
 		this.id = livingEntity.getId();
 		this.uuid = livingEntity.getUUID();
 		this.type = Registry.ENTITY_TYPE.getId(livingEntity.getType());
-		this.x = livingEntity.x;
-		this.y = livingEntity.y;
-		this.z = livingEntity.z;
+		this.x = livingEntity.getX();
+		this.y = livingEntity.getY();
+		this.z = livingEntity.getZ();
 		this.yRot = (byte)((int)(livingEntity.yRot * 256.0F / 360.0F));
 		this.xRot = (byte)((int)(livingEntity.xRot * 256.0F / 360.0F));
 		this.yHeadRot = (byte)((int)(livingEntity.yHeadRot * 256.0F / 360.0F));

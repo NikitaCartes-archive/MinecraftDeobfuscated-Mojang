@@ -162,8 +162,8 @@ public class MapItemSavedData extends SavedData {
 						MapDecoration.Type.PLAYER,
 						holdingPlayer2.player.level,
 						string,
-						holdingPlayer2.player.x,
-						holdingPlayer2.player.z,
+						holdingPlayer2.player.getX(),
+						holdingPlayer2.player.getZ(),
 						(double)holdingPlayer2.player.yRot,
 						null
 					);

@@ -28,20 +28,18 @@ public class SpinAttackEffectLayer<T extends LivingEntity> extends RenderLayer<T
 		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
 	) {
 		if (livingEntity.isAutoSpinAttack()) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE));
-			OverlayTexture.setDefault(vertexConsumer);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
 
 			for (int n = 0; n < 3; n++) {
 				poseStack.pushPose();
-				poseStack.mulPose(Vector3f.YP.rotation(j * (float)(-(45 + n * 5)), true));
-				float o = 0.75F * (float)n;
-				poseStack.scale(o, o, o);
+				float o = j * (float)(-(45 + n * 5));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
+				float p = 0.75F * (float)n;
+				poseStack.scale(p, p, p);
 				poseStack.translate(0.0, (double)(-0.2F + 0.6F * (float)n), 0.0);
-				this.box.render(poseStack, vertexConsumer, m, i, null);
+				this.box.render(poseStack, vertexConsumer, m, i, OverlayTexture.NO_OVERLAY, null);
 				poseStack.popPose();
 			}
-
-			vertexConsumer.unsetDefaultOverlayCoords();
 		}
 	}
 }

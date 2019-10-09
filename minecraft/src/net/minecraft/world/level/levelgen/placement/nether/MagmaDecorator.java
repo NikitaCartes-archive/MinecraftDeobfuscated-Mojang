@@ -9,11 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 
-public class MagmaDecorator extends FeatureDecorator<DecoratorFrequency> {
-	public MagmaDecorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class MagmaDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+	public MagmaDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -21,15 +21,15 @@ public class MagmaDecorator extends FeatureDecorator<DecoratorFrequency> {
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequency decoratorFrequency,
+		FrequencyDecoratorConfiguration frequencyDecoratorConfiguration,
 		BlockPos blockPos
 	) {
 		int i = levelAccessor.getSeaLevel() / 2 + 1;
-		return IntStream.range(0, decoratorFrequency.count).mapToObj(j -> {
-			int k = random.nextInt(16);
-			int l = i - 5 + random.nextInt(10);
-			int m = random.nextInt(16);
-			return blockPos.offset(k, l, m);
+		return IntStream.range(0, frequencyDecoratorConfiguration.count).mapToObj(j -> {
+			int k = random.nextInt(16) + blockPos.getX();
+			int l = random.nextInt(16) + blockPos.getZ();
+			int m = i - 5 + random.nextInt(10);
+			return new BlockPos(k, m, l);
 		});
 	}
 }

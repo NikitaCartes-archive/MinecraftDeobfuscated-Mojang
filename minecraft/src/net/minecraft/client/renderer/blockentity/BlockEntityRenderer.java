@@ -17,7 +17,7 @@ public abstract class BlockEntityRenderer<T extends BlockEntity> {
 		this.renderer = blockEntityRenderDispatcher;
 	}
 
-	public abstract void render(T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i);
+	public abstract void render(T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j);
 
 	protected TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
 		return Minecraft.getInstance().getTextureAtlas().getSprite(resourceLocation);

@@ -7,14 +7,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.TridentModel;
 import net.minecraft.client.renderer.banner.BannerTextures;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -57,16 +55,16 @@ public class EntityBlockRenderer {
 	private final ShieldModel shieldModel = new ShieldModel();
 	private final TridentModel tridentModel = new TridentModel();
 
-	public void renderByItem(ItemStack itemStack, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public void renderByItem(ItemStack itemStack, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		Item item = itemStack.getItem();
 		if (item instanceof BlockItem) {
 			Block block = ((BlockItem)item).getBlock();
 			if (block instanceof AbstractBannerBlock) {
 				this.banner.fromItem(itemStack, ((AbstractBannerBlock)block).getColor());
-				BlockEntityRenderDispatcher.instance.renderItem(this.banner, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.banner, poseStack, multiBufferSource, i, j);
 			} else if (block instanceof BedBlock) {
 				this.bed.setColor(((BedBlock)block).getColor());
-				BlockEntityRenderDispatcher.instance.renderItem(this.bed, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.bed, poseStack, multiBufferSource, i, j);
 			} else if (block instanceof AbstractSkullBlock) {
 				GameProfile gameProfile = null;
 				if (itemStack.hasTag()) {
@@ -74,8 +72,8 @@ public class EntityBlockRenderer {
 					if (compoundTag.contains("SkullOwner", 10)) {
 						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
 					} else if (compoundTag.contains("SkullOwner", 8) && !StringUtils.isBlank(compoundTag.getString("SkullOwner"))) {
-						GameProfile var12 = new GameProfile(null, compoundTag.getString("SkullOwner"));
-						gameProfile = SkullBlockEntity.updateGameprofile(var12);
+						GameProfile var13 = new GameProfile(null, compoundTag.getString("SkullOwner"));
+						gameProfile = SkullBlockEntity.updateGameprofile(var13);
 						compoundTag.remove("SkullOwner");
 						compoundTag.put("SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
 					}
@@ -83,19 +81,19 @@ public class EntityBlockRenderer {
 
 				SkullBlockRenderer.renderSkull(null, 180.0F, ((AbstractSkullBlock)block).getType(), gameProfile, 0.0F, poseStack, multiBufferSource, i);
 			} else if (block == Blocks.CONDUIT) {
-				BlockEntityRenderDispatcher.instance.renderItem(this.conduit, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.conduit, poseStack, multiBufferSource, i, j);
 			} else if (block == Blocks.CHEST) {
-				BlockEntityRenderDispatcher.instance.renderItem(this.chest, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.chest, poseStack, multiBufferSource, i, j);
 			} else if (block == Blocks.ENDER_CHEST) {
-				BlockEntityRenderDispatcher.instance.renderItem(this.enderChest, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.enderChest, poseStack, multiBufferSource, i, j);
 			} else if (block == Blocks.TRAPPED_CHEST) {
-				BlockEntityRenderDispatcher.instance.renderItem(this.trappedChest, poseStack, multiBufferSource, i);
+				BlockEntityRenderDispatcher.instance.renderItem(this.trappedChest, poseStack, multiBufferSource, i, j);
 			} else if (block instanceof ShulkerBoxBlock) {
 				DyeColor dyeColor = ShulkerBoxBlock.getColorFromItem(item);
 				if (dyeColor == null) {
-					BlockEntityRenderDispatcher.instance.renderItem(DEFAULT_SHULKER_BOX, poseStack, multiBufferSource, i);
+					BlockEntityRenderDispatcher.instance.renderItem(DEFAULT_SHULKER_BOX, poseStack, multiBufferSource, i, j);
 				} else {
-					BlockEntityRenderDispatcher.instance.renderItem(SHULKER_BOXES[dyeColor.getId()], poseStack, multiBufferSource, i);
+					BlockEntityRenderDispatcher.instance.renderItem(SHULKER_BOXES[dyeColor.getId()], poseStack, multiBufferSource, i, j);
 				}
 			}
 		} else {
@@ -110,19 +108,16 @@ public class EntityBlockRenderer {
 
 				poseStack.pushPose();
 				poseStack.scale(1.0F, -1.0F, -1.0F);
-				VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, resourceLocation, false, itemStack.hasFoil(), false);
-				OverlayTexture.setDefault(vertexConsumer);
-				this.shieldModel.render(poseStack, vertexConsumer, i);
-				vertexConsumer.unsetDefaultOverlayCoords();
+				VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(resourceLocation), false, itemStack.hasFoil());
+				this.shieldModel.renderToBuffer(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F);
 				poseStack.popPose();
 			} else if (item == Items.TRIDENT) {
-				Minecraft.getInstance().getTextureManager().bind(TridentModel.TEXTURE);
 				poseStack.pushPose();
 				poseStack.scale(1.0F, -1.0F, -1.0F);
-				VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBuffer(multiBufferSource, TridentModel.TEXTURE, false, itemStack.hasFoil(), false);
-				OverlayTexture.setDefault(vertexConsumer2);
-				this.tridentModel.render(poseStack, vertexConsumer2, i);
-				vertexConsumer2.unsetDefaultOverlayCoords();
+				VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBuffer(
+					multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil()
+				);
+				this.tridentModel.renderToBuffer(poseStack, vertexConsumer2, i, j, 1.0F, 1.0F, 1.0F);
 				poseStack.popPose();
 			}
 		}

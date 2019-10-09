@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.FeaturePoolElement;
@@ -214,8 +215,8 @@ public class DesertVillagePools {
 					new ResourceLocation("empty"),
 					ImmutableList.of(
 						new Pair<>(new SinglePoolElement("village/desert/desert_lamp_1"), 10),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.CACTUS, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.HAY_PILE, FeatureConfiguration.NONE)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.CACTUS_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.HAY_PILE_CONFIG)), 4),
 						Pair.of(EmptyPoolElement.INSTANCE, 10)
 					),
 					StructureTemplatePool.Projection.RIGID
@@ -228,8 +229,8 @@ public class DesertVillagePools {
 					new ResourceLocation("empty"),
 					ImmutableList.of(
 						new Pair<>(new SinglePoolElement("village/desert/desert_lamp_1", immutableList), 10),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.CACTUS, FeatureConfiguration.NONE)), 4),
-						new Pair<>(new FeaturePoolElement(new ConfiguredFeature<>(Feature.HAY_PILE, FeatureConfiguration.NONE)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.CACTUS_CONFIG)), 4),
+						new Pair<>(new FeaturePoolElement(Feature.BLOCK_PILE.configured(BiomeDefaultFeatures.HAY_PILE_CONFIG)), 4),
 						Pair.of(EmptyPoolElement.INSTANCE, 10)
 					),
 					StructureTemplatePool.Projection.RIGID

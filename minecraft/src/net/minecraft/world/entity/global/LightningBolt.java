@@ -56,8 +56,12 @@ public class LightningBolt extends Entity {
 	public void tick() {
 		super.tick();
 		if (this.life == 2) {
-			this.level.playSound(null, this.x, this.y, this.z, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F);
-			this.level.playSound(null, this.x, this.y, this.z, SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
+			this.level
+				.playSound(
+					null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F
+				);
+			this.level
+				.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.WEATHER, 2.0F, 0.5F + this.random.nextFloat() * 0.2F);
 		}
 
 		this.life--;
@@ -78,7 +82,9 @@ public class LightningBolt extends Entity {
 			} else if (!this.visualOnly) {
 				double d = 3.0;
 				List<Entity> list = this.level
-					.getEntities(this, new AABB(this.x - 3.0, this.y - 3.0, this.z - 3.0, this.x + 3.0, this.y + 6.0 + 3.0, this.z + 3.0), Entity::isAlive);
+					.getEntities(
+						this, new AABB(this.getX() - 3.0, this.getY() - 3.0, this.getZ() - 3.0, this.getX() + 3.0, this.getY() + 6.0 + 3.0, this.getZ() + 3.0), Entity::isAlive
+					);
 
 				for (Entity entity : list) {
 					entity.thunderHit(this);

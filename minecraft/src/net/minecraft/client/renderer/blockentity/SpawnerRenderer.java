@@ -18,7 +18,7 @@ public class SpawnerRenderer extends BlockEntityRenderer<SpawnerBlockEntity> {
 	}
 
 	public void render(
-		SpawnerBlockEntity spawnerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
+		SpawnerBlockEntity spawnerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
 	) {
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0.0, 0.5);
@@ -26,15 +26,15 @@ public class SpawnerRenderer extends BlockEntityRenderer<SpawnerBlockEntity> {
 		Entity entity = baseSpawner.getOrCreateDisplayEntity();
 		if (entity != null) {
 			float h = 0.53125F;
-			float j = Math.max(entity.getBbWidth(), entity.getBbHeight());
-			if ((double)j > 1.0) {
-				h /= j;
+			float k = Math.max(entity.getBbWidth(), entity.getBbHeight());
+			if ((double)k > 1.0) {
+				h /= k;
 			}
 
 			poseStack.translate(0.0, 0.4F, 0.0);
-			poseStack.mulPose(Vector3f.YP.rotation((float)Mth.lerp((double)g, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0F, true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees((float)Mth.lerp((double)g, baseSpawner.getoSpin(), baseSpawner.getSpin()) * 10.0F));
 			poseStack.translate(0.0, -0.2F, 0.0);
-			poseStack.mulPose(Vector3f.XP.rotation(-30.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(-30.0F));
 			poseStack.scale(h, h, h);
 			entity.moveTo(d, e, f, 0.0F, 0.0F);
 			Minecraft.getInstance().getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, 0.0F, g, poseStack, multiBufferSource);

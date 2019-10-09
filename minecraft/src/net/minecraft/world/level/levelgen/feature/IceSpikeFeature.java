@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 	public IceSpikeFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
@@ -50,14 +51,14 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 						if ((m == 0 && n == 0 || !(g * g + h * h > f * f)) && (m != -l && m != l && n != -l && n != l || !(random.nextFloat() > 0.75F))) {
 							BlockState blockState = levelAccessor.getBlockState(blockPos.offset(m, k, n));
 							Block block = blockState.getBlock();
-							if (blockState.isAir() || Block.equalsDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+							if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
 								this.setBlock(levelAccessor, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
 							}
 
 							if (k != 0 && l > 1) {
 								blockState = levelAccessor.getBlockState(blockPos.offset(m, -k, n));
 								block = blockState.getBlock();
-								if (blockState.isAir() || Block.equalsDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+								if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
 									this.setBlock(levelAccessor, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
 								}
 							}
@@ -84,7 +85,7 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 					while (blockPos2.getY() > 50) {
 						BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
 						Block block2 = blockState2.getBlock();
-						if (!blockState2.isAir() && !Block.equalsDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) {
+						if (!blockState2.isAir() && !isDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) {
 							break;
 						}
 

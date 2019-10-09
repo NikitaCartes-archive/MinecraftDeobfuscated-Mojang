@@ -65,7 +65,8 @@ public class HurtByTargetGoal extends TargetGoal {
 		List<Mob> list = this.mob
 			.level
 			.getLoadedEntitiesOfClass(
-				this.mob.getClass(), new AABB(this.mob.x, this.mob.y, this.mob.z, this.mob.x + 1.0, this.mob.y + 1.0, this.mob.z + 1.0).inflate(d, 10.0, d)
+				this.mob.getClass(),
+				new AABB(this.mob.getX(), this.mob.getY(), this.mob.getZ(), this.mob.getX() + 1.0, this.mob.getY() + 1.0, this.mob.getZ() + 1.0).inflate(d, 10.0, d)
 			);
 		Iterator var4 = list.iterator();
 

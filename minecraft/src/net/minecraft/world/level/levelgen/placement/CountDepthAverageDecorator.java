@@ -17,10 +17,10 @@ public class CountDepthAverageDecorator extends SimpleFeatureDecorator<DepthAver
 		int j = depthAverageConfigation.baseline;
 		int k = depthAverageConfigation.spread;
 		return IntStream.range(0, i).mapToObj(kx -> {
-			int l = random.nextInt(16);
-			int m = random.nextInt(k) + random.nextInt(k) - k + j;
-			int n = random.nextInt(16);
-			return blockPos.offset(l, m, n);
+			int l = random.nextInt(16) + blockPos.getX();
+			int m = random.nextInt(16) + blockPos.getZ();
+			int n = random.nextInt(k) + random.nextInt(k) - k + j;
+			return new BlockPos(l, n, m);
 		});
 	}
 }

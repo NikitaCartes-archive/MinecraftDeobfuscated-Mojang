@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -22,6 +23,7 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 	private float itemUseTicks;
 
 	public IllagerModel(float f, float g, int i, int j) {
+		super(RenderType::entityCutoutNoCull);
 		this.head = new ModelPart(this).setTexSize(i, j);
 		this.head.setPos(0.0F, 0.0F + g, 0.0F);
 		this.head.texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, f);

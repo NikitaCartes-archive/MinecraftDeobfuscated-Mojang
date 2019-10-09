@@ -12,8 +12,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class CountChanceHeightmapDoubleDecorator extends FeatureDecorator<DecoratorFrequencyChance> {
-	public CountChanceHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends DecoratorFrequencyChance> function) {
+public class CountChanceHeightmapDoubleDecorator extends FeatureDecorator<FrequencyChanceDecoratorConfiguration> {
+	public CountChanceHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends FrequencyChanceDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -21,19 +21,17 @@ public class CountChanceHeightmapDoubleDecorator extends FeatureDecorator<Decora
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequencyChance decoratorFrequencyChance,
+		FrequencyChanceDecoratorConfiguration frequencyChanceDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		return IntStream.range(0, decoratorFrequencyChance.count).filter(i -> random.nextFloat() < decoratorFrequencyChance.chance).mapToObj(i -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k)).getY() * 2;
-			if (l <= 0) {
-				return null;
-			} else {
-				int m = random.nextInt(l);
-				return blockPos.offset(j, m, k);
-			}
-		}).filter(Objects::nonNull);
+		return IntStream.range(0, frequencyChanceDecoratorConfiguration.count)
+			.filter(i -> random.nextFloat() < frequencyChanceDecoratorConfiguration.chance)
+			.mapToObj(i -> {
+				int j = random.nextInt(16) + blockPos.getX();
+				int k = random.nextInt(16) + blockPos.getZ();
+				int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k) * 2;
+				return l <= 0 ? null : new BlockPos(j, random.nextInt(l), k);
+			})
+			.filter(Objects::nonNull);
 	}
 }

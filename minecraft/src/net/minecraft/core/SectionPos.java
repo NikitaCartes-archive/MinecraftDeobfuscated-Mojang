@@ -26,7 +26,9 @@ public class SectionPos extends Vec3i {
 	}
 
 	public static SectionPos of(Entity entity) {
-		return new SectionPos(blockToSectionCoord(Mth.floor(entity.x)), blockToSectionCoord(Mth.floor(entity.y)), blockToSectionCoord(Mth.floor(entity.z)));
+		return new SectionPos(
+			blockToSectionCoord(Mth.floor(entity.getX())), blockToSectionCoord(Mth.floor(entity.getY())), blockToSectionCoord(Mth.floor(entity.getZ()))
+		);
 	}
 
 	public static SectionPos of(long l) {

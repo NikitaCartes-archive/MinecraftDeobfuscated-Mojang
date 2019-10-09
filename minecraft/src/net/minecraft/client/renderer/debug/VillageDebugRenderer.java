@@ -256,7 +256,7 @@ public class VillageDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	private boolean isPlayerCloseEnoughToMob(VillageDebugRenderer.BrainDump brainDump) {
 		Player player = this.minecraft.player;
-		BlockPos blockPos = new BlockPos(player.x, brainDump.pos.y(), player.z);
+		BlockPos blockPos = new BlockPos(player.getX(), brainDump.pos.y(), player.getZ());
 		BlockPos blockPos2 = new BlockPos(brainDump.pos);
 		return blockPos.closerThan(blockPos2, 30.0);
 	}

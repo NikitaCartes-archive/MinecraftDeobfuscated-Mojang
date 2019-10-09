@@ -19,12 +19,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratedFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
@@ -56,18 +56,18 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 		Map<String, Map<String, String>> map = this.settings.getStructuresOptions();
 
 		for (String string : map.keySet()) {
-			ConfiguredFeature<?>[] configuredFeatures = (ConfiguredFeature<?>[])FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
+			ConfiguredFeature<?, ?>[] configuredFeatures = (ConfiguredFeature<?, ?>[])FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
 			if (configuredFeatures != null) {
-				for (ConfiguredFeature<?> configuredFeature : configuredFeatures) {
+				for (ConfiguredFeature<?, ?> configuredFeature : configuredFeatures) {
 					flatLevelBiomeWrapper.addFeature((GenerationStep.Decoration)FlatLevelGeneratorSettings.STRUCTURE_FEATURES_STEP.get(configuredFeature), configuredFeature);
-					ConfiguredFeature<?> configuredFeature2 = ((DecoratedFeatureConfiguration)configuredFeature.config).feature;
+					ConfiguredFeature<?, ?> configuredFeature2 = ((DecoratedFeatureConfiguration)configuredFeature.config).feature;
 					if (configuredFeature2.feature instanceof StructureFeature) {
 						StructureFeature<FeatureConfiguration> structureFeature = (StructureFeature<FeatureConfiguration>)configuredFeature2.feature;
 						FeatureConfiguration featureConfiguration = biome.getStructureConfiguration(structureFeature);
-						flatLevelBiomeWrapper.addStructureStart(
-							structureFeature,
-							featureConfiguration != null ? featureConfiguration : (FeatureConfiguration)FlatLevelGeneratorSettings.STRUCTURE_FEATURES_DEFAULT.get(configuredFeature)
-						);
+						FeatureConfiguration featureConfiguration2 = featureConfiguration != null
+							? featureConfiguration
+							: (FeatureConfiguration)FlatLevelGeneratorSettings.STRUCTURE_FEATURES_DEFAULT.get(configuredFeature);
+						flatLevelBiomeWrapper.addStructureStart(structureFeature.configured(featureConfiguration2));
 					}
 				}
 			}
@@ -81,7 +81,7 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 
 			for (GenerationStep.Decoration decoration : GenerationStep.Decoration.values()) {
 				if (!list.contains(decoration)) {
-					for (ConfiguredFeature<?> configuredFeature2 : biome.getFeaturesForStep(decoration)) {
+					for (ConfiguredFeature<?, ?> configuredFeature2 : biome.getFeaturesForStep(decoration)) {
 						flatLevelBiomeWrapper.addFeature(decoration, configuredFeature2);
 					}
 				}
@@ -96,7 +96,7 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 				this.settings.deleteLayer(i);
 				flatLevelBiomeWrapper.addFeature(
 					GenerationStep.Decoration.TOP_LAYER_MODIFICATION,
-					Biome.makeComposite(Feature.FILL_LAYER, new LayerConfiguration(i, blockState), FeatureDecorator.NOPE, DecoratorConfiguration.NONE)
+					Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 				);
 			}
 		}

@@ -9,8 +9,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
-public class LakeWaterPlacementDecorator extends FeatureDecorator<LakeChanceDecoratorConfig> {
-	public LakeWaterPlacementDecorator(Function<Dynamic<?>, ? extends LakeChanceDecoratorConfig> function) {
+public class LakeWaterPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
+	public LakeWaterPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -18,14 +18,14 @@ public class LakeWaterPlacementDecorator extends FeatureDecorator<LakeChanceDeco
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		LakeChanceDecoratorConfig lakeChanceDecoratorConfig,
+		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		if (random.nextInt(lakeChanceDecoratorConfig.chance) == 0) {
-			int i = random.nextInt(16);
-			int j = random.nextInt(chunkGenerator.getGenDepth());
-			int k = random.nextInt(16);
-			return Stream.of(blockPos.offset(i, j, k));
+		if (random.nextInt(chanceDecoratorConfiguration.chance) == 0) {
+			int i = random.nextInt(16) + blockPos.getX();
+			int j = random.nextInt(16) + blockPos.getZ();
+			int k = random.nextInt(chunkGenerator.getGenDepth());
+			return Stream.of(new BlockPos(i, k, j));
 		} else {
 			return Stream.empty();
 		}

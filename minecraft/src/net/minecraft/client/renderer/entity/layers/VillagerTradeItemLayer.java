@@ -24,7 +24,7 @@ public class VillagerTradeItemLayer<T extends LivingEntity> extends RenderLayer<
 	) {
 		poseStack.pushPose();
 		poseStack.translate(0.0, 0.4F, -0.4F);
-		poseStack.mulPose(Vector3f.XP.rotation(180.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.MAINHAND);
 		Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
 		poseStack.popPose();

@@ -71,7 +71,7 @@ public class EnderEyeItem extends Item {
 			if (level instanceof ServerLevel) {
 				BlockPos blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false);
 				if (blockPos != null) {
-					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.x, player.y + (double)(player.getBbHeight() / 2.0F), player.z);
+					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
 					eyeOfEnder.setItem(itemStack);
 					eyeOfEnder.signalTo(blockPos);
 					level.addFreshEntity(eyeOfEnder);
@@ -79,7 +79,9 @@ public class EnderEyeItem extends Item {
 						CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayer)player, blockPos);
 					}
 
-					level.playSound(null, player.x, player.y, player.z, SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+					level.playSound(
+						null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
+					);
 					level.levelEvent(null, 1003, new BlockPos(player), 0);
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);

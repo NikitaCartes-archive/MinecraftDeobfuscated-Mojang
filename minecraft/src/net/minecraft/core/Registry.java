@@ -53,7 +53,11 @@ import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacerType;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
@@ -82,6 +86,12 @@ public abstract class Registry<T> implements IdMap<T> {
 	public static final Registry<Feature<?>> FEATURE = registerSimple("feature", () -> Feature.ORE);
 	public static final Registry<FeatureDecorator<?>> DECORATOR = registerSimple("decorator", () -> FeatureDecorator.NOPE);
 	public static final Registry<Biome> BIOME = registerSimple("biome", () -> Biomes.DEFAULT);
+	public static final Registry<BlockStateProviderType<?>> BLOCKSTATE_PROVIDER_TYPES = registerSimple(
+		"block_state_provider_type", () -> BlockStateProviderType.SIMPLE_STATE_PROVIDER
+	);
+	public static final Registry<BlockPlacerType<?>> BLOCK_PLACER_TYPES = registerSimple("block_placer_type", () -> BlockPlacerType.SIMPLE_BLOCK_PLACER);
+	public static final Registry<FoliagePlacerType<?>> FOLIAGE_PLACER_TYPES = registerSimple("foliage_placer_type", () -> FoliagePlacerType.BLOB_FOLIAGE_PLACER);
+	public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = registerSimple("tree_decorator_type", () -> TreeDecoratorType.LEAVE_VINE);
 	public static final Registry<ParticleType<? extends ParticleOptions>> PARTICLE_TYPE = registerSimple("particle_type", () -> ParticleTypes.BLOCK);
 	public static final Registry<BiomeSourceType<?, ?>> BIOME_SOURCE_TYPE = registerSimple("biome_source_type", () -> BiomeSourceType.VANILLA_LAYERED);
 	public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = registerSimple("block_entity_type", () -> BlockEntityType.FURNACE);

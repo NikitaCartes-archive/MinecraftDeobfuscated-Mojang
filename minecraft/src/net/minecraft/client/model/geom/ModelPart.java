@@ -14,7 +14,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
@@ -106,21 +105,21 @@ public class ModelPart {
 		this.z = h;
 	}
 
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite) {
-		this.render(poseStack, vertexConsumer, f, i, textureAtlasSprite, 1.0F, 1.0F, 1.0F);
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite) {
+		this.render(poseStack, vertexConsumer, f, i, j, textureAtlasSprite, 1.0F, 1.0F, 1.0F);
 	}
 
 	public void render(
-		PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float j
+		PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float k
 	) {
 		if (this.visible) {
 			if (!this.cubes.isEmpty() || !this.children.isEmpty()) {
 				poseStack.pushPose();
 				this.translateAndRotate(poseStack, f);
-				this.compile(poseStack.getPose(), vertexConsumer, f, i, textureAtlasSprite, g, h, j);
+				this.compile(poseStack.getPose(), vertexConsumer, f, i, j, textureAtlasSprite, g, h, k);
 
 				for (ModelPart modelPart : this.children) {
-					modelPart.render(poseStack, vertexConsumer, f, i, textureAtlasSprite, g, h, j);
+					modelPart.render(poseStack, vertexConsumer, f, i, j, textureAtlasSprite, g, h, k);
 				}
 
 				poseStack.popPose();
@@ -131,20 +130,20 @@ public class ModelPart {
 	public void translateAndRotate(PoseStack poseStack, float f) {
 		poseStack.translate((double)(this.x * f), (double)(this.y * f), (double)(this.z * f));
 		if (this.zRot != 0.0F) {
-			poseStack.mulPose(Vector3f.ZP.rotation(this.zRot, false));
+			poseStack.mulPose(Vector3f.ZP.rotation(this.zRot));
 		}
 
 		if (this.yRot != 0.0F) {
-			poseStack.mulPose(Vector3f.YP.rotation(this.yRot, false));
+			poseStack.mulPose(Vector3f.YP.rotation(this.yRot));
 		}
 
 		if (this.xRot != 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotation(this.xRot, false));
+			poseStack.mulPose(Vector3f.XP.rotation(this.xRot));
 		}
 	}
 
 	private void compile(
-		Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, int i, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float j
+		Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float g, float h, float k
 	) {
 		Matrix3f matrix3f = new Matrix3f(matrix4f);
 
@@ -156,15 +155,14 @@ public class ModelPart {
 				vector3f2.transform(matrix3f);
 				vector3f2.cross(vector3f);
 				vector3f2.normalize();
-				float k = vector3f2.x();
-				float l = vector3f2.y();
-				float m = vector3f2.z();
+				float l = vector3f2.x();
+				float m = vector3f2.y();
+				float n = vector3f2.z();
 
-				for (int n = 0; n < 4; n++) {
-					ModelPart.Vertex vertex = polygon.vertices[n];
+				for (int o = 0; o < 4; o++) {
+					ModelPart.Vertex vertex = polygon.vertices[o];
 					Vector4f vector4f = new Vector4f((float)vertex.pos.x * f, (float)vertex.pos.y * f, (float)vertex.pos.z * f, 1.0F);
 					vector4f.transform(matrix4f);
-					float o = Mth.diffuseLight(k, l, m);
 					float p;
 					float q;
 					if (textureAtlasSprite == null) {
@@ -176,10 +174,11 @@ public class ModelPart {
 					}
 
 					vertexConsumer.vertex((double)vector4f.x(), (double)vector4f.y(), (double)vector4f.z())
-						.color(o * g, o * h, o * j, 1.0F)
+						.color(g, h, k, 1.0F)
 						.uv(p, q)
+						.overlayCoords(j)
 						.uv2(i)
-						.normal(k, l, m)
+						.normal(l, m, n)
 						.endVertex();
 				}
 			}

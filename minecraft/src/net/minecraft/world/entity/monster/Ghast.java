@@ -47,7 +47,7 @@ public class Ghast extends FlyingMob implements Enemy {
 		this.goalSelector.addGoal(7, new Ghast.GhastLookGoal(this));
 		this.goalSelector.addGoal(7, new Ghast.GhastShootFireballGoal(this));
 		this.targetSelector
-			.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.y - this.y) <= 4.0));
+			.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0));
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -176,8 +176,8 @@ public class Ghast extends FlyingMob implements Enemy {
 				LivingEntity livingEntity = this.ghast.getTarget();
 				double d = 64.0;
 				if (livingEntity.distanceToSqr(this.ghast) < 4096.0) {
-					double e = livingEntity.x - this.ghast.x;
-					double f = livingEntity.z - this.ghast.z;
+					double e = livingEntity.getX() - this.ghast.getX();
+					double f = livingEntity.getZ() - this.ghast.getZ();
 					this.ghast.yRot = -((float)Mth.atan2(e, f)) * (180.0F / (float)Math.PI);
 					this.ghast.yBodyRot = this.ghast.yRot;
 				}
@@ -199,7 +199,7 @@ public class Ghast extends FlyingMob implements Enemy {
 			if (this.operation == MoveControl.Operation.MOVE_TO) {
 				if (this.floatDuration-- <= 0) {
 					this.floatDuration = this.floatDuration + this.ghast.getRandom().nextInt(5) + 2;
-					Vec3 vec3 = new Vec3(this.wantedX - this.ghast.x, this.wantedY - this.ghast.y, this.wantedZ - this.ghast.z);
+					Vec3 vec3 = new Vec3(this.wantedX - this.ghast.getX(), this.wantedY - this.ghast.getY(), this.wantedZ - this.ghast.getZ());
 					double d = vec3.length();
 					vec3 = vec3.normalize();
 					if (this.canReach(vec3, Mth.ceil(d))) {
@@ -262,17 +262,13 @@ public class Ghast extends FlyingMob implements Enemy {
 				if (this.chargeTime == 20) {
 					double e = 4.0;
 					Vec3 vec3 = this.ghast.getViewVector(1.0F);
-					double f = livingEntity.x - (this.ghast.x + vec3.x * 4.0);
-					double g = livingEntity.getBoundingBox().minY
-						+ (double)(livingEntity.getBbHeight() / 2.0F)
-						- (0.5 + this.ghast.y + (double)(this.ghast.getBbHeight() / 2.0F));
-					double h = livingEntity.z - (this.ghast.z + vec3.z * 4.0);
+					double f = livingEntity.getX() - (this.ghast.getX() + vec3.x * 4.0);
+					double g = livingEntity.getY(0.5) - (0.5 + this.ghast.getY(0.5));
+					double h = livingEntity.getZ() - (this.ghast.getZ() + vec3.z * 4.0);
 					level.levelEvent(null, 1016, new BlockPos(this.ghast), 0);
 					LargeFireball largeFireball = new LargeFireball(level, this.ghast, f, g, h);
 					largeFireball.explosionPower = this.ghast.getExplosionPower();
-					largeFireball.x = this.ghast.x + vec3.x * 4.0;
-					largeFireball.y = this.ghast.y + (double)(this.ghast.getBbHeight() / 2.0F) + 0.5;
-					largeFireball.z = this.ghast.z + vec3.z * 4.0;
+					largeFireball.setPos(this.ghast.getX() + vec3.x * 4.0, this.ghast.getY(0.5) + 0.5, largeFireball.getZ() + vec3.z * 4.0);
 					level.addFreshEntity(largeFireball);
 					this.chargeTime = -40;
 				}
@@ -298,9 +294,9 @@ public class Ghast extends FlyingMob implements Enemy {
 			if (!moveControl.hasWanted()) {
 				return true;
 			} else {
-				double d = moveControl.getWantedX() - this.ghast.x;
-				double e = moveControl.getWantedY() - this.ghast.y;
-				double f = moveControl.getWantedZ() - this.ghast.z;
+				double d = moveControl.getWantedX() - this.ghast.getX();
+				double e = moveControl.getWantedY() - this.ghast.getY();
+				double f = moveControl.getWantedZ() - this.ghast.getZ();
 				double g = d * d + e * e + f * f;
 				return g < 1.0 || g > 3600.0;
 			}
@@ -314,9 +310,9 @@ public class Ghast extends FlyingMob implements Enemy {
 		@Override
 		public void start() {
 			Random random = this.ghast.getRandom();
-			double d = this.ghast.x + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
-			double e = this.ghast.y + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
-			double f = this.ghast.z + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			double d = this.ghast.getX() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			double e = this.ghast.getY() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
+			double f = this.ghast.getZ() + (double)((random.nextFloat() * 2.0F - 1.0F) * 16.0F);
 			this.ghast.getMoveControl().setWantedPosition(d, e, f, 1.0);
 		}
 	}

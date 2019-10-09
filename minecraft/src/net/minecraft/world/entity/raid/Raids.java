@@ -93,7 +93,7 @@ public class Raids extends SavedData {
 					.getInRange(PoiType.ALL, blockPos, 64, PoiManager.Occupancy.IS_OCCUPIED)
 					.collect(Collectors.toList());
 				int i = 0;
-				Vec3 vec3 = new Vec3(0.0, 0.0, 0.0);
+				Vec3 vec3 = Vec3.ZERO;
 
 				for (PoiRecord poiRecord : list) {
 					BlockPos blockPos2 = poiRecord.getPos();

@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,6 +24,10 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
@@ -70,7 +75,14 @@ public class TestCommand {
 								.executes(commandContext -> importTestStructure(commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))
 						)
 				)
-				.then(Commands.literal("pos").executes(commandContext -> showPos(commandContext.getSource())))
+				.then(
+					Commands.literal("pos")
+						.executes(commandContext -> showPos(commandContext.getSource(), "pos"))
+						.then(
+							Commands.argument("var", StringArgumentType.word())
+								.executes(commandContext -> showPos(commandContext.getSource(), StringArgumentType.getString(commandContext, "var")))
+						)
+				)
 				.then(
 					Commands.literal("create")
 						.then(
@@ -141,7 +153,7 @@ public class TestCommand {
 		}
 	}
 
-	private static int showPos(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+	private static int showPos(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {
 		BlockHitResult blockHitResult = (BlockHitResult)commandSourceStack.getPlayerOrException().pick(10.0, 1.0F, false);
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		ServerLevel serverLevel = commandSourceStack.getLevel();
@@ -156,11 +168,18 @@ public class TestCommand {
 		} else {
 			StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity((BlockPos)optional.get());
 			BlockPos blockPos2 = blockPos.subtract((Vec3i)optional.get());
-			String string = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
-			String string2 = structureBlockEntity.getStructurePath();
-			say(commandSourceStack, "Position relative to " + string2 + ":");
-			say(commandSourceStack, string);
-			DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string, -2147418368, 10000);
+			String string2 = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
+			String string3 = structureBlockEntity.getStructurePath();
+			Component component = new TextComponent(string2)
+				.setStyle(
+					new Style()
+						.setBold(true)
+						.setColor(ChatFormatting.GREEN)
+						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard")))
+						.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");"))
+				);
+			commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
+			DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);
 			return 1;
 		}
 	}
@@ -205,6 +224,7 @@ public class TestCommand {
 			gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
 		}
 
+		runTestPreparation(testFunction, serverLevel);
 		GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
 	}
 
@@ -242,9 +262,17 @@ public class TestCommand {
 			blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 		);
 		GameTestRunner.clearMarkers(serverLevel);
+		runTestPreparation(testFunction, serverLevel);
 		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, blockPos2, serverLevel);
 		GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
 		return 1;
+	}
+
+	private static void runTestPreparation(TestFunction testFunction, ServerLevel serverLevel) {
+		Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(testFunction.getBatchName());
+		if (consumer != null) {
+			consumer.accept(serverLevel);
+		}
 	}
 
 	private static int runAllTests(CommandSourceStack commandSourceStack) {
@@ -333,11 +361,6 @@ public class TestCommand {
 
 		@Override
 		public void testStructureLoaded(GameTestInfo gameTestInfo) {
-		}
-
-		@Override
-		public void testPassed(GameTestInfo gameTestInfo) {
-			TestCommand.showTestSummaryIfAllDone(this.level, this.tracker);
 		}
 
 		@Override

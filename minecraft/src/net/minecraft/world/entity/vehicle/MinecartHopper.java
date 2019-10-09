@@ -73,17 +73,17 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 
 	@Override
 	public double getLevelX() {
-		return this.x;
+		return this.getX();
 	}
 
 	@Override
 	public double getLevelY() {
-		return this.y + 0.5;
+		return this.getY() + 0.5;
 	}
 
 	@Override
 	public double getLevelZ() {
-		return this.z;
+		return this.getZ();
 	}
 
 	@Override

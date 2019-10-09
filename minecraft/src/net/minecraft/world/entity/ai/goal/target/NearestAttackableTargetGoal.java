@@ -52,16 +52,10 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 			this.target = this.mob
 				.level
 				.getNearestLoadedEntity(
-					this.targetType,
-					this.targetConditions,
-					this.mob,
-					this.mob.x,
-					this.mob.y + (double)this.mob.getEyeHeight(),
-					this.mob.z,
-					this.getTargetSearchArea(this.getFollowDistance())
+					this.targetType, this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ(), this.getTargetSearchArea(this.getFollowDistance())
 				);
 		} else {
-			this.target = this.mob.level.getNearestPlayer(this.targetConditions, this.mob, this.mob.x, this.mob.y + (double)this.mob.getEyeHeight(), this.mob.z);
+			this.target = this.mob.level.getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 		}
 	}
 

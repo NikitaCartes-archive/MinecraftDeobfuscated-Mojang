@@ -8,18 +8,18 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
-public class LakeFeature extends Feature<LakeConfiguration> {
+public class LakeFeature extends Feature<BlockStateConfiguration> {
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public LakeFeature(Function<Dynamic<?>, ? extends LakeConfiguration> function) {
+	public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
 		super(function);
 	}
 
@@ -28,7 +28,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
-		LakeConfiguration lakeConfiguration
+		BlockStateConfiguration blockStateConfiguration
 	) {
 		while (blockPos.getY() > 5 && levelAccessor.isEmptyBlock(blockPos)) {
 			blockPos = blockPos.below();
@@ -86,7 +86,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 									return false;
 								}
 
-								if (t < 4 && !material.isSolid() && levelAccessor.getBlockState(blockPos.offset(j, t, s)) != lakeConfiguration.state) {
+								if (t < 4 && !material.isSolid() && levelAccessor.getBlockState(blockPos.offset(j, t, s)) != blockStateConfiguration.state) {
 									return false;
 								}
 							}
@@ -98,7 +98,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 					for (int s = 0; s < 16; s++) {
 						for (int tx = 0; tx < 8; tx++) {
 							if (bls[(j * 16 + s) * 8 + tx]) {
-								levelAccessor.setBlock(blockPos.offset(j, tx, s), tx >= 4 ? AIR : lakeConfiguration.state, 2);
+								levelAccessor.setBlock(blockPos.offset(j, tx, s), tx >= 4 ? AIR : blockStateConfiguration.state, 2);
 							}
 						}
 					}
@@ -109,7 +109,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 						for (int txx = 4; txx < 8; txx++) {
 							if (bls[(j * 16 + s) * 8 + txx]) {
 								BlockPos blockPos2 = blockPos.offset(j, txx - 1, s);
-								if (Block.equalsDirt(levelAccessor.getBlockState(blockPos2).getBlock()) && levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
+								if (isDirt(levelAccessor.getBlockState(blockPos2).getBlock()) && levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
 									Biome biome = levelAccessor.getBiome(blockPos2);
 									if (biome.getSurfaceBuilderConfig().getTopMaterial().getBlock() == Blocks.MYCELIUM) {
 										levelAccessor.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
@@ -122,7 +122,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 					}
 				}
 
-				if (lakeConfiguration.state.getMaterial() == Material.LAVA) {
+				if (blockStateConfiguration.state.getMaterial() == Material.LAVA) {
 					for (int j = 0; j < 16; j++) {
 						for (int s = 0; s < 16; s++) {
 							for (int txxx = 0; txxx < 8; txxx++) {
@@ -143,7 +143,7 @@ public class LakeFeature extends Feature<LakeConfiguration> {
 					}
 				}
 
-				if (lakeConfiguration.state.getMaterial() == Material.WATER) {
+				if (blockStateConfiguration.state.getMaterial() == Material.WATER) {
 					for (int j = 0; j < 16; j++) {
 						for (int s = 0; s < 16; s++) {
 							int txxxx = 4;

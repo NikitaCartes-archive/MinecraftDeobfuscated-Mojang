@@ -30,7 +30,7 @@ public class FlyingPathNavigation extends PathNavigation {
 
 	@Override
 	protected Vec3 getTempMobPos() {
-		return new Vec3(this.mob.x, this.mob.y, this.mob.z);
+		return this.mob.position();
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class FlyingPathNavigation extends PathNavigation {
 				this.updatePath();
 			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
 				Vec3 vec3 = this.path.getPos(this.mob, this.path.getIndex());
-				if (Mth.floor(this.mob.x) == Mth.floor(vec3.x) && Mth.floor(this.mob.y) == Mth.floor(vec3.y) && Mth.floor(this.mob.z) == Mth.floor(vec3.z)) {
+				if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {
 					this.path.setIndex(this.path.getIndex() + 1);
 				}
 			}

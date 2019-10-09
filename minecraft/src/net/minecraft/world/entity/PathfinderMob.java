@@ -22,7 +22,7 @@ public abstract class PathfinderMob extends Mob {
 
 	@Override
 	public boolean checkSpawnRules(LevelAccessor levelAccessor, MobSpawnType mobSpawnType) {
-		return this.getWalkTargetValue(new BlockPos(this.x, this.getBoundingBox().minY, this.z), levelAccessor) >= 0.0F;
+		return this.getWalkTargetValue(new BlockPos(this), levelAccessor) >= 0.0F;
 	}
 
 	public boolean isPathFinding() {
@@ -49,15 +49,17 @@ public abstract class PathfinderMob extends Mob {
 				this.dropLeash(true, true);
 				this.goalSelector.disableControlFlag(Goal.Flag.MOVE);
 			} else if (f > 6.0F) {
-				double d = (entity.x - this.x) / (double)f;
-				double e = (entity.y - this.y) / (double)f;
-				double g = (entity.z - this.z) / (double)f;
+				double d = (entity.getX() - this.getX()) / (double)f;
+				double e = (entity.getY() - this.getY()) / (double)f;
+				double g = (entity.getZ() - this.getZ()) / (double)f;
 				this.setDeltaMovement(this.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
 			} else {
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				float h = 2.0F;
-				Vec3 vec3 = new Vec3(entity.x - this.x, entity.y - this.y, entity.z - this.z).normalize().scale((double)Math.max(f - 2.0F, 0.0F));
-				this.getNavigation().moveTo(this.x + vec3.x, this.y + vec3.y, this.z + vec3.z, this.followLeashSpeed());
+				Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getY() - this.getY(), entity.getZ() - this.getZ())
+					.normalize()
+					.scale((double)Math.max(f - 2.0F, 0.0F));
+				this.getNavigation().moveTo(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z, this.followLeashSpeed());
 			}
 		}
 	}

@@ -6,19 +6,19 @@ import java.util.SortedMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 
 @Environment(EnvType.CLIENT)
 public class RenderBuffers {
 	private final ChunkBufferBuilderPack fixedBufferPack = new ChunkBufferBuilderPack();
 	private final SortedMap<RenderType, BufferBuilder> fixedBuffers = Util.make(new Object2ObjectLinkedOpenHashMap<>(), object2ObjectLinkedOpenHashMap -> {
-		for (RenderType renderType : RenderType.chunkBufferLayers()) {
-			object2ObjectLinkedOpenHashMap.put(renderType, this.fixedBufferPack.builder(renderType));
-		}
-
-		object2ObjectLinkedOpenHashMap.put(RenderType.TRANSLUCENT_NO_CRUMBLING, new BufferBuilder(RenderType.TRANSLUCENT_NO_CRUMBLING.bufferSize()));
-		object2ObjectLinkedOpenHashMap.put(RenderType.GLINT, new BufferBuilder(RenderType.GLINT.bufferSize()));
-		object2ObjectLinkedOpenHashMap.put(RenderType.ENTITY_GLINT, new BufferBuilder(RenderType.ENTITY_GLINT.bufferSize()));
-		object2ObjectLinkedOpenHashMap.put(RenderType.WATER_MASK, new BufferBuilder(RenderType.WATER_MASK.bufferSize()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.solid()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutout()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.translucent()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.translucentNoCrumbling(), new BufferBuilder(RenderType.translucentNoCrumbling().bufferSize()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.glint(), new BufferBuilder(RenderType.glint().bufferSize()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.entityGlint(), new BufferBuilder(RenderType.entityGlint().bufferSize()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.waterMask(), new BufferBuilder(RenderType.waterMask().bufferSize()));
 	});
 	private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediateWithBuffers(this.fixedBuffers, new BufferBuilder(256));
 	private final MultiBufferSource.BufferSource effectBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));

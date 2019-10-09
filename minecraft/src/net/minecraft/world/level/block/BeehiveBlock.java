@@ -69,7 +69,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 		super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
 		if (!level.isClientSide) {
 			if (blockEntity instanceof BeehiveBlockEntity && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-				((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+				((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 				level.updateNeighbourForOutputSignal(blockPos, this);
 			}
 
@@ -100,13 +100,13 @@ public class BeehiveBlock extends BaseEntityBlock {
 		boolean bl = false;
 		if (i >= 5) {
 			if (itemStack.getItem() == Items.SHEARS) {
-				level.playSound(player, player.x, player.y, player.z, SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 				dropHoneycomb(level, blockPos);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 				bl = true;
 			} else if (itemStack.getItem() == Items.GLASS_BOTTLE) {
 				itemStack.shrink(1);
-				level.playSound(player, player.x, player.y, player.z, SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
+				level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
 				if (itemStack.isEmpty()) {
 					player.setItemInHand(interactionHand, new ItemStack(Items.HONEY_BOTTLE));
 				} else if (!player.inventory.add(new ItemStack(Items.HONEY_BOTTLE))) {
@@ -118,19 +118,21 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		if (bl) {
-			this.releaseBeesAndResetState(level, blockState, blockPos, player);
+			this.releaseBeesAndResetState(level, blockState, blockPos, player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			return true;
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
 	}
 
-	public void releaseBeesAndResetState(Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player) {
+	public void releaseBeesAndResetState(
+		Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
+	) {
 		level.setBlock(blockPos, blockState.setValue(HONEY_LEVEL, Integer.valueOf(0)), 3);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof BeehiveBlockEntity) {
 			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-			beehiveBlockEntity.emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+			beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, beeReleaseStatus);
 		}
 	}
 
@@ -146,7 +148,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 	@Environment(EnvType.CLIENT)
 	private void trySpawnDripParticles(Level level, BlockPos blockPos, BlockState blockState) {
-		if (blockState.getFluidState().isEmpty()) {
+		if (blockState.getFluidState().isEmpty() && !(level.random.nextFloat() < 0.3F)) {
 			VoxelShape voxelShape = blockState.getCollisionShape(level, blockPos);
 			double d = voxelShape.max(Direction.Axis.Y);
 			if (d >= 1.0 && !blockState.is(BlockTags.IMPERMEABLE)) {
@@ -240,7 +242,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 			if (blockEntity instanceof BeehiveBlockEntity) {
 				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-				beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+				beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			}
 		}
 
@@ -255,7 +257,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
 			if (blockEntity instanceof BeehiveBlockEntity) {
 				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-				beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+				beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			}
 		}
 

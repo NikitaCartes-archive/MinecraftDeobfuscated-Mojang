@@ -9,6 +9,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.structure.BeardedStructureStart;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -39,7 +40,7 @@ public class VillageFeature extends StructureFeature<VillageConfiguration> {
 	@Override
 	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
 		ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
-		return i == chunkPos.x && j == chunkPos.z ? chunkGenerator.isBiomeValidStartForStructure(biome, Feature.VILLAGE) : false;
+		return i == chunkPos.x && j == chunkPos.z ? chunkGenerator.isBiomeValidStartForStructure(biome, this) : false;
 	}
 
 	@Override

@@ -71,9 +71,9 @@ public class ExperienceOrb extends Entity {
 			this.throwTime--;
 		}
 
-		this.xo = this.x;
-		this.yo = this.y;
-		this.zo = this.z;
+		this.xo = this.getX();
+		this.yo = this.getY();
+		this.zo = this.getZ();
 		if (this.isUnderLiquid(FluidTags.WATER)) {
 			this.setUnderwaterMovement();
 		} else if (!this.isNoGravity()) {
@@ -88,7 +88,7 @@ public class ExperienceOrb extends Entity {
 		}
 
 		if (!this.level.noCollision(this.getBoundingBox())) {
-			this.checkInBlock(this.x, (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.z);
+			this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 		}
 
 		double d = 8.0;
@@ -106,7 +106,9 @@ public class ExperienceOrb extends Entity {
 
 		if (this.followingPlayer != null) {
 			Vec3 vec3 = new Vec3(
-				this.followingPlayer.x - this.x, this.followingPlayer.y + (double)this.followingPlayer.getEyeHeight() / 2.0 - this.y, this.followingPlayer.z - this.z
+				this.followingPlayer.getX() - this.getX(),
+				this.followingPlayer.getY() + (double)this.followingPlayer.getEyeHeight() / 2.0 - this.getY(),
+				this.followingPlayer.getZ() - this.getZ()
 			);
 			double e = vec3.lengthSqr();
 			if (e < 64.0) {
@@ -118,7 +120,7 @@ public class ExperienceOrb extends Entity {
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		float g = 0.98F;
 		if (this.onGround) {
-			g = this.level.getBlockState(new BlockPos(this.x, this.getBoundingBox().minY - 1.0, this.z)).getBlock().getFriction() * 0.98F;
+			g = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
 		}
 
 		this.setDeltaMovement(this.getDeltaMovement().multiply((double)g, 0.98, (double)g));

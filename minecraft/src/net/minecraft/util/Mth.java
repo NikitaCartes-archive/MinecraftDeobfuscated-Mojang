@@ -544,11 +544,6 @@ public class Mth {
 		return g + f * wrapDegrees(h - g);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static float diffuseLight(float f, float g, float h) {
-		return Math.min(f * f * 0.6F + g * g * ((3.0F + g) / 4.0F) + h * h * 0.8F, 1.0F);
-	}
-
 	@Deprecated
 	public static float rotlerp(float f, float g, float h) {
 		float i = g - f;

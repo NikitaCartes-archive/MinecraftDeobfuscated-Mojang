@@ -48,25 +48,25 @@ public class RandomPos {
 
 	@Nullable
 	public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-		Vec3 vec32 = vec3.subtract(pathfinderMob.x, pathfinderMob.y, pathfinderMob.z);
+		Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
 		return generateRandomPos(pathfinderMob, i, j, vec32);
 	}
 
 	@Nullable
 	public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3, double d) {
-		Vec3 vec32 = vec3.subtract(pathfinderMob.x, pathfinderMob.y, pathfinderMob.z);
+		Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
 		return generateRandomPos(pathfinderMob, i, j, vec32, true, d, pathfinderMob::getWalkTargetValue);
 	}
 
 	@Nullable
 	public static Vec3 getLandPosAvoid(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-		Vec3 vec32 = new Vec3(pathfinderMob.x, pathfinderMob.y, pathfinderMob.z).subtract(vec3);
+		Vec3 vec32 = pathfinderMob.position().subtract(vec3);
 		return generateRandomPos(pathfinderMob, i, j, vec32, false, (float) (Math.PI / 2), pathfinderMob::getWalkTargetValue);
 	}
 
 	@Nullable
 	public static Vec3 getPosAvoid(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
-		Vec3 vec32 = new Vec3(pathfinderMob.x, pathfinderMob.y, pathfinderMob.z).subtract(vec3);
+		Vec3 vec32 = pathfinderMob.position().subtract(vec3);
 		return generateRandomPos(pathfinderMob, i, j, vec32);
 	}
 
@@ -126,20 +126,20 @@ public class RandomPos {
 				int q = blockPos2.getZ();
 				if (pathfinderMob.hasRestriction() && i > 1) {
 					BlockPos blockPos3 = pathfinderMob.getRestrictCenter();
-					if (pathfinderMob.x > (double)blockPos3.getX()) {
+					if (pathfinderMob.getX() > (double)blockPos3.getX()) {
 						o -= random.nextInt(i / 2);
 					} else {
 						o += random.nextInt(i / 2);
 					}
 
-					if (pathfinderMob.z > (double)blockPos3.getZ()) {
+					if (pathfinderMob.getZ() > (double)blockPos3.getZ()) {
 						q -= random.nextInt(i / 2);
 					} else {
 						q += random.nextInt(i / 2);
 					}
 				}
 
-				BlockPos blockPos3x = new BlockPos((double)o + pathfinderMob.x, (double)p + pathfinderMob.y, (double)q + pathfinderMob.z);
+				BlockPos blockPos3x = new BlockPos((double)o + pathfinderMob.getX(), (double)p + pathfinderMob.getY(), (double)q + pathfinderMob.getZ());
 				if ((!bl4 || pathfinderMob.isWithinRestriction(blockPos3x)) && (!bl3 || pathNavigation.isStableDestination(blockPos3x))) {
 					if (bl2) {
 						blockPos3x = moveAboveSolid(blockPos3x, random.nextInt(l + 1) + m, pathfinderMob.level.getMaxBuildHeight(), predicate);

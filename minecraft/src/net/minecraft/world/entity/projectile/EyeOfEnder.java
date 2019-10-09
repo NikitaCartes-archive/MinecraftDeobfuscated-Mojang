@@ -82,13 +82,13 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double d = (double)blockPos.getX();
 		int i = blockPos.getY();
 		double e = (double)blockPos.getZ();
-		double f = d - this.x;
-		double g = e - this.z;
+		double f = d - this.getX();
+		double g = e - this.getZ();
 		float h = Mth.sqrt(f * f + g * g);
 		if (h > 12.0F) {
-			this.tx = this.x + f / (double)h * 12.0;
-			this.tz = this.z + g / (double)h * 12.0;
-			this.ty = this.y + 8.0;
+			this.tx = this.getX() + f / (double)h * 12.0;
+			this.tz = this.getZ() + g / (double)h * 12.0;
+			this.ty = this.getY() + 8.0;
 		} else {
 			this.tx = d;
 			this.ty = (double)i;
@@ -116,12 +116,12 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 	public void tick() {
 		super.tick();
 		Vec3 vec3 = this.getDeltaMovement();
-		this.x = this.x + vec3.x;
-		this.y = this.y + vec3.y;
-		this.z = this.z + vec3.z;
-		float f = Mth.sqrt(getHorizontalDistanceSqr(vec3));
+		double d = this.getX() + vec3.x;
+		double e = this.getY() + vec3.y;
+		double f = this.getZ() + vec3.z;
+		float g = Mth.sqrt(getHorizontalDistanceSqr(vec3));
 		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI);
+		this.xRot = (float)(Mth.atan2(vec3.y, (double)g) * 180.0F / (float)Math.PI);
 
 		while (this.xRot - this.xRotO < -180.0F) {
 			this.xRotO -= 360.0F;
@@ -142,34 +142,34 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		this.xRot = Mth.lerp(0.2F, this.xRotO, this.xRot);
 		this.yRot = Mth.lerp(0.2F, this.yRotO, this.yRot);
 		if (!this.level.isClientSide) {
-			double d = this.tx - this.x;
-			double e = this.tz - this.z;
-			float g = (float)Math.sqrt(d * d + e * e);
-			float h = (float)Mth.atan2(e, d);
-			double i = Mth.lerp(0.0025, (double)f, (double)g);
-			double j = vec3.y;
-			if (g < 1.0F) {
-				i *= 0.8;
-				j *= 0.8;
+			double h = this.tx - d;
+			double i = this.tz - f;
+			float j = (float)Math.sqrt(h * h + i * i);
+			float k = (float)Mth.atan2(i, h);
+			double l = Mth.lerp(0.0025, (double)g, (double)j);
+			double m = vec3.y;
+			if (j < 1.0F) {
+				l *= 0.8;
+				m *= 0.8;
 			}
 
-			int k = this.y < this.ty ? 1 : -1;
-			vec3 = new Vec3(Math.cos((double)h) * i, j + ((double)k - j) * 0.015F, Math.sin((double)h) * i);
+			int n = this.getY() < this.ty ? 1 : -1;
+			vec3 = new Vec3(Math.cos((double)k) * l, m + ((double)n - m) * 0.015F, Math.sin((double)k) * l);
 			this.setDeltaMovement(vec3);
 		}
 
-		float l = 0.25F;
+		float o = 0.25F;
 		if (this.isInWater()) {
-			for (int m = 0; m < 4; m++) {
-				this.level.addParticle(ParticleTypes.BUBBLE, this.x - vec3.x * 0.25, this.y - vec3.y * 0.25, this.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+			for (int p = 0; p < 4; p++) {
+				this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 			}
 		} else {
 			this.level
 				.addParticle(
 					ParticleTypes.PORTAL,
-					this.x - vec3.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
-					this.y - vec3.y * 0.25 - 0.5,
-					this.z - vec3.z * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
+					d - vec3.x * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
+					e - vec3.y * 0.25 - 0.5,
+					f - vec3.z * 0.25 + this.random.nextDouble() * 0.6 - 0.3,
 					vec3.x,
 					vec3.y,
 					vec3.z
@@ -177,17 +177,19 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		}
 
 		if (!this.level.isClientSide) {
-			this.setPos(this.x, this.y, this.z);
+			this.setPos(d, e, f);
 			this.life++;
 			if (this.life > 80 && !this.level.isClientSide) {
 				this.playSound(SoundEvents.ENDER_EYE_DEATH, 1.0F, 1.0F);
 				this.remove();
 				if (this.surviveAfterDeath) {
-					this.level.addFreshEntity(new ItemEntity(this.level, this.x, this.y, this.z, this.getItem()));
+					this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
 				} else {
 					this.level.levelEvent(2003, new BlockPos(this), 0);
 				}
 			}
+		} else {
+			this.setPosRaw(d, e, f);
 		}
 	}
 

@@ -1,11 +1,14 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.SlimeModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -20,8 +23,12 @@ public class SlimeOuterLayer<T extends LivingEntity> extends RenderLayer<T, Slim
 	public void render(
 		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
 	) {
-		coloredModelCopyLayerRender(
-			this.getParentModel(), this.model, this.getTextureLocation(livingEntity), poseStack, multiBufferSource, i, livingEntity, f, g, j, k, l, m, h
-		);
+		if (!livingEntity.isInvisible()) {
+			this.getParentModel().copyPropertiesTo(this.model);
+			this.model.prepareMobModel(livingEntity, f, g, h);
+			this.model.setupAnim(livingEntity, f, g, j, k, l, m);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(livingEntity)));
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), 1.0F, 1.0F, 1.0F);
+		}
 	}
 }

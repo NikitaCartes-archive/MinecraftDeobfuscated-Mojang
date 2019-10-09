@@ -30,7 +30,7 @@ public class MoveTowardsTargetGoal extends Goal {
 		} else if (this.target.distanceToSqr(this.mob) > (double)(this.within * this.within)) {
 			return false;
 		} else {
-			Vec3 vec3 = RandomPos.getPosTowards(this.mob, 16, 7, new Vec3(this.target.x, this.target.y, this.target.z));
+			Vec3 vec3 = RandomPos.getPosTowards(this.mob, 16, 7, this.target.position());
 			if (vec3 == null) {
 				return false;
 			} else {

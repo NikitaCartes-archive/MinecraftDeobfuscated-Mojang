@@ -10,8 +10,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class IcebergPlacementDecorator extends FeatureDecorator<DecoratorChance> {
-	public IcebergPlacementDecorator(Function<Dynamic<?>, ? extends DecoratorChance> function) {
+public class IcebergPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
+	public IcebergPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -19,13 +19,14 @@ public class IcebergPlacementDecorator extends FeatureDecorator<DecoratorChance>
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorChance decoratorChance,
+		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		if (random.nextFloat() < 1.0F / (float)decoratorChance.chance) {
-			int i = random.nextInt(8) + 4;
-			int j = random.nextInt(8) + 4;
-			return Stream.of(levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(i, 0, j)));
+		if (random.nextFloat() < 1.0F / (float)chanceDecoratorConfiguration.chance) {
+			int i = random.nextInt(8) + 4 + blockPos.getX();
+			int j = random.nextInt(8) + 4 + blockPos.getZ();
+			int k = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, i, j);
+			return Stream.of(new BlockPos(i, k, j));
 		} else {
 			return Stream.empty();
 		}

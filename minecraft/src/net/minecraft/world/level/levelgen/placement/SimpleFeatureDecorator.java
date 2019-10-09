@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public abstract class SimpleFeatureDecorator<DC extends DecoratorConfiguration> extends FeatureDecorator<DC> {
 	public SimpleFeatureDecorator(Function<Dynamic<?>, ? extends DC> function) {

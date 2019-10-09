@@ -14,6 +14,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -109,22 +110,22 @@ public class BlockEntityRenderDispatcher {
 			i = 15728880;
 		}
 
-		blockEntityRenderer.render(blockEntity, d, e, f, g, poseStack, multiBufferSource, i);
+		blockEntityRenderer.render(blockEntity, d, e, f, g, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
 	}
 
 	@Deprecated
-	public <E extends BlockEntity> void renderItem(E blockEntity, PoseStack poseStack, int i) {
+	public <E extends BlockEntity> void renderItem(E blockEntity, PoseStack poseStack) {
 		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(this.singleRenderBuffer);
-		this.renderItem(blockEntity, poseStack, bufferSource, i);
+		this.renderItem(blockEntity, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
 		bufferSource.endBatch();
 	}
 
-	public <E extends BlockEntity> boolean renderItem(E blockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public <E extends BlockEntity> boolean renderItem(E blockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		BlockEntityRenderer<E> blockEntityRenderer = this.getRenderer(blockEntity);
 		if (blockEntityRenderer == null) {
 			return true;
 		} else {
-			tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0F, poseStack, multiBufferSource, i));
+			tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0F, poseStack, multiBufferSource, i, j));
 			return false;
 		}
 	}

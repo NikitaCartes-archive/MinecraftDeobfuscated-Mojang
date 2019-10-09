@@ -2,12 +2,12 @@ package net.minecraft.client.renderer.texture;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class OverlayTexture implements AutoCloseable {
+	public static final int NO_OVERLAY = pack(0, 10);
 	private final DynamicTexture texture = new DynamicTexture(16, 16, false);
 
 	public OverlayTexture() {
@@ -52,11 +52,15 @@ public class OverlayTexture implements AutoCloseable {
 		return bl ? 3 : 10;
 	}
 
-	public void teardownOverlayColor() {
-		RenderSystem.teardownOverlayColor();
+	public static int pack(int i, int j) {
+		return i | j << 16;
 	}
 
-	public static void setDefault(VertexConsumer vertexConsumer) {
-		vertexConsumer.defaultOverlayCoords(0, 10);
+	public static int pack(float f, boolean bl) {
+		return pack(u(f), v(bl));
+	}
+
+	public void teardownOverlayColor() {
+		RenderSystem.teardownOverlayColor();
 	}
 }

@@ -3,7 +3,7 @@ package net.minecraft.world.level.levelgen.placement;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class DepthAverageConfigation implements DecoratorConfiguration {
 	public final int count;

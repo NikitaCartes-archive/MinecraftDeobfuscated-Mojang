@@ -5,9 +5,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -28,7 +28,7 @@ public class SmallEndIslandsBiome extends Biome {
 		);
 		this.addFeature(
 			GenerationStep.Decoration.RAW_GENERATION,
-			makeComposite(Feature.END_ISLAND, FeatureConfiguration.NONE, FeatureDecorator.END_ISLAND, DecoratorConfiguration.NONE)
+			Feature.END_ISLAND.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.END_ISLAND.configured(DecoratorConfiguration.NONE))
 		);
 		BiomeDefaultFeatures.addEndCity(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 10, 4, 4));

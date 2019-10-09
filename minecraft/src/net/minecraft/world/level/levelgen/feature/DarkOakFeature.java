@@ -8,21 +8,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public class DarkOakFeature extends AbstractTreeFeature<NoneFeatureConfiguration> {
-	private static final BlockState LOG = Blocks.DARK_OAK_LOG.defaultBlockState();
-	private static final BlockState LEAVES = Blocks.DARK_OAK_LEAVES.defaultBlockState();
-
-	public DarkOakFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, boolean bl) {
-		super(function, bl);
+public class DarkOakFeature extends AbstractTreeFeature<MegaTreeConfiguration> {
+	public DarkOakFeature(Function<Dynamic<?>, ? extends MegaTreeConfiguration> function) {
+		super(function);
 	}
 
-	@Override
-	public boolean doPlace(Set<BlockPos> set, LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, BoundingBox boundingBox) {
-		int i = random.nextInt(3) + random.nextInt(2) + 6;
+	public boolean doPlace(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		BlockPos blockPos,
+		Set<BlockPos> set,
+		Set<BlockPos> set2,
+		BoundingBox boundingBox,
+		MegaTreeConfiguration megaTreeConfiguration
+	) {
+		int i = random.nextInt(3) + random.nextInt(2) + megaTreeConfiguration.baseHeight;
 		int j = blockPos.getX();
 		int k = blockPos.getY();
 		int l = blockPos.getZ();
@@ -54,41 +57,41 @@ public class DarkOakFeature extends AbstractTreeFeature<NoneFeatureConfiguration
 					int s = k + r;
 					BlockPos blockPos3 = new BlockPos(o, s, p);
 					if (isAirOrLeaves(levelSimulatedRW, blockPos3)) {
-						this.placeLogAt(set, levelSimulatedRW, blockPos3, boundingBox);
-						this.placeLogAt(set, levelSimulatedRW, blockPos3.east(), boundingBox);
-						this.placeLogAt(set, levelSimulatedRW, blockPos3.south(), boundingBox);
-						this.placeLogAt(set, levelSimulatedRW, blockPos3.east().south(), boundingBox);
+						this.placeLog(levelSimulatedRW, random, blockPos3, set, boundingBox, megaTreeConfiguration);
+						this.placeLog(levelSimulatedRW, random, blockPos3.east(), set, boundingBox, megaTreeConfiguration);
+						this.placeLog(levelSimulatedRW, random, blockPos3.south(), set, boundingBox, megaTreeConfiguration);
+						this.placeLog(levelSimulatedRW, random, blockPos3.east().south(), set, boundingBox, megaTreeConfiguration);
 					}
 				}
 
 				for (int r = -2; r <= 0; r++) {
 					for (int s = -2; s <= 0; s++) {
 						int t = -1;
-						this.placeLeafAt(levelSimulatedRW, o + r, q + t, p + s, boundingBox, set);
-						this.placeLeafAt(levelSimulatedRW, 1 + o - r, q + t, p + s, boundingBox, set);
-						this.placeLeafAt(levelSimulatedRW, o + r, q + t, 1 + p - s, boundingBox, set);
-						this.placeLeafAt(levelSimulatedRW, 1 + o - r, q + t, 1 + p - s, boundingBox, set);
+						this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r, q + t, p + s), set2, boundingBox, megaTreeConfiguration);
+						this.placeLeaf(levelSimulatedRW, random, new BlockPos(1 + o - r, q + t, p + s), set2, boundingBox, megaTreeConfiguration);
+						this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r, q + t, 1 + p - s), set2, boundingBox, megaTreeConfiguration);
+						this.placeLeaf(levelSimulatedRW, random, new BlockPos(1 + o - r, q + t, 1 + p - s), set2, boundingBox, megaTreeConfiguration);
 						if ((r > -2 || s > -1) && (r != -1 || s != -2)) {
-							int var29 = 1;
-							this.placeLeafAt(levelSimulatedRW, o + r, q + var29, p + s, boundingBox, set);
-							this.placeLeafAt(levelSimulatedRW, 1 + o - r, q + var29, p + s, boundingBox, set);
-							this.placeLeafAt(levelSimulatedRW, o + r, q + var29, 1 + p - s, boundingBox, set);
-							this.placeLeafAt(levelSimulatedRW, 1 + o - r, q + var29, 1 + p - s, boundingBox, set);
+							int var31 = 1;
+							this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r, q + var31, p + s), set2, boundingBox, megaTreeConfiguration);
+							this.placeLeaf(levelSimulatedRW, random, new BlockPos(1 + o - r, q + var31, p + s), set2, boundingBox, megaTreeConfiguration);
+							this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r, q + var31, 1 + p - s), set2, boundingBox, megaTreeConfiguration);
+							this.placeLeaf(levelSimulatedRW, random, new BlockPos(1 + o - r, q + var31, 1 + p - s), set2, boundingBox, megaTreeConfiguration);
 						}
 					}
 				}
 
 				if (random.nextBoolean()) {
-					this.placeLeafAt(levelSimulatedRW, o, q + 2, p, boundingBox, set);
-					this.placeLeafAt(levelSimulatedRW, o + 1, q + 2, p, boundingBox, set);
-					this.placeLeafAt(levelSimulatedRW, o + 1, q + 2, p + 1, boundingBox, set);
-					this.placeLeafAt(levelSimulatedRW, o, q + 2, p + 1, boundingBox, set);
+					this.placeLeaf(levelSimulatedRW, random, new BlockPos(o, q + 2, p), set2, boundingBox, megaTreeConfiguration);
+					this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + 1, q + 2, p), set2, boundingBox, megaTreeConfiguration);
+					this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + 1, q + 2, p + 1), set2, boundingBox, megaTreeConfiguration);
+					this.placeLeaf(levelSimulatedRW, random, new BlockPos(o, q + 2, p + 1), set2, boundingBox, megaTreeConfiguration);
 				}
 
 				for (int r = -3; r <= 4; r++) {
 					for (int sx = -3; sx <= 4; sx++) {
 						if ((r != -3 || sx != -3) && (r != -3 || sx != 4) && (r != 4 || sx != -3) && (r != 4 || sx != 4) && (Math.abs(r) < 3 || Math.abs(sx) < 3)) {
-							this.placeLeafAt(levelSimulatedRW, o + r, q, p + sx, boundingBox, set);
+							this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r, q, p + sx), set2, boundingBox, megaTreeConfiguration);
 						}
 					}
 				}
@@ -99,19 +102,19 @@ public class DarkOakFeature extends AbstractTreeFeature<NoneFeatureConfiguration
 							int t = random.nextInt(3) + 2;
 
 							for (int u = 0; u < t; u++) {
-								this.placeLogAt(set, levelSimulatedRW, new BlockPos(j + r, q - u - 1, l + sxx), boundingBox);
+								this.placeLog(levelSimulatedRW, random, new BlockPos(j + r, q - u - 1, l + sxx), set, boundingBox, megaTreeConfiguration);
 							}
 
 							for (int u = -1; u <= 1; u++) {
 								for (int v = -1; v <= 1; v++) {
-									this.placeLeafAt(levelSimulatedRW, o + r + u, q, p + sxx + v, boundingBox, set);
+									this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r + u, q, p + sxx + v), set2, boundingBox, megaTreeConfiguration);
 								}
 							}
 
 							for (int u = -2; u <= 2; u++) {
 								for (int v = -2; v <= 2; v++) {
 									if (Math.abs(u) != 2 || Math.abs(v) != 2) {
-										this.placeLeafAt(levelSimulatedRW, o + r + u, q - 1, p + sxx + v, boundingBox, set);
+										this.placeLeaf(levelSimulatedRW, random, new BlockPos(o + r + u, q - 1, p + sxx + v), set2, boundingBox, megaTreeConfiguration);
 									}
 								}
 							}
@@ -152,18 +155,5 @@ public class DarkOakFeature extends AbstractTreeFeature<NoneFeatureConfiguration
 		}
 
 		return true;
-	}
-
-	private void placeLogAt(Set<BlockPos> set, LevelSimulatedRW levelSimulatedRW, BlockPos blockPos, BoundingBox boundingBox) {
-		if (isFree(levelSimulatedRW, blockPos)) {
-			this.setBlock(set, levelSimulatedRW, blockPos, LOG, boundingBox);
-		}
-	}
-
-	private void placeLeafAt(LevelSimulatedRW levelSimulatedRW, int i, int j, int k, BoundingBox boundingBox, Set<BlockPos> set) {
-		BlockPos blockPos = new BlockPos(i, j, k);
-		if (isAir(levelSimulatedRW, blockPos)) {
-			this.setBlock(set, levelSimulatedRW, blockPos, LEAVES, boundingBox);
-		}
 	}
 }

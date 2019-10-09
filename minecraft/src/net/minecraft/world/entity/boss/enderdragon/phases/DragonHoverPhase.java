@@ -14,7 +14,7 @@ public class DragonHoverPhase extends AbstractDragonPhaseInstance {
 	@Override
 	public void doServerTick() {
 		if (this.targetLocation == null) {
-			this.targetLocation = new Vec3(this.dragon.x, this.dragon.y, this.dragon.z);
+			this.targetLocation = this.dragon.position();
 		}
 	}
 

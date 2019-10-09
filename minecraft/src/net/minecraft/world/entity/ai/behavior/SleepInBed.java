@@ -55,7 +55,7 @@ public class SleepInBed extends Behavior<LivingEntity> {
 		} else {
 			BlockPos blockPos = ((GlobalPos)optional.get()).pos();
 			return livingEntity.getBrain().isActive(Activity.REST)
-				&& livingEntity.y > (double)blockPos.getY() + 0.4
+				&& livingEntity.getY() > (double)blockPos.getY() + 0.4
 				&& blockPos.closerThan(livingEntity.position(), 1.14);
 		}
 	}

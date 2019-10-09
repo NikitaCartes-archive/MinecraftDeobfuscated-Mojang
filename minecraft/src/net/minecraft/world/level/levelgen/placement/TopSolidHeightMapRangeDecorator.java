@@ -11,20 +11,24 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-public class TopSolidHeightMapRangeDecorator extends FeatureDecorator<DecoratorRange> {
-	public TopSolidHeightMapRangeDecorator(Function<Dynamic<?>, ? extends DecoratorRange> function) {
+public class TopSolidHeightMapRangeDecorator extends FeatureDecorator<RangeDecoratorConfiguration> {
+	public TopSolidHeightMapRangeDecorator(Function<Dynamic<?>, ? extends RangeDecoratorConfiguration> function) {
 		super(function);
 	}
 
 	public Stream<BlockPos> getPositions(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorRange decoratorRange, BlockPos blockPos
+		LevelAccessor levelAccessor,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		RangeDecoratorConfiguration rangeDecoratorConfiguration,
+		BlockPos blockPos
 	) {
-		int i = random.nextInt(decoratorRange.max - decoratorRange.min) + decoratorRange.min;
+		int i = random.nextInt(rangeDecoratorConfiguration.max - rangeDecoratorConfiguration.min) + rangeDecoratorConfiguration.min;
 		return IntStream.range(0, i).mapToObj(ix -> {
-			int j = random.nextInt(16);
-			int k = random.nextInt(16);
-			int l = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + j, blockPos.getZ() + k);
-			return new BlockPos(blockPos.getX() + j, l, blockPos.getZ() + k);
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, j, k);
+			return new BlockPos(j, l, k);
 		});
 	}
 }

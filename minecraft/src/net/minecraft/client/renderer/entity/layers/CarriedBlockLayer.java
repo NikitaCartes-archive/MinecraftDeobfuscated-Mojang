@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -24,12 +25,12 @@ public class CarriedBlockLayer extends RenderLayer<EnderMan, EndermanModel<Ender
 		if (blockState != null) {
 			poseStack.pushPose();
 			poseStack.translate(0.0, 0.6875, -0.75);
-			poseStack.mulPose(Vector3f.XP.rotation(20.0F, true));
-			poseStack.mulPose(Vector3f.YP.rotation(45.0F, true));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(45.0F));
 			poseStack.translate(0.25, 0.1875, 0.25);
 			float n = 0.5F;
 			poseStack.scale(-0.5F, -0.5F, 0.5F);
-			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
+			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
 			poseStack.popPose();
 		}
 	}

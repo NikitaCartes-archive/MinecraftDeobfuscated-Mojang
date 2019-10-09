@@ -40,9 +40,7 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 				if (livingEntity != null) {
 					Vec3 vec3 = this.getPosition(livingEntity, (double)livingEntity.getBbHeight() * 0.5, 1.0F);
 					Vec3 vec32 = this.getPosition(guardian, (double)guardian.getEyeHeight(), 1.0F);
-					if (frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
-						return true;
-					}
+					return frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z));
 				}
 			}
 
@@ -51,9 +49,9 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 	}
 
 	private Vec3 getPosition(LivingEntity livingEntity, double d, float f) {
-		double e = Mth.lerp((double)f, livingEntity.xOld, livingEntity.x);
-		double g = Mth.lerp((double)f, livingEntity.yOld, livingEntity.y) + d;
-		double h = Mth.lerp((double)f, livingEntity.zOld, livingEntity.z);
+		double e = Mth.lerp((double)f, livingEntity.xOld, livingEntity.getX());
+		double g = Mth.lerp((double)f, livingEntity.yOld, livingEntity.getY()) + d;
+		double h = Mth.lerp((double)f, livingEntity.zOld, livingEntity.getZ());
 		return new Vec3(e, g, h);
 	}
 
@@ -74,8 +72,8 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 			vec33 = vec33.normalize();
 			float n = (float)Math.acos(vec33.y);
 			float o = (float)Math.atan2(vec33.z, vec33.x);
-			poseStack.mulPose(Vector3f.YP.rotation(((float) (Math.PI / 2) - o) * (180.0F / (float)Math.PI), true));
-			poseStack.mulPose(Vector3f.XP.rotation(n * (180.0F / (float)Math.PI), true));
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(((float) (Math.PI / 2) - o) * (180.0F / (float)Math.PI)));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(n * (180.0F / (float)Math.PI)));
 			int p = 1;
 			float q = j * 0.05F * -1.5F;
 			float r = i * i;
@@ -104,8 +102,7 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 			float ap = 0.4999F;
 			float aq = -1.0F + k;
 			float ar = m * 2.5F + aq;
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(GUARDIAN_BEAM_LOCATION));
-			OverlayTexture.setDefault(vertexConsumer);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(GUARDIAN_BEAM_LOCATION));
 			Matrix4f matrix4f = poseStack.getPose();
 			vertex(vertexConsumer, matrix4f, af, m, ag, s, t, u, 0.4999F, ar);
 			vertex(vertexConsumer, matrix4f, af, 0.0F, ag, s, t, u, 0.4999F, aq);
@@ -124,13 +121,18 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 			vertex(vertexConsumer, matrix4f, z, m, aa, s, t, u, 1.0F, as + 0.5F);
 			vertex(vertexConsumer, matrix4f, ad, m, ae, s, t, u, 1.0F, as);
 			vertex(vertexConsumer, matrix4f, ab, m, ac, s, t, u, 0.5F, as);
-			vertexConsumer.unsetDefaultOverlayCoords();
 			poseStack.popPose();
 		}
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, int i, int j, int k, float l, float m) {
-		vertexConsumer.vertex(matrix4f, f, g, h).color(i, j, k, 255).uv(l, m).uv2(15728880).normal(0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, f, g, h)
+			.color(i, j, k, 255)
+			.uv(l, m)
+			.overlayCoords(OverlayTexture.NO_OVERLAY)
+			.uv2(15728880)
+			.normal(0.0F, 1.0F, 0.0F)
+			.endVertex();
 	}
 
 	public ResourceLocation getTextureLocation(Guardian guardian) {

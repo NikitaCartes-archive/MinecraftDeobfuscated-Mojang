@@ -107,7 +107,7 @@ public class StructureTemplate {
 		this.entityInfoList.clear();
 
 		for (Entity entity : list) {
-			Vec3 vec3 = new Vec3(entity.x - (double)blockPos.getX(), entity.y - (double)blockPos.getY(), entity.z - (double)blockPos.getZ());
+			Vec3 vec3 = new Vec3(entity.getX() - (double)blockPos.getX(), entity.getY() - (double)blockPos.getY(), entity.getZ() - (double)blockPos.getZ());
 			CompoundTag compoundTag = new CompoundTag();
 			entity.save(compoundTag);
 			BlockPos blockPos3;

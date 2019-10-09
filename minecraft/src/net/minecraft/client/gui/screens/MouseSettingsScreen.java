@@ -6,22 +6,21 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
-public class MouseSettingsScreen extends Screen {
-	private final Screen lastScreen;
+public class MouseSettingsScreen extends OptionsSubScreen {
 	private OptionsList list;
 	private static final Option[] OPTIONS = new Option[]{
 		Option.SENSITIVITY, Option.INVERT_MOUSE, Option.MOUSE_WHEEL_SENSITIVITY, Option.DISCRETE_MOUSE_SCROLL, Option.TOUCHSCREEN
 	};
 
-	public MouseSettingsScreen(Screen screen) {
-		super(new TranslatableComponent("options.mouse_settings.title"));
-		this.lastScreen = screen;
+	public MouseSettingsScreen(Screen screen, Options options) {
+		super(screen, options, new TranslatableComponent("options.mouse_settings.title"));
 	}
 
 	@Override
@@ -35,14 +34,9 @@ public class MouseSettingsScreen extends Screen {
 
 		this.children.add(this.list);
 		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, I18n.get("gui.done"), button -> {
-			this.minecraft.options.save();
+			this.options.save();
 			this.minecraft.setScreen(this.lastScreen);
 		}));
-	}
-
-	@Override
-	public void removed() {
-		this.minecraft.options.save();
 	}
 
 	@Override

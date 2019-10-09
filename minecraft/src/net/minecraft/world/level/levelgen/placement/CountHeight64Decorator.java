@@ -10,8 +10,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
-public class CountHeight64Decorator extends FeatureDecorator<DecoratorFrequency> {
-	public CountHeight64Decorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+public class CountHeight64Decorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+	public CountHeight64Decorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
 		super(function);
 	}
 
@@ -19,14 +19,14 @@ public class CountHeight64Decorator extends FeatureDecorator<DecoratorFrequency>
 		LevelAccessor levelAccessor,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
-		DecoratorFrequency decoratorFrequency,
+		FrequencyDecoratorConfiguration frequencyDecoratorConfiguration,
 		BlockPos blockPos
 	) {
-		return IntStream.range(0, decoratorFrequency.count).mapToObj(i -> {
-			int j = random.nextInt(16);
-			int k = 64;
-			int l = random.nextInt(16);
-			return blockPos.offset(j, 64, l);
+		return IntStream.range(0, frequencyDecoratorConfiguration.count).mapToObj(i -> {
+			int j = random.nextInt(16) + blockPos.getX();
+			int k = random.nextInt(16) + blockPos.getZ();
+			int l = 64;
+			return new BlockPos(j, 64, k);
 		});
 	}
 }

@@ -40,7 +40,7 @@ public class LevitationTrigger extends SimpleCriterionTrigger<LevitationTrigger.
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, Vec3 vec3, int i) {
-			return !this.distance.matches(vec3.x, vec3.y, vec3.z, serverPlayer.x, serverPlayer.y, serverPlayer.z) ? false : this.duration.matches(i);
+			return !this.distance.matches(vec3.x, vec3.y, vec3.z, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ()) ? false : this.duration.matches(i);
 		}
 
 		@Override

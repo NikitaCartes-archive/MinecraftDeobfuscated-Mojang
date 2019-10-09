@@ -33,9 +33,9 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 			(double)(this.getParentModel().head.x / 16.0F), (double)(this.getParentModel().head.y / 16.0F), (double)(this.getParentModel().head.z / 16.0F)
 		);
 		float n = fox.getHeadRollAngle(h);
-		poseStack.mulPose(Vector3f.ZP.rotation(n, false));
-		poseStack.mulPose(Vector3f.YP.rotation(k, true));
-		poseStack.mulPose(Vector3f.XP.rotation(l, true));
+		poseStack.mulPose(Vector3f.ZP.rotation(n));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
 		if (fox.isBaby()) {
 			if (bl) {
 				poseStack.translate(0.4F, 0.26F, 0.15F);
@@ -48,9 +48,9 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 			poseStack.translate(0.06F, 0.27F, -0.5);
 		}
 
-		poseStack.mulPose(Vector3f.XP.rotation(90.0F, true));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 		if (bl) {
-			poseStack.mulPose(Vector3f.ZP.rotation(90.0F, true));
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
 		}
 
 		ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);

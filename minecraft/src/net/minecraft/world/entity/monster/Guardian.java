@@ -205,7 +205,7 @@ public class Guardian extends Monster {
 					this.clientSideTailAnimationSpeed = 2.0F;
 					Vec3 vec3 = this.getDeltaMovement();
 					if (vec3.y > 0.0 && this.clientSideTouchedGround && !this.isSilent()) {
-						this.level.playLocalSound(this.x, this.y, this.z, this.getFlopSound(), this.getSoundSource(), 1.0F, 1.0F, false);
+						this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getFlopSound(), this.getSoundSource(), 1.0F, 1.0F, false);
 					}
 
 					this.clientSideTouchedGround = vec3.y < 0.0 && this.level.loadedAndEntityCanStandOn(new BlockPos(this).below(), this);
@@ -235,13 +235,7 @@ public class Guardian extends Monster {
 					for (int i = 0; i < 2; i++) {
 						this.level
 							.addParticle(
-								ParticleTypes.BUBBLE,
-								this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth() - vec3.x * 1.5,
-								this.y + this.random.nextDouble() * (double)this.getBbHeight() - vec3.y * 1.5,
-								this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth() - vec3.z * 1.5,
-								0.0,
-								0.0,
-								0.0
+								ParticleTypes.BUBBLE, this.getRandomX(0.5) - vec3.x * 1.5, this.getRandomY() - vec3.y * 1.5, this.getRandomZ(0.5) - vec3.z * 1.5, 0.0, 0.0, 0.0
 							);
 					}
 				}
@@ -256,9 +250,9 @@ public class Guardian extends Monster {
 						this.getLookControl().setLookAt(livingEntity, 90.0F, 90.0F);
 						this.getLookControl().tick();
 						double d = (double)this.getAttackAnimationScale(0.0F);
-						double e = livingEntity.x - this.x;
-						double f = livingEntity.y + (double)(livingEntity.getBbHeight() * 0.5F) - (this.y + (double)this.getEyeHeight());
-						double g = livingEntity.z - this.z;
+						double e = livingEntity.getX() - this.getX();
+						double f = livingEntity.getY(0.5) - this.getEyeY();
+						double g = livingEntity.getZ() - this.getZ();
 						double h = Math.sqrt(e * e + f * f + g * g);
 						e /= h;
 						f /= h;
@@ -267,7 +261,7 @@ public class Guardian extends Monster {
 
 						while (j < h) {
 							j += 1.8 - d + this.random.nextDouble() * (1.7 - d);
-							this.level.addParticle(ParticleTypes.BUBBLE, this.x + e * j, this.y + f * j + (double)this.getEyeHeight(), this.z + g * j, 0.0, 0.0, 0.0);
+							this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + e * j, this.getEyeY() + f * j, this.getZ() + g * j, 0.0, 0.0, 0.0);
 						}
 					}
 				}
@@ -450,7 +444,7 @@ public class Guardian extends Monster {
 		@Override
 		public void tick() {
 			if (this.operation == MoveControl.Operation.MOVE_TO && !this.guardian.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(this.wantedX - this.guardian.x, this.wantedY - this.guardian.y, this.wantedZ - this.guardian.z);
+				Vec3 vec3 = new Vec3(this.wantedX - this.guardian.getX(), this.wantedY - this.guardian.getY(), this.wantedZ - this.guardian.getZ());
 				double d = vec3.length();
 				double e = vec3.x / d;
 				double f = vec3.y / d;
@@ -467,9 +461,9 @@ public class Guardian extends Monster {
 				double n = Math.sin((double)(this.guardian.tickCount + this.guardian.getId()) * 0.75) * 0.05;
 				this.guardian.setDeltaMovement(this.guardian.getDeltaMovement().add(k * l, n * (m + l) * 0.25 + (double)j * f * 0.1, k * m));
 				LookControl lookControl = this.guardian.getLookControl();
-				double o = this.guardian.x + e * 2.0;
-				double p = (double)this.guardian.getEyeHeight() + this.guardian.y + f / d;
-				double q = this.guardian.z + g * 2.0;
+				double o = this.guardian.getX() + e * 2.0;
+				double p = this.guardian.getEyeY() + f / d;
+				double q = this.guardian.getZ() + g * 2.0;
 				double r = lookControl.getWantedX();
 				double s = lookControl.getWantedY();
 				double t = lookControl.getWantedZ();
