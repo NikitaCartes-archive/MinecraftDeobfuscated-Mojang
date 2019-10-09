@@ -85,9 +85,9 @@ public class PortalForcer {
         int r;
         int i = 16;
         double d = -1.0;
-        int j = Mth.floor(entity.x);
-        int k = Mth.floor(entity.y);
-        int l = Mth.floor(entity.z);
+        int j = Mth.floor(entity.getX());
+        int k = Mth.floor(entity.getY());
+        int l = Mth.floor(entity.getZ());
         int m = j;
         int n = k;
         int o = l;
@@ -95,9 +95,9 @@ public class PortalForcer {
         int q = this.random.nextInt(4);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (r = j - 16; r <= j + 16; ++r) {
-            e = (double)r + 0.5 - entity.x;
+            e = (double)r + 0.5 - entity.getX();
             for (s = l - 16; s <= l + 16; ++s) {
-                f = (double)s + 0.5 - entity.z;
+                f = (double)s + 0.5 - entity.getZ();
                 block2: for (t = this.level.getHeight() - 1; t >= 0; --t) {
                     if (!this.level.isEmptyBlock(mutableBlockPos.set(r, t, s))) continue;
                     while (t > 0 && this.level.isEmptyBlock(mutableBlockPos.set(r, t - 1, s))) {
@@ -121,7 +121,7 @@ public class PortalForcer {
                                 }
                             }
                         }
-                        double g = (double)t + 0.5 - entity.y;
+                        double g = (double)t + 0.5 - entity.getY();
                         double h = e * e + g * g + f * f;
                         if (!(d < 0.0) && !(h < d)) continue;
                         d = h;
@@ -135,9 +135,9 @@ public class PortalForcer {
         }
         if (d < 0.0) {
             for (r = j - 16; r <= j + 16; ++r) {
-                e = (double)r + 0.5 - entity.x;
+                e = (double)r + 0.5 - entity.getX();
                 for (s = l - 16; s <= l + 16; ++s) {
-                    f = (double)s + 0.5 - entity.z;
+                    f = (double)s + 0.5 - entity.getZ();
                     block10: for (t = this.level.getHeight() - 1; t >= 0; --t) {
                         if (!this.level.isEmptyBlock(mutableBlockPos.set(r, t, s))) continue;
                         while (t > 0 && this.level.isEmptyBlock(mutableBlockPos.set(r, t - 1, s))) {
@@ -155,7 +155,7 @@ public class PortalForcer {
                                     if (y < 0 && !this.level.getBlockState(mutableBlockPos).getMaterial().isSolid() || y >= 0 && !this.level.isEmptyBlock(mutableBlockPos)) continue block10;
                                 }
                             }
-                            double g = (double)t + 0.5 - entity.y;
+                            double g = (double)t + 0.5 - entity.getY();
                             double h = e * e + g * g + f * f;
                             if (!(d < 0.0) && !(h < d)) continue;
                             d = h;

@@ -32,7 +32,7 @@ extends AbstractDragonPhaseInstance {
             this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
             return;
         }
-        double d = this.targetLocation.distanceToSqr(this.dragon.x, this.dragon.y, this.dragon.z);
+        double d = this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
         if (d < 100.0 || d > 22500.0 || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
             ++this.timeSinceCharge;
         }

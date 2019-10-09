@@ -13,25 +13,25 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureRadius;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusConfiguration;
 
 public class IcePatchFeature
-extends Feature<FeatureRadius> {
+extends Feature<FeatureRadiusConfiguration> {
     private final Block block = Blocks.PACKED_ICE;
 
-    public IcePatchFeature(Function<Dynamic<?>, ? extends FeatureRadius> function) {
+    public IcePatchFeature(Function<Dynamic<?>, ? extends FeatureRadiusConfiguration> function) {
         super(function);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FeatureRadius featureRadius) {
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FeatureRadiusConfiguration featureRadiusConfiguration) {
         while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
             blockPos = blockPos.below();
         }
         if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.SNOW_BLOCK) {
             return false;
         }
-        int i = random.nextInt(featureRadius.radius) + 2;
+        int i = random.nextInt(featureRadiusConfiguration.radius) + 2;
         boolean j = true;
         for (int k = blockPos.getX() - i; k <= blockPos.getX() + i; ++k) {
             for (int l = blockPos.getZ() - i; l <= blockPos.getZ() + i; ++l) {
@@ -41,7 +41,7 @@ extends Feature<FeatureRadius> {
                 for (int o = blockPos.getY() - 1; o <= blockPos.getY() + 1; ++o) {
                     BlockPos blockPos2 = new BlockPos(k, o, l);
                     Block block = levelAccessor.getBlockState(blockPos2).getBlock();
-                    if (!Block.equalsDirt(block) && block != Blocks.SNOW_BLOCK && block != Blocks.ICE) continue;
+                    if (!IcePatchFeature.isDirt(block) && block != Blocks.SNOW_BLOCK && block != Blocks.ICE) continue;
                     levelAccessor.setBlock(blockPos2, this.block.defaultBlockState(), 2);
                 }
             }

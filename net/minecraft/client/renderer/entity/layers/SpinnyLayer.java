@@ -33,11 +33,9 @@ extends RenderLayer<T, M> {
         EntityModel<T> entityModel = this.model();
         entityModel.prepareMobModel(entity, f, g, h);
         ((EntityModel)this.getParentModel()).copyPropertiesTo(entityModel);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.POWER_SWIRL(this.getTextureLocation(), this.xOffset(n), n * 0.01f));
-        OverlayTexture.setDefault(vertexConsumer);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.powerSwirl(this.getTextureLocation(), this.xOffset(n), n * 0.01f));
         entityModel.setupAnim(entity, f, g, j, k, l, m);
-        entityModel.renderToBuffer(poseStack, vertexConsumer, i, 0.5f, 0.5f, 0.5f);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5f, 0.5f, 0.5f);
     }
 
     protected abstract float xOffset(float var1);

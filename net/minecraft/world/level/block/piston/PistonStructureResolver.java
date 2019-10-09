@@ -55,10 +55,14 @@ public class PistonStructureResolver {
         }
         for (int i = 0; i < this.toPush.size(); ++i) {
             BlockPos blockPos = this.toPush.get(i);
-            if (this.level.getBlockState(blockPos).getBlock() != Blocks.SLIME_BLOCK || this.addBranchingBlocks(blockPos)) continue;
+            if (!this.isSticky(this.level.getBlockState(blockPos).getBlock()) || this.addBranchingBlocks(blockPos)) continue;
             return false;
         }
         return true;
+    }
+
+    private boolean isSticky(Block block) {
+        return block == Blocks.SLIME_BLOCK || block == Blocks.HONEY_BLOCK;
     }
 
     private boolean addBlockLine(BlockPos blockPos, Direction direction) {
@@ -81,7 +85,7 @@ public class PistonStructureResolver {
         if (i + this.toPush.size() > 12) {
             return false;
         }
-        while (block == Blocks.SLIME_BLOCK) {
+        while (this.isSticky(block)) {
             BlockPos blockPos2 = blockPos.relative(this.pushDirection.getOpposite(), i);
             blockState = this.level.getBlockState(blockPos2);
             block = blockState.getBlock();
@@ -102,7 +106,7 @@ public class PistonStructureResolver {
                 this.reorderListAtCollision(j, l);
                 for (int m = 0; m <= l + j; ++m) {
                     BlockPos blockPos4 = this.toPush.get(m);
-                    if (this.level.getBlockState(blockPos4).getBlock() != Blocks.SLIME_BLOCK || this.addBranchingBlocks(blockPos4)) continue;
+                    if (!this.isSticky(this.level.getBlockState(blockPos4).getBlock()) || this.addBranchingBlocks(blockPos4)) continue;
                     return false;
                 }
                 return true;

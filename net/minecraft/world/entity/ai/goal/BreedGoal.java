@@ -100,11 +100,11 @@ extends Goal {
         this.animal.resetLove();
         this.partner.resetLove();
         agableMob.setAge(-24000);
-        agableMob.moveTo(this.animal.x, this.animal.y, this.animal.z, 0.0f, 0.0f);
+        agableMob.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0f, 0.0f);
         this.level.addFreshEntity(agableMob);
         this.level.broadcastEntityEvent(this.animal, (byte)18);
         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.x, this.animal.y, this.animal.z, this.animal.getRandom().nextInt(7) + 1));
+            this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
         }
     }
 }

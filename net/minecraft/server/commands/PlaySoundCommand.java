@@ -44,16 +44,16 @@ public class PlaySoundCommand {
         double d = Math.pow(f > 1.0f ? (double)(f * 16.0f) : 16.0, 2.0);
         int i = 0;
         for (ServerPlayer serverPlayer : collection) {
-            double e = vec3.x - serverPlayer.x;
-            double j = vec3.y - serverPlayer.y;
-            double k = vec3.z - serverPlayer.z;
+            double e = vec3.x - serverPlayer.getX();
+            double j = vec3.y - serverPlayer.getY();
+            double k = vec3.z - serverPlayer.getZ();
             double l = e * e + j * j + k * k;
             Vec3 vec32 = vec3;
             float m = f;
             if (l > d) {
                 if (h <= 0.0f) continue;
                 double n = Mth.sqrt(l);
-                vec32 = new Vec3(serverPlayer.x + e / n * 2.0, serverPlayer.y + j / n * 2.0, serverPlayer.z + k / n * 2.0);
+                vec32 = new Vec3(serverPlayer.getX() + e / n * 2.0, serverPlayer.getY() + j / n * 2.0, serverPlayer.getZ() + k / n * 2.0);
                 m = h;
             }
             serverPlayer.connection.send(new ClientboundCustomSoundPacket(resourceLocation, soundSource, vec32, m, g));

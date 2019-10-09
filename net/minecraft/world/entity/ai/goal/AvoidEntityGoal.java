@@ -53,11 +53,11 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        this.toAvoid = this.mob.level.getNearestLoadedEntity(this.avoidClass, this.avoidEntityTargeting, this.mob, this.mob.x, this.mob.y, this.mob.z, this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist));
+        this.toAvoid = this.mob.level.getNearestLoadedEntity(this.avoidClass, this.avoidEntityTargeting, this.mob, this.mob.getX(), this.mob.getY(), this.mob.getZ(), this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist));
         if (this.toAvoid == null) {
             return false;
         }
-        Vec3 vec3 = RandomPos.getPosAvoid(this.mob, 16, 7, new Vec3(((LivingEntity)this.toAvoid).x, ((LivingEntity)this.toAvoid).y, ((LivingEntity)this.toAvoid).z));
+        Vec3 vec3 = RandomPos.getPosAvoid(this.mob, 16, 7, ((Entity)this.toAvoid).position());
         if (vec3 == null) {
             return false;
         }

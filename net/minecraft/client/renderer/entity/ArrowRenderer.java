@@ -28,8 +28,8 @@ extends EntityRenderer<T> {
     @Override
     public void render(T abstractArrow, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot), true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(h, ((AbstractArrow)abstractArrow).yRotO, ((AbstractArrow)abstractArrow).yRot) - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(h, ((AbstractArrow)abstractArrow).xRotO, ((AbstractArrow)abstractArrow).xRot)));
         boolean i = false;
         float j = 0.0f;
         float k = 0.5f;
@@ -43,14 +43,13 @@ extends EntityRenderer<T> {
         float s = (float)((AbstractArrow)abstractArrow).shakeTime - h;
         if (s > 0.0f) {
             float t = -Mth.sin(s * 3.0f) * s;
-            poseStack.mulPose(Vector3f.ZP.rotation(t, true));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(t));
         }
-        poseStack.mulPose(Vector3f.XP.rotation(45.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0f));
         poseStack.scale(0.05625f, 0.05625f, 0.05625f);
         poseStack.translate(-4.0, 0.0, 0.0);
         int u = ((Entity)abstractArrow).getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(abstractArrow)));
-        OverlayTexture.setDefault(vertexConsumer);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(abstractArrow)));
         Matrix4f matrix4f = poseStack.getPose();
         this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0f, 0.15625f, 1, 0, 0, u);
         this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625f, 0.15625f, 1, 0, 0, u);
@@ -61,19 +60,18 @@ extends EntityRenderer<T> {
         this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625f, 0.3125f, -1, 0, 0, u);
         this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0f, 0.3125f, -1, 0, 0, u);
         for (int v = 0; v < 4; ++v) {
-            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
             this.vertex(matrix4f, vertexConsumer, -8, -2, 0, 0.0f, 0.0f, 0, 1, 0, u);
             this.vertex(matrix4f, vertexConsumer, 8, -2, 0, 0.5f, 0.0f, 0, 1, 0, u);
             this.vertex(matrix4f, vertexConsumer, 8, 2, 0, 0.5f, 0.15625f, 0, 1, 0, u);
             this.vertex(matrix4f, vertexConsumer, -8, 2, 0, 0.0f, 0.15625f, 0, 1, 0, u);
         }
-        vertexConsumer.unsetDefaultOverlayCoords();
         poseStack.popPose();
         super.render(abstractArrow, d, e, f, g, h, poseStack, multiBufferSource);
     }
 
     public void vertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-        vertexConsumer.vertex(matrix4f, i, j, k).color(255, 255, 255, 255).uv(f, g).uv2(o).normal(l, n, m).endVertex();
+        vertexConsumer.vertex(matrix4f, i, j, k).color(255, 255, 255, 255).uv(f, g).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(o).normal(l, n, m).endVertex();
     }
 }
 

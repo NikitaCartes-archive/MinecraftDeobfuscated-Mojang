@@ -129,9 +129,9 @@ implements TickableBlockEntity {
         int i = (int)this.nearbyEntities.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
         this.nearbyEntities.stream().filter(this::isRaiderWithinRange).forEach(livingEntity -> {
             float f = 1.0f;
-            float g = Mth.sqrt((livingEntity.x - (double)blockPos.getX()) * (livingEntity.x - (double)blockPos.getX()) + (livingEntity.z - (double)blockPos.getZ()) * (livingEntity.z - (double)blockPos.getZ()));
-            double d = (double)((float)blockPos.getX() + 0.5f) + (double)(1.0f / g) * (livingEntity.x - (double)blockPos.getX());
-            double e = (double)((float)blockPos.getZ() + 0.5f) + (double)(1.0f / g) * (livingEntity.z - (double)blockPos.getZ());
+            float g = Mth.sqrt((livingEntity.getX() - (double)blockPos.getX()) * (livingEntity.getX() - (double)blockPos.getX()) + (livingEntity.getZ() - (double)blockPos.getZ()) * (livingEntity.getZ() - (double)blockPos.getZ()));
+            double d = (double)((float)blockPos.getX() + 0.5f) + (double)(1.0f / g) * (livingEntity.getX() - (double)blockPos.getX());
+            double e = (double)((float)blockPos.getZ() + 0.5f) + (double)(1.0f / g) * (livingEntity.getZ() - (double)blockPos.getZ());
             int j = Mth.clamp((i - 21) / -2, 3, 15);
             for (int k = 0; k < j; ++k) {
                 atomicInteger.addAndGet(5);

@@ -271,6 +271,10 @@ extends Monster {
             zombie.setCustomName(this.getCustomName());
             zombie.setCustomNameVisible(this.isCustomNameVisible());
         }
+        if (this.isPersistenceRequired()) {
+            zombie.setPersistenceRequired();
+        }
+        zombie.setInvulnerable(this.isInvulnerable());
         this.level.addFreshEntity(zombie);
         this.remove();
     }
@@ -287,9 +291,9 @@ extends Monster {
                 livingEntity = (LivingEntity)damageSource.getEntity();
             }
             if (livingEntity != null && this.level.getDifficulty() == Difficulty.HARD && (double)this.random.nextFloat() < this.getAttribute(SPAWN_REINFORCEMENTS_CHANCE).getValue() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-                int i = Mth.floor(this.x);
-                int j = Mth.floor(this.y);
-                int k = Mth.floor(this.z);
+                int i = Mth.floor(this.getX());
+                int j = Mth.floor(this.getY());
+                int k = Mth.floor(this.getZ());
                 Zombie zombie = new Zombie(this.level);
                 for (int l = 0; l < 50; ++l) {
                     int o;
@@ -414,6 +418,10 @@ extends Monster {
                 zombieVillager.setCustomName(villager.getCustomName());
                 zombieVillager.setCustomNameVisible(villager.isCustomNameVisible());
             }
+            if (this.isPersistenceRequired()) {
+                zombieVillager.setPersistenceRequired();
+            }
+            zombieVillager.setInvulnerable(this.isInvulnerable());
             this.level.addFreshEntity(zombieVillager);
             this.level.levelEvent(null, 1026, new BlockPos(this), 0);
         }
@@ -454,7 +462,7 @@ extends Monster {
                     }
                 } else if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
                     Chicken chicken2 = EntityType.CHICKEN.create(this.level);
-                    chicken2.moveTo(this.x, this.y, this.z, this.yRot, 0.0f);
+                    chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
                     chicken2.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
                     chicken2.setChickenJockey(true);
                     levelAccessor.addFreshEntity(chicken2);

@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.level;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -103,7 +105,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
@@ -124,9 +125,11 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.BonusChestFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -266,7 +269,7 @@ extends Level {
                 long l = this.levelData.getDayTime() + 24000L;
                 this.setDayTime(l - l % 24000L);
             }
-            this.players.stream().filter(LivingEntity::isSleeping).forEach(serverPlayer -> serverPlayer.stopSleepInBed(false, false));
+            this.wakeUpAllPlayers();
             if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
                 this.stopWeather();
             }
@@ -344,6 +347,10 @@ extends Level {
             this.tickBlockEntities();
         }
         profilerFiller.pop();
+    }
+
+    private void wakeUpAllPlayers() {
+        this.players.stream().filter(LivingEntity::isSleeping).collect(Collectors.toList()).forEach(serverPlayer -> serverPlayer.stopSleepInBed(false, false));
     }
 
     public void tickChunk(LevelChunk levelChunk, int i) {
@@ -491,7 +498,7 @@ extends Level {
         if (!(entity instanceof Player) && !this.getChunkSource().isEntityTickingChunk(entity)) {
             return;
         }
-        entity.setPosAndOldPos(entity.x, entity.y, entity.z);
+        entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
         entity.yRotO = entity.yRot;
         entity.xRotO = entity.xRot;
         if (entity.inChunk) {
@@ -516,7 +523,7 @@ extends Level {
         if (!(entity2 instanceof Player) && !this.getChunkSource().isEntityTickingChunk(entity2)) {
             return;
         }
-        entity2.setPosAndOldPos(entity2.x, entity2.y, entity2.z);
+        entity2.setPosAndOldPos(entity2.getX(), entity2.getY(), entity2.getZ());
         entity2.yRotO = entity2.yRot;
         entity2.xRotO = entity2.xRot;
         if (entity2.inChunk) {
@@ -533,9 +540,9 @@ extends Level {
 
     public void updateChunkPos(Entity entity) {
         this.getProfiler().push("chunkCheck");
-        int i = Mth.floor(entity.x / 16.0);
-        int j = Mth.floor(entity.y / 16.0);
-        int k = Mth.floor(entity.z / 16.0);
+        int i = Mth.floor(entity.getX() / 16.0);
+        int j = Mth.floor(entity.getY() / 16.0);
+        int k = Mth.floor(entity.getZ() / 16.0);
         if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
             if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
                 this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
@@ -604,12 +611,12 @@ extends Level {
     }
 
     protected void generateBonusItemsNearSpawn() {
-        BonusChestFeature bonusChestFeature = Feature.BONUS_CHEST;
+        ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
         for (int i = 0; i < 10; ++i) {
             int j = this.levelData.getXSpawn() + this.random.nextInt(6) - this.random.nextInt(6);
             int k = this.levelData.getZSpawn() + this.random.nextInt(6) - this.random.nextInt(6);
             BlockPos blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(j, 0, k)).above();
-            if (bonusChestFeature.place((LevelAccessor)this, this.getChunkSource().getGenerator(), this.random, blockPos, FeatureConfiguration.NONE)) break;
+            if (configuredFeature.place(this, this.getChunkSource().getGenerator(), this.random, blockPos)) break;
         }
     }
 
@@ -643,7 +650,7 @@ extends Level {
         ArrayList<Entity> list = Lists.newArrayList();
         ServerChunkCache serverChunkCache = this.getChunkSource();
         for (Entity entity : this.entitiesById.values()) {
-            if (entityType != null && entity.getType() != entityType || !serverChunkCache.hasChunk(Mth.floor(entity.x) >> 4, Mth.floor(entity.z) >> 4) || !predicate.test(entity)) continue;
+            if (entityType != null && entity.getType() != entityType || !serverChunkCache.hasChunk(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4) || !predicate.test(entity)) continue;
             list.add(entity);
         }
         return list;
@@ -731,7 +738,7 @@ extends Level {
         }
         this.players.add(serverPlayer);
         this.updateSleepingPlayerList();
-        ChunkAccess chunkAccess = this.getChunk(Mth.floor(serverPlayer.x / 16.0), Mth.floor(serverPlayer.z / 16.0), ChunkStatus.FULL, true);
+        ChunkAccess chunkAccess = this.getChunk(Mth.floor(serverPlayer.getX() / 16.0), Mth.floor(serverPlayer.getZ() / 16.0), ChunkStatus.FULL, true);
         if (chunkAccess instanceof LevelChunk) {
             chunkAccess.addEntity(serverPlayer);
         }
@@ -746,7 +753,7 @@ extends Level {
         if (this.isUUIDUsed(entity)) {
             return false;
         }
-        ChunkAccess chunkAccess = this.getChunk(Mth.floor(entity.x / 16.0), Mth.floor(entity.z / 16.0), ChunkStatus.FULL, entity.forcedLoading);
+        ChunkAccess chunkAccess = this.getChunk(Mth.floor(entity.getX() / 16.0), Mth.floor(entity.getZ() / 16.0), ChunkStatus.FULL, entity.forcedLoading);
         if (!(chunkAccess instanceof LevelChunk)) {
             return false;
         }
@@ -846,7 +853,7 @@ extends Level {
 
     public void addGlobalEntity(LightningBolt lightningBolt) {
         this.globalEntities.add(lightningBolt);
-        this.server.getPlayerList().broadcast(null, lightningBolt.x, lightningBolt.y, lightningBolt.z, 512.0, this.dimension.getType(), new ClientboundAddGlobalEntityPacket(lightningBolt));
+        this.server.getPlayerList().broadcast(null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimension.getType(), new ClientboundAddGlobalEntityPacket(lightningBolt));
     }
 
     @Override
@@ -855,7 +862,7 @@ extends Level {
             double f;
             double e;
             double d;
-            if (serverPlayer == null || serverPlayer.level != this || serverPlayer.getId() == i || !((d = (double)blockPos.getX() - serverPlayer.x) * d + (e = (double)blockPos.getY() - serverPlayer.y) * e + (f = (double)blockPos.getZ() - serverPlayer.z) * f < 1024.0)) continue;
+            if (serverPlayer == null || serverPlayer.level != this || serverPlayer.getId() == i || !((d = (double)blockPos.getX() - serverPlayer.getX()) * d + (e = (double)blockPos.getY() - serverPlayer.getY()) * e + (f = (double)blockPos.getZ() - serverPlayer.getZ()) * f < 1024.0)) continue;
             serverPlayer.connection.send(new ClientboundBlockDestructionPacket(i, blockPos, j));
         }
     }
@@ -867,7 +874,7 @@ extends Level {
 
     @Override
     public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-        this.server.getPlayerList().broadcast(player, entity.x, entity.y, entity.z, f > 1.0f ? (double)(16.0f * f) : 16.0, this.dimension.getType(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g));
+        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), f > 1.0f ? (double)(16.0f * f) : 16.0, this.dimension.getType(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g));
     }
 
     @Override
@@ -1216,7 +1223,7 @@ extends Level {
         for (Entity entity : iterable) {
             Component component = entity.getCustomName();
             Component component2 = entity.getDisplayName();
-            csvOutput.writeRow(entity.x, entity.y, entity.z, entity.getUUID(), Registry.ENTITY_TYPE.getKey(entity.getType()), entity.isAlive(), component2.getString(), component != null ? component.getString() : null);
+            csvOutput.writeRow(entity.getX(), entity.getY(), entity.getZ(), entity.getUUID(), Registry.ENTITY_TYPE.getKey(entity.getType()), entity.isAlive(), component2.getString(), component != null ? component.getString() : null);
         }
     }
 
@@ -1226,6 +1233,11 @@ extends Level {
             BlockPos blockPos = blockEntity.getBlockPos();
             csvOutput.writeRow(blockPos.getX(), blockPos.getY(), blockPos.getZ(), Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()));
         }
+    }
+
+    @VisibleForTesting
+    public void clearBlockEvents(BoundingBox boundingBox) {
+        this.blockEvents.removeIf(blockEventData -> boundingBox.isInside(blockEventData.getPos()));
     }
 
     @Override

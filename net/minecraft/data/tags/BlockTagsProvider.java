@@ -62,8 +62,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.WOODEN_TRAPDOORS).add((Block[])new Block[]{Blocks.ACACIA_TRAPDOOR, Blocks.BIRCH_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.JUNGLE_TRAPDOOR, Blocks.OAK_TRAPDOOR, Blocks.SPRUCE_TRAPDOOR});
         this.tag(BlockTags.TRAPDOORS).addTag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.IRON_TRAPDOOR);
         this.tag(BlockTags.UNDERWATER_BONEMEALS).add(Blocks.SEAGRASS).addTag(BlockTags.CORALS).addTag(BlockTags.WALL_CORALS);
-        this.tag(BlockTags.DIRT_LIKE).add(Blocks.DIRT).add(Blocks.GRASS_BLOCK).add(Blocks.PODZOL).add(Blocks.COARSE_DIRT).add(Blocks.MYCELIUM);
-        this.tag(BlockTags.BAMBOO_PLANTABLE_ON).add(Blocks.BAMBOO).add(Blocks.BAMBOO_SAPLING).add(Blocks.GRAVEL).addTag(BlockTags.SAND).addTag(BlockTags.DIRT_LIKE);
+        this.tag(BlockTags.BAMBOO_PLANTABLE_ON).add(Blocks.BAMBOO).add(Blocks.BAMBOO_SAPLING).add(Blocks.GRAVEL).addTag(BlockTags.SAND).add(Blocks.DIRT).add(Blocks.GRASS_BLOCK).add(Blocks.PODZOL).add(Blocks.COARSE_DIRT).add(Blocks.MYCELIUM);
         this.tag(BlockTags.STANDING_SIGNS).add((Block[])new Block[]{Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.BIRCH_SIGN, Blocks.ACACIA_SIGN, Blocks.JUNGLE_SIGN, Blocks.DARK_OAK_SIGN});
         this.tag(BlockTags.WALL_SIGNS).add((Block[])new Block[]{Blocks.OAK_WALL_SIGN, Blocks.SPRUCE_WALL_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.DARK_OAK_WALL_SIGN});
         this.tag(BlockTags.SIGNS).addTag(BlockTags.STANDING_SIGNS).addTag(BlockTags.WALL_SIGNS);
@@ -73,7 +72,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.WITHER_IMMUNE).add((Block[])new Block[]{Blocks.BARRIER, Blocks.BEDROCK, Blocks.END_PORTAL, Blocks.END_PORTAL_FRAME, Blocks.END_GATEWAY, Blocks.COMMAND_BLOCK, Blocks.REPEATING_COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.STRUCTURE_BLOCK, Blocks.JIGSAW, Blocks.MOVING_PISTON});
         this.tag(BlockTags.TALL_FLOWERS).add((Block[])new Block[]{Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH});
         this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS);
-        this.tag(BlockTags.BEEHIVES).add((Block[])new Block[]{Blocks.BEE_NEST, Blocks.BEE_HIVE});
+        this.tag(BlockTags.BEEHIVES).add((Block[])new Block[]{Blocks.BEE_NEST, Blocks.BEEHIVE});
         this.tag(BlockTags.CROPS).add((Block[])new Block[]{Blocks.BEETROOTS, Blocks.CARROTS, Blocks.POTATOES, Blocks.WHEAT, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM});
         this.tag(BlockTags.BEE_GROWABLES).addTag(BlockTags.CROPS).add(Blocks.SWEET_BERRY_BUSH);
     }

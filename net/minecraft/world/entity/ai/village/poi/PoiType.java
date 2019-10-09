@@ -44,7 +44,7 @@ public class PoiType {
     public static final PoiType WEAPONSMITH = PoiType.register("weaponsmith", PoiType.getBlockStates(Blocks.GRINDSTONE), 1, 1);
     public static final PoiType HOME = PoiType.register("home", BEDS, 1, 1);
     public static final PoiType MEETING = PoiType.register("meeting", PoiType.getBlockStates(Blocks.BELL), 32, 6);
-    public static final PoiType BEE_HIVE = PoiType.register("bee_hive", PoiType.getBlockStates(Blocks.BEE_HIVE), 0, 1);
+    public static final PoiType BEEHIVE = PoiType.register("beehive", PoiType.getBlockStates(Blocks.BEEHIVE), 0, 1);
     public static final PoiType BEE_NEST = PoiType.register("bee_nest", PoiType.getBlockStates(Blocks.BEE_NEST), 0, 1);
     public static final PoiType NETHER_PORTAL = PoiType.register("nether_portal", PoiType.getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
     private final String name;

@@ -35,29 +35,27 @@ extends EntityRenderer<Boat> {
         float k;
         poseStack.pushPose();
         poseStack.translate(0.0, 0.375, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         float i = (float)boat.getHurtTime() - h;
         float j = boat.getDamage() - h;
         if (j < 0.0f) {
             j = 0.0f;
         }
         if (i > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(i) * i * j / 10.0f * (float)boat.getHurtDir(), true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(i) * i * j / 10.0f * (float)boat.getHurtDir()));
         }
         if (!Mth.equal(k = boat.getBubbleAngle(h), 0.0f)) {
             poseStack.mulPose(new Quaternion(new Vector3f(1.0f, 0.0f, 1.0f), boat.getBubbleAngle(h), true));
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         int l = boat.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(boat)));
-        OverlayTexture.setDefault(vertexConsumer);
-        poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
         this.model.setupAnim(boat, h, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        this.model.renderToBuffer(poseStack, vertexConsumer, l);
-        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.WATER_MASK);
-        this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625f, l, null);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(boat)));
+        this.model.renderToBuffer(poseStack, vertexConsumer, l, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
+        this.model.waterPatch().render(poseStack, vertexConsumer2, 0.0625f, l, OverlayTexture.NO_OVERLAY, null);
         poseStack.popPose();
-        vertexConsumer.unsetDefaultOverlayCoords();
         super.render(boat, d, e, f, g, h, poseStack, multiBufferSource);
     }
 

@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -74,10 +75,8 @@ extends RenderLayer<T, M> {
     }
 
     private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorItem armorItem, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h, @Nullable String string) {
-        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.getArmorLocation(armorItem, bl2, string), false, bl, false);
-        OverlayTexture.setDefault(vertexConsumer);
-        ((AgeableListModel)humanoidModel).renderToBuffer(poseStack, vertexConsumer, i, f, g, h);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.entityCutoutNoCull(this.getArmorLocation(armorItem, bl2, string)), false, bl);
+        ((AgeableListModel)humanoidModel).renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h);
     }
 
     public A getArmorModel(EquipmentSlot equipmentSlot) {

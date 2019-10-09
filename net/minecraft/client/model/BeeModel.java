@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.ModelUtils;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -30,7 +31,7 @@ extends AgeableListModel<T> {
     private float rollAmount;
 
     public BeeModel() {
-        super(false, 24.0f, 0.0f);
+        super(RenderType::entityCutoutNoCull, false, 24.0f, 0.0f, 2.0f, 2.0f, 24.0f);
         this.texWidth = 64;
         this.texHeight = 64;
         this.bone = new ModelPart(this);

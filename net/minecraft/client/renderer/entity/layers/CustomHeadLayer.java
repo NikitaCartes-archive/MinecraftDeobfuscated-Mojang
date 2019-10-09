@@ -82,7 +82,7 @@ extends RenderLayer<T, M> {
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
             n = 0.625f;
             poseStack.translate(0.0, -0.25, 0.0);
-            poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
             poseStack.scale(0.625f, -0.625f, -0.625f);
             if (bl) {
                 poseStack.translate(0.0, 0.1875, 0.0);

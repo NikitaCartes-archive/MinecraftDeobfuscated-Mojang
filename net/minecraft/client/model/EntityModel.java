@@ -3,11 +3,12 @@
  */
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
@@ -17,11 +18,9 @@ extends Model {
     public boolean riding;
     public boolean young = true;
 
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
-        this.renderToBuffer(poseStack, vertexConsumer, i, 1.0f, 1.0f, 1.0f);
+    protected EntityModel(Function<ResourceLocation, RenderType> function) {
+        super(function);
     }
-
-    public abstract void renderToBuffer(PoseStack var1, VertexConsumer var2, int var3, float var4, float var5, float var6);
 
     public abstract void setupAnim(T var1, float var2, float var3, float var4, float var5, float var6, float var7);
 

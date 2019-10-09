@@ -27,9 +27,9 @@ extends AbstractDragonPhaseInstance {
     public void doClientTick() {
         Vec3 vec3 = this.dragon.getHeadLookVector(1.0f).normalize();
         vec3.yRot(-0.7853982f);
-        double d = this.dragon.head.x;
-        double e = this.dragon.head.y + (double)(this.dragon.head.getBbHeight() / 2.0f);
-        double f = this.dragon.head.z;
+        double d = this.dragon.head.getX();
+        double e = this.dragon.head.getY(0.5);
+        double f = this.dragon.head.getZ();
         for (int i = 0; i < 8; ++i) {
             Random random = this.dragon.getRandom();
             double g = d + random.nextGaussian() / 2.0;
@@ -46,7 +46,7 @@ extends AbstractDragonPhaseInstance {
         if (this.targetLocation == null) {
             this.targetLocation = new Vec3(this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION));
         }
-        if (this.targetLocation.distanceToSqr(this.dragon.x, this.dragon.y, this.dragon.z) < 1.0) {
+        if (this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ()) < 1.0) {
             this.dragon.getPhaseManager().getPhase(EnderDragonPhase.SITTING_FLAMING).resetFlameCount();
             this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_SCANNING);
         }

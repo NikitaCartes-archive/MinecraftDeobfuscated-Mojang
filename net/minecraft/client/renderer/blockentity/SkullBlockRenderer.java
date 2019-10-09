@@ -60,13 +60,13 @@ extends BlockEntityRenderer<SkullBlockEntity> {
     }
 
     @Override
-    public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(SkullBlockEntity skullBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         float h = skullBlockEntity.getMouthAnimation(g);
         BlockState blockState = skullBlockEntity.getBlockState();
         boolean bl = blockState.getBlock() instanceof WallSkullBlock;
         Direction direction = bl ? blockState.getValue(WallSkullBlock.FACING) : null;
-        float j = 22.5f * (float)(bl ? (2 + direction.get2DDataValue()) * 4 : blockState.getValue(SkullBlock.ROTATION));
-        SkullBlockRenderer.renderSkull(direction, j, ((AbstractSkullBlock)blockState.getBlock()).getType(), skullBlockEntity.getOwnerProfile(), h, poseStack, multiBufferSource, i);
+        float k = 22.5f * (float)(bl ? (2 + direction.get2DDataValue()) * 4 : blockState.getValue(SkullBlock.ROTATION));
+        SkullBlockRenderer.renderSkull(direction, k, ((AbstractSkullBlock)blockState.getBlock()).getType(), skullBlockEntity.getOwnerProfile(), h, poseStack, multiBufferSource, i);
     }
 
     public static void renderSkull(@Nullable Direction direction, float f, SkullBlock.Type type, @Nullable GameProfile gameProfile, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -94,21 +94,23 @@ extends BlockEntityRenderer<SkullBlockEntity> {
             }
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(SkullBlockRenderer.getLocation(type, gameProfile)));
-        OverlayTexture.setDefault(vertexConsumer);
-        skullModel.render(poseStack, vertexConsumer, g, f, 0.0f, 0.0625f, i);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SkullBlockRenderer.getRenderType(type, gameProfile));
+        skullModel.setupAnim(g, f, 0.0f);
+        skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 
-    private static ResourceLocation getLocation(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
+    private static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
         ResourceLocation resourceLocation = SKIN_BY_TYPE.get(type);
-        if (type == SkullBlock.Types.PLAYER && gameProfile != null) {
-            Minecraft minecraft = Minecraft.getInstance();
-            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
-            resourceLocation = map.containsKey((Object)MinecraftProfileTexture.Type.SKIN) ? minecraft.getSkinManager().registerTexture(map.get((Object)MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN) : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+        if (type != SkullBlock.Types.PLAYER || gameProfile == null) {
+            return RenderType.entitySolid(resourceLocation);
         }
-        return resourceLocation;
+        Minecraft minecraft = Minecraft.getInstance();
+        Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
+        if (map.containsKey((Object)MinecraftProfileTexture.Type.SKIN)) {
+            return RenderType.entityTranslucent(minecraft.getSkinManager().registerTexture(map.get((Object)MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN));
+        }
+        return RenderType.entitySolid(DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile)));
     }
 }
 

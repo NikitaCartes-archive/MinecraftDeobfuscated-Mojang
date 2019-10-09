@@ -15,28 +15,27 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.DecoratorNoiseDependant;
+import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class NoiseHeightmapDoubleDecorator
-extends FeatureDecorator<DecoratorNoiseDependant> {
-    public NoiseHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends DecoratorNoiseDependant> function) {
+extends FeatureDecorator<NoiseDependantDecoratorConfiguration> {
+    public NoiseHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends NoiseDependantDecoratorConfiguration> function) {
         super(function);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorNoiseDependant decoratorNoiseDependant, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, NoiseDependantDecoratorConfiguration noiseDependantDecoratorConfiguration, BlockPos blockPos) {
         double d = Biome.BIOME_INFO_NOISE.getValue((double)blockPos.getX() / 200.0, (double)blockPos.getZ() / 200.0, false);
-        int i2 = d < decoratorNoiseDependant.noiseLevel ? decoratorNoiseDependant.belowNoise : decoratorNoiseDependant.aboveNoise;
+        int i2 = d < noiseDependantDecoratorConfiguration.noiseLevel ? noiseDependantDecoratorConfiguration.belowNoise : noiseDependantDecoratorConfiguration.aboveNoise;
         return IntStream.range(0, i2).mapToObj(i -> {
             int k;
-            int j = random.nextInt(16);
-            int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k = random.nextInt(16))).getY() * 2;
+            int j = random.nextInt(16) + blockPos.getX();
+            int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k = random.nextInt(16) + blockPos.getZ()) * 2;
             if (l <= 0) {
                 return null;
             }
-            int m = random.nextInt(l);
-            return blockPos.offset(j, m, k);
+            return new BlockPos(j, random.nextInt(l), k);
         }).filter(Objects::nonNull);
     }
 }

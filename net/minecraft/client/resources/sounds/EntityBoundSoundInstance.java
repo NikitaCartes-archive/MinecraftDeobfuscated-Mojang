@@ -24,9 +24,9 @@ extends AbstractTickableSoundInstance {
         this.volume = f;
         this.pitch = g;
         this.entity = entity;
-        this.x = (float)this.entity.x;
-        this.y = (float)this.entity.y;
-        this.z = (float)this.entity.z;
+        this.x = (float)this.entity.getX();
+        this.y = (float)this.entity.getY();
+        this.z = (float)this.entity.getZ();
     }
 
     @Override
@@ -35,9 +35,9 @@ extends AbstractTickableSoundInstance {
             this.stopped = true;
             return;
         }
-        this.x = (float)this.entity.x;
-        this.y = (float)this.entity.y;
-        this.z = (float)this.entity.z;
+        this.x = (float)this.entity.getX();
+        this.y = (float)this.entity.getY();
+        this.z = (float)this.entity.getZ();
     }
 }
 

@@ -4,7 +4,6 @@
 package net.minecraft.client.renderer.entity.player;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -179,17 +178,14 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
         PlayerModel playerModel = (PlayerModel)this.getModel();
         this.setModelProperties(abstractClientPlayer);
         int i = abstractClientPlayer.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getSkinTextureLocation()));
-        OverlayTexture.setDefault(vertexConsumer);
         playerModel.attackTime = 0.0f;
         playerModel.crouching = false;
         playerModel.swimAmount = 0.0f;
         playerModel.setupAnim(abstractClientPlayer, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
         modelPart.xRot = 0.0f;
-        modelPart.render(poseStack, vertexConsumer, 0.0625f, i, null);
+        modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), 0.0625f, i, OverlayTexture.NO_OVERLAY, null);
         modelPart2.xRot = 0.0f;
-        modelPart2.render(poseStack, vertexConsumer, 0.0625f, i, null);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        modelPart2.render(poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())), 0.0625f, i, OverlayTexture.NO_OVERLAY, null);
     }
 
     @Override
@@ -200,7 +196,7 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             float j = (float)abstractClientPlayer.getFallFlyingTicks() + h;
             float k = Mth.clamp(j * j / 100.0f, 0.0f, 1.0f);
             if (!abstractClientPlayer.isAutoSpinAttack()) {
-                poseStack.mulPose(Vector3f.XP.rotation(k * (-90.0f - abstractClientPlayer.xRot), true));
+                poseStack.mulPose(Vector3f.XP.rotationDegrees(k * (-90.0f - abstractClientPlayer.xRot)));
             }
             Vec3 vec3 = abstractClientPlayer.getViewVector(h);
             Vec3 vec32 = abstractClientPlayer.getDeltaMovement();
@@ -209,13 +205,13 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             if (d > 0.0 && e > 0.0) {
                 double l = (vec32.x * vec3.x + vec32.z * vec3.z) / (Math.sqrt(d) * Math.sqrt(e));
                 double m = vec32.x * vec3.z - vec32.z * vec3.x;
-                poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l)), false));
+                poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
             }
         } else if (i > 0.0f) {
             super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
             float j = abstractClientPlayer.isInWater() ? -90.0f - abstractClientPlayer.xRot : -90.0f;
             float k = Mth.lerp(i, 0.0f, j);
-            poseStack.mulPose(Vector3f.XP.rotation(k, true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(k));
             if (abstractClientPlayer.isVisuallySwimming()) {
                 poseStack.translate(0.0, -1.0, 0.3f);
             }

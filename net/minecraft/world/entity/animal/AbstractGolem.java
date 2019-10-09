@@ -17,7 +17,8 @@ extends PathfinderMob {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g) {
+        return false;
     }
 
     @Override

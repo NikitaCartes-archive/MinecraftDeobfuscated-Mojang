@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 
 @Environment(value=EnvType.CLIENT)
 public class ShieldModel
@@ -17,6 +18,7 @@ extends Model {
     private final ModelPart handle;
 
     public ShieldModel() {
+        super(RenderType::entitySolid);
         this.texWidth = 64;
         this.texHeight = 64;
         this.plate = new ModelPart(this, 0, 0);
@@ -25,9 +27,10 @@ extends Model {
         this.handle.addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f, 0.0f);
     }
 
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
-        this.plate.render(poseStack, vertexConsumer, 0.0625f, i, null);
-        this.handle.render(poseStack, vertexConsumer, 0.0625f, i, null);
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+        this.plate.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
+        this.handle.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
     }
 }
 

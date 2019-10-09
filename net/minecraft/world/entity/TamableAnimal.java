@@ -95,7 +95,7 @@ extends Animal {
             double d = this.random.nextGaussian() * 0.02;
             double e = this.random.nextGaussian() * 0.02;
             double f = this.random.nextGaussian() * 0.02;
-            this.level.addParticle(particleOptions, this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()), this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), d, e, f);
+            this.level.addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
         }
     }
 

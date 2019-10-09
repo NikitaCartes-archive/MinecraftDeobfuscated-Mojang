@@ -799,7 +799,7 @@ public class Items {
     public static final Item ENDER_EYE = Items.registerItem("ender_eye", (Item)new EnderEyeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item GLISTERING_MELON_SLICE = Items.registerItem("glistering_melon_slice", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
     public static final Item BAT_SPAWN_EGG = Items.registerItem("bat_spawn_egg", (Item)new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
-    public static final Item BEE_SPAWN_EGG = Items.registerItem("bee_spawn_egg", (Item)new SpawnEggItem(EntityType.BEE, 0xFFE55E, 2500144, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item BEE_SPAWN_EGG = Items.registerItem("bee_spawn_egg", (Item)new SpawnEggItem(EntityType.BEE, 15582019, 4400155, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item BLAZE_SPAWN_EGG = Items.registerItem("blaze_spawn_egg", (Item)new SpawnEggItem(EntityType.BLAZE, 16167425, 16775294, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item CAT_SPAWN_EGG = Items.registerItem("cat_spawn_egg", (Item)new SpawnEggItem(EntityType.CAT, 15714446, 9794134, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item CAVE_SPIDER_SPAWN_EGG = Items.registerItem("cave_spider_spawn_egg", (Item)new SpawnEggItem(EntityType.CAVE_SPIDER, 803406, 11013646, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -981,8 +981,10 @@ public class Items {
     public static final Item CAMPFIRE = Items.registerBlock(Blocks.CAMPFIRE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEYCOMB = Items.registerItem("honeycomb", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item BEE_NEST = Items.registerBlock(Blocks.BEE_NEST, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item BEE_HIVE = Items.registerBlock(Blocks.BEE_HIVE, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item BEEHIVE = Items.registerBlock(Blocks.BEEHIVE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEY_BOTTLE = Items.registerItem("honey_bottle", (Item)new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).tab(CreativeModeTab.TAB_FOOD).stacksTo(1)));
+    public static final Item HONEY_BLOCK = Items.registerBlock(Blocks.HONEY_BLOCK, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item HONEYCOMB_BLOCK = Items.registerBlock(Blocks.HONEYCOMB_BLOCK, CreativeModeTab.TAB_DECORATIONS);
 
     private static Item registerBlock(Block block) {
         return Items.registerBlock(new BlockItem(block, new Item.Properties()));

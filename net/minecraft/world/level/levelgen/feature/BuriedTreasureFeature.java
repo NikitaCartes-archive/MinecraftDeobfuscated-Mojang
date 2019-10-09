@@ -11,9 +11,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.BuriedTreasureConfiguration;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.BuriedTreasureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -27,9 +26,9 @@ extends StructureFeature<BuriedTreasureConfiguration> {
 
     @Override
     public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-        if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.BURIED_TREASURE)) {
+        if (chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
             ((WorldgenRandom)random).setLargeFeatureWithSalt(chunkGenerator.getSeed(), i, j, 10387320);
-            BuriedTreasureConfiguration buriedTreasureConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.BURIED_TREASURE);
+            BuriedTreasureConfiguration buriedTreasureConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
             return random.nextFloat() < buriedTreasureConfiguration.probability;
         }
         return false;

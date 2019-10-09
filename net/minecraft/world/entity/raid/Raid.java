@@ -400,13 +400,13 @@ public class Raid {
         int i = 64;
         Collection<ServerPlayer> collection = this.raidEvent.getPlayers();
         for (ServerPlayer serverPlayer : this.level.players()) {
-            Vec3 vec3 = new Vec3(serverPlayer.x, serverPlayer.y, serverPlayer.z);
-            Vec3 vec32 = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            Vec3 vec3 = serverPlayer.position();
+            Vec3 vec32 = new Vec3(blockPos);
             float g = Mth.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
             double d = vec3.x + (double)(13.0f / g) * (vec32.x - vec3.x);
             double e = vec3.z + (double)(13.0f / g) * (vec32.z - vec3.z);
             if (!(g <= 64.0f) && !collection.contains(serverPlayer)) continue;
-            serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, d, serverPlayer.y, e, 64.0f, 1.0f));
+            serverPlayer.connection.send(new ClientboundSoundPacket(SoundEvents.RAID_HORN, SoundSource.NEUTRAL, d, serverPlayer.getY(), e, 64.0f, 1.0f));
         }
     }
 

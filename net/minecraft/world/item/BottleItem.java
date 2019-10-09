@@ -37,7 +37,7 @@ extends Item {
         if (!list.isEmpty()) {
             AreaEffectCloud areaEffectCloud2 = list.get(0);
             areaEffectCloud2.setRadius(areaEffectCloud2.getRadius() - 0.5f);
-            level.playSound(null, player.x, player.y, player.z, SoundEvents.BOTTLE_FILL_DRAGONBREATH, SoundSource.NEUTRAL, 1.0f, 1.0f);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL_DRAGONBREATH, SoundSource.NEUTRAL, 1.0f, 1.0f);
             return InteractionResultHolder.success(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)));
         }
         HitResult hitResult = BottleItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
@@ -50,7 +50,7 @@ extends Item {
                 return InteractionResultHolder.pass(itemStack);
             }
             if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
-                level.playSound(player, player.x, player.y, player.z, SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
+                level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
                 return InteractionResultHolder.success(this.turnBottleIntoItem(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)));
             }
         }

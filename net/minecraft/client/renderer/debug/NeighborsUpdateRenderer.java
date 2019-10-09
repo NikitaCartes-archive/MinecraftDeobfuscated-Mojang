@@ -64,7 +64,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         HashSet<BlockPos> set = Sets.newHashSet();
         HashMap<BlockPos, Integer> map = Maps.newHashMap();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
         Iterator<Map.Entry<Long, Map<BlockPos, Integer>>> iterator = this.lastUpdate.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, Map<BlockPos, Integer>> entry = iterator.next();

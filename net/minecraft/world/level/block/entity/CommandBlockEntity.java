@@ -114,10 +114,23 @@ extends BlockEntity {
     }
 
     public void setAutomatic(boolean bl) {
-        Block block;
         boolean bl2 = this.auto;
         this.auto = bl;
-        if (!bl2 && bl && !this.powered && this.level != null && this.getMode() != Mode.SEQUENCE && (block = this.getBlockState().getBlock()) instanceof CommandBlock) {
+        if (!bl2 && bl && !this.powered && this.level != null && this.getMode() != Mode.SEQUENCE) {
+            this.scheduleTick();
+        }
+    }
+
+    public void onModeSwitch() {
+        Mode mode = this.getMode();
+        if (mode == Mode.AUTO && (this.powered || this.auto) && this.level != null) {
+            this.scheduleTick();
+        }
+    }
+
+    private void scheduleTick() {
+        Block block = this.getBlockState().getBlock();
+        if (block instanceof CommandBlock) {
             this.markConditionMet();
             this.level.getBlockTicks().scheduleTick(this.worldPosition, block, block.getTickDelay(this.level));
         }

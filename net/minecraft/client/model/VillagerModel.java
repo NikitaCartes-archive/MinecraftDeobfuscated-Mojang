@@ -10,6 +10,7 @@ import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.VillagerHeadModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -34,6 +35,7 @@ VillagerHeadModel {
     }
 
     public VillagerModel(float f, int i, int j) {
+        super(RenderType::entityCutoutNoCull);
         float g = 0.5f;
         this.head = new ModelPart(this).setTexSize(i, j);
         this.head.setPos(0.0f, 0.0f, 0.0f);

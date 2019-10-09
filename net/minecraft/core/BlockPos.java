@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Serializable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +53,7 @@ implements Serializable {
     }
 
     public BlockPos(Entity entity) {
-        this(entity.x, entity.y, entity.z);
+        this(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public BlockPos(Vec3 vec3) {
@@ -241,6 +242,10 @@ implements Serializable {
         return BlockPos.betweenClosedStream(Math.min(blockPos.getX(), blockPos2.getX()), Math.min(blockPos.getY(), blockPos2.getY()), Math.min(blockPos.getZ(), blockPos2.getZ()), Math.max(blockPos.getX(), blockPos2.getX()), Math.max(blockPos.getY(), blockPos2.getY()), Math.max(blockPos.getZ(), blockPos2.getZ()));
     }
 
+    public static Stream<BlockPos> betweenClosedStream(BoundingBox boundingBox) {
+        return BlockPos.betweenClosedStream(Math.min(boundingBox.x0, boundingBox.x1), Math.min(boundingBox.y0, boundingBox.y1), Math.min(boundingBox.z0, boundingBox.z1), Math.max(boundingBox.x0, boundingBox.x1), Math.max(boundingBox.y0, boundingBox.y1), Math.max(boundingBox.z0, boundingBox.z1));
+    }
+
     public static Stream<BlockPos> betweenClosedStream(final int i, final int j, final int k, final int l, final int m, final int n) {
         return StreamSupport.stream(new Spliterators.AbstractSpliterator<BlockPos>((long)((l - i + 1) * (m - j + 1) * (n - k + 1)), 64){
             final Cursor3D cursor;
@@ -332,7 +337,7 @@ implements Serializable {
         }
 
         public static PooledMutableBlockPos acquire(Entity entity) {
-            return PooledMutableBlockPos.acquire(entity.x, entity.y, entity.z);
+            return PooledMutableBlockPos.acquire(entity.getX(), entity.getY(), entity.getZ());
         }
 
         public static PooledMutableBlockPos acquire(double d, double e, double f) {
@@ -465,6 +470,10 @@ implements Serializable {
             this(Mth.floor(d), Mth.floor(e), Mth.floor(f));
         }
 
+        public MutableBlockPos(Entity entity) {
+            this(entity.getX(), entity.getY(), entity.getZ());
+        }
+
         @Override
         public BlockPos offset(double d, double e, double f) {
             return super.offset(d, e, f).immutable();
@@ -508,7 +517,7 @@ implements Serializable {
         }
 
         public MutableBlockPos set(Entity entity) {
-            return this.set(entity.x, entity.y, entity.z);
+            return this.set(entity.getX(), entity.getY(), entity.getZ());
         }
 
         public MutableBlockPos set(double d, double e, double f) {

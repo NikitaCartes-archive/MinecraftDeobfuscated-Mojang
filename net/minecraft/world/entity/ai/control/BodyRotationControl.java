@@ -57,9 +57,9 @@ public class BodyRotationControl {
     }
 
     private boolean isMoving() {
-        double d = this.mob.x - this.mob.xo;
-        double e = this.mob.z - this.mob.zo;
-        return d * d + e * e > 2.500000277905201E-7;
+        double e;
+        double d = this.mob.getX() - this.mob.xo;
+        return d * d + (e = this.mob.getZ() - this.mob.zo) * e > 2.500000277905201E-7;
     }
 }
 

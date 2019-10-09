@@ -24,12 +24,12 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratedFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
@@ -56,18 +56,19 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
         FlatLevelBiomeWrapper flatLevelBiomeWrapper = new FlatLevelBiomeWrapper(biome.getSurfaceBuilder(), biome.getPrecipitation(), biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getTemperature(), biome.getDownfall(), biome.getWaterColor(), biome.getWaterFogColor(), biome.getParent());
         Map<String, Map<String, String>> map = ((FlatLevelGeneratorSettings)this.settings).getStructuresOptions();
         for (String string : map.keySet()) {
-            ConfiguredFeature<?>[] configuredFeatureArray = FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
+            ConfiguredFeature<?, ?>[] configuredFeatureArray = FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
             if (configuredFeatureArray == null) continue;
-            ConfiguredFeature<?>[] configuredFeatureArray2 = configuredFeatureArray;
+            ConfiguredFeature<?, ?>[] configuredFeatureArray2 = configuredFeatureArray;
             int n = configuredFeatureArray2.length;
             for (int i = 0; i < n; ++i) {
-                StructureFeature structureFeature;
-                ConfiguredFeature<?> configuredFeature = configuredFeatureArray2[i];
+                ConfiguredFeature<?, ?> configuredFeature = configuredFeatureArray2[i];
                 flatLevelBiomeWrapper.addFeature(FlatLevelGeneratorSettings.STRUCTURE_FEATURES_STEP.get(configuredFeature), configuredFeature);
-                ConfiguredFeature<?> configuredFeature2 = ((DecoratedFeatureConfiguration)configuredFeature.config).feature;
+                ConfiguredFeature<?, ?> configuredFeature2 = ((DecoratedFeatureConfiguration)configuredFeature.config).feature;
                 if (!(configuredFeature2.feature instanceof StructureFeature)) continue;
-                Object featureConfiguration = biome.getStructureConfiguration(structureFeature = (StructureFeature)configuredFeature2.feature);
-                flatLevelBiomeWrapper.addStructureStart(structureFeature, featureConfiguration != null ? featureConfiguration : FlatLevelGeneratorSettings.STRUCTURE_FEATURES_DEFAULT.get(configuredFeature));
+                StructureFeature structureFeature = (StructureFeature)configuredFeature2.feature;
+                Object featureConfiguration = biome.getStructureConfiguration(structureFeature);
+                Object featureConfiguration2 = featureConfiguration != null ? featureConfiguration : FlatLevelGeneratorSettings.STRUCTURE_FEATURES_DEFAULT.get(configuredFeature);
+                flatLevelBiomeWrapper.addStructureStart(structureFeature.configured(featureConfiguration2));
             }
         }
         boolean bl2 = bl = (!((FlatLevelGeneratorSettings)this.settings).isVoidGen() || biome == Biomes.THE_VOID) && map.containsKey("decoration");
@@ -77,7 +78,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
             list.add(GenerationStep.Decoration.SURFACE_STRUCTURES);
             for (GenerationStep.Decoration decoration : GenerationStep.Decoration.values()) {
                 if (list.contains((Object)decoration)) continue;
-                for (ConfiguredFeature<?> configuredFeature2 : biome.getFeaturesForStep(decoration)) {
+                for (ConfiguredFeature<?, ?> configuredFeature2 : biome.getFeaturesForStep(decoration)) {
                     flatLevelBiomeWrapper.addFeature(decoration, configuredFeature2);
                 }
             }
@@ -88,7 +89,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
             BlockState blockState = blockStates[var6_11];
             if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
                 ((FlatLevelGeneratorSettings)this.settings).deleteLayer((int)var6_11);
-                flatLevelBiomeWrapper.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Biome.makeComposite(Feature.FILL_LAYER, new LayerConfiguration((int)var6_11, blockState), FeatureDecorator.NOPE, DecoratorConfiguration.NONE));
+                flatLevelBiomeWrapper.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration((int)var6_11, blockState)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
             }
             ++var6_11;
         }

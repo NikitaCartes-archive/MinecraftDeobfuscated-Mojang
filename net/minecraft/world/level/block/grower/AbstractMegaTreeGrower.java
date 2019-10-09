@@ -12,9 +12,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractMegaTreeGrower
@@ -31,11 +30,11 @@ extends AbstractTreeGrower {
     }
 
     @Nullable
-    protected abstract AbstractTreeFeature<NoneFeatureConfiguration> getMegaFeature(Random var1);
+    protected abstract ConfiguredFeature<MegaTreeConfiguration, ?> getConfiguredMegaFeature(Random var1);
 
     public boolean placeMega(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
-        AbstractTreeFeature<NoneFeatureConfiguration> abstractTreeFeature = this.getMegaFeature(random);
-        if (abstractTreeFeature == null) {
+        ConfiguredFeature<MegaTreeConfiguration, ?> configuredFeature = this.getConfiguredMegaFeature(random);
+        if (configuredFeature == null) {
             return false;
         }
         BlockState blockState2 = Blocks.AIR.defaultBlockState();
@@ -43,7 +42,7 @@ extends AbstractTreeGrower {
         levelAccessor.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);
         levelAccessor.setBlock(blockPos.offset(i, 0, j + 1), blockState2, 4);
         levelAccessor.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState2, 4);
-        if (abstractTreeFeature.place(levelAccessor, chunkGenerator, random, blockPos.offset(i, 0, j), FeatureConfiguration.NONE, false)) {
+        if (configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos.offset(i, 0, j))) {
             return true;
         }
         levelAccessor.setBlock(blockPos.offset(i, 0, j), blockState, 4);

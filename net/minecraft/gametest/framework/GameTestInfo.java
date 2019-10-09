@@ -3,15 +3,16 @@
  */
 package net.minecraft.gametest.framework;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestListener;
+import net.minecraft.gametest.framework.GameTestSequence;
 import net.minecraft.gametest.framework.GameTestTimeoutException;
 import net.minecraft.gametest.framework.StructureUtils;
 import net.minecraft.gametest.framework.TestFunction;
@@ -21,50 +22,85 @@ import org.jetbrains.annotations.Nullable;
 
 public class GameTestInfo {
     private final TestFunction testFunction;
-    private final BlockPos testPos;
+    private BlockPos testPos;
     private final ServerLevel level;
     private final Collection<GameTestListener> listeners = Lists.newArrayList();
-    private int remainingTicksUntilTimeout;
-    private Runnable succeedWhenThisAssertPasses;
-    private Map<Runnable, Long> assertAtTickTimeMap = Maps.newHashMap();
+    private final int timeoutTicks;
+    private final Collection<GameTestSequence> sequences = Lists.newCopyOnWriteArrayList();
+    private Object2LongMap<Runnable> runAtTickTimeMap = new Object2LongOpenHashMap<Runnable>();
+    private long startTick;
+    private long tickCount;
     private boolean started = false;
-    private long startTime = -1L;
+    private final Stopwatch timer = Stopwatch.createUnstarted();
     private boolean done = false;
-    private long doneTime = -1L;
     @Nullable
     private Throwable error;
 
-    public GameTestInfo(TestFunction testFunction, BlockPos blockPos, ServerLevel serverLevel) {
+    public GameTestInfo(TestFunction testFunction, ServerLevel serverLevel) {
         this.testFunction = testFunction;
-        this.testPos = blockPos;
         this.level = serverLevel;
-        this.remainingTicksUntilTimeout = testFunction.getMaxTicks();
+        this.timeoutTicks = testFunction.getMaxTicks();
+    }
+
+    public GameTestInfo(TestFunction testFunction, BlockPos blockPos, ServerLevel serverLevel) {
+        this(testFunction, serverLevel);
+        this.assignPosition(blockPos);
+    }
+
+    void assignPosition(BlockPos blockPos) {
+        this.testPos = blockPos;
+    }
+
+    void startExecution() {
+        this.startTick = this.level.getGameTime() + 1L + this.testFunction.getSetupTicks();
+        this.timer.start();
     }
 
     public void tick() {
         if (this.isDone()) {
             return;
         }
-        Iterator<Map.Entry<Runnable, Long>> iterator = this.assertAtTickTimeMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Runnable, Long> entry = iterator.next();
-            if (entry.getValue() > this.level.getGameTime()) continue;
+        this.tickCount = this.level.getGameTime() - this.startTick;
+        if (this.tickCount < 0L) {
+            return;
+        }
+        if (this.tickCount == 0L) {
+            this.startTest();
+        }
+        Iterator objectIterator = this.runAtTickTimeMap.object2LongEntrySet().iterator();
+        while (objectIterator.hasNext()) {
+            Object2LongMap.Entry entry = (Object2LongMap.Entry)objectIterator.next();
+            if (entry.getLongValue() > this.tickCount) continue;
             try {
-                entry.getKey().run();
+                ((Runnable)entry.getKey()).run();
             } catch (Exception exception) {
                 this.fail(exception);
             }
-            iterator.remove();
+            objectIterator.remove();
         }
-        --this.remainingTicksUntilTimeout;
-        if (this.remainingTicksUntilTimeout <= 0) {
-            if (this.succeedWhenThisAssertPasses == null) {
+        if (this.tickCount > (long)this.timeoutTicks) {
+            if (this.sequences.isEmpty()) {
                 this.fail(new GameTestTimeoutException("Didn't succeed or fail within " + this.testFunction.getMaxTicks() + " ticks"));
             } else {
-                this.tryAssertAndEndTest();
+                this.sequences.forEach(gameTestSequence -> gameTestSequence.tickAndFailIfNotComplete(this.tickCount));
+                if (this.error == null) {
+                    this.fail(new GameTestTimeoutException("No sequences finished"));
+                }
             }
-        } else if (this.succeedWhenThisAssertPasses != null) {
-            this.tryAssertAndEndTestIfSuccessful();
+        } else {
+            this.sequences.forEach(gameTestSequence -> gameTestSequence.tickAndContinue(this.tickCount));
+        }
+    }
+
+    private void startTest() {
+        if (this.started) {
+            throw new IllegalStateException("Test already started");
+        }
+        this.started = true;
+        try {
+            this.testFunction.run(new GameTestHelper(this));
+        } catch (Exception exception) {
+            this.fail(exception);
         }
     }
 
@@ -74,18 +110,6 @@ public class GameTestInfo {
 
     public BlockPos getTestPos() {
         return this.testPos;
-    }
-
-    public void spawnStructureAndRunTest(int i) {
-        try {
-            StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
-            structureBlockEntity.setStructureName(this.getTestName());
-            StructureUtils.addCommandBlockAndButtonToStartTest(this.testPos.offset(1, 0, -1), this.level);
-            this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
-            this.testFunction.run(new GameTestHelper(this));
-        } catch (RuntimeException runtimeException) {
-            this.fail(runtimeException);
-        }
     }
 
     @Nullable
@@ -122,19 +146,16 @@ public class GameTestInfo {
         return this.done;
     }
 
-    public void succeed() {
-        this.done = true;
-        this.doneTime = Util.getMillis();
-        this.error = null;
-        this.succeedWhenThisAssertPasses = null;
-        this.listeners.forEach(gameTestListener -> gameTestListener.testPassed(this));
+    private void finish() {
+        if (!this.done) {
+            this.done = true;
+            this.timer.stop();
+        }
     }
 
     public void fail(Throwable throwable) {
-        this.done = true;
-        this.doneTime = Util.getMillis();
+        this.finish();
         this.error = throwable;
-        this.succeedWhenThisAssertPasses = null;
         this.listeners.forEach(gameTestListener -> gameTestListener.testFailed(this));
     }
 
@@ -151,28 +172,11 @@ public class GameTestInfo {
         this.listeners.add(gameTestListener);
     }
 
-    private void tryAssertAndEndTest() {
-        try {
-            this.succeedWhenThisAssertPasses.run();
-            this.succeed();
-        } catch (Exception exception) {
-            this.fail(exception);
-        }
-    }
-
-    private void tryAssertAndEndTestIfSuccessful() {
-        try {
-            this.succeedWhenThisAssertPasses.run();
-            this.succeed();
-        } catch (Exception exception) {
-            // empty catch block
-        }
-    }
-
     public void spawnStructure(int i) {
-        StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
-        this.started = true;
-        this.startTime = Util.getMillis();
+        StructureBlockEntity structureBlockEntity = StructureUtils.spawnStructure(this.testFunction.getStructureName(), this.testPos, i, this.level, false);
+        structureBlockEntity.setStructureName(this.getTestName());
+        StructureUtils.addCommandBlockAndButtonToStartTest(this.testPos.offset(1, 0, -1), this.level);
+        this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
     }
 
     public boolean isRequired() {
@@ -181,6 +185,10 @@ public class GameTestInfo {
 
     public boolean isOptional() {
         return !this.testFunction.isRequired();
+    }
+
+    public String getStructureName() {
+        return this.testFunction.getStructureName();
     }
 }
 

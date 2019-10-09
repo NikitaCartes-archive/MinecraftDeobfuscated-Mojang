@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.feature.SavannaVillagePools;
 import net.minecraft.world.level.levelgen.feature.SnowyVillagePools;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.TaigaVillagePools;
-import net.minecraft.world.level.levelgen.feature.VillageConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;

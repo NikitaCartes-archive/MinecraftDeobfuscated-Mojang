@@ -87,9 +87,9 @@ extends Entity {
 
     @Override
     public void refreshDimensions() {
-        double d = this.x;
-        double e = this.y;
-        double f = this.z;
+        double d = this.getX();
+        double e = this.getY();
+        double f = this.getZ();
         super.refreshDimensions();
         this.setPos(d, e, f);
     }
@@ -179,10 +179,10 @@ extends Entity {
                             int m = l >> 16 & 0xFF;
                             int n = l >> 8 & 0xFF;
                             int o = l & 0xFF;
-                            this.level.addAlwaysVisibleParticle(particleOptions, this.x + (double)j, this.y, this.z + (double)k, (float)m / 255.0f, (float)n / 255.0f, (float)o / 255.0f);
+                            this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)j, this.getY(), this.getZ() + (double)k, (float)m / 255.0f, (float)n / 255.0f, (float)o / 255.0f);
                             continue;
                         }
-                        this.level.addAlwaysVisibleParticle(particleOptions, this.x + (double)j, this.y, this.z + (double)k, 0.0, 0.0, 0.0);
+                        this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)j, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
                     }
                     break block23;
                 }
@@ -198,9 +198,9 @@ extends Entity {
                         int n = m >> 16 & 0xFF;
                         int o = m >> 8 & 0xFF;
                         int s = m & 0xFF;
-                        this.level.addAlwaysVisibleParticle(particleOptions, this.x + (double)k, this.y, this.z + (double)r, (float)n / 255.0f, (float)o / 255.0f, (float)s / 255.0f);
+                        this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)k, this.getY(), this.getZ() + (double)r, (float)n / 255.0f, (float)o / 255.0f, (float)s / 255.0f);
                     } else {
-                        this.level.addAlwaysVisibleParticle(particleOptions, this.x + (double)k, this.y, this.z + (double)r, (0.5 - this.random.nextDouble()) * 0.15, 0.01f, (0.5 - this.random.nextDouble()) * 0.15);
+                        this.level.addAlwaysVisibleParticle(particleOptions, this.getX() + (double)k, this.getY(), this.getZ() + (double)r, (0.5 - this.random.nextDouble()) * 0.15, 0.01f, (0.5 - this.random.nextDouble()) * 0.15);
                     }
                     ++q;
                 }
@@ -245,7 +245,7 @@ extends Entity {
                             double e;
                             double d;
                             double t;
-                            if (this.victims.containsKey(livingEntity) || !livingEntity.isAffectedByPotions() || !((t = (d = livingEntity.x - this.x) * d + (e = livingEntity.z - this.z) * e) <= (double)(f * f))) continue;
+                            if (this.victims.containsKey(livingEntity) || !livingEntity.isAffectedByPotions() || !((t = (d = livingEntity.getX() - this.getX()) * d + (e = livingEntity.getZ() - this.getZ()) * e) <= (double)(f * f))) continue;
                             this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);
                             for (MobEffectInstance mobEffectInstance2 : list) {
                                 if (mobEffectInstance2.getEffect().isInstantenous()) {

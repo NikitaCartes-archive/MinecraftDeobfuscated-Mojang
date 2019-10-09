@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LeashKnotModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -32,11 +31,9 @@ extends EntityRenderer<LeashFenceKnotEntity> {
         float i = 0.0625f;
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         int j = leashFenceKnotEntity.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(KNOT_LOCATION));
-        OverlayTexture.setDefault(vertexConsumer);
         this.model.setupAnim(leashFenceKnotEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
-        this.model.renderToBuffer(poseStack, vertexConsumer, j);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(KNOT_LOCATION));
+        this.model.renderToBuffer(poseStack, vertexConsumer, j, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(leashFenceKnotEntity, d, e, f, g, h, poseStack, multiBufferSource);
     }

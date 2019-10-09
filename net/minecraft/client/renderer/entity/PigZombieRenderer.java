@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -18,8 +19,8 @@ extends HumanoidMobRenderer<PigZombie, ZombieModel<PigZombie>> {
     private static final ResourceLocation ZOMBIE_PIGMAN_LOCATION = new ResourceLocation("textures/entity/zombie_pigman.png");
 
     public PigZombieRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new ZombieModel(), 0.5f);
-        this.addLayer(new HumanoidArmorLayer(this, new ZombieModel(0.5f, true), new ZombieModel(1.0f, true)));
+        super(entityRenderDispatcher, new ZombieModel(RenderType::entityCutoutNoCull, 0.0f, false), 0.5f);
+        this.addLayer(new HumanoidArmorLayer(this, new ZombieModel(RenderType::entityCutoutNoCull, 0.5f, true), new ZombieModel(RenderType::entityCutoutNoCull, 1.0f, true)));
     }
 
     @Override

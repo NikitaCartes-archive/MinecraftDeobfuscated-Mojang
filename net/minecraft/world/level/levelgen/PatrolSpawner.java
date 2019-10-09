@@ -18,6 +18,7 @@ public class PatrolSpawner {
     private int nextTick;
 
     public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
+        int k;
         if (!bl) {
             return 0;
         }
@@ -46,9 +47,7 @@ public class PatrolSpawner {
             return 0;
         }
         int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-        int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        mutableBlockPos.set(player.x, player.y, player.z).move(j, 0, k);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(player).move(j, 0, k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1));
         if (!serverLevel.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getY() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getY() + 10, mutableBlockPos.getZ() + 10)) {
             return 0;
         }

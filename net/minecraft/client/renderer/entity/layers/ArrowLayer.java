@@ -35,7 +35,7 @@ extends StuckInBodyLayer<T, M> {
     @Override
     protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, float h, float i) {
         float j = Mth.sqrt(f * f + h * h);
-        this.arrow = new Arrow(entity.level, entity.x, entity.y, entity.z);
+        this.arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
         this.arrow.yRot = (float)(Math.atan2(f, h) * 57.2957763671875);
         this.arrow.xRot = (float)(Math.atan2(g, j) * 57.2957763671875);
         this.arrow.yRotO = this.arrow.yRot;

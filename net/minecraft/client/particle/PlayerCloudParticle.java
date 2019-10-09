@@ -14,7 +14,6 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 
 @Environment(value=EnvType.CLIENT)
 public class PlayerCloudParticle
@@ -54,6 +53,7 @@ extends TextureSheetParticle {
 
     @Override
     public void tick() {
+        double d;
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
@@ -67,13 +67,10 @@ extends TextureSheetParticle {
         this.yd *= (double)0.96f;
         this.zd *= (double)0.96f;
         Player player = this.level.getNearestPlayer(this.x, this.y, this.z, 2.0, false);
-        if (player != null) {
-            AABB aABB = player.getBoundingBox();
-            if (this.y > aABB.minY) {
-                this.y += (aABB.minY - this.y) * 0.2;
-                this.yd += (player.getDeltaMovement().y - this.yd) * 0.2;
-                this.setPos(this.x, this.y, this.z);
-            }
+        if (player != null && this.y > (d = player.getY())) {
+            this.y += (d - this.y) * 0.2;
+            this.yd += (player.getDeltaMovement().y - this.yd) * 0.2;
+            this.setPos(this.x, this.y, this.z);
         }
         if (this.onGround) {
             this.xd *= (double)0.7f;

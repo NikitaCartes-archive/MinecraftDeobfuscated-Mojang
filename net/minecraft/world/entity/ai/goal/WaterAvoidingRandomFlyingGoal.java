@@ -39,12 +39,12 @@ extends WaterAvoidingRandomStrollGoal {
         BlockPos blockPos = new BlockPos(this.mob);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.x - 3.0), Mth.floor(this.mob.y - 6.0), Mth.floor(this.mob.z - 3.0), Mth.floor(this.mob.x + 3.0), Mth.floor(this.mob.y + 6.0), Mth.floor(this.mob.z + 3.0));
+        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.getX() - 3.0), Mth.floor(this.mob.getY() - 6.0), Mth.floor(this.mob.getZ() - 3.0), Mth.floor(this.mob.getX() + 3.0), Mth.floor(this.mob.getY() + 6.0), Mth.floor(this.mob.getZ() + 3.0));
         for (BlockPos blockPos2 : iterable) {
             Block block;
             boolean bl;
             if (blockPos.equals(blockPos2) || !(bl = (block = this.mob.level.getBlockState(mutableBlockPos2.set(blockPos2).move(Direction.DOWN)).getBlock()) instanceof LeavesBlock || block.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.set(blockPos2).move(Direction.UP))) continue;
-            return new Vec3(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
+            return new Vec3(blockPos2);
         }
         return null;
     }

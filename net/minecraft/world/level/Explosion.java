@@ -171,7 +171,7 @@ public class Explosion {
             double ab;
             double x;
             Entity entity = list.get(w);
-            if (entity.ignoreExplosion() || !((x = (double)(Mth.sqrt(entity.distanceToSqr(new Vec3(this.x, this.y, this.z))) / r)) <= 1.0) || (ab = (double)Mth.sqrt((y = entity.x - this.x) * y + (z = entity.y + (double)entity.getEyeHeight() - this.y) * z + (aa = entity.z - this.z) * aa)) == 0.0) continue;
+            if (entity.ignoreExplosion() || !((x = (double)(Mth.sqrt(entity.distanceToSqr(new Vec3(this.x, this.y, this.z))) / r)) <= 1.0) || (ab = (double)Mth.sqrt((y = entity.getX() - this.x) * y + (z = entity.getEyeY() - this.y) * z + (aa = entity.getZ() - this.z) * aa)) == 0.0) continue;
             y /= ab;
             z /= ab;
             aa /= ab;

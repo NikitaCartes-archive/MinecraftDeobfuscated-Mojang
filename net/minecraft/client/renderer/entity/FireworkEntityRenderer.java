@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
@@ -29,14 +30,15 @@ extends EntityRenderer<FireworkRocketEntity> {
     @Override
     public void render(FireworkRocketEntity fireworkRocketEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(-this.entityRenderDispatcher.playerRotY, true));
-        poseStack.mulPose(Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
+        float i = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
         if (fireworkRocketEntity.isShotAtAngle()) {
-            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
         } else {
-            poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         }
-        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, fireworkRocketEntity.getLightColor(), poseStack, multiBufferSource);
+        this.itemRenderer.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, fireworkRocketEntity.getLightColor(), OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
         poseStack.popPose();
         super.render(fireworkRocketEntity, d, e, f, g, h, poseStack, multiBufferSource);
     }

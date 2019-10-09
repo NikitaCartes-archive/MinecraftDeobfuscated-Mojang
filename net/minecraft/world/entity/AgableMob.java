@@ -60,7 +60,7 @@ extends PathfinderMob {
             AgableMob agableMob;
             if (!this.level.isClientSide && (agableMob = this.getBreedOffspring(this)) != null) {
                 agableMob.setAge(-24000);
-                agableMob.moveTo(this.x, this.y, this.z, 0.0f, 0.0f);
+                agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f);
                 this.level.addFreshEntity(agableMob);
                 if (itemStack.hasCustomHoverName()) {
                     agableMob.setCustomName(itemStack.getHoverName());
@@ -148,7 +148,7 @@ extends PathfinderMob {
         if (this.level.isClientSide) {
             if (this.forcedAgeTimer > 0) {
                 if (this.forcedAgeTimer % 4 == 0) {
-                    this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()), this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), 0.0, 0.0, 0.0);
+                    this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
                 }
                 --this.forcedAgeTimer;
             }

@@ -46,7 +46,7 @@ extends ThrowableItemProjectile {
             this.level.levelEvent(2002, new BlockPos(this), PotionUtils.getColor(Potions.WATER));
             for (int i = 3 + this.level.random.nextInt(5) + this.level.random.nextInt(5); i > 0; i -= j) {
                 j = ExperienceOrb.getExperienceValue(i);
-                this.level.addFreshEntity(new ExperienceOrb(this.level, this.x, this.y, this.z, j));
+                this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
             }
             this.remove();
         }

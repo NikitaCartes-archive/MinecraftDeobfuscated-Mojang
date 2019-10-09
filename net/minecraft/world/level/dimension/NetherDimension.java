@@ -22,6 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class NetherDimension
 extends Dimension {
+    private static final Vec3 NETHER_FOG_COLOR = new Vec3(0.2f, 0.03f, 0.03f);
+
     public NetherDimension(Level level, DimensionType dimensionType) {
         super(level, dimensionType);
         this.ultraWarm = true;
@@ -31,7 +33,7 @@ extends Dimension {
     @Override
     @Environment(value=EnvType.CLIENT)
     public Vec3 getFogColor(float f, float g) {
-        return new Vec3(0.2f, 0.03f, 0.03f);
+        return NETHER_FOG_COLOR;
     }
 
     @Override

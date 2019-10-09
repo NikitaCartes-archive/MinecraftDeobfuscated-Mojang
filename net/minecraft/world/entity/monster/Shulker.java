@@ -263,7 +263,7 @@ implements Enemy {
             double d = 0.5 - (double)Mth.sin((0.5f + this.currentPeekAmount) * (float)Math.PI) * 0.5;
             double e = 0.5 - (double)Mth.sin((0.5f + this.currentPeekAmountO) * (float)Math.PI) * 0.5;
             Direction direction3 = this.getAttachFace().getOpposite();
-            this.setBoundingBox(new AABB(this.x - 0.5, this.y, this.z - 0.5, this.x + 0.5, this.y + 1.0, this.z + 0.5).expandTowards((double)direction3.getStepX() * d, (double)direction3.getStepY() * d, (double)direction3.getStepZ() * d));
+            this.setBoundingBox(new AABB(this.getX() - 0.5, this.getY(), this.getZ() - 0.5, this.getX() + 0.5, this.getY() + 1.0, this.getZ() + 0.5).expandTowards((double)direction3.getStepX() * d, (double)direction3.getStepY() * d, (double)direction3.getStepZ() * d));
             double g = d - e;
             if (g > 0.0 && !(list = this.level.getEntities(this, this.getBoundingBox())).isEmpty()) {
                 for (Entity entity : list) {

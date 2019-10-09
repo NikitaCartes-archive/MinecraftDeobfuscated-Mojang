@@ -33,18 +33,17 @@ extends EntityRenderer<DragonFireball> {
         float i = 1.0f;
         float j = 0.5f;
         float k = 0.25f;
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - this.entityRenderDispatcher.playerRotY, true));
-        poseStack.mulPose(Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - this.entityRenderDispatcher.playerRotY));
+        float l = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX;
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
         Matrix4f matrix4f = poseStack.getPose();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION));
-        OverlayTexture.setDefault(vertexConsumer);
-        int l = dragonFireball.getLightColor();
-        vertexConsumer.vertex(matrix4f, -0.5f, -0.25f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(l).normal(0.0f, 1.0f, 0.0f).endVertex();
-        vertexConsumer.vertex(matrix4f, 0.5f, -0.25f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(l).normal(0.0f, 1.0f, 0.0f).endVertex();
-        vertexConsumer.vertex(matrix4f, 0.5f, 0.75f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(l).normal(0.0f, 1.0f, 0.0f).endVertex();
-        vertexConsumer.vertex(matrix4f, -0.5f, 0.75f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(l).normal(0.0f, 1.0f, 0.0f).endVertex();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TEXTURE_LOCATION));
+        int m = dragonFireball.getLightColor();
+        vertexConsumer.vertex(matrix4f, -0.5f, -0.25f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, 0.5f, -0.25f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, 0.5f, 0.75f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, -0.5f, 0.75f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 0.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
         poseStack.popPose();
-        vertexConsumer.unsetDefaultOverlayCoords();
         super.render(dragonFireball, d, e, f, g, h, poseStack, multiBufferSource);
     }
 

@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -57,19 +58,19 @@ extends BlockEntityRenderer<BedBlockEntity> {
     }
 
     @Override
-    public void render(BedBlockEntity bedBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(BedBlockEntity bedBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
         if (bedBlockEntity.hasLevel()) {
             BlockState blockState = bedBlockEntity.getBlockState();
-            this.renderPiece(poseStack, vertexConsumer, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), resourceLocation, i, false);
+            this.renderPiece(poseStack, vertexConsumer, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), resourceLocation, i, j, false);
         } else {
-            this.renderPiece(poseStack, vertexConsumer, true, Direction.SOUTH, resourceLocation, i, false);
-            this.renderPiece(poseStack, vertexConsumer, false, Direction.SOUTH, resourceLocation, i, true);
+            this.renderPiece(poseStack, vertexConsumer, true, Direction.SOUTH, resourceLocation, i, j, false);
+            this.renderPiece(poseStack, vertexConsumer, false, Direction.SOUTH, resourceLocation, i, j, true);
         }
     }
 
-    private void renderPiece(PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Direction direction, ResourceLocation resourceLocation, int i, boolean bl2) {
+    private void renderPiece(PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Direction direction, ResourceLocation resourceLocation, int i, int j, boolean bl2) {
         this.headPiece.visible = bl;
         this.footPiece.visible = !bl;
         this.legs[0].visible = !bl;
@@ -78,17 +79,17 @@ extends BlockEntityRenderer<BedBlockEntity> {
         this.legs[3].visible = bl;
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5625, bl2 ? -1.0 : 0.0);
-        poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
         poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Vector3f.ZP.rotation(180.0f + direction.toYRot(), true));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f + direction.toYRot()));
         poseStack.translate(-0.5, -0.5, -0.5);
         TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
-        this.headPiece.render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
-        this.footPiece.render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
-        this.legs[0].render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
-        this.legs[1].render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
-        this.legs[2].render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
-        this.legs[3].render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
+        this.headPiece.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.footPiece.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[0].render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[1].render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[2].render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.legs[3].render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
         poseStack.popPose();
     }
 }

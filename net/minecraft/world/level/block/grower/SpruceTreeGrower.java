@@ -3,28 +3,27 @@
  */
 package net.minecraft.world.level.block.grower;
 
-import com.mojang.datafixers.Dynamic;
 import java.util.Random;
-import java.util.function.Function;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.MegaPineTreeFeature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.SpruceFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public class SpruceTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected AbstractTreeFeature<NoneFeatureConfiguration> getFeature(Random random) {
-        return new SpruceFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize), true);
+    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+        return Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG);
     }
 
     @Override
     @Nullable
-    protected AbstractTreeFeature<NoneFeatureConfiguration> getMegaFeature(Random random) {
-        return new MegaPineTreeFeature(NoneFeatureConfiguration::deserialize, false, random.nextBoolean());
+    protected ConfiguredFeature<MegaTreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
+        return Feature.MEGA_SPRUCE_TREE.configured(random.nextBoolean() ? BiomeDefaultFeatures.MEGA_SPRUCE_TREE_CONFIG : BiomeDefaultFeatures.MEGA_PINE_TREE_CONFIG);
     }
 }
 

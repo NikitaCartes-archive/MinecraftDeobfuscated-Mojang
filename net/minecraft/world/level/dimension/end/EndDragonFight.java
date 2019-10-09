@@ -39,7 +39,6 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
@@ -52,11 +51,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -328,7 +327,7 @@ public class EndDragonFight {
 
     private void spawnNewGateway(BlockPos blockPos) {
         this.level.levelEvent(3000, blockPos, 0);
-        Feature.END_GATEWAY.place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos, EndGatewayConfiguration.delayedExitSearch());
+        Feature.END_GATEWAY.configured(EndGatewayConfiguration.delayedExitSearch()).place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos);
     }
 
     private void spawnExitPortal(boolean bl) {
@@ -339,7 +338,7 @@ public class EndDragonFight {
                 this.portalLocation = this.portalLocation.below();
             }
         }
-        endPodiumFeature.place((LevelAccessor)this.level, this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation, FeatureConfiguration.NONE);
+        endPodiumFeature.configured(FeatureConfiguration.NONE).place(this.level, this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
     }
 
     private EnderDragon createNewDragon() {

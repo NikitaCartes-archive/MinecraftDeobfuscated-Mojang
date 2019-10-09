@@ -12,7 +12,7 @@ extends HitResult {
     private final Entity entity;
 
     public EntityHitResult(Entity entity) {
-        this(entity, new Vec3(entity.x, entity.y, entity.z));
+        this(entity, entity.position());
     }
 
     public EntityHitResult(Entity entity, Vec3 vec3) {

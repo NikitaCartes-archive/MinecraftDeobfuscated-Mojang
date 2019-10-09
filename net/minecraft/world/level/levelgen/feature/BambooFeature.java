@@ -8,7 +8,6 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BambooBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -18,7 +17,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
 public class BambooFeature
 extends Feature<ProbabilityFeatureConfiguration> {
@@ -48,7 +47,7 @@ extends Feature<ProbabilityFeatureConfiguration> {
                             int n = l - blockPos.getX();
                             if (n * n + (o = m - blockPos.getZ()) * o > k * k) continue;
                             mutableBlockPos2.set(l, levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE, l, m) - 1, m);
-                            if (!levelAccessor.getBlockState(mutableBlockPos2).getBlock().is(BlockTags.DIRT_LIKE)) continue;
+                            if (!BambooFeature.isDirt(levelAccessor.getBlockState(mutableBlockPos2).getBlock())) continue;
                             levelAccessor.setBlock(mutableBlockPos2, Blocks.PODZOL.defaultBlockState(), 2);
                         }
                     }

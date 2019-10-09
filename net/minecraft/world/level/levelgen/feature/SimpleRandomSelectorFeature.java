@@ -12,18 +12,18 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.SimpleRandomFeatureConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 
 public class SimpleRandomSelectorFeature
-extends Feature<SimpleRandomFeatureConfig> {
-    public SimpleRandomSelectorFeature(Function<Dynamic<?>, ? extends SimpleRandomFeatureConfig> function) {
+extends Feature<SimpleRandomFeatureConfiguration> {
+    public SimpleRandomSelectorFeature(Function<Dynamic<?>, ? extends SimpleRandomFeatureConfiguration> function) {
         super(function);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SimpleRandomFeatureConfig simpleRandomFeatureConfig) {
-        int i = random.nextInt(simpleRandomFeatureConfig.features.size());
-        ConfiguredFeature<?> configuredFeature = simpleRandomFeatureConfig.features.get(i);
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SimpleRandomFeatureConfiguration simpleRandomFeatureConfiguration) {
+        int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
+        ConfiguredFeature<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i);
         return configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos);
     }
 }

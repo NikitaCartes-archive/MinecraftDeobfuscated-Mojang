@@ -43,6 +43,14 @@ public class BlockEventData {
         return false;
     }
 
+    public int hashCode() {
+        int i = this.pos.hashCode();
+        i = 31 * i + this.block.hashCode();
+        i = 31 * i + this.paramA;
+        i = 31 * i + this.paramB;
+        return i;
+    }
+
     public String toString() {
         return "TE(" + this.pos + ")," + this.paramA + "," + this.paramB + "," + this.block;
     }

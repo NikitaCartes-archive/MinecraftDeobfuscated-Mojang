@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.decoration;
 
-import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -87,27 +86,28 @@ extends HangingEntity {
             return;
         }
         double d = 0.46875;
-        this.x = (double)this.pos.getX() + 0.5 - (double)this.direction.getStepX() * 0.46875;
-        this.y = (double)this.pos.getY() + 0.5 - (double)this.direction.getStepY() * 0.46875;
-        this.z = (double)this.pos.getZ() + 0.5 - (double)this.direction.getStepZ() * 0.46875;
-        double e = this.getWidth();
-        double f = this.getHeight();
-        double g = this.getWidth();
+        double e = (double)this.pos.getX() + 0.5 - (double)this.direction.getStepX() * 0.46875;
+        double f = (double)this.pos.getY() + 0.5 - (double)this.direction.getStepY() * 0.46875;
+        double g = (double)this.pos.getZ() + 0.5 - (double)this.direction.getStepZ() * 0.46875;
+        this.setPosRaw(e, f, g);
+        double h = this.getWidth();
+        double i = this.getHeight();
+        double j = this.getWidth();
         Direction.Axis axis = this.direction.getAxis();
         switch (axis) {
             case X: {
-                e = 1.0;
+                h = 1.0;
                 break;
             }
             case Y: {
-                f = 1.0;
+                i = 1.0;
                 break;
             }
             case Z: {
-                g = 1.0;
+                j = 1.0;
             }
         }
-        this.setBoundingBox(new AABB(this.x - (e /= 32.0), this.y - (f /= 32.0), this.z - (g /= 32.0), this.x + e, this.y + f, this.z + g));
+        this.setBoundingBox(new AABB(e - (h /= 32.0), f - (i /= 32.0), g - (j /= 32.0), e + h, f + i, g + j));
     }
 
     @Override
@@ -119,7 +119,7 @@ extends HangingEntity {
         if (!(blockState.getMaterial().isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(blockState))) {
             return false;
         }
-        return this.level.getEntities(this, this.getBoundingBox(), (Predicate<? super Entity>)HANGING_ENTITY).isEmpty();
+        return this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty();
     }
 
     @Override

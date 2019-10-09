@@ -10,6 +10,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
@@ -17,17 +18,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class VideoSettingsScreen
-extends Screen {
-    private final Screen lastScreen;
-    private final Options options;
+extends OptionsSubScreen {
     private OptionsList list;
     private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS, Option.BIOME_BLEND_RADIUS};
     private int oldMipmaps;
 
     public VideoSettingsScreen(Screen screen, Options options) {
-        super(new TranslatableComponent("options.videoTitle", new Object[0]));
-        this.lastScreen = screen;
-        this.options = options;
+        super(screen, options, new TranslatableComponent("options.videoTitle", new Object[0]));
     }
 
     @Override
@@ -52,7 +49,7 @@ extends Screen {
             this.minecraft.getTextureAtlas().setFilter(false, this.options.mipmapLevels > 0);
             this.minecraft.delayTextureReload();
         }
-        this.minecraft.options.save();
+        super.removed();
     }
 
     @Override

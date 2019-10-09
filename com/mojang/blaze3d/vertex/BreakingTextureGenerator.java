@@ -50,8 +50,8 @@ extends DefaultedVertexConsumer {
         this.g = this.defaultG;
         this.b = this.defaultB;
         this.a = this.defaultA;
-        this.overlayU = this.defaultOverlayU;
-        this.overlayV = this.defaultOverlayV;
+        this.overlayU = 0;
+        this.overlayV = 10;
         this.lightCoords = 0xF000F0;
         this.nx = 0.0f;
         this.ny = 1.0f;
@@ -114,9 +114,6 @@ extends DefaultedVertexConsumer {
 
     @Override
     public VertexConsumer overlayCoords(int i, int j) {
-        if (this.defaultOverlayCoordsSet) {
-            throw new IllegalStateException();
-        }
         this.overlayU = i;
         this.overlayV = j;
         return this;

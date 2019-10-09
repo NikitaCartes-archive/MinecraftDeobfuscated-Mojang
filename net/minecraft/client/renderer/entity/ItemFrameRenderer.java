@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -50,25 +51,25 @@ extends EntityRenderer<ItemFrame> {
         poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
         double i = 0.46875;
         poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
-        poseStack.mulPose(Vector3f.XP.rotation(itemFrame.xRot, true));
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - itemFrame.yRot, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - itemFrame.yRot));
         BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
         ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
         ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
         poseStack.pushPose();
         poseStack.translate(-0.5, -0.5, -0.5);
         int j = itemFrame.getLightColor();
-        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.getPose(), multiBufferSource.getBuffer(RenderType.SOLID), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, j);
+        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.solid()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, j, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         ItemStack itemStack = itemFrame.getItem();
         if (!itemStack.isEmpty()) {
             boolean bl = itemStack.getItem() == Items.FILLED_MAP;
             poseStack.translate(0.0, 0.0, 0.4375);
             int k = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-            poseStack.mulPose(Vector3f.ZP.rotation((float)k * 360.0f / 8.0f, true));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)k * 360.0f / 8.0f));
             if (bl) {
                 this.entityRenderDispatcher.textureManager.bind(MapRenderer.MAP_BACKGROUND_LOCATION);
-                poseStack.mulPose(Vector3f.ZP.rotation(180.0f, true));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
                 float l = 0.0078125f;
                 poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
                 poseStack.translate(-64.0, -64.0, 0.0);
@@ -79,7 +80,7 @@ extends EntityRenderer<ItemFrame> {
                 }
             } else {
                 poseStack.scale(0.5f, 0.5f, 0.5f);
-                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, j, poseStack, multiBufferSource);
+                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, j, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
             }
         }
         poseStack.popPose();

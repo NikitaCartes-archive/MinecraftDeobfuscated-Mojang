@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -64,7 +65,7 @@ extends EntityRenderer<ItemEntity> {
         float m = bakedModel.getTransforms().getTransform((ItemTransforms.TransformType)ItemTransforms.TransformType.GROUND).scale.y();
         poseStack.translate(0.0, l + 0.25f * m, 0.0);
         float n = ((float)itemEntity.getAge() + h) / 20.0f + itemEntity.bobOffs;
-        poseStack.mulPose(Vector3f.YP.rotation(n, false));
+        poseStack.mulPose(Vector3f.YP.rotation(n));
         float o = bakedModel.getTransforms().ground.scale.x();
         float p = bakedModel.getTransforms().ground.scale.y();
         float q = bakedModel.getTransforms().ground.scale.z();
@@ -88,7 +89,7 @@ extends EntityRenderer<ItemEntity> {
                     poseStack.translate(s, t, 0.0);
                 }
             }
-            this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, itemEntity.getLightColor(), bakedModel);
+            this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, itemEntity.getLightColor(), OverlayTexture.NO_OVERLAY, bakedModel);
             poseStack.popPose();
             if (bl) continue;
             poseStack.translate(0.0f * o, 0.0f * p, 0.09375f * q);

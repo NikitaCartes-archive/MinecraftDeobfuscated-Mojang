@@ -72,7 +72,7 @@ public class MoveControl {
             float m = (h *= j) * l - (i *= j) * k;
             float n = i * l + h * k;
             PathNavigation pathNavigation = this.mob.getNavigation();
-            if (pathNavigation != null && (nodeEvaluator = pathNavigation.getNodeEvaluator()) != null && nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.x + (double)m), Mth.floor(this.mob.y), Mth.floor(this.mob.z + (double)n)) != BlockPathTypes.WALKABLE) {
+            if (pathNavigation != null && (nodeEvaluator = pathNavigation.getNodeEvaluator()) != null && nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.getX() + (double)m), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)n)) != BlockPathTypes.WALKABLE) {
                 this.strafeForwards = 1.0f;
                 this.strafeRight = 0.0f;
                 g = f;
@@ -83,9 +83,9 @@ public class MoveControl {
             this.operation = Operation.WAIT;
         } else if (this.operation == Operation.MOVE_TO) {
             this.operation = Operation.WAIT;
-            double d = this.wantedX - this.mob.x;
-            double o = this.wantedY - this.mob.y;
-            double e = this.wantedZ - this.mob.z;
+            double d = this.wantedX - this.mob.getX();
+            double e = this.wantedZ - this.mob.getZ();
+            double o = this.wantedY - this.mob.getY();
             double p = d * d + o * o + e * e;
             if (p < 2.500000277905201E-7) {
                 this.mob.setZza(0.0f);
@@ -98,7 +98,7 @@ public class MoveControl {
             BlockState blockState = this.mob.level.getBlockState(blockPos);
             Block block = blockState.getBlock();
             VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
-            if (o > (double)this.mob.maxUpStep && d * d + e * e < (double)Math.max(1.0f, this.mob.getBbWidth()) || !voxelShape.isEmpty() && this.mob.y < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY() && !block.is(BlockTags.DOORS) && !block.is(BlockTags.FENCES)) {
+            if (o > (double)this.mob.maxUpStep && d * d + e * e < (double)Math.max(1.0f, this.mob.getBbWidth()) || !voxelShape.isEmpty() && this.mob.getY() < voxelShape.max(Direction.Axis.Y) + (double)blockPos.getY() && !block.is(BlockTags.DOORS) && !block.is(BlockTags.FENCES)) {
                 this.mob.getJumpControl().jump();
                 this.operation = Operation.JUMPING;
             }

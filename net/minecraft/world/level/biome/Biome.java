@@ -44,13 +44,9 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratedFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.FlowerFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
@@ -81,8 +77,8 @@ public abstract class Biome {
     protected final BiomeCategory biomeCategory;
     protected final Precipitation precipitation;
     protected final Map<GenerationStep.Carving, List<ConfiguredWorldCarver<?>>> carvers = Maps.newHashMap();
-    protected final Map<GenerationStep.Decoration, List<ConfiguredFeature<?>>> features = Maps.newHashMap();
-    protected final List<ConfiguredFeature<?>> flowerFeatures = Lists.newArrayList();
+    protected final Map<GenerationStep.Decoration, List<ConfiguredFeature<?, ?>>> features = Maps.newHashMap();
+    protected final List<ConfiguredFeature<?, ?>> flowerFeatures = Lists.newArrayList();
     protected final Map<StructureFeature<?>, FeatureConfiguration> validFeatureStarts = Maps.newHashMap();
     private final Map<MobCategory, List<SpawnerData>> spawners = Maps.newHashMap();
     private final ThreadLocal<Long2FloatLinkedOpenHashMap> temperatureCache = ThreadLocal.withInitial(() -> Util.make(() -> {
@@ -103,11 +99,6 @@ public abstract class Biome {
 
     public static <C extends CarverConfiguration> ConfiguredWorldCarver<C> makeCarver(WorldCarver<C> worldCarver, C carverConfiguration) {
         return new ConfiguredWorldCarver<C>(worldCarver, carverConfiguration);
-    }
-
-    public static <F extends FeatureConfiguration, D extends DecoratorConfiguration> ConfiguredFeature<?> makeComposite(Feature<F> feature, F featureConfiguration, FeatureDecorator<D> featureDecorator, D decoratorConfiguration) {
-        Feature<DecoratedFeatureConfiguration> feature2 = feature instanceof FlowerFeature ? Feature.DECORATED_FLOWER : Feature.DECORATED;
-        return new ConfiguredFeature<DecoratedFeatureConfiguration>(feature2, new DecoratedFeatureConfiguration(feature, featureConfiguration, featureDecorator, decoratorConfiguration));
     }
 
     protected Biome(BiomeBuilder biomeBuilder) {
@@ -219,7 +210,7 @@ public abstract class Biome {
         return blockPos.getY() >= 0 && blockPos.getY() < 256 && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10 && (blockState = levelReader.getBlockState(blockPos)).isAir() && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos);
     }
 
-    public void addFeature(GenerationStep.Decoration decoration, ConfiguredFeature<?> configuredFeature) {
+    public void addFeature(GenerationStep.Decoration decoration, ConfiguredFeature<?, ?> configuredFeature) {
         if (configuredFeature.feature == Feature.DECORATED_FLOWER) {
             this.flowerFeatures.add(configuredFeature);
         }
@@ -234,8 +225,8 @@ public abstract class Biome {
         return this.carvers.computeIfAbsent(carving2, carving -> Lists.newArrayList());
     }
 
-    public <C extends FeatureConfiguration> void addStructureStart(StructureFeature<C> structureFeature, C featureConfiguration) {
-        this.validFeatureStarts.put(structureFeature, featureConfiguration);
+    public <C extends FeatureConfiguration> void addStructureStart(ConfiguredFeature<C, ? extends StructureFeature<C>> configuredFeature) {
+        this.validFeatureStarts.put((StructureFeature<?>)configuredFeature.feature, (FeatureConfiguration)configuredFeature.config);
     }
 
     public <C extends FeatureConfiguration> boolean isValidStart(StructureFeature<C> structureFeature) {
@@ -247,23 +238,23 @@ public abstract class Biome {
         return (C)this.validFeatureStarts.get(structureFeature);
     }
 
-    public List<ConfiguredFeature<?>> getFlowerFeatures() {
+    public List<ConfiguredFeature<?, ?>> getFlowerFeatures() {
         return this.flowerFeatures;
     }
 
-    public List<ConfiguredFeature<?>> getFeaturesForStep(GenerationStep.Decoration decoration) {
+    public List<ConfiguredFeature<?, ?>> getFeaturesForStep(GenerationStep.Decoration decoration) {
         return this.features.get((Object)decoration);
     }
 
     public void generate(GenerationStep.Decoration decoration, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, LevelAccessor levelAccessor, long l, WorldgenRandom worldgenRandom, BlockPos blockPos) {
         int i = 0;
-        for (ConfiguredFeature<?> configuredFeature : this.features.get((Object)decoration)) {
+        for (ConfiguredFeature<?, ?> configuredFeature : this.features.get((Object)decoration)) {
             worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
             try {
                 configuredFeature.place(levelAccessor, chunkGenerator, worldgenRandom, blockPos);
             } catch (Exception exception) {
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
-                crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey(configuredFeature.feature)).setDetail("Description", configuredFeature.feature::toString);
+                crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Description", () -> configuredFeature.feature.toString());
                 throw new ReportedException(crashReport);
             }
             ++i;

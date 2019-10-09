@@ -133,7 +133,7 @@ public abstract class PlayerList {
         if (connection.getRemoteAddress() != null) {
             string2 = connection.getRemoteAddress().toString();
         }
-        LOGGER.info("{}[{}] logged in with entity id {} at ({}, {}, {})", (Object)serverPlayer.getName().getString(), (Object)string2, (Object)serverPlayer.getId(), (Object)serverPlayer.x, (Object)serverPlayer.y, (Object)serverPlayer.z);
+        LOGGER.info("{}[{}] logged in with entity id {} at ({}, {}, {})", (Object)serverPlayer.getName().getString(), (Object)string2, (Object)serverPlayer.getId(), (Object)serverPlayer.getX(), (Object)serverPlayer.getY(), (Object)serverPlayer.getZ());
         LevelData levelData = serverLevel.getLevelData();
         this.updatePlayerGameMode(serverPlayer, null, serverLevel);
         ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer);
@@ -154,7 +154,7 @@ public abstract class PlayerList {
         this.server.invalidateStatus();
         TranslatableComponent component = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName()) : new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
         this.broadcastMessage(component.withStyle(ChatFormatting.YELLOW));
-        serverGamePacketListenerImpl.teleport(serverPlayer.x, serverPlayer.y, serverPlayer.z, serverPlayer.yRot, serverPlayer.xRot);
+        serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.yRot, serverPlayer.xRot);
         this.players.add(serverPlayer);
         this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
         this.broadcastAll(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, serverPlayer));
@@ -380,13 +380,13 @@ public abstract class PlayerList {
                 serverPlayer2.connection.send(new ClientboundGameEventPacket(0, 0.0f));
             }
         }
-        while (!serverLevel.noCollision(serverPlayer2) && serverPlayer2.y < 256.0) {
-            serverPlayer2.setPos(serverPlayer2.x, serverPlayer2.y + 1.0, serverPlayer2.z);
+        while (!serverLevel.noCollision(serverPlayer2) && serverPlayer2.getY() < 256.0) {
+            serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
         serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.dimension, LevelData.obfuscateSeed(levelData.getSeed()), levelData.getGeneratorType(), serverPlayer2.gameMode.getGameModeForPlayer()));
         BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
-        serverPlayer2.connection.teleport(serverPlayer2.x, serverPlayer2.y, serverPlayer2.z, serverPlayer2.yRot, serverPlayer2.xRot);
+        serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
         serverPlayer2.connection.send(new ClientboundSetSpawnPositionPacket(blockPos2));
         serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverPlayer2.connection.send(new ClientboundSetExperiencePacket(serverPlayer2.experienceProgress, serverPlayer2.totalExperience, serverPlayer2.experienceLevel));
@@ -516,7 +516,7 @@ public abstract class PlayerList {
             double j;
             double h;
             ServerPlayer serverPlayer = this.players.get(i);
-            if (serverPlayer == player || serverPlayer.dimension != dimensionType || !((h = d - serverPlayer.x) * h + (j = e - serverPlayer.y) * j + (k = f - serverPlayer.z) * k < g * g)) continue;
+            if (serverPlayer == player || serverPlayer.dimension != dimensionType || !((h = d - serverPlayer.getX()) * h + (j = e - serverPlayer.getY()) * j + (k = f - serverPlayer.getZ()) * k < g * g)) continue;
             serverPlayer.connection.send(packet);
         }
     }

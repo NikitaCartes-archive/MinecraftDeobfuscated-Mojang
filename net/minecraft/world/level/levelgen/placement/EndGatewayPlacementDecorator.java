@@ -12,7 +12,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.NoneDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class EndGatewayPlacementDecorator
@@ -26,9 +26,9 @@ extends FeatureDecorator<NoneDecoratorConfiguration> {
         int j;
         int i;
         int k;
-        if (random.nextInt(700) == 0 && (k = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(i = random.nextInt(16), 0, j = random.nextInt(16))).getY()) > 0) {
+        if (random.nextInt(700) == 0 && (k = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, i = random.nextInt(16) + blockPos.getX(), j = random.nextInt(16) + blockPos.getZ())) > 0) {
             int l = k + 3 + random.nextInt(7);
-            return Stream.of(blockPos.offset(i, l, j));
+            return Stream.of(new BlockPos(i, l, j));
         }
         return Stream.empty();
     }

@@ -80,6 +80,7 @@ import net.minecraft.world.level.block.GravelBlock;
 import net.minecraft.world.level.block.GrindstoneBlock;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.HayBlock;
+import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.HopperBlock;
 import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.block.IceBlock;
@@ -382,7 +383,7 @@ public class Blocks {
     public static final Block OAK_FENCE = Blocks.register("oak_fence", new FenceBlock(Block.Properties.of(Material.WOOD, Blocks.OAK_PLANKS.materialColor).strength(2.0f, 3.0f).sound(SoundType.WOOD)));
     public static final Block PUMPKIN = Blocks.register("pumpkin", new PumpkinBlock(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_ORANGE).strength(1.0f).sound(SoundType.WOOD)));
     public static final Block NETHERRACK = Blocks.register("netherrack", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(0.4f)));
-    public static final Block SOUL_SAND = Blocks.register("soul_sand", new SoulsandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5f).sound(SoundType.SAND)));
+    public static final Block SOUL_SAND = Blocks.register("soul_sand", new SoulsandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5f).speedFactor(0.4f).sound(SoundType.SAND)));
     public static final Block GLOWSTONE = Blocks.register("glowstone", new Block(Block.Properties.of(Material.GLASS, MaterialColor.SAND).strength(0.3f).sound(SoundType.GLASS).lightLevel(15)));
     public static final Block NETHER_PORTAL = Blocks.register("nether_portal", new NetherPortalBlock(Block.Properties.of(Material.PORTAL).noCollission().randomTicks().strength(-1.0f).sound(SoundType.GLASS).lightLevel(11).noDrops()));
     public static final Block CARVED_PUMPKIN = Blocks.register("carved_pumpkin", new CarvedPumpkinBlock(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_ORANGE).strength(1.0f).sound(SoundType.WOOD)));
@@ -867,7 +868,9 @@ public class Blocks {
     public static final Block JIGSAW = Blocks.register("jigsaw", new JigsawBlock(Block.Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).strength(-1.0f, 3600000.0f).noDrops()));
     public static final Block COMPOSTER = Blocks.register("composter", new ComposterBlock(Block.Properties.of(Material.WOOD).strength(0.6f).sound(SoundType.WOOD)));
     public static final Block BEE_NEST = Blocks.register("bee_nest", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.3f).sound(SoundType.WOOD)));
-    public static final Block BEE_HIVE = Blocks.register("bee_hive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6f).sound(SoundType.WOOD)));
+    public static final Block BEEHIVE = Blocks.register("beehive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6f).sound(SoundType.WOOD)));
+    public static final Block HONEY_BLOCK = Blocks.register("honey_block", new HoneyBlock(Block.Properties.of(Material.CLAY, MaterialColor.COLOR_ORANGE).speedFactor(0.4f).jumpFactor(0.5f).noOcclusion().sound(SoundType.HONEY_BLOCK)));
+    public static final Block HONEYCOMB_BLOCK = Blocks.register("honeycomb_block", new Block(Block.Properties.of(Material.CLAY, MaterialColor.COLOR_ORANGE).strength(0.6f).sound(SoundType.CORAL_BLOCK)));
 
     private static Block register(String string, Block block) {
         return Registry.register(Registry.BLOCK, string, block);

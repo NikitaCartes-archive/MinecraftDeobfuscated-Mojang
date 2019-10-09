@@ -286,16 +286,6 @@ public class RenderSystem {
         GlStateManager._disableCull();
     }
 
-    public static void cullFace(GlStateManager.CullFace cullFace) {
-        RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager._cullFace(cullFace.value);
-    }
-
-    public static void cullFace(int i) {
-        RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager._cullFace(i);
-    }
-
     public static void polygonMode(int i, int j) {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
         GlStateManager._polygonMode(i, j);
@@ -582,7 +572,6 @@ public class RenderSystem {
         GlStateManager._depthFunc(515);
         GlStateManager._enableAlphaTest();
         GlStateManager._alphaFunc(516, 0.1f);
-        GlStateManager._cullFace(GlStateManager.CullFace.BACK.value);
         GlStateManager._matrixMode(5889);
         GlStateManager._loadIdentity();
         GlStateManager._matrixMode(5888);
@@ -699,14 +688,14 @@ public class RenderSystem {
         GlStateManager.teardownOverlayColor();
     }
 
-    public static void setupLevelDiffuseLighting() {
+    public static void setupLevelDiffuseLighting(Matrix4f matrix4f) {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager.setupLevelDiffuseLighting();
+        GlStateManager.setupLevelDiffuseLighting(matrix4f);
     }
 
-    public static void setupGuiDiffuseLighting() {
+    public static void setupGuiDiffuseLighting(Matrix4f matrix4f) {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager.setupGuiDiffuseLighting();
+        GlStateManager.setupGuiDiffuseLighting(matrix4f);
     }
 
     public static void mulTextureByProjModelView() {
@@ -759,213 +748,213 @@ public class RenderSystem {
         RenderSystem.alphaFunc(516, 0.1f);
     }
 
-    private static /* synthetic */ void lambda$setupOverlayColor$69(IntSupplier intSupplier, int i) {
+    private static /* synthetic */ void lambda$setupGuiDiffuseLighting$69(Matrix4f matrix4f) {
+        GlStateManager.setupGuiDiffuseLighting(matrix4f);
+    }
+
+    private static /* synthetic */ void lambda$setupLevelDiffuseLighting$68(Matrix4f matrix4f) {
+        GlStateManager.setupLevelDiffuseLighting(matrix4f);
+    }
+
+    private static /* synthetic */ void lambda$setupOverlayColor$67(IntSupplier intSupplier, int i) {
         GlStateManager.setupOverlayColor(intSupplier.getAsInt(), i);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix4$68(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix4$66(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix3$67(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix3$65(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix3(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniformMatrix2$66(int i, boolean bl, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniformMatrix2$64(int i, boolean bl, FloatBuffer floatBuffer) {
         GlStateManager._glUniformMatrix2(i, bl, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform4$65(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform4$63(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform4(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform3$64(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform3$62(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform3(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform2$63(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform2$61(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform2(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1$62(int i, FloatBuffer floatBuffer) {
+    private static /* synthetic */ void lambda$glUniform1$60(int i, FloatBuffer floatBuffer) {
         GlStateManager._glUniform1(i, floatBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform4$61(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform4$59(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform4(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform3$60(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform3$58(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform3(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform2$59(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform2$57(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform2(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1$58(int i, IntBuffer intBuffer) {
+    private static /* synthetic */ void lambda$glUniform1$56(int i, IntBuffer intBuffer) {
         GlStateManager._glUniform1(i, intBuffer);
     }
 
-    private static /* synthetic */ void lambda$glUniform1i$57(int i, int j) {
+    private static /* synthetic */ void lambda$glUniform1i$55(int i, int j) {
         GlStateManager._glUniform1i(i, j);
     }
 
-    private static /* synthetic */ void lambda$glDeleteBuffers$56(int i) {
+    private static /* synthetic */ void lambda$glDeleteBuffers$54(int i) {
         GlStateManager._glDeleteBuffers(i);
     }
 
-    private static /* synthetic */ void lambda$glBindBuffer$55(int i, Supplier supplier) {
+    private static /* synthetic */ void lambda$glBindBuffer$53(int i, Supplier supplier) {
         GlStateManager._glBindBuffer(i, (Integer)supplier.get());
     }
 
-    private static /* synthetic */ void lambda$glMultiTexCoord2f$54(int i, float f, float g) {
+    private static /* synthetic */ void lambda$glMultiTexCoord2f$52(int i, float f, float g) {
         GlStateManager._glMultiTexCoord2f(i, f, g);
     }
 
-    private static /* synthetic */ void lambda$renderCrosshair$53(int i) {
+    private static /* synthetic */ void lambda$renderCrosshair$51(int i) {
         GLX._renderCrosshair(i, true, true, true);
     }
 
-    private static /* synthetic */ void lambda$getString$52(int i, Consumer consumer) {
+    private static /* synthetic */ void lambda$getString$50(int i, Consumer consumer) {
         String string = GlStateManager._getString(i);
         consumer.accept(string);
     }
 
-    private static /* synthetic */ void lambda$readPixels$51(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
+    private static /* synthetic */ void lambda$readPixels$49(int i, int j, int k, int l, int m, int n, ByteBuffer byteBuffer) {
         GlStateManager._readPixels(i, j, k, l, m, n, byteBuffer);
     }
 
-    private static /* synthetic */ void lambda$pixelTransfer$50(int i, float f) {
+    private static /* synthetic */ void lambda$pixelTransfer$48(int i, float f) {
         GlStateManager._pixelTransfer(i, f);
     }
 
-    private static /* synthetic */ void lambda$pixelStore$49(int i, int j) {
+    private static /* synthetic */ void lambda$pixelStore$47(int i, int j) {
         GlStateManager._pixelStore(i, j);
     }
 
-    private static /* synthetic */ void lambda$lineWidth$48(float f) {
+    private static /* synthetic */ void lambda$lineWidth$46(float f) {
         GlStateManager._lineWidth(f);
     }
 
-    private static /* synthetic */ void lambda$drawArrays$47(int i, int j, int k) {
+    private static /* synthetic */ void lambda$drawArrays$45(int i, int j, int k) {
         GlStateManager._drawArrays(i, j, k);
     }
 
-    private static /* synthetic */ void lambda$color3f$46(float f, float g, float h) {
+    private static /* synthetic */ void lambda$color3f$44(float f, float g, float h) {
         GlStateManager._color4f(f, g, h, 1.0f);
     }
 
-    private static /* synthetic */ void lambda$color4f$45(float f, float g, float h, float i) {
+    private static /* synthetic */ void lambda$color4f$43(float f, float g, float h, float i) {
         GlStateManager._color4f(f, g, h, i);
     }
 
-    private static /* synthetic */ void lambda$multMatrix$44(Matrix4f matrix4f) {
+    private static /* synthetic */ void lambda$multMatrix$42(Matrix4f matrix4f) {
         GlStateManager._multMatrix(matrix4f);
     }
 
-    private static /* synthetic */ void lambda$translated$43(double d, double e, double f) {
+    private static /* synthetic */ void lambda$translated$41(double d, double e, double f) {
         GlStateManager._translated(d, e, f);
     }
 
-    private static /* synthetic */ void lambda$translatef$42(float f, float g, float h) {
+    private static /* synthetic */ void lambda$translatef$40(float f, float g, float h) {
         GlStateManager._translatef(f, g, h);
     }
 
-    private static /* synthetic */ void lambda$scaled$41(double d, double e, double f) {
+    private static /* synthetic */ void lambda$scaled$39(double d, double e, double f) {
         GlStateManager._scaled(d, e, f);
     }
 
-    private static /* synthetic */ void lambda$scalef$40(float f, float g, float h) {
+    private static /* synthetic */ void lambda$scalef$38(float f, float g, float h) {
         GlStateManager._scalef(f, g, h);
     }
 
-    private static /* synthetic */ void lambda$rotatef$39(float f, float g, float h, float i) {
+    private static /* synthetic */ void lambda$rotatef$37(float f, float g, float h, float i) {
         GlStateManager._rotatef(f, g, h, i);
     }
 
-    private static /* synthetic */ void lambda$ortho$38(double d, double e, double f, double g, double h, double i) {
+    private static /* synthetic */ void lambda$ortho$36(double d, double e, double f, double g, double h, double i) {
         GlStateManager._ortho(d, e, f, g, h, i);
     }
 
-    private static /* synthetic */ void lambda$matrixMode$37(int i) {
+    private static /* synthetic */ void lambda$matrixMode$35(int i) {
         GlStateManager._matrixMode(i);
     }
 
-    private static /* synthetic */ void lambda$clear$36(int i, boolean bl) {
+    private static /* synthetic */ void lambda$clear$34(int i, boolean bl) {
         GlStateManager._clear(i, bl);
     }
 
-    private static /* synthetic */ void lambda$clearStencil$35(int i) {
+    private static /* synthetic */ void lambda$clearStencil$33(int i) {
         GlStateManager._clearStencil(i);
     }
 
-    private static /* synthetic */ void lambda$clearColor$34(float f, float g, float h, float i) {
+    private static /* synthetic */ void lambda$clearColor$32(float f, float g, float h, float i) {
         GlStateManager._clearColor(f, g, h, i);
     }
 
-    private static /* synthetic */ void lambda$clearDepth$33(double d) {
+    private static /* synthetic */ void lambda$clearDepth$31(double d) {
         GlStateManager._clearDepth(d);
     }
 
-    private static /* synthetic */ void lambda$stencilOp$32(int i, int j, int k) {
+    private static /* synthetic */ void lambda$stencilOp$30(int i, int j, int k) {
         GlStateManager._stencilOp(i, j, k);
     }
 
-    private static /* synthetic */ void lambda$stencilMask$31(int i) {
+    private static /* synthetic */ void lambda$stencilMask$29(int i) {
         GlStateManager._stencilMask(i);
     }
 
-    private static /* synthetic */ void lambda$stencilFunc$30(int i, int j, int k) {
+    private static /* synthetic */ void lambda$stencilFunc$28(int i, int j, int k) {
         GlStateManager._stencilFunc(i, j, k);
     }
 
-    private static /* synthetic */ void lambda$colorMask$29(boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+    private static /* synthetic */ void lambda$colorMask$27(boolean bl, boolean bl2, boolean bl3, boolean bl4) {
         GlStateManager._colorMask(bl, bl2, bl3, bl4);
     }
 
-    private static /* synthetic */ void lambda$viewport$28(int i, int j, int k, int l) {
+    private static /* synthetic */ void lambda$viewport$26(int i, int j, int k, int l) {
         GlStateManager._viewport(i, j, k, l);
     }
 
-    private static /* synthetic */ void lambda$shadeModel$27(int i) {
+    private static /* synthetic */ void lambda$shadeModel$25(int i) {
         GlStateManager._shadeModel(i);
     }
 
-    private static /* synthetic */ void lambda$bindTexture$26(int i) {
+    private static /* synthetic */ void lambda$bindTexture$24(int i) {
         GlStateManager._bindTexture(i);
     }
 
-    private static /* synthetic */ void lambda$deleteTexture$25(int i) {
+    private static /* synthetic */ void lambda$deleteTexture$23(int i) {
         GlStateManager._deleteTexture(i);
     }
 
-    private static /* synthetic */ void lambda$texParameter$24(int i, int j, int k) {
+    private static /* synthetic */ void lambda$texParameter$22(int i, int j, int k) {
         GlStateManager._texParameter(i, j, k);
     }
 
-    private static /* synthetic */ void lambda$activeTexture$23(int i) {
+    private static /* synthetic */ void lambda$activeTexture$21(int i) {
         GlStateManager._activeTexture(i);
     }
 
-    private static /* synthetic */ void lambda$logicOp$22(GlStateManager.LogicOp logicOp) {
+    private static /* synthetic */ void lambda$logicOp$20(GlStateManager.LogicOp logicOp) {
         GlStateManager._logicOp(logicOp.value);
     }
 
-    private static /* synthetic */ void lambda$polygonOffset$21(float f, float g) {
+    private static /* synthetic */ void lambda$polygonOffset$19(float f, float g) {
         GlStateManager._polygonOffset(f, g);
     }
 
-    private static /* synthetic */ void lambda$polygonMode$20(int i, int j) {
+    private static /* synthetic */ void lambda$polygonMode$18(int i, int j) {
         GlStateManager._polygonMode(i, j);
-    }
-
-    private static /* synthetic */ void lambda$cullFace$19(int i) {
-        GlStateManager._cullFace(i);
-    }
-
-    private static /* synthetic */ void lambda$cullFace$18(GlStateManager.CullFace cullFace) {
-        GlStateManager._cullFace(cullFace.value);
     }
 
     private static /* synthetic */ void lambda$fogi$17(int i, int j) {

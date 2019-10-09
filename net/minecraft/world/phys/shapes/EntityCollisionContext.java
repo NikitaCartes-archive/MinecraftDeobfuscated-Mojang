@@ -33,7 +33,7 @@ implements CollisionContext {
 
     @Deprecated
     protected EntityCollisionContext(Entity entity) {
-        this(entity.isDescending(), entity.getBoundingBox().minY, entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem().getItem() : Items.AIR);
+        this(entity.isDescending(), entity.getY(), entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem().getItem() : Items.AIR);
     }
 
     @Override

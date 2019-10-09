@@ -51,10 +51,8 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
             return true;
         }
         if (shulker.getClientSideTeleportInterpolation() > 0 && shulker.hasValidInterpolationPositions()) {
-            BlockPos blockPos = shulker.getOldAttachPosition();
-            BlockPos blockPos2 = shulker.getAttachPosition();
-            Vec3 vec3 = new Vec3(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
-            Vec3 vec32 = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            Vec3 vec3 = new Vec3(shulker.getAttachPosition());
+            Vec3 vec32 = new Vec3(shulker.getOldAttachPosition());
             if (frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
                 return true;
             }

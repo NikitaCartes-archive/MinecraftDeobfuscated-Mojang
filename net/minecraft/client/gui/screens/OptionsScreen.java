@@ -74,13 +74,13 @@ extends Screen {
                 button.setMessage(Option.REALMS_NOTIFICATIONS.getMessage(this.options));
             }));
         }
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, I18n.get("options.skinCustomisation", new Object[0]), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this))));
+        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 48 - 6, 150, 20, I18n.get("options.skinCustomisation", new Object[0]), button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 48 - 6, 150, 20, I18n.get("options.sounds", new Object[0]), button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 72 - 6, 150, 20, I18n.get("options.video", new Object[0]), button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, I18n.get("options.controls", new Object[0]), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, I18n.get("options.language", new Object[0]), button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.options, this.minecraft.getLanguageManager()))));
+        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, I18n.get("options.language", new Object[0]), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, I18n.get("options.chat.title", new Object[0]), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, I18n.get("options.resourcepack", new Object[0]), button -> this.minecraft.setScreen(new ResourcePackSelectScreen(this))));
+        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, I18n.get("options.resourcepack", new Object[0]), button -> this.minecraft.setScreen(new ResourcePackSelectScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, I18n.get("options.accessibility.title", new Object[0]), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
     }

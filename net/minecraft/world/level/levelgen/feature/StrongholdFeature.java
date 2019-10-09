@@ -17,9 +17,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -110,7 +109,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
         this.currentSeed = chunkGenerator.getSeed();
         ArrayList<Biome> list = Lists.newArrayList();
         for (Biome biome : Registry.BIOME) {
-            if (biome == null || !chunkGenerator.isBiomeValidStartForStructure(biome, Feature.STRONGHOLD)) continue;
+            if (biome == null || !chunkGenerator.isBiomeValidStartForStructure(biome, this)) continue;
             list.add(biome);
         }
         int i = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getStrongholdsDistance();

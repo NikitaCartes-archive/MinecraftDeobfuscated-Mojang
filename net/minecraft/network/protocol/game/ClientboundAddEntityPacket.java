@@ -55,7 +55,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundAddEntityPacket(Entity entity, int i) {
-        this(entity.getId(), entity.getUUID(), entity.x, entity.y, entity.z, entity.xRot, entity.yRot, entity.getType(), i, entity.getDeltaMovement());
+        this(entity.getId(), entity.getUUID(), entity.getX(), entity.getY(), entity.getZ(), entity.xRot, entity.yRot, entity.getType(), i, entity.getDeltaMovement());
     }
 
     public ClientboundAddEntityPacket(Entity entity, EntityType<?> entityType, int i, BlockPos blockPos) {

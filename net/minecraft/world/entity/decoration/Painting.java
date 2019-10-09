@@ -124,7 +124,7 @@ extends HangingEntity {
     @Override
     @Environment(value=EnvType.CLIENT)
     public void lerpTo(double d, double e, double f, float g, float h, int i, boolean bl) {
-        BlockPos blockPos = this.pos.offset(d - this.x, e - this.y, f - this.z);
+        BlockPos blockPos = this.pos.offset(d - this.getX(), e - this.getY(), f - this.getZ());
         this.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 

@@ -161,7 +161,7 @@ extends Monster {
         spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         if (levelAccessor.getRandom().nextInt(100) == 0) {
             Skeleton skeleton = EntityType.SKELETON.create(this.level);
-            skeleton.moveTo(this.x, this.y, this.z, this.yRot, 0.0f);
+            skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
             skeleton.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, null, null);
             levelAccessor.addFreshEntity(skeleton);
             skeleton.startRiding(this);

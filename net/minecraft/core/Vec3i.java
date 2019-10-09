@@ -13,8 +13,11 @@ import org.jetbrains.annotations.Unmodifiable;
 public class Vec3i
 implements Comparable<Vec3i> {
     public static final Vec3i ZERO = new Vec3i(0, 0, 0);
+    @Deprecated
     private final int x;
+    @Deprecated
     private final int y;
+    @Deprecated
     private final int z;
 
     public Vec3i(int i, int j, int k) {
@@ -91,7 +94,7 @@ implements Comparable<Vec3i> {
     }
 
     public boolean closerThan(Vec3i vec3i, double d) {
-        return this.distSqr(vec3i.x, vec3i.y, vec3i.z, false) < d * d;
+        return this.distSqr(vec3i.getX(), vec3i.getY(), vec3i.getZ(), false) < d * d;
     }
 
     public boolean closerThan(Position position, double d) {
@@ -115,9 +118,9 @@ implements Comparable<Vec3i> {
     }
 
     public int distManhattan(Vec3i vec3i) {
-        float f = Math.abs(vec3i.getX() - this.x);
-        float g = Math.abs(vec3i.getY() - this.y);
-        float h = Math.abs(vec3i.getZ() - this.z);
+        float f = Math.abs(vec3i.getX() - this.getX());
+        float g = Math.abs(vec3i.getY() - this.getY());
+        float h = Math.abs(vec3i.getZ() - this.getZ());
         return (int)(f + g + h);
     }
 

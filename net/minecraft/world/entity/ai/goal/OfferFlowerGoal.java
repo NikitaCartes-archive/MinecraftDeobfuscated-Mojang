@@ -29,7 +29,7 @@ extends Goal {
         if (this.golem.getRandom().nextInt(8000) != 0) {
             return false;
         }
-        this.villager = this.golem.level.getNearestEntity(Villager.class, OFFER_TARGER_CONTEXT, this.golem, this.golem.x, this.golem.y, this.golem.z, this.golem.getBoundingBox().inflate(6.0, 2.0, 6.0));
+        this.villager = this.golem.level.getNearestEntity(Villager.class, OFFER_TARGER_CONTEXT, this.golem, this.golem.getX(), this.golem.getY(), this.golem.getZ(), this.golem.getBoundingBox().inflate(6.0, 2.0, 6.0));
         return this.villager != null;
     }
 

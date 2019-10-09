@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -19,12 +20,12 @@ public class Lighting {
         RenderSystem.disableColorMaterial();
     }
 
-    public static void setupLevel() {
-        RenderSystem.setupLevelDiffuseLighting();
+    public static void setupLevel(Matrix4f matrix4f) {
+        RenderSystem.setupLevelDiffuseLighting(matrix4f);
     }
 
-    public static void setupGui() {
-        RenderSystem.setupGuiDiffuseLighting();
+    public static void setupGui(Matrix4f matrix4f) {
+        RenderSystem.setupGuiDiffuseLighting(matrix4f);
     }
 }
 

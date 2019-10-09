@@ -9,11 +9,10 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.BlockBlobConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration;
 
 public class BlockBlobFeature
 extends Feature<BlockBlobConfiguration> {
@@ -24,7 +23,7 @@ extends Feature<BlockBlobConfiguration> {
     @Override
     public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockBlobConfiguration blockBlobConfiguration) {
         Block block;
-        while (blockPos.getY() > 3 && (levelAccessor.isEmptyBlock(blockPos.below()) || (block = levelAccessor.getBlockState(blockPos.below()).getBlock()) != Blocks.GRASS_BLOCK && !Block.equalsDirt(block) && !Block.equalsStone(block))) {
+        while (blockPos.getY() > 3 && (levelAccessor.isEmptyBlock(blockPos.below()) || !BlockBlobFeature.isDirt(block = levelAccessor.getBlockState(blockPos.below()).getBlock()) && !BlockBlobFeature.isStone(block))) {
             blockPos = blockPos.below();
         }
         if (blockPos.getY() <= 3) {

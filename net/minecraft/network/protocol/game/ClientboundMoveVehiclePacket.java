@@ -23,9 +23,9 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundMoveVehiclePacket(Entity entity) {
-        this.x = entity.x;
-        this.y = entity.y;
-        this.z = entity.z;
+        this.x = entity.getX();
+        this.y = entity.getY();
+        this.z = entity.getZ();
         this.yRot = entity.yRot;
         this.xRot = entity.xRot;
     }

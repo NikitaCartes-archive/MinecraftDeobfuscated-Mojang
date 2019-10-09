@@ -39,9 +39,9 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         }
         poseStack.pushPose();
         poseStack.translate(0.0, 0.0, 0.125);
-        double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak) - Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.x);
-        double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak) - Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.y);
-        double n = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.z);
+        double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak) - Mth.lerp((double)h, abstractClientPlayer.xo, abstractClientPlayer.getX());
+        double e = Mth.lerp((double)h, abstractClientPlayer.yCloakO, abstractClientPlayer.yCloak) - Mth.lerp((double)h, abstractClientPlayer.yo, abstractClientPlayer.getY());
+        double n = Mth.lerp((double)h, abstractClientPlayer.zCloakO, abstractClientPlayer.zCloak) - Mth.lerp((double)h, abstractClientPlayer.zo, abstractClientPlayer.getZ());
         float o = abstractClientPlayer.yBodyRotO + (abstractClientPlayer.yBodyRot - abstractClientPlayer.yBodyRotO);
         double p = Mth.sin(o * ((float)Math.PI / 180));
         double q = -Mth.cos(o * ((float)Math.PI / 180));
@@ -59,13 +59,11 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
         if (abstractClientPlayer.isCrouching()) {
             r += 25.0f;
         }
-        poseStack.mulPose(Vector3f.XP.rotation(6.0f + s / 2.0f + r, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(t / 2.0f, true));
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - t / 2.0f, true));
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(abstractClientPlayer.getCloakTextureLocation()));
-        OverlayTexture.setDefault(vertexConsumer);
-        ((PlayerModel)this.getParentModel()).renderCloak(poseStack, vertexConsumer, 0.0625f, i);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0f + s / 2.0f + r));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(t / 2.0f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - t / 2.0f));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getCloakTextureLocation()));
+        ((PlayerModel)this.getParentModel()).renderCloak(poseStack, vertexConsumer, 0.0625f, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

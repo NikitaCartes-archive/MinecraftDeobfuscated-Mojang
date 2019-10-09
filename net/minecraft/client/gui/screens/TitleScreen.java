@@ -106,7 +106,7 @@ extends Screen {
         } else {
             this.createNormalMenuOptions(j, 24);
         }
-        this.addButton(new ImageButton(this.width / 2 - 124, j + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), I18n.get("narrator.button.language", new Object[0])));
+        this.addButton(new ImageButton(this.width / 2 - 124, j + 72 + 12, 20, 20, 0, 106, 20, Button.WIDGETS_LOCATION, 256, 256, button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.minecraft.options, this.minecraft.getLanguageManager())), I18n.get("narrator.button.language", new Object[0])));
         this.addButton(new Button(this.width / 2 - 100, j + 72 + 12, 98, 20, I18n.get("menu.options", new Object[0]), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options))));
         this.addButton(new Button(this.width / 2 + 2, j + 72 + 12, 98, 20, I18n.get("menu.quit", new Object[0]), button -> this.minecraft.stop()));
         this.addButton(new ImageButton(this.width / 2 + 104, j + 72 + 12, 20, 20, 0, 0, 20, ACCESSIBILITY_TEXTURE, 32, 64, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), I18n.get("narrator.button.accessibility", new Object[0])));

@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.TridentModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -31,13 +30,11 @@ extends EntityRenderer<ThrownTrident> {
     @Override
     public void render(ThrownTrident thrownTrident, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(Mth.lerp(h, thrownTrident.yRotO, thrownTrident.yRot) - 90.0f, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(Mth.lerp(h, thrownTrident.xRotO, thrownTrident.xRot) + 90.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(h, thrownTrident.yRotO, thrownTrident.yRot) - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(h, thrownTrident.xRotO, thrownTrident.xRot) + 90.0f));
         int i = thrownTrident.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(thrownTrident)));
-        OverlayTexture.setDefault(vertexConsumer);
-        this.model.render(poseStack, vertexConsumer, i);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(thrownTrident)));
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(thrownTrident, d, e, f, g, h, poseStack, multiBufferSource);
     }

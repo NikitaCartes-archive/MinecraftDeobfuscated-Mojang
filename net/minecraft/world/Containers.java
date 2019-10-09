@@ -21,7 +21,7 @@ public class Containers {
     }
 
     public static void dropContents(Level level, Entity entity, Container container) {
-        Containers.dropContents(level, entity.x, entity.y, entity.z, container);
+        Containers.dropContents(level, entity.getX(), entity.getY(), entity.getZ(), container);
     }
 
     private static void dropContents(Level level, double d, double e, double f, Container container) {

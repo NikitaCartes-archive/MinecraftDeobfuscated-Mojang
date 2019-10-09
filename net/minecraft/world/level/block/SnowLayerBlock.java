@@ -72,7 +72,7 @@ extends Block {
         if (block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BARRIER) {
             return false;
         }
-        return Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP) || block == this && blockState2.getValue(LAYERS) == 8;
+        return Block.isFaceFull(blockState2.getShape(levelReader, blockPos.below()), Direction.UP) || block == this && blockState2.getValue(LAYERS) == 8;
     }
 
     @Override

@@ -8,13 +8,13 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.feature.SeagrassFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.ShipwreckConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -23,9 +23,9 @@ public final class OceanBiome
 extends Biome {
     public OceanBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.OCEAN).depth(-1.0f).scale(0.1f).temperature(0.5f).downfall(0.5f).waterColor(4159204).waterFogColor(329011).parent(null));
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-        this.addStructureStart(Feature.SHIPWRECK, new ShipwreckConfiguration(false));
-        this.addStructureStart(Feature.OCEAN_RUIN, new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.9f));
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+        this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));
+        this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.9f)));
         BiomeDefaultFeatures.addOceanCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);
@@ -39,7 +39,7 @@ extends Biome {
         BiomeDefaultFeatures.addDefaultMushrooms(this);
         BiomeDefaultFeatures.addDefaultExtraVegetation(this);
         BiomeDefaultFeatures.addDefaultSprings(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, OceanBiome.makeComposite(Feature.SEAGRASS, new SeagrassFeatureConfiguration(48, 0.3), FeatureDecorator.TOP_SOLID_HEIGHTMAP, DecoratorConfiguration.NONE));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SEAGRASS.configured(new SeagrassFeatureConfiguration(48, 0.3)).decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP.configured(DecoratorConfiguration.NONE)));
         BiomeDefaultFeatures.addDefaultSeagrass(this);
         BiomeDefaultFeatures.addColdOceanExtraVegetation(this);
         BiomeDefaultFeatures.addSurfaceFreezing(this);

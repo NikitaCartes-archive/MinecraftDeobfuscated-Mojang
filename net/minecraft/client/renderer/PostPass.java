@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
@@ -48,22 +49,11 @@ implements AutoCloseable {
         this.auxHeights.add(this.auxHeights.size(), j);
     }
 
-    private void prepareState() {
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.disableBlend();
-        RenderSystem.disableDepthTest();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableFog();
-        RenderSystem.enableTexture();
-        RenderSystem.bindTexture(0);
-    }
-
     public void setOrthoMatrix(Matrix4f matrix4f) {
         this.shaderOrthoMatrix = matrix4f;
     }
 
     public void process(float f) {
-        this.prepareState();
         this.inTarget.unbindWrite();
         float g = this.outTarget.width;
         float h = this.outTarget.height;
@@ -83,17 +73,15 @@ implements AutoCloseable {
         this.outTarget.clear(Minecraft.ON_OSX);
         this.outTarget.bindWrite(false);
         RenderSystem.depthMask(false);
-        RenderSystem.colorMask(true, true, true, true);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(0.0, 0.0, 500.0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(g, 0.0, 500.0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(g, h, 500.0).color(255, 255, 255, 255).endVertex();
         bufferBuilder.vertex(0.0, h, 500.0).color(255, 255, 255, 255).endVertex();
-        tesselator.end();
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
         RenderSystem.depthMask(true);
-        RenderSystem.colorMask(true, true, true, true);
         this.effect.clear();
         this.outTarget.unbindWrite();
         this.inTarget.unbindRead();

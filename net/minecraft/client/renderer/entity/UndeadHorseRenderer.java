@@ -9,6 +9,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +22,7 @@ extends AbstractHorseRenderer<AbstractHorse, HorseModel<AbstractHorse>> {
     private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.newHashMap(ImmutableMap.of(EntityType.ZOMBIE_HORSE, new ResourceLocation("textures/entity/horse/horse_zombie.png"), EntityType.SKELETON_HORSE, new ResourceLocation("textures/entity/horse/horse_skeleton.png")));
 
     public UndeadHorseRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new HorseModel(0.0f), 1.0f);
+        super(entityRenderDispatcher, new HorseModel(RenderType::entityCutoutNoCull, 0.0f), 1.0f);
     }
 
     @Override

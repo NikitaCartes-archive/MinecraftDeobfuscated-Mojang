@@ -223,19 +223,18 @@ PlayerRideableJumping {
     private void eating() {
         this.openMouth();
         if (!this.isSilent()) {
-            this.level.playSound(null, this.x, this.y, this.z, SoundEvents.HORSE_EAT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HORSE_EAT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
         }
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
-        BlockState blockState;
+    public boolean causeFallDamage(float f, float g) {
         int i;
         if (f > 1.0f) {
             this.playSound(SoundEvents.HORSE_LAND, 0.4f, 1.0f);
         }
-        if ((i = Mth.ceil((f * 0.5f - 3.0f) * g)) <= 0) {
-            return;
+        if ((i = this.calculateFallDamage(f, g)) <= 0) {
+            return false;
         }
         this.hurt(DamageSource.FALL, i);
         if (this.isVehicle()) {
@@ -243,10 +242,13 @@ PlayerRideableJumping {
                 entity.hurt(DamageSource.FALL, i);
             }
         }
-        if (!(blockState = this.level.getBlockState(new BlockPos(this.x, this.y - 0.2 - (double)this.yRotO, this.z))).isAir() && !this.isSilent()) {
-            SoundType soundType = blockState.getSoundType();
-            this.level.playSound(null, this.x, this.y, this.z, soundType.getStepSound(), this.getSoundSource(), soundType.getVolume() * 0.5f, soundType.getPitch() * 0.75f);
-        }
+        this.playBlockFallSound();
+        return true;
+    }
+
+    @Override
+    protected int calculateFallDamage(float f, float g) {
+        return Mth.ceil((f * 0.5f - 3.0f) * g);
     }
 
     protected int getInventorySize() {
@@ -431,7 +433,7 @@ PlayerRideableJumping {
             bl = true;
         }
         if (this.isBaby() && i > 0) {
-            this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()), this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), 0.0, 0.0, 0.0);
+            this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
             if (!this.level.isClientSide) {
                 this.ageUp(i);
             }
@@ -512,7 +514,7 @@ PlayerRideableJumping {
 
     protected void followMommy() {
         AbstractHorse livingEntity;
-        if (this.isBred() && this.isBaby() && !this.isEating() && (livingEntity = this.level.getNearestEntity(AbstractHorse.class, MOMMY_TARGETING, this, this.x, this.y, this.z, this.getBoundingBox().inflate(16.0))) != null && this.distanceToSqr(livingEntity) > 4.0) {
+        if (this.isBred() && this.isBaby() && !this.isEating() && (livingEntity = this.level.getNearestEntity(AbstractHorse.class, MOMMY_TARGETING, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0))) != null && this.distanceToSqr(livingEntity) > 4.0) {
             this.navigation.createPath(livingEntity, 0);
         }
     }
@@ -678,9 +680,8 @@ PlayerRideableJumping {
             this.setIsJumping(false);
         }
         this.animationSpeedOld = this.animationSpeed;
-        d = this.x - this.xo;
-        e = this.z - this.zo;
-        float j = Mth.sqrt(d * d + e * e) * 4.0f;
+        d = this.getX() - this.xo;
+        float j = Mth.sqrt(d * d + (e = this.getZ() - this.zo) * e) * 4.0f;
         if (j > 1.0f) {
             j = 1.0f;
         }
@@ -816,7 +817,7 @@ PlayerRideableJumping {
             double d = this.random.nextGaussian() * 0.02;
             double e = this.random.nextGaussian() * 0.02;
             double f = this.random.nextGaussian() * 0.02;
-            this.level.addParticle(particleOptions, this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()), this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), d, e, f);
+            this.level.addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), d, e, f);
         }
     }
 
@@ -844,7 +845,7 @@ PlayerRideableJumping {
             float g = Mth.cos(this.yBodyRot * ((float)Math.PI / 180));
             float h = 0.7f * this.standAnimO;
             float i = 0.15f * this.standAnimO;
-            entity.setPos(this.x + (double)(h * f), this.y + this.getRideHeight() + entity.getRidingHeight() + (double)i, this.z - (double)(h * g));
+            entity.setPos(this.getX() + (double)(h * f), this.getY() + this.getRideHeight() + entity.getRidingHeight() + (double)i, this.getZ() - (double)(h * g));
             if (entity instanceof LivingEntity) {
                 ((LivingEntity)entity).yBodyRot = this.yBodyRot;
             }

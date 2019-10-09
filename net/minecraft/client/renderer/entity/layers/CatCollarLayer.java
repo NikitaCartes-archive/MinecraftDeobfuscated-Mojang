@@ -29,7 +29,7 @@ extends RenderLayer<Cat, CatModel<Cat>> {
             return;
         }
         float[] fs = cat.getCollarColor().getTextureDiffuseColors();
-        CatCollarLayer.coloredModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
+        CatCollarLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
     }
 }
 

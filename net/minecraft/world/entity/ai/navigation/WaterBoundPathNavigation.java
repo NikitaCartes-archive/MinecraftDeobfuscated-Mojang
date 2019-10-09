@@ -39,7 +39,7 @@ extends PathNavigation {
 
     @Override
     protected Vec3 getTempMobPos() {
-        return new Vec3(this.mob.x, this.mob.y + (double)this.mob.getBbHeight() * 0.5, this.mob.z);
+        return new Vec3(this.mob.getX(), this.mob.getY(0.5), this.mob.getZ());
     }
 
     @Override
@@ -56,7 +56,7 @@ extends PathNavigation {
             this.updatePath();
         } else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
             vec3 = this.path.getPos(this.mob, this.path.getIndex());
-            if (Mth.floor(this.mob.x) == Mth.floor(vec3.x) && Mth.floor(this.mob.y) == Mth.floor(vec3.y) && Mth.floor(this.mob.z) == Mth.floor(vec3.z)) {
+            if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {
                 this.path.setIndex(this.path.getIndex() + 1);
             }
         }
@@ -82,7 +82,7 @@ extends PathNavigation {
         }
         int i = 6;
         Vec3 vec33 = this.path.currentPos();
-        if (Math.abs(this.mob.x - (vec33.x + 0.5)) < (double)g && Math.abs(this.mob.z - (vec33.z + 0.5)) < (double)g && Math.abs(this.mob.y - vec33.y) < (double)(g * 2.0f)) {
+        if (Math.abs(this.mob.getX() - (vec33.x + 0.5)) < (double)g && Math.abs(this.mob.getZ() - (vec33.z + 0.5)) < (double)g && Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0f)) {
             this.path.next();
         }
         for (int j = Math.min(this.path.getIndex() + 6, this.path.getSize() - 1); j > this.path.getIndex(); --j) {

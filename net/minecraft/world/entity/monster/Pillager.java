@@ -227,10 +227,10 @@ RangedAttackMob {
     @Override
     public void shootProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
         Entity entity = (Entity)((Object)projectile);
-        double d = livingEntity.x - this.x;
-        double e = livingEntity.z - this.z;
+        double d = livingEntity.getX() - this.getX();
+        double e = livingEntity.getZ() - this.getZ();
         double g = Mth.sqrt(d * d + e * e);
-        double h = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0f) - entity.y + g * (double)0.2f;
+        double h = livingEntity.getY(0.3333333333333333) - entity.getY() + g * (double)0.2f;
         Vector3f vector3f = this.getProjectileShotVector(new Vec3(d, h, e), f);
         projectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), 1.6f, 14 - this.level.getDifficulty().getId() * 4);
         this.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));

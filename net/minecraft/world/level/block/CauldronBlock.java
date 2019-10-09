@@ -62,7 +62,7 @@ extends Block {
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         int i = blockState.getValue(LEVEL);
         float f = (float)blockPos.getY() + (6.0f + (float)(3 * i)) / 16.0f;
-        if (!level.isClientSide && entity.isOnFire() && i > 0 && entity.getBoundingBox().minY <= (double)f) {
+        if (!level.isClientSide && entity.isOnFire() && i > 0 && entity.getY() <= (double)f) {
             entity.clearFire();
             this.setWaterLevel(level, blockPos, blockState, i - 1);
         }

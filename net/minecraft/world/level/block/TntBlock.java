@@ -82,7 +82,7 @@ extends Block {
         }
         PrimedTnt primedTnt = new PrimedTnt(level, (float)blockPos.getX() + 0.5f, blockPos.getY(), (float)blockPos.getZ() + 0.5f, livingEntity);
         level.addFreshEntity(primedTnt);
-        level.playSound(null, primedTnt.x, primedTnt.y, primedTnt.z, SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0f, 1.0f);
+        level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0f, 1.0f);
     }
 
     @Override

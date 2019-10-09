@@ -285,9 +285,7 @@ extends TextureSheetParticle {
             if (this.onGround) {
                 this.remove();
                 this.level.addParticle(this.landParticle, this.x, this.y, this.z, 0.0, 0.0, 0.0);
-                if (this.level.random.nextFloat() < 0.3f) {
-                    this.level.playLocalSound(this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 1.0f, 1.0f, false);
-                }
+                this.level.playLocalSound(this.x + 0.5, this.y, this.z + 0.5, SoundEvents.BEEHIVE_DRIP, SoundSource.BLOCKS, 0.3f + this.level.random.nextFloat() * 2.0f / 3.0f, 1.0f, false);
             }
         }
     }

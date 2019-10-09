@@ -40,10 +40,10 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
 
     @Override
     protected void setupRotations(ArmorStand armorStand, PoseStack poseStack, float f, float g, float h) {
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         float i = (float)(armorStand.level.getGameTime() - armorStand.lastHit) + h;
         if (i < 5.0f) {
-            poseStack.mulPose(Vector3f.YP.rotation(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.sin(i / 1.5f * (float)Math.PI) * 3.0f));
         }
     }
 

@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(value=EnvType.CLIENT)
@@ -16,7 +17,7 @@ extends HorseModel<T> {
     private final ModelPart boxR;
 
     public ChestedHorseModel(float f) {
-        super(f);
+        super(RenderType::entitySolid, f);
         this.boxL.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 8.0f, 3.0f);
         this.boxR = new ModelPart(this, 26, 21);
         this.boxR.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 8.0f, 3.0f);

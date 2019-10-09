@@ -36,14 +36,18 @@ extends SkullModel {
     }
 
     @Override
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j) {
+    public void setupAnim(float f, float g, float h) {
         this.jaw.xRot = (float)(Math.sin(f * (float)Math.PI * 0.2f) + 1.0) * 0.2f;
         this.head.yRot = g * ((float)Math.PI / 180);
         this.head.xRot = h * ((float)Math.PI / 180);
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
         poseStack.pushPose();
         poseStack.translate(0.0, -0.374375f, 0.0);
         poseStack.scale(0.75f, 0.75f, 0.75f);
-        this.head.render(poseStack, vertexConsumer, i, j, null);
+        this.head.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
         poseStack.popPose();
     }
 }

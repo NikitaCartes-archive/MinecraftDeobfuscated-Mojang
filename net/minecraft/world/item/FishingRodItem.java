@@ -42,9 +42,9 @@ extends Item {
                 int i = player2.fishing.retrieve(itemStack);
                 itemStack.hurtAndBreak(i, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
-            level.playSound(null, player2.x, player2.y, player2.z, SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
+            level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
         } else {
-            level.playSound(null, player2.x, player2.y, player2.z, SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
+            level.playSound(null, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
             if (!level.isClientSide) {
                 int i = EnchantmentHelper.getFishingSpeedBonus(itemStack);
                 int j = EnchantmentHelper.getFishingLuckBonus(itemStack);

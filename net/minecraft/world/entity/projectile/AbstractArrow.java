@@ -84,7 +84,7 @@ implements Projectile {
     }
 
     protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level) {
-        this(entityType, livingEntity.x, livingEntity.y + (double)livingEntity.getEyeHeight() - (double)0.1f, livingEntity.z, level);
+        this(entityType, livingEntity.getX(), livingEntity.getEyeY() - (double)0.1f, livingEntity.getZ(), level);
         this.setOwner(livingEntity);
         if (livingEntity instanceof Player) {
             this.pickup = Pickup.ALLOWED;
@@ -149,13 +149,14 @@ implements Projectile {
             this.yRot = (float)(Mth.atan2(d, f) * 57.2957763671875);
             this.xRotO = this.xRot;
             this.yRotO = this.yRot;
-            this.moveTo(this.x, this.y, this.z, this.yRot, this.xRot);
+            this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
             this.life = 0;
         }
     }
 
     @Override
     public void tick() {
+        Vec3 vec32;
         VoxelShape voxelShape;
         BlockPos blockPos;
         BlockState blockState;
@@ -169,9 +170,10 @@ implements Projectile {
             this.yRotO = this.yRot;
             this.xRotO = this.xRot;
         }
-        if (!((blockState = this.level.getBlockState(blockPos = new BlockPos(this.x, this.y, this.z))).isAir() || bl || (voxelShape = blockState.getCollisionShape(this.level, blockPos)).isEmpty())) {
+        if (!((blockState = this.level.getBlockState(blockPos = new BlockPos(this))).isAir() || bl || (voxelShape = blockState.getCollisionShape(this.level, blockPos)).isEmpty())) {
+            vec32 = this.position();
             for (AABB aABB : voxelShape.toAabbs()) {
-                if (!aABB.move(blockPos).contains(new Vec3(this.x, this.y, this.z))) continue;
+                if (!aABB.move(blockPos).contains(vec32)) continue;
                 this.inGround = true;
                 break;
             }
@@ -196,14 +198,13 @@ implements Projectile {
         }
         this.inGroundTime = 0;
         ++this.flightTime;
-        Vec3 vec32 = new Vec3(this.x, this.y, this.z);
-        Vec3 vec33 = vec32.add(vec3);
-        HitResult hitResult = this.level.clip(new ClipContext(vec32, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+        Vec3 vec33 = this.position();
+        HitResult hitResult = this.level.clip(new ClipContext(vec33, vec32 = vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         if (hitResult.getType() != HitResult.Type.MISS) {
-            vec33 = hitResult.getLocation();
+            vec32 = hitResult.getLocation();
         }
         while (!this.removed) {
-            EntityHitResult entityHitResult = this.findHitEntity(vec32, vec33);
+            EntityHitResult entityHitResult = this.findHitEntity(vec33, vec32);
             if (entityHitResult != null) {
                 hitResult = entityHitResult;
             }
@@ -228,15 +229,15 @@ implements Projectile {
         double g = vec3.z;
         if (this.isCritArrow()) {
             for (int i = 0; i < 4; ++i) {
-                this.level.addParticle(ParticleTypes.CRIT, this.x + d * (double)i / 4.0, this.y + e * (double)i / 4.0, this.z + g * (double)i / 4.0, -d, -e + 0.2, -g);
+                this.level.addParticle(ParticleTypes.CRIT, this.getX() + d * (double)i / 4.0, this.getY() + e * (double)i / 4.0, this.getZ() + g * (double)i / 4.0, -d, -e + 0.2, -g);
             }
         }
-        this.x += d;
-        this.y += e;
-        this.z += g;
-        float h = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
+        double h = this.getX() + d;
+        double j = this.getY() + e;
+        double k = this.getZ() + g;
+        float l = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
         this.yRot = bl ? (float)(Mth.atan2(-d, -g) * 57.2957763671875) : (float)(Mth.atan2(d, g) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(e, h) * 57.2957763671875);
+        this.xRot = (float)(Mth.atan2(e, l) * 57.2957763671875);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }
@@ -251,21 +252,21 @@ implements Projectile {
         }
         this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
         this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
-        float j = 0.99f;
-        float k = 0.05f;
+        float m = 0.99f;
+        float n = 0.05f;
         if (this.isInWater()) {
-            for (int l = 0; l < 4; ++l) {
-                float m = 0.25f;
-                this.level.addParticle(ParticleTypes.BUBBLE, this.x - d * 0.25, this.y - e * 0.25, this.z - g * 0.25, d, e, g);
+            for (int o = 0; o < 4; ++o) {
+                float p = 0.25f;
+                this.level.addParticle(ParticleTypes.BUBBLE, h - d * 0.25, j - e * 0.25, k - g * 0.25, d, e, g);
             }
-            j = this.getWaterInertia();
+            m = this.getWaterInertia();
         }
-        this.setDeltaMovement(vec3.scale(j));
+        this.setDeltaMovement(vec3.scale(m));
         if (!this.isNoGravity() && !bl) {
             Vec3 vec34 = this.getDeltaMovement();
             this.setDeltaMovement(vec34.x, vec34.y - (double)0.05f, vec34.z);
         }
-        this.setPos(this.x, this.y, this.z);
+        this.setPos(h, j, k);
         this.checkInsideBlocks();
     }
 
@@ -284,12 +285,10 @@ implements Projectile {
             BlockState blockState;
             BlockHitResult blockHitResult = (BlockHitResult)hitResult;
             this.lastState = blockState = this.level.getBlockState(blockHitResult.getBlockPos());
-            Vec3 vec3 = blockHitResult.getLocation().subtract(this.x, this.y, this.z);
+            Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
             this.setDeltaMovement(vec3);
             Vec3 vec32 = vec3.normalize().scale(0.05f);
-            this.x -= vec32.x;
-            this.y -= vec32.y;
-            this.z -= vec32.z;
+            this.setPosRaw(this.getX() - vec32.x, this.getY() - vec32.y, this.getZ() - vec32.z);
             this.playSound(this.getHitGroundSoundEvent(), 1.0f, 1.2f / (this.random.nextFloat() * 0.2f + 0.9f));
             this.inGround = true;
             this.shakeTime = 7;

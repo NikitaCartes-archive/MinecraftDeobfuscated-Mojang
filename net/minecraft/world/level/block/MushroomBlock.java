@@ -9,13 +9,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.HugeMushroomFeatureConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -72,14 +74,17 @@ implements BonemealableBlock {
     }
 
     public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
+        ConfiguredFeature<HugeMushroomFeatureConfiguration, ?> configuredFeature;
         serverLevel.removeBlock(blockPos, false);
-        Feature<HugeMushroomFeatureConfig> feature = null;
         if (this == Blocks.BROWN_MUSHROOM) {
-            feature = Feature.HUGE_BROWN_MUSHROOM;
+            configuredFeature = Feature.HUGE_BROWN_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_BROWN_MUSHROOM_CONFIG);
         } else if (this == Blocks.RED_MUSHROOM) {
-            feature = Feature.HUGE_RED_MUSHROOM;
+            configuredFeature = Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG);
+        } else {
+            serverLevel.setBlock(blockPos, blockState, 3);
+            return false;
         }
-        if (feature != null && feature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos, new HugeMushroomFeatureConfig(true))) {
+        if (configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
             return true;
         }
         serverLevel.setBlock(blockPos, blockState, 3);

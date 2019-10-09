@@ -34,6 +34,7 @@ import net.minecraft.client.renderer.blockentity.SpawnerRenderer;
 import net.minecraft.client.renderer.blockentity.StructureBlockRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndGatewayRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -112,22 +113,22 @@ public class BlockEntityRenderDispatcher {
     private static <T extends BlockEntity> void setupAndRender(BlockEntityRenderer<T> blockEntityRenderer, T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         Level level = blockEntity.getLevel();
         int i = level != null ? level.getLightColor(blockEntity.getBlockPos()) : 0xF000F0;
-        blockEntityRenderer.render(blockEntity, d, e, f, g, poseStack, multiBufferSource, i);
+        blockEntityRenderer.render(blockEntity, d, e, f, g, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
     }
 
     @Deprecated
-    public <E extends BlockEntity> void renderItem(E blockEntity, PoseStack poseStack, int i) {
+    public <E extends BlockEntity> void renderItem(E blockEntity, PoseStack poseStack) {
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(this.singleRenderBuffer);
-        this.renderItem(blockEntity, poseStack, bufferSource, i);
+        this.renderItem(blockEntity, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY);
         bufferSource.endBatch();
     }
 
-    public <E extends BlockEntity> boolean renderItem(E blockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public <E extends BlockEntity> boolean renderItem(E blockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         BlockEntityRenderer blockEntityRenderer = this.getRenderer(blockEntity);
         if (blockEntityRenderer == null) {
             return true;
         }
-        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0f, poseStack, multiBufferSource, i));
+        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0f, poseStack, multiBufferSource, i, j));
         return false;
     }
 

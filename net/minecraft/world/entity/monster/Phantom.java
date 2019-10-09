@@ -119,14 +119,14 @@ implements Enemy {
             float f = Mth.cos((float)(this.getId() * 3 + this.tickCount) * 0.13f + (float)Math.PI);
             float g = Mth.cos((float)(this.getId() * 3 + this.tickCount + 1) * 0.13f + (float)Math.PI);
             if (f > 0.0f && g <= 0.0f) {
-                this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.PHANTOM_FLAP, this.getSoundSource(), 0.95f + this.random.nextFloat() * 0.05f, 0.95f + this.random.nextFloat() * 0.05f, false);
+                this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.PHANTOM_FLAP, this.getSoundSource(), 0.95f + this.random.nextFloat() * 0.05f, 0.95f + this.random.nextFloat() * 0.05f, false);
             }
             int i = this.getPhantomSize();
             float h = Mth.cos(this.yRot * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
             float j = Mth.sin(this.yRot * ((float)Math.PI / 180)) * (1.3f + 0.21f * (float)i);
             float k = (0.3f + f * 0.45f) * ((float)i * 0.2f + 1.0f);
-            this.level.addParticle(ParticleTypes.MYCELIUM, this.x + (double)h, this.y + (double)k, this.z + (double)j, 0.0, 0.0, 0.0);
-            this.level.addParticle(ParticleTypes.MYCELIUM, this.x - (double)h, this.y + (double)k, this.z - (double)j, 0.0, 0.0, 0.0);
+            this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
+            this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
         }
         if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
             this.remove();
@@ -237,7 +237,7 @@ implements Enemy {
             this.nextScanTick = 60;
             List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
             if (!list.isEmpty()) {
-                list.sort((player, player2) -> player.y > player2.y ? -1 : 1);
+                list.sort((player, player2) -> player.getY() > player2.getY() ? -1 : 1);
                 for (Player player3 : list) {
                     if (!Phantom.this.canAttack(player3, TargetingConditions.DEFAULT)) continue;
                     Phantom.this.setTarget(player3);
@@ -354,7 +354,7 @@ implements Enemy {
         @Override
         public void tick() {
             LivingEntity livingEntity = Phantom.this.getTarget();
-            Phantom.this.moveTargetPoint = new Vec3(livingEntity.x, livingEntity.y + (double)livingEntity.getBbHeight() * 0.5, livingEntity.z);
+            Phantom.this.moveTargetPoint = new Vec3(livingEntity.getX(), livingEntity.getY(0.5), livingEntity.getZ());
             if (Phantom.this.getBoundingBox().inflate(0.2f).intersects(livingEntity.getBoundingBox())) {
                 Phantom.this.doHurtTarget(livingEntity);
                 Phantom.this.attackPhase = AttackPhase.CIRCLE;
@@ -407,11 +407,11 @@ implements Enemy {
             if (this.touchingTarget()) {
                 this.selectNext();
             }
-            if (((Phantom)Phantom.this).moveTargetPoint.y < Phantom.this.y && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).below(1))) {
+            if (((Phantom)Phantom.this).moveTargetPoint.y < Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).below(1))) {
                 this.height = Math.max(1.0f, this.height);
                 this.selectNext();
             }
-            if (((Phantom)Phantom.this).moveTargetPoint.y > Phantom.this.y && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).above(1))) {
+            if (((Phantom)Phantom.this).moveTargetPoint.y > Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).above(1))) {
                 this.height = Math.min(-1.0f, this.height);
                 this.selectNext();
             }
@@ -433,7 +433,7 @@ implements Enemy {
         }
 
         protected boolean touchingTarget() {
-            return Phantom.this.moveTargetPoint.distanceToSqr(Phantom.this.x, Phantom.this.y, Phantom.this.z) < 4.0;
+            return Phantom.this.moveTargetPoint.distanceToSqr(Phantom.this.getX(), Phantom.this.getY(), Phantom.this.getZ()) < 4.0;
         }
     }
 
@@ -477,9 +477,9 @@ implements Enemy {
                 Phantom.this.yRot += 180.0f;
                 this.speed = 0.1f;
             }
-            float f = (float)(((Phantom)Phantom.this).moveTargetPoint.x - Phantom.this.x);
-            float g = (float)(((Phantom)Phantom.this).moveTargetPoint.y - Phantom.this.y);
-            float h = (float)(((Phantom)Phantom.this).moveTargetPoint.z - Phantom.this.z);
+            float f = (float)(((Phantom)Phantom.this).moveTargetPoint.x - Phantom.this.getX());
+            float g = (float)(((Phantom)Phantom.this).moveTargetPoint.y - Phantom.this.getY());
+            float h = (float)(((Phantom)Phantom.this).moveTargetPoint.z - Phantom.this.getZ());
             double d = Mth.sqrt(f * f + h * h);
             double e = 1.0 - (double)Mth.abs(g * 0.7f) / d;
             f = (float)((double)f * e);

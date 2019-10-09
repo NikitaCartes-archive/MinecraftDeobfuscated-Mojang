@@ -68,7 +68,7 @@ public class MultipleTestTracker {
             if (!gameTestInfo.hasStarted()) {
                 stringBuffer.append(' ');
             } else if (gameTestInfo.hasSucceeded()) {
-                stringBuffer.append('\u221a');
+                stringBuffer.append('+');
             } else if (gameTestInfo.hasFailed()) {
                 stringBuffer.append(gameTestInfo.isRequired() ? (char)'X' : (char)'x');
             } else {

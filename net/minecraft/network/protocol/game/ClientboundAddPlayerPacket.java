@@ -28,9 +28,9 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundAddPlayerPacket(Player player) {
         this.entityId = player.getId();
         this.playerId = player.getGameProfile().getId();
-        this.x = player.x;
-        this.y = player.y;
-        this.z = player.z;
+        this.x = player.getX();
+        this.y = player.getY();
+        this.z = player.getZ();
         this.yRot = (byte)(player.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(player.xRot * 256.0f / 360.0f);
     }

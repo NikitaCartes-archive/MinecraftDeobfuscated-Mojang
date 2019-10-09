@@ -266,7 +266,7 @@ extends ChunkSource {
 
     @Override
     public boolean isEntityTickingChunk(Entity entity) {
-        long l = ChunkPos.asLong(Mth.floor(entity.x) >> 4, Mth.floor(entity.z) >> 4);
+        long l = ChunkPos.asLong(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
         return this.checkChunkFuture(l, ChunkHolder::getEntityTickingChunkFuture);
     }
 
@@ -282,7 +282,7 @@ extends ChunkSource {
     }
 
     public boolean isInAccessibleChunk(Entity entity) {
-        long l = ChunkPos.asLong(Mth.floor(entity.x) >> 4, Mth.floor(entity.z) >> 4);
+        long l = ChunkPos.asLong(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
         return this.checkChunkFuture(l, ChunkHolder::getFullChunkFuture);
     }
 

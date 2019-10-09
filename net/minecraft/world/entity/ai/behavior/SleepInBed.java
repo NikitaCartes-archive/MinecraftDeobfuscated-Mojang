@@ -55,7 +55,7 @@ extends Behavior<LivingEntity> {
             return false;
         }
         BlockPos blockPos = optional.get().pos();
-        return livingEntity.getBrain().isActive(Activity.REST) && livingEntity.y > (double)blockPos.getY() + 0.4 && blockPos.closerThan(livingEntity.position(), 1.14);
+        return livingEntity.getBrain().isActive(Activity.REST) && livingEntity.getY() > (double)blockPos.getY() + 0.4 && blockPos.closerThan(livingEntity.position(), 1.14);
     }
 
     @Override

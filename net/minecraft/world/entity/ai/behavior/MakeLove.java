@@ -116,7 +116,7 @@ extends Behavior<Villager> {
         villager.setAge(6000);
         villager2.setAge(6000);
         villager3.setAge(-24000);
-        villager3.moveTo(villager.x, villager.y, villager.z, 0.0f, 0.0f);
+        villager3.moveTo(villager.getX(), villager.getY(), villager.getZ(), 0.0f, 0.0f);
         villager.level.addFreshEntity(villager3);
         villager.level.broadcastEntityEvent(villager3, (byte)12);
         return Optional.of(villager3);

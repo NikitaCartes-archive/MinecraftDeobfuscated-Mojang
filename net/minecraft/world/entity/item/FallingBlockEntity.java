@@ -128,7 +128,7 @@ extends Entity {
             boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
             boolean bl2 = bl && this.level.getFluidState(blockPos).is(FluidTags.WATER);
             double d = this.getDeltaMovement().lengthSqr();
-            if (bl && d > 1.0 && (blockHitResult = this.level.clip(new ClipContext(new Vec3(this.xo, this.yo, this.zo), new Vec3(this.x, this.y, this.z), ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, this))).getType() != HitResult.Type.MISS && this.level.getFluidState(blockHitResult.getBlockPos()).is(FluidTags.WATER)) {
+            if (bl && d > 1.0 && (blockHitResult = this.level.clip(new ClipContext(new Vec3(this.xo, this.yo, this.zo), this.position(), ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, this))).getType() != HitResult.Type.MISS && this.level.getFluidState(blockHitResult.getBlockPos()).is(FluidTags.WATER)) {
                 blockPos = blockHitResult.getBlockPos();
                 bl2 = true;
             }
@@ -180,7 +180,7 @@ extends Entity {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g) {
         int i;
         if (this.hurtEntities && (i = Mth.ceil(f - 1.0f)) > 0) {
             ArrayList<Entity> list = Lists.newArrayList(this.level.getEntities(this, this.getBoundingBox()));
@@ -198,6 +198,7 @@ extends Entity {
                 }
             }
         }
+        return false;
     }
 
     @Override

@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -55,7 +56,7 @@ implements ResourceManagerReloadListener {
         }
         BakedModel bakedModel = this.blockModelShaper.getBlockModel(blockState);
         long l = blockState.getSeed(blockPos);
-        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l);
+        this.modelRenderer.tesselateBlock(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, true, this.random, l, OverlayTexture.NO_OVERLAY);
     }
 
     public boolean renderBatched(BlockState blockState, BlockPos blockPos, BlockAndBiomeGetter blockAndBiomeGetter, PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Random random) {
@@ -64,7 +65,7 @@ implements ResourceManagerReloadListener {
             if (renderShape != RenderShape.MODEL) {
                 return false;
             }
-            return this.modelRenderer.tesselateBlock(blockAndBiomeGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos));
+            return this.modelRenderer.tesselateBlock(blockAndBiomeGetter, this.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, random, blockState.getSeed(blockPos), OverlayTexture.NO_OVERLAY);
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Tesselating block in world");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Block being tesselated");
@@ -92,7 +93,7 @@ implements ResourceManagerReloadListener {
         return this.blockModelShaper.getBlockModel(blockState);
     }
 
-    public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, int k) {
+    public void renderSingleBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         RenderShape renderShape = blockState.getRenderShape();
         if (renderShape == RenderShape.INVISIBLE) {
             return;
@@ -101,19 +102,19 @@ implements ResourceManagerReloadListener {
             case MODEL: {
                 BakedModel bakedModel = this.getBlockModel(blockState);
                 poseStack.pushPose();
-                poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
-                int l = this.blockColors.getColor(blockState, null, null, 0);
-                float f = (float)(l >> 16 & 0xFF) / 255.0f;
-                float g = (float)(l >> 8 & 0xFF) / 255.0f;
-                float h = (float)(l & 0xFF) / 255.0f;
-                this.modelRenderer.renderModel(poseStack.getPose(), multiBufferSource.getBuffer(RenderType.getRenderLayer(blockState)), blockState, bakedModel, f, g, h, i);
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
+                int k = this.blockColors.getColor(blockState, null, null, 0);
+                float f = (float)(k >> 16 & 0xFF) / 255.0f;
+                float g = (float)(k >> 8 & 0xFF) / 255.0f;
+                float h = (float)(k & 0xFF) / 255.0f;
+                this.modelRenderer.renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j);
                 poseStack.popPose();
                 break;
             }
             case ENTITYBLOCK_ANIMATED: {
                 poseStack.pushPose();
-                poseStack.mulPose(Vector3f.YP.rotation(90.0f, true));
-                EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i);
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
+                EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);
                 poseStack.popPose();
             }
         }

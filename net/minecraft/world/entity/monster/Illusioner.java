@@ -59,8 +59,8 @@ implements RangedAttackMob {
         this.xpReward = 5;
         this.clientSideIllusionOffsets = new Vec3[2][4];
         for (int i = 0; i < 4; ++i) {
-            this.clientSideIllusionOffsets[0][i] = new Vec3(0.0, 0.0, 0.0);
-            this.clientSideIllusionOffsets[1][i] = new Vec3(0.0, 0.0, 0.0);
+            this.clientSideIllusionOffsets[0][i] = Vec3.ZERO;
+            this.clientSideIllusionOffsets[1][i] = Vec3.ZERO;
         }
     }
 
@@ -124,9 +124,9 @@ implements RangedAttackMob {
                     this.clientSideIllusionOffsets[1][j] = new Vec3((double)(-6.0f + (float)this.random.nextInt(13)) * 0.5, Math.max(0, this.random.nextInt(6) - 4), (double)(-6.0f + (float)this.random.nextInt(13)) * 0.5);
                 }
                 for (j = 0; j < 16; ++j) {
-                    this.level.addParticle(ParticleTypes.CLOUD, this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(), this.y + this.random.nextDouble() * (double)this.getBbHeight(), this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(), 0.0, 0.0, 0.0);
+                    this.level.addParticle(ParticleTypes.CLOUD, this.getRandomX(0.5), this.getRandomY(), this.getZ(0.5), 0.0, 0.0, 0.0);
                 }
-                this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0f, 1.0f, false);
+                this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ILLUSIONER_MIRROR_MOVE, this.getSoundSource(), 1.0f, 1.0f, false);
             } else if (this.hurtTime == this.hurtDuration - 1) {
                 this.clientSideIllusionTicks = 3;
                 for (int k = 0; k < 4; ++k) {
@@ -195,9 +195,9 @@ implements RangedAttackMob {
     public void performRangedAttack(LivingEntity livingEntity, float f) {
         ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
         AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(this, itemStack, f);
-        double d = livingEntity.x - this.x;
-        double e = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0f) - abstractArrow.y;
-        double g = livingEntity.z - this.z;
+        double d = livingEntity.getX() - this.getX();
+        double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
+        double g = livingEntity.getZ() - this.getZ();
         double h = Mth.sqrt(d * d + g * g);
         abstractArrow.shoot(d, e + h * (double)0.2f, g, 1.6f, 14 - this.level.getDifficulty().getId() * 4);
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));

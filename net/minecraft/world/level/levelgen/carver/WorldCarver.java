@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
 import net.minecraft.world.level.levelgen.carver.HellCaveWorldCarver;
 import net.minecraft.world.level.levelgen.carver.UnderwaterCanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.UnderwaterCaveWorldCarver;
-import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;

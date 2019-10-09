@@ -58,7 +58,7 @@ extends Item {
             this.randomizePose(armorStand, level.random);
             EntityType.updateCustomEntityTag(level, useOnContext.getPlayer(), armorStand, itemStack.getTag());
             level.addFreshEntity(armorStand);
-            level.playSound(null, armorStand.x, armorStand.y, armorStand.z, SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
+            level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
         }
         itemStack.shrink(1);
         return InteractionResult.SUCCESS;

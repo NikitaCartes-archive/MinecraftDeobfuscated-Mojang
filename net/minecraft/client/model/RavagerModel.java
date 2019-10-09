@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Ravager;
 
@@ -24,6 +25,7 @@ extends ListModel<Ravager> {
     private final ModelPart neck;
 
     public RavagerModel() {
+        super(RenderType::entityCutoutNoCull);
         this.texWidth = 128;
         this.texHeight = 128;
         int i = 16;

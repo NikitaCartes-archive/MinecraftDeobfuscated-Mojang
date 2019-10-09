@@ -11,7 +11,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.ReplaceBlockConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 
 public class ReplaceBlockFeature
 extends Feature<ReplaceBlockConfiguration> {

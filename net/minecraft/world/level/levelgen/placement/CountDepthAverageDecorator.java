@@ -24,10 +24,10 @@ extends SimpleFeatureDecorator<DepthAverageConfigation> {
         int j = depthAverageConfigation.baseline;
         int k2 = depthAverageConfigation.spread;
         return IntStream.range(0, i).mapToObj(k -> {
-            int l = random.nextInt(16);
-            int m = random.nextInt(k2) + random.nextInt(k2) - k2 + j;
-            int n = random.nextInt(16);
-            return blockPos.offset(l, m, n);
+            int l = random.nextInt(16) + blockPos.getX();
+            int m = random.nextInt(16) + blockPos.getZ();
+            int n = random.nextInt(k2) + random.nextInt(k2) - k2 + j;
+            return new BlockPos(l, n, m);
         });
     }
 }

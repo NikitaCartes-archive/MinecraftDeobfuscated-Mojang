@@ -5,9 +5,12 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
@@ -17,6 +20,10 @@ extends ListModel<E> {
     private float g = 1.0f;
     private float b = 1.0f;
 
+    public ColorableListModel(Function<ResourceLocation, RenderType> function) {
+        super(function);
+    }
+
     public void setColor(float f, float g, float h) {
         this.r = f;
         this.g = g;
@@ -24,8 +31,8 @@ extends ListModel<E> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
-        super.renderToBuffer(poseStack, vertexConsumer, i, this.r * f, this.g * g, this.b * h);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+        super.renderToBuffer(poseStack, vertexConsumer, i, j, this.r * f, this.g * g, this.b * h);
     }
 }
 

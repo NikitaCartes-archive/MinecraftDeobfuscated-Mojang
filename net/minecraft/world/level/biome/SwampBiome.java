@@ -11,12 +11,12 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.SeagrassFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -24,8 +24,8 @@ public final class SwampBiome
 extends Biome {
     protected SwampBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.SWAMP, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.SWAMP).depth(-0.2f).scale(0.1f).temperature(0.8f).downfall(0.9f).waterColor(6388580).waterFogColor(2302743).parent(null));
-        this.addStructureStart(Feature.SWAMP_HUT, FeatureConfiguration.NONE);
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
+        this.addStructureStart(Feature.SWAMP_HUT.configured(FeatureConfiguration.NONE));
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);
@@ -37,7 +37,7 @@ extends Biome {
         BiomeDefaultFeatures.addDefaultMushrooms(this);
         BiomeDefaultFeatures.addSwampExtraVegetation(this);
         BiomeDefaultFeatures.addDefaultSprings(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, SwampBiome.makeComposite(Feature.SEAGRASS, new SeagrassFeatureConfiguration(64, 0.6), FeatureDecorator.TOP_SOLID_HEIGHTMAP, DecoratorConfiguration.NONE));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SEAGRASS.configured(new SeagrassFeatureConfiguration(64, 0.6)).decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP.configured(DecoratorConfiguration.NONE)));
         BiomeDefaultFeatures.addSwampExtraDecoration(this);
         BiomeDefaultFeatures.addSurfaceFreezing(this);
         this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));

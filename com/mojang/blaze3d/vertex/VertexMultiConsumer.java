@@ -43,7 +43,7 @@ implements VertexConsumer {
 
     @Override
     public VertexConsumer overlayCoords(int i, int j) {
-        this.delegates.forEach(vertexConsumer -> vertexConsumer.uv2(i, j));
+        this.delegates.forEach(vertexConsumer -> vertexConsumer.overlayCoords(i, j));
         return this;
     }
 
@@ -62,16 +62,6 @@ implements VertexConsumer {
     @Override
     public void endVertex() {
         this.delegates.forEach(VertexConsumer::endVertex);
-    }
-
-    @Override
-    public void defaultOverlayCoords(int i, int j) {
-        this.delegates.forEach(vertexConsumer -> vertexConsumer.defaultOverlayCoords(i, j));
-    }
-
-    @Override
-    public void unsetDefaultOverlayCoords() {
-        this.delegates.forEach(VertexConsumer::unsetDefaultOverlayCoords);
     }
 }
 

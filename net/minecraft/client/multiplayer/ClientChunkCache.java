@@ -175,7 +175,7 @@ extends ChunkSource {
 
     @Override
     public boolean isEntityTickingChunk(Entity entity) {
-        return this.hasChunk(Mth.floor(entity.x) >> 4, Mth.floor(entity.z) >> 4);
+        return this.hasChunk(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
     }
 
     @Override

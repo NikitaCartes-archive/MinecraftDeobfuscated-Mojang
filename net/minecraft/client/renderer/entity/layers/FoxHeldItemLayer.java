@@ -37,9 +37,9 @@ extends RenderLayer<Fox, FoxModel<Fox>> {
         }
         poseStack.translate(((FoxModel)this.getParentModel()).head.x / 16.0f, ((FoxModel)this.getParentModel()).head.y / 16.0f, ((FoxModel)this.getParentModel()).head.z / 16.0f);
         n = fox.getHeadRollAngle(h);
-        poseStack.mulPose(Vector3f.ZP.rotation(n, false));
-        poseStack.mulPose(Vector3f.YP.rotation(k, true));
-        poseStack.mulPose(Vector3f.XP.rotation(l, true));
+        poseStack.mulPose(Vector3f.ZP.rotation(n));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
         if (fox.isBaby()) {
             if (bl) {
                 poseStack.translate(0.4f, 0.26f, 0.15f);
@@ -51,9 +51,9 @@ extends RenderLayer<Fox, FoxModel<Fox>> {
         } else {
             poseStack.translate(0.06f, 0.27f, -0.5);
         }
-        poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
         if (bl) {
-            poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
         }
         ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
         Minecraft.getInstance().getItemInHandRenderer().renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);

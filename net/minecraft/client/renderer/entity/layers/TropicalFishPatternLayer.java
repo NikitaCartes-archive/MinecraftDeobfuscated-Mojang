@@ -29,7 +29,7 @@ extends RenderLayer<TropicalFish, EntityModel<TropicalFish>> {
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, TropicalFish tropicalFish, float f, float g, float h, float j, float k, float l, float m) {
         ColorableListModel entityModel = tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB;
         float[] fs = tropicalFish.getPatternColor();
-        TropicalFishPatternLayer.coloredModelCopyLayerRender(this.getParentModel(), entityModel, tropicalFish.getPatternTextureLocation(), poseStack, multiBufferSource, i, tropicalFish, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
+        TropicalFishPatternLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), entityModel, tropicalFish.getPatternTextureLocation(), poseStack, multiBufferSource, i, tropicalFish, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
     }
 }
 

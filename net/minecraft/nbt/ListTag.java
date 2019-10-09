@@ -6,10 +6,13 @@ package net.minecraft.nbt;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.bytes.ByteOpenHashSet;
+import it.unimi.dsi.fastutil.bytes.ByteSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import net.minecraft.nbt.CollectionTag;
@@ -65,6 +68,7 @@ extends CollectionTag<Tag> {
             return this.load(dataInput, i, nbtAccounter);
         }
     };
+    private static final ByteSet INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
     private final List<Tag> list;
     private byte type;
 
@@ -273,23 +277,36 @@ extends CollectionTag<Tag> {
         if (this.isEmpty()) {
             return new TextComponent("[]");
         }
-        TextComponent component = new TextComponent("[");
-        if (!string.isEmpty()) {
-            component.append("\n");
-        }
-        for (int j = 0; j < this.list.size(); ++j) {
-            TextComponent component2 = new TextComponent(Strings.repeat(string, i + 1));
-            component2.append(this.list.get(j).getPrettyDisplay(string, i + 1));
-            if (j != this.list.size() - 1) {
-                component2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
+        if (INLINE_ELEMENT_TYPES.contains(this.type) && this.size() <= 8) {
+            String string2 = ", ";
+            TextComponent component = new TextComponent("[");
+            for (int j = 0; j < this.list.size(); ++j) {
+                if (j != 0) {
+                    component.append(", ");
+                }
+                component.append(this.list.get(j).getPrettyDisplay());
             }
-            component.append(component2);
+            component.append("]");
+            return component;
+        }
+        TextComponent component2 = new TextComponent("[");
+        if (!string.isEmpty()) {
+            component2.append("\n");
+        }
+        String string3 = String.valueOf(',');
+        for (int j = 0; j < this.list.size(); ++j) {
+            TextComponent component3 = new TextComponent(Strings.repeat(string, i + 1));
+            component3.append(this.list.get(j).getPrettyDisplay(string, i + 1));
+            if (j != this.list.size() - 1) {
+                component3.append(string3).append(string.isEmpty() ? " " : "\n");
+            }
+            component2.append(component3);
         }
         if (!string.isEmpty()) {
-            component.append("\n").append(Strings.repeat(string, i));
+            component2.append("\n").append(Strings.repeat(string, i));
         }
-        component.append("]");
-        return component;
+        component2.append("]");
+        return component2;
     }
 
     public int getElementType() {

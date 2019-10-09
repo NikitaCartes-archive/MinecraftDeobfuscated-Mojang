@@ -14,7 +14,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class OreFeature
 extends Feature<OreConfiguration> {

@@ -39,7 +39,7 @@ extends AbstractDragonPhaseInstance {
     @Override
     public void doServerTick() {
         double d;
-        double d2 = d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.x, this.dragon.y, this.dragon.z);
+        double d2 = d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
         if (d < 100.0 || d > 22500.0 || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
             this.findNewTarget();
         }
@@ -58,7 +58,7 @@ extends AbstractDragonPhaseInstance {
             BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION);
             Player player = this.dragon.level.getNearestPlayer(NEAR_EGG_TARGETING, blockPos.getX(), blockPos.getY(), blockPos.getZ());
             if (player != null) {
-                Vec3 vec3 = new Vec3(player.x, 0.0, player.z).normalize();
+                Vec3 vec3 = new Vec3(player.getX(), 0.0, player.getZ()).normalize();
                 j = this.dragon.findClosestNode(-vec3.x * 40.0, 105.0, -vec3.z * 40.0);
             } else {
                 j = this.dragon.findClosestNode(40.0, blockPos.getY(), 0.0);

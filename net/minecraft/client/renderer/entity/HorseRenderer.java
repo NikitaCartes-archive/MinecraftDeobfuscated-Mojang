@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HorseModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.AbstractHorseRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.layers.HorseArmorLayer;
@@ -22,7 +23,7 @@ extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
     private static final Map<String, ResourceLocation> LAYERED_LOCATION_CACHE = Maps.newHashMap();
 
     public HorseRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-        super(entityRenderDispatcher, new HorseModel(0.0f), 1.1f);
+        super(entityRenderDispatcher, new HorseModel(RenderType::entitySolid, 0.0f), 1.1f);
         this.addLayer(new HorseArmorLayer(this));
     }
 

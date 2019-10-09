@@ -131,9 +131,9 @@ CommandSource {
     public double xo;
     public double yo;
     public double zo;
-    public double x;
-    public double y;
-    public double z;
+    private double x;
+    private double y;
+    private double z;
     private Vec3 deltaMovement = Vec3.ZERO;
     public float yRot;
     public float xRot;
@@ -304,10 +304,9 @@ CommandSource {
         if (this.level == null) {
             return;
         }
-        while (this.y > 0.0 && this.y < 256.0) {
-            this.setPos(this.x, this.y, this.z);
+        for (double d = this.getY(); d > 0.0 && d < 256.0; d += 1.0) {
+            this.setPos(this.getX(), d, this.getZ());
             if (this.level.noCollision(this)) break;
-            this.y += 1.0;
         }
         this.setDeltaMovement(Vec3.ZERO);
         this.xRot = 0.0f;
@@ -331,12 +330,14 @@ CommandSource {
     }
 
     public void setPos(double d, double e, double f) {
-        this.x = d;
-        this.y = e;
-        this.z = f;
-        float g = this.dimensions.width / 2.0f;
-        float h = this.dimensions.height;
-        this.setBoundingBox(new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)h, f + (double)g));
+        this.setPosRaw(d, e, f);
+        this.refreshBoundingBox();
+    }
+
+    protected void refreshBoundingBox() {
+        float f = this.dimensions.width / 2.0f;
+        float g = this.dimensions.height;
+        this.setBoundingBox(new AABB(this.x - (double)f, this.y, this.z - (double)f, this.x + (double)f, this.y + (double)g, this.z + (double)f));
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -394,7 +395,7 @@ CommandSource {
             this.lavaHurt();
             this.fallDistance *= 0.5f;
         }
-        if (this.y < -64.0) {
+        if (this.getY() < -64.0) {
             this.outOfWorld();
         }
         if (!this.level.isClientSide) {
@@ -457,9 +458,6 @@ CommandSource {
     }
 
     public void move(MoverType moverType, Vec3 vec3) {
-        BlockPos blockPos2;
-        BlockState blockState2;
-        Block block;
         Vec3 vec32;
         if (this.noPhysics) {
             this.setBoundingBox(this.getBoundingBox().move(vec3));
@@ -473,7 +471,6 @@ CommandSource {
         if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {
             vec3 = vec3.multiply(this.stuckSpeedMultiplier);
             this.stuckSpeedMultiplier = Vec3.ZERO;
-            this.setDeltaMovement(Vec3.ZERO);
         }
         if ((vec32 = this.collide(vec3 = this.maybeBackOffFromEdge(vec3, moverType))).lengthSqr() > 1.0E-7) {
             this.setBoundingBox(this.getBoundingBox().move(vec32));
@@ -485,15 +482,8 @@ CommandSource {
         this.verticalCollision = vec3.y != vec32.y;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
         this.collision = this.horizontalCollision || this.verticalCollision;
-        int i = Mth.floor(this.x);
-        int j = Mth.floor(this.y - (double)0.2f);
-        int k = Mth.floor(this.z);
-        BlockPos blockPos = new BlockPos(i, j, k);
+        BlockPos blockPos = this.getOnPos();
         BlockState blockState = this.level.getBlockState(blockPos);
-        if (blockState.isAir() && ((block = (blockState2 = this.level.getBlockState(blockPos2 = blockPos.below())).getBlock()).is(BlockTags.FENCES) || block.is(BlockTags.WALLS) || block instanceof FenceGateBlock)) {
-            blockState = blockState2;
-            blockPos = blockPos2;
-        }
         this.checkFallDamage(vec32.y, this.onGround, blockState, blockPos);
         Vec3 vec33 = this.getDeltaMovement();
         if (vec3.x != vec32.x) {
@@ -502,18 +492,18 @@ CommandSource {
         if (vec3.z != vec32.z) {
             this.setDeltaMovement(vec33.x, vec33.y, 0.0);
         }
-        Block block2 = blockState.getBlock();
+        Block block = blockState.getBlock();
         if (vec3.y != vec32.y) {
-            block2.updateEntityAfterFallOn(this.level, this);
+            block.updateEntityAfterFallOn(this.level, this);
         }
         if (this.onGround && !this.isSteppingCarefully()) {
-            block2.stepOn(this.level, blockPos, this);
+            block.stepOn(this.level, blockPos, this);
         }
         if (this.isMovementNoisy() && !this.isPassenger()) {
             double d = vec32.x;
             double e = vec32.y;
             double f = vec32.z;
-            if (block2 != Blocks.LADDER && block2 != Blocks.SCAFFOLDING) {
+            if (block != Blocks.LADDER && block != Blocks.SCAFFOLDING) {
                 e = 0.0;
             }
             this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6);
@@ -545,6 +535,7 @@ CommandSource {
             this.fillCrashReportCategory(crashReportCategory);
             throw new ReportedException(crashReport);
         }
+        this.setDeltaMovement(this.getDeltaMovement().multiply(this.getSpeedFactor(), 1.0, this.getSpeedFactor()));
         boolean bl = this.isInWaterRainOrBubble();
         if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001))) {
             if (!bl) {
@@ -562,6 +553,36 @@ CommandSource {
             this.remainingFireTicks = -this.getFireImmuneTicks();
         }
         this.level.getProfiler().pop();
+    }
+
+    protected BlockPos getOnPos() {
+        BlockPos blockPos2;
+        BlockState blockState;
+        Block block;
+        int k;
+        int j;
+        int i = Mth.floor(this.x);
+        BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.y - (double)0.2f), k = Mth.floor(this.z));
+        if (this.level.getBlockState(blockPos).isAir() && ((block = (blockState = this.level.getBlockState(blockPos2 = blockPos.below())).getBlock()).is(BlockTags.FENCES) || block.is(BlockTags.WALLS) || block instanceof FenceGateBlock)) {
+            return blockPos2;
+        }
+        return blockPos;
+    }
+
+    protected float getJumpFactor() {
+        float f = this.level.getBlockState(new BlockPos(this)).getBlock().getJumpFactor();
+        float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getJumpFactor();
+        return (double)f == 1.0 ? g : f;
+    }
+
+    private float getSpeedFactor() {
+        float f = this.level.getBlockState(new BlockPos(this)).getBlock().getSpeedFactor();
+        float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor();
+        return (double)f == 1.0 ? g : f;
+    }
+
+    protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
+        return new BlockPos(this.x, this.getBoundingBox().minY - 0.5 - 1.0E-7, this.z);
     }
 
     protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
@@ -697,9 +718,7 @@ CommandSource {
 
     public void setLocationFromBoundingbox() {
         AABB aABB = this.getBoundingBox();
-        this.x = (aABB.minX + aABB.maxX) / 2.0;
-        this.y = aABB.minY;
-        this.z = (aABB.minZ + aABB.maxZ) / 2.0;
+        this.setPosRaw((aABB.minX + aABB.maxX) / 2.0, aABB.minY, (aABB.minZ + aABB.maxZ) / 2.0);
     }
 
     protected SoundEvent getSwimSound() {
@@ -768,7 +787,7 @@ CommandSource {
 
     public void playSound(SoundEvent soundEvent, float f, float g) {
         if (!this.isSilent()) {
-            this.level.playSound(null, this.x, this.y, this.z, soundEvent, this.getSoundSource(), f, g);
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), f, g);
         }
     }
 
@@ -818,12 +837,13 @@ CommandSource {
         return this.getType().fireImmune();
     }
 
-    public void causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g) {
         if (this.isVehicle()) {
             for (Entity entity : this.getPassengers()) {
                 entity.causeFallDamage(f, g);
             }
         }
+        return false;
     }
 
     public boolean isInWater() {
@@ -832,7 +852,7 @@ CommandSource {
 
     private boolean isInRain() {
         try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire(this);){
-            boolean bl = this.level.isRainingAt(pooledMutableBlockPos) || this.level.isRainingAt(pooledMutableBlockPos.set(this.x, this.y + (double)this.dimensions.height, this.z));
+            boolean bl = this.level.isRainingAt(pooledMutableBlockPos) || this.level.isRainingAt(pooledMutableBlockPos.set(this.getX(), this.getY() + (double)this.dimensions.height, this.getZ()));
             return bl;
         }
     }
@@ -906,19 +926,19 @@ CommandSource {
         } else {
             this.playSound(this.getSwimHighSpeedSplashSound(), g, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
         }
-        float h = Mth.floor(this.getBoundingBox().minY);
+        float h = Mth.floor(this.getY());
         int i = 0;
         while ((float)i < 1.0f + this.dimensions.width * 20.0f) {
             j = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
             k = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            this.level.addParticle(ParticleTypes.BUBBLE, this.x + (double)j, h + 1.0f, this.z + (double)k, vec3.x, vec3.y - (double)(this.random.nextFloat() * 0.2f), vec3.z);
+            this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + (double)j, h + 1.0f, this.getZ() + (double)k, vec3.x, vec3.y - (double)(this.random.nextFloat() * 0.2f), vec3.z);
             ++i;
         }
         i = 0;
         while ((float)i < 1.0f + this.dimensions.width * 20.0f) {
             j = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
             k = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            this.level.addParticle(ParticleTypes.SPLASH, this.x + (double)j, h + 1.0f, this.z + (double)k, vec3.x, vec3.y, vec3.z);
+            this.level.addParticle(ParticleTypes.SPLASH, this.getX() + (double)j, h + 1.0f, this.getZ() + (double)k, vec3.x, vec3.y, vec3.z);
             ++i;
         }
     }
@@ -932,12 +952,12 @@ CommandSource {
     protected void doSprintParticleEffect() {
         int k;
         int j;
-        int i = Mth.floor(this.x);
-        BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.y - (double)0.2f), k = Mth.floor(this.z));
+        int i = Mth.floor(this.getX());
+        BlockPos blockPos = new BlockPos(i, j = Mth.floor(this.getY() - (double)0.2f), k = Mth.floor(this.getZ()));
         BlockState blockState = this.level.getBlockState(blockPos);
         if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
             Vec3 vec3 = this.getDeltaMovement();
-            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.x + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, this.y + 0.1, this.z + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, vec3.x * -4.0, 1.5, vec3.z * -4.0);
+            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, vec3.x * -4.0, 1.5, vec3.z * -4.0);
         }
     }
 
@@ -949,8 +969,8 @@ CommandSource {
         if (this.getVehicle() instanceof Boat) {
             return false;
         }
-        double d = this.y + (double)this.getEyeHeight();
-        BlockPos blockPos = new BlockPos(this.x, d, this.z);
+        double d = this.getEyeY();
+        BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
         if (bl && !this.level.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
             return false;
         }
@@ -984,7 +1004,7 @@ CommandSource {
 
     @Environment(value=EnvType.CLIENT)
     public int getLightColor() {
-        BlockPos blockPos = new BlockPos(this.x, this.y + (double)this.getEyeHeight(), this.z);
+        BlockPos blockPos = new BlockPos(this.getX(), this.getEyeY(), this.getZ());
         if (this.level.hasChunkAt(blockPos)) {
             return this.level.getLightColor(blockPos);
         }
@@ -992,9 +1012,9 @@ CommandSource {
     }
 
     public float getBrightness() {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.x, 0.0, this.z);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.getX(), 0.0, this.getZ());
         if (this.level.hasChunkAt(mutableBlockPos)) {
-            mutableBlockPos.setY(Mth.floor(this.y + (double)this.getEyeHeight()));
+            mutableBlockPos.setY(Mth.floor(this.getEyeY()));
             return this.level.getBrightness(mutableBlockPos);
         }
         return 0.0f;
@@ -1005,13 +1025,12 @@ CommandSource {
     }
 
     public void absMoveTo(double d, double e, double f, float g, float h) {
-        this.x = Mth.clamp(d, -3.0E7, 3.0E7);
-        this.y = e;
-        this.z = Mth.clamp(f, -3.0E7, 3.0E7);
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        this.setPos(this.x, this.y, this.z);
+        double i = Mth.clamp(d, -3.0E7, 3.0E7);
+        double j = Mth.clamp(f, -3.0E7, 3.0E7);
+        this.xo = i;
+        this.yo = e;
+        this.zo = j;
+        this.setPos(i, e, j);
         this.yRot = g % 360.0f;
         this.xRot = Mth.clamp(h, -90.0f, 90.0f) % 360.0f;
         this.yRotO = this.yRot;
@@ -1026,32 +1045,30 @@ CommandSource {
         this.setPosAndOldPos(d, e, f);
         this.yRot = g;
         this.xRot = h;
-        this.setPos(this.x, this.y, this.z);
+        this.refreshBoundingBox();
     }
 
     public void setPosAndOldPos(double d, double e, double f) {
-        this.x = d;
-        this.y = e;
-        this.z = f;
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
-        this.xOld = this.x;
-        this.yOld = this.y;
-        this.zOld = this.z;
+        this.setPosRaw(d, e, f);
+        this.xo = d;
+        this.yo = e;
+        this.zo = f;
+        this.xOld = d;
+        this.yOld = e;
+        this.zOld = f;
     }
 
     public float distanceTo(Entity entity) {
-        float f = (float)(this.x - entity.x);
-        float g = (float)(this.y - entity.y);
-        float h = (float)(this.z - entity.z);
+        float f = (float)(this.getX() - entity.getX());
+        float g = (float)(this.getY() - entity.getY());
+        float h = (float)(this.getZ() - entity.getZ());
         return Mth.sqrt(f * f + g * g + h * h);
     }
 
     public double distanceToSqr(double d, double e, double f) {
-        double g = this.x - d;
-        double h = this.y - e;
-        double i = this.z - f;
+        double g = this.getX() - d;
+        double h = this.getY() - e;
+        double i = this.getZ() - f;
         return g * g + h * h + i * i;
     }
 
@@ -1060,9 +1077,9 @@ CommandSource {
     }
 
     public double distanceToSqr(Vec3 vec3) {
-        double d = this.x - vec3.x;
-        double e = this.y - vec3.y;
-        double f = this.z - vec3.z;
+        double d = this.getX() - vec3.x;
+        double e = this.getY() - vec3.y;
+        double f = this.getZ() - vec3.z;
         return d * d + e * e + f * f;
     }
 
@@ -1070,15 +1087,15 @@ CommandSource {
     }
 
     public void push(Entity entity) {
+        double e;
         if (this.isPassengerOfSameVehicle(entity)) {
             return;
         }
         if (entity.noPhysics || this.noPhysics) {
             return;
         }
-        double d = entity.x - this.x;
-        double e = entity.z - this.z;
-        double f = Mth.absMax(d, e);
+        double d = entity.getX() - this.getX();
+        double f = Mth.absMax(d, e = entity.getZ() - this.getZ());
         if (f >= (double)0.01f) {
             f = Mth.sqrt(f);
             d /= f;
@@ -1157,11 +1174,11 @@ CommandSource {
 
     public Vec3 getEyePosition(float f) {
         if (f == 1.0f) {
-            return new Vec3(this.x, this.y + (double)this.getEyeHeight(), this.z);
+            return new Vec3(this.getX(), this.getEyeY(), this.getZ());
         }
-        double d = Mth.lerp((double)f, this.xo, this.x);
-        double e = Mth.lerp((double)f, this.yo, this.y) + (double)this.getEyeHeight();
-        double g = Mth.lerp((double)f, this.zo, this.z);
+        double d = Mth.lerp((double)f, this.xo, this.getX());
+        double e = Mth.lerp((double)f, this.yo, this.getY()) + (double)this.getEyeHeight();
+        double g = Mth.lerp((double)f, this.zo, this.getZ());
         return new Vec3(d, e, g);
     }
 
@@ -1188,9 +1205,9 @@ CommandSource {
 
     @Environment(value=EnvType.CLIENT)
     public boolean shouldRender(double d, double e, double f) {
-        double g = this.x - d;
-        double h = this.y - e;
-        double i = this.z - f;
+        double g = this.getX() - d;
+        double h = this.getY() - e;
+        double i = this.getZ() - f;
         double j = g * g + h * h + i * i;
         return this.shouldRenderAtSqrDistance(j);
     }
@@ -1224,7 +1241,7 @@ CommandSource {
     public CompoundTag saveWithoutId(CompoundTag compoundTag) {
         try {
             ListTag listTag;
-            compoundTag.put("Pos", this.newDoubleList(this.x, this.y, this.z));
+            compoundTag.put("Pos", this.newDoubleList(this.getX(), this.getY(), this.getZ()));
             Vec3 vec3 = this.getDeltaMovement();
             compoundTag.put("Motion", this.newDoubleList(vec3.x, vec3.y, vec3.z));
             compoundTag.put("Rotation", this.newFloatList(this.yRot, this.xRot));
@@ -1309,13 +1326,13 @@ CommandSource {
                 this.uuid = compoundTag.getUUID("UUID");
                 this.stringUUID = this.uuid.toString();
             }
-            if (!(Double.isFinite(this.x) && Double.isFinite(this.y) && Double.isFinite(this.z))) {
+            if (!(Double.isFinite(this.getX()) && Double.isFinite(this.getY()) && Double.isFinite(this.getZ()))) {
                 throw new IllegalStateException("Entity has invalid position");
             }
             if (!Double.isFinite(this.yRot) || !Double.isFinite(this.xRot)) {
                 throw new IllegalStateException("Entity has invalid rotation");
             }
-            this.setPos(this.x, this.y, this.z);
+            this.refreshBoundingBox();
             this.setRot(this.yRot, this.xRot);
             if (compoundTag.contains("CustomName", 8)) {
                 this.setCustomName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
@@ -1334,7 +1351,7 @@ CommandSource {
             }
             this.readAdditionalSaveData(compoundTag);
             if (this.repositionEntityAfterLoad()) {
-                this.setPos(this.x, this.y, this.z);
+                this.setPos(this.getX(), this.getY(), this.getZ());
             }
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Loading entity NBT");
@@ -1398,7 +1415,7 @@ CommandSource {
         if (this.level.isClientSide) {
             return null;
         }
-        ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y + (double)f, this.z, itemStack);
+        ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY() + (double)f, this.getZ(), itemStack);
         itemEntity.setDefaultPickUpDelay();
         this.level.addFreshEntity(itemEntity);
         return itemEntity;
@@ -1414,9 +1431,9 @@ CommandSource {
         }
         try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
             for (int i = 0; i < 8; ++i) {
-                int j = Mth.floor(this.y + (double)(((float)((i >> 0) % 2) - 0.5f) * 0.1f) + (double)this.eyeHeight);
-                int k = Mth.floor(this.x + (double)(((float)((i >> 1) % 2) - 0.5f) * this.dimensions.width * 0.8f));
-                int l = Mth.floor(this.z + (double)(((float)((i >> 2) % 2) - 0.5f) * this.dimensions.width * 0.8f));
+                int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5f) * 0.1f) + (double)this.eyeHeight);
+                int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5f) * this.dimensions.width * 0.8f));
+                int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * this.dimensions.width * 0.8f));
                 if (pooledMutableBlockPos.getX() == k && pooledMutableBlockPos.getY() == j && pooledMutableBlockPos.getZ() == l) continue;
                 pooledMutableBlockPos.set(k, j, l);
                 if (!this.level.getBlockState(pooledMutableBlockPos).isViewBlocking(this.level, pooledMutableBlockPos)) continue;
@@ -1449,7 +1466,7 @@ CommandSource {
         if (!this.hasPassenger(entity)) {
             return;
         }
-        entity.setPos(this.x, this.y + this.getRideHeight() + entity.getRidingHeight(), this.z);
+        entity.setPos(this.getX(), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ());
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -1575,8 +1592,8 @@ CommandSource {
             NetherPortalBlock cfr_ignored_0 = (NetherPortalBlock)Blocks.NETHER_PORTAL;
             BlockPattern.BlockPatternMatch blockPatternMatch = NetherPortalBlock.getPortalShape(this.level, this.portalEntranceBlock);
             double d = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? (double)blockPatternMatch.getFrontTopLeft().getZ() : (double)blockPatternMatch.getFrontTopLeft().getX();
-            double e = Math.abs(Mth.pct((blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? this.z : this.x) - (double)(blockPatternMatch.getForwards().getClockWise().getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 1 : 0), d, d - (double)blockPatternMatch.getWidth()));
-            double f = Mth.pct(this.y - 1.0, blockPatternMatch.getFrontTopLeft().getY(), blockPatternMatch.getFrontTopLeft().getY() - blockPatternMatch.getHeight());
+            double e = Math.abs(Mth.pct((blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? this.getZ() : this.getX()) - (double)(blockPatternMatch.getForwards().getClockWise().getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 1 : 0), d, d - (double)blockPatternMatch.getWidth()));
+            double f = Mth.pct(this.getY() - 1.0, blockPatternMatch.getFrontTopLeft().getY(), blockPatternMatch.getFrontTopLeft().getY() - blockPatternMatch.getHeight());
             this.portalEntranceOffset = new Vec3(e, f, 0.0);
             this.portalEntranceForwards = blockPatternMatch.getForwards();
         }
@@ -1851,6 +1868,10 @@ CommandSource {
             Entity.removeAction(component2);
             return component2;
         }
+        return this.getTypeName();
+    }
+
+    protected Component getTypeName() {
         return this.type.getDescription();
     }
 
@@ -1877,7 +1898,7 @@ CommandSource {
     }
 
     public String toString() {
-        return String.format(Locale.ROOT, "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]", this.getClass().getSimpleName(), this.getName().getContents(), this.id, this.level == null ? "~NULL~" : this.level.getLevelData().getLevelName(), this.x, this.y, this.z);
+        return String.format(Locale.ROOT, "%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]", this.getClass().getSimpleName(), this.getName().getContents(), this.id, this.level == null ? "~NULL~" : this.level.getLevelData().getLevelName(), this.getX(), this.getY(), this.getZ());
     }
 
     public boolean isInvulnerableTo(DamageSource damageSource) {
@@ -1893,7 +1914,7 @@ CommandSource {
     }
 
     public void copyPosition(Entity entity) {
-        this.moveTo(entity.x, entity.y, entity.z, entity.yRot, entity.xRot);
+        this.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
     }
 
     public void restoreFrom(Entity entity) {
@@ -1927,8 +1948,8 @@ CommandSource {
         } else if (dimensionType == DimensionType.THE_END) {
             blockPos = serverLevel2.getDimensionSpecificSpawn();
         } else {
-            double d = this.x;
-            double e = this.z;
+            double d = this.getX();
+            double e = this.getZ();
             double g = 8.0;
             if (dimensionType2 == DimensionType.OVERWORLD && dimensionType == DimensionType.NETHER) {
                 d /= 8.0;
@@ -1944,7 +1965,7 @@ CommandSource {
             d = Mth.clamp(d, h, j);
             e = Mth.clamp(e, i, k);
             Vec3 vec32 = this.getPortalEntranceOffset();
-            blockPos = new BlockPos(d, this.y, e);
+            blockPos = new BlockPos(d, this.getY(), e);
             BlockPattern.PortalInfo portalInfo = serverLevel2.getPortalForcer().findPortal(blockPos, vec3, this.getPortalEntranceForwards(), vec32.x, vec32.y, this instanceof Player);
             if (portalInfo == null) {
                 return null;
@@ -2001,8 +2022,8 @@ CommandSource {
         crashReportCategory.setDetail("Entity Type", () -> EntityType.getKey(this.getType()) + " (" + this.getClass().getCanonicalName() + ")");
         crashReportCategory.setDetail("Entity ID", this.id);
         crashReportCategory.setDetail("Entity Name", () -> this.getName().getString());
-        crashReportCategory.setDetail("Entity's Exact location", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", this.x, this.y, this.z));
-        crashReportCategory.setDetail("Entity's Block location", CrashReportCategory.formatLocation(Mth.floor(this.x), Mth.floor(this.y), Mth.floor(this.z)));
+        crashReportCategory.setDetail("Entity's Exact location", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", this.getX(), this.getY(), this.getZ()));
+        crashReportCategory.setDetail("Entity's Block location", CrashReportCategory.formatLocation(Mth.floor(this.getX()), Mth.floor(this.getY()), Mth.floor(this.getZ())));
         Vec3 vec3 = this.getDeltaMovement();
         crashReportCategory.setDetail("Entity's Momentum", String.format(Locale.ROOT, "%.2f, %.2f, %.2f", vec3.x, vec3.y, vec3.z));
         crashReportCategory.setDetail("Entity's Passengers", () -> this.getPassengers().toString());
@@ -2111,7 +2132,7 @@ CommandSource {
         this.eyeHeight = this.getEyeHeight(pose, entityDimensions2);
         if (entityDimensions2.width < entityDimensions.width) {
             double d = (double)entityDimensions2.width / 2.0;
-            this.setBoundingBox(new AABB(this.x - d, this.y, this.z - d, this.x + d, this.y + (double)entityDimensions2.height, this.z + d));
+            this.setBoundingBox(new AABB(this.getX() - d, this.getY(), this.getZ() - d, this.getX() + d, this.getY() + (double)entityDimensions2.height, this.getZ() + d));
             return;
         }
         AABB aABB = this.getBoundingBox();
@@ -2157,8 +2178,8 @@ CommandSource {
     protected AABB getBoundingBoxForPose(Pose pose) {
         EntityDimensions entityDimensions = this.getDimensions(pose);
         float f = entityDimensions.width / 2.0f;
-        Vec3 vec3 = new Vec3(this.x - (double)f, this.y, this.z - (double)f);
-        Vec3 vec32 = new Vec3(this.x + (double)f, this.y + (double)entityDimensions.height, this.z + (double)f);
+        Vec3 vec3 = new Vec3(this.getX() - (double)f, this.getY(), this.getZ() - (double)f);
+        Vec3 vec32 = new Vec3(this.getX() + (double)f, this.getY() + (double)entityDimensions.height, this.getZ() + (double)f);
         return new AABB(vec3, vec32);
     }
 
@@ -2192,7 +2213,7 @@ CommandSource {
     }
 
     public Vec3 getCommandSenderWorldPosition() {
-        return new Vec3(this.x, this.y, this.z);
+        return this.position();
     }
 
     public Level getCommandSenderWorld() {
@@ -2365,7 +2386,7 @@ CommandSource {
     }
 
     public CommandSourceStack createCommandSourceStack() {
-        return new CommandSourceStack(this, new Vec3(this.x, this.y, this.z), this.getRotationVector(), this.level instanceof ServerLevel ? (ServerLevel)this.level : null, this.getPermissionLevel(), this.getName().getString(), this.getDisplayName(), this.level.getServer(), this);
+        return new CommandSourceStack(this, this.position(), this.getRotationVector(), this.level instanceof ServerLevel ? (ServerLevel)this.level : null, this.getPermissionLevel(), this.getName().getString(), this.getDisplayName(), this.level.getServer(), this);
     }
 
     protected int getPermissionLevel() {
@@ -2486,6 +2507,52 @@ CommandSource {
 
     public void setDeltaMovement(double d, double e, double f) {
         this.setDeltaMovement(new Vec3(d, e, f));
+    }
+
+    public final double getX() {
+        return this.x;
+    }
+
+    public double getX(double d) {
+        return this.x + (double)this.getBbWidth() * d;
+    }
+
+    public double getRandomX(double d) {
+        return this.getX((2.0 * this.random.nextDouble() + 1.0) * d);
+    }
+
+    public final double getY() {
+        return this.y;
+    }
+
+    public double getY(double d) {
+        return this.y + (double)this.getBbHeight() * d;
+    }
+
+    public double getRandomY() {
+        return this.getY(this.random.nextDouble());
+    }
+
+    public double getEyeY() {
+        return this.y + (double)this.eyeHeight;
+    }
+
+    public final double getZ() {
+        return this.z;
+    }
+
+    public double getZ(double d) {
+        return this.z + (double)this.getBbWidth() * d;
+    }
+
+    public double getRandomZ(double d) {
+        return this.getZ((2.0 * this.random.nextDouble() + 1.0) * d);
+    }
+
+    public void setPosRaw(double d, double e, double f) {
+        this.x = d;
+        this.y = e;
+        this.z = f;
     }
 }
 

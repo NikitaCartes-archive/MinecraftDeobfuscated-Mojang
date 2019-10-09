@@ -34,7 +34,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
-        this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.x, serverPlayer.y, serverPlayer.z));
+        this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ()));
     }
 
     @Override

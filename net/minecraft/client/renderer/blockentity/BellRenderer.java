@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -34,26 +35,26 @@ extends BlockEntityRenderer<BellBlockEntity> {
     }
 
     @Override
-    public void render(BellBlockEntity bellBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(BellBlockEntity bellBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         float h = (float)bellBlockEntity.ticks + g;
-        float j = 0.0f;
         float k = 0.0f;
+        float l = 0.0f;
         if (bellBlockEntity.shaking) {
-            float l = Mth.sin(h / (float)Math.PI) / (4.0f + h / 3.0f);
+            float m = Mth.sin(h / (float)Math.PI) / (4.0f + h / 3.0f);
             if (bellBlockEntity.clickDirection == Direction.NORTH) {
-                j = -l;
+                k = -m;
             } else if (bellBlockEntity.clickDirection == Direction.SOUTH) {
-                j = l;
+                k = m;
             } else if (bellBlockEntity.clickDirection == Direction.EAST) {
-                k = -l;
+                l = -m;
             } else if (bellBlockEntity.clickDirection == Direction.WEST) {
-                k = l;
+                l = m;
             }
         }
-        this.bellBody.xRot = j;
-        this.bellBody.zRot = k;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
-        this.bellBody.render(poseStack, vertexConsumer, 0.0625f, i, this.getSprite(BELL_RESOURCE_LOCATION));
+        this.bellBody.xRot = k;
+        this.bellBody.zRot = l;
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        this.bellBody.render(poseStack, vertexConsumer, 0.0625f, i, j, this.getSprite(BELL_RESOURCE_LOCATION));
     }
 }
 

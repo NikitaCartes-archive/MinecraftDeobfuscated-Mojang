@@ -346,14 +346,14 @@ public class EntityRenderDispatcher {
             poseStack.pushPose();
             poseStack.translate(i, j, k);
             entityRenderer.render(entity, i, j, k, g, h, poseStack, multiBufferSource);
-            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (m = (float)((1.0 - (l = this.distanceToSqr(entity.x, entity.y, entity.z)) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
+            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (m = (float)((1.0 - (l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
                 EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
             }
             if (entity.displayFireAnimation()) {
                 this.renderFlame(poseStack, multiBufferSource, entity);
             }
             if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-                this.renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.LINES), entity, h);
+                this.renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
             }
             poseStack.popPose();
         } catch (Throwable throwable) {
@@ -373,14 +373,14 @@ public class EntityRenderDispatcher {
         float g = entity.getBbWidth() / 2.0f;
         this.renderBox(poseStack, vertexConsumer, entity, 1.0f, 1.0f, 1.0f);
         if (entity instanceof EnderDragon) {
-            double d = entity.x - Mth.lerp((double)f, entity.xOld, entity.x);
-            double e = entity.y - Mth.lerp((double)f, entity.yOld, entity.y);
-            double h = entity.z - Mth.lerp((double)f, entity.zOld, entity.z);
+            double d = entity.getX() - Mth.lerp((double)f, entity.xOld, entity.getX());
+            double e = entity.getY() - Mth.lerp((double)f, entity.yOld, entity.getY());
+            double h = entity.getZ() - Mth.lerp((double)f, entity.zOld, entity.getZ());
             for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
                 poseStack.pushPose();
-                double i = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.x);
-                double j = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.y);
-                double k = h + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.z);
+                double i = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());
+                double j = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.getY());
+                double k = h + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.getZ());
                 poseStack.translate(i, j, k);
                 this.renderBox(poseStack, vertexConsumer, enderDragonPart, 0.25f, 1.0f, 0.0f);
                 poseStack.popPose();
@@ -397,7 +397,7 @@ public class EntityRenderDispatcher {
     }
 
     private void renderBox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f, float g, float h) {
-        AABB aABB = entity.getBoundingBox().move(-entity.x, -entity.y, -entity.z);
+        AABB aABB = entity.getBoundingBox().move(-entity.getX(), -entity.getY(), -entity.getZ());
         LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB, f, g, h, 1.0f);
     }
 
@@ -411,12 +411,12 @@ public class EntityRenderDispatcher {
         float g = 0.5f;
         float h = 0.0f;
         float i = entity.getBbHeight() / f;
-        float j = (float)(entity.y - entity.getBoundingBox().minY);
-        poseStack.mulPose(Vector3f.YP.rotation(-this.playerRotY, true));
+        float j = 0.0f;
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.playerRotY));
         poseStack.translate(0.0, 0.0, -0.3f + (float)((int)i) * 0.02f);
         float k = 0.0f;
         int l = 0;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.CUTOUT);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
         Matrix4f matrix4f = poseStack.getPose();
         while (i > 0.0f) {
             TextureAtlasSprite textureAtlasSprite3 = l % 2 == 0 ? textureAtlasSprite : textureAtlasSprite2;
@@ -443,7 +443,7 @@ public class EntityRenderDispatcher {
     }
 
     private static void fireVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
-        vertexConsumer.vertex(matrix4f, f, g, h).color(255, 255, 255, 255).uv(i, j).uv2(240).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 
     private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {
@@ -452,9 +452,9 @@ public class EntityRenderDispatcher {
         if (entity instanceof Mob && (mob = (Mob)entity).isBaby()) {
             i *= 0.5f;
         }
-        double d = Mth.lerp((double)g, entity.xOld, entity.x);
-        double e = Mth.lerp((double)g, entity.yOld, entity.y);
-        double j = Mth.lerp((double)g, entity.zOld, entity.z);
+        double d = Mth.lerp((double)g, entity.xOld, entity.getX());
+        double e = Mth.lerp((double)g, entity.yOld, entity.getY());
+        double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
         int k = Mth.floor(d - (double)i);
         int l = Mth.floor(d + (double)i);
         int m = Mth.floor(e - (double)i);
@@ -462,12 +462,10 @@ public class EntityRenderDispatcher {
         int o = Mth.floor(j - (double)i);
         int p = Mth.floor(j + (double)i);
         Matrix4f matrix4f = poseStack.getPose();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(SHADOW_LOCATION, false, true, false, 0.1f, false, false));
-        OverlayTexture.setDefault(vertexConsumer);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(SHADOW_LOCATION));
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
             EntityRenderDispatcher.renderBlockShadow(matrix4f, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
         }
-        vertexConsumer.unsetDefaultOverlayCoords();
     }
 
     private static void renderBlockShadow(Matrix4f matrix4f, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h) {
@@ -511,7 +509,7 @@ public class EntityRenderDispatcher {
     }
 
     private static void shadowVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
-        vertexConsumer.vertex(matrix4f, g, h, i).color(1.0f, 1.0f, 1.0f, f).uv(j, k).uv2(0xF000F0).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, g, h, i).color(1.0f, 1.0f, 1.0f, f).uv(j, k).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 
     public void setLevel(@Nullable Level level) {

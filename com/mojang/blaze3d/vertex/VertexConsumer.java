@@ -14,7 +14,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.system.MemoryStack;
@@ -37,10 +36,6 @@ public interface VertexConsumer {
 
     public void endVertex();
 
-    public void defaultOverlayCoords(int var1, int var2);
-
-    public void unsetDefaultOverlayCoords();
-
     default public VertexConsumer color(float f, float g, float h, float i) {
         return this.color((int)(f * 255.0f), (int)(g * 255.0f), (int)(h * 255.0f), (int)(i * 255.0f));
     }
@@ -49,58 +44,54 @@ public interface VertexConsumer {
         return this.uv2(i & 0xFFFF, i >> 16 & 0xFFFF);
     }
 
-    default public void putBulkData(Matrix4f matrix4f, BakedQuad bakedQuad, float f, float g, float h, int i) {
-        this.putBulkData(matrix4f, bakedQuad, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, f, g, h, new int[]{i, i, i, i}, false);
+    default public VertexConsumer overlayCoords(int i) {
+        return this.overlayCoords(i & 0xFFFF, i >> 16 & 0xFFFF);
     }
 
-    default public void putBulkData(Matrix4f matrix4f, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, boolean bl) {
+    default public void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float f, float g, float h, int i, int j) {
+        this.putBulkData(matrix4f, matrix3f, bakedQuad, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, f, g, h, new int[]{i, i, i, i}, j, false);
+    }
+
+    default public void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
         int[] js = bakedQuad.getVertices();
         Vec3i vec3i = bakedQuad.getDirection().getNormal();
         Vector3f vector3f = new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-        Matrix3f matrix3f = new Matrix3f(matrix4f);
-        matrix3f.transpose();
-        float i = matrix3f.adjugateAndDet();
-        if (i < 1.0E-5f) {
-            LOGGER.warn("Could not invert matrix while baking vertex: " + matrix4f);
-        } else {
-            float j = matrix3f.determinant();
-            matrix3f.mul(Mth.fastInvCubeRoot(j));
-        }
         vector3f.transform(matrix3f);
-        int k = 8;
-        int l = js.length / 8;
+        int j = 8;
+        int k = js.length / 8;
         try (MemoryStack memoryStack = MemoryStack.stackPush();){
             ByteBuffer byteBuffer = memoryStack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
             IntBuffer intBuffer = byteBuffer.asIntBuffer();
-            for (int m = 0; m < l; ++m) {
+            for (int l = 0; l < k; ++l) {
                 byte d;
                 byte c;
                 byte b;
-                int q;
+                int p;
                 intBuffer.clear();
-                intBuffer.put(js, m * 8, 8);
-                float n = byteBuffer.getFloat(0);
-                float o = byteBuffer.getFloat(4);
-                float p = byteBuffer.getFloat(8);
+                intBuffer.put(js, l * 8, 8);
+                float m = byteBuffer.getFloat(0);
+                float n = byteBuffer.getFloat(4);
+                float o = byteBuffer.getFloat(8);
                 if (bl) {
-                    q = byteBuffer.get(12) & 0xFF;
-                    int r = byteBuffer.get(13) & 0xFF;
-                    int s = byteBuffer.get(14) & 0xFF;
-                    b = (byte)((float)q * fs[m] * f);
-                    c = (byte)((float)r * fs[m] * g);
-                    d = (byte)((float)s * fs[m] * h);
+                    p = byteBuffer.get(12) & 0xFF;
+                    int q = byteBuffer.get(13) & 0xFF;
+                    int r = byteBuffer.get(14) & 0xFF;
+                    b = (byte)((float)p * fs[l] * f);
+                    c = (byte)((float)q * fs[l] * g);
+                    d = (byte)((float)r * fs[l] * h);
                 } else {
-                    b = (byte)(255.0f * fs[m] * f);
-                    c = (byte)(255.0f * fs[m] * g);
-                    d = (byte)(255.0f * fs[m] * h);
+                    b = (byte)(255.0f * fs[l] * f);
+                    c = (byte)(255.0f * fs[l] * g);
+                    d = (byte)(255.0f * fs[l] * h);
                 }
-                q = is[m];
-                float t = byteBuffer.getFloat(16);
-                float u = byteBuffer.getFloat(20);
-                this.vertex(matrix4f, n, o, p);
+                p = is[l];
+                float s = byteBuffer.getFloat(16);
+                float t = byteBuffer.getFloat(20);
+                this.vertex(matrix4f, m, n, o);
                 this.color(b, c, d, 255);
-                this.uv(t, u);
-                this.uv2(q);
+                this.uv(s, t);
+                this.overlayCoords(i);
+                this.uv2(p);
                 this.normal(vector3f.x(), vector3f.y(), vector3f.z());
                 this.endVertex();
             }

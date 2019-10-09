@@ -8,12 +8,11 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.SpringConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 
 public class SpringFeature
 extends Feature<SpringConfiguration> {
@@ -23,28 +22,31 @@ extends Feature<SpringConfiguration> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SpringConfiguration springConfiguration) {
-        if (!Block.equalsStone(levelAccessor.getBlockState(blockPos.above()).getBlock())) {
+        if (!springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.above()).getBlock())) {
             return false;
         }
-        if (!Block.equalsStone(levelAccessor.getBlockState(blockPos.below()).getBlock())) {
+        if (springConfiguration.requiresBlockBelow && !springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.below()).getBlock())) {
             return false;
         }
         BlockState blockState = levelAccessor.getBlockState(blockPos);
-        if (!blockState.isAir() && !Block.equalsStone(blockState.getBlock())) {
+        if (!blockState.isAir() && !springConfiguration.validBlocks.contains(blockState.getBlock())) {
             return false;
         }
         int i = 0;
         int j = 0;
-        if (Block.equalsStone(levelAccessor.getBlockState(blockPos.west()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.west()).getBlock())) {
             ++j;
         }
-        if (Block.equalsStone(levelAccessor.getBlockState(blockPos.east()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.east()).getBlock())) {
             ++j;
         }
-        if (Block.equalsStone(levelAccessor.getBlockState(blockPos.north()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.north()).getBlock())) {
             ++j;
         }
-        if (Block.equalsStone(levelAccessor.getBlockState(blockPos.south()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.south()).getBlock())) {
+            ++j;
+        }
+        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.below()).getBlock())) {
             ++j;
         }
         int k = 0;
@@ -60,7 +62,10 @@ extends Feature<SpringConfiguration> {
         if (levelAccessor.isEmptyBlock(blockPos.south())) {
             ++k;
         }
-        if (j == 3 && k == 1) {
+        if (levelAccessor.isEmptyBlock(blockPos.below())) {
+            ++k;
+        }
+        if (j == springConfiguration.rockCount && k == springConfiguration.holeCount) {
             levelAccessor.setBlock(blockPos, springConfiguration.state.createLegacyBlock(), 2);
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, springConfiguration.state.getType(), 0);
             ++i;

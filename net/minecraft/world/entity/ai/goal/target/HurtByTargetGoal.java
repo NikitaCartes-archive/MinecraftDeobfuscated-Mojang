@@ -62,7 +62,7 @@ extends TargetGoal {
 
     protected void alertOthers() {
         double d = this.getFollowDistance();
-        List<?> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), new AABB(this.mob.x, this.mob.y, this.mob.z, this.mob.x + 1.0, this.mob.y + 1.0, this.mob.z + 1.0).inflate(d, 10.0, d));
+        List<?> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), new AABB(this.mob.getX(), this.mob.getY(), this.mob.getZ(), this.mob.getX() + 1.0, this.mob.getY() + 1.0, this.mob.getZ() + 1.0).inflate(d, 10.0, d));
         for (Mob mob : list) {
             if (this.mob == mob || mob.getTarget() != null || this.mob instanceof TamableAnimal && ((TamableAnimal)this.mob).getOwner() != ((TamableAnimal)mob).getOwner() || mob.isAlliedTo(this.mob.getLastHurtByMob())) continue;
             if (this.toIgnoreAlert != null) {

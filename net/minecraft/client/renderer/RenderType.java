@@ -5,9 +5,6 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -16,19 +13,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -39,337 +37,167 @@ import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class RenderType {
-    public static final RenderType SOLID = new RenderType("solid", DefaultVertexFormat.BLOCK, 7, 0x200000, true, () -> {
-        RenderSystem.enableTexture();
-        Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, true);
-        RenderSystem.enableCull();
-        RenderSystem.shadeModel(7425);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        RenderSystem.disableAlphaTest();
-        RenderSystem.disableBlend();
-        RenderSystem.depthFunc(515);
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-    }, () -> {
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-        RenderSystem.shadeModel(7424);
-    });
-    public static final RenderType CUTOUT_MIPPED = new RenderType("cutout_mipped", DefaultVertexFormat.BLOCK, 7, 131072, true, () -> {
-        Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, true);
-        RenderSystem.enableAlphaTest();
-        RenderSystem.alphaFunc(516, 0.5f);
-        RenderSystem.disableBlend();
-        RenderSystem.shadeModel(7425);
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-    }, () -> {
-        RenderSystem.disableAlphaTest();
-        RenderSystem.defaultAlphaFunc();
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-        RenderSystem.shadeModel(7424);
-    });
-    public static final RenderType CUTOUT = new RenderType("cutout", DefaultVertexFormat.BLOCK, 7, 131072, true, () -> {
-        CUTOUT_MIPPED.setupRenderState();
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-    }, () -> CUTOUT_MIPPED.clearRenderState());
-    public static final RenderType TRANSLUCENT = new RenderType("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, () -> {
-        Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-        Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.shadeModel(7425);
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-    }, () -> {
-        RenderSystem.disableBlend();
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-        RenderSystem.shadeModel(7424);
-    });
-    public static final RenderType TRANSLUCENT_NO_CRUMBLING = new RenderType("translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 256, false, TRANSLUCENT::setupRenderState, TRANSLUCENT::clearRenderState);
-    public static final RenderType LEASH = new RenderType("leash", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, () -> {
-        RenderSystem.disableTexture();
-        RenderSystem.disableCull();
-    }, () -> {
-        RenderSystem.enableTexture();
-        RenderSystem.enableCull();
-    });
-    public static final RenderType WATER_MASK = new RenderType("water_mask", DefaultVertexFormat.BLOCK, 7, 256, false, () -> {
-        RenderSystem.disableTexture();
-        RenderSystem.colorMask(false, false, false, false);
-    }, () -> {
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.enableTexture();
-    });
-    public static final RenderType GLINT = new RenderType("glint", DefaultVertexFormat.POSITION_TEX, 7, 256, false, () -> RenderType.setupGlint(8.0f), () -> RenderType.clearGlint());
-    public static final RenderType ENTITY_GLINT = new RenderType("entity_glint", DefaultVertexFormat.POSITION_TEX, 7, 256, false, () -> RenderType.setupGlint(0.16f), () -> RenderType.clearGlint());
-    public static final RenderType BEACON_BEAM = new RenderType("beacon_beam", DefaultVertexFormat.BLOCK, 7, 256, false, () -> {
-        RenderSystem.defaultAlphaFunc();
-        Minecraft.getInstance().getTextureManager().bind(BeaconRenderer.BEAM_LOCATION);
-        RenderSystem.texParameter(3553, 10242, 10497);
-        RenderSystem.texParameter(3553, 10243, 10497);
-        RenderSystem.disableFog();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.depthMask(false);
-    }, () -> {
-        RenderSystem.enableFog();
-        RenderSystem.depthMask(true);
-    });
-    public static final RenderType LIGHTNING = new RenderType("lightning", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, () -> {
-        RenderSystem.disableTexture();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableTexture();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-        RenderSystem.shadeModel(7425);
-        RenderSystem.disableAlphaTest();
-    }, () -> {
-        RenderSystem.enableTexture();
-        RenderSystem.depthMask(true);
-        RenderSystem.shadeModel(7424);
-        RenderSystem.enableAlphaTest();
-    });
-    public static final RenderType LINES = new RenderType("lines", DefaultVertexFormat.POSITION_COLOR, 1, 256, false, () -> {
-        RenderSystem.disableAlphaTest();
-        RenderSystem.lineWidth(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f));
-        RenderSystem.disableTexture();
-        RenderSystem.matrixMode(5889);
-        RenderSystem.pushMatrix();
-        RenderSystem.scalef(1.0f, 1.0f, 0.999f);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-    }, () -> {
-        RenderSystem.matrixMode(5889);
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(5888);
-        RenderSystem.enableTexture();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.disableBlend();
-    });
+public class RenderType
+extends RenderStateShard {
+    private static final RenderType SOLID = new CompositeRenderType("solid", DefaultVertexFormat.BLOCK, 7, 0x200000, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET_MIPPED).createCompositeState(false));
+    private static final RenderType CUTOUT_MIPPED = new CompositeRenderType("cutout_mipped", DefaultVertexFormat.BLOCK, 7, 131072, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET_MIPPED).setAlphaState(MIDWAY_ALPHA).createCompositeState(false));
+    private static final RenderType CUTOUT = new CompositeRenderType("cutout", DefaultVertexFormat.BLOCK, 7, 131072, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET).setAlphaState(MIDWAY_ALPHA).createCompositeState(false));
+    private static final RenderType TRANSLUCENT = new CompositeRenderType("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET).setTransparencyState(TRANSLUCENT_TRANSPARENCY).createCompositeState(false));
+    private static final RenderType TRANSLUCENT_NO_CRUMBLING = new RenderType("translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 256, false, true, TRANSLUCENT::setupRenderState, TRANSLUCENT::clearRenderState);
+    private static final RenderType LEASH = new CompositeRenderType("leash", DefaultVertexFormat.POSITION_COLOR, 7, 256, CompositeState.builder().setTextureState(NO_TEXTURE).setCullState(NO_CULL).createCompositeState(false));
+    private static final RenderType WATER_MASK = new CompositeRenderType("water_mask", DefaultVertexFormat.POSITION, 7, 256, CompositeState.builder().setTextureState(NO_TEXTURE).setWriteMaskState(DEPTH_WRITE).createCompositeState(false));
+    private static final RenderType GLINT = new CompositeRenderType("glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(GLINT_TEXTURING).createCompositeState(false));
+    private static final RenderType ENTITY_GLINT = new CompositeRenderType("entity_glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(ENTITY_GLINT_TEXTURING).createCompositeState(false));
+    private static final RenderType BEACON_BEAM = new CompositeRenderType("beacon_beam", DefaultVertexFormat.BLOCK, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(BeaconRenderer.BEAM_LOCATION, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setWriteMaskState(COLOR_WRITE).setFogState(NO_FOG).createCompositeState(false));
+    private static final RenderType LIGHTNING = new CompositeRenderType("lightning", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, true, CompositeState.builder().setWriteMaskState(COLOR_WRITE).setTransparencyState(LIGHTNING_TRANSPARENCY).setShadeModelState(SMOOTH_SHADE).createCompositeState(false));
     private static boolean renderCutout;
     private static final Map<Block, RenderType> TYPE_BY_BLOCK;
     private static final Map<Fluid, RenderType> TYPE_BY_FLUID;
-    private final String name;
     private final VertexFormat format;
     private final int mode;
     private final int bufferSize;
-    private final Runnable setupState;
-    private final Runnable clearState;
     private final boolean affectsCrumbling;
+    private final boolean sortOnUpload;
 
-    public static RenderType NEW_ENTITY(ResourceLocation resourceLocation) {
-        return RenderType.NEW_ENTITY(resourceLocation, false, true, false);
+    public static RenderType solid() {
+        return SOLID;
     }
 
-    public static RenderType NEW_ENTITY(ResourceLocation resourceLocation, boolean bl, boolean bl2, boolean bl3) {
-        return RenderType.NEW_ENTITY(resourceLocation, bl, bl2, bl3, 0.1f, false, true);
+    public static RenderType cutoutMipped() {
+        return CUTOUT_MIPPED;
     }
 
-    public static RenderType NEW_ENTITY(ResourceLocation resourceLocation, boolean bl, boolean bl2, boolean bl3, float f, boolean bl4, boolean bl5) {
-        return new StatefullRenderType<EntityState>("new_entity", DefaultVertexFormat.NEW_ENTITY, 256, new EntityState(resourceLocation, bl, bl2, bl3, f, bl4, bl5), false, entityState -> {
-            RenderSystem.disableCull();
-            RenderSystem.enableRescaleNormal();
-            RenderSystem.shadeModel(((EntityState)entityState).smoothShading ? 7425 : 7424);
-            Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-            Minecraft.getInstance().gameRenderer.overlayTexture().setupOverlayColor();
-            Minecraft.getInstance().getTextureManager().bind(((EntityState)entityState).texture);
-            RenderSystem.texParameter(3553, 10241, 9728);
-            RenderSystem.texParameter(3553, 10240, 9728);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.enableDepthTest();
-            if (((EntityState)entityState).forceTranslucent) {
-                RenderSystem.depthMask(false);
-                RenderSystem.enableBlend();
-                RenderSystem.blendColor(1.0f, 1.0f, 1.0f, 0.15f);
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-            }
-            if (((EntityState)entityState).alphaCutoff <= 0.0f) {
-                RenderSystem.disableAlphaTest();
-            } else {
-                RenderSystem.enableAlphaTest();
-                RenderSystem.alphaFunc(516, ((EntityState)entityState).alphaCutoff);
-            }
-            if (((EntityState)entityState).lighting) {
-                Lighting.turnBackOn();
-            }
-            if (((EntityState)entityState).equalDepth) {
-                RenderSystem.depthFunc(514);
-            }
-        }, entityState -> {
-            RenderSystem.shadeModel(7424);
-            Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-            Minecraft.getInstance().gameRenderer.overlayTexture().teardownOverlayColor();
-            RenderSystem.enableCull();
-            RenderSystem.cullFace(GlStateManager.CullFace.BACK);
-            if (((EntityState)entityState).forceTranslucent) {
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.blendColor(1.0f, 1.0f, 1.0f, 1.0f);
-                RenderSystem.depthMask(true);
-            }
-            if (((EntityState)entityState).lighting) {
-                Lighting.turnOff();
-            }
-            if (((EntityState)entityState).equalDepth) {
-                RenderSystem.depthFunc(515);
-            }
-            RenderSystem.disableAlphaTest();
-            RenderSystem.defaultAlphaFunc();
-        }){
-
-            @Override
-            public Optional<ResourceLocation> outlineTexture() {
-                return ((EntityState)this.state()).affectsOutline ? Optional.of(((EntityState)this.state()).texture) : Optional.empty();
-            }
-        };
+    public static RenderType cutout() {
+        return CUTOUT;
     }
 
-    public static RenderType EYES(ResourceLocation resourceLocation2) {
-        return new StatefullRenderType<ResourceLocation>("eyes", DefaultVertexFormat.NEW_ENTITY, 256, resourceLocation2, false, resourceLocation -> {
-            Minecraft.getInstance().getTextureManager().bind((ResourceLocation)resourceLocation);
-            RenderSystem.enableBlend();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-            RenderSystem.depthMask(false);
-            FogRenderer.resetFogColor(true);
-            RenderSystem.enableDepthTest();
-        }, resourceLocation -> {
-            RenderSystem.depthMask(true);
-            RenderSystem.disableBlend();
-            RenderSystem.enableAlphaTest();
-            FogRenderer.resetFogColor(false);
-            RenderSystem.defaultBlendFunc();
-        });
+    public static RenderType translucent() {
+        return TRANSLUCENT;
     }
 
-    public static RenderType POWER_SWIRL(ResourceLocation resourceLocation, float f, float g) {
-        RenderType renderType = RenderType.NEW_ENTITY(resourceLocation);
-        return new StatefullRenderType<SwirlState>("power_swirl", DefaultVertexFormat.NEW_ENTITY, 256, new SwirlState(resourceLocation, f, g), false, swirlState -> {
-            renderType.setupRenderState();
-            RenderSystem.matrixMode(5890);
-            RenderSystem.pushMatrix();
-            RenderSystem.loadIdentity();
-            RenderSystem.translatef(((SwirlState)swirlState).uOffset, ((SwirlState)swirlState).vOffset, 0.0f);
-            RenderSystem.matrixMode(5888);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-            FogRenderer.resetFogColor(true);
-        }, swirlState -> {
-            renderType.clearRenderState();
-            FogRenderer.resetFogColor(false);
-            RenderSystem.matrixMode(5890);
-            RenderSystem.popMatrix();
-            RenderSystem.matrixMode(5888);
-            RenderSystem.disableBlend();
-            RenderSystem.depthMask(true);
-        });
+    public static RenderType translucentNoCrumbling() {
+        return TRANSLUCENT_NO_CRUMBLING;
     }
 
-    public static RenderType OUTLINE(ResourceLocation resourceLocation2) {
-        return new StatefullRenderType<ResourceLocation>("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 256, resourceLocation2, false, resourceLocation -> {
-            Minecraft.getInstance().getTextureManager().bind((ResourceLocation)resourceLocation);
-            RenderSystem.disableCull();
-            RenderSystem.depthFunc(519);
-            RenderSystem.disableFog();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.defaultAlphaFunc();
-            RenderSystem.disableBlend();
-            RenderSystem.setupOutline();
-            Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false);
-        }, resourceLocation -> {
-            RenderSystem.enableCull();
-            RenderSystem.depthFunc(515);
-            RenderSystem.disableAlphaTest();
-            RenderSystem.enableFog();
-            RenderSystem.teardownOutline();
-            Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-        });
+    public static RenderType entitySolid(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
     }
 
-    public static RenderType CRUMBLING(int i) {
-        return new StatefullRenderType<Integer>("crumbling", DefaultVertexFormat.BLOCK, 256, Integer.valueOf(i), false, integer -> {
-            Minecraft.getInstance().getTextureManager().bind(ModelBakery.BREAKING_LOCATIONS.get((int)integer));
-            RenderSystem.polygonOffset(-1.0f, -10.0f);
-            RenderSystem.enablePolygonOffset();
-            RenderSystem.defaultAlphaFunc();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.enableBlend();
-            RenderSystem.depthMask(false);
-            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        }, integer -> {
-            RenderSystem.disableAlphaTest();
-            RenderSystem.polygonOffset(0.0f, 0.0f);
-            RenderSystem.disablePolygonOffset();
-            RenderSystem.disableBlend();
-            RenderSystem.depthMask(true);
-        });
+    public static RenderType entityCutout(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
     }
 
-    public static RenderType TEXT(ResourceLocation resourceLocation2) {
-        return new StatefullRenderType<ResourceLocation>("text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, 256, resourceLocation2, false, resourceLocation -> {
-            Minecraft.getInstance().getTextureManager().bind((ResourceLocation)resourceLocation);
-            RenderSystem.enableAlphaTest();
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
-        }, resourceLocation -> Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer());
+    public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
     }
 
-    public static RenderType TEXT_SEE_THROUGH(ResourceLocation resourceLocation2) {
-        RenderType renderType = RenderType.TEXT(resourceLocation2);
-        return new StatefullRenderType<ResourceLocation>("text_see_through", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, 256, resourceLocation2, false, resourceLocation -> {
-            renderType.setupRenderState();
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
-        }, resourceLocation -> {
-            renderType.clearRenderState();
-            RenderSystem.enableDepthTest();
-            RenderSystem.depthMask(true);
-        });
+    public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
     }
 
-    public static RenderType PORTAL(int i) {
-        return new StatefullRenderType<Integer>("portal", DefaultVertexFormat.POSITION_COLOR, 256, Integer.valueOf(i), false, integer -> {
-            RenderSystem.enableBlend();
-            if (integer >= 2) {
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE.value, GlStateManager.DestFactor.ONE.value);
-                Minecraft.getInstance().getTextureManager().bind(TheEndPortalRenderer.END_PORTAL_LOCATION);
-                FogRenderer.resetFogColor(true);
-            } else {
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value);
-                Minecraft.getInstance().getTextureManager().bind(TheEndPortalRenderer.END_SKY_LOCATION);
-            }
-            RenderSystem.matrixMode(5890);
-            RenderSystem.pushMatrix();
-            RenderSystem.loadIdentity();
-            RenderSystem.translatef(0.5f, 0.5f, 0.0f);
-            RenderSystem.scalef(0.5f, 0.5f, 1.0f);
-            RenderSystem.translatef(17.0f / (float)integer.intValue(), (2.0f + (float)integer.intValue() / 1.5f) * ((float)(Util.getMillis() % 800000L) / 800000.0f), 0.0f);
-            RenderSystem.rotatef(((float)(integer * integer) * 4321.0f + (float)integer.intValue() * 9.0f) * 2.0f, 0.0f, 0.0f, 1.0f);
-            RenderSystem.scalef(4.5f - (float)integer.intValue() / 4.0f, 4.5f - (float)integer.intValue() / 4.0f, 1.0f);
-            RenderSystem.mulTextureByProjModelView();
-            RenderSystem.matrixMode(5888);
-            RenderSystem.setupEndPortalTexGen();
-        }, integer -> {
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.matrixMode(5890);
-            RenderSystem.popMatrix();
-            RenderSystem.matrixMode(5888);
-            RenderSystem.clearTexGen();
-            FogRenderer.resetFogColor(false);
-        });
+    public static RenderType entityForceTranslucent(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(FORCED_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_force_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
     }
 
-    public RenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, Runnable runnable, Runnable runnable2) {
-        this.name = string;
+    public static RenderType entitySmoothCutout(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setAlphaState(MIDWAY_ALPHA).setDiffuseLightingState(DIFFUSE_LIGHTING).setShadeModelState(SMOOTH_SHADE).setCullState(NO_CULL).setLightmapState(LIGHTMAP).createCompositeState(true);
+        return new CompositeRenderType("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+    }
+
+    public static RenderType entityDecal(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setDepthTestState(EQUAL_DEPTH_TEST).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(false);
+        return new CompositeRenderType("entity_decal", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+    }
+
+    public static RenderType entityNoOutline(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(false);
+        return new CompositeRenderType("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
+    }
+
+    public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setAlphaState(new RenderStateShard.AlphaStateShard(f)).setCullState(NO_CULL).createCompositeState(true);
+        return new CompositeRenderType("entity_alpha", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+    }
+
+    public static RenderType eyes(ResourceLocation resourceLocation) {
+        RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
+        return new CompositeRenderType("eyes", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, CompositeState.builder().setTextureState(textureStateShard).setTransparencyState(ADDITIVE_TRANSPARENCY).setWriteMaskState(COLOR_WRITE).setFogState(BLACK_FOG).createCompositeState(false));
+    }
+
+    public static RenderType powerSwirl(ResourceLocation resourceLocation, float f, float g) {
+        return new CompositeRenderType("power_swirl", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTexturingState(new RenderStateShard.SwirlTexturingStateShard(f, g)).setFogState(BLACK_FOG).setTransparencyState(ADDITIVE_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(false));
+    }
+
+    public static RenderType leash() {
+        return LEASH;
+    }
+
+    public static RenderType waterMask() {
+        return WATER_MASK;
+    }
+
+    public static RenderType outline(ResourceLocation resourceLocation) {
+        return new CompositeRenderType("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(NO_CULL).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(false));
+    }
+
+    public static RenderType glint() {
+        return GLINT;
+    }
+
+    public static RenderType entityGlint() {
+        return ENTITY_GLINT;
+    }
+
+    public static RenderType crumbling(int i) {
+        RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(ModelBakery.BREAKING_LOCATIONS.get(i), false, false);
+        return new CompositeRenderType("crumbling", DefaultVertexFormat.BLOCK, 7, 256, false, true, CompositeState.builder().setTextureState(textureStateShard).setAlphaState(DEFAULT_ALPHA).setTransparencyState(CRUMBLING_TRANSPARENCY).setWriteMaskState(COLOR_WRITE).setLayeringState(POLYGON_OFFSET_LAYERING).createCompositeState(false));
+    }
+
+    public static RenderType text(ResourceLocation resourceLocation) {
+        return new CompositeRenderType("text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setAlphaState(DEFAULT_ALPHA).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLightmapState(LIGHTMAP).createCompositeState(false));
+    }
+
+    public static RenderType textSeeThrough(ResourceLocation resourceLocation) {
+        return new CompositeRenderType("text_see_through", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setAlphaState(DEFAULT_ALPHA).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLightmapState(LIGHTMAP).setDepthTestState(NO_DEPTH_TEST).setWriteMaskState(COLOR_WRITE).createCompositeState(false));
+    }
+
+    public static RenderType beaconBeam() {
+        return BEACON_BEAM;
+    }
+
+    public static RenderType lightning() {
+        return LIGHTNING;
+    }
+
+    public static RenderType endPortal(int i) {
+        RenderStateShard.TextureStateShard textureStateShard;
+        RenderStateShard.TransparencyStateShard transparencyStateShard;
+        if (i <= 1) {
+            transparencyStateShard = TRANSLUCENT_TRANSPARENCY;
+            textureStateShard = new RenderStateShard.TextureStateShard(TheEndPortalRenderer.END_SKY_LOCATION, false, false);
+        } else {
+            transparencyStateShard = ADDITIVE_TRANSPARENCY;
+            textureStateShard = new RenderStateShard.TextureStateShard(TheEndPortalRenderer.END_PORTAL_LOCATION, false, false);
+        }
+        return new CompositeRenderType("end_portal", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, true, CompositeState.builder().setTransparencyState(transparencyStateShard).setTextureState(textureStateShard).setTexturingState(new RenderStateShard.PortalTexturingStateShard(i)).setFogState(BLACK_FOG).createCompositeState(false));
+    }
+
+    public static RenderType lines() {
+        return new CompositeRenderType("lines", DefaultVertexFormat.POSITION_COLOR, 1, 256, CompositeState.builder().setLineState(new RenderStateShard.LineStateShard(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f))).setLayeringState(PROJECTION_LAYERING).setTransparencyState(TRANSLUCENT_TRANSPARENCY).createCompositeState(false));
+    }
+
+    public RenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {
+        super(string, runnable, runnable2);
         this.format = vertexFormat;
         this.mode = i;
         this.bufferSize = j;
-        this.setupState = runnable;
-        this.clearState = runnable2;
         this.affectsCrumbling = bl;
+        this.sortOnUpload = bl2;
     }
 
     public static void setFancy(boolean bl) {
@@ -390,16 +218,36 @@ public class RenderType {
         return this.name;
     }
 
-    public static RenderType getRenderLayer(BlockState blockState) {
+    public static RenderType getChunkRenderType(BlockState blockState) {
         Block block = blockState.getBlock();
         if (block instanceof LeavesBlock) {
-            return renderCutout ? CUTOUT_MIPPED : SOLID;
+            return renderCutout ? RenderType.cutoutMipped() : RenderType.solid();
         }
         RenderType renderType = TYPE_BY_BLOCK.get(block);
         if (renderType != null) {
             return renderType;
         }
-        return SOLID;
+        return RenderType.solid();
+    }
+
+    public static RenderType getRenderType(BlockState blockState) {
+        RenderType renderType = RenderType.getChunkRenderType(blockState);
+        if (renderType == RenderType.translucent()) {
+            return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+        }
+        if (renderType == RenderType.cutout() || renderType == RenderType.cutoutMipped()) {
+            return RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
+        }
+        return RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
+    }
+
+    public static RenderType getRenderType(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        if (item instanceof BlockItem) {
+            Block block = ((BlockItem)item).getBlock();
+            return RenderType.getRenderType(block.defaultBlockState());
+        }
+        return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
     }
 
     public static RenderType getRenderLayer(FluidState fluidState) {
@@ -407,23 +255,15 @@ public class RenderType {
         if (renderType != null) {
             return renderType;
         }
-        return SOLID;
+        return RenderType.solid();
     }
 
     public static List<RenderType> chunkBufferLayers() {
-        return ImmutableList.of(SOLID, CUTOUT_MIPPED, CUTOUT, TRANSLUCENT);
+        return ImmutableList.of(RenderType.solid(), RenderType.cutoutMipped(), RenderType.cutout(), RenderType.translucent());
     }
 
     public int bufferSize() {
         return this.bufferSize;
-    }
-
-    public void setupRenderState() {
-        this.setupState.run();
-    }
-
-    public void clearRenderState() {
-        this.clearState.run();
     }
 
     public VertexFormat format() {
@@ -440,54 +280,6 @@ public class RenderType {
 
     public boolean affectsCrumbling() {
         return this.affectsCrumbling;
-    }
-
-    public boolean equals(@Nullable Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || this.getClass() != object.getClass()) {
-            return false;
-        }
-        RenderType renderType = (RenderType)object;
-        return this.name.equals(renderType.name);
-    }
-
-    public int hashCode() {
-        return this.name.hashCode();
-    }
-
-    private static void setupGlint(float f) {
-        RenderSystem.enableTexture();
-        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        textureManager.bind(ItemRenderer.ENCHANT_GLINT_LOCATION);
-        RenderSystem.texParameter(3553, 10241, 9728);
-        RenderSystem.texParameter(3553, 10240, 9728);
-        RenderSystem.texParameter(3553, 10242, 10497);
-        RenderSystem.texParameter(3553, 10243, 10497);
-        RenderSystem.depthMask(false);
-        RenderSystem.depthFunc(514);
-        RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
-        RenderSystem.matrixMode(5890);
-        RenderSystem.pushMatrix();
-        RenderSystem.loadIdentity();
-        long l = Util.getMillis() * 8L;
-        float g = (float)(l % 110000L) / 110000.0f;
-        float h = (float)(l % 30000L) / 30000.0f;
-        RenderSystem.translatef(-g, h, 0.0f);
-        RenderSystem.rotatef(10.0f, 0.0f, 0.0f, 1.0f);
-        RenderSystem.scalef(f, f, f);
-    }
-
-    private static void clearGlint() {
-        RenderSystem.popMatrix();
-        RenderSystem.matrixMode(5888);
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.depthFunc(515);
-        RenderSystem.depthMask(true);
     }
 
     static {
@@ -704,6 +496,7 @@ public class RenderType {
             hashMap.put(Blocks.RED_STAINED_GLASS_PANE, TRANSLUCENT);
             hashMap.put(Blocks.BLACK_STAINED_GLASS_PANE, TRANSLUCENT);
             hashMap.put(Blocks.SLIME_BLOCK, TRANSLUCENT);
+            hashMap.put(Blocks.HONEY_BLOCK, TRANSLUCENT);
             hashMap.put(Blocks.FROSTED_ICE, TRANSLUCENT);
             hashMap.put(Blocks.BUBBLE_COLUMN, TRANSLUCENT);
         });
@@ -714,81 +507,28 @@ public class RenderType {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class EntityState {
-        private final ResourceLocation texture;
-        private final boolean forceTranslucent;
-        private final boolean lighting;
-        private final boolean smoothShading;
-        private final float alphaCutoff;
-        private final boolean equalDepth;
-        private final boolean affectsOutline;
-
-        public EntityState(ResourceLocation resourceLocation, boolean bl, boolean bl2, boolean bl3, float f, boolean bl4, boolean bl5) {
-            this.texture = resourceLocation;
-            this.forceTranslucent = bl;
-            this.lighting = bl2;
-            this.smoothShading = bl3;
-            this.alphaCutoff = f;
-            this.equalDepth = bl4;
-            this.affectsOutline = bl5;
-        }
-
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            EntityState entityState = (EntityState)object;
-            return this.forceTranslucent == entityState.forceTranslucent && this.lighting == entityState.lighting && this.texture.equals(entityState.texture);
-        }
-
-        public int hashCode() {
-            return Objects.hash(this.texture, this.forceTranslucent, this.lighting);
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static final class SwirlState {
-        private final ResourceLocation texture;
-        private final float uOffset;
-        private final float vOffset;
-
-        public SwirlState(ResourceLocation resourceLocation, float f, float g) {
-            this.texture = resourceLocation;
-            this.uOffset = f;
-            this.vOffset = g;
-        }
-
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-            if (object == null || this.getClass() != object.getClass()) {
-                return false;
-            }
-            SwirlState swirlState = (SwirlState)object;
-            return Float.compare(swirlState.uOffset, this.uOffset) == 0 && Float.compare(swirlState.vOffset, this.vOffset) == 0 && this.texture.equals(swirlState.texture);
-        }
-
-        public int hashCode() {
-            return Objects.hash(this.texture, Float.valueOf(this.uOffset), Float.valueOf(this.vOffset));
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static class StatefullRenderType<S>
+    static class CompositeRenderType
     extends RenderType {
-        private final S state;
+        private final CompositeState state;
+        private int hashCode;
+        private boolean hashed = false;
 
-        protected final S state() {
-            return this.state;
+        public CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, CompositeState compositeState) {
+            this(string, vertexFormat, i, j, false, false, compositeState);
         }
 
-        public StatefullRenderType(String string, VertexFormat vertexFormat, int i, S object, boolean bl, Consumer<S> consumer, Consumer<S> consumer2) {
-            super(string, vertexFormat, 7, i, bl, () -> consumer.accept(object), () -> consumer2.accept(object));
-            this.state = object;
+        public CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, CompositeState compositeState) {
+            super(string, vertexFormat, i, j, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
+            this.state = compositeState;
+        }
+
+        @Override
+        public Optional<ResourceLocation> outlineTexture() {
+            return this.state().affectsOutline ? this.state().textureState.texture() : Optional.empty();
+        }
+
+        protected final CompositeState state() {
+            return this.state;
         }
 
         @Override
@@ -799,13 +539,178 @@ public class RenderType {
             if (this.getClass() != object.getClass()) {
                 return false;
             }
-            StatefullRenderType statefullRenderType = (StatefullRenderType)object;
-            return this.state.equals(statefullRenderType.state);
+            CompositeRenderType compositeRenderType = (CompositeRenderType)object;
+            return this.state.equals(compositeRenderType.state);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(super.hashCode(), this.state);
+            if (!this.hashed) {
+                this.hashed = true;
+                this.hashCode = Objects.hash(super.hashCode(), this.state);
+            }
+            return this.hashCode;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static final class CompositeState {
+        private final RenderStateShard.TextureStateShard textureState;
+        private final RenderStateShard.TransparencyStateShard transparencyState;
+        private final RenderStateShard.DiffuseLightingStateShard diffuseLightingState;
+        private final RenderStateShard.ShadeModelStateShard shadeModelState;
+        private final RenderStateShard.AlphaStateShard alphaState;
+        private final RenderStateShard.DepthTestStateShard depthTestState;
+        private final RenderStateShard.CullStateShard cullState;
+        private final RenderStateShard.LightmapStateShard lightmapState;
+        private final RenderStateShard.OverlayStateShard overlayState;
+        private final RenderStateShard.FogStateShard fogState;
+        private final RenderStateShard.LayeringStateShard layeringState;
+        private final RenderStateShard.OutputStateShard outputState;
+        private final RenderStateShard.TexturingStateShard texturingState;
+        private final RenderStateShard.WriteMaskStateShard writeMaskState;
+        private final RenderStateShard.LineStateShard lineState;
+        private final boolean affectsOutline;
+        private final ImmutableList<RenderStateShard> states;
+
+        private CompositeState(RenderStateShard.TextureStateShard textureStateShard, RenderStateShard.TransparencyStateShard transparencyStateShard, RenderStateShard.DiffuseLightingStateShard diffuseLightingStateShard, RenderStateShard.ShadeModelStateShard shadeModelStateShard, RenderStateShard.AlphaStateShard alphaStateShard, RenderStateShard.DepthTestStateShard depthTestStateShard, RenderStateShard.CullStateShard cullStateShard, RenderStateShard.LightmapStateShard lightmapStateShard, RenderStateShard.OverlayStateShard overlayStateShard, RenderStateShard.FogStateShard fogStateShard, RenderStateShard.LayeringStateShard layeringStateShard, RenderStateShard.OutputStateShard outputStateShard, RenderStateShard.TexturingStateShard texturingStateShard, RenderStateShard.WriteMaskStateShard writeMaskStateShard, RenderStateShard.LineStateShard lineStateShard, boolean bl) {
+            this.textureState = textureStateShard;
+            this.transparencyState = transparencyStateShard;
+            this.diffuseLightingState = diffuseLightingStateShard;
+            this.shadeModelState = shadeModelStateShard;
+            this.alphaState = alphaStateShard;
+            this.depthTestState = depthTestStateShard;
+            this.cullState = cullStateShard;
+            this.lightmapState = lightmapStateShard;
+            this.overlayState = overlayStateShard;
+            this.fogState = fogStateShard;
+            this.layeringState = layeringStateShard;
+            this.outputState = outputStateShard;
+            this.texturingState = texturingStateShard;
+            this.writeMaskState = writeMaskStateShard;
+            this.lineState = lineStateShard;
+            this.affectsOutline = bl;
+            this.states = ImmutableList.of(this.textureState, this.transparencyState, this.diffuseLightingState, this.shadeModelState, this.alphaState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.fogState, this.layeringState, this.outputState, new RenderStateShard[]{this.texturingState, this.writeMaskState, this.lineState});
+        }
+
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || this.getClass() != object.getClass()) {
+                return false;
+            }
+            CompositeState compositeState = (CompositeState)object;
+            return this.affectsOutline == compositeState.affectsOutline && this.states.equals(compositeState.states);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.states, this.affectsOutline);
+        }
+
+        public static CompositeStateBuilder builder() {
+            return new CompositeStateBuilder();
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public static class CompositeStateBuilder {
+            private RenderStateShard.TextureStateShard textureState = RenderStateShard.NO_TEXTURE;
+            private RenderStateShard.TransparencyStateShard transparencyState = RenderStateShard.NO_TRANSPARENCY;
+            private RenderStateShard.DiffuseLightingStateShard diffuseLightingState = RenderStateShard.NO_DIFFUSE_LIGHTING;
+            private RenderStateShard.ShadeModelStateShard shadeModelState = RenderStateShard.FLAT_SHADE;
+            private RenderStateShard.AlphaStateShard alphaState = RenderStateShard.NO_ALPHA;
+            private RenderStateShard.DepthTestStateShard depthTestState = RenderStateShard.LEQUAL_DEPTH_TEST;
+            private RenderStateShard.CullStateShard cullState = RenderStateShard.CULL;
+            private RenderStateShard.LightmapStateShard lightmapState = RenderStateShard.NO_LIGHTMAP;
+            private RenderStateShard.OverlayStateShard overlayState = RenderStateShard.NO_OVERLAY;
+            private RenderStateShard.FogStateShard fogState = RenderStateShard.FOG;
+            private RenderStateShard.LayeringStateShard layeringState = RenderStateShard.NO_LAYERING;
+            private RenderStateShard.OutputStateShard outputState = RenderStateShard.MAIN_TARGET;
+            private RenderStateShard.TexturingStateShard texturingState = RenderStateShard.DEFAULT_TEXTURING;
+            private RenderStateShard.WriteMaskStateShard writeMaskState = RenderStateShard.COLOR_DEPTH_WRITE;
+            private RenderStateShard.LineStateShard lineState = RenderStateShard.DEFAULT_LINE;
+
+            private CompositeStateBuilder() {
+            }
+
+            public CompositeStateBuilder setTextureState(RenderStateShard.TextureStateShard textureStateShard) {
+                this.textureState = textureStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setTransparencyState(RenderStateShard.TransparencyStateShard transparencyStateShard) {
+                this.transparencyState = transparencyStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setDiffuseLightingState(RenderStateShard.DiffuseLightingStateShard diffuseLightingStateShard) {
+                this.diffuseLightingState = diffuseLightingStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setShadeModelState(RenderStateShard.ShadeModelStateShard shadeModelStateShard) {
+                this.shadeModelState = shadeModelStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setAlphaState(RenderStateShard.AlphaStateShard alphaStateShard) {
+                this.alphaState = alphaStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setDepthTestState(RenderStateShard.DepthTestStateShard depthTestStateShard) {
+                this.depthTestState = depthTestStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setCullState(RenderStateShard.CullStateShard cullStateShard) {
+                this.cullState = cullStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setLightmapState(RenderStateShard.LightmapStateShard lightmapStateShard) {
+                this.lightmapState = lightmapStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setOverlayState(RenderStateShard.OverlayStateShard overlayStateShard) {
+                this.overlayState = overlayStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setFogState(RenderStateShard.FogStateShard fogStateShard) {
+                this.fogState = fogStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setLayeringState(RenderStateShard.LayeringStateShard layeringStateShard) {
+                this.layeringState = layeringStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setOutputState(RenderStateShard.OutputStateShard outputStateShard) {
+                this.outputState = outputStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setTexturingState(RenderStateShard.TexturingStateShard texturingStateShard) {
+                this.texturingState = texturingStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setWriteMaskState(RenderStateShard.WriteMaskStateShard writeMaskStateShard) {
+                this.writeMaskState = writeMaskStateShard;
+                return this;
+            }
+
+            public CompositeStateBuilder setLineState(RenderStateShard.LineStateShard lineStateShard) {
+                this.lineState = lineStateShard;
+                return this;
+            }
+
+            public CompositeState createCompositeState(boolean bl) {
+                return new CompositeState(this.textureState, this.transparencyState, this.diffuseLightingState, this.shadeModelState, this.alphaState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.fogState, this.layeringState, this.outputState, this.texturingState, this.writeMaskState, this.lineState, bl);
+            }
         }
     }
 }

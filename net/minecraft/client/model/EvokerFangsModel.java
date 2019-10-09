@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -19,6 +20,7 @@ extends ListModel<T> {
     private final ModelPart lowerJaw;
 
     public EvokerFangsModel() {
+        super(RenderType::entityCutoutNoCull);
         this.base.setPos(-5.0f, 22.0f, -5.0f);
         this.base.addBox(0.0f, 0.0f, 0.0f, 10.0f, 12.0f, 10.0f);
         this.upperJaw = new ModelPart(this, 40, 0);

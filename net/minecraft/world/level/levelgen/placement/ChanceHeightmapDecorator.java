@@ -12,22 +12,22 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.placement.DecoratorChance;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class ChanceHeightmapDecorator
-extends FeatureDecorator<DecoratorChance> {
-    public ChanceHeightmapDecorator(Function<Dynamic<?>, ? extends DecoratorChance> function) {
+extends FeatureDecorator<ChanceDecoratorConfiguration> {
+    public ChanceHeightmapDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
         super(function);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorChance decoratorChance, BlockPos blockPos) {
-        if (random.nextFloat() < 1.0f / (float)decoratorChance.chance) {
-            int i = random.nextInt(16);
-            int j = random.nextInt(16);
-            BlockPos blockPos2 = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(i, 0, j));
-            return Stream.of(blockPos2);
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos) {
+        if (random.nextFloat() < 1.0f / (float)chanceDecoratorConfiguration.chance) {
+            int i = random.nextInt(16) + blockPos.getX();
+            int j = random.nextInt(16) + blockPos.getZ();
+            int k = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, i, j);
+            return Stream.of(new BlockPos(i, k, j));
         }
         return Stream.empty();
     }

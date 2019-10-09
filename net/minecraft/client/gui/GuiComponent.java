@@ -141,14 +141,15 @@ public abstract class GuiComponent {
     }
 
     protected static void innerBlit(int i, int j, int k, int l, int m, float f, float g, float h, float n) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(i, l, m).uv(f, n).endVertex();
         bufferBuilder.vertex(j, l, m).uv(g, n).endVertex();
         bufferBuilder.vertex(j, k, m).uv(g, h).endVertex();
         bufferBuilder.vertex(i, k, m).uv(f, h).endVertex();
-        tesselator.end();
+        bufferBuilder.end();
+        RenderSystem.enableAlphaTest();
+        BufferUploader.end(bufferBuilder);
     }
 
     public int getBlitOffset() {

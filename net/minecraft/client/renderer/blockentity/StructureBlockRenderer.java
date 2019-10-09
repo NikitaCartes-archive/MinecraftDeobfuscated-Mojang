@@ -28,13 +28,13 @@ extends BlockEntityRenderer<StructureBlockEntity> {
     }
 
     @Override
-    public void render(StructureBlockEntity structureBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(StructureBlockEntity structureBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+        double s;
         double r;
         double q;
         double p;
         double o;
         double n;
-        double m;
         if (!Minecraft.getInstance().player.canUseGameMasterBlocks() && !Minecraft.getInstance().player.isSpectator()) {
             return;
         }
@@ -47,60 +47,60 @@ extends BlockEntityRenderer<StructureBlockEntity> {
             return;
         }
         double h = blockPos.getX();
-        double j = blockPos.getZ();
-        double k = blockPos.getY();
-        double l = k + (double)blockPos2.getY();
+        double k = blockPos.getZ();
+        double l = blockPos.getY();
+        double m = l + (double)blockPos2.getY();
         switch (structureBlockEntity.getMirror()) {
             case LEFT_RIGHT: {
-                m = blockPos2.getX();
-                n = -blockPos2.getZ();
+                n = blockPos2.getX();
+                o = -blockPos2.getZ();
                 break;
             }
             case FRONT_BACK: {
-                m = -blockPos2.getX();
-                n = blockPos2.getZ();
+                n = -blockPos2.getX();
+                o = blockPos2.getZ();
                 break;
             }
             default: {
-                m = blockPos2.getX();
-                n = blockPos2.getZ();
+                n = blockPos2.getX();
+                o = blockPos2.getZ();
             }
         }
         switch (structureBlockEntity.getRotation()) {
             case CLOCKWISE_90: {
-                o = n < 0.0 ? h : h + 1.0;
-                p = m < 0.0 ? j + 1.0 : j;
-                q = o - n;
-                r = p + m;
+                p = o < 0.0 ? h : h + 1.0;
+                q = n < 0.0 ? k + 1.0 : k;
+                r = p - o;
+                s = q + n;
                 break;
             }
             case CLOCKWISE_180: {
-                o = m < 0.0 ? h : h + 1.0;
-                p = n < 0.0 ? j : j + 1.0;
-                q = o - m;
+                p = n < 0.0 ? h : h + 1.0;
+                q = o < 0.0 ? k : k + 1.0;
                 r = p - n;
+                s = q - o;
                 break;
             }
             case COUNTERCLOCKWISE_90: {
-                o = n < 0.0 ? h + 1.0 : h;
-                p = m < 0.0 ? j : j + 1.0;
-                q = o + n;
-                r = p - m;
+                p = o < 0.0 ? h + 1.0 : h;
+                q = n < 0.0 ? k : k + 1.0;
+                r = p + o;
+                s = q - n;
                 break;
             }
             default: {
-                o = m < 0.0 ? h + 1.0 : h;
-                p = n < 0.0 ? j + 1.0 : j;
-                q = o + m;
+                p = n < 0.0 ? h + 1.0 : h;
+                q = o < 0.0 ? k + 1.0 : k;
                 r = p + n;
+                s = q + o;
             }
         }
-        float s = 1.0f;
-        float t = 0.9f;
-        float u = 0.5f;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LINES);
+        float t = 1.0f;
+        float u = 0.9f;
+        float v = 0.5f;
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
         if (structureBlockEntity.getMode() == StructureMode.SAVE || structureBlockEntity.getShowBoundingBox()) {
-            LevelRenderer.renderLineBox(poseStack, vertexConsumer, o, k, p, q, l, r, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
+            LevelRenderer.renderLineBox(poseStack, vertexConsumer, p, l, q, r, m, s, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
         }
         if (structureBlockEntity.getMode() == StructureMode.SAVE && structureBlockEntity.getShowAir()) {
             this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, true, poseStack);

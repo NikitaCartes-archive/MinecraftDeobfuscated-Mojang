@@ -72,9 +72,9 @@ extends Goal {
                     return false;
                 }
             } else {
-                this.px = this.player.x;
-                this.py = this.player.y;
-                this.pz = this.player.z;
+                this.px = this.player.getX();
+                this.py = this.player.getY();
+                this.pz = this.player.getZ();
             }
             this.pRotX = this.player.xRot;
             this.pRotY = this.player.yRot;
@@ -88,9 +88,9 @@ extends Goal {
 
     @Override
     public void start() {
-        this.px = this.player.x;
-        this.py = this.player.y;
-        this.pz = this.player.z;
+        this.px = this.player.getX();
+        this.py = this.player.getY();
+        this.pz = this.player.getZ();
         this.isRunning = true;
     }
 

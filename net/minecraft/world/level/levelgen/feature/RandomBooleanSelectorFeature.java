@@ -11,21 +11,21 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.RandomBooleanFeatureConfig;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 
 public class RandomBooleanSelectorFeature
-extends Feature<RandomBooleanFeatureConfig> {
-    public RandomBooleanSelectorFeature(Function<Dynamic<?>, ? extends RandomBooleanFeatureConfig> function) {
+extends Feature<RandomBooleanFeatureConfiguration> {
+    public RandomBooleanSelectorFeature(Function<Dynamic<?>, ? extends RandomBooleanFeatureConfiguration> function) {
         super(function);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, RandomBooleanFeatureConfig randomBooleanFeatureConfig) {
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, RandomBooleanFeatureConfiguration randomBooleanFeatureConfiguration) {
         boolean bl = random.nextBoolean();
         if (bl) {
-            return randomBooleanFeatureConfig.featureTrue.place(levelAccessor, chunkGenerator, random, blockPos);
+            return randomBooleanFeatureConfiguration.featureTrue.place(levelAccessor, chunkGenerator, random, blockPos);
         }
-        return randomBooleanFeatureConfig.featureFalse.place(levelAccessor, chunkGenerator, random, blockPos);
+        return randomBooleanFeatureConfiguration.featureFalse.place(levelAccessor, chunkGenerator, random, blockPos);
     }
 }
 

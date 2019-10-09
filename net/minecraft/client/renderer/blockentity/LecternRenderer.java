@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +29,7 @@ extends BlockEntityRenderer<LecternBlockEntity> {
     }
 
     @Override
-    public void render(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         BlockState blockState = lecternBlockEntity.getBlockState();
         if (!blockState.getValue(LecternBlock.HAS_BOOK).booleanValue()) {
             return;
@@ -36,12 +37,12 @@ extends BlockEntityRenderer<LecternBlockEntity> {
         poseStack.pushPose();
         poseStack.translate(0.5, 1.0625, 0.5);
         float h = blockState.getValue(LecternBlock.FACING).getClockWise().toYRot();
-        poseStack.mulPose(Vector3f.YP.rotation(-h, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(67.5f, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(67.5f));
         poseStack.translate(0.0, -0.125, 0.0);
         this.bookModel.setupAnim(0.0f, 0.1f, 0.9f, 1.2f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.SOLID);
-        this.bookModel.render(poseStack, vertexConsumer, 0.0625f, i, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
         poseStack.popPose();
     }
 }

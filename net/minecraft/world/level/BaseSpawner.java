@@ -121,7 +121,7 @@ public abstract class BaseSpawner {
                     this.delay();
                     return;
                 }
-                entity2.moveTo(entity2.x, entity2.y, entity2.z, level.random.nextFloat() * 360.0f, 0.0f);
+                entity2.moveTo(entity2.getX(), entity2.getY(), entity2.getZ(), level.random.nextFloat() * 360.0f, 0.0f);
                 if (entity2 instanceof Mob) {
                     Mob mob = (Mob)entity2;
                     if (!mob.checkSpawnRules(level, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(level)) continue;

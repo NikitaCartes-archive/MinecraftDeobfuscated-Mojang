@@ -26,9 +26,9 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundTeleportEntityPacket(Entity entity) {
         this.id = entity.getId();
-        this.x = entity.x;
-        this.y = entity.y;
-        this.z = entity.z;
+        this.x = entity.getX();
+        this.y = entity.getY();
+        this.z = entity.getZ();
         this.yRot = (byte)(entity.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(entity.xRot * 256.0f / 360.0f);
         this.onGround = entity.onGround;

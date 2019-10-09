@@ -65,7 +65,7 @@ extends Goal {
 
     @Override
     public void tick() {
-        double d = this.mob.distanceToSqr(this.target.x, this.target.getBoundingBox().minY, this.target.z);
+        double d = this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
         boolean bl = this.mob.getSensing().canSee(this.target);
         this.seeTime = bl ? ++this.seeTime : 0;
         if (d > (double)this.attackRadiusSqr || this.seeTime < 5) {

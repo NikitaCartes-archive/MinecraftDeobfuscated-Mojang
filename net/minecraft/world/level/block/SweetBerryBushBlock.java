@@ -76,9 +76,9 @@ implements BonemealableBlock {
             return;
         }
         entity.makeStuckInBlock(blockState, new Vec3(0.8f, 0.75, 0.8f));
-        if (!(level.isClientSide || blockState.getValue(AGE) <= 0 || entity.xOld == entity.x && entity.zOld == entity.z)) {
-            double d = Math.abs(entity.x - entity.xOld);
-            double e = Math.abs(entity.z - entity.zOld);
+        if (!(level.isClientSide || blockState.getValue(AGE) <= 0 || entity.xOld == entity.getX() && entity.zOld == entity.getZ())) {
+            double d = Math.abs(entity.getX() - entity.xOld);
+            double e = Math.abs(entity.getZ() - entity.zOld);
             if (d >= (double)0.003f || e >= (double)0.003f) {
                 entity.hurt(DamageSource.SWEET_BERRY_BUSH, 1.0f);
             }

@@ -48,14 +48,14 @@ implements Comparable<KeyMapping> {
     public static void set(InputConstants.Key key, boolean bl) {
         KeyMapping keyMapping = MAP.get(key);
         if (keyMapping != null) {
-            keyMapping.isDown = bl;
+            keyMapping.setDown(bl);
         }
     }
 
     public static void setAll() {
         for (KeyMapping keyMapping : ALL.values()) {
             if (keyMapping.key.getType() != InputConstants.Type.KEYSYM || keyMapping.key.getValue() == InputConstants.UNKNOWN.getValue()) continue;
-            keyMapping.isDown = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keyMapping.key.getValue());
+            keyMapping.setDown(InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keyMapping.key.getValue()));
         }
     }
 
@@ -103,7 +103,7 @@ implements Comparable<KeyMapping> {
 
     private void release() {
         this.clickCount = 0;
-        this.isDown = false;
+        this.setDown(false);
     }
 
     public String getName() {
@@ -180,6 +180,10 @@ implements Comparable<KeyMapping> {
 
     public String saveString() {
         return this.key.getName();
+    }
+
+    public void setDown(boolean bl) {
+        this.isDown = bl;
     }
 
     @Override

@@ -99,7 +99,8 @@ extends Animal {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g) {
+        return false;
     }
 
     @Override
@@ -168,7 +169,7 @@ extends Animal {
         float g = Mth.cos(this.yBodyRot * ((float)Math.PI / 180));
         float h = 0.1f;
         float i = 0.0f;
-        entity.setPos(this.x + (double)(0.1f * f), this.y + (double)(this.getBbHeight() * 0.5f) + entity.getRidingHeight() + 0.0, this.z - (double)(0.1f * g));
+        entity.setPos(this.getX() + (double)(0.1f * f), this.getY(0.5) + entity.getRidingHeight() + 0.0, this.getZ() - (double)(0.1f * g));
         if (entity instanceof LivingEntity) {
             ((LivingEntity)entity).yBodyRot = this.yBodyRot;
         }

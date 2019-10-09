@@ -14,16 +14,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
-public abstract class BlockPileFeature
-extends Feature<NoneFeatureConfiguration> {
-    public BlockPileFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
+public class BlockPileFeature
+extends Feature<BlockPileConfiguration> {
+    public BlockPileFeature(Function<Dynamic<?>, ? extends BlockPileConfiguration> function) {
         super(function);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration) {
         if (blockPos.getY() < 5) {
             return false;
         }
@@ -33,11 +33,11 @@ extends Feature<NoneFeatureConfiguration> {
             int l;
             int k = blockPos.getX() - blockPos2.getX();
             if ((float)(k * k + (l = blockPos.getZ() - blockPos2.getZ()) * l) <= random.nextFloat() * 10.0f - random.nextFloat() * 6.0f) {
-                this.tryPlaceBlock(levelAccessor, blockPos2, random);
+                this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
                 continue;
             }
             if (!((double)random.nextFloat() < 0.031)) continue;
-            this.tryPlaceBlock(levelAccessor, blockPos2, random);
+            this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
         }
         return true;
     }
@@ -51,12 +51,10 @@ extends Feature<NoneFeatureConfiguration> {
         return blockState.isFaceSturdy(levelAccessor, blockPos2, Direction.UP);
     }
 
-    private void tryPlaceBlock(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
+    private void tryPlaceBlock(LevelAccessor levelAccessor, BlockPos blockPos, Random random, BlockPileConfiguration blockPileConfiguration) {
         if (levelAccessor.isEmptyBlock(blockPos) && this.mayPlaceOn(levelAccessor, blockPos, random)) {
-            levelAccessor.setBlock(blockPos, this.getBlockState(levelAccessor), 4);
+            levelAccessor.setBlock(blockPos, blockPileConfiguration.stateProvider.getState(random, blockPos), 4);
         }
     }
-
-    protected abstract BlockState getBlockState(LevelAccessor var1);
 }
 

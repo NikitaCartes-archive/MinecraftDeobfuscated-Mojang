@@ -9,22 +9,21 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTreeGrower {
     @Nullable
-    protected abstract AbstractTreeFeature<NoneFeatureConfiguration> getFeature(Random var1);
+    protected abstract ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random var1);
 
     public boolean growTree(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-        AbstractTreeFeature<NoneFeatureConfiguration> abstractTreeFeature = this.getFeature(random);
-        if (abstractTreeFeature == null) {
+        ConfiguredFeature<SmallTreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random);
+        if (configuredFeature == null) {
             return false;
         }
         levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-        if (abstractTreeFeature.place(levelAccessor, chunkGenerator, random, blockPos, FeatureConfiguration.NONE, false)) {
+        if (configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos)) {
             return true;
         }
         levelAccessor.setBlock(blockPos, blockState, 4);

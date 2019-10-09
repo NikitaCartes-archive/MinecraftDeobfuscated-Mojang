@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ParrotModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ParrotRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -39,10 +38,8 @@ extends RenderLayer<T, PlayerModel<T>> {
         EntityType.byString(compoundTag.getString("id")).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> {
             poseStack.pushPose();
             poseStack.translate(bl ? (double)0.4f : (double)-0.4f, player.isCrouching() ? (double)-1.3f : -1.5, 0.0);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]));
-            OverlayTexture.setDefault(vertexConsumer);
-            this.model.renderOnShoulder(poseStack, vertexConsumer, i, f, g, j, k, l, player.tickCount);
-            vertexConsumer.unsetDefaultOverlayCoords();
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]));
+            this.model.renderOnShoulder(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, j, k, l, player.tickCount);
             poseStack.popPose();
         });
     }

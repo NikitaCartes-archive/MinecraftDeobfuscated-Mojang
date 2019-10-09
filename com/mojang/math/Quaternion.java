@@ -12,13 +12,12 @@ import net.minecraft.util.Mth;
 public final class Quaternion {
     private final float[] values;
 
-    public Quaternion() {
-        this.values = new float[4];
-        this.values[3] = 1.0f;
+    private Quaternion(float[] fs) {
+        this.values = fs;
     }
 
     public Quaternion(float f, float g, float h, float i) {
-        this.values = new float[4];
+        this(new float[4]);
         this.values[0] = f;
         this.values[1] = g;
         this.values[2] = h;
@@ -153,6 +152,11 @@ public final class Quaternion {
             this.values[2] = 0.0f;
             this.values[3] = 0.0f;
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Quaternion copy() {
+        return new Quaternion((float[])this.values.clone());
     }
 }
 

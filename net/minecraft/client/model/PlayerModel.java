@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -32,7 +33,7 @@ extends HumanoidModel<T> {
     private final boolean slim;
 
     public PlayerModel(float f, boolean bl) {
-        super(f, 0.0f, 64, 64);
+        super(RenderType::entityTranslucent, f, 0.0f, 64, 64);
         this.slim = bl;
         this.ear = new ModelPart(this, 24, 0);
         this.ear.addBox(-3.0f, -6.0f, -1.0f, 6.0f, 6.0f, 1.0f, f);
@@ -82,15 +83,15 @@ extends HumanoidModel<T> {
         return Iterables.concat(super.bodyParts(), ImmutableList.of(this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket));
     }
 
-    public void renderEars(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i) {
+    public void renderEars(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j) {
         this.ear.copyFrom(this.head);
         this.ear.x = 0.0f;
         this.ear.y = 0.0f;
-        this.ear.render(poseStack, vertexConsumer, f, i, null);
+        this.ear.render(poseStack, vertexConsumer, f, i, j, null);
     }
 
-    public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i) {
-        this.cloak.render(poseStack, vertexConsumer, f, i, null);
+    public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j) {
+        this.cloak.render(poseStack, vertexConsumer, f, i, j, null);
     }
 
     @Override

@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.CanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.UnderwaterCaveWorldCarver;
-import net.minecraft.world.level.levelgen.feature.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
 public class UnderwaterCanyonWorldCarver
 extends CanyonWorldCarver {

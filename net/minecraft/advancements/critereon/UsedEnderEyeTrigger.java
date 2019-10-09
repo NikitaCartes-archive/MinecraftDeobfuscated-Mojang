@@ -29,8 +29,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     public void trigger(ServerPlayer serverPlayer, BlockPos blockPos) {
-        double d = serverPlayer.x - (double)blockPos.getX();
-        double e = serverPlayer.z - (double)blockPos.getZ();
+        double d = serverPlayer.getX() - (double)blockPos.getX();
+        double e = serverPlayer.getZ() - (double)blockPos.getZ();
         double f = d * d + e * e;
         this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(f));
     }

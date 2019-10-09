@@ -37,8 +37,7 @@ extends RandomStrollGoal {
         SectionPos sectionPos = SectionPos.of(blockPos);
         SectionPos sectionPos2 = BehaviorUtils.findSectionClosestToVillage(serverLevel, sectionPos, 2);
         if (sectionPos2 != sectionPos) {
-            BlockPos blockPos2 = sectionPos2.center();
-            return RandomPos.getPosTowards(this.mob, 10, 7, new Vec3(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
+            return RandomPos.getPosTowards(this.mob, 10, 7, new Vec3(sectionPos2.center()));
         }
         return null;
     }

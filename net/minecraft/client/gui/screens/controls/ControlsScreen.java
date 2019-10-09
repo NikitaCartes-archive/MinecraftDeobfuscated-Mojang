@@ -12,6 +12,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.MouseSettingsScreen;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.ControlList;
 import net.minecraft.client.resources.language.I18n;
@@ -19,29 +20,24 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class ControlsScreen
-extends Screen {
-    private static final Option[] OPTIONS = new Option[]{Option.INVERT_MOUSE, Option.SENSITIVITY, Option.TOUCHSCREEN, Option.AUTO_JUMP};
-    private final Screen lastScreen;
-    private final Options options;
+extends OptionsSubScreen {
     public KeyMapping selectedKey;
     public long lastKeySelection;
     private ControlList controlList;
     private Button resetButton;
 
     public ControlsScreen(Screen screen, Options options) {
-        super(new TranslatableComponent("controls.title", new Object[0]));
-        this.lastScreen = screen;
-        this.options = options;
+        super(screen, options, new TranslatableComponent("controls.title", new Object[0]));
     }
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 155, 18, 150, 20, I18n.get("options.mouse_settings", new Object[0]), button -> this.minecraft.setScreen(new MouseSettingsScreen(this))));
-        this.addButton(Option.AUTO_JUMP.createButton(this.minecraft.options, this.width / 2 - 155 + 160, 18, 150));
+        this.addButton(new Button(this.width / 2 - 155, 18, 150, 20, I18n.get("options.mouse_settings", new Object[0]), button -> this.minecraft.setScreen(new MouseSettingsScreen(this, this.options))));
+        this.addButton(Option.AUTO_JUMP.createButton(this.options, this.width / 2 - 155 + 160, 18, 150));
         this.controlList = new ControlList(this, this.minecraft);
         this.children.add(this.controlList);
         this.resetButton = this.addButton(new Button(this.width / 2 - 155, this.height - 29, 150, 20, I18n.get("controls.resetAll", new Object[0]), button -> {
-            for (KeyMapping keyMapping : this.minecraft.options.keyMappings) {
+            for (KeyMapping keyMapping : this.options.keyMappings) {
                 keyMapping.setKey(keyMapping.getDefaultKey());
             }
             KeyMapping.resetMapping();

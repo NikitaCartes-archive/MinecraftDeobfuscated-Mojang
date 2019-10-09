@@ -29,14 +29,14 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
     }
 
     @Override
-    public void render(BeaconBlockEntity beaconBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(BeaconBlockEntity beaconBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         long l = beaconBlockEntity.getLevel().getGameTime();
         List<BeaconBlockEntity.BeaconBeamSection> list = beaconBlockEntity.getBeamSections();
-        int j = 0;
-        for (int k = 0; k < list.size(); ++k) {
-            BeaconBlockEntity.BeaconBeamSection beaconBeamSection = list.get(k);
-            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, g, l, j, k == list.size() - 1 ? 1024 : beaconBeamSection.getHeight(), beaconBeamSection.getColor());
-            j += beaconBeamSection.getHeight();
+        int k = 0;
+        for (int m = 0; m < list.size(); ++m) {
+            BeaconBlockEntity.BeaconBeamSection beaconBeamSection = list.get(m);
+            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, g, l, k, m == list.size() - 1 ? 1024 : beaconBeamSection.getHeight(), beaconBeamSection.getColor());
+            k += beaconBeamSection.getHeight();
         }
     }
 
@@ -55,7 +55,7 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         float r = fs[1];
         float s = fs[2];
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(n * 2.25f - 45.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(n * 2.25f - 45.0f));
         float t = 0.0f;
         float u = h;
         float v = h;
@@ -68,10 +68,7 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         float ac = 1.0f;
         float ad = -1.0f + p;
         float ae = (float)j * g * (0.5f / h) + ad;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(resourceLocation));
-        OverlayTexture.setDefault(vertexConsumer);
-        BeaconRenderer.renderPart(poseStack, vertexConsumer, q, r, s, 1.0f, i, m, 0.0f, u, v, 0.0f, x, 0.0f, 0.0f, aa, 0.0f, 1.0f, ae, ad);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        BeaconRenderer.renderPart(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation)), q, r, s, 1.0f, i, m, 0.0f, u, v, 0.0f, x, 0.0f, 0.0f, aa, 0.0f, 1.0f, ae, ad);
         poseStack.popPose();
         t = -k;
         u = -k;
@@ -85,7 +82,7 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
         ac = 1.0f;
         ad = -1.0f + p;
         ae = (float)j * g + ad;
-        BeaconRenderer.renderPart(poseStack, multiBufferSource.getBuffer(RenderType.BEACON_BEAM), q, r, s, 0.125f, i, m, t, u, v, w, x, y, z, aa, 0.0f, 1.0f, ae, ad);
+        BeaconRenderer.renderPart(poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam()), q, r, s, 0.125f, i, m, t, u, v, w, x, y, z, aa, 0.0f, 1.0f, ae, ad);
         poseStack.popPose();
     }
 
@@ -105,7 +102,7 @@ extends BlockEntityRenderer<BeaconBlockEntity> {
     }
 
     private static void addVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j, float k, float l, float m, float n) {
-        vertexConsumer.vertex(matrix4f, k, j, l).color(f, g, h, i).uv(m, n).uv2(0xF000F0).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, k, j, l).color(f, g, h, i).uv(m, n).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 
     @Override

@@ -39,15 +39,15 @@ extends WalkNodeEvaluator {
         BlockPathTypes blockPathTypes;
         int i;
         if (this.canFloat() && this.mob.isInWater()) {
-            i = Mth.floor(this.mob.getBoundingBox().minY);
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.x, (double)i, this.mob.z);
+            i = Mth.floor(this.mob.getY());
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
             Block block = this.level.getBlockState(mutableBlockPos).getBlock();
             while (block == Blocks.WATER) {
-                mutableBlockPos.set(this.mob.x, (double)(++i), this.mob.z);
+                mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
                 block = this.level.getBlockState(mutableBlockPos).getBlock();
             }
         } else {
-            i = Mth.floor(this.mob.getBoundingBox().minY + 0.5);
+            i = Mth.floor(this.mob.getY() + 0.5);
         }
         if (this.mob.getPathfindingMalus(blockPathTypes = this.getBlockPathType(this.mob, (blockPos = new BlockPos(this.mob)).getX(), i, blockPos.getZ())) < 0.0f) {
             HashSet<BlockPos> set = Sets.newHashSet();
@@ -232,13 +232,13 @@ extends WalkNodeEvaluator {
 
     @Override
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-        BlockPathTypes blockPathTypes = this.getBlockPathTypeRaw(blockGetter, i, j, k);
+        BlockPathTypes blockPathTypes = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j, k);
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-            BlockPathTypes blockPathTypes2 = this.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+            BlockPathTypes blockPathTypes2 = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
             blockPathTypes = blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block == Blocks.CAMPFIRE ? BlockPathTypes.DAMAGE_FIRE : (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS ? BlockPathTypes.DAMAGE_CACTUS : (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER ? BlockPathTypes.DAMAGE_OTHER : (blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE)));
         }
-        blockPathTypes = this.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        blockPathTypes = FlyNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
         return blockPathTypes;
     }
 

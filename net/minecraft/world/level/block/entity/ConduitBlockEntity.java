@@ -178,7 +178,7 @@ implements TickableBlockEntity {
             this.destroyTarget = null;
         }
         if (this.destroyTarget != null) {
-            this.level.playSound(null, this.destroyTarget.x, this.destroyTarget.y, this.destroyTarget.z, SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.BLOCKS, 1.0f, 1.0f);
+            this.level.playSound(null, this.destroyTarget.getX(), this.destroyTarget.getY(), this.destroyTarget.getZ(), SoundEvents.CONDUIT_ATTACK_TARGET, SoundSource.BLOCKS, 1.0f, 1.0f);
             this.destroyTarget.hurt(DamageSource.MAGIC, 4.0f);
         }
         if (livingEntity2 != this.destroyTarget) {
@@ -231,7 +231,7 @@ implements TickableBlockEntity {
             this.level.addParticle(ParticleTypes.NAUTILUS, vec3.x, vec3.y, vec3.z, vec32.x, vec32.y, vec32.z);
         }
         if (this.destroyTarget != null) {
-            Vec3 vec33 = new Vec3(this.destroyTarget.x, this.destroyTarget.y + (double)this.destroyTarget.getEyeHeight(), this.destroyTarget.z);
+            Vec3 vec33 = new Vec3(this.destroyTarget.getX(), this.destroyTarget.getEyeY(), this.destroyTarget.getZ());
             float j = (-0.5f + random.nextFloat()) * (3.0f + this.destroyTarget.getBbWidth());
             g = -1.0f + random.nextFloat() * this.destroyTarget.getBbHeight();
             h = (-0.5f + random.nextFloat()) * (3.0f + this.destroyTarget.getBbWidth());

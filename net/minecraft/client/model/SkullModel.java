@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 
 @Environment(value=EnvType.CLIENT)
 public class SkullModel
@@ -20,6 +21,7 @@ extends Model {
     }
 
     public SkullModel(int i, int j, int k, int l) {
+        super(RenderType::entityTranslucent);
         this.texWidth = k;
         this.texHeight = l;
         this.head = new ModelPart(this, i, j);
@@ -27,10 +29,14 @@ extends Model {
         this.head.setPos(0.0f, 0.0f, 0.0f);
     }
 
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j) {
+    public void setupAnim(float f, float g, float h) {
         this.head.yRot = g * ((float)Math.PI / 180);
         this.head.xRot = h * ((float)Math.PI / 180);
-        this.head.render(poseStack, vertexConsumer, i, j, null);
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+        this.head.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
     }
 }
 

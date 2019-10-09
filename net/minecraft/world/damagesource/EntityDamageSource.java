@@ -57,7 +57,7 @@ extends DamageSource {
     @Override
     @Nullable
     public Vec3 getSourcePosition() {
-        return new Vec3(this.entity.x, this.entity.y, this.entity.z);
+        return this.entity != null ? this.entity.position() : null;
     }
 }
 

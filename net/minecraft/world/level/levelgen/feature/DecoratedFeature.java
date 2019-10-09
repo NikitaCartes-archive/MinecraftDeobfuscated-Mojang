@@ -11,8 +11,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 
 public class DecoratedFeature
 extends Feature<DecoratedFeatureConfiguration> {

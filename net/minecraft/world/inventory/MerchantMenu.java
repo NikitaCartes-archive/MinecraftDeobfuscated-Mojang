@@ -147,7 +147,7 @@ extends AbstractContainerMenu {
     private void playTradeSound() {
         if (!this.trader.getLevel().isClientSide) {
             Entity entity = (Entity)((Object)this.trader);
-            this.trader.getLevel().playLocalSound(entity.x, entity.y, entity.z, this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0f, 1.0f, false);
+            this.trader.getLevel().playLocalSound(entity.getX(), entity.getY(), entity.getZ(), this.trader.getNotifyTradeSound(), SoundSource.NEUTRAL, 1.0f, 1.0f, false);
         }
     }
 

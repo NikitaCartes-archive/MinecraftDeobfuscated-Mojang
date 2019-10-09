@@ -321,7 +321,7 @@ extends Monster {
             if (this.operation != MoveControl.Operation.MOVE_TO) {
                 return;
             }
-            Vec3 vec3 = new Vec3(this.wantedX - Vex.this.x, this.wantedY - Vex.this.y, this.wantedZ - Vex.this.z);
+            Vec3 vec3 = new Vec3(this.wantedX - Vex.this.getX(), this.wantedY - Vex.this.getY(), this.wantedZ - Vex.this.getZ());
             double d = vec3.length();
             if (d < Vex.this.getBoundingBox().getSize()) {
                 this.operation = MoveControl.Operation.WAIT;
@@ -332,8 +332,8 @@ extends Monster {
                     Vec3 vec32 = Vex.this.getDeltaMovement();
                     Vex.this.yBodyRot = Vex.this.yRot = -((float)Mth.atan2(vec32.x, vec32.z)) * 57.295776f;
                 } else {
-                    double e = Vex.this.getTarget().x - Vex.this.x;
-                    double f = Vex.this.getTarget().z - Vex.this.z;
+                    double e = Vex.this.getTarget().getX() - Vex.this.getX();
+                    double f = Vex.this.getTarget().getZ() - Vex.this.getZ();
                     Vex.this.yBodyRot = Vex.this.yRot = -((float)Mth.atan2(e, f)) * 57.295776f;
                 }
             }

@@ -8,22 +8,21 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.PillagerOutpostConfiguration;
-import net.minecraft.world.level.levelgen.feature.VillageConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class SnowyTundraBiome
 extends Biome {
     public SnowyTundraBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.SNOW).biomeCategory(Biome.BiomeCategory.ICY).depth(0.125f).scale(0.05f).temperature(0.0f).downfall(0.5f).waterColor(4159204).waterFogColor(329011).parent(null));
-        this.addStructureStart(Feature.VILLAGE, new VillageConfiguration("village/snowy/town_centers", 6));
-        this.addStructureStart(Feature.IGLOO, FeatureConfiguration.NONE);
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-        this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
-        this.addStructureStart(Feature.PILLAGER_OUTPOST, new PillagerOutpostConfiguration(0.004));
+        this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/snowy/town_centers", 6)));
+        this.addStructureStart(Feature.IGLOO.configured(FeatureConfiguration.NONE));
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+        this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
+        this.addStructureStart(Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);

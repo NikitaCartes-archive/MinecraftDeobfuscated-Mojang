@@ -309,6 +309,12 @@ public class SoundEvents {
     public static final SoundEvent GUARDIAN_HURT = SoundEvents.register("entity.guardian.hurt");
     public static final SoundEvent GUARDIAN_HURT_LAND = SoundEvents.register("entity.guardian.hurt_land");
     public static final SoundEvent HOE_TILL = SoundEvents.register("item.hoe.till");
+    public static final SoundEvent HONEY_BLOCK_BREAK = SoundEvents.register("block.honey_block.break");
+    public static final SoundEvent HONEY_BLOCK_FALL = SoundEvents.register("block.honey_block.fall");
+    public static final SoundEvent HONEY_BLOCK_HIT = SoundEvents.register("block.honey_block.hit");
+    public static final SoundEvent HONEY_BLOCK_PLACE = SoundEvents.register("block.honey_block.place");
+    public static final SoundEvent HONEY_BLOCK_SLIDE = SoundEvents.register("block.honey_block.slide");
+    public static final SoundEvent HONEY_BLOCK_STEP = SoundEvents.register("block.honey_block.step");
     public static final SoundEvent HONEY_DRINK = SoundEvents.register("item.honey_bottle.drink");
     public static final SoundEvent HORSE_AMBIENT = SoundEvents.register("entity.horse.ambient");
     public static final SoundEvent HORSE_ANGRY = SoundEvents.register("entity.horse.angry");
@@ -352,8 +358,10 @@ public class SoundEvents {
     public static final SoundEvent IRON_DOOR_CLOSE = SoundEvents.register("block.iron_door.close");
     public static final SoundEvent IRON_DOOR_OPEN = SoundEvents.register("block.iron_door.open");
     public static final SoundEvent IRON_GOLEM_ATTACK = SoundEvents.register("entity.iron_golem.attack");
+    public static final SoundEvent IRON_GOLEM_DAMAGE = SoundEvents.register("entity.iron_golem.damage");
     public static final SoundEvent IRON_GOLEM_DEATH = SoundEvents.register("entity.iron_golem.death");
     public static final SoundEvent IRON_GOLEM_HURT = SoundEvents.register("entity.iron_golem.hurt");
+    public static final SoundEvent IRON_GOLEM_REPAIR = SoundEvents.register("entity.iron_golem.repair");
     public static final SoundEvent IRON_GOLEM_STEP = SoundEvents.register("entity.iron_golem.step");
     public static final SoundEvent IRON_TRAPDOOR_CLOSE = SoundEvents.register("block.iron_trapdoor.close");
     public static final SoundEvent IRON_TRAPDOOR_OPEN = SoundEvents.register("block.iron_trapdoor.open");
@@ -474,7 +482,6 @@ public class SoundEvents {
     public static final SoundEvent PARROT_IMITATE_HUSK = SoundEvents.register("entity.parrot.imitate.husk");
     public static final SoundEvent PARROT_IMITATE_ILLUSIONER = SoundEvents.register("entity.parrot.imitate.illusioner");
     public static final SoundEvent PARROT_IMITATE_MAGMA_CUBE = SoundEvents.register("entity.parrot.imitate.magma_cube");
-    public static final SoundEvent PARROT_IMITATE_PANDA = SoundEvents.register("entity.parrot.imitate.panda");
     public static final SoundEvent PARROT_IMITATE_PHANTOM = SoundEvents.register("entity.parrot.imitate.phantom");
     public static final SoundEvent PARROT_IMITATE_PILLAGER = SoundEvents.register("entity.parrot.imitate.pillager");
     public static final SoundEvent PARROT_IMITATE_POLAR_BEAR = SoundEvents.register("entity.parrot.imitate.polar_bear");

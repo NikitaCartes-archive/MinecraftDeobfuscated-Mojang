@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.IronGolemModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.IronGolemCrackinessLayer;
 import net.minecraft.client.renderer.entity.layers.IronGolemFlowerLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.IronGolem;
@@ -17,10 +18,11 @@ import net.minecraft.world.entity.animal.IronGolem;
 @Environment(value=EnvType.CLIENT)
 public class IronGolemRenderer
 extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
-    private static final ResourceLocation GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem.png");
+    private static final ResourceLocation GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem/iron_golem.png");
 
     public IronGolemRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new IronGolemModel(), 0.7f);
+        this.addLayer(new IronGolemCrackinessLayer(this));
         this.addLayer(new IronGolemFlowerLayer(this));
     }
 
@@ -38,7 +40,7 @@ extends MobRenderer<IronGolem, IronGolemModel<IronGolem>> {
         float i = 13.0f;
         float j = ironGolem.animationPosition - ironGolem.animationSpeed * (1.0f - h) + 6.0f;
         float k = (Math.abs(j % 13.0f - 6.5f) - 3.25f) / 3.25f;
-        poseStack.mulPose(Vector3f.ZP.rotation(6.5f * k, true));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.5f * k));
     }
 }
 

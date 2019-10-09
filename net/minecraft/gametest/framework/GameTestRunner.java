@@ -3,11 +3,14 @@
  */
 package net.minecraft.gametest.framework;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
@@ -36,11 +39,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class GameTestRunner {
     public static TestReporter TEST_REPORTER = new LogTestReporter();
 
     public static void runTest(GameTestInfo gameTestInfo, GameTestTicker gameTestTicker) {
+        gameTestInfo.startExecution();
         gameTestTicker.add(gameTestInfo);
         gameTestInfo.addListener(new GameTestListener(){
 
@@ -50,19 +55,13 @@ public class GameTestRunner {
             }
 
             @Override
-            public void testPassed(GameTestInfo gameTestInfo) {
-                GameTestRunner.spawnBeacon(gameTestInfo, Blocks.LIME_STAINED_GLASS);
-                GameTestRunner.visualizePassedTest(gameTestInfo);
-            }
-
-            @Override
             public void testFailed(GameTestInfo gameTestInfo) {
                 GameTestRunner.spawnBeacon(gameTestInfo, gameTestInfo.isRequired() ? Blocks.RED_STAINED_GLASS : Blocks.ORANGE_STAINED_GLASS);
                 GameTestRunner.spawnLectern(gameTestInfo, Util.describeError(gameTestInfo.getError()));
                 GameTestRunner.visualizeFailedTest(gameTestInfo);
             }
         });
-        gameTestInfo.spawnStructureAndRunTest(2);
+        gameTestInfo.spawnStructure(2);
     }
 
     public static Collection<GameTestInfo> runTestBatches(Collection<GameTestBatch> collection, BlockPos blockPos, ServerLevel serverLevel, GameTestTicker gameTestTicker) {
@@ -82,10 +81,11 @@ public class GameTestRunner {
             Collection collection = map.computeIfAbsent(string2, string -> Lists.newArrayList());
             collection.add(testFunction);
         });
-        return map.keySet().stream().map(string -> {
+        return map.keySet().stream().flatMap(string -> {
             Collection collection = (Collection)map.get(string);
             Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(string);
-            return new GameTestBatch((String)string, collection, consumer);
+            AtomicInteger atomicInteger = new AtomicInteger();
+            return Streams.stream(Iterables.partition(collection, 100)).map(list -> new GameTestBatch(string + ":" + atomicInteger.incrementAndGet(), collection, consumer));
         }).collect(Collectors.toList());
     }
 
@@ -98,11 +98,6 @@ public class GameTestRunner {
             GameTestRunner.showRedBox(gameTestInfo.getLevel(), gameTestAssertPosException.getAbsolutePos(), gameTestAssertPosException.getMessageToShowAtBlock());
         }
         TEST_REPORTER.onTestFailed(gameTestInfo);
-    }
-
-    private static void visualizePassedTest(GameTestInfo gameTestInfo) {
-        GameTestRunner.say(gameTestInfo.getLevel(), ChatFormatting.GREEN, gameTestInfo.getTestName() + " passed!");
-        TEST_REPORTER.onTestSuccess(gameTestInfo);
     }
 
     private static void spawnBeacon(GameTestInfo gameTestInfo, Block block) {
@@ -162,7 +157,9 @@ public class GameTestRunner {
         BlockPos blockPos3 = blockPos2.offset(i, 0, i);
         BlockPos.betweenClosedStream(blockPos22, blockPos3).filter(blockPos -> serverLevel.getBlockState((BlockPos)blockPos).getBlock() == Blocks.STRUCTURE_BLOCK).forEach(blockPos -> {
             StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity((BlockPos)blockPos);
-            StructureUtils.clearSpaceForStructure(structureBlockEntity.getBlockPos(), structureBlockEntity.getStructureSize(), 2, serverLevel);
+            BlockPos blockPos2 = structureBlockEntity.getBlockPos();
+            BoundingBox boundingBox = StructureUtils.createStructureBoundingBox(blockPos2, structureBlockEntity.getStructureSize(), 2);
+            StructureUtils.clearSpaceForStructure(boundingBox, blockPos2.getY(), serverLevel);
         });
     }
 }

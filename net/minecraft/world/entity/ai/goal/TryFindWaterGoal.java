@@ -26,7 +26,7 @@ extends Goal {
     @Override
     public void start() {
         Vec3i blockPos = null;
-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.x - 2.0), Mth.floor(this.mob.y - 2.0), Mth.floor(this.mob.z - 2.0), Mth.floor(this.mob.x + 2.0), Mth.floor(this.mob.y), Mth.floor(this.mob.z + 2.0));
+        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.getX() - 2.0), Mth.floor(this.mob.getY() - 2.0), Mth.floor(this.mob.getZ() - 2.0), Mth.floor(this.mob.getX() + 2.0), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + 2.0));
         for (BlockPos blockPos2 : iterable) {
             if (!this.mob.level.getFluidState(blockPos2).is(FluidTags.WATER)) continue;
             blockPos = blockPos2;

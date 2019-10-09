@@ -15,9 +15,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -49,7 +48,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
     public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
         if (i == chunkPos.x && j == chunkPos.z) {
-            if (!chunkGenerator.isBiomeValidStartForStructure(biome, Feature.END_CITY)) {
+            if (!chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
                 return false;
             }
             int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator);

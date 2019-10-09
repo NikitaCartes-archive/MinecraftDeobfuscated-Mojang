@@ -12,8 +12,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
 public class DiskReplaceFeature
 extends Feature<DiskConfiguration> {

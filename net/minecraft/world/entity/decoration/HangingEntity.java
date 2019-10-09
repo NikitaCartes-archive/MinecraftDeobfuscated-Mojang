@@ -67,9 +67,7 @@ extends Entity {
         d -= (double)this.direction.getStepX() * 0.46875;
         f -= (double)this.direction.getStepZ() * 0.46875;
         Direction direction = this.direction.getCounterClockWise();
-        this.x = d += h * (double)direction.getStepX();
-        this.y = e += i;
-        this.z = f += h * (double)direction.getStepZ();
+        this.setPosRaw(d += h * (double)direction.getStepX(), e += i, f += h * (double)direction.getStepZ());
         double j = this.getWidth();
         double k = this.getHeight();
         double l = this.getWidth();
@@ -190,7 +188,7 @@ extends Entity {
 
     @Override
     public ItemEntity spawnAtLocation(ItemStack itemStack, float f) {
-        ItemEntity itemEntity = new ItemEntity(this.level, this.x + (double)((float)this.direction.getStepX() * 0.15f), this.y + (double)f, this.z + (double)((float)this.direction.getStepZ() * 0.15f), itemStack);
+        ItemEntity itemEntity = new ItemEntity(this.level, this.getX() + (double)((float)this.direction.getStepX() * 0.15f), this.getY() + (double)f, this.getZ() + (double)((float)this.direction.getStepZ() * 0.15f), itemStack);
         itemEntity.setDefaultPickUpDelay();
         this.level.addFreshEntity(itemEntity);
         return itemEntity;

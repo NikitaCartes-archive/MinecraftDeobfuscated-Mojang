@@ -21,6 +21,7 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -39,6 +40,10 @@ import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +59,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TestCommand {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("test").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.literal("runthis").executes(commandContext -> TestCommand.runNearbyTest((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("runthese").executes(commandContext -> TestCommand.runAllNearbyTests((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("run").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", TestFunctionArgument.testFunctionArgument()).executes(commandContext -> TestCommand.runTest((CommandSourceStack)commandContext.getSource(), TestFunctionArgument.getTestFunction(commandContext, "testName")))))).then(((LiteralArgumentBuilder)Commands.literal("runall").executes(commandContext -> TestCommand.runAllTests((CommandSourceStack)commandContext.getSource()))).then(Commands.argument("testClassName", TestClassNameArgument.testClassName()).executes(commandContext -> TestCommand.runAllTestsInClass((CommandSourceStack)commandContext.getSource(), TestClassNameArgument.getTestClassName(commandContext, "testClassName")))))).then(Commands.literal("export").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.exportTestStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))))).then(Commands.literal("import").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.importTestStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))))).then(Commands.literal("pos").executes(commandContext -> TestCommand.showPos((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("create").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), 5, 5, 5))).then(((RequiredArgumentBuilder)Commands.argument("width", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "width")))).then(Commands.argument("height", IntegerArgumentType.integer()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("depth", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "height"), IntegerArgumentType.getInteger(commandContext, "depth"))))))))).then(((LiteralArgumentBuilder)Commands.literal("clearall").executes(commandContext -> TestCommand.clearAllTests((CommandSourceStack)commandContext.getSource(), 200))).then(Commands.argument("radius", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.clearAllTests((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "radius"))))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("test").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.literal("runthis").executes(commandContext -> TestCommand.runNearbyTest((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("runthese").executes(commandContext -> TestCommand.runAllNearbyTests((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("run").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", TestFunctionArgument.testFunctionArgument()).executes(commandContext -> TestCommand.runTest((CommandSourceStack)commandContext.getSource(), TestFunctionArgument.getTestFunction(commandContext, "testName")))))).then(((LiteralArgumentBuilder)Commands.literal("runall").executes(commandContext -> TestCommand.runAllTests((CommandSourceStack)commandContext.getSource()))).then(Commands.argument("testClassName", TestClassNameArgument.testClassName()).executes(commandContext -> TestCommand.runAllTestsInClass((CommandSourceStack)commandContext.getSource(), TestClassNameArgument.getTestClassName(commandContext, "testClassName")))))).then(Commands.literal("export").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.exportTestStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))))).then(Commands.literal("import").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.importTestStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))))).then(((LiteralArgumentBuilder)Commands.literal("pos").executes(commandContext -> TestCommand.showPos((CommandSourceStack)commandContext.getSource(), "pos"))).then(Commands.argument("var", StringArgumentType.word()).executes(commandContext -> TestCommand.showPos((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "var")))))).then(Commands.literal("create").then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)Commands.argument("testName", StringArgumentType.word()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), 5, 5, 5))).then(((RequiredArgumentBuilder)Commands.argument("width", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "width")))).then(Commands.argument("height", IntegerArgumentType.integer()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("depth", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.createNewStructure((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "testName"), IntegerArgumentType.getInteger(commandContext, "width"), IntegerArgumentType.getInteger(commandContext, "height"), IntegerArgumentType.getInteger(commandContext, "depth"))))))))).then(((LiteralArgumentBuilder)Commands.literal("clearall").executes(commandContext -> TestCommand.clearAllTests((CommandSourceStack)commandContext.getSource(), 200))).then(Commands.argument("radius", IntegerArgumentType.integer()).executes(commandContext -> TestCommand.clearAllTests((CommandSourceStack)commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "radius"))))));
     }
 
     private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
@@ -77,7 +82,7 @@ public class TestCommand {
         return 0;
     }
 
-    private static int showPos(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+    private static int showPos(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {
         ServerLevel serverLevel;
         BlockHitResult blockHitResult = (BlockHitResult)commandSourceStack.getPlayerOrException().pick(10.0, 1.0f, false);
         BlockPos blockPos = blockHitResult.getBlockPos();
@@ -91,11 +96,11 @@ public class TestCommand {
         }
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(optional.get());
         BlockPos blockPos2 = blockPos.subtract(optional.get());
-        String string = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
-        String string2 = structureBlockEntity.getStructurePath();
-        TestCommand.say(commandSourceStack, "Position relative to " + string2 + ":");
-        TestCommand.say(commandSourceStack, string);
-        DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string, -2147418368, 10000);
+        String string2 = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
+        String string3 = structureBlockEntity.getStructurePath();
+        Component component = new TextComponent(string2).setStyle(new Style().setBold(true).setColor(ChatFormatting.GREEN).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard"))).setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");")));
+        commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
+        DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);
         return 1;
     }
 
@@ -136,6 +141,7 @@ public class TestCommand {
             multipleTestTracker.add(gameTestInfo);
             gameTestInfo.addListener(new TestSummaryDisplayer(serverLevel, multipleTestTracker));
         }
+        TestCommand.runTestPreparation(testFunction, serverLevel);
         GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
     }
 
@@ -166,9 +172,17 @@ public class TestCommand {
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3);
         GameTestRunner.clearMarkers(serverLevel);
+        TestCommand.runTestPreparation(testFunction, serverLevel);
         GameTestInfo gameTestInfo = new GameTestInfo(testFunction, blockPos2, serverLevel);
         GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
         return 1;
+    }
+
+    private static void runTestPreparation(TestFunction testFunction, ServerLevel serverLevel) {
+        Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(testFunction.getBatchName());
+        if (consumer != null) {
+            consumer.accept(serverLevel);
+        }
     }
 
     private static int runAllTests(CommandSourceStack commandSourceStack) {
@@ -253,11 +267,6 @@ public class TestCommand {
 
         @Override
         public void testStructureLoaded(GameTestInfo gameTestInfo) {
-        }
-
-        @Override
-        public void testPassed(GameTestInfo gameTestInfo) {
-            TestCommand.showTestSummaryIfAllDone(this.level, this.tracker);
         }
 
         @Override

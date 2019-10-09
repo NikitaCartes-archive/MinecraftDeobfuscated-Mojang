@@ -12,6 +12,7 @@ import net.minecraft.client.model.EndermanModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -30,12 +31,12 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
         }
         poseStack.pushPose();
         poseStack.translate(0.0, 0.6875, -0.75);
-        poseStack.mulPose(Vector3f.XP.rotation(20.0f, true));
-        poseStack.mulPose(Vector3f.YP.rotation(45.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(45.0f));
         poseStack.translate(0.25, 0.1875, 0.25);
         float n = 0.5f;
         poseStack.scale(-0.5f, -0.5f, 0.5f);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 }

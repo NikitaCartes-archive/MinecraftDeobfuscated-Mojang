@@ -40,32 +40,30 @@ extends StuckInBodyLayer<T, M> {
         float k = (float)(Math.atan2(f, h) * 57.2957763671875);
         float l = (float)(Math.atan2(g, j) * 57.2957763671875);
         poseStack.translate(0.0, 0.0, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotation(k - 90.0f, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(l, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(k - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(l));
         float m = 0.0f;
         float n = 0.125f;
         float o = 0.0f;
         float p = 0.0625f;
         float q = 0.03125f;
-        poseStack.mulPose(Vector3f.XP.rotation(45.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0f));
         poseStack.scale(0.03125f, 0.03125f, 0.03125f);
         poseStack.translate(2.5, 0.0, 0.0);
         int r = entity.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(BEE_STINGER_LOCATION));
-        OverlayTexture.setDefault(vertexConsumer);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(BEE_STINGER_LOCATION));
         for (int s = 0; s < 4; ++s) {
-            poseStack.mulPose(Vector3f.XP.rotation(90.0f, true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
             Matrix4f matrix4f = poseStack.getPose();
             BeeStingerLayer.vertex(vertexConsumer, matrix4f, -4.5f, -1, 0.0f, 0.0f, r);
             BeeStingerLayer.vertex(vertexConsumer, matrix4f, 4.5f, -1, 0.125f, 0.0f, r);
             BeeStingerLayer.vertex(vertexConsumer, matrix4f, 4.5f, 1, 0.125f, 0.0625f, r);
             BeeStingerLayer.vertex(vertexConsumer, matrix4f, -4.5f, 1, 0.0f, 0.0625f, r);
         }
-        vertexConsumer.unsetDefaultOverlayCoords();
     }
 
     private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, int i, float g, float h, int j) {
-        vertexConsumer.vertex(matrix4f, f, i, 0.0f).color(255, 255, 255, 255).uv(g, h).uv2(j).normal(0.0f, 1.0f, 0.0f).endVertex();
+        vertexConsumer.vertex(matrix4f, f, i, 0.0f).color(255, 255, 255, 255).uv(g, h).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(j).normal(0.0f, 1.0f, 0.0f).endVertex();
     }
 }
 

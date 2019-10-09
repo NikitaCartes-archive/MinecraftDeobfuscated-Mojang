@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ambient.Bat;
 
@@ -22,6 +23,7 @@ extends ListModel<Bat> {
     private final ModelPart leftWingTip;
 
     public BatModel() {
+        super(RenderType::entityCutoutNoCull);
         this.texWidth = 64;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 0);

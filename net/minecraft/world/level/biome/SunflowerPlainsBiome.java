@@ -7,37 +7,35 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DoublePlantConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.placement.DecoratorChance;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class SunflowerPlainsBiome
 extends Biome {
     protected SunflowerPlainsBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.PLAINS).depth(0.125f).scale(0.05f).temperature(0.8f).downfall(0.4f).waterColor(4159204).waterFogColor(329011).parent("plains"));
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-        this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+        this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);
         BiomeDefaultFeatures.addDefaultMonsterRoom(this);
         BiomeDefaultFeatures.addPlainGrass(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, SunflowerPlainsBiome.makeComposite(Feature.DOUBLE_PLANT, new DoublePlantConfiguration(Blocks.SUNFLOWER.defaultBlockState()), FeatureDecorator.COUNT_HEIGHTMAP_32, new DecoratorFrequency(10)));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.SUNFLOWER_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(10))));
         BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
         BiomeDefaultFeatures.addDefaultOres(this);
         BiomeDefaultFeatures.addDefaultSoftDisks(this);
         BiomeDefaultFeatures.addPlainVegetation(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, SunflowerPlainsBiome.makeComposite(Feature.REED, FeatureConfiguration.NONE, FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE, new DecoratorFrequency(10)));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.SUGAR_CANE_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE.configured(new FrequencyDecoratorConfiguration(10))));
         BiomeDefaultFeatures.addDefaultMushrooms(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, SunflowerPlainsBiome.makeComposite(Feature.PUMPKIN, FeatureConfiguration.NONE, FeatureDecorator.CHANCE_HEIGHTMAP_DOUBLE, new DecoratorChance(32)));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(BiomeDefaultFeatures.PUMPKIN_CONFIG).decorated(FeatureDecorator.CHANCE_HEIGHTMAP_DOUBLE.configured(new ChanceDecoratorConfiguration(32))));
         BiomeDefaultFeatures.addDefaultSprings(this);
         BiomeDefaultFeatures.addSurfaceFreezing(this);
         this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));

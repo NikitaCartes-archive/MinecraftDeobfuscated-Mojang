@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -37,10 +38,11 @@ extends EntityRenderer<T> {
     public void render(T entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         poseStack.pushPose();
         poseStack.scale(this.scale, this.scale, this.scale);
-        poseStack.mulPose(Vector3f.YP.rotation(-this.entityRenderDispatcher.playerRotY, true));
-        poseStack.mulPose(Vector3f.XP.rotation((float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX, true));
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f, true));
-        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, ((Entity)entity).getLightColor(), poseStack, multiBufferSource);
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
+        float i = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, ((Entity)entity).getLightColor(), OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
         poseStack.popPose();
         super.render(entity, d, e, f, g, h, poseStack, multiBufferSource);
     }

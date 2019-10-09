@@ -154,8 +154,8 @@ implements ChunkHolder.PlayerProvider {
     private static double euclideanDistanceSquared(ChunkPos chunkPos, Entity entity) {
         double d = chunkPos.x * 16 + 8;
         double e = chunkPos.z * 16 + 8;
-        double f = d - entity.x;
-        double g = e - entity.z;
+        double f = d - entity.getX();
+        double g = e - entity.getZ();
         return f * f + g * g;
     }
 
@@ -167,8 +167,8 @@ implements ChunkHolder.PlayerProvider {
             i = sectionPos.x();
             j = sectionPos.z();
         } else {
-            i = Mth.floor(serverPlayer.x / 16.0);
-            j = Mth.floor(serverPlayer.z / 16.0);
+            i = Mth.floor(serverPlayer.getX() / 16.0);
+            j = Mth.floor(serverPlayer.getZ() / 16.0);
         }
         return ChunkMap.checkerboardDistance(chunkPos, i, j);
     }
@@ -687,8 +687,8 @@ implements ChunkHolder.PlayerProvider {
     void updatePlayerStatus(ServerPlayer serverPlayer, boolean bl) {
         boolean bl2 = this.skipPlayer(serverPlayer);
         boolean bl3 = this.playerMap.ignoredOrUnknown(serverPlayer);
-        int i = Mth.floor(serverPlayer.x) >> 4;
-        int j = Mth.floor(serverPlayer.z) >> 4;
+        int i = Mth.floor(serverPlayer.getX()) >> 4;
+        int j = Mth.floor(serverPlayer.getZ()) >> 4;
         if (bl) {
             this.playerMap.addPlayer(ChunkPos.asLong(i, j), serverPlayer, bl2);
             this.updatePlayerPos(serverPlayer);
@@ -726,8 +726,8 @@ implements ChunkHolder.PlayerProvider {
             }
             trackedEntity.updatePlayer(serverPlayer);
         }
-        int i = Mth.floor(serverPlayer.x) >> 4;
-        int j = Mth.floor(serverPlayer.z) >> 4;
+        int i = Mth.floor(serverPlayer.getX()) >> 4;
+        int j = Mth.floor(serverPlayer.getZ()) >> 4;
         SectionPos sectionPos = serverPlayer.getLastSectionPos();
         SectionPos sectionPos2 = SectionPos.of(serverPlayer);
         long l = sectionPos.chunk().toLong();
@@ -975,7 +975,7 @@ implements ChunkHolder.PlayerProvider {
             if (serverPlayer == this.entity) {
                 return;
             }
-            Vec3 vec3 = new Vec3(serverPlayer.x, serverPlayer.y, serverPlayer.z).subtract(this.serverEntity.sentPos());
+            Vec3 vec3 = serverPlayer.position().subtract(this.serverEntity.sentPos());
             int i = Math.min(this.getEffectiveRange(), (ChunkMap.this.viewDistance - 1) * 16);
             boolean bl2 = bl = vec3.x >= (double)(-i) && vec3.x <= (double)i && vec3.z >= (double)(-i) && vec3.z <= (double)i && this.entity.broadcastToPlayer(serverPlayer);
             if (bl) {

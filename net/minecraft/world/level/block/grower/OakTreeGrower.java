@@ -3,22 +3,20 @@
  */
 package net.minecraft.world.level.block.grower;
 
-import com.mojang.datafixers.Dynamic;
 import java.util.Random;
-import java.util.function.Function;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.BigTreeFeature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public class OakTreeGrower
 extends AbstractTreeGrower {
     @Override
     @Nullable
-    protected AbstractTreeFeature<NoneFeatureConfiguration> getFeature(Random random) {
-        return random.nextInt(10) == 0 ? new BigTreeFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize), true) : new TreeFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize), true);
+    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+        return random.nextInt(10) == 0 ? Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_CONFIG) : Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_CONFIG);
     }
 }
 

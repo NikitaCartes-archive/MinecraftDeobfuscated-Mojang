@@ -54,16 +54,16 @@ extends NodeEvaluator {
         BlockPos blockPos;
         int i;
         if (this.canFloat() && this.mob.isInWater()) {
-            i = Mth.floor(this.mob.getBoundingBox().minY);
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.x, (double)i, this.mob.z);
+            i = Mth.floor(this.mob.getY());
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
             BlockState blockState = this.level.getBlockState(mutableBlockPos);
             while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
-                mutableBlockPos.set(this.mob.x, (double)(++i), this.mob.z);
+                mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
                 blockState = this.level.getBlockState(mutableBlockPos);
             }
             --i;
         } else if (this.mob.onGround) {
-            i = Mth.floor(this.mob.getBoundingBox().minY + 0.5);
+            i = Mth.floor(this.mob.getY() + 0.5);
         } else {
             blockPos = new BlockPos(this.mob);
             while ((this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND)) && blockPos.getY() > 0) {
@@ -108,7 +108,8 @@ extends NodeEvaluator {
         int j = 0;
         BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, node.x, node.y + 1, node.z);
         if (this.mob.getPathfindingMalus(blockPathTypes) >= 0.0f) {
-            j = Mth.floor(Math.max(1.0f, this.mob.maxUpStep));
+            BlockPathTypes blockPathTypes2 = this.getBlockPathType(this.mob, node.x, node.y, node.z);
+            j = blockPathTypes2 == BlockPathTypes.STICKY_HONEY ? 0 : Mth.floor(Math.max(1.0f, this.mob.maxUpStep));
         }
         if ((node2 = this.getLandNode(node.x, node.y, node.z + 1, j, d = WalkNodeEvaluator.getFloorLevel(this.level, new BlockPos(node.x, node.y, node.z)), Direction.SOUTH)) != null && !node2.closed && node2.costMalus >= 0.0f) {
             nodes[i++] = node2;
@@ -309,10 +310,14 @@ extends NodeEvaluator {
 
     @Override
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-        BlockPathTypes blockPathTypes = this.getBlockPathTypeRaw(blockGetter, i, j, k);
+        return WalkNodeEvaluator.getBlockPathTypeStatic(blockGetter, i, j, k);
+    }
+
+    public static BlockPathTypes getBlockPathTypeStatic(BlockGetter blockGetter, int i, int j, int k) {
+        BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j, k);
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-            BlockPathTypes blockPathTypes2 = this.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+            BlockPathTypes blockPathTypes2 = WalkNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
             BlockPathTypes blockPathTypes3 = blockPathTypes = blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER || blockPathTypes2 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || block == Blocks.CAMPFIRE) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
@@ -323,28 +328,37 @@ extends NodeEvaluator {
             if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
                 blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
             }
+            if (blockPathTypes2 == BlockPathTypes.STICKY_HONEY) {
+                blockPathTypes = BlockPathTypes.STICKY_HONEY;
+            }
         }
-        blockPathTypes = this.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        blockPathTypes = WalkNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
         return blockPathTypes;
     }
 
-    public BlockPathTypes checkNeighbourBlocks(BlockGetter blockGetter, int i, int j, int k, BlockPathTypes blockPathTypes) {
+    public static BlockPathTypes checkNeighbourBlocks(BlockGetter blockGetter, int i, int j, int k, BlockPathTypes blockPathTypes) {
         if (blockPathTypes == BlockPathTypes.WALKABLE) {
             try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
                 for (int l = -1; l <= 1; ++l) {
                     for (int m = -1; m <= 1; ++m) {
-                        if (l == 0 && m == 0) continue;
-                        Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, j, m + k)).getBlock();
-                        if (block == Blocks.CACTUS) {
-                            blockPathTypes = BlockPathTypes.DANGER_CACTUS;
-                            continue;
+                        for (int n = -1; n <= 1; ++n) {
+                            if (l == 0 && n == 0) continue;
+                            Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, m + j, n + k)).getBlock();
+                            if (block == Blocks.CACTUS) {
+                                blockPathTypes = BlockPathTypes.DANGER_CACTUS;
+                                continue;
+                            }
+                            if (block == Blocks.FIRE || block == Blocks.LAVA) {
+                                blockPathTypes = BlockPathTypes.DANGER_FIRE;
+                                continue;
+                            }
+                            if (block == Blocks.SWEET_BERRY_BUSH) {
+                                blockPathTypes = BlockPathTypes.DANGER_OTHER;
+                                continue;
+                            }
+                            if (block != Blocks.HONEY_BLOCK) continue;
+                            blockPathTypes = BlockPathTypes.STICKY_HONEY;
                         }
-                        if (block == Blocks.FIRE) {
-                            blockPathTypes = BlockPathTypes.DANGER_FIRE;
-                            continue;
-                        }
-                        if (block != Blocks.SWEET_BERRY_BUSH) continue;
-                        blockPathTypes = BlockPathTypes.DANGER_OTHER;
                     }
                 }
             }
@@ -352,7 +366,7 @@ extends NodeEvaluator {
         return blockPathTypes;
     }
 
-    protected BlockPathTypes getBlockPathTypeRaw(BlockGetter blockGetter, int i, int j, int k) {
+    protected static BlockPathTypes getBlockPathTypeRaw(BlockGetter blockGetter, int i, int j, int k) {
         BlockPos blockPos = new BlockPos(i, j, k);
         BlockState blockState = blockGetter.getBlockState(blockPos);
         Block block = blockState.getBlock();
@@ -371,6 +385,9 @@ extends NodeEvaluator {
         }
         if (block == Blocks.SWEET_BERRY_BUSH) {
             return BlockPathTypes.DAMAGE_OTHER;
+        }
+        if (block == Blocks.HONEY_BLOCK) {
+            return BlockPathTypes.STICKY_HONEY;
         }
         if (block instanceof DoorBlock && material == Material.WOOD && !blockState.getValue(DoorBlock.OPEN).booleanValue()) {
             return BlockPathTypes.DOOR_WOOD_CLOSED;

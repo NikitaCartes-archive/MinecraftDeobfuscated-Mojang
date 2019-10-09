@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieVillagerModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -21,8 +22,8 @@ extends HumanoidMobRenderer<ZombieVillager, ZombieVillagerModel<ZombieVillager>>
     private static final ResourceLocation ZOMBIE_VILLAGER_LOCATION = new ResourceLocation("textures/entity/zombie_villager/zombie_villager.png");
 
     public ZombieVillagerRenderer(EntityRenderDispatcher entityRenderDispatcher, ReloadableResourceManager reloadableResourceManager) {
-        super(entityRenderDispatcher, new ZombieVillagerModel(), 0.5f);
-        this.addLayer(new HumanoidArmorLayer(this, new ZombieVillagerModel(0.5f, true), new ZombieVillagerModel(1.0f, true)));
+        super(entityRenderDispatcher, new ZombieVillagerModel(RenderType::entityCutoutNoCull, 0.0f, false), 0.5f);
+        this.addLayer(new HumanoidArmorLayer(this, new ZombieVillagerModel(RenderType::entitySolid, 0.5f, true), new ZombieVillagerModel(RenderType::entitySolid, 1.0f, true)));
         this.addLayer(new VillagerProfessionLayer<ZombieVillager, ZombieVillagerModel<ZombieVillager>>(this, reloadableResourceManager, "zombie_villager"));
     }
 

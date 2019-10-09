@@ -73,6 +73,8 @@ extends Goal {
 
     @Override
     public void tick() {
+        double f;
+        double e;
         if (this.followingMob == null || this.mob.isLeashed()) {
             return;
         }
@@ -81,17 +83,15 @@ extends Goal {
             return;
         }
         this.timeToRecalcPath = 10;
-        double d = this.mob.x - this.followingMob.x;
-        double e = this.mob.y - this.followingMob.y;
-        double f = this.mob.z - this.followingMob.z;
-        double g = d * d + e * e + f * f;
+        double d = this.mob.getX() - this.followingMob.getX();
+        double g = d * d + (e = this.mob.getY() - this.followingMob.getY()) * e + (f = this.mob.getZ() - this.followingMob.getZ()) * f;
         if (g <= (double)(this.stopDistance * this.stopDistance)) {
             this.navigation.stop();
             LookControl lookControl = this.followingMob.getLookControl();
-            if (g <= (double)this.stopDistance || lookControl.getWantedX() == this.mob.x && lookControl.getWantedY() == this.mob.y && lookControl.getWantedZ() == this.mob.z) {
-                double h = this.followingMob.x - this.mob.x;
-                double i = this.followingMob.z - this.mob.z;
-                this.navigation.moveTo(this.mob.x - h, this.mob.y, this.mob.z - i, this.speedModifier);
+            if (g <= (double)this.stopDistance || lookControl.getWantedX() == this.mob.getX() && lookControl.getWantedY() == this.mob.getY() && lookControl.getWantedZ() == this.mob.getZ()) {
+                double h = this.followingMob.getX() - this.mob.getX();
+                double i = this.followingMob.getZ() - this.mob.getZ();
+                this.navigation.moveTo(this.mob.getX() - h, this.mob.getY(), this.mob.getZ() - i, this.speedModifier);
             }
             return;
         }

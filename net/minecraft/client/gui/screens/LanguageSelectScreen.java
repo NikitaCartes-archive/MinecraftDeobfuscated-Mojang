@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.OptionButton;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.Language;
@@ -22,18 +23,14 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class LanguageSelectScreen
-extends Screen {
-    protected final Screen lastScreen;
+extends OptionsSubScreen {
     private LanguageSelectionList packSelectionList;
-    private final Options options;
     private final LanguageManager languageManager;
     private OptionButton forceUnicodeButton;
     private Button doneButton;
 
     public LanguageSelectScreen(Screen screen, Options options, LanguageManager languageManager) {
-        super(new TranslatableComponent("options.language", new Object[0]));
-        this.lastScreen = screen;
-        this.options = options;
+        super(screen, options, new TranslatableComponent("options.language", new Object[0]));
         this.languageManager = languageManager;
     }
 

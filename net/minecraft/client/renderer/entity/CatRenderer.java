@@ -44,7 +44,7 @@ extends MobRenderer<Cat, CatModel<Cat>> {
         float i = cat.getLieDownAmount(h);
         if (i > 0.0f) {
             poseStack.translate(0.4f * i, 0.15f * i, 0.1f * i);
-            poseStack.mulPose(Vector3f.ZP.rotation(Mth.rotLerp(i, 0.0f, 90.0f), true));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.rotLerp(i, 0.0f, 90.0f)));
             BlockPos blockPos = new BlockPos(cat);
             List<Player> list = cat.level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0));
             for (Player player : list) {

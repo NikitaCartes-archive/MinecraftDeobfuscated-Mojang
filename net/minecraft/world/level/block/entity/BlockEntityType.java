@@ -87,7 +87,7 @@ public class BlockEntityType<T extends BlockEntity> {
     public static final BlockEntityType<BellBlockEntity> BELL = BlockEntityType.register("bell", Builder.of(BellBlockEntity::new, Blocks.BELL));
     public static final BlockEntityType<JigsawBlockEntity> JIGSAW = BlockEntityType.register("jigsaw", Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW));
     public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = BlockEntityType.register("campfire", Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE));
-    public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = BlockEntityType.register("beehive", Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEE_HIVE));
+    public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = BlockEntityType.register("beehive", Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE));
     private final Supplier<? extends T> factory;
     private final Set<Block> validBlocks;
     private final Type<?> dataType;

@@ -104,7 +104,7 @@ extends ProjectileWeaponItem {
         if (f >= 1.0f && !CrossbowItem.isCharged(itemStack) && CrossbowItem.tryLoadProjectiles(livingEntity, itemStack)) {
             CrossbowItem.setCharged(itemStack, true);
             SoundSource soundSource = livingEntity instanceof Player ? SoundSource.PLAYERS : SoundSource.HOSTILE;
-            level.playSound(null, livingEntity.x, livingEntity.y, livingEntity.z, SoundEvents.CROSSBOW_LOADING_END, soundSource, 1.0f, 1.0f / (random.nextFloat() * 0.5f + 1.0f) + 0.2f);
+            level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_LOADING_END, soundSource, 1.0f, 1.0f / (random.nextFloat() * 0.5f + 1.0f) + 0.2f);
         }
     }
 
@@ -200,7 +200,7 @@ extends ProjectileWeaponItem {
         }
         boolean bl3 = bl2 = itemStack2.getItem() == Items.FIREWORK_ROCKET;
         if (bl2) {
-            projectile = new FireworkRocketEntity(level, itemStack2, livingEntity2.x, livingEntity2.y + (double)livingEntity2.getEyeHeight() - (double)0.15f, livingEntity2.z, true);
+            projectile = new FireworkRocketEntity(level, itemStack2, livingEntity2.getX(), livingEntity2.getEyeY() - (double)0.15f, livingEntity2.getZ(), true);
         } else {
             projectile = CrossbowItem.getArrow(level, livingEntity2, itemStack, itemStack2);
             if (bl || i != 0.0f) {
@@ -220,7 +220,7 @@ extends ProjectileWeaponItem {
         }
         itemStack.hurtAndBreak(bl2 ? 3 : 1, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent(interactionHand));
         level.addFreshEntity(projectile);
-        level.playSound(null, livingEntity2.x, livingEntity2.y, livingEntity2.z, SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0f, f);
+        level.playSound(null, livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0f, f);
     }
 
     private static AbstractArrow getArrow(Level level, LivingEntity livingEntity, ItemStack itemStack, ItemStack itemStack2) {
@@ -294,11 +294,11 @@ extends ProjectileWeaponItem {
             }
             if (f >= 0.2f && !this.startSoundPlayed) {
                 this.startSoundPlayed = true;
-                level.playSound(null, livingEntity.x, livingEntity.y, livingEntity.z, soundEvent, SoundSource.PLAYERS, 0.5f, 1.0f);
+                level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), soundEvent, SoundSource.PLAYERS, 0.5f, 1.0f);
             }
             if (f >= 0.5f && soundEvent2 != null && !this.midLoadSoundPlayed) {
                 this.midLoadSoundPlayed = true;
-                level.playSound(null, livingEntity.x, livingEntity.y, livingEntity.z, soundEvent2, SoundSource.PLAYERS, 0.5f, 1.0f);
+                level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), soundEvent2, SoundSource.PLAYERS, 0.5f, 1.0f);
             }
         }
     }

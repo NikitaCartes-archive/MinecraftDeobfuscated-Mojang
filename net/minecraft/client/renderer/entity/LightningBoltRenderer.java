@@ -37,7 +37,7 @@ extends EntityRenderer<LightningBolt> {
             i += (float)(random.nextInt(11) - 5);
             j += (float)(random.nextInt(11) - 5);
         }
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.LIGHTNING);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lightning());
         Matrix4f matrix4f = poseStack.getPose();
         for (int l = 0; l < 4; ++l) {
             Random random2 = new Random(lightningBolt.seed);

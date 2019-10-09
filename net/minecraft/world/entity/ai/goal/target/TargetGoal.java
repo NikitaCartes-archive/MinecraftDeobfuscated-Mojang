@@ -126,8 +126,8 @@ extends Goal {
         if (node == null) {
             return false;
         }
-        int i = node.x - Mth.floor(livingEntity.x);
-        return (double)(i * i + (j = node.z - Mth.floor(livingEntity.z)) * j) <= 2.25;
+        int i = node.x - Mth.floor(livingEntity.getX());
+        return (double)(i * i + (j = node.z - Mth.floor(livingEntity.getZ())) * j) <= 2.25;
     }
 
     public TargetGoal setUnseenMemoryTicks(int i) {

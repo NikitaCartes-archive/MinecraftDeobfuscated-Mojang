@@ -8,17 +8,17 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class SnowyTaigaMountainsBiome
 extends Biome {
     public SnowyTaigaMountainsBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.SNOW).biomeCategory(Biome.BiomeCategory.TAIGA).depth(0.3f).scale(0.4f).temperature(-0.5f).downfall(0.4f).waterColor(4020182).waterFogColor(329011).parent("snowy_taiga"));
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-        this.addStructureStart(Feature.STRONGHOLD, FeatureConfiguration.NONE);
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
+        this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);

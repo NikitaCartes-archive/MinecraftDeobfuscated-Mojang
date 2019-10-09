@@ -36,30 +36,23 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        return !serverLevel.canSeeSky(new BlockPos(livingEntity.x, livingEntity.getBoundingBox().minY, livingEntity.z));
+        return !serverLevel.canSeeSky(new BlockPos(livingEntity));
     }
 
     @Nullable
     private Vec3 getOutdoorPosition(ServerLevel serverLevel, LivingEntity livingEntity) {
         Random random = livingEntity.getRandom();
-        BlockPos blockPos = new BlockPos(livingEntity.x, livingEntity.getBoundingBox().minY, livingEntity.z);
+        BlockPos blockPos = new BlockPos(livingEntity);
         for (int i = 0; i < 10; ++i) {
             BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
-            if (!MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, livingEntity)) continue;
-            return new Vec3(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
+            if (!MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, livingEntity, blockPos2)) continue;
+            return new Vec3(blockPos2);
         }
         return null;
     }
 
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    public static boolean hasNoBlocksAbove(ServerLevel serverLevel, LivingEntity livingEntity) {
-        if (!serverLevel.canSeeSky(new BlockPos(livingEntity))) return false;
-        BlockPos blockPos = new BlockPos(livingEntity);
-        if (!((double)serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() <= livingEntity.y)) return false;
-        return true;
+    public static boolean hasNoBlocksAbove(ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
+        return serverLevel.canSeeSky(blockPos) && (double)serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() <= livingEntity.getY();
     }
 }
 

@@ -46,7 +46,7 @@ extends Goal {
     }
 
     private void findAirPosition() {
-        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.x - 1.0), Mth.floor(this.mob.y), Mth.floor(this.mob.z - 1.0), Mth.floor(this.mob.x + 1.0), Mth.floor(this.mob.y + 8.0), Mth.floor(this.mob.z + 1.0));
+        Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.getX() - 1.0), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() - 1.0), Mth.floor(this.mob.getX() + 1.0), Mth.floor(this.mob.getY() + 8.0), Mth.floor(this.mob.getZ() + 1.0));
         Vec3i blockPos = null;
         for (BlockPos blockPos2 : iterable) {
             if (!this.givesAir(this.mob.level, blockPos2)) continue;
@@ -54,7 +54,7 @@ extends Goal {
             break;
         }
         if (blockPos == null) {
-            blockPos = new BlockPos(this.mob.x, this.mob.y + 8.0, this.mob.z);
+            blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 8.0, this.mob.getZ());
         }
         this.mob.getNavigation().moveTo(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ(), 1.0);
     }

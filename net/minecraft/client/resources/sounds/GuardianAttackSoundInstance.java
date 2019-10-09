@@ -30,9 +30,9 @@ extends AbstractTickableSoundInstance {
             this.stopped = true;
             return;
         }
-        this.x = (float)this.guardian.x;
-        this.y = (float)this.guardian.y;
-        this.z = (float)this.guardian.z;
+        this.x = (float)this.guardian.getX();
+        this.y = (float)this.guardian.getY();
+        this.z = (float)this.guardian.getZ();
         float f = this.guardian.getAttackAnimationScale(0.0f);
         this.volume = 0.0f + 1.0f * f * f;
         this.pitch = 0.7f + 0.5f * f;

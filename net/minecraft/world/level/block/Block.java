@@ -110,6 +110,8 @@ implements ItemLike {
     protected final Material material;
     protected final MaterialColor materialColor;
     private final float friction;
+    private final float speedFactor;
+    private final float jumpFactor;
     protected final StateDefinition<Block, BlockState> stateDefinition;
     private BlockState defaultBlockState;
     protected final boolean hasCollision;
@@ -157,7 +159,7 @@ implements ItemLike {
         List<Entity> list = level.getEntities(null, voxelShape.bounds());
         for (Entity entity : list) {
             double d = Shapes.collide(Direction.Axis.Y, entity.getBoundingBox().move(0.0, 1.0, 0.0), Stream.of(voxelShape), -1.0);
-            entity.teleportTo(entity.x, entity.y + 1.0 + d, entity.z);
+            entity.teleportTo(entity.getX(), entity.getY() + 1.0 + d, entity.getZ());
         }
         return blockState2;
     }
@@ -260,6 +262,8 @@ implements ItemLike {
         this.destroySpeed = properties.destroyTime;
         this.isTicking = properties.isTicking;
         this.friction = properties.friction;
+        this.speedFactor = properties.speedFactor;
+        this.jumpFactor = properties.jumpFactor;
         this.dynamicShape = properties.dynamicShape;
         this.drops = properties.drops;
         this.canOcclude = properties.canOcclude;
@@ -693,6 +697,14 @@ implements ItemLike {
         return this.friction;
     }
 
+    public float getSpeedFactor() {
+        return this.speedFactor;
+    }
+
+    public float getJumpFactor() {
+        return this.jumpFactor;
+    }
+
     @Deprecated
     @Environment(value=EnvType.CLIENT)
     public long getSeed(BlockState blockState, BlockPos blockPos) {
@@ -776,14 +788,6 @@ implements ItemLike {
     public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
     }
 
-    public static boolean equalsStone(Block block) {
-        return block == Blocks.STONE || block == Blocks.GRANITE || block == Blocks.DIORITE || block == Blocks.ANDESITE;
-    }
-
-    public static boolean equalsDirt(Block block) {
-        return block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL;
-    }
-
     public static enum OffsetType {
         NONE,
         XZ,
@@ -801,6 +805,8 @@ implements ItemLike {
         private float destroyTime;
         private boolean isTicking;
         private float friction = 0.6f;
+        private float speedFactor = 1.0f;
+        private float jumpFactor = 1.0f;
         private ResourceLocation drops;
         private boolean canOcclude = true;
         private boolean dynamicShape;
@@ -833,6 +839,7 @@ implements ItemLike {
             properties.materialColor = block.materialColor;
             properties.soundType = block.soundType;
             properties.friction = block.getFriction();
+            properties.speedFactor = block.getSpeedFactor();
             properties.dynamicShape = block.dynamicShape;
             properties.canOcclude = block.canOcclude;
             return properties;
@@ -851,6 +858,16 @@ implements ItemLike {
 
         public Properties friction(float f) {
             this.friction = f;
+            return this;
+        }
+
+        public Properties speedFactor(float f) {
+            this.speedFactor = f;
+            return this;
+        }
+
+        public Properties jumpFactor(float f) {
+            this.jumpFactor = f;
             return this;
         }
 

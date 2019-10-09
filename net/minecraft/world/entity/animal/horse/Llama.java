@@ -51,7 +51,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -165,7 +164,7 @@ implements RangedAttackMob {
         float f = Mth.cos(this.yBodyRot * ((float)Math.PI / 180));
         float g = Mth.sin(this.yBodyRot * ((float)Math.PI / 180));
         float h = 0.3f;
-        entity.setPos(this.x + (double)(0.3f * g), this.y + this.getRideHeight() + entity.getRidingHeight(), this.z - (double)(0.3f * f));
+        entity.setPos(this.getX() + (double)(0.3f * g), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ() - (double)(0.3f * f));
     }
 
     @Override
@@ -203,7 +202,7 @@ implements RangedAttackMob {
             bl = true;
         }
         if (this.isBaby() && i > 0) {
-            this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.x + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), this.y + 0.5 + (double)(this.random.nextFloat() * this.getBbHeight()), this.z + (double)(this.random.nextFloat() * this.getBbWidth() * 2.0f) - (double)this.getBbWidth(), 0.0, 0.0, 0.0);
+            this.level.addParticle(ParticleTypes.HAPPY_VILLAGER, this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0), 0.0, 0.0, 0.0);
             if (!this.level.isClientSide) {
                 this.ageUp(i);
             }
@@ -216,7 +215,7 @@ implements RangedAttackMob {
             }
         }
         if (bl && !this.isSilent()) {
-            this.level.playSound(null, this.x, this.y, this.z, SoundEvents.LLAMA_EAT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LLAMA_EAT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
         }
         return bl;
     }
@@ -368,12 +367,12 @@ implements RangedAttackMob {
 
     private void spit(LivingEntity livingEntity) {
         LlamaSpit llamaSpit = new LlamaSpit(this.level, this);
-        double d = livingEntity.x - this.x;
-        double e = livingEntity.getBoundingBox().minY + (double)(livingEntity.getBbHeight() / 3.0f) - llamaSpit.y;
-        double f = livingEntity.z - this.z;
+        double d = livingEntity.getX() - this.getX();
+        double e = livingEntity.getY(0.3333333333333333) - llamaSpit.getY();
+        double f = livingEntity.getZ() - this.getZ();
         float g = Mth.sqrt(d * d + f * f) * 0.2f;
         llamaSpit.shoot(d, e + (double)g, f, 1.5f, 10.0f);
-        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.LLAMA_SPIT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+        this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.LLAMA_SPIT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
         this.level.addFreshEntity(llamaSpit);
         this.didSpit = true;
     }
@@ -383,11 +382,10 @@ implements RangedAttackMob {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
-        BlockState blockState;
-        int i = Mth.ceil((f * 0.5f - 3.0f) * g);
+    public boolean causeFallDamage(float f, float g) {
+        int i = this.calculateFallDamage(f, g);
         if (i <= 0) {
-            return;
+            return false;
         }
         if (f >= 6.0f) {
             this.hurt(DamageSource.FALL, i);
@@ -397,10 +395,8 @@ implements RangedAttackMob {
                 }
             }
         }
-        if (!(blockState = this.level.getBlockState(new BlockPos(this.x, this.y - 0.2 - (double)this.yRotO, this.z))).isAir() && !this.isSilent()) {
-            SoundType soundType = blockState.getSoundType();
-            this.level.playSound(null, this.x, this.y, this.z, soundType.getStepSound(), this.getSoundSource(), soundType.getVolume() * 0.5f, soundType.getPitch() * 0.75f);
-        }
+        this.playBlockFallSound();
+        return true;
     }
 
     public void leaveCaravan() {

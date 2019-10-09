@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public abstract class SimpleFeatureDecorator<DC extends DecoratorConfiguration>

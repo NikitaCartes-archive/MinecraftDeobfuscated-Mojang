@@ -3,6 +3,7 @@
  */
 package com.mojang.blaze3d.vertex;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.MemoryTracker;
@@ -133,7 +134,7 @@ implements BufferVertexConsumer {
         ByteBuffer byteBuffer = ByteBuffer.allocate(this.vertices * this.format.getVertexSize());
         byteBuffer.put(this.buffer);
         this.buffer.clear();
-        return new State(byteBuffer, new VertexFormat(this.format));
+        return new State(byteBuffer, this.format);
     }
 
     private static float getQuadDistanceFromPlayer(FloatBuffer floatBuffer, float f, float g, float h, int i, int j) {
@@ -163,7 +164,7 @@ implements BufferVertexConsumer {
         this.buffer.position(this.totalRenderedBytes);
         this.buffer.put(state.data);
         this.buffer.clear();
-        this.format = new VertexFormat(state.format);
+        this.format = state.format;
         this.vertices = i / this.format.getVertexSize();
         this.nextElementByte = this.totalRenderedBytes + this.vertices * this.format.getVertexSize();
     }
@@ -175,7 +176,7 @@ implements BufferVertexConsumer {
         this.building = true;
         this.mode = i;
         this.format = vertexFormat;
-        this.currentElement = vertexFormat.getElement(0);
+        this.currentElement = (VertexFormatElement)vertexFormat.getElements().get(0);
         this.elementIndex = 0;
         this.buffer.clear();
     }
@@ -218,18 +219,16 @@ implements BufferVertexConsumer {
 
     @Override
     public void nextElement() {
-        ++this.elementIndex;
-        this.nextElementByte += this.currentElement().getByteSize();
-        this.elementIndex %= this.format.getElementCount();
-        this.currentElement = this.format.getElement(this.elementIndex);
-        if (this.currentElement().getUsage() == VertexFormatElement.Usage.PADDING) {
+        VertexFormatElement vertexFormatElement;
+        ImmutableList<VertexFormatElement> immutableList = this.format.getElements();
+        this.elementIndex = (this.elementIndex + 1) % immutableList.size();
+        this.nextElementByte += this.currentElement.getByteSize();
+        this.currentElement = vertexFormatElement = (VertexFormatElement)immutableList.get(this.elementIndex);
+        if (vertexFormatElement.getUsage() == VertexFormatElement.Usage.PADDING) {
             this.nextElement();
         }
         if (this.defaultColorSet && this.currentElement.getUsage() == VertexFormatElement.Usage.COLOR) {
             BufferVertexConsumer.super.color(this.defaultR, this.defaultG, this.defaultB, this.defaultA);
-        }
-        if (this.defaultOverlayCoordsSet && this.currentElement.getUsage() == VertexFormatElement.Usage.UV && this.currentElement.getIndex() == 1) {
-            BufferVertexConsumer.super.overlayCoords(this.defaultOverlayU, this.defaultOverlayV);
         }
     }
 
@@ -239,14 +238,6 @@ implements BufferVertexConsumer {
             throw new IllegalStateException();
         }
         return BufferVertexConsumer.super.color(i, j, k, l);
-    }
-
-    @Override
-    public VertexConsumer overlayCoords(int i, int j) {
-        if (this.defaultOverlayCoordsSet) {
-            throw new IllegalStateException();
-        }
-        return BufferVertexConsumer.super.overlayCoords(i, j);
     }
 
     public Pair<DrawState, ByteBuffer> popNextBuffer() {
@@ -266,6 +257,10 @@ implements BufferVertexConsumer {
         if (this.totalRenderedBytes != this.totalUploadedBytes) {
             LOGGER.warn("Bytes mismatch " + this.totalRenderedBytes + " " + this.totalUploadedBytes);
         }
+        this.discard();
+    }
+
+    public void discard() {
         this.totalRenderedBytes = 0;
         this.totalUploadedBytes = 0;
         this.nextElementByte = 0;

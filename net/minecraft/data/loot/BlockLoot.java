@@ -561,6 +561,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.DIORITE_WALL);
         this.dropSelf(Blocks.LOOM);
         this.dropSelf(Blocks.SCAFFOLDING);
+        this.dropSelf(Blocks.HONEY_BLOCK);
+        this.dropSelf(Blocks.HONEYCOMB_BLOCK);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
@@ -726,7 +728,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.YELLOW_BANNER, BlockLoot::createBannerDrop);
         this.add(Blocks.PLAYER_HEAD, (Block block) -> LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Owner", "SkullOwner"))))));
         this.add(Blocks.BEE_NEST, BlockLoot::createBeeNestDrop);
-        this.add(Blocks.BEE_HIVE, BlockLoot::createBeeHiveDrop);
+        this.add(Blocks.BEEHIVE, BlockLoot::createBeeHiveDrop);
         this.add(Blocks.BIRCH_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.BIRCH_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.ACACIA_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.ACACIA_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
         this.add(Blocks.JUNGLE_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.JUNGLE_SAPLING, JUNGLE_LEAVES_SAPLING_CHANGES));

@@ -42,7 +42,7 @@ public class Camera {
         this.detached = bl;
         this.mirror = bl2;
         this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
-        this.setPosition(Mth.lerp((double)f, entity.xo, entity.x), Mth.lerp((double)f, entity.yo, entity.y) + (double)Mth.lerp(f, this.eyeHeightOld, this.eyeHeight), Mth.lerp((double)f, entity.zo, entity.z));
+        this.setPosition(Mth.lerp((double)f, entity.xo, entity.getX()), Mth.lerp((double)f, entity.yo, entity.getY()) + (double)Mth.lerp(f, this.eyeHeightOld, this.eyeHeight), Mth.lerp((double)f, entity.zo, entity.getZ()));
         if (bl) {
             if (bl2) {
                 this.yRot += 180.0f;

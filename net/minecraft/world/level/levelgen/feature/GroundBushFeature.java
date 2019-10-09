@@ -9,38 +9,28 @@ import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class GroundBushFeature
-extends AbstractTreeFeature<NoneFeatureConfiguration> {
-    private final BlockState leaf;
-    private final BlockState trunk;
-
-    public GroundBushFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, BlockState blockState, BlockState blockState2) {
-        super(function, false);
-        this.trunk = blockState;
-        this.leaf = blockState2;
+extends AbstractTreeFeature<TreeConfiguration> {
+    public GroundBushFeature(Function<Dynamic<?>, ? extends TreeConfiguration> function) {
+        super(function);
     }
 
     @Override
-    public boolean doPlace(Set<BlockPos> set, LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, BoundingBox boundingBox) {
+    public boolean doPlace(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, Set<BlockPos> set2, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
         if (GroundBushFeature.isGrassOrDirt(levelSimulatedRW, blockPos = levelSimulatedRW.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos).below())) {
             blockPos = blockPos.above();
-            this.setBlock(set, levelSimulatedRW, blockPos, this.trunk, boundingBox);
-            for (int i = blockPos.getY(); i <= blockPos.getY() + 2; ++i) {
-                int j = i - blockPos.getY();
-                int k = 2 - j;
-                for (int l = blockPos.getX() - k; l <= blockPos.getX() + k; ++l) {
-                    int m = l - blockPos.getX();
-                    for (int n = blockPos.getZ() - k; n <= blockPos.getZ() + k; ++n) {
-                        BlockPos blockPos2;
-                        int o = n - blockPos.getZ();
-                        if (Math.abs(m) == k && Math.abs(o) == k && random.nextInt(2) == 0 || !GroundBushFeature.isAirOrLeaves(levelSimulatedRW, blockPos2 = new BlockPos(l, i, n))) continue;
-                        this.setBlock(set, levelSimulatedRW, blockPos2, this.leaf, boundingBox);
+            this.placeLog(levelSimulatedRW, random, blockPos, set, boundingBox, treeConfiguration);
+            for (int i = 0; i <= 2; ++i) {
+                int j = 2 - i;
+                for (int k = -j; k <= j; ++k) {
+                    for (int l = -j; l <= j; ++l) {
+                        if (Math.abs(k) == j && Math.abs(l) == j && random.nextInt(2) == 0) continue;
+                        this.placeLeaf(levelSimulatedRW, random, new BlockPos(k + blockPos.getX(), i + blockPos.getY(), l + blockPos.getZ()), set2, boundingBox, treeConfiguration);
                     }
                 }
             }

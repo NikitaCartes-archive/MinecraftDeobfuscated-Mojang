@@ -120,7 +120,7 @@ extends AbstractMinecart {
         @Override
         @Environment(value=EnvType.CLIENT)
         public Vec3 getPosition() {
-            return new Vec3(MinecartCommandBlock.this.x, MinecartCommandBlock.this.y, MinecartCommandBlock.this.z);
+            return MinecartCommandBlock.this.position();
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -130,7 +130,7 @@ extends AbstractMinecart {
 
         @Override
         public CommandSourceStack createCommandSourceStack() {
-            return new CommandSourceStack(this, new Vec3(MinecartCommandBlock.this.x, MinecartCommandBlock.this.y, MinecartCommandBlock.this.z), MinecartCommandBlock.this.getRotationVector(), this.getLevel(), 2, this.getName().getString(), MinecartCommandBlock.this.getDisplayName(), this.getLevel().getServer(), MinecartCommandBlock.this);
+            return new CommandSourceStack(this, MinecartCommandBlock.this.position(), MinecartCommandBlock.this.getRotationVector(), this.getLevel(), 2, this.getName().getString(), MinecartCommandBlock.this.getDisplayName(), this.getLevel().getServer(), MinecartCommandBlock.this);
         }
     }
 }

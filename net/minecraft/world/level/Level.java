@@ -715,7 +715,7 @@ AutoCloseable {
         }
         if (blockEntity != null && !blockEntity.isRemoved()) {
             if (this.updatingBlockEntities) {
-                blockEntity.setPosition(blockPos);
+                blockEntity.setLevelAndPosition(this, blockPos);
                 Iterator<BlockEntity> iterator = this.pendingBlockEntities.iterator();
                 while (iterator.hasNext()) {
                     BlockEntity blockEntity2 = iterator.next();
@@ -812,12 +812,12 @@ AutoCloseable {
         return list;
     }
 
-    public List<Entity> getEntities(@Nullable EntityType<?> entityType, AABB aABB, Predicate<? super Entity> predicate) {
+    public <T extends Entity> List<T> getEntities(@Nullable EntityType<T> entityType, AABB aABB, Predicate<? super T> predicate) {
         int i = Mth.floor((aABB.minX - 2.0) / 16.0);
         int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
         int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
         int l = Mth.ceil((aABB.maxZ + 2.0) / 16.0);
-        ArrayList<Entity> list = Lists.newArrayList();
+        ArrayList list = Lists.newArrayList();
         for (int m = i; m < j; ++m) {
             for (int n = k; n < l; ++n) {
                 LevelChunk levelChunk = this.getChunkSource().getChunk(m, n, false);

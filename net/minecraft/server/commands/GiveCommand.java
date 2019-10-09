@@ -48,7 +48,7 @@ public class GiveCommand {
                 if (itemEntity != null) {
                     itemEntity.makeFakeItem();
                 }
-                serverPlayer.level.playSound(null, serverPlayer.x, serverPlayer.y, serverPlayer.z, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f, ((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
+                serverPlayer.level.playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f, ((serverPlayer.getRandom().nextFloat() - serverPlayer.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
                 serverPlayer.inventoryMenu.broadcastChanges();
             }
         }

@@ -130,7 +130,7 @@ extends Monster {
         if (this.tickCount >= this.lastStareSound + 400) {
             this.lastStareSound = this.tickCount;
             if (!this.isSilent()) {
-                this.level.playLocalSound(this.x, this.y + (double)this.getEyeHeight(), this.z, SoundEvents.ENDERMAN_STARE, this.getSoundSource(), 2.5f, 1.0f, false);
+                this.level.playLocalSound(this.getX(), this.getEyeY(), this.getZ(), SoundEvents.ENDERMAN_STARE, this.getSoundSource(), 2.5f, 1.0f, false);
             }
         }
     }
@@ -168,7 +168,7 @@ extends Monster {
             return false;
         }
         Vec3 vec3 = player.getViewVector(1.0f).normalize();
-        Vec3 vec32 = new Vec3(this.x - player.x, this.getBoundingBox().minY + (double)this.getEyeHeight() - (player.y + (double)player.getEyeHeight()), this.z - player.z);
+        Vec3 vec32 = new Vec3(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
         double d = vec32.length();
         double e = vec3.dot(vec32 = vec32.normalize());
         if (e > 1.0 - 0.025 / d) {
@@ -186,7 +186,7 @@ extends Monster {
     public void aiStep() {
         if (this.level.isClientSide) {
             for (int i = 0; i < 2; ++i) {
-                this.level.addParticle(ParticleTypes.PORTAL, this.x + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(), this.y + this.random.nextDouble() * (double)this.getBbHeight() - 0.25, this.z + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(), (this.random.nextDouble() - 0.5) * 2.0, -this.random.nextDouble(), (this.random.nextDouble() - 0.5) * 2.0);
+                this.level.addParticle(ParticleTypes.PORTAL, this.getRandomX(0.5), this.getRandomY() - 0.25, this.getRandomZ(0.5), (this.random.nextDouble() - 0.5) * 2.0, -this.random.nextDouble(), (this.random.nextDouble() - 0.5) * 2.0);
             }
         }
         this.jumping = false;
@@ -210,19 +210,19 @@ extends Monster {
         if (this.level.isClientSide() || !this.isAlive()) {
             return false;
         }
-        double d = this.x + (this.random.nextDouble() - 0.5) * 64.0;
-        double e = this.y + (double)(this.random.nextInt(64) - 32);
-        double f = this.z + (this.random.nextDouble() - 0.5) * 64.0;
+        double d = this.getX() + (this.random.nextDouble() - 0.5) * 64.0;
+        double e = this.getY() + (double)(this.random.nextInt(64) - 32);
+        double f = this.getZ() + (this.random.nextDouble() - 0.5) * 64.0;
         return this.teleport(d, e, f);
     }
 
     private boolean teleportTowards(Entity entity) {
-        Vec3 vec3 = new Vec3(this.x - entity.x, this.getBoundingBox().minY + (double)(this.getBbHeight() / 2.0f) - entity.y + (double)entity.getEyeHeight(), this.z - entity.z);
+        Vec3 vec3 = new Vec3(this.getX() - entity.getX(), this.getY(0.5) - entity.getEyeY(), this.getZ() - entity.getZ());
         vec3 = vec3.normalize();
         double d = 16.0;
-        double e = this.x + (this.random.nextDouble() - 0.5) * 8.0 - vec3.x * 16.0;
-        double f = this.y + (double)(this.random.nextInt(16) - 8) - vec3.y * 16.0;
-        double g = this.z + (this.random.nextDouble() - 0.5) * 8.0 - vec3.z * 16.0;
+        double e = this.getX() + (this.random.nextDouble() - 0.5) * 8.0 - vec3.x * 16.0;
+        double f = this.getY() + (double)(this.random.nextInt(16) - 8) - vec3.y * 16.0;
+        double g = this.getZ() + (this.random.nextDouble() - 0.5) * 8.0 - vec3.z * 16.0;
         return this.teleport(e, f, g);
     }
 
@@ -334,13 +334,13 @@ extends Monster {
             Vec3 vec32;
             Random random = this.enderman.getRandom();
             Level level = this.enderman.level;
-            int i = Mth.floor(this.enderman.x - 2.0 + random.nextDouble() * 4.0);
-            int j = Mth.floor(this.enderman.y + random.nextDouble() * 3.0);
-            int k = Mth.floor(this.enderman.z - 2.0 + random.nextDouble() * 4.0);
+            int i = Mth.floor(this.enderman.getX() - 2.0 + random.nextDouble() * 4.0);
+            int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 3.0);
+            int k = Mth.floor(this.enderman.getZ() - 2.0 + random.nextDouble() * 4.0);
             BlockPos blockPos = new BlockPos(i, j, k);
             BlockState blockState = level.getBlockState(blockPos);
             Block block = blockState.getBlock();
-            Vec3 vec3 = new Vec3((double)Mth.floor(this.enderman.x) + 0.5, (double)j + 0.5, (double)Mth.floor(this.enderman.z) + 0.5);
+            Vec3 vec3 = new Vec3((double)Mth.floor(this.enderman.getX()) + 0.5, (double)j + 0.5, (double)Mth.floor(this.enderman.getZ()) + 0.5);
             BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.enderman));
             boolean bl2 = bl = blockHitResult.getType() != HitResult.Type.MISS && blockHitResult.getBlockPos().equals(blockPos);
             if (block.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
@@ -373,9 +373,9 @@ extends Monster {
         public void tick() {
             Random random = this.enderman.getRandom();
             Level levelAccessor = this.enderman.level;
-            int i = Mth.floor(this.enderman.x - 1.0 + random.nextDouble() * 2.0);
-            int j = Mth.floor(this.enderman.y + random.nextDouble() * 2.0);
-            int k = Mth.floor(this.enderman.z - 1.0 + random.nextDouble() * 2.0);
+            int i = Mth.floor(this.enderman.getX() - 1.0 + random.nextDouble() * 2.0);
+            int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 2.0);
+            int k = Mth.floor(this.enderman.getZ() - 1.0 + random.nextDouble() * 2.0);
             BlockPos blockPos = new BlockPos(i, j, k);
             BlockState blockState = levelAccessor.getBlockState(blockPos);
             BlockPos blockPos2 = blockPos.below();

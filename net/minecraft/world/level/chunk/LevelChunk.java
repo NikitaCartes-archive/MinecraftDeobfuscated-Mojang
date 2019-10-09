@@ -282,13 +282,13 @@ implements ChunkAccess {
     public void addEntity(Entity entity) {
         int k;
         this.lastSaveHadEntities = true;
-        int i = Mth.floor(entity.x / 16.0);
-        int j = Mth.floor(entity.z / 16.0);
+        int i = Mth.floor(entity.getX() / 16.0);
+        int j = Mth.floor(entity.getZ() / 16.0);
         if (i != this.chunkPos.x || j != this.chunkPos.z) {
             LOGGER.warn("Wrong location! ({}, {}) should be ({}, {}), {}", (Object)i, (Object)j, (Object)this.chunkPos.x, (Object)this.chunkPos.z, (Object)entity);
             entity.removed = true;
         }
-        if ((k = Mth.floor(entity.y / 16.0)) < 0) {
+        if ((k = Mth.floor(entity.getY() / 16.0)) < 0) {
             k = 0;
         }
         if (k >= this.entitySections.length) {
@@ -373,8 +373,7 @@ implements ChunkAccess {
         if (!(this.getBlockState(blockPos).getBlock() instanceof EntityBlock)) {
             return;
         }
-        blockEntity.setLevel(this.level);
-        blockEntity.setPosition(blockPos);
+        blockEntity.setLevelAndPosition(this.level, blockPos);
         blockEntity.clearRemoved();
         BlockEntity blockEntity2 = this.blockEntities.put(blockPos.immutable(), blockEntity);
         if (blockEntity2 != null && blockEntity2 != blockEntity) {
@@ -444,15 +443,17 @@ implements ChunkAccess {
         }
     }
 
-    public void getEntities(@Nullable EntityType<?> entityType, AABB aABB, List<Entity> list, Predicate<? super Entity> predicate) {
+    public <T extends Entity> void getEntities(@Nullable EntityType<?> entityType, AABB aABB, List<? super T> list, Predicate<? super T> predicate) {
         int i = Mth.floor((aABB.minY - 2.0) / 16.0);
         int j = Mth.floor((aABB.maxY + 2.0) / 16.0);
         i = Mth.clamp(i, 0, this.entitySections.length - 1);
         j = Mth.clamp(j, 0, this.entitySections.length - 1);
         for (int k = i; k <= j; ++k) {
             for (Entity entity : this.entitySections[k].find(Entity.class)) {
-                if (entityType != null && entity.getType() != entityType || !entity.getBoundingBox().intersects(aABB) || !predicate.test(entity)) continue;
-                list.add(entity);
+                if (entityType != null && entity.getType() != entityType) continue;
+                Entity entity2 = entity;
+                if (!entity.getBoundingBox().intersects(aABB) || !predicate.test(entity2)) continue;
+                list.add(entity2);
             }
         }
     }
@@ -662,7 +663,7 @@ implements ChunkAccess {
             blockEntity = BlockEntity.loadStatic(compoundTag);
         }
         if (blockEntity != null) {
-            blockEntity.setPosition(blockPos);
+            blockEntity.setLevelAndPosition(this.level, blockPos);
             this.addBlockEntity(blockEntity);
         } else {
             LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", (Object)this.getBlockState(blockPos), (Object)blockPos);

@@ -61,7 +61,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Sheep
 extends Animal {
-    public static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
     private static final Map<DyeColor, ItemLike> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), enumMap -> {
         enumMap.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
         enumMap.put(DyeColor.ORANGE, Blocks.ORANGE_WOOL);

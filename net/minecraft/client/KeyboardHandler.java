@@ -152,7 +152,7 @@ public class KeyboardHandler {
                     return false;
                 }
                 this.debugFeedbackTranslated("debug.copy_location.message", new Object[0]);
-                this.setClipboard(String.format(Locale.ROOT, "/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", DimensionType.getName(this.minecraft.player.level.dimension.getType()), this.minecraft.player.x, this.minecraft.player.y, this.minecraft.player.z, Float.valueOf(this.minecraft.player.yRot), Float.valueOf(this.minecraft.player.xRot)));
+                this.setClipboard(String.format(Locale.ROOT, "/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", DimensionType.getName(this.minecraft.player.level.dimension.getType()), this.minecraft.player.getX(), this.minecraft.player.getY(), this.minecraft.player.getZ(), Float.valueOf(this.minecraft.player.yRot), Float.valueOf(this.minecraft.player.xRot)));
                 return true;
             }
         }
@@ -189,21 +189,20 @@ public class KeyboardHandler {
             case ENTITY: {
                 Entity entity = ((EntityHitResult)hitResult).getEntity();
                 ResourceLocation resourceLocation = Registry.ENTITY_TYPE.getKey(entity.getType());
-                Vec3 vec3 = new Vec3(entity.x, entity.y, entity.z);
                 if (bl) {
                     if (bl2) {
                         this.minecraft.player.connection.getDebugQueryHandler().queryEntityTag(entity.getId(), compoundTag -> {
-                            this.copyCreateEntityCommand(resourceLocation, vec3, (CompoundTag)compoundTag);
+                            this.copyCreateEntityCommand(resourceLocation, entity.position(), (CompoundTag)compoundTag);
                             this.debugFeedbackTranslated("debug.inspect.server.entity", new Object[0]);
                         });
                         break;
                     }
-                    CompoundTag compoundTag3 = entity.saveWithoutId(new CompoundTag());
-                    this.copyCreateEntityCommand(resourceLocation, vec3, compoundTag3);
+                    CompoundTag compoundTag2 = entity.saveWithoutId(new CompoundTag());
+                    this.copyCreateEntityCommand(resourceLocation, entity.position(), compoundTag2);
                     this.debugFeedbackTranslated("debug.inspect.client.entity", new Object[0]);
                     break;
                 }
-                this.copyCreateEntityCommand(resourceLocation, vec3, null);
+                this.copyCreateEntityCommand(resourceLocation, entity.position(), null);
                 this.debugFeedbackTranslated("debug.inspect.client.entity", new Object[0]);
                 break;
             }

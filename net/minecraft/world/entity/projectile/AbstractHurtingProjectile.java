@@ -49,8 +49,7 @@ extends Entity {
     public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, double d, double e, double f, Level level) {
         this(entityType, level);
         this.owner = livingEntity;
-        this.moveTo(livingEntity.x, livingEntity.y, livingEntity.z, livingEntity.yRot, livingEntity.xRot);
-        this.setPos(this.x, this.y, this.z);
+        this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
         this.setDeltaMovement(Vec3.ZERO);
         double g = Mth.sqrt((d += this.random.nextGaussian() * 0.4) * d + (e += this.random.nextGaussian() * 0.4) * e + (f += this.random.nextGaussian() * 0.4) * f);
         this.xPower = d / g * 0.1;
@@ -88,21 +87,21 @@ extends Entity {
             this.onHit(hitResult);
         }
         Vec3 vec3 = this.getDeltaMovement();
-        this.x += vec3.x;
-        this.y += vec3.y;
-        this.z += vec3.z;
+        double d = this.getX() + vec3.x;
+        double e = this.getY() + vec3.y;
+        double f = this.getZ() + vec3.z;
         ProjectileUtil.rotateTowardsMovement(this, 0.2f);
-        float f = this.getInertia();
+        float g = this.getInertia();
         if (this.isInWater()) {
             for (int i = 0; i < 4; ++i) {
-                float g = 0.25f;
-                this.level.addParticle(ParticleTypes.BUBBLE, this.x - vec3.x * 0.25, this.y - vec3.y * 0.25, this.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+                float h = 0.25f;
+                this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
             }
-            f = 0.8f;
+            g = 0.8f;
         }
-        this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale(f));
-        this.level.addParticle(this.getTrailParticle(), this.x, this.y + 0.5, this.z, 0.0, 0.0, 0.0);
-        this.setPos(this.x, this.y, this.z);
+        this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale(g));
+        this.level.addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
+        this.setPos(d, e, f);
     }
 
     protected boolean shouldBurn() {
@@ -188,7 +187,7 @@ extends Entity {
     @Override
     public Packet<?> getAddEntityPacket() {
         int i = this.owner == null ? 0 : this.owner.getId();
-        return new ClientboundAddEntityPacket(this.getId(), this.getUUID(), this.x, this.y, this.z, this.xRot, this.yRot, this.getType(), i, new Vec3(this.xPower, this.yPower, this.zPower));
+        return new ClientboundAddEntityPacket(this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.xRot, this.yRot, this.getType(), i, new Vec3(this.xPower, this.yPower, this.zPower));
     }
 }
 

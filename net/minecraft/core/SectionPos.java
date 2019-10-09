@@ -34,7 +34,7 @@ extends Vec3i {
     }
 
     public static SectionPos of(Entity entity) {
-        return new SectionPos(SectionPos.blockToSectionCoord(Mth.floor(entity.x)), SectionPos.blockToSectionCoord(Mth.floor(entity.y)), SectionPos.blockToSectionCoord(Mth.floor(entity.z)));
+        return new SectionPos(SectionPos.blockToSectionCoord(Mth.floor(entity.getX())), SectionPos.blockToSectionCoord(Mth.floor(entity.getY())), SectionPos.blockToSectionCoord(Mth.floor(entity.getZ())));
     }
 
     public static SectionPos of(long l) {

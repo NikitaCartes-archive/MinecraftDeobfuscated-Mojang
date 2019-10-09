@@ -84,7 +84,7 @@ extends ProjectileWeaponItem {
             }
             level.addFreshEntity(abstractArrow);
         }
-        level.playSound(null, player.x, player.y, player.z, SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0f, 1.0f / (random.nextFloat() * 0.4f + 1.2f) + f * 0.5f);
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0f, 1.0f / (random.nextFloat() * 0.4f + 1.2f) + f * 0.5f);
         if (!bl2 && !player.abilities.instabuild) {
             itemStack2.shrink(1);
             if (itemStack2.isEmpty()) {

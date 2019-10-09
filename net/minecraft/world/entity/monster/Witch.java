@@ -148,7 +148,7 @@ implements RangedAttackMob {
                     this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), potion));
                     this.usingTime = this.getMainHandItem().getUseDuration();
                     this.setUsingItem(true);
-                    this.level.playSound(null, this.x, this.y, this.z, SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+                    this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
                     AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
                     attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING);
                     attributeInstance.addModifier(SPEED_MODIFIER_DRINKING);
@@ -171,7 +171,7 @@ implements RangedAttackMob {
     public void handleEntityEvent(byte b) {
         if (b == 15) {
             for (int i = 0; i < this.random.nextInt(35) + 10; ++i) {
-                this.level.addParticle(ParticleTypes.WITCH, this.x + this.random.nextGaussian() * (double)0.13f, this.getBoundingBox().maxY + 0.5 + this.random.nextGaussian() * (double)0.13f, this.z + this.random.nextGaussian() * (double)0.13f, 0.0, 0.0, 0.0);
+                this.level.addParticle(ParticleTypes.WITCH, this.getX() + this.random.nextGaussian() * (double)0.13f, this.getBoundingBox().maxY + 0.5 + this.random.nextGaussian() * (double)0.13f, this.getZ() + this.random.nextGaussian() * (double)0.13f, 0.0, 0.0, 0.0);
             }
         } else {
             super.handleEntityEvent(b);
@@ -196,9 +196,9 @@ implements RangedAttackMob {
             return;
         }
         Vec3 vec3 = livingEntity.getDeltaMovement();
-        double d = livingEntity.x + vec3.x - this.x;
-        double e = livingEntity.y + (double)livingEntity.getEyeHeight() - (double)1.1f - this.y;
-        double g = livingEntity.z + vec3.z - this.z;
+        double d = livingEntity.getX() + vec3.x - this.getX();
+        double e = livingEntity.getEyeY() - (double)1.1f - this.getY();
+        double g = livingEntity.getZ() + vec3.z - this.getZ();
         float h = Mth.sqrt(d * d + g * g);
         Potion potion = Potions.HARMING;
         if (livingEntity instanceof Raider) {
@@ -215,7 +215,7 @@ implements RangedAttackMob {
         thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
         thrownPotion.xRot -= -20.0f;
         thrownPotion.shoot(d, e + (double)(h * 0.2f), g, 0.75f, 8.0f);
-        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+        this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
         this.level.addFreshEntity(thrownPotion);
     }
 

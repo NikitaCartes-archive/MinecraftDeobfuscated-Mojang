@@ -7,87 +7,81 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.Dynamic;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
-public abstract class AbstractTreeFeature<T extends FeatureConfiguration>
+public abstract class AbstractTreeFeature<T extends TreeConfiguration>
 extends Feature<T> {
-    public AbstractTreeFeature(Function<Dynamic<?>, ? extends T> function, boolean bl) {
-        super(function, bl);
+    public AbstractTreeFeature(Function<Dynamic<?>, ? extends T> function) {
+        super(function);
     }
 
     protected static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Block block = blockState.getBlock();
-            return blockState.isAir() || blockState.is(BlockTags.LEAVES) || block == Blocks.GRASS_BLOCK || Block.equalsDirt(block) || block.is(BlockTags.LOGS) || block.is(BlockTags.SAPLINGS) || block == Blocks.VINE;
+            return blockState.isAir() || blockState.is(BlockTags.LEAVES) || AbstractTreeFeature.isDirt(block) || block.is(BlockTags.LOGS) || block.is(BlockTags.SAPLINGS) || block == Blocks.VINE;
         });
     }
 
-    protected static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+    public static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, BlockState::isAir);
     }
 
     protected static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> Block.equalsDirt(blockState.getBlock()));
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
+            Block block = blockState.getBlock();
+            return AbstractTreeFeature.isDirt(block) && block != Blocks.GRASS_BLOCK && block != Blocks.MYCELIUM;
+        });
     }
 
-    protected static boolean isBlockWater(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+    protected static boolean isVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.getBlock() == Blocks.VINE);
+    }
+
+    public static boolean isBlockWater(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.getBlock() == Blocks.WATER);
     }
 
-    protected static boolean isLeaves(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(BlockTags.LEAVES));
-    }
-
-    protected static boolean isAirOrLeaves(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+    public static boolean isAirOrLeaves(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.isAir() || blockState.is(BlockTags.LEAVES));
     }
 
-    protected static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
-            Block block = blockState.getBlock();
-            return Block.equalsDirt(block) || block == Blocks.GRASS_BLOCK;
-        });
+    public static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> AbstractTreeFeature.isDirt(blockState.getBlock()));
     }
 
     protected static boolean isGrassOrDirtOrFarmland(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Block block = blockState.getBlock();
-            return Block.equalsDirt(block) || block == Blocks.GRASS_BLOCK || block == Blocks.FARMLAND;
+            return AbstractTreeFeature.isDirt(block) || block == Blocks.FARMLAND;
         });
     }
 
-    protected static boolean isReplaceablePlant(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+    public static boolean isReplaceablePlant(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Material material = blockState.getMaterial();
             return material == Material.REPLACEABLE_PLANT;
@@ -100,122 +94,111 @@ extends Feature<T> {
         }
     }
 
+    protected boolean placeLog(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+        if (AbstractTreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos) || AbstractTreeFeature.isReplaceablePlant(levelSimulatedRW, blockPos) || AbstractTreeFeature.isBlockWater(levelSimulatedRW, blockPos)) {
+            this.setBlock(levelSimulatedRW, blockPos, treeConfiguration.trunkProvider.getState(random, blockPos), boundingBox);
+            set.add(blockPos.immutable());
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean placeLeaf(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+        if (AbstractTreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos) || AbstractTreeFeature.isReplaceablePlant(levelSimulatedRW, blockPos) || AbstractTreeFeature.isBlockWater(levelSimulatedRW, blockPos)) {
+            this.setBlock(levelSimulatedRW, blockPos, treeConfiguration.leavesProvider.getState(random, blockPos), boundingBox);
+            set.add(blockPos.immutable());
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void setBlock(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState) {
         this.setBlockKnownShape(levelWriter, blockPos, blockState);
     }
 
-    protected final void setBlock(Set<BlockPos> set, LevelWriter levelWriter, BlockPos blockPos, BlockState blockState, BoundingBox boundingBox) {
+    protected final void setBlock(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState, BoundingBox boundingBox) {
         this.setBlockKnownShape(levelWriter, blockPos, blockState);
         boundingBox.expand(new BoundingBox(blockPos, blockPos));
-        if (BlockTags.LOGS.contains(blockState.getBlock())) {
-            set.add(blockPos.immutable());
-        }
     }
 
     private void setBlockKnownShape(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState) {
-        if (this.doUpdate) {
-            levelWriter.setBlock(blockPos, blockState, 19);
-        } else {
-            levelWriter.setBlock(blockPos, blockState, 18);
-        }
+        levelWriter.setBlock(blockPos, blockState, 19);
     }
 
-    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration, boolean bl) {
-        Biome biome;
+    @Override
+    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T treeConfiguration) {
         HashSet<BlockPos> set = Sets.newHashSet();
+        HashSet<BlockPos> set2 = Sets.newHashSet();
+        HashSet<BlockPos> set3 = Sets.newHashSet();
         BoundingBox boundingBox = BoundingBox.getUnknownBox();
-        boolean bl2 = this.doPlace(set, levelAccessor, random, blockPos, boundingBox);
-        if (boundingBox.x0 > boundingBox.x1) {
+        boolean bl = this.doPlace(levelAccessor, random, blockPos, set, set2, boundingBox, treeConfiguration);
+        if (boundingBox.x0 > boundingBox.x1 || !bl || set.isEmpty()) {
             return false;
         }
-        ArrayList<Set<BlockPos>> list = Lists.newArrayList();
+        if (!((TreeConfiguration)treeConfiguration).decorators.isEmpty()) {
+            ArrayList<BlockPos> list = Lists.newArrayList(set);
+            ArrayList<BlockPos> list2 = Lists.newArrayList(set2);
+            list.sort(Comparator.comparingInt(Vec3i::getY));
+            list2.sort(Comparator.comparingInt(Vec3i::getY));
+            ((TreeConfiguration)treeConfiguration).decorators.forEach(treeDecorator -> treeDecorator.place(levelAccessor, random, list, list2, set3, boundingBox));
+        }
+        DiscreteVoxelShape discreteVoxelShape = this.updateLeaves(levelAccessor, boundingBox, set, set3);
+        StructureTemplate.updateShapeAtEdge(levelAccessor, 3, discreteVoxelShape, boundingBox.x0, boundingBox.y0, boundingBox.z0);
+        return true;
+    }
+
+    private DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2) {
+        ArrayList list = Lists.newArrayList();
+        BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
         int i = 6;
         for (int j = 0; j < 6; ++j) {
             list.add(Sets.newHashSet());
         }
-        BitSetDiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
         try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            if (bl2 && !set.isEmpty()) {
-                for (BlockPos blockPos2 : Lists.newArrayList(set)) {
-                    if (boundingBox.isInside(blockPos2)) {
-                        ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
-                    }
-                    for (Direction direction : Direction.values()) {
-                        BlockState blockState;
-                        pooledMutableBlockPos.set(blockPos2).move(direction);
-                        if (set.contains(pooledMutableBlockPos) || !(blockState = levelAccessor.getBlockState(pooledMutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE)) continue;
-                        ((Set)list.get(0)).add(pooledMutableBlockPos.immutable());
-                        this.setBlockKnownShape(levelAccessor, pooledMutableBlockPos, (BlockState)blockState.setValue(BlockStateProperties.DISTANCE, 1));
-                        if (!boundingBox.isInside(pooledMutableBlockPos)) continue;
-                        ((DiscreteVoxelShape)discreteVoxelShape).setFull(pooledMutableBlockPos.getX() - boundingBox.x0, pooledMutableBlockPos.getY() - boundingBox.y0, pooledMutableBlockPos.getZ() - boundingBox.z0, true, true);
-                    }
+            for (BlockPos blockPos : Lists.newArrayList(set2)) {
+                if (!boundingBox.isInside(blockPos)) continue;
+                ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos.getX() - boundingBox.x0, blockPos.getY() - boundingBox.y0, blockPos.getZ() - boundingBox.z0, true, true);
+            }
+            for (BlockPos blockPos : Lists.newArrayList(set)) {
+                if (boundingBox.isInside(blockPos)) {
+                    ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos.getX() - boundingBox.x0, blockPos.getY() - boundingBox.y0, blockPos.getZ() - boundingBox.z0, true, true);
+                }
+                for (Direction direction : Direction.values()) {
+                    BlockState blockState;
+                    pooledMutableBlockPos.set(blockPos).move(direction);
+                    if (set.contains(pooledMutableBlockPos) || !(blockState = levelAccessor.getBlockState(pooledMutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE)) continue;
+                    ((Set)list.get(0)).add(pooledMutableBlockPos.immutable());
+                    this.setBlockKnownShape(levelAccessor, pooledMutableBlockPos, (BlockState)blockState.setValue(BlockStateProperties.DISTANCE, 1));
+                    if (!boundingBox.isInside(pooledMutableBlockPos)) continue;
+                    ((DiscreteVoxelShape)discreteVoxelShape).setFull(pooledMutableBlockPos.getX() - boundingBox.x0, pooledMutableBlockPos.getY() - boundingBox.y0, pooledMutableBlockPos.getZ() - boundingBox.z0, true, true);
                 }
             }
             for (int k = 1; k < 6; ++k) {
-                Set set2 = (Set)list.get(k - 1);
-                Set set3 = (Set)list.get(k);
-                for (BlockPos blockPos3 : set2) {
-                    if (boundingBox.isInside(blockPos3)) {
-                        ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos3.getX() - boundingBox.x0, blockPos3.getY() - boundingBox.y0, blockPos3.getZ() - boundingBox.z0, true, true);
+                Set set3 = (Set)list.get(k - 1);
+                Set set4 = (Set)list.get(k);
+                for (BlockPos blockPos2 : set3) {
+                    if (boundingBox.isInside(blockPos2)) {
+                        ((DiscreteVoxelShape)discreteVoxelShape).setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
                     }
                     for (Direction direction2 : Direction.values()) {
                         int l;
                         BlockState blockState2;
-                        pooledMutableBlockPos.set(blockPos3).move(direction2);
-                        if (set2.contains(pooledMutableBlockPos) || set3.contains(pooledMutableBlockPos) || !(blockState2 = levelAccessor.getBlockState(pooledMutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE) || (l = blockState2.getValue(BlockStateProperties.DISTANCE).intValue()) <= k + 1) continue;
+                        pooledMutableBlockPos.set(blockPos2).move(direction2);
+                        if (set3.contains(pooledMutableBlockPos) || set4.contains(pooledMutableBlockPos) || !(blockState2 = levelAccessor.getBlockState(pooledMutableBlockPos)).hasProperty(BlockStateProperties.DISTANCE) || (l = blockState2.getValue(BlockStateProperties.DISTANCE).intValue()) <= k + 1) continue;
                         BlockState blockState3 = (BlockState)blockState2.setValue(BlockStateProperties.DISTANCE, k + 1);
                         this.setBlockKnownShape(levelAccessor, pooledMutableBlockPos, blockState3);
                         if (boundingBox.isInside(pooledMutableBlockPos)) {
                             ((DiscreteVoxelShape)discreteVoxelShape).setFull(pooledMutableBlockPos.getX() - boundingBox.x0, pooledMutableBlockPos.getY() - boundingBox.y0, pooledMutableBlockPos.getZ() - boundingBox.z0, true, true);
                         }
-                        set3.add(pooledMutableBlockPos.immutable());
+                        set4.add(pooledMutableBlockPos.immutable());
                     }
                 }
             }
         }
-        if (bl && ((biome = levelAccessor.getBiome(blockPos)) == Biomes.FLOWER_FOREST || biome == Biomes.SUNFLOWER_PLAINS || biome == Biomes.PLAINS)) {
-            this.spawnBeehive(levelAccessor, random, blockPos, boundingBox, list, biome);
-        }
-        StructureTemplate.updateShapeAtEdge(levelAccessor, 3, discreteVoxelShape, boundingBox.x0, boundingBox.y0, boundingBox.z0);
-        return bl2;
+        return discreteVoxelShape;
     }
 
-    @Override
-    public final boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, T featureConfiguration) {
-        return this.place(levelAccessor, chunkGenerator, random, blockPos, featureConfiguration, true);
-    }
-
-    private void spawnBeehive(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BoundingBox boundingBox, List<Set<BlockPos>> list, Biome biome) {
-        float f;
-        float f2 = f = biome == Biomes.FLOWER_FOREST ? 0.01f : 0.05f;
-        if (random.nextFloat() < f) {
-            BlockPos blockPos22;
-            Direction direction = BeehiveBlock.SPAWN_DIRECTIONS[random.nextInt(BeehiveBlock.SPAWN_DIRECTIONS.length)];
-            int i = boundingBox.y1;
-            if (!list.isEmpty()) {
-                for (BlockPos blockPos22 : list.get(0)) {
-                    if (blockPos22.getY() >= i) continue;
-                    i = blockPos22.getY();
-                }
-            }
-            BlockState blockState = (BlockState)Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
-            blockPos22 = blockPos.offset(direction.getStepX(), i - 1 - blockPos.getY(), direction.getStepZ());
-            if (levelAccessor.isEmptyBlock(blockPos22) && levelAccessor.isEmptyBlock(blockPos22.relative(Direction.SOUTH))) {
-                this.setBlock(levelAccessor, blockPos22, blockState);
-                BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos22);
-                if (blockEntity instanceof BeehiveBlockEntity) {
-                    BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-                    int j = 2 + random.nextInt(2);
-                    for (int k = 0; k < j; ++k) {
-                        Bee bee = new Bee((EntityType<? extends Bee>)EntityType.BEE, levelAccessor.getLevel());
-                        beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
-                    }
-                }
-            }
-        }
-    }
-
-    protected abstract boolean doPlace(Set<BlockPos> var1, LevelSimulatedRW var2, Random var3, BlockPos var4, BoundingBox var5);
+    protected abstract boolean doPlace(LevelSimulatedRW var1, Random var2, BlockPos var3, Set<BlockPos> var4, Set<BlockPos> var5, BoundingBox var6, T var7);
 }
 

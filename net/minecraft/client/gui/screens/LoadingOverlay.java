@@ -81,9 +81,9 @@ extends Overlay {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
         this.blit(n, p, 0, 0, 256, 256);
         float q = this.reload.getActualProgress();
-        this.currentProgress = this.currentProgress * 0.95f + q * 0.050000012f;
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + q * 0.050000012f, 0.0f, 1.0f);
         if (g < 1.0f) {
-            this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, this.currentProgress, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
+            this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
         }
         if (g >= 2.0f) {
             this.minecraft.setOverlay(null);
@@ -98,11 +98,11 @@ extends Overlay {
         }
     }
 
-    private void drawProgressBar(int i, int j, int k, int l, float f, float g) {
-        int m = Mth.ceil((float)(k - i - 2) * f);
-        LoadingOverlay.fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0f - g) * 255.0f) << 16 | Math.round((1.0f - g) * 255.0f) << 8 | Math.round((1.0f - g) * 255.0f));
+    private void drawProgressBar(int i, int j, int k, int l, float f) {
+        int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
+        LoadingOverlay.fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0f - f) * 255.0f) << 16 | Math.round((1.0f - f) * 255.0f) << 8 | Math.round((1.0f - f) * 255.0f));
         LoadingOverlay.fill(i, j, k, l, -1);
-        LoadingOverlay.fill(i + 1, j + 1, i + m, l - 1, 0xFF000000 | (int)Mth.lerp(1.0f - g, 226.0f, 255.0f) << 16 | (int)Mth.lerp(1.0f - g, 40.0f, 255.0f) << 8 | (int)Mth.lerp(1.0f - g, 55.0f, 255.0f));
+        LoadingOverlay.fill(i + 1, j + 1, i + m, l - 1, 0xFF000000 | (int)Mth.lerp(1.0f - f, 226.0f, 255.0f) << 16 | (int)Mth.lerp(1.0f - f, 40.0f, 255.0f) << 8 | (int)Mth.lerp(1.0f - f, 55.0f, 255.0f));
     }
 
     @Override

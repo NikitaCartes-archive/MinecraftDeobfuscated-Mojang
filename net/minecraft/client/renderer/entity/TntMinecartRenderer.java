@@ -4,16 +4,13 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MinecartRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,18 +33,12 @@ extends MinecartRenderer<MinecartTNT> {
             float h = 1.0f + g * 0.3f;
             poseStack.scale(h, h, h);
         }
-        if (j > -1 && j / 5 % 2 == 0) {
-            TntMinecartRenderer.renderWhiteSolidBlock(blockState, poseStack, multiBufferSource, i);
-        } else {
-            Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
-        }
+        TntMinecartRenderer.renderWhiteSolidBlock(blockState, poseStack, multiBufferSource, i, j > -1 && j / 5 % 2 == 0);
     }
 
-    public static void renderWhiteSolidBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TextureAtlas.LOCATION_BLOCKS));
-        vertexConsumer.defaultOverlayCoords(OverlayTexture.u(1.0f), 10);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, renderType -> renderType == RenderType.SOLID ? vertexConsumer : multiBufferSource.getBuffer(renderType), i, 0, 10);
-        vertexConsumer.unsetDefaultOverlayCoords();
+    public static void renderWhiteSolidBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl) {
+        int j = bl ? OverlayTexture.pack(OverlayTexture.u(1.0f), 10) : OverlayTexture.NO_OVERLAY;
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
     }
 }
 

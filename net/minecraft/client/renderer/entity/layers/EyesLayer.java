@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -25,10 +26,8 @@ extends RenderLayer<T, M> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l, float m) {
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.EYES(this.getTextureLocation()));
-        OverlayTexture.setDefault(vertexConsumer);
-        ((EntityModel)this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, 0xF00000);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.eyes(this.getTextureLocation()));
+        ((Model)this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
     }
 
     public abstract ResourceLocation getTextureLocation();

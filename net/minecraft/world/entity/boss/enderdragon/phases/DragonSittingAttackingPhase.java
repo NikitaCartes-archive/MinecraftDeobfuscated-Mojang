@@ -18,7 +18,7 @@ extends AbstractDragonSittingPhase {
 
     @Override
     public void doClientTick() {
-        this.dragon.level.playLocalSound(this.dragon.x, this.dragon.y, this.dragon.z, SoundEvents.ENDER_DRAGON_GROWL, this.dragon.getSoundSource(), 2.5f, 0.8f + this.dragon.getRandom().nextFloat() * 0.3f, false);
+        this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), SoundEvents.ENDER_DRAGON_GROWL, this.dragon.getSoundSource(), 2.5f, 0.8f + this.dragon.getRandom().nextFloat() * 0.3f, false);
     }
 
     @Override

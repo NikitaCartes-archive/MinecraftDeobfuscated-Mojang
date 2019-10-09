@@ -112,7 +112,7 @@ extends AmbientCreature {
         super.tick();
         if (this.isResting()) {
             this.setDeltaMovement(Vec3.ZERO);
-            this.y = (double)Mth.floor(this.y) + 1.0 - (double)this.getBbHeight();
+            this.setPosRaw(this.getX(), (double)Mth.floor(this.getY()) + 1.0 - (double)this.getBbHeight(), this.getZ());
         } else {
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, 0.6, 1.0));
         }
@@ -141,11 +141,11 @@ extends AmbientCreature {
                 this.targetPosition = null;
             }
             if (this.targetPosition == null || this.random.nextInt(30) == 0 || this.targetPosition.closerThan(this.position(), 2.0)) {
-                this.targetPosition = new BlockPos(this.x + (double)this.random.nextInt(7) - (double)this.random.nextInt(7), this.y + (double)this.random.nextInt(6) - 2.0, this.z + (double)this.random.nextInt(7) - (double)this.random.nextInt(7));
+                this.targetPosition = new BlockPos(this.getX() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7), this.getY() + (double)this.random.nextInt(6) - 2.0, this.getZ() + (double)this.random.nextInt(7) - (double)this.random.nextInt(7));
             }
-            double d = (double)this.targetPosition.getX() + 0.5 - this.x;
-            double e = (double)this.targetPosition.getY() + 0.1 - this.y;
-            double f = (double)this.targetPosition.getZ() + 0.5 - this.z;
+            double d = (double)this.targetPosition.getX() + 0.5 - this.getX();
+            double e = (double)this.targetPosition.getY() + 0.1 - this.getY();
+            double f = (double)this.targetPosition.getZ() + 0.5 - this.getZ();
             Vec3 vec3 = this.getDeltaMovement();
             Vec3 vec32 = vec3.add((Math.signum(d) * 0.5 - vec3.x) * (double)0.1f, (Math.signum(e) * (double)0.7f - vec3.y) * (double)0.1f, (Math.signum(f) * 0.5 - vec3.z) * (double)0.1f);
             this.setDeltaMovement(vec32);
@@ -165,7 +165,8 @@ extends AmbientCreature {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
+    public boolean causeFallDamage(float f, float g) {
+        return false;
     }
 
     @Override

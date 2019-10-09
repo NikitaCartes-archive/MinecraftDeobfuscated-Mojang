@@ -37,9 +37,9 @@ implements Packet<ClientGamePacketListener> {
         this.id = livingEntity.getId();
         this.uuid = livingEntity.getUUID();
         this.type = Registry.ENTITY_TYPE.getId(livingEntity.getType());
-        this.x = livingEntity.x;
-        this.y = livingEntity.y;
-        this.z = livingEntity.z;
+        this.x = livingEntity.getX();
+        this.y = livingEntity.getY();
+        this.z = livingEntity.getZ();
         this.yRot = (byte)(livingEntity.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(livingEntity.xRot * 256.0f / 360.0f);
         this.yHeadRot = (byte)(livingEntity.yHeadRot * 256.0f / 360.0f);

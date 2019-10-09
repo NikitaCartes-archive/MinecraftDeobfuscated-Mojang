@@ -179,7 +179,7 @@ extends Monster {
                     ((PatrollingMonster)this.mob).setPatrolling(false);
                 } else if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerThan(((Entity)this.mob).position(), 10.0)) {
                     Vec3 vec3 = new Vec3(((PatrollingMonster)this.mob).getPatrolTarget());
-                    Vec3 vec32 = new Vec3(((PatrollingMonster)this.mob).x, ((PatrollingMonster)this.mob).y, ((PatrollingMonster)this.mob).z);
+                    Vec3 vec32 = ((Entity)this.mob).position();
                     Vec3 vec33 = vec32.subtract(vec3);
                     vec3 = vec33.yRot(90.0f).scale(0.4).add(vec3);
                     Vec3 vec34 = vec3.subtract(vec32).normalize().scale(10.0).add(vec32);

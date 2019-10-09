@@ -19,7 +19,6 @@ import net.minecraft.world.entity.animal.Turtle;
 public class TurtleModel<T extends Turtle>
 extends QuadrupedModel<T> {
     private final ModelPart eggBelly;
-    private float yOffset;
 
     public TurtleModel(float f) {
         super(12, f, true, 120.0f, 0.0f, 9.0f, 6.0f, 120);
@@ -83,15 +82,19 @@ extends QuadrupedModel<T> {
             this.leg1.xRot = 0.0f;
         }
         this.eggBelly.visible = !this.young && ((Turtle)turtle).hasEgg();
-        this.yOffset = this.eggBelly.visible ? -0.08f : 0.0f;
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, float f, float g, float h) {
-        poseStack.pushPose();
-        poseStack.translate(0.0, this.yOffset, 0.0);
-        super.renderToBuffer(poseStack, vertexConsumer, i, f, g, h);
-        poseStack.popPose();
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+        boolean bl = this.eggBelly.visible;
+        if (bl) {
+            poseStack.pushPose();
+            poseStack.translate(0.0, -0.08f, 0.0);
+        }
+        super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h);
+        if (bl) {
+            poseStack.popPose();
+        }
     }
 }
 

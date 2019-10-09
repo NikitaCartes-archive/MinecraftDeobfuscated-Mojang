@@ -1196,7 +1196,7 @@ WindowEventHandler {
             }
             this.profiler.popPush("animateTick");
             if (!this.pause && this.level != null) {
-                this.level.animateTick(Mth.floor(this.player.x), Mth.floor(this.player.y), Mth.floor(this.player.z));
+                this.level.animateTick(Mth.floor(this.player.getX()), Mth.floor(this.player.getY()), Mth.floor(this.player.getZ()));
             }
             this.profiler.popPush("particles");
             if (!this.pause) {

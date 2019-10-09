@@ -14,8 +14,8 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -31,8 +31,8 @@ extends StructureFeature<MineshaftConfiguration> {
     @Override
     public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
         ((WorldgenRandom)random).setLargeFeatureSeed(chunkGenerator.getSeed(), i, j);
-        if (chunkGenerator.isBiomeValidStartForStructure(biome, Feature.MINESHAFT)) {
-            MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.MINESHAFT);
+        if (chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
+            MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
             double d = mineshaftConfiguration.probability;
             return random.nextDouble() < d;
         }

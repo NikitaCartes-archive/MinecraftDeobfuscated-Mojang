@@ -52,7 +52,7 @@ extends ThrowableItemProjectile {
         if (b == 3) {
             ParticleOptions particleOptions = this.getParticle();
             for (int i = 0; i < 8; ++i) {
-                this.level.addParticle(particleOptions, this.x, this.y, this.z, 0.0, 0.0, 0.0);
+                this.level.addParticle(particleOptions, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         }
     }

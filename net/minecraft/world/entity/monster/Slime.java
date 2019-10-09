@@ -66,7 +66,7 @@ implements Enemy {
         this.goalSelector.addGoal(2, new SlimeAttackGoal(this));
         this.goalSelector.addGoal(3, new SlimeRandomDirectionGoal(this));
         this.goalSelector.addGoal(5, new SlimeKeepOnJumpingGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.y - this.y) <= 4.0));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<IronGolem>((Mob)this, IronGolem.class, true));
     }
 
@@ -84,7 +84,7 @@ implements Enemy {
 
     protected void setSize(int i, boolean bl) {
         this.entityData.set(ID_SIZE, i);
-        this.setPos(this.x, this.y, this.z);
+        this.refreshBoundingBox();
         this.refreshDimensions();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(i * i);
         this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
@@ -140,7 +140,7 @@ implements Enemy {
                 float g = this.random.nextFloat() * 0.5f + 0.5f;
                 float h = Mth.sin(f) * (float)i * 0.5f * g;
                 float k = Mth.cos(f) * (float)i * 0.5f * g;
-                this.level.addParticle(this.getParticleType(), this.x + (double)h, this.getBoundingBox().minY, this.z + (double)k, 0.0, 0.0, 0.0);
+                this.level.addParticle(this.getParticleType(), this.getX() + (double)h, this.getY(), this.getZ() + (double)k, 0.0, 0.0, 0.0);
             }
             this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f) / 0.8f);
             this.targetSquish = -0.5f;
@@ -161,9 +161,9 @@ implements Enemy {
 
     @Override
     public void refreshDimensions() {
-        double d = this.x;
-        double e = this.y;
-        double f = this.z;
+        double d = this.getX();
+        double e = this.getY();
+        double f = this.getZ();
         super.refreshDimensions();
         this.setPos(d, e, f);
     }
@@ -200,8 +200,9 @@ implements Enemy {
                 if (this.isPersistenceRequired()) {
                     slime.setPersistenceRequired();
                 }
+                slime.setInvulnerable(this.isInvulnerable());
                 slime.setSize(i / 2, true);
-                slime.moveTo(this.x + (double)f, this.y + 0.5, this.z + (double)g, this.random.nextFloat() * 360.0f, 0.0f);
+                slime.moveTo(this.getX() + (double)f, this.getY() + 0.5, this.getZ() + (double)g, this.random.nextFloat() * 360.0f, 0.0f);
                 this.level.addFreshEntity(slime);
             }
         }

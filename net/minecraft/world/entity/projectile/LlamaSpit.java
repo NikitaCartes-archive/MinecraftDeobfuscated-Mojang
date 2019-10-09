@@ -38,7 +38,7 @@ implements Projectile {
     public LlamaSpit(Level level, Llama llama) {
         this((EntityType<? extends LlamaSpit>)EntityType.LLAMA_SPIT, level);
         this.owner = llama;
-        this.setPos(llama.x - (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.sin(llama.yBodyRot * ((float)Math.PI / 180)), llama.y + (double)llama.getEyeHeight() - (double)0.1f, llama.z + (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.cos(llama.yBodyRot * ((float)Math.PI / 180)));
+        this.setPos(llama.getX() - (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.sin(llama.yBodyRot * ((float)Math.PI / 180)), llama.getEyeY() - (double)0.1f, llama.getZ() + (double)(llama.getBbWidth() + 1.0f) * 0.5 * (double)Mth.cos(llama.yBodyRot * ((float)Math.PI / 180)));
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -63,12 +63,12 @@ implements Projectile {
         if (hitResult != null) {
             this.onHit(hitResult);
         }
-        this.x += vec3.x;
-        this.y += vec3.y;
-        this.z += vec3.z;
-        float f = Mth.sqrt(LlamaSpit.getHorizontalDistanceSqr(vec3));
+        double d = this.getX() + vec3.x;
+        double e = this.getY() + vec3.y;
+        double f = this.getZ() + vec3.z;
+        float g = Mth.sqrt(LlamaSpit.getHorizontalDistanceSqr(vec3));
         this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, f) * 57.2957763671875);
+        this.xRot = (float)(Mth.atan2(vec3.y, g) * 57.2957763671875);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }
@@ -83,8 +83,8 @@ implements Projectile {
         }
         this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
         this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
-        float g = 0.99f;
-        float h = 0.06f;
+        float h = 0.99f;
+        float i = 0.06f;
         if (!this.level.containsMaterial(this.getBoundingBox(), Material.AIR)) {
             this.remove();
             return;
@@ -97,7 +97,7 @@ implements Projectile {
         if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.06f, 0.0));
         }
-        this.setPos(this.x, this.y, this.z);
+        this.setPos(d, e, f);
     }
 
     @Override
@@ -110,7 +110,7 @@ implements Projectile {
             this.yRot = (float)(Mth.atan2(d, f) * 57.2957763671875);
             this.xRotO = this.xRot;
             this.yRotO = this.yRot;
-            this.moveTo(this.x, this.y, this.z, this.yRot, this.xRot);
+            this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
         }
     }
 

@@ -56,7 +56,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public boolean matches(ServerPlayer serverPlayer, Vec3 vec3, int i) {
-            if (!this.distance.matches(vec3.x, vec3.y, vec3.z, serverPlayer.x, serverPlayer.y, serverPlayer.z)) {
+            if (!this.distance.matches(vec3.x, vec3.y, vec3.z, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())) {
                 return false;
             }
             return this.duration.matches(i);

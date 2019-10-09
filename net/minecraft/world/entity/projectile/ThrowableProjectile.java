@@ -50,7 +50,7 @@ implements Projectile {
     }
 
     protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, LivingEntity livingEntity, Level level) {
-        this(entityType, livingEntity.x, livingEntity.y + (double)livingEntity.getEyeHeight() - (double)0.1f, livingEntity.z, level);
+        this(entityType, livingEntity.getX(), livingEntity.getEyeY() - (double)0.1f, livingEntity.getZ(), level);
         this.owner = livingEntity;
         this.ownerId = livingEntity.getUUID();
     }
@@ -100,7 +100,7 @@ implements Projectile {
 
     @Override
     public void tick() {
-        float h;
+        float j;
         super.tick();
         if (this.shakeTime > 0) {
             --this.shakeTime;
@@ -132,12 +132,12 @@ implements Projectile {
             }
         }
         Vec3 vec3 = this.getDeltaMovement();
-        this.x += vec3.x;
-        this.y += vec3.y;
-        this.z += vec3.z;
-        float f = Mth.sqrt(ThrowableProjectile.getHorizontalDistanceSqr(vec3));
+        double d = this.getX() + vec3.x;
+        double e = this.getY() + vec3.y;
+        double f = this.getZ() + vec3.z;
+        float g = Mth.sqrt(ThrowableProjectile.getHorizontalDistanceSqr(vec3));
         this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, f) * 57.2957763671875);
+        this.xRot = (float)(Mth.atan2(vec3.y, g) * 57.2957763671875);
         while (this.xRot - this.xRotO < -180.0f) {
             this.xRotO -= 360.0f;
         }
@@ -154,19 +154,19 @@ implements Projectile {
         this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
         if (this.isInWater()) {
             for (int i = 0; i < 4; ++i) {
-                float g = 0.25f;
-                this.level.addParticle(ParticleTypes.BUBBLE, this.x - vec3.x * 0.25, this.y - vec3.y * 0.25, this.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+                float h = 0.25f;
+                this.level.addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
             }
-            h = 0.8f;
+            j = 0.8f;
         } else {
-            h = 0.99f;
+            j = 0.99f;
         }
-        this.setDeltaMovement(vec3.scale(h));
+        this.setDeltaMovement(vec3.scale(j));
         if (!this.isNoGravity()) {
             Vec3 vec32 = this.getDeltaMovement();
             this.setDeltaMovement(vec32.x, vec32.y - (double)this.getGravity(), vec32.z);
         }
-        this.setPos(this.x, this.y, this.z);
+        this.setPos(d, e, f);
     }
 
     protected float getGravity() {

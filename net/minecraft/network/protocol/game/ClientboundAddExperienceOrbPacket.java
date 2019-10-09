@@ -24,9 +24,9 @@ implements Packet<ClientGamePacketListener> {
 
     public ClientboundAddExperienceOrbPacket(ExperienceOrb experienceOrb) {
         this.id = experienceOrb.getId();
-        this.x = experienceOrb.x;
-        this.y = experienceOrb.y;
-        this.z = experienceOrb.z;
+        this.x = experienceOrb.getX();
+        this.y = experienceOrb.getY();
+        this.z = experienceOrb.getZ();
         this.value = experienceOrb.getValue();
     }
 

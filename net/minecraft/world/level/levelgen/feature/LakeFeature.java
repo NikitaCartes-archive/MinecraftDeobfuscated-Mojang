@@ -11,26 +11,25 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.LakeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
 public class LakeFeature
-extends Feature<LakeConfiguration> {
+extends Feature<BlockStateConfiguration> {
     private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-    public LakeFeature(Function<Dynamic<?>, ? extends LakeConfiguration> function) {
+    public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
         super(function);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, LakeConfiguration lakeConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
         int t;
         int j;
         while (blockPos.getY() > 5 && levelAccessor.isEmptyBlock(blockPos)) {
@@ -76,7 +75,7 @@ extends Feature<LakeConfiguration> {
                     if (t >= 4 && material.isLiquid()) {
                         return false;
                     }
-                    if (t >= 4 || material.isSolid() || levelAccessor.getBlockState(blockPos.offset(j, t, s)) == lakeConfiguration.state) continue;
+                    if (t >= 4 || material.isSolid() || levelAccessor.getBlockState(blockPos.offset(j, t, s)) == blockStateConfiguration.state) continue;
                     return false;
                 }
             }
@@ -85,7 +84,7 @@ extends Feature<LakeConfiguration> {
             for (int s = 0; s < 16; ++s) {
                 for (t = 0; t < 8; ++t) {
                     if (!bls[(j * 16 + s) * 8 + t]) continue;
-                    levelAccessor.setBlock(blockPos.offset(j, t, s), t >= 4 ? AIR : lakeConfiguration.state, 2);
+                    levelAccessor.setBlock(blockPos.offset(j, t, s), t >= 4 ? AIR : blockStateConfiguration.state, 2);
                 }
             }
         }
@@ -93,7 +92,7 @@ extends Feature<LakeConfiguration> {
             for (int s = 0; s < 16; ++s) {
                 for (t = 4; t < 8; ++t) {
                     BlockPos blockPos2;
-                    if (!bls[(j * 16 + s) * 8 + t] || !Block.equalsDirt(levelAccessor.getBlockState(blockPos2 = blockPos.offset(j, t - 1, s)).getBlock()) || levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, t, s)) <= 0) continue;
+                    if (!bls[(j * 16 + s) * 8 + t] || !LakeFeature.isDirt(levelAccessor.getBlockState(blockPos2 = blockPos.offset(j, t - 1, s)).getBlock()) || levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, t, s)) <= 0) continue;
                     Biome biome = levelAccessor.getBiome(blockPos2);
                     if (biome.getSurfaceBuilderConfig().getTopMaterial().getBlock() == Blocks.MYCELIUM) {
                         levelAccessor.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
@@ -103,7 +102,7 @@ extends Feature<LakeConfiguration> {
                 }
             }
         }
-        if (lakeConfiguration.state.getMaterial() == Material.LAVA) {
+        if (blockStateConfiguration.state.getMaterial() == Material.LAVA) {
             for (j = 0; j < 16; ++j) {
                 for (int s = 0; s < 16; ++s) {
                     for (t = 0; t < 8; ++t) {
@@ -115,7 +114,7 @@ extends Feature<LakeConfiguration> {
                 }
             }
         }
-        if (lakeConfiguration.state.getMaterial() == Material.WATER) {
+        if (blockStateConfiguration.state.getMaterial() == Material.WATER) {
             for (j = 0; j < 16; ++j) {
                 for (int s = 0; s < 16; ++s) {
                     t = 4;

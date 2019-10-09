@@ -32,10 +32,10 @@ extends MobRenderer<Cod, CodModel<Cod>> {
     protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h) {
         super.setupRotations(cod, poseStack, f, g, h);
         float i = 4.3f * Mth.sin(0.6f * f);
-        poseStack.mulPose(Vector3f.YP.rotation(i, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(i));
         if (!cod.isInWater()) {
             poseStack.translate(0.1f, 0.1f, -0.1f);
-            poseStack.mulPose(Vector3f.ZP.rotation(90.0f, true));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
         }
     }
 }

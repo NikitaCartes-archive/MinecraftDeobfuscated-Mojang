@@ -28,7 +28,7 @@ extends NoRenderParticle {
     }
 
     private TrackingEmitter(Level level, Entity entity, ParticleOptions particleOptions, int i, Vec3 vec3) {
-        super(level, entity.x, entity.getBoundingBox().minY + (double)(entity.getBbHeight() / 2.0f), entity.z, vec3.x, vec3.y, vec3.z);
+        super(level, entity.getX(), entity.getY(0.5), entity.getZ(), vec3.x, vec3.y, vec3.z);
         this.entity = entity;
         this.lifeTime = i;
         this.particleType = particleOptions;
@@ -42,9 +42,9 @@ extends NoRenderParticle {
             double e;
             double d = this.random.nextFloat() * 2.0f - 1.0f;
             if (d * d + (e = (double)(this.random.nextFloat() * 2.0f - 1.0f)) * e + (f = (double)(this.random.nextFloat() * 2.0f - 1.0f)) * f > 1.0) continue;
-            double g = this.entity.x + d * (double)this.entity.getBbWidth() / 4.0;
-            double h = this.entity.getBoundingBox().minY + (double)(this.entity.getBbHeight() / 2.0f) + e * (double)this.entity.getBbHeight() / 4.0;
-            double j = this.entity.z + f * (double)this.entity.getBbWidth() / 4.0;
+            double g = this.entity.getX(d / 4.0);
+            double h = this.entity.getY(0.5 + e / 4.0);
+            double j = this.entity.getZ(f / 4.0);
             this.level.addParticle(this.particleType, false, g, h, j, d, e + 0.2, f);
         }
         ++this.life;

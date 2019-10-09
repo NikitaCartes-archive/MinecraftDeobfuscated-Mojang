@@ -161,7 +161,7 @@ implements AutoCloseable {
             if (resourceLocation != null) {
                 v = bl4 ? glyphInfo.getBoldOffset() : 0.0f;
                 w = bl ? glyphInfo.getShadowOffset() : 0.0f;
-                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation) : RenderType.TEXT(resourceLocation));
+                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation) : RenderType.text(resourceLocation));
                 this.renderChar(bakedGlyph, bl4, bl5, v, o + w, g + w, matrix4f, vertexConsumer, p, q, r, s, k);
             }
             v = glyphInfo.getAdvance(bl4);
@@ -182,7 +182,7 @@ implements AutoCloseable {
             list.add(new BakedGlyph.Effect(f - 1.0f, g + 9.0f, o + 1.0f, g - 1.0f, 0.01f, y, z, aa, x));
         }
         if (!list.isEmpty() && (resourceLocation2 = (bakedGlyph2 = this.fonts.whiteGlyph()).getTexture()) != null) {
-            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.TEXT_SEE_THROUGH(resourceLocation2) : RenderType.TEXT(resourceLocation2));
+            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation2) : RenderType.text(resourceLocation2));
             for (BakedGlyph.Effect effect : list) {
                 bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);
             }

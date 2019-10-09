@@ -13,6 +13,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import java.util.List;
 import java.util.Random;
@@ -75,18 +76,18 @@ implements ResourceManagerReloadListener {
         return this.itemModelShaper;
     }
 
-    private void renderModelLists(BakedModel bakedModel, ItemStack itemStack, int i, PoseStack poseStack, VertexConsumer vertexConsumer) {
+    private void renderModelLists(BakedModel bakedModel, ItemStack itemStack, int i, int j, PoseStack poseStack, VertexConsumer vertexConsumer) {
         Random random = new Random();
         long l = 42L;
         for (Direction direction : Direction.values()) {
             random.setSeed(42L);
-            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, random), itemStack, i);
+            this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, direction, random), itemStack, i, j);
         }
         random.setSeed(42L);
-        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, random), itemStack, i);
+        this.renderQuadList(poseStack, vertexConsumer, bakedModel.getQuads(null, null, random), itemStack, i, j);
     }
 
-    public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, BakedModel bakedModel) {
+    public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
         if (itemStack.isEmpty()) {
             return;
         }
@@ -97,35 +98,34 @@ implements ResourceManagerReloadListener {
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
         poseStack.translate(-0.5, -0.5, -0.5);
         if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && transformType != ItemTransforms.TransformType.GUI) {
-            EntityBlockRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i);
+            EntityBlockRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
         } else {
-            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, TextureAtlas.LOCATION_BLOCKS, true, itemStack.hasFoil(), bakedModel.isGui3d());
-            OverlayTexture.setDefault(vertexConsumer);
-            this.renderModelLists(bakedModel, itemStack, i, poseStack, vertexConsumer);
-            vertexConsumer.unsetDefaultOverlayCoords();
+            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.getRenderType(itemStack), true, itemStack.hasFoil());
+            this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
         }
         poseStack.popPose();
     }
 
-    public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, ResourceLocation resourceLocation, boolean bl, boolean bl2, boolean bl3) {
+    public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
         if (bl2) {
-            return new VertexMultiConsumer(ImmutableList.of(multiBufferSource.getBuffer(bl ? RenderType.GLINT : RenderType.ENTITY_GLINT), multiBufferSource.getBuffer(RenderType.NEW_ENTITY(resourceLocation))));
+            return new VertexMultiConsumer(ImmutableList.of(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType)));
         }
-        return multiBufferSource.getBuffer(RenderType.NEW_ENTITY(resourceLocation));
+        return multiBufferSource.getBuffer(renderType);
     }
 
-    private void renderQuadList(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i) {
+    private void renderQuadList(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j) {
         boolean bl = !itemStack.isEmpty();
         Matrix4f matrix4f = poseStack.getPose();
+        Matrix3f matrix3f = poseStack.getNormal();
         for (BakedQuad bakedQuad : list) {
-            int j = -1;
+            int k = -1;
             if (bl && bakedQuad.isTinted()) {
-                j = this.itemColors.getColor(itemStack, bakedQuad.getTintIndex());
+                k = this.itemColors.getColor(itemStack, bakedQuad.getTintIndex());
             }
-            float f = (float)(j >> 16 & 0xFF) / 255.0f;
-            float g = (float)(j >> 8 & 0xFF) / 255.0f;
-            float h = (float)(j & 0xFF) / 255.0f;
-            vertexConsumer.putBulkData(matrix4f, bakedQuad, f, g, h, i);
+            float f = (float)(k >> 16 & 0xFF) / 255.0f;
+            float g = (float)(k >> 8 & 0xFF) / 255.0f;
+            float h = (float)(k & 0xFF) / 255.0f;
+            vertexConsumer.putBulkData(matrix4f, matrix3f, bakedQuad, f, g, h, i, j);
         }
     }
 
@@ -143,16 +143,16 @@ implements ResourceManagerReloadListener {
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
     }
 
-    public void renderStatic(ItemStack itemStack, ItemTransforms.TransformType transformType, int i, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i);
+    public void renderStatic(ItemStack itemStack, ItemTransforms.TransformType transformType, int i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+        this.renderStatic(null, itemStack, transformType, false, poseStack, multiBufferSource, null, i, j);
     }
 
-    public void renderStatic(@Nullable LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int i) {
+    public void renderStatic(@Nullable LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, @Nullable Level level, int i, int j) {
         if (itemStack.isEmpty()) {
             return;
         }
         BakedModel bakedModel = this.getModel(itemStack, level, livingEntity);
-        this.render(itemStack, transformType, bl, poseStack, multiBufferSource, i, bakedModel);
+        this.render(itemStack, transformType, bl, poseStack, multiBufferSource, i, j, bakedModel);
     }
 
     public void renderGuiItem(ItemStack itemStack, int i, int j) {
@@ -175,7 +175,7 @@ implements ResourceManagerReloadListener {
         RenderSystem.scalef(16.0f, 16.0f, 16.0f);
         PoseStack poseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, bakedModel);
+        this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
@@ -215,13 +215,13 @@ implements ResourceManagerReloadListener {
         if (itemStack.isEmpty()) {
             return;
         }
+        PoseStack poseStack = new PoseStack();
         if (itemStack.getCount() != 1 || string != null) {
             String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-            RenderSystem.disableDepthTest();
-            RenderSystem.disableBlend();
-            font.drawShadow(string2, i + 19 - 2 - font.width(string2), j + 6 + 3, 0xFFFFFF);
-            RenderSystem.enableBlend();
-            RenderSystem.enableDepthTest();
+            poseStack.translate(0.0, 0.0, this.blitOffset + 200.0f);
+            MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            font.drawInBatch(string2, i + 19 - 2 - font.width(string2), j + 6 + 3, 0xFFFFFF, true, poseStack.getPose(), bufferSource, false, 0, 0xF000F0);
+            bufferSource.endBatch();
         }
         if (itemStack.isDamaged()) {
             RenderSystem.disableDepthTest();

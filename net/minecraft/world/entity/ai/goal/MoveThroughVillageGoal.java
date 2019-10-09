@@ -80,7 +80,7 @@ extends Goal {
         this.path = groundPathNavigation.createPath(this.poiPos, 0);
         groundPathNavigation.setCanOpenDoors(bl);
         if (this.path == null) {
-            Vec3 vec32 = RandomPos.getPosTowards(this.mob, 10, 7, new Vec3(this.poiPos.getX(), this.poiPos.getY(), this.poiPos.getZ()));
+            Vec3 vec32 = RandomPos.getPosTowards(this.mob, 10, 7, new Vec3(this.poiPos));
             if (vec32 == null) {
                 return false;
             }

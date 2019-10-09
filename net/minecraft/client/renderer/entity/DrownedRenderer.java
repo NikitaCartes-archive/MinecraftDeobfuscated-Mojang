@@ -36,7 +36,7 @@ extends AbstractZombieRenderer<Drowned, DrownedModel<Drowned>> {
         super.setupRotations(drowned, poseStack, f, g, h);
         float i = drowned.getSwimAmount(h);
         if (i > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotation(Mth.lerp(i, drowned.xRot, -10.0f - drowned.xRot), true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.lerp(i, drowned.xRot, -10.0f - drowned.xRot)));
         }
     }
 }

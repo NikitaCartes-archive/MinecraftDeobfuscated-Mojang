@@ -200,9 +200,9 @@ extends WaterAnimal {
                 this.fish.setSpeed(0.0f);
                 return;
             }
-            double d = this.wantedX - this.fish.x;
-            double e = this.wantedY - this.fish.y;
-            double f = this.wantedZ - this.fish.z;
+            double d = this.wantedX - this.fish.getX();
+            double e = this.wantedY - this.fish.getY();
+            double f = this.wantedZ - this.fish.getZ();
             double g = Mth.sqrt(d * d + e * e + f * f);
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
             this.fish.yBodyRot = this.fish.yRot = this.rotlerp(this.fish.yRot, h, 90.0f);

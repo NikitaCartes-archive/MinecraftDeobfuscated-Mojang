@@ -75,11 +75,15 @@ public interface MultiBufferSource {
 
         public void endBatch(RenderType renderType) {
             BufferBuilder bufferBuilder = this.getBuilderRaw(renderType);
+            boolean bl = Objects.equals(this.lastState, Optional.of(renderType));
+            if (!bl && bufferBuilder == this.builder) {
+                return;
+            }
             if (!this.startedBuffers.remove(bufferBuilder)) {
                 return;
             }
             renderType.end(bufferBuilder);
-            if (Objects.equals(this.lastState, Optional.of(renderType))) {
+            if (bl) {
                 this.lastState = Optional.empty();
             }
         }

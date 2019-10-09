@@ -20,9 +20,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -57,7 +56,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
         if (i == chunkPos.x && j == chunkPos.z) {
             Set<Biome> set = chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32);
             for (Biome biome2 : set) {
-                if (chunkGenerator.isBiomeValidStartForStructure(biome2, Feature.WOODLAND_MANSION)) continue;
+                if (chunkGenerator.isBiomeValidStartForStructure(biome2, this)) continue;
                 return false;
             }
             return true;

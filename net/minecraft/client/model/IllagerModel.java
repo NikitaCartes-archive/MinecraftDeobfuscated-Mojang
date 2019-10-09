@@ -11,6 +11,7 @@ import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,6 +34,7 @@ HeadedModel {
     private float itemUseTicks;
 
     public IllagerModel(float f, float g, int i, int j) {
+        super(RenderType::entityCutoutNoCull);
         this.head = new ModelPart(this).setTexSize(i, j);
         this.head.setPos(0.0f, 0.0f + g, 0.0f);
         this.head.texOffs(0, 0).addBox(-4.0f, -10.0f, -4.0f, 8.0f, 10.0f, 8.0f, f);

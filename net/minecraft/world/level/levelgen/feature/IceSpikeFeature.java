@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class IceSpikeFeature
 extends Feature<NoneFeatureConfiguration> {
@@ -49,13 +49,13 @@ extends Feature<NoneFeatureConfiguration> {
                     if ((m != 0 || n != 0) && g * g + h * h > f * f || (m == -l || m == l || n == -l || n == l) && random.nextFloat() > 0.75f) continue;
                     BlockState blockState = levelAccessor.getBlockState(blockPos.offset(m, k, n));
                     Block block = blockState.getBlock();
-                    if (blockState.isAir() || Block.equalsDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
+                    if (blockState.isAir() || IceSpikeFeature.isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
                         this.setBlock(levelAccessor, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
                     }
                     if (k == 0 || l <= 1) continue;
                     blockState = levelAccessor.getBlockState(blockPos.offset(m, -k, n));
                     block = blockState.getBlock();
-                    if (!blockState.isAir() && !Block.equalsDirt(block) && block != Blocks.SNOW_BLOCK && block != Blocks.ICE) continue;
+                    if (!blockState.isAir() && !IceSpikeFeature.isDirt(block) && block != Blocks.SNOW_BLOCK && block != Blocks.ICE) continue;
                     this.setBlock(levelAccessor, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
                 }
             }
@@ -76,7 +76,7 @@ extends Feature<NoneFeatureConfiguration> {
                 while (blockPos2.getY() > 50) {
                     BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
                     Block block2 = blockState2.getBlock();
-                    if (!blockState2.isAir() && !Block.equalsDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) continue block5;
+                    if (!blockState2.isAir() && !IceSpikeFeature.isDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) continue block5;
                     this.setBlock(levelAccessor, blockPos2, Blocks.PACKED_ICE.defaultBlockState());
                     blockPos2 = blockPos2.below();
                     if (--p > 0) continue;

@@ -108,7 +108,7 @@ public class StructureTemplate {
         List<Entity> list = level.getEntitiesOfClass(Entity.class, new AABB(blockPos, blockPos2), entity -> !(entity instanceof Player));
         this.entityInfoList.clear();
         for (Entity entity2 : list) {
-            Vec3 vec3 = new Vec3(entity2.x - (double)blockPos.getX(), entity2.y - (double)blockPos.getY(), entity2.z - (double)blockPos.getZ());
+            Vec3 vec3 = new Vec3(entity2.getX() - (double)blockPos.getX(), entity2.getY() - (double)blockPos.getY(), entity2.getZ() - (double)blockPos.getZ());
             CompoundTag compoundTag = new CompoundTag();
             entity2.save(compoundTag);
             BlockPos blockPos3 = entity2 instanceof Painting ? ((Painting)entity2).getPos().subtract(blockPos) : new BlockPos(vec3);

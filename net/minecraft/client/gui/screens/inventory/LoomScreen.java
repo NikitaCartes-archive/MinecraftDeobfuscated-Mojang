@@ -89,7 +89,7 @@ extends AbstractContainerScreen<LoomMenu> {
             RenderSystem.translatef(k + 139, l + 52, 0.0f);
             RenderSystem.scalef(24.0f, -24.0f, 1.0f);
             this.resultBanner.setOnlyRenderPattern(true);
-            BlockEntityRenderDispatcher.instance.renderItem(this.resultBanner, new PoseStack(), 0xF000F0);
+            BlockEntityRenderDispatcher.instance.renderItem(this.resultBanner, new PoseStack());
             this.resultBanner.setOnlyRenderPattern(false);
             RenderSystem.popMatrix();
         } else if (this.hasMaxPatterns) {
@@ -137,7 +137,7 @@ extends AbstractContainerScreen<LoomMenu> {
         RenderSystem.translatef((float)j + 0.5f, k + 16, 0.0f);
         RenderSystem.scalef(6.0f, -6.0f, 1.0f);
         RenderSystem.translatef(0.5f, 0.5f, 0.0f);
-        BlockEntityRenderDispatcher.instance.renderItem(bannerBlockEntity, new PoseStack(), 0xF000F0);
+        BlockEntityRenderDispatcher.instance.renderItem(bannerBlockEntity, new PoseStack());
         RenderSystem.popMatrix();
         this.minecraft.getTextureAtlas().bind();
     }

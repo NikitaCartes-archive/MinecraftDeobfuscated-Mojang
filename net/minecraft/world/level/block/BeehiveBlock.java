@@ -79,7 +79,7 @@ extends BaseEntityBlock {
         if (!level.isClientSide) {
             List<Bee> list;
             if (blockEntity instanceof BeehiveBlockEntity && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-                ((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+                ((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
                 level.updateNeighbourForOutputSignal(blockPos, this);
             }
             if (!(list = level.getEntitiesOfClass(Bee.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0))).isEmpty()) {
@@ -106,13 +106,13 @@ extends BaseEntityBlock {
         boolean bl = false;
         if (i >= 5) {
             if (itemStack.getItem() == Items.SHEARS) {
-                level.playSound(player2, player2.x, player2.y, player2.z, SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0f, 1.0f);
+                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BEEHIVE_SHEAR, SoundSource.NEUTRAL, 1.0f, 1.0f);
                 BeehiveBlock.dropHoneycomb(level, blockPos);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
                 bl = true;
             } else if (itemStack.getItem() == Items.GLASS_BOTTLE) {
                 itemStack.shrink(1);
-                level.playSound(player2, player2.x, player2.y, player2.z, SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
+                level.playSound(player2, player2.getX(), player2.getY(), player2.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
                 if (itemStack.isEmpty()) {
                     player2.setItemInHand(interactionHand, new ItemStack(Items.HONEY_BOTTLE));
                 } else if (!player2.inventory.add(new ItemStack(Items.HONEY_BOTTLE))) {
@@ -122,18 +122,18 @@ extends BaseEntityBlock {
             }
         }
         if (bl) {
-            this.releaseBeesAndResetState(level, blockState, blockPos, player2);
+            this.releaseBeesAndResetState(level, blockState, blockPos, player2, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
             return true;
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);
     }
 
-    public void releaseBeesAndResetState(Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player) {
+    public void releaseBeesAndResetState(Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
         level.setBlock(blockPos, (BlockState)blockState.setValue(HONEY_LEVEL, 0), 3);
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof BeehiveBlockEntity) {
             BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-            beehiveBlockEntity.emptyAllLivingFromHive(player, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+            beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, beeReleaseStatus);
         }
     }
 
@@ -149,7 +149,7 @@ extends BaseEntityBlock {
 
     @Environment(value=EnvType.CLIENT)
     private void trySpawnDripParticles(Level level, BlockPos blockPos, BlockState blockState) {
-        if (!blockState.getFluidState().isEmpty()) {
+        if (!blockState.getFluidState().isEmpty() || level.random.nextFloat() < 0.3f) {
             return;
         }
         VoxelShape voxelShape = blockState.getCollisionShape(level, blockPos);
@@ -229,7 +229,7 @@ extends BaseEntityBlock {
         Entity entity = builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
         if ((entity instanceof PrimedTnt || entity instanceof Creeper || entity instanceof WitherSkull || entity instanceof WitherBoss || entity instanceof MinecartTNT) && (blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)) instanceof BeehiveBlockEntity) {
             BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-            beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+            beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
         }
         return super.getDrops(blockState, builder);
     }
@@ -239,7 +239,7 @@ extends BaseEntityBlock {
         BlockEntity blockEntity;
         if (levelAccessor.getBlockState(blockPos2).getBlock() instanceof FireBlock && (blockEntity = levelAccessor.getBlockEntity(blockPos)) instanceof BeehiveBlockEntity) {
             BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-            beehiveBlockEntity.emptyAllLivingFromHive(null, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+            beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }

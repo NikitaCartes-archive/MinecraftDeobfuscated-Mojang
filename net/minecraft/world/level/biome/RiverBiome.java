@@ -8,11 +8,11 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.SeagrassFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -20,7 +20,7 @@ public final class RiverBiome
 extends Biome {
     public RiverBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.RIVER).depth(-0.5f).scale(0.0f).temperature(0.5f).downfall(0.5f).waterColor(4159204).waterFogColor(329011).parent(null));
-        this.addStructureStart(Feature.MINESHAFT, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
+        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);
@@ -34,7 +34,7 @@ extends Biome {
         BiomeDefaultFeatures.addDefaultMushrooms(this);
         BiomeDefaultFeatures.addDefaultExtraVegetation(this);
         BiomeDefaultFeatures.addDefaultSprings(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, RiverBiome.makeComposite(Feature.SEAGRASS, new SeagrassFeatureConfiguration(48, 0.4), FeatureDecorator.TOP_SOLID_HEIGHTMAP, DecoratorConfiguration.NONE));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SEAGRASS.configured(new SeagrassFeatureConfiguration(48, 0.4)).decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP.configured(DecoratorConfiguration.NONE)));
         BiomeDefaultFeatures.addSurfaceFreezing(this);
         this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.SQUID, 2, 1, 4));
         this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.SALMON, 5, 1, 5));

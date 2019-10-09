@@ -12,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.MinecartModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -45,9 +44,9 @@ extends EntityRenderer<T> {
         float j = (((float)(l >> 20 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         float k = (((float)(l >> 24 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         poseStack.translate(i, j, k);
-        double m = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).xOld, ((AbstractMinecart)abstractMinecart).x);
-        double n = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).yOld, ((AbstractMinecart)abstractMinecart).y);
-        double o = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).zOld, ((AbstractMinecart)abstractMinecart).z);
+        double m = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).xOld, ((Entity)abstractMinecart).getX());
+        double n = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).yOld, ((Entity)abstractMinecart).getY());
+        double o = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).zOld, ((Entity)abstractMinecart).getZ());
         double p = 0.3f;
         Vec3 vec3 = ((AbstractMinecart)abstractMinecart).getPos(m, n, o);
         float q = Mth.lerp(h, ((AbstractMinecart)abstractMinecart).xRotO, ((AbstractMinecart)abstractMinecart).xRot);
@@ -69,15 +68,15 @@ extends EntityRenderer<T> {
             }
         }
         poseStack.translate(0.0, 0.375, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
-        poseStack.mulPose(Vector3f.ZP.rotation(-q, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-q));
         float r = (float)((AbstractMinecart)abstractMinecart).getHurtTime() - h;
         float s = ((AbstractMinecart)abstractMinecart).getDamage() - h;
         if (s < 0.0f) {
             s = 0.0f;
         }
         if (r > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotation(Mth.sin(r) * r * s / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir(), true));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(r) * r * s / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir()));
         }
         int t = ((AbstractMinecart)abstractMinecart).getDisplayOffset();
         int u = ((Entity)abstractMinecart).getLightColor();
@@ -92,10 +91,8 @@ extends EntityRenderer<T> {
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         this.model.setupAnim(abstractMinecart, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(abstractMinecart)));
-        OverlayTexture.setDefault(vertexConsumer);
-        this.model.renderToBuffer(poseStack, vertexConsumer, u);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(abstractMinecart)));
+        this.model.renderToBuffer(poseStack, vertexConsumer, u, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 
@@ -105,7 +102,7 @@ extends EntityRenderer<T> {
     }
 
     protected void renderMinecartContents(T abstractMinecart, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, 0, 10);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
     }
 }
 

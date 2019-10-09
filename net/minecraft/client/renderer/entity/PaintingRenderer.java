@@ -35,15 +35,13 @@ extends EntityRenderer<Painting> {
     @Override
     public void render(Painting painting, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(180.0f - g, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         Motive motive = painting.motive;
         float i = 0.0625f;
         poseStack.scale(0.0625f, 0.0625f, 0.0625f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(this.getTextureLocation(painting)));
-        OverlayTexture.setDefault(vertexConsumer);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(this.getTextureLocation(painting)));
         PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
         this.renderPainting(poseStack.getPose(), vertexConsumer, painting, motive.getWidth(), motive.getHeight(), paintingTextureManager.get(motive), paintingTextureManager.getBackSprite());
-        vertexConsumer.unsetDefaultOverlayCoords();
         poseStack.popPose();
         super.render(painting, d, e, f, g, h, poseStack, multiBufferSource);
     }
@@ -79,21 +77,21 @@ extends EntityRenderer<Painting> {
                 float ab = f + (float)(y * 16);
                 float ac = g + (float)((z + 1) * 16);
                 float ad = g + (float)(z * 16);
-                int ae = Mth.floor(painting.x);
-                int af = Mth.floor(painting.y + (double)((ac + ad) / 2.0f / 16.0f));
-                int ag = Mth.floor(painting.z);
+                int ae = Mth.floor(painting.getX());
+                int af = Mth.floor(painting.getY() + (double)((ac + ad) / 2.0f / 16.0f));
+                int ag = Mth.floor(painting.getZ());
                 Direction direction = painting.getDirection();
                 if (direction == Direction.NORTH) {
-                    ae = Mth.floor(painting.x + (double)((aa + ab) / 2.0f / 16.0f));
+                    ae = Mth.floor(painting.getX() + (double)((aa + ab) / 2.0f / 16.0f));
                 }
                 if (direction == Direction.WEST) {
-                    ag = Mth.floor(painting.z - (double)((aa + ab) / 2.0f / 16.0f));
+                    ag = Mth.floor(painting.getZ() - (double)((aa + ab) / 2.0f / 16.0f));
                 }
                 if (direction == Direction.SOUTH) {
-                    ae = Mth.floor(painting.x - (double)((aa + ab) / 2.0f / 16.0f));
+                    ae = Mth.floor(painting.getX() - (double)((aa + ab) / 2.0f / 16.0f));
                 }
                 if (direction == Direction.EAST) {
-                    ag = Mth.floor(painting.z + (double)((aa + ab) / 2.0f / 16.0f));
+                    ag = Mth.floor(painting.getZ() + (double)((aa + ab) / 2.0f / 16.0f));
                 }
                 int ah = painting.level.getLightColor(new BlockPos(ae, af, ag));
                 float ai = textureAtlasSprite.getU(d * (double)(w - y));
@@ -129,7 +127,7 @@ extends EntityRenderer<Painting> {
     }
 
     private void vertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, int k, int l, int m, int n) {
-        vertexConsumer.vertex(matrix4f, f, g, j).color(255, 255, 255, 255).uv(h, i).uv2(n).normal(k, l, m).endVertex();
+        vertexConsumer.vertex(matrix4f, f, g, j).color(255, 255, 255, 255).uv(h, i).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(n).normal(k, l, m).endVertex();
     }
 }
 

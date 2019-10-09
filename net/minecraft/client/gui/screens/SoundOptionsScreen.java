@@ -10,6 +10,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.VolumeSlider;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -17,14 +18,9 @@ import net.minecraft.sounds.SoundSource;
 
 @Environment(value=EnvType.CLIENT)
 public class SoundOptionsScreen
-extends Screen {
-    private final Screen lastScreen;
-    private final Options options;
-
+extends OptionsSubScreen {
     public SoundOptionsScreen(Screen screen, Options options) {
-        super(new TranslatableComponent("options.sounds.title", new Object[0]));
-        this.lastScreen = screen;
-        this.options = options;
+        super(screen, options, new TranslatableComponent("options.sounds.title", new Object[0]));
     }
 
     @Override
@@ -43,11 +39,6 @@ extends Screen {
             this.minecraft.options.save();
         }));
         this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.options.save();
     }
 
     @Override

@@ -76,9 +76,9 @@ extends Entity {
     public FishingHook(Level level, Player player, double d, double e, double f) {
         this(level, player, 0, 0);
         this.setPos(d, e, f);
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
+        this.xo = this.getX();
+        this.yo = this.getY();
+        this.zo = this.getZ();
     }
 
     public FishingHook(Player player, Level level, int i, int j) {
@@ -89,9 +89,9 @@ extends Entity {
         float k = Mth.sin(-g * ((float)Math.PI / 180) - (float)Math.PI);
         float l = -Mth.cos(-f * ((float)Math.PI / 180));
         float m = Mth.sin(-f * ((float)Math.PI / 180));
-        double d = this.owner.x - (double)k * 0.3;
-        double e = this.owner.y + (double)this.owner.getEyeHeight();
-        double n = this.owner.z - (double)h * 0.3;
+        double d = this.owner.getX() - (double)k * 0.3;
+        double e = this.owner.getEyeY();
+        double n = this.owner.getZ() - (double)h * 0.3;
         this.moveTo(d, e, n, g, f);
         Vec3 vec3 = new Vec3(-k, Mth.clamp(-(m / l), -5.0f, 5.0f), -h);
         double o = vec3.length();
@@ -179,17 +179,14 @@ extends Entity {
                         this.hookedIn = null;
                         this.currentState = FishHookState.FLYING;
                     } else {
-                        this.x = this.hookedIn.x;
-                        this.y = this.hookedIn.getBoundingBox().minY + (double)this.hookedIn.getBbHeight() * 0.8;
-                        this.z = this.hookedIn.z;
-                        this.setPos(this.x, this.y, this.z);
+                        this.setPos(this.hookedIn.getX(), this.hookedIn.getY(0.8), this.hookedIn.getZ());
                     }
                 }
                 return;
             }
             if (this.currentState == FishHookState.BOBBING) {
                 Vec3 vec3 = this.getDeltaMovement();
-                double d = this.y + vec3.y - (double)blockPos.getY() - (double)f;
+                double d = this.getY() + vec3.y - (double)blockPos.getY() - (double)f;
                 if (Math.abs(d) < 0.01) {
                     d += Math.signum(d) * 0.1;
                 }
@@ -206,7 +203,6 @@ extends Entity {
         this.updateRotation();
         double e = 0.92;
         this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
-        this.setPos(this.x, this.y, this.z);
     }
 
     private boolean shouldStopFishing() {
@@ -281,13 +277,13 @@ extends Entity {
             this.timeUntilHooked -= i;
             if (this.timeUntilHooked > 0) {
                 double j;
+                double e;
                 this.fishAngle = (float)((double)this.fishAngle + this.random.nextGaussian() * 4.0);
                 float f = this.fishAngle * ((float)Math.PI / 180);
                 float g = Mth.sin(f);
                 float h = Mth.cos(f);
-                double d = this.x + (double)(g * (float)this.timeUntilHooked * 0.1f);
-                double e = (float)Mth.floor(this.getBoundingBox().minY) + 1.0f;
-                Block block = serverLevel.getBlockState(new BlockPos(d, e - 1.0, j = this.z + (double)(h * (float)this.timeUntilHooked * 0.1f))).getBlock();
+                double d = this.getX() + (double)(g * (float)this.timeUntilHooked * 0.1f);
+                Block block = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(h * (float)this.timeUntilHooked * 0.1f))).getBlock();
                 if (block == Blocks.WATER) {
                     if (this.random.nextFloat() < 0.15f) {
                         serverLevel.sendParticles(ParticleTypes.BUBBLE, d, e - (double)0.1f, j, 1, g, 0.1, h, 0.0);
@@ -301,9 +297,9 @@ extends Entity {
                 Vec3 vec3 = this.getDeltaMovement();
                 this.setDeltaMovement(vec3.x, -0.4f * Mth.nextFloat(this.random, 0.6f, 1.0f), vec3.z);
                 this.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.25f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
-                double m = this.getBoundingBox().minY + 0.5;
-                serverLevel.sendParticles(ParticleTypes.BUBBLE, this.x, m, this.z, (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
-                serverLevel.sendParticles(ParticleTypes.FISHING, this.x, m, this.z, (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
+                double m = this.getY() + 0.5;
+                serverLevel.sendParticles(ParticleTypes.BUBBLE, this.getX(), m, this.getZ(), (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
+                serverLevel.sendParticles(ParticleTypes.FISHING, this.getX(), m, this.getZ(), (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
                 this.nibble = Mth.nextInt(this.random, 20, 40);
             }
         } else if (this.timeUntilLured > 0) {
@@ -321,8 +317,8 @@ extends Entity {
                 double e;
                 float g = Mth.nextFloat(this.random, 0.0f, 360.0f) * ((float)Math.PI / 180);
                 float h = Mth.nextFloat(this.random, 25.0f, 60.0f);
-                double d = this.x + (double)(Mth.sin(g) * h * 0.1f);
-                Block block = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getBoundingBox().minY) + 1.0f)) - 1.0, j = this.z + (double)(Mth.cos(g) * h * 0.1f))).getBlock();
+                double d = this.getX() + (double)(Mth.sin(g) * h * 0.1f);
+                Block block = serverLevel.getBlockState(new BlockPos(d, (e = (double)((float)Mth.floor(this.getY()) + 1.0f)) - 1.0, j = this.getZ() + (double)(Mth.cos(g) * h * 0.1f))).getBlock();
                 if (block == Blocks.WATER) {
                     serverLevel.sendParticles(ParticleTypes.SPLASH, d, e, j, 2 + this.random.nextInt(2), 0.1f, 0.0, 0.1f, 0.0);
                 }
@@ -361,14 +357,14 @@ extends Entity {
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
             CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)this.owner, itemStack, this, list);
             for (ItemStack itemStack2 : list) {
-                ItemEntity itemEntity = new ItemEntity(this.level, this.x, this.y, this.z, itemStack2);
-                double d = this.owner.x - this.x;
-                double e = this.owner.y - this.y;
-                double f = this.owner.z - this.z;
+                ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), itemStack2);
+                double d = this.owner.getX() - this.getX();
+                double e = this.owner.getY() - this.getY();
+                double f = this.owner.getZ() - this.getZ();
                 double g = 0.1;
                 itemEntity.setDeltaMovement(d * 0.1, e * 0.1 + Math.sqrt(Math.sqrt(d * d + e * e + f * f)) * 0.08, f * 0.1);
                 this.level.addFreshEntity(itemEntity);
-                this.owner.level.addFreshEntity(new ExperienceOrb(this.owner.level, this.owner.x, this.owner.y + 0.5, this.owner.z + 0.5, this.random.nextInt(6) + 1));
+                this.owner.level.addFreshEntity(new ExperienceOrb(this.owner.level, this.owner.getX(), this.owner.getY() + 0.5, this.owner.getZ() + 0.5, this.random.nextInt(6) + 1));
                 if (!itemStack2.getItem().is(ItemTags.FISHES)) continue;
                 this.owner.awardStat(Stats.FISH_CAUGHT, 1);
             }
@@ -394,7 +390,7 @@ extends Entity {
         if (this.owner == null) {
             return;
         }
-        Vec3 vec3 = new Vec3(this.owner.x - this.x, this.owner.y - this.y, this.owner.z - this.z).scale(0.1);
+        Vec3 vec3 = new Vec3(this.owner.getX() - this.getX(), this.owner.getY() - this.getY(), this.owner.getZ() - this.getZ()).scale(0.1);
         this.hookedIn.setDeltaMovement(this.hookedIn.getDeltaMovement().add(vec3));
     }
 

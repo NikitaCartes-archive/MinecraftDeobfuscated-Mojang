@@ -9,7 +9,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
@@ -118,6 +117,7 @@ ResourceManagerReloadListener {
     public void close() {
         this.lightTexture.close();
         this.mapRenderer.close();
+        this.overlayTexture.close();
         this.shutdownEffect();
     }
 
@@ -310,7 +310,7 @@ ResourceManagerReloadListener {
             float g = (float)livingEntity.hurtTime - f;
             if (livingEntity.getHealth() <= 0.0f) {
                 h = Math.min((float)livingEntity.deathTime + f, 20.0f);
-                poseStack.mulPose(Vector3f.ZP.rotation(40.0f - 8000.0f / (h + 200.0f), true));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0f - 8000.0f / (h + 200.0f)));
             }
             if (g < 0.0f) {
                 return;
@@ -318,9 +318,9 @@ ResourceManagerReloadListener {
             g /= (float)livingEntity.hurtDuration;
             g = Mth.sin(g * g * g * g * (float)Math.PI);
             h = livingEntity.hurtDir;
-            poseStack.mulPose(Vector3f.YP.rotation(-h, true));
-            poseStack.mulPose(Vector3f.ZP.rotation(-g * 14.0f, true));
-            poseStack.mulPose(Vector3f.YP.rotation(h, true));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(-g * 14.0f));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
         }
     }
 
@@ -333,8 +333,8 @@ ResourceManagerReloadListener {
         float h = -(player.walkDist + g * f);
         float i = Mth.lerp(f, player.oBob, player.bob);
         poseStack.translate(Mth.sin(h * (float)Math.PI) * i * 0.5f, -Math.abs(Mth.cos(h * (float)Math.PI) * i), 0.0);
-        poseStack.mulPose(Vector3f.ZP.rotation(Mth.sin(h * (float)Math.PI) * i * 3.0f, true));
-        poseStack.mulPose(Vector3f.XP.rotation(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f, true));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.sin(h * (float)Math.PI) * i * 3.0f));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(Math.abs(Mth.cos(h * (float)Math.PI - 0.2f) * i) * 5.0f));
     }
 
     private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
@@ -420,6 +420,11 @@ ResourceManagerReloadListener {
             }
             this.minecraft.levelRenderer.doEntityOutline();
             if (this.postEffect != null && this.effectActive) {
+                RenderSystem.disableBlend();
+                RenderSystem.disableDepthTest();
+                RenderSystem.disableAlphaTest();
+                RenderSystem.disableFog();
+                RenderSystem.enableTexture();
                 RenderSystem.matrixMode(5890);
                 RenderSystem.pushMatrix();
                 RenderSystem.loadIdentity();
@@ -436,7 +441,7 @@ ResourceManagerReloadListener {
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
         RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
-        Lighting.setupGui();
+        Lighting.setupGui(poseStack.getPose());
         if (bl && this.minecraft.level != null) {
             this.minecraft.getProfiler().popPush("gui");
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
@@ -547,13 +552,14 @@ ResourceManagerReloadListener {
             float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
             h *= h;
             Vector3f vector3f = new Vector3f(0.0f, 1.0f, 1.0f);
-            poseStack.mulPose(vector3f.rotation(((float)this.tick + f) * (float)i, true));
+            poseStack.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
             poseStack.scale(1.0f / h, 1.0f, 1.0f);
-            poseStack.mulPose(vector3f.rotation(-((float)this.tick + f) * (float)i, true));
+            float j = -((float)this.tick + f) * (float)i;
+            poseStack.mulPose(vector3f.rotationDegrees(j));
         }
         camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), this.minecraft.options.thirdPersonView > 0, this.minecraft.options.thirdPersonView == 2, f);
-        poseStack.mulPose(Vector3f.XP.rotation(camera.getXRot(), true));
-        poseStack.mulPose(Vector3f.YP.rotation(camera.getYRot() + 180.0f, true));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0f));
         this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture);
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {
@@ -602,12 +608,11 @@ ResourceManagerReloadListener {
         poseStack.translate((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0f)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0f)), -50.0);
         float q = 50.0f + 175.0f * Mth.sin(n);
         poseStack.scale(q, -q, q);
-        poseStack.scale(q, -q, q);
-        poseStack.mulPose(Vector3f.YP.rotation(900.0f * Mth.abs(Mth.sin(n)), true));
-        poseStack.mulPose(Vector3f.XP.rotation(6.0f * Mth.cos(g * 8.0f), true));
-        poseStack.mulPose(Vector3f.ZP.rotation(6.0f * Mth.cos(g * 8.0f), true));
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, poseStack, bufferSource);
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(900.0f * Mth.abs(Mth.sin(n))));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(6.0f * Mth.cos(g * 8.0f)));
+        MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
+        this.minecraft.getItemRenderer().renderStatic(this.itemActivationItem, ItemTransforms.TransformType.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, poseStack, bufferSource);
         poseStack.popPose();
         bufferSource.endBatch();
         RenderSystem.popAttributes();

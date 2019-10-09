@@ -192,10 +192,10 @@ extends WalkNodeEvaluator {
 
     @Override
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-        BlockPathTypes blockPathTypes = this.getBlockPathTypeRaw(blockGetter, i, j, k);
+        BlockPathTypes blockPathTypes = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j, k);
         if (blockPathTypes == BlockPathTypes.WATER) {
             for (Direction direction : Direction.values()) {
-                BlockPathTypes blockPathTypes2 = this.getBlockPathTypeRaw(blockGetter, i + direction.getStepX(), j + direction.getStepY(), k + direction.getStepZ());
+                BlockPathTypes blockPathTypes2 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i + direction.getStepX(), j + direction.getStepY(), k + direction.getStepZ());
                 if (blockPathTypes2 != BlockPathTypes.BLOCKED) continue;
                 return BlockPathTypes.WATER_BORDER;
             }
@@ -203,7 +203,7 @@ extends WalkNodeEvaluator {
         }
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-            BlockPathTypes blockPathTypes3 = this.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+            BlockPathTypes blockPathTypes3 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
             blockPathTypes = blockPathTypes3 == BlockPathTypes.WALKABLE || blockPathTypes3 == BlockPathTypes.OPEN || blockPathTypes3 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
             if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || block == Blocks.CAMPFIRE) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
@@ -215,7 +215,7 @@ extends WalkNodeEvaluator {
                 blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
             }
         }
-        blockPathTypes = this.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
         return blockPathTypes;
     }
 }

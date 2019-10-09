@@ -92,8 +92,8 @@ extends ComplexItem {
         int i = 1 << mapItemSavedData.scale;
         int j = mapItemSavedData.x;
         int k = mapItemSavedData.z;
-        int l = Mth.floor(entity.x - (double)j) / i + 64;
-        int m = Mth.floor(entity.z - (double)k) / i + 64;
+        int l = Mth.floor(entity.getX() - (double)j) / i + 64;
+        int m = Mth.floor(entity.getZ() - (double)k) / i + 64;
         int n = 128 / i;
         if (level.dimension.isHasCeiling()) {
             n /= 2;

@@ -5,12 +5,15 @@ package net.minecraft.client.model;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -36,16 +39,12 @@ HeadedModel {
     public float swimAmount;
     private float itemUseTicks;
 
-    public HumanoidModel() {
-        this(0.0f);
-    }
-
     public HumanoidModel(float f) {
-        this(f, 0.0f, 64, 32);
+        this(RenderType::entitySolid, f, 0.0f, 64, 32);
     }
 
-    public HumanoidModel(float f, float g, int i, int j) {
-        super(true, 16.0f, 0.0f);
+    public HumanoidModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {
+        super(function, true, 16.0f, 0.0f, 2.0f, 2.0f, 24.0f);
         this.texWidth = i;
         this.texHeight = j;
         this.head = new ModelPart(this, 0, 0);

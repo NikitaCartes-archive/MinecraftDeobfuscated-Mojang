@@ -73,7 +73,13 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, I18n.get("selectWorld.enterName", new Object[0]));
+        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, I18n.get("selectWorld.enterName", new Object[0])){
+
+            @Override
+            protected String getNarrationMessage() {
+                return super.getNarrationMessage() + ". " + I18n.get("selectWorld.resultFolder", new Object[0]) + " " + CreateWorldScreen.this.resultFolder;
+            }
+        };
         this.nameEdit.setValue(this.initName);
         this.nameEdit.setResponder(string -> {
             this.initName = string;
@@ -95,8 +101,19 @@ extends Screen {
                     this.setGameMode(SelectedGameMode.SURVIVAL);
                 }
             }
-            this.updateSelectionStrings();
-        }));
+            button.queueNarration(250);
+        }){
+
+            @Override
+            public String getMessage() {
+                return I18n.get("selectWorld.gameMode", new Object[0]) + ": " + I18n.get("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name, new Object[0]);
+            }
+
+            @Override
+            protected String getNarrationMessage() {
+                return super.getNarrationMessage() + ". " + CreateWorldScreen.this.gameModeHelp1 + " " + CreateWorldScreen.this.gameModeHelp2;
+            }
+        });
         this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, I18n.get("selectWorld.enterSeed", new Object[0]));
         this.seedEdit.setValue(this.initSeed);
         this.seedEdit.setResponder(string -> {
@@ -105,8 +122,19 @@ extends Screen {
         this.children.add(this.seedEdit);
         this.featuresButton = this.addButton(new Button(this.width / 2 - 155, 100, 150, 20, I18n.get("selectWorld.mapFeatures", new Object[0]), button -> {
             this.features = !this.features;
-            this.updateSelectionStrings();
-        }));
+            button.queueNarration(250);
+        }){
+
+            @Override
+            public String getMessage() {
+                return I18n.get("selectWorld.mapFeatures", new Object[0]) + ' ' + I18n.get(CreateWorldScreen.this.features ? "options.on" : "options.off", new Object[0]);
+            }
+
+            @Override
+            protected String getNarrationMessage() {
+                return super.getNarrationMessage() + ". " + I18n.get("selectWorld.mapFeatures.info", new Object[0]);
+            }
+        });
         this.featuresButton.visible = false;
         this.typeButton = this.addButton(new Button(this.width / 2 + 5, 100, 150, 20, I18n.get("selectWorld.mapType", new Object[0]), button -> {
             ++this.levelTypeIndex;
@@ -119,9 +147,24 @@ extends Screen {
                 this.levelTypeIndex = 0;
             }
             this.levelTypeOptions = new CompoundTag();
-            this.updateSelectionStrings();
             this.setDisplayOptions(this.displayOptions);
-        }));
+            button.queueNarration(250);
+        }){
+
+            @Override
+            public String getMessage() {
+                return I18n.get("selectWorld.mapType", new Object[0]) + ' ' + I18n.get(LevelType.LEVEL_TYPES[CreateWorldScreen.this.levelTypeIndex].getDescriptionId(), new Object[0]);
+            }
+
+            @Override
+            protected String getNarrationMessage() {
+                LevelType levelType = LevelType.LEVEL_TYPES[CreateWorldScreen.this.levelTypeIndex];
+                if (levelType.hasHelpText()) {
+                    return super.getNarrationMessage() + ". " + I18n.get(levelType.getHelpTextId(), new Object[0]);
+                }
+                return super.getNarrationMessage();
+            }
+        });
         this.typeButton.visible = false;
         this.customizeTypeButton = this.addButton(new Button(this.width / 2 + 5, 120, 150, 20, I18n.get("selectWorld.customizeType", new Object[0]), button -> {
             if (LevelType.LEVEL_TYPES[this.levelTypeIndex] == LevelType.FLAT) {
@@ -135,13 +178,30 @@ extends Screen {
         this.commandsButton = this.addButton(new Button(this.width / 2 - 155, 151, 150, 20, I18n.get("selectWorld.allowCommands", new Object[0]), button -> {
             this.commandsChanged = true;
             this.commands = !this.commands;
-            this.updateSelectionStrings();
-        }));
+            button.queueNarration(250);
+        }){
+
+            @Override
+            public String getMessage() {
+                return I18n.get("selectWorld.allowCommands", new Object[0]) + ' ' + I18n.get(CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore ? "options.on" : "options.off", new Object[0]);
+            }
+
+            @Override
+            protected String getNarrationMessage() {
+                return super.getNarrationMessage() + ". " + I18n.get("selectWorld.allowCommands.info", new Object[0]);
+            }
+        });
         this.commandsButton.visible = false;
         this.bonusItemsButton = this.addButton(new Button(this.width / 2 + 5, 151, 150, 20, I18n.get("selectWorld.bonusItems", new Object[0]), button -> {
             this.bonusItems = !this.bonusItems;
-            this.updateSelectionStrings();
-        }));
+            button.queueNarration(250);
+        }){
+
+            @Override
+            public String getMessage() {
+                return I18n.get("selectWorld.bonusItems", new Object[0]) + ' ' + I18n.get(CreateWorldScreen.this.bonusItems && !CreateWorldScreen.this.hardCore ? "options.on" : "options.off", new Object[0]);
+            }
+        });
         this.bonusItemsButton.visible = false;
         this.moreOptionsButton = this.addButton(new Button(this.width / 2 - 75, 187, 150, 20, I18n.get("selectWorld.moreWorldOptions", new Object[0]), button -> this.toggleDisplayOptions()));
         this.createButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, I18n.get("selectWorld.create", new Object[0]), button -> this.onCreate()));
@@ -151,12 +211,16 @@ extends Screen {
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
         this.updateResultFolder();
-        this.updateSelectionStrings();
+    }
+
+    private void updateGameModeHelp() {
+        this.gameModeHelp1 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line1", new Object[0]);
+        this.gameModeHelp2 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line2", new Object[0]);
     }
 
     private void updateResultFolder() {
         this.resultFolder = this.nameEdit.getValue().trim();
-        if (this.resultFolder.length() == 0) {
+        if (this.resultFolder.isEmpty()) {
             this.resultFolder = "World";
         }
         try {
@@ -169,16 +233,6 @@ extends Screen {
                 throw new RuntimeException("Could not create save folder", exception2);
             }
         }
-    }
-
-    private void updateSelectionStrings() {
-        this.modeButton.setMessage(I18n.get("selectWorld.gameMode", new Object[0]) + ": " + I18n.get("selectWorld.gameMode." + this.gameMode.name, new Object[0]));
-        this.gameModeHelp1 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line1", new Object[0]);
-        this.gameModeHelp2 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line2", new Object[0]);
-        this.featuresButton.setMessage(I18n.get("selectWorld.mapFeatures", new Object[0]) + ' ' + I18n.get(this.features ? "options.on" : "options.off", new Object[0]));
-        this.bonusItemsButton.setMessage(I18n.get("selectWorld.bonusItems", new Object[0]) + ' ' + I18n.get(this.bonusItems && !this.hardCore ? "options.on" : "options.off", new Object[0]));
-        this.typeButton.setMessage(I18n.get("selectWorld.mapType", new Object[0]) + ' ' + I18n.get(LevelType.LEVEL_TYPES[this.levelTypeIndex].getDescriptionId(), new Object[0]));
-        this.commandsButton.setMessage(I18n.get("selectWorld.allowCommands", new Object[0]) + ' ' + I18n.get(this.commands && !this.hardCore ? "options.on" : "options.off", new Object[0]));
     }
 
     @Override
@@ -244,7 +298,7 @@ extends Screen {
             this.bonusItemsButton.active = true;
         }
         this.gameMode = selectedGameMode;
-        this.updateSelectionStrings();
+        this.updateGameModeHelp();
     }
 
     private void setDisplayOptions(boolean bl) {

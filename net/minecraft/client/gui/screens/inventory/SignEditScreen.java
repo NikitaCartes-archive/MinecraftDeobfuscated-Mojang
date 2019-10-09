@@ -110,7 +110,7 @@ extends Screen {
         RenderSystem.translatef(0.0f, -1.0625f, 0.0f);
         this.sign.setCursorInfo(this.line, this.signField.getCursorPos(), this.signField.getSelectionPos(), this.frame / 6 % 2 == 0);
         RenderSystem.translatef(-0.5f, -0.75f, -0.5f);
-        BlockEntityRenderDispatcher.instance.renderItem(this.sign, new PoseStack(), 0xF000F0);
+        BlockEntityRenderDispatcher.instance.renderItem(this.sign, new PoseStack());
         this.sign.resetCursorInfo();
         RenderSystem.popMatrix();
         super.render(i, j, f);

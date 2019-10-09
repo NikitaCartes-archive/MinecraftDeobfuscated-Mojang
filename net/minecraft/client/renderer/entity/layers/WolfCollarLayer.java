@@ -28,7 +28,7 @@ extends RenderLayer<Wolf, WolfModel<Wolf>> {
             return;
         }
         float[] fs = wolf.getCollarColor().getTextureDiffuseColors();
-        WolfCollarLayer.renderColoredModel(this.getParentModel(), WOLF_COLLAR_LOCATION, poseStack, multiBufferSource, i, wolf, fs[0], fs[1], fs[2]);
+        WolfCollarLayer.renderColoredCutoutModel(this.getParentModel(), WOLF_COLLAR_LOCATION, poseStack, multiBufferSource, i, wolf, fs[0], fs[1], fs[2]);
     }
 }
 

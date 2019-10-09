@@ -6,6 +6,7 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
 @Environment(value=EnvType.CLIENT)
@@ -16,7 +17,7 @@ extends HumanoidModel<ArmorStand> {
     }
 
     protected ArmorStandArmorModel(float f, int i, int j) {
-        super(f, 0.0f, i, j);
+        super(RenderType::entitySolid, f, 0.0f, i, j);
     }
 
     @Override

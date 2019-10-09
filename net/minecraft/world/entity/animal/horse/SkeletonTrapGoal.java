@@ -28,7 +28,7 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        return this.horse.level.hasNearbyAlivePlayer(this.horse.x, this.horse.y, this.horse.z, 10.0);
+        return this.horse.level.hasNearbyAlivePlayer(this.horse.getX(), this.horse.getY(), this.horse.getZ(), 10.0);
     }
 
     @Override
@@ -37,7 +37,7 @@ extends Goal {
         this.horse.setTrap(false);
         this.horse.setTamed(true);
         this.horse.setAge(0);
-        ((ServerLevel)this.horse.level).addGlobalEntity(new LightningBolt(this.horse.level, this.horse.x, this.horse.y, this.horse.z, true));
+        ((ServerLevel)this.horse.level).addGlobalEntity(new LightningBolt(this.horse.level, this.horse.getX(), this.horse.getY(), this.horse.getZ(), true));
         Skeleton skeleton = this.createSkeleton(difficultyInstance, this.horse);
         skeleton.startRiding(this.horse);
         for (int i = 0; i < 3; ++i) {
@@ -51,7 +51,7 @@ extends Goal {
     private AbstractHorse createHorse(DifficultyInstance difficultyInstance) {
         SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level);
         skeletonHorse.finalizeSpawn(this.horse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
-        skeletonHorse.setPos(this.horse.x, this.horse.y, this.horse.z);
+        skeletonHorse.setPos(this.horse.getX(), this.horse.getY(), this.horse.getZ());
         skeletonHorse.invulnerableTime = 60;
         skeletonHorse.setPersistenceRequired();
         skeletonHorse.setTamed(true);
@@ -63,7 +63,7 @@ extends Goal {
     private Skeleton createSkeleton(DifficultyInstance difficultyInstance, AbstractHorse abstractHorse) {
         Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level);
         skeleton.finalizeSpawn(abstractHorse.level, difficultyInstance, MobSpawnType.TRIGGERED, null, null);
-        skeleton.setPos(abstractHorse.x, abstractHorse.y, abstractHorse.z);
+        skeleton.setPos(abstractHorse.getX(), abstractHorse.getY(), abstractHorse.getZ());
         skeleton.invulnerableTime = 60;
         skeleton.setPersistenceRequired();
         if (skeleton.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {

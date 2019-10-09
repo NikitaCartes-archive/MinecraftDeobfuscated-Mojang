@@ -13,7 +13,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.NoneDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class DarkOakTreePlacementDecorator
@@ -27,9 +27,10 @@ extends FeatureDecorator<NoneDecoratorConfiguration> {
         return IntStream.range(0, 16).mapToObj(i -> {
             int j = i / 4;
             int k = i % 4;
-            int l = j * 4 + 1 + random.nextInt(3);
-            int m = k * 4 + 1 + random.nextInt(3);
-            return levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(l, 0, m));
+            int l = j * 4 + 1 + random.nextInt(3) + blockPos.getX();
+            int m = k * 4 + 1 + random.nextInt(3) + blockPos.getZ();
+            int n = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, l, m);
+            return new BlockPos(l, n, m);
         });
     }
 }

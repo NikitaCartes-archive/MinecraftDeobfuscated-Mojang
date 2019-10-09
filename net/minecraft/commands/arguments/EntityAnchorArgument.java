@@ -83,7 +83,7 @@ implements ArgumentType<Anchor> {
         }
 
         public Vec3 apply(Entity entity) {
-            return this.transform.apply(new Vec3(entity.x, entity.y, entity.z), entity);
+            return this.transform.apply(entity.position(), entity);
         }
 
         public Vec3 apply(CommandSourceStack commandSourceStack) {

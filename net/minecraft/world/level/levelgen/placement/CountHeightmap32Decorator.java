@@ -14,26 +14,25 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequency;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 
 public class CountHeightmap32Decorator
-extends FeatureDecorator<DecoratorFrequency> {
-    public CountHeightmap32Decorator(Function<Dynamic<?>, ? extends DecoratorFrequency> function) {
+extends FeatureDecorator<FrequencyDecoratorConfiguration> {
+    public CountHeightmap32Decorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
         super(function);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorFrequency decoratorFrequency, BlockPos blockPos) {
-        return IntStream.range(0, decoratorFrequency.count).mapToObj(i -> {
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, FrequencyDecoratorConfiguration frequencyDecoratorConfiguration, BlockPos blockPos) {
+        return IntStream.range(0, frequencyDecoratorConfiguration.count).mapToObj(i -> {
             int k;
-            int j = random.nextInt(16);
-            int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k = random.nextInt(16))).getY() + 32;
+            int j = random.nextInt(16) + blockPos.getX();
+            int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k = random.nextInt(16) + blockPos.getZ()) + 32;
             if (l <= 0) {
                 return null;
             }
-            int m = random.nextInt(l);
-            return blockPos.offset(j, m, k);
+            return new BlockPos(j, random.nextInt(l), k);
         }).filter(Objects::nonNull);
     }
 }

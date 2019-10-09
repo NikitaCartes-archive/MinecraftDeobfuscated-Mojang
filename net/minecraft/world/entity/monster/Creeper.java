@@ -90,12 +90,13 @@ implements PowerableMob {
     }
 
     @Override
-    public void causeFallDamage(float f, float g) {
-        super.causeFallDamage(f, g);
+    public boolean causeFallDamage(float f, float g) {
+        boolean bl = super.causeFallDamage(f, g);
         this.swell = (int)((float)this.swell + f * 1.5f);
         if (this.swell > this.maxSwell - 5) {
             this.swell = this.maxSwell - 5;
         }
+        return bl;
     }
 
     @Override
@@ -209,7 +210,7 @@ implements PowerableMob {
     protected boolean mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.FLINT_AND_STEEL) {
-            this.level.playSound(player2, this.x, this.y, this.z, SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
+            this.level.playSound(player2, this.getX(), this.getY(), this.getZ(), SoundEvents.FLINTANDSTEEL_USE, this.getSoundSource(), 1.0f, this.random.nextFloat() * 0.4f + 0.8f);
             if (!this.level.isClientSide) {
                 this.ignite();
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
@@ -224,7 +225,7 @@ implements PowerableMob {
             Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
             float f = this.isPowered() ? 2.0f : 1.0f;
             this.dead = true;
-            this.level.explode(this, this.x, this.y, this.z, (float)this.explosionRadius * f, blockInteraction);
+            this.level.explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, blockInteraction);
             this.remove();
             this.spawnLingeringCloud();
         }
@@ -233,7 +234,7 @@ implements PowerableMob {
     private void spawnLingeringCloud() {
         Collection<MobEffectInstance> collection = this.getActiveEffects();
         if (!collection.isEmpty()) {
-            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level, this.x, this.y, this.z);
+            AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level, this.getX(), this.getY(), this.getZ());
             areaEffectCloud.setRadius(2.5f);
             areaEffectCloud.setRadiusOnUse(-0.5f);
             areaEffectCloud.setWaitTime(10);

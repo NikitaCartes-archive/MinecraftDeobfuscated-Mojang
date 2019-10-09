@@ -34,9 +34,9 @@ public class ScreenEffectRenderer {
             BlockState blockState = minecraft.level.getBlockState(new BlockPos(minecraft.player));
             LocalPlayer player = minecraft.player;
             for (int i = 0; i < 8; ++i) {
-                double d = player.x + (double)(((float)((i >> 0) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
-                double e = player.y + (double)(((float)((i >> 1) % 2) - 0.5f) * 0.1f);
-                double f = player.z + (double)(((float)((i >> 2) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
+                double d = player.getX() + (double)(((float)((i >> 0) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
+                double e = player.getY() + (double)(((float)((i >> 1) % 2) - 0.5f) * 0.1f);
+                double f = player.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
                 BlockPos blockPos = new BlockPos(d, e + (double)player.getEyeHeight(), f);
                 BlockState blockState2 = minecraft.level.getBlockState(blockPos);
                 if (!blockState2.isViewBlocking(minecraft.level, blockPos)) continue;
@@ -126,7 +126,7 @@ public class ScreenEffectRenderer {
             float o = 0.5f;
             float p = -0.5f;
             poseStack.translate((float)(-(i * 2 - 1)) * 0.24f, -0.3f, 0.0);
-            poseStack.mulPose(Vector3f.YP.rotation((float)(i * 2 - 1) * 10.0f, true));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees((float)(i * 2 - 1) * 10.0f));
             Matrix4f matrix4f = poseStack.getPose();
             bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
             bufferBuilder.vertex(matrix4f, -0.5f, -0.5f, -0.5f).color(1.0f, 1.0f, 1.0f, 0.9f).uv(h, k).endVertex();

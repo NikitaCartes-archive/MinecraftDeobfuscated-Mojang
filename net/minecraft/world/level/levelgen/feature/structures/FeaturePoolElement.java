@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
@@ -30,15 +31,15 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class FeaturePoolElement
 extends StructurePoolElement {
-    private final ConfiguredFeature<?> feature;
+    private final ConfiguredFeature<?, ?> feature;
     private final CompoundTag defaultJigsawNBT;
 
     @Deprecated
-    public FeaturePoolElement(ConfiguredFeature<?> configuredFeature) {
+    public FeaturePoolElement(ConfiguredFeature<?, ?> configuredFeature) {
         this(configuredFeature, StructureTemplatePool.Projection.RIGID);
     }
 
-    public FeaturePoolElement(ConfiguredFeature<?> configuredFeature, StructureTemplatePool.Projection projection) {
+    public FeaturePoolElement(ConfiguredFeature<?, ?> configuredFeature, StructureTemplatePool.Projection projection) {
         super(projection);
         this.feature = configuredFeature;
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
@@ -91,7 +92,7 @@ extends StructurePoolElement {
     }
 
     public String toString() {
-        return "Feature[" + Registry.FEATURE.getKey(this.feature.feature) + "]";
+        return "Feature[" + Registry.FEATURE.getKey((Feature<?>)this.feature.feature) + "]";
     }
 }
 

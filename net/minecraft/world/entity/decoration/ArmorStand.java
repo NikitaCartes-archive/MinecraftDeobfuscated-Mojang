@@ -84,9 +84,9 @@ extends LivingEntity {
 
     @Override
     public void refreshDimensions() {
-        double d = this.x;
-        double e = this.y;
-        double f = this.z;
+        double d = this.getX();
+        double e = this.getY();
+        double f = this.getZ();
         super.refreshDimensions();
         this.setPos(d, e, f);
     }
@@ -456,7 +456,7 @@ extends LivingEntity {
     public void handleEntityEvent(byte b) {
         if (b == 32) {
             if (this.level.isClientSide) {
-                this.level.playLocalSound(this.x, this.y, this.z, SoundEvents.ARMOR_STAND_HIT, this.getSoundSource(), 0.3f, 1.0f, false);
+                this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_HIT, this.getSoundSource(), 0.3f, 1.0f, false);
                 this.lastHit = this.level.getGameTime();
             }
         } else {
@@ -476,7 +476,7 @@ extends LivingEntity {
 
     private void showBreakingParticles() {
         if (this.level instanceof ServerLevel) {
-            ((ServerLevel)this.level).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()), this.x, this.y + (double)this.getBbHeight() / 1.5, this.z, 10, this.getBbWidth() / 4.0f, this.getBbHeight() / 4.0f, this.getBbWidth() / 4.0f, 0.05);
+            ((ServerLevel)this.level).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()), this.getX(), this.getY(0.6666666666666666), this.getZ(), 10, this.getBbWidth() / 4.0f, this.getBbHeight() / 4.0f, this.getBbWidth() / 4.0f, 0.05);
         }
     }
 
@@ -515,7 +515,7 @@ extends LivingEntity {
     }
 
     private void playBrokenSound() {
-        this.level.playSound(null, this.x, this.y, this.z, SoundEvents.ARMOR_STAND_BREAK, this.getSoundSource(), 1.0f, 1.0f);
+        this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ARMOR_STAND_BREAK, this.getSoundSource(), 1.0f, 1.0f);
     }
 
     @Override

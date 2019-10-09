@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -36,6 +37,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
@@ -109,8 +113,8 @@ extends AbstractGolem {
         if (this.offerFlowerTick > 0) {
             --this.offerFlowerTick;
         }
-        if (IronGolem.getHorizontalDistanceSqr(this.getDeltaMovement()) > 2.500000277905201E-7 && this.random.nextInt(5) == 0 && !(blockState = this.level.getBlockState(new BlockPos(i = Mth.floor(this.x), j = Mth.floor(this.y - (double)0.2f), k = Mth.floor(this.z)))).isAir()) {
-            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.x + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), this.getBoundingBox().minY + 0.1, this.z + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), 4.0 * ((double)this.random.nextFloat() - 0.5), 0.5, ((double)this.random.nextFloat() - 0.5) * 4.0);
+        if (IronGolem.getHorizontalDistanceSqr(this.getDeltaMovement()) > 2.500000277905201E-7 && this.random.nextInt(5) == 0 && !(blockState = this.level.getBlockState(new BlockPos(i = Mth.floor(this.getX()), j = Mth.floor(this.getY() - (double)0.2f), k = Mth.floor(this.getZ())))).isAir()) {
+            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), 4.0 * ((double)this.random.nextFloat() - 0.5), 0.5, ((double)this.random.nextFloat() - 0.5) * 4.0);
         }
     }
 
@@ -145,13 +149,39 @@ extends AbstractGolem {
     public boolean doHurtTarget(Entity entity) {
         this.attackAnimationTick = 10;
         this.level.broadcastEntityEvent(this, (byte)4);
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), this.getAttackDamage() / 2.0f + (float)this.random.nextInt((int)this.getAttackDamage()));
+        float f = this.getAttackDamage();
+        float g = f > 0.0f ? f / 2.0f + (float)this.random.nextInt((int)f) : 0.0f;
+        boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
         if (bl) {
             entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4f, 0.0));
             this.doEnchantDamageEffects(this, entity);
         }
         this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0f, 1.0f);
         return bl;
+    }
+
+    @Override
+    public boolean hurt(DamageSource damageSource, float f) {
+        Crackiness crackiness = this.getCrackiness();
+        boolean bl = super.hurt(damageSource, f);
+        if (bl && this.getCrackiness() != crackiness) {
+            this.playSound(SoundEvents.IRON_GOLEM_DAMAGE, 1.0f, 1.0f);
+        }
+        return bl;
+    }
+
+    public Crackiness getCrackiness() {
+        float f = this.getHealth();
+        if (f < 25.0f) {
+            return Crackiness.HIGH;
+        }
+        if (f < 50.0f) {
+            return Crackiness.MEDIUM;
+        }
+        if (f < 75.0f) {
+            return Crackiness.LOW;
+        }
+        return Crackiness.NONE;
     }
 
     @Override
@@ -192,6 +222,26 @@ extends AbstractGolem {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.IRON_GOLEM_DEATH;
+    }
+
+    @Override
+    protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        Item item = itemStack.getItem();
+        if (item != Items.IRON_INGOT) {
+            return false;
+        }
+        float f = this.getHealth();
+        this.heal(25.0f);
+        if (this.getHealth() == f) {
+            return true;
+        }
+        float g = 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
+        this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0f, g);
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
+        return true;
     }
 
     @Override
@@ -237,6 +287,14 @@ extends AbstractGolem {
             return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, levelReader.getBlockState(blockPos), Fluids.EMPTY.defaultFluidState()) && levelReader.isUnobstructed(this);
         }
         return false;
+    }
+
+    public static enum Crackiness {
+        NONE,
+        LOW,
+        MEDIUM,
+        HIGH;
+
     }
 }
 

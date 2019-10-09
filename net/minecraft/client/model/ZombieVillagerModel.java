@@ -3,11 +3,14 @@
  */
 package net.minecraft.client.model;
 
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.VillagerHeadModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Zombie;
@@ -18,12 +21,8 @@ extends HumanoidModel<T>
 implements VillagerHeadModel {
     private ModelPart hatRim;
 
-    public ZombieVillagerModel() {
-        this(0.0f, false);
-    }
-
-    public ZombieVillagerModel(float f, boolean bl) {
-        super(f, 0.0f, 64, bl ? 32 : 64);
+    public ZombieVillagerModel(Function<ResourceLocation, RenderType> function, float f, boolean bl) {
+        super(function, f, 0.0f, 64, bl ? 32 : 64);
         if (bl) {
             this.head = new ModelPart(this, 0, 0);
             this.head.addBox(-4.0f, -10.0f, -4.0f, 8.0f, 8.0f, 8.0f, f);

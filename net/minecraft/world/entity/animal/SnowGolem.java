@@ -87,9 +87,9 @@ implements RangedAttackMob {
     public void aiStep() {
         super.aiStep();
         if (!this.level.isClientSide) {
-            int i = Mth.floor(this.x);
-            int j = Mth.floor(this.y);
-            int k = Mth.floor(this.z);
+            int i = Mth.floor(this.getX());
+            int j = Mth.floor(this.getY());
+            int k = Mth.floor(this.getZ());
             if (this.isInWaterRainOrBubble()) {
                 this.hurt(DamageSource.DROWN, 1.0f);
             }
@@ -103,8 +103,8 @@ implements RangedAttackMob {
             }
             BlockState blockState = Blocks.SNOW.defaultBlockState();
             for (int l = 0; l < 4; ++l) {
-                i = Mth.floor(this.x + (double)((float)(l % 2 * 2 - 1) * 0.25f));
-                BlockPos blockPos3 = new BlockPos(i, j = Mth.floor(this.y), k = Mth.floor(this.z + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25f)));
+                i = Mth.floor(this.getX() + (double)((float)(l % 2 * 2 - 1) * 0.25f));
+                BlockPos blockPos3 = new BlockPos(i, j = Mth.floor(this.getY()), k = Mth.floor(this.getZ() + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25f)));
                 if (!this.level.getBlockState(blockPos3).isAir() || !(this.level.getBiome(blockPos3).getTemperature(blockPos3) < 0.8f) || !blockState.canSurvive(this.level, blockPos3)) continue;
                 this.level.setBlockAndUpdate(blockPos3, blockState);
             }
@@ -114,10 +114,10 @@ implements RangedAttackMob {
     @Override
     public void performRangedAttack(LivingEntity livingEntity, float f) {
         Snowball snowball = new Snowball(this.level, this);
-        double d = livingEntity.y + (double)livingEntity.getEyeHeight() - (double)1.1f;
-        double e = livingEntity.x - this.x;
-        double g = d - snowball.y;
-        double h = livingEntity.z - this.z;
+        double d = livingEntity.getEyeY() - (double)1.1f;
+        double e = livingEntity.getX() - this.getX();
+        double g = d - snowball.getY();
+        double h = livingEntity.getZ() - this.getZ();
         float i = Mth.sqrt(e * e + h * h) * 0.2f;
         snowball.shoot(e, g + (double)i, h, 1.6f, 12.0f);
         this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));

@@ -106,10 +106,11 @@ implements DataProvider {
     }
 
     /*
-     * Opcode count of 15385 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
+     * Opcode count of 15540 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
      */
     private void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(Blocks.ACACIA_WOOD, 3).define(Character.valueOf('#'), Blocks.ACACIA_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.ACACIA_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_ACACIA_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_ACACIA_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_ACACIA_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.ACACIA_BOAT).define(Character.valueOf('#'), Blocks.ACACIA_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.ACACIA_BUTTON).requires(Blocks.ACACIA_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.ACACIA_PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.ACACIA_DOOR, 3).define(Character.valueOf('#'), Blocks.ACACIA_PLANKS).pattern("##").pattern("##").pattern("##").group("wooden_door").unlocks("has_planks", this.has(Blocks.ACACIA_PLANKS)).save(consumer);
@@ -127,9 +128,10 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Items.ARROW, 4).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.FLINT).define(Character.valueOf('Y'), Items.FEATHER).pattern("X").pattern("#").pattern("Y").unlocks("has_feather", this.has(Items.FEATHER)).unlocks("has_flint", this.has(Items.FLINT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BARREL, 1).define(Character.valueOf('P'), ItemTags.PLANKS).define(Character.valueOf('S'), ItemTags.WOODEN_SLABS).pattern("PSP").pattern("P P").pattern("PSP").unlocks("has_planks", this.has(ItemTags.PLANKS)).unlocks("has_wood_slab", this.has(ItemTags.WOODEN_SLABS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BEACON).define(Character.valueOf('S'), Items.NETHER_STAR).define(Character.valueOf('G'), Blocks.GLASS).define(Character.valueOf('O'), Blocks.OBSIDIAN).pattern("GGG").pattern("GSG").pattern("OOO").unlocks("has_nether_star", this.has(Items.NETHER_STAR)).save(consumer);
-        ShapedRecipeBuilder.shaped(Blocks.BEE_HIVE).define(Character.valueOf('P'), ItemTags.PLANKS).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("PPP").pattern("HHH").pattern("PPP").unlocks("has_honeycomb", this.has(Items.HONEYCOMB)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.BEEHIVE).define(Character.valueOf('P'), ItemTags.PLANKS).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("PPP").pattern("HHH").pattern("PPP").unlocks("has_honeycomb", this.has(Items.HONEYCOMB)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.BEETROOT_SOUP).requires(Items.BOWL).requires(Items.BEETROOT, 6).unlocks("has_beetroot", this.has(Items.BEETROOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BIRCH_WOOD, 3).define(Character.valueOf('#'), Blocks.BIRCH_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.BIRCH_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_BIRCH_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_BIRCH_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_BIRCH_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.BIRCH_BOAT).define(Character.valueOf('#'), Blocks.BIRCH_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.BIRCH_BUTTON).requires(Blocks.BIRCH_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.BIRCH_PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.BIRCH_DOOR, 3).define(Character.valueOf('#'), Blocks.BIRCH_PLANKS).pattern("##").pattern("##").pattern("##").group("wooden_door").unlocks("has_planks", this.has(Blocks.BIRCH_PLANKS)).save(consumer);
@@ -232,6 +234,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.CYAN_TERRACOTTA, 8).define(Character.valueOf('#'), Blocks.TERRACOTTA).define(Character.valueOf('X'), Items.CYAN_DYE).pattern("###").pattern("#X#").pattern("###").group("stained_terracotta").unlocks("has_terracotta", this.has(Blocks.TERRACOTTA)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.CYAN_WOOL).requires(Items.CYAN_DYE).requires(Blocks.WHITE_WOOL).group("wool").unlocks("has_white_wool", this.has(Blocks.WHITE_WOOL)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.DARK_OAK_WOOD, 3).define(Character.valueOf('#'), Blocks.DARK_OAK_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.DARK_OAK_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_DARK_OAK_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_DARK_OAK_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_DARK_OAK_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.DARK_OAK_BOAT).define(Character.valueOf('#'), Blocks.DARK_OAK_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.DARK_OAK_BUTTON).requires(Blocks.DARK_OAK_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.DARK_OAK_PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.DARK_OAK_DOOR, 3).define(Character.valueOf('#'), Blocks.DARK_OAK_PLANKS).pattern("##").pattern("##").pattern("##").group("wooden_door").unlocks("has_planks", this.has(Blocks.DARK_OAK_PLANKS)).save(consumer);
@@ -324,6 +327,8 @@ implements DataProvider {
         ShapelessRecipeBuilder.shapeless(Blocks.GREEN_WOOL).requires(Items.GREEN_DYE).requires(Blocks.WHITE_WOOL).group("wool").unlocks("has_white_wool", this.has(Blocks.WHITE_WOOL)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.HAY_BLOCK).define(Character.valueOf('#'), Items.WHEAT).pattern("###").pattern("###").pattern("###").unlocks("has_at_least_9_wheat", this.has(MinMaxBounds.Ints.atLeast(9), Items.WHEAT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE).define(Character.valueOf('#'), Items.IRON_INGOT).pattern("##").unlocks("has_iron_ingot", this.has(Items.IRON_INGOT)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.HONEY_BLOCK, 1).define(Character.valueOf('S'), Items.HONEY_BOTTLE).pattern("SS").pattern("SS").unlocks("has_honey_block", this.has(Blocks.HONEY_BLOCK)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.HONEYCOMB_BLOCK).define(Character.valueOf('H'), Items.HONEYCOMB).pattern("HH").pattern("HH").unlocks("has_honeycomb", this.has(Items.HONEYCOMB)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.HOPPER).define(Character.valueOf('C'), Blocks.CHEST).define(Character.valueOf('I'), Items.IRON_INGOT).pattern("I I").pattern("ICI").pattern(" I ").unlocks("has_iron_ingot", this.has(Items.IRON_INGOT)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.HOPPER_MINECART).define(Character.valueOf('A'), Blocks.HOPPER).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlocks("has_minecart", this.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.IRON_AXE).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.IRON_INGOT).pattern("XX").pattern("X#").pattern(" #").unlocks("has_iron_ingot", this.has(Items.IRON_INGOT)).save(consumer);
@@ -345,6 +350,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Items.ITEM_FRAME).define(Character.valueOf('#'), Items.STICK).define(Character.valueOf('X'), Items.LEATHER).pattern("###").pattern("#X#").pattern("###").unlocks("has_leather", this.has(Items.LEATHER)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.JUKEBOX).define(Character.valueOf('#'), ItemTags.PLANKS).define(Character.valueOf('X'), Items.DIAMOND).pattern("###").pattern("#X#").pattern("###").unlocks("has_diamond", this.has(Items.DIAMOND)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.JUNGLE_WOOD, 3).define(Character.valueOf('#'), Blocks.JUNGLE_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.JUNGLE_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_JUNGLE_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_JUNGLE_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_JUNGLE_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.JUNGLE_BOAT).define(Character.valueOf('#'), Blocks.JUNGLE_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.JUNGLE_BUTTON).requires(Blocks.JUNGLE_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.JUNGLE_PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.JUNGLE_DOOR, 3).define(Character.valueOf('#'), Blocks.JUNGLE_PLANKS).pattern("##").pattern("##").pattern("##").group("wooden_door").unlocks("has_planks", this.has(Blocks.JUNGLE_PLANKS)).save(consumer);
@@ -443,6 +449,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.NETHER_WART_BLOCK).define(Character.valueOf('#'), Items.NETHER_WART).pattern("###").pattern("###").pattern("###").unlocks("has_nether_wart", this.has(Items.NETHER_WART)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.NOTE_BLOCK).define(Character.valueOf('#'), ItemTags.PLANKS).define(Character.valueOf('X'), Items.REDSTONE).pattern("###").pattern("#X#").pattern("###").unlocks("has_redstone", this.has(Items.REDSTONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.OAK_WOOD, 3).define(Character.valueOf('#'), Blocks.OAK_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.OAK_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_OAK_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_OAK_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_OAK_LOG)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.OAK_BUTTON).requires(Blocks.OAK_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.OAK_PLANKS)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.OAK_PLANKS, 4).requires(ItemTags.OAK_LOGS).group("planks").unlocks("has_log", this.has(ItemTags.OAK_LOGS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.OAK_PRESSURE_PLATE).define(Character.valueOf('#'), Blocks.OAK_PLANKS).pattern("##").group("wooden_pressure_plate").unlocks("has_planks", this.has(Blocks.OAK_PLANKS)).save(consumer);
@@ -562,6 +569,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Items.GLISTERING_MELON_SLICE).define(Character.valueOf('#'), Items.GOLD_NUGGET).define(Character.valueOf('X'), Items.MELON_SLICE).pattern("###").pattern("#X#").pattern("###").unlocks("has_melon", this.has(Items.MELON_SLICE)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.SPECTRAL_ARROW, 2).define(Character.valueOf('#'), Items.GLOWSTONE_DUST).define(Character.valueOf('X'), Items.ARROW).pattern(" # ").pattern("#X#").pattern(" # ").unlocks("has_glowstone_dust", this.has(Items.GLOWSTONE_DUST)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.SPRUCE_WOOD, 3).define(Character.valueOf('#'), Blocks.SPRUCE_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.SPRUCE_LOG)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.STRIPPED_SPRUCE_WOOD, 3).define(Character.valueOf('#'), Blocks.STRIPPED_SPRUCE_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.STRIPPED_SPRUCE_LOG)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.SPRUCE_BOAT).define(Character.valueOf('#'), Blocks.SPRUCE_PLANKS).pattern("# #").pattern("###").group("boat").unlocks("in_water", this.insideOf(Blocks.WATER)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Blocks.SPRUCE_BUTTON).requires(Blocks.SPRUCE_PLANKS).group("wooden_button").unlocks("has_planks", this.has(Blocks.SPRUCE_PLANKS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.SPRUCE_DOOR, 3).define(Character.valueOf('#'), Blocks.SPRUCE_PLANKS).pattern("##").pattern("##").pattern("##").group("wooden_door").unlocks("has_planks", this.has(Blocks.SPRUCE_PLANKS)).save(consumer);

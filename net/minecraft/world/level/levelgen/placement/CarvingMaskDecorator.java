@@ -15,21 +15,21 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.placement.DecoratorCarvingMaskConfig;
+import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class CarvingMaskDecorator
-extends FeatureDecorator<DecoratorCarvingMaskConfig> {
-    public CarvingMaskDecorator(Function<Dynamic<?>, ? extends DecoratorCarvingMaskConfig> function) {
+extends FeatureDecorator<CarvingMaskDecoratorConfiguration> {
+    public CarvingMaskDecorator(Function<Dynamic<?>, ? extends CarvingMaskDecoratorConfiguration> function) {
         super(function);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorCarvingMaskConfig decoratorCarvingMaskConfig, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, CarvingMaskDecoratorConfiguration carvingMaskDecoratorConfiguration, BlockPos blockPos) {
         ChunkAccess chunkAccess = levelAccessor.getChunk(blockPos);
         ChunkPos chunkPos = chunkAccess.getPos();
-        BitSet bitSet = chunkAccess.getCarvingMask(decoratorCarvingMaskConfig.step);
-        return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < decoratorCarvingMaskConfig.probability).mapToObj(i -> {
+        BitSet bitSet = chunkAccess.getCarvingMask(carvingMaskDecoratorConfiguration.step);
+        return IntStream.range(0, bitSet.length()).filter(i -> bitSet.get(i) && random.nextFloat() < carvingMaskDecoratorConfiguration.probability).mapToObj(i -> {
             int j = i & 0xF;
             int k = i >> 4 & 0xF;
             int l = i >> 8;

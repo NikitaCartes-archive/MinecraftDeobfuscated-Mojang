@@ -14,26 +14,25 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.placement.DecoratorFrequencyChance;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.placement.FrequencyChanceDecoratorConfiguration;
 
 public class CountChanceHeightmapDoubleDecorator
-extends FeatureDecorator<DecoratorFrequencyChance> {
-    public CountChanceHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends DecoratorFrequencyChance> function) {
+extends FeatureDecorator<FrequencyChanceDecoratorConfiguration> {
+    public CountChanceHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends FrequencyChanceDecoratorConfiguration> function) {
         super(function);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DecoratorFrequencyChance decoratorFrequencyChance, BlockPos blockPos) {
-        return IntStream.range(0, decoratorFrequencyChance.count).filter(i -> random.nextFloat() < decoratorFrequencyChance.chance).mapToObj(i -> {
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, FrequencyChanceDecoratorConfiguration frequencyChanceDecoratorConfiguration, BlockPos blockPos) {
+        return IntStream.range(0, frequencyChanceDecoratorConfiguration.count).filter(i -> random.nextFloat() < frequencyChanceDecoratorConfiguration.chance).mapToObj(i -> {
             int k;
-            int j = random.nextInt(16);
-            int l = levelAccessor.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(j, 0, k = random.nextInt(16))).getY() * 2;
+            int j = random.nextInt(16) + blockPos.getX();
+            int l = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, j, k = random.nextInt(16) + blockPos.getZ()) * 2;
             if (l <= 0) {
                 return null;
             }
-            int m = random.nextInt(l);
-            return blockPos.offset(j, m, k);
+            return new BlockPos(j, random.nextInt(l), k);
         }).filter(Objects::nonNull);
     }
 }

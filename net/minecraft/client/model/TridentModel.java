@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -18,6 +19,7 @@ extends Model {
     private final ModelPart pole = new ModelPart(32, 32, 0, 6);
 
     public TridentModel() {
+        super(RenderType::entitySolid);
         this.pole.addBox(-0.5f, 2.0f, -0.5f, 1.0f, 25.0f, 1.0f, 0.0f);
         ModelPart modelPart = new ModelPart(32, 32, 4, 0);
         modelPart.addBox(-1.5f, 0.0f, -0.5f, 3.0f, 2.0f, 1.0f);
@@ -34,8 +36,9 @@ extends Model {
         this.pole.addChild(modelPart4);
     }
 
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i) {
-        this.pole.render(poseStack, vertexConsumer, 0.0625f, i, null);
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+        this.pole.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
     }
 }
 

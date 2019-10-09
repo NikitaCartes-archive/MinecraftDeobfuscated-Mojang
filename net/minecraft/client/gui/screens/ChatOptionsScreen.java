@@ -10,22 +10,19 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class ChatOptionsScreen
-extends Screen {
+extends OptionsSubScreen {
     private static final Option[] CHAT_OPTIONS = new Option[]{Option.CHAT_VISIBILITY, Option.CHAT_COLOR, Option.CHAT_LINKS, Option.CHAT_LINKS_PROMPT, Option.CHAT_OPACITY, Option.TEXT_BACKGROUND_OPACITY, Option.CHAT_SCALE, Option.CHAT_WIDTH, Option.CHAT_HEIGHT_FOCUSED, Option.CHAT_HEIGHT_UNFOCUSED, Option.REDUCED_DEBUG_INFO, Option.AUTO_SUGGESTIONS, Option.NARRATOR};
-    private final Screen lastScreen;
-    private final Options options;
     private AbstractWidget narratorButton;
 
     public ChatOptionsScreen(Screen screen, Options options) {
-        super(new TranslatableComponent("options.chat.title", new Object[0]));
-        this.lastScreen = screen;
-        this.options = options;
+        super(screen, options, new TranslatableComponent("options.chat.title", new Object[0]));
     }
 
     @Override
@@ -42,11 +39,6 @@ extends Screen {
             ++i;
         }
         this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i + 1) / 2, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
-    }
-
-    @Override
-    public void removed() {
-        this.minecraft.options.save();
     }
 
     @Override

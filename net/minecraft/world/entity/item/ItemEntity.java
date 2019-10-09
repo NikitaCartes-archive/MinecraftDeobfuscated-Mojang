@@ -82,9 +82,9 @@ extends Entity {
         if (this.pickupDelay > 0 && this.pickupDelay != Short.MAX_VALUE) {
             --this.pickupDelay;
         }
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
+        this.xo = this.getX();
+        this.yo = this.getY();
+        this.zo = this.getZ();
         Vec3 vec3 = this.getDeltaMovement();
         if (this.isUnderLiquid(FluidTags.WATER)) {
             this.setUnderwaterMovement();
@@ -96,21 +96,21 @@ extends Entity {
         } else {
             boolean bl = this.noPhysics = !this.level.noCollision(this);
             if (this.noPhysics) {
-                this.checkInBlock(this.x, (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.z);
+                this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
             }
         }
         if (!this.onGround || ItemEntity.getHorizontalDistanceSqr(this.getDeltaMovement()) > (double)1.0E-5f || (this.tickCount + this.getId()) % 4 == 0) {
             this.move(MoverType.SELF, this.getDeltaMovement());
             float f = 0.98f;
             if (this.onGround) {
-                f = this.level.getBlockState(new BlockPos(this.x, this.getBoundingBox().minY - 1.0, this.z)).getBlock().getFriction() * 0.98f;
+                f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
             }
             this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.98, f));
             if (this.onGround) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, -0.5, 1.0));
             }
         }
-        boolean bl = Mth.floor(this.xo) != Mth.floor(this.x) || Mth.floor(this.yo) != Mth.floor(this.y) || Mth.floor(this.zo) != Mth.floor(this.z);
+        boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
         int n = i = bl ? 2 : 40;
         if (this.tickCount % i == 0) {
             if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {

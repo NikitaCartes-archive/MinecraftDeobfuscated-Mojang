@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
@@ -33,7 +34,7 @@ extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
     }
 
     @Override
-    public void render(ShulkerBoxBlockEntity shulkerBoxBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+    public void render(ShulkerBoxBlockEntity shulkerBoxBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         DyeColor dyeColor;
         BlockState blockState;
         Direction direction = Direction.UP;
@@ -50,11 +51,11 @@ extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
         poseStack.scale(0.9995f, 0.9995f, 0.9995f);
         poseStack.mulPose(direction.getRotation());
         poseStack.translate(0.0, -1.0, 0.0);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.CUTOUT_MIPPED);
-        this.model.getBase().render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+        this.model.getBase().render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
         poseStack.translate(0.0, -shulkerBoxBlockEntity.getProgress(g) * 0.5f, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotation(270.0f * shulkerBoxBlockEntity.getProgress(g), true));
-        this.model.getLid().render(poseStack, vertexConsumer, 0.0625f, i, textureAtlasSprite);
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0f * shulkerBoxBlockEntity.getProgress(g)));
+        this.model.getLid().render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
         poseStack.popPose();
     }
 }

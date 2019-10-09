@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EvokerFangsModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -38,16 +37,14 @@ extends EntityRenderer<EvokerFangs> {
             j = (float)((double)j * ((1.0 - (double)i) / (double)0.1f));
         }
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotation(90.0f - evokerFangs.yRot, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f - evokerFangs.yRot));
         poseStack.scale(-j, -j, j);
         float k = 0.03125f;
         poseStack.translate(0.0, -0.626f, 0.0);
         int l = evokerFangs.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.NEW_ENTITY(TEXTURE_LOCATION));
-        OverlayTexture.setDefault(vertexConsumer);
         this.model.setupAnim(evokerFangs, i, 0.0f, 0.0f, evokerFangs.yRot, evokerFangs.xRot, 0.03125f);
-        this.model.renderToBuffer(poseStack, vertexConsumer, l);
-        vertexConsumer.unsetDefaultOverlayCoords();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
+        this.model.renderToBuffer(poseStack, vertexConsumer, l, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(evokerFangs, d, e, f, g, h, poseStack, multiBufferSource);
     }

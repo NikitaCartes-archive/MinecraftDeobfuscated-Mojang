@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -39,13 +38,9 @@ extends EntityRenderer<PrimedTnt> {
             poseStack.scale(j, j, j);
         }
         int k = primedTnt.getLightColor();
-        poseStack.mulPose(Vector3f.YP.rotation(-90.0f, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
         poseStack.translate(-0.5, -0.5, 0.5);
-        if (primedTnt.getLife() / 5 % 2 == 0) {
-            TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, k);
-        } else {
-            Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, k, 0, 10);
-        }
+        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, k, primedTnt.getLife() / 5 % 2 == 0);
         poseStack.popPose();
         super.render(primedTnt, d, e, f, g, h, poseStack, multiBufferSource);
     }

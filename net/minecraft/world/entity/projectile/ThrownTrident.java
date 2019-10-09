@@ -72,10 +72,10 @@ extends AbstractArrow {
                 this.remove();
             } else if (i > 0) {
                 this.setNoPhysics(true);
-                Vec3 vec3 = new Vec3(entity.x - this.x, entity.y + (double)entity.getEyeHeight() - this.y, entity.z - this.z);
-                this.y += vec3.y * 0.015 * (double)i;
+                Vec3 vec3 = new Vec3(entity.getX() - this.getX(), entity.getEyeY() - this.getY(), entity.getZ() - this.getZ());
+                this.setPosRaw(this.getX(), this.getY() + vec3.y * 0.015 * (double)i, this.getZ());
                 if (this.level.isClientSide) {
-                    this.yOld = this.y;
+                    this.yOld = this.getY();
                 }
                 double d = 0.05 * (double)i;
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.95).add(vec3.normalize().scale(d)));

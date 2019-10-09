@@ -53,7 +53,8 @@ public class ClickEvent {
         OPEN_FILE("open_file", false),
         RUN_COMMAND("run_command", true),
         SUGGEST_COMMAND("suggest_command", true),
-        CHANGE_PAGE("change_page", true);
+        CHANGE_PAGE("change_page", true),
+        COPY_TO_CLIPBOARD("copy_to_clipboard", true);
 
         private static final Map<String, Action> LOOKUP;
         private final boolean allowFromServer;

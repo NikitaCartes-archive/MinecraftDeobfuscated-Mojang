@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.monster.Vex;
@@ -20,11 +21,7 @@ extends HumanoidModel<Vex> {
     private final ModelPart rightWing;
 
     public VexModel() {
-        this(0.0f);
-    }
-
-    public VexModel(float f) {
-        super(f, 0.0f, 64, 64);
+        super(RenderType::entityCutoutNoCull, 0.0f, 0.0f, 64, 64);
         this.leftLeg.visible = false;
         this.hat.visible = false;
         this.rightLeg = new ModelPart(this, 32, 0);

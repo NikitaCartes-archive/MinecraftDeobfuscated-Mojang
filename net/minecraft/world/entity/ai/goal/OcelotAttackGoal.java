@@ -53,7 +53,7 @@ extends Goal {
     public void tick() {
         this.mob.getLookControl().setLookAt(this.target, 30.0f, 30.0f);
         double d = this.mob.getBbWidth() * 2.0f * (this.mob.getBbWidth() * 2.0f);
-        double e = this.mob.distanceToSqr(this.target.x, this.target.getBoundingBox().minY, this.target.z);
+        double e = this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
         double f = 0.8;
         if (e > d && e < 16.0) {
             f = 1.33;

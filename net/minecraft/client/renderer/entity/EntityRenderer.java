@@ -37,7 +37,7 @@ public abstract class EntityRenderer<T extends Entity> {
         }
         AABB aABB = ((Entity)entity).getBoundingBoxForCulling().inflate(0.5);
         if (aABB.hasNaN() || aABB.getSize() == 0.0) {
-            aABB = new AABB(((Entity)entity).x - 2.0, ((Entity)entity).y - 2.0, ((Entity)entity).z - 2.0, ((Entity)entity).x + 2.0, ((Entity)entity).y + 2.0, ((Entity)entity).z + 2.0);
+            aABB = new AABB(((Entity)entity).getX() - 2.0, ((Entity)entity).getY() - 2.0, ((Entity)entity).getZ() - 2.0, ((Entity)entity).getX() + 2.0, ((Entity)entity).getY() + 2.0, ((Entity)entity).getZ() + 2.0);
         }
         return frustum.isVisible(aABB);
     }
@@ -77,8 +77,8 @@ public abstract class EntityRenderer<T extends Entity> {
         int j = "deadmau5".equals(string) ? -10 : 0;
         poseStack.pushPose();
         poseStack.translate(0.0, f, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotation(-this.entityRenderDispatcher.playerRotY, true));
-        poseStack.mulPose(Vector3f.XP.rotation(this.entityRenderDispatcher.playerRotX, true));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(this.entityRenderDispatcher.playerRotX));
         poseStack.scale(-0.025f, -0.025f, 0.025f);
         Matrix4f matrix4f = poseStack.getPose();
         float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25f);
