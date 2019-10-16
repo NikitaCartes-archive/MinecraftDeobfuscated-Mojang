@@ -51,9 +51,6 @@ extends RenderLayer<T, M> {
         }
         poseStack.pushPose();
         ((ArmedModel)this.getParentModel()).translateToHand(0.0625f, humanoidArm, poseStack);
-        if (livingEntity.isCrouching()) {
-            poseStack.translate(0.0, 0.2f, 0.0);
-        }
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         boolean bl = humanoidArm == HumanoidArm.LEFT;

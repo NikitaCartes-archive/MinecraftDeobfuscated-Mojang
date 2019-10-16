@@ -127,6 +127,7 @@ implements VillagerDataHolder {
             }
             if (!this.level.isClientSide) {
                 this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
+                player.swing(interactionHand, true);
             }
             return true;
         }

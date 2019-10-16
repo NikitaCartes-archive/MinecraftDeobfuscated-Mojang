@@ -54,6 +54,7 @@ public class ItemTags {
     public static final Tag<Item> MUSIC_DISCS;
     public static final Tag<Item> COALS;
     public static final Tag<Item> ARROWS;
+    public static final Tag<Item> LECTERN_BOOKS;
 
     public static void reset(TagCollection<Item> tagCollection) {
         source = tagCollection;
@@ -110,6 +111,7 @@ public class ItemTags {
         MUSIC_DISCS = ItemTags.bind("music_discs");
         COALS = ItemTags.bind("coals");
         ARROWS = ItemTags.bind("arrows");
+        LECTERN_BOOKS = ItemTags.bind("lectern_books");
     }
 
     public static class Wrapper

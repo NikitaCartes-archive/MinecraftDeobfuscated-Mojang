@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -72,15 +73,15 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (player.mayBuild()) {
             if (level.isClientSide) {
-                return true;
+                return InteractionResult.SUCCESS;
             }
             BlockState blockState2 = (BlockState)blockState.cycle(INVERTED);
             level.setBlock(blockPos, blockState2, 4);
             DaylightDetectorBlock.updateSignalStrength(blockState2, level, blockPos);
-            return true;
+            return InteractionResult.SUCCESS;
         }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }

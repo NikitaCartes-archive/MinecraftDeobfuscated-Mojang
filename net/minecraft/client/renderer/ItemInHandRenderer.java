@@ -81,7 +81,7 @@ public class ItemInHandRenderer {
         poseStack.popPose();
     }
 
-    private void renderOneHandedMap(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, HumanoidArm humanoidArm, float g, ItemStack itemStack) {
+    private void renderOneHandedMap(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, HumanoidArm humanoidArm, float g, ItemStack itemStack) {
         float h = humanoidArm == HumanoidArm.RIGHT ? 1.0f : -1.0f;
         poseStack.translate(h * 0.125f, -0.125, 0.0);
         if (!this.minecraft.player.isInvisible()) {
@@ -92,26 +92,26 @@ public class ItemInHandRenderer {
         }
         poseStack.pushPose();
         poseStack.translate(h * 0.51f, -0.08f + f * -1.2f, -0.75);
-        float i = Mth.sqrt(g);
-        float j = Mth.sin(i * (float)Math.PI);
-        float k = -0.5f * j;
-        float l = 0.4f * Mth.sin(i * ((float)Math.PI * 2));
-        float m = -0.3f * Mth.sin(g * (float)Math.PI);
-        poseStack.translate(h * k, l - 0.3f * j, m);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(j * -45.0f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(h * j * -30.0f));
-        this.renderMap(poseStack, multiBufferSource, itemStack);
+        float j = Mth.sqrt(g);
+        float k = Mth.sin(j * (float)Math.PI);
+        float l = -0.5f * k;
+        float m = 0.4f * Mth.sin(j * ((float)Math.PI * 2));
+        float n = -0.3f * Mth.sin(g * (float)Math.PI);
+        poseStack.translate(h * l, m - 0.3f * k, n);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(k * -45.0f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(h * k * -30.0f));
+        this.renderMap(poseStack, multiBufferSource, i, itemStack);
         poseStack.popPose();
     }
 
-    private void renderTwoHandedMap(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, float g, float h) {
-        float i = Mth.sqrt(h);
-        float j = -0.2f * Mth.sin(h * (float)Math.PI);
-        float k = -0.4f * Mth.sin(i * (float)Math.PI);
-        poseStack.translate(0.0, -j / 2.0f, k);
-        float l = this.calculateMapTilt(f);
-        poseStack.translate(0.0, 0.04f + g * -1.2f + l * -0.5f, -0.72f);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(l * -85.0f));
+    private void renderTwoHandedMap(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, float h) {
+        float j = Mth.sqrt(h);
+        float k = -0.2f * Mth.sin(h * (float)Math.PI);
+        float l = -0.4f * Mth.sin(j * (float)Math.PI);
+        poseStack.translate(0.0, -k / 2.0f, l);
+        float m = this.calculateMapTilt(f);
+        poseStack.translate(0.0, 0.04f + g * -1.2f + m * -0.5f, -0.72f);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(m * -85.0f));
         if (!this.minecraft.player.isInvisible()) {
             poseStack.pushPose();
             poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
@@ -119,13 +119,13 @@ public class ItemInHandRenderer {
             this.renderMapHand(poseStack, multiBufferSource, HumanoidArm.LEFT);
             poseStack.popPose();
         }
-        float m = Mth.sin(i * (float)Math.PI);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(m * 20.0f));
+        float n = Mth.sin(j * (float)Math.PI);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(n * 20.0f));
         poseStack.scale(2.0f, 2.0f, 2.0f);
-        this.renderMap(poseStack, multiBufferSource, this.mainHandItem);
+        this.renderMap(poseStack, multiBufferSource, i, this.mainHandItem);
     }
 
-    private void renderMap(PoseStack poseStack, MultiBufferSource multiBufferSource, ItemStack itemStack) {
+    private void renderMap(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ItemStack itemStack) {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
         poseStack.scale(0.38f, 0.38f, 0.38f);
@@ -133,13 +133,13 @@ public class ItemInHandRenderer {
         poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_BACKGROUND_LOCATION));
         Matrix4f matrix4f = poseStack.getPose();
-        vertexConsumer.vertex(matrix4f, -7.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(0xF000F0).endVertex();
-        vertexConsumer.vertex(matrix4f, 135.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(0xF000F0).endVertex();
-        vertexConsumer.vertex(matrix4f, 135.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(0xF000F0).endVertex();
-        vertexConsumer.vertex(matrix4f, -7.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(0xF000F0).endVertex();
+        vertexConsumer.vertex(matrix4f, -7.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, 135.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, 135.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(i).endVertex();
+        vertexConsumer.vertex(matrix4f, -7.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 0.0f).uv2(i).endVertex();
         MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, this.minecraft.level);
         if (mapItemSavedData != null) {
-            this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, false, 0xF000F0);
+            this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, false, i);
         }
     }
 
@@ -259,46 +259,47 @@ public class ItemInHandRenderer {
                 this.renderPlayerArm(poseStack, multiBufferSource, i, h, humanoidArm);
             }
         } else if (itemStack.getItem() == Items.FILLED_MAP) {
+            int j = abstractClientPlayer.getLightColor();
             if (bl && this.offHandItem.isEmpty()) {
-                this.renderTwoHandedMap(poseStack, multiBufferSource, g, i, h);
+                this.renderTwoHandedMap(poseStack, multiBufferSource, j, g, i, h);
             } else {
-                this.renderOneHandedMap(poseStack, multiBufferSource, i, humanoidArm, h, itemStack);
+                this.renderOneHandedMap(poseStack, multiBufferSource, j, i, humanoidArm, h, itemStack);
             }
         } else if (itemStack.getItem() == Items.CROSSBOW) {
-            int j;
+            int k;
             boolean bl2 = CrossbowItem.isCharged(itemStack);
             boolean bl3 = humanoidArm == HumanoidArm.RIGHT;
-            int n = j = bl3 ? 1 : -1;
+            int n = k = bl3 ? 1 : -1;
             if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand) {
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
-                poseStack.translate((float)j * -0.4785682f, -0.094387f, 0.05731530860066414);
+                poseStack.translate((float)k * -0.4785682f, -0.094387f, 0.05731530860066414);
                 poseStack.mulPose(Vector3f.XP.rotationDegrees(-11.935f));
-                poseStack.mulPose(Vector3f.YP.rotationDegrees((float)j * 65.3f));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * -9.785f));
-                float k = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
-                float l = k / (float)CrossbowItem.getChargeDuration(itemStack);
-                if (l > 1.0f) {
-                    l = 1.0f;
+                poseStack.mulPose(Vector3f.YP.rotationDegrees((float)k * 65.3f));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)k * -9.785f));
+                float l = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
+                float m = l / (float)CrossbowItem.getChargeDuration(itemStack);
+                if (m > 1.0f) {
+                    m = 1.0f;
                 }
-                if (l > 0.1f) {
-                    float m = Mth.sin((k - 0.1f) * 1.3f);
-                    float n2 = l - 0.1f;
-                    float o = m * n2;
-                    poseStack.translate(o * 0.0f, o * 0.004f, o * 0.0f);
+                if (m > 0.1f) {
+                    float n2 = Mth.sin((l - 0.1f) * 1.3f);
+                    float o = m - 0.1f;
+                    float p = n2 * o;
+                    poseStack.translate(p * 0.0f, p * 0.004f, p * 0.0f);
                 }
-                poseStack.translate(l * 0.0f, l * 0.0f, l * 0.04f);
-                poseStack.scale(1.0f, 1.0f, 1.0f + l * 0.2f);
-                poseStack.mulPose(Vector3f.YN.rotationDegrees((float)j * 45.0f));
+                poseStack.translate(m * 0.0f, m * 0.0f, m * 0.04f);
+                poseStack.scale(1.0f, 1.0f, 1.0f + m * 0.2f);
+                poseStack.mulPose(Vector3f.YN.rotationDegrees((float)k * 45.0f));
             } else {
-                float k = -0.4f * Mth.sin(Mth.sqrt(h) * (float)Math.PI);
-                float l = 0.2f * Mth.sin(Mth.sqrt(h) * ((float)Math.PI * 2));
-                float m = -0.2f * Mth.sin(h * (float)Math.PI);
-                poseStack.translate((float)j * k, l, m);
+                float l = -0.4f * Mth.sin(Mth.sqrt(h) * (float)Math.PI);
+                float m = 0.2f * Mth.sin(Mth.sqrt(h) * ((float)Math.PI * 2));
+                float n3 = -0.2f * Mth.sin(h * (float)Math.PI);
+                poseStack.translate((float)k * l, m, n3);
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
                 this.applyItemArmAttackTransform(poseStack, humanoidArm, h);
                 if (bl2 && h < 0.001f) {
-                    poseStack.translate((float)j * -0.641864f, 0.0, 0.0);
-                    poseStack.mulPose(Vector3f.YP.rotationDegrees((float)j * 10.0f));
+                    poseStack.translate((float)k * -0.641864f, 0.0, 0.0);
+                    poseStack.mulPose(Vector3f.YP.rotationDegrees((float)k * 10.0f));
                 }
             }
             this.renderItem(abstractClientPlayer, itemStack, bl3 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !bl3, poseStack, multiBufferSource);
@@ -306,7 +307,7 @@ public class ItemInHandRenderer {
             boolean bl2;
             boolean bl3 = bl2 = humanoidArm == HumanoidArm.RIGHT;
             if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand) {
-                int p = bl2 ? 1 : -1;
+                int q = bl2 ? 1 : -1;
                 switch (itemStack.getUseAnimation()) {
                     case NONE: {
                         this.applyItemArmTransform(poseStack, humanoidArm, i);
@@ -324,62 +325,62 @@ public class ItemInHandRenderer {
                     }
                     case BOW: {
                         this.applyItemArmTransform(poseStack, humanoidArm, i);
-                        poseStack.translate((float)p * -0.2785682f, 0.18344387412071228, 0.15731531381607056);
+                        poseStack.translate((float)q * -0.2785682f, 0.18344387412071228, 0.15731531381607056);
                         poseStack.mulPose(Vector3f.XP.rotationDegrees(-13.935f));
-                        poseStack.mulPose(Vector3f.YP.rotationDegrees((float)p * 35.3f));
-                        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)p * -9.785f));
-                        float q = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
-                        float k = q / 20.0f;
-                        k = (k * k + k * 2.0f) / 3.0f;
-                        if (k > 1.0f) {
-                            k = 1.0f;
+                        poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 35.3f));
+                        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -9.785f));
+                        float r = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
+                        float l = r / 20.0f;
+                        l = (l * l + l * 2.0f) / 3.0f;
+                        if (l > 1.0f) {
+                            l = 1.0f;
                         }
-                        if (k > 0.1f) {
-                            float l = Mth.sin((q - 0.1f) * 1.3f);
-                            float m = k - 0.1f;
-                            float n = l * m;
-                            poseStack.translate(n * 0.0f, n * 0.004f, n * 0.0f);
+                        if (l > 0.1f) {
+                            float m = Mth.sin((r - 0.1f) * 1.3f);
+                            float n = l - 0.1f;
+                            float o = m * n;
+                            poseStack.translate(o * 0.0f, o * 0.004f, o * 0.0f);
                         }
-                        poseStack.translate(k * 0.0f, k * 0.0f, k * 0.04f);
-                        poseStack.scale(1.0f, 1.0f, 1.0f + k * 0.2f);
-                        poseStack.mulPose(Vector3f.YN.rotationDegrees((float)p * 45.0f));
+                        poseStack.translate(l * 0.0f, l * 0.0f, l * 0.04f);
+                        poseStack.scale(1.0f, 1.0f, 1.0f + l * 0.2f);
+                        poseStack.mulPose(Vector3f.YN.rotationDegrees((float)q * 45.0f));
                         break;
                     }
                     case SPEAR: {
                         this.applyItemArmTransform(poseStack, humanoidArm, i);
-                        poseStack.translate((float)p * -0.5f, 0.7f, 0.1f);
+                        poseStack.translate((float)q * -0.5f, 0.7f, 0.1f);
                         poseStack.mulPose(Vector3f.XP.rotationDegrees(-55.0f));
-                        poseStack.mulPose(Vector3f.YP.rotationDegrees((float)p * 35.3f));
-                        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)p * -9.785f));
-                        float q = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
-                        float k = q / 10.0f;
-                        if (k > 1.0f) {
-                            k = 1.0f;
+                        poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 35.3f));
+                        poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -9.785f));
+                        float r = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0f);
+                        float l = r / 10.0f;
+                        if (l > 1.0f) {
+                            l = 1.0f;
                         }
-                        if (k > 0.1f) {
-                            float l = Mth.sin((q - 0.1f) * 1.3f);
-                            float m = k - 0.1f;
-                            float n = l * m;
-                            poseStack.translate(n * 0.0f, n * 0.004f, n * 0.0f);
+                        if (l > 0.1f) {
+                            float m = Mth.sin((r - 0.1f) * 1.3f);
+                            float n = l - 0.1f;
+                            float o = m * n;
+                            poseStack.translate(o * 0.0f, o * 0.004f, o * 0.0f);
                         }
-                        poseStack.translate(0.0, 0.0, k * 0.2f);
-                        poseStack.scale(1.0f, 1.0f, 1.0f + k * 0.2f);
-                        poseStack.mulPose(Vector3f.YN.rotationDegrees((float)p * 45.0f));
+                        poseStack.translate(0.0, 0.0, l * 0.2f);
+                        poseStack.scale(1.0f, 1.0f, 1.0f + l * 0.2f);
+                        poseStack.mulPose(Vector3f.YN.rotationDegrees((float)q * 45.0f));
                         break;
                     }
                 }
             } else if (abstractClientPlayer.isAutoSpinAttack()) {
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
-                int p = bl2 ? 1 : -1;
-                poseStack.translate((float)p * -0.4f, 0.8f, 0.3f);
-                poseStack.mulPose(Vector3f.YP.rotationDegrees((float)p * 65.0f));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)p * -85.0f));
+                int q = bl2 ? 1 : -1;
+                poseStack.translate((float)q * -0.4f, 0.8f, 0.3f);
+                poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 65.0f));
+                poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -85.0f));
             } else {
-                float r = -0.4f * Mth.sin(Mth.sqrt(h) * (float)Math.PI);
-                float q = 0.2f * Mth.sin(Mth.sqrt(h) * ((float)Math.PI * 2));
-                float k = -0.2f * Mth.sin(h * (float)Math.PI);
-                int s = bl2 ? 1 : -1;
-                poseStack.translate((float)s * r, q, k);
+                float s = -0.4f * Mth.sin(Mth.sqrt(h) * (float)Math.PI);
+                float r = 0.2f * Mth.sin(Mth.sqrt(h) * ((float)Math.PI * 2));
+                float l = -0.2f * Mth.sin(h * (float)Math.PI);
+                int t = bl2 ? 1 : -1;
+                poseStack.translate((float)t * s, r, l);
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
                 this.applyItemArmAttackTransform(poseStack, humanoidArm, h);
             }

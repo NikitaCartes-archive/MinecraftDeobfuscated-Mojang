@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -49,7 +50,7 @@ extends Block {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         boolean bl2;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
@@ -72,8 +73,9 @@ extends Block {
                 }
                 level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
             }
+            return InteractionResult.SUCCESS;
         }
-        return true;
+        return InteractionResult.CONSUME;
     }
 
     @Override

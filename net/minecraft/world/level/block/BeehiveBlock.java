@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -100,7 +101,7 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         int i = blockState.getValue(HONEY_LEVEL);
         boolean bl = false;
@@ -123,7 +124,7 @@ extends BaseEntityBlock {
         }
         if (bl) {
             this.releaseBeesAndResetState(level, blockState, blockPos, player2, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
-            return true;
+            return InteractionResult.SUCCESS;
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);
     }

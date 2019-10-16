@@ -250,7 +250,6 @@ public class MultiPlayerGameMode {
         boolean bl2;
         this.ensureHasSentCarriedItem();
         BlockPos blockPos = blockHitResult.getBlockPos();
-        Vec3 vec3 = blockHitResult.getLocation();
         if (!this.minecraft.level.getWorldBorder().isWithinBounds(blockPos)) {
             return InteractionResult.FAIL;
         }
@@ -261,9 +260,9 @@ public class MultiPlayerGameMode {
         }
         boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
         boolean bl3 = bl2 = localPlayer.isSecondaryUseActive() && bl;
-        if (!bl2 && multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult)) {
+        if (!bl2 && (interactionResult = multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
             this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
-            return InteractionResult.SUCCESS;
+            return interactionResult;
         }
         this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
         if (itemStack.isEmpty() || localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
@@ -280,15 +279,15 @@ public class MultiPlayerGameMode {
         return interactionResult;
     }
 
-    public InteractionResultHolder<ItemStack> useItem(Player player, Level level, InteractionHand interactionHand) {
+    public InteractionResult useItem(Player player, Level level, InteractionHand interactionHand) {
         if (this.localPlayerMode == GameType.SPECTATOR) {
-            return InteractionResultHolder.pass(null);
+            return InteractionResult.PASS;
         }
         this.ensureHasSentCarriedItem();
         this.connection.send(new ServerboundUseItemPacket(interactionHand));
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
-            return InteractionResultHolder.pass(itemStack);
+            return InteractionResult.PASS;
         }
         int i = itemStack.getCount();
         InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
@@ -296,7 +295,7 @@ public class MultiPlayerGameMode {
         if (itemStack2 != itemStack || itemStack2.getCount() != i) {
             player.setItemInHand(interactionHand, itemStack2);
         }
-        return interactionResultHolder;
+        return interactionResultHolder.getResult();
     }
 
     public LocalPlayer createPlayer(MultiPlayerLevel multiPlayerLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {

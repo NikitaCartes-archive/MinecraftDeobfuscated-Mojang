@@ -203,6 +203,7 @@ extends Entity {
         this.updateRotation();
         double e = 0.92;
         this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
+        this.reapplyPosition();
     }
 
     private boolean shouldStopFishing() {

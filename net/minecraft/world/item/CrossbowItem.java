@@ -84,7 +84,7 @@ extends ProjectileWeaponItem {
         if (CrossbowItem.isCharged(itemStack)) {
             CrossbowItem.performShooting(level, player, interactionHand, itemStack, CrossbowItem.getShootingPower(itemStack), 1.0f);
             CrossbowItem.setCharged(itemStack, false);
-            return InteractionResultHolder.successNoSwing(itemStack);
+            return InteractionResultHolder.consume(itemStack);
         }
         if (!player.getProjectile(itemStack).isEmpty()) {
             if (!CrossbowItem.isCharged(itemStack)) {
@@ -92,7 +92,7 @@ extends ProjectileWeaponItem {
                 this.midLoadSoundPlayed = false;
                 player.startUsingItem(interactionHand);
             }
-            return InteractionResultHolder.successNoSwing(itemStack);
+            return InteractionResultHolder.consume(itemStack);
         }
         return InteractionResultHolder.fail(itemStack);
     }

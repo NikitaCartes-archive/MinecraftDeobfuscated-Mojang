@@ -126,8 +126,6 @@ extends GuiComponent {
             float f = this.progress == null ? 0.0f : this.progress.getPercent();
             AdvancementWidgetType advancementWidgetType = f >= 1.0f ? AdvancementWidgetType.OBTAINED : AdvancementWidgetType.UNOBTAINED;
             this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.enableBlend();
             this.blit(i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
             this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
         }

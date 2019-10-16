@@ -18,9 +18,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PowerableMob;
 
 @Environment(value=EnvType.CLIENT)
-public abstract class SpinnyLayer<T extends Entity, M extends EntityModel<T>>
+public abstract class EnergySwirlLayer<T extends Entity, M extends EntityModel<T>>
 extends RenderLayer<T, M> {
-    public SpinnyLayer(RenderLayerParent<T, M> renderLayerParent) {
+    public EnergySwirlLayer(RenderLayerParent<T, M> renderLayerParent) {
         super(renderLayerParent);
     }
 
@@ -33,7 +33,7 @@ extends RenderLayer<T, M> {
         EntityModel<T> entityModel = this.model();
         entityModel.prepareMobModel(entity, f, g, h);
         ((EntityModel)this.getParentModel()).copyPropertiesTo(entityModel);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.powerSwirl(this.getTextureLocation(), this.xOffset(n), n * 0.01f));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.energySwirl(this.getTextureLocation(), this.xOffset(n), n * 0.01f));
         entityModel.setupAnim(entity, f, g, j, k, l, m);
         entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5f, 0.5f, 0.5f);
     }

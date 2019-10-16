@@ -551,7 +551,7 @@ ResourceManagerReloadListener {
             }
             float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
             h *= h;
-            Vector3f vector3f = new Vector3f(0.0f, 1.0f, 1.0f);
+            Vector3f vector3f = new Vector3f(0.0f, Mth.SQRT_OF_TWO / 2.0f, Mth.SQRT_OF_TWO / 2.0f);
             poseStack.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
             poseStack.scale(1.0f / h, 1.0f, 1.0f);
             float j = -((float)this.tick + f) * (float)i;

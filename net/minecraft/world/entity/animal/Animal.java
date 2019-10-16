@@ -124,9 +124,10 @@ extends AgableMob {
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (this.isFood(itemStack)) {
-            if (this.getAge() == 0 && this.canFallInLove()) {
+            if (!this.level.isClientSide && this.getAge() == 0 && this.canFallInLove()) {
                 this.usePlayerItem(player, itemStack);
                 this.setInLove(player);
+                player.swing(interactionHand, true);
                 return true;
             }
             if (this.isBaby()) {

@@ -86,6 +86,7 @@ extends Animal {
         return !this.isLeashed();
     }
 
+    @Environment(value=EnvType.CLIENT)
     protected void spawnTamingParticles(boolean bl) {
         SimpleParticleType particleOptions = ParticleTypes.HEART;
         if (!bl) {

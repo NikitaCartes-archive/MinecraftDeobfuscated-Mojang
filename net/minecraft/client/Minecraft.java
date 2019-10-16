@@ -169,7 +169,6 @@ import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
@@ -1069,14 +1068,19 @@ WindowEventHandler {
             LOGGER.warn("Null returned as 'hitResult', this shouldn't happen!");
         }
         for (InteractionHand interactionHand : InteractionHand.values()) {
-            InteractionResultHolder<ItemStack> interactionResultHolder;
+            InteractionResult interactionResult3;
             ItemStack itemStack = this.player.getItemInHand(interactionHand);
             if (this.hitResult != null) {
                 switch (this.hitResult.getType()) {
                     case ENTITY: {
                         EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
                         Entity entity = entityHitResult.getEntity();
-                        if (this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand) == InteractionResult.SUCCESS || this.gameMode.interact(this.player, entity, interactionHand) == InteractionResult.SUCCESS) {
+                        InteractionResult interactionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand);
+                        if (!interactionResult.consumesAction()) {
+                            interactionResult = this.gameMode.interact(this.player, entity, interactionHand);
+                        }
+                        if (!interactionResult.consumesAction()) break;
+                        if (interactionResult.shouldSwing()) {
                             this.player.swing(interactionHand);
                         }
                         return;
@@ -1084,21 +1088,23 @@ WindowEventHandler {
                     case BLOCK: {
                         BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
                         int i = itemStack.getCount();
-                        InteractionResult interactionResult = this.gameMode.useItemOn(this.player, this.level, interactionHand, blockHitResult);
-                        if (interactionResult == InteractionResult.SUCCESS) {
-                            this.player.swing(interactionHand);
-                            if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.gameMode.hasInfiniteItems())) {
-                                this.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);
+                        InteractionResult interactionResult2 = this.gameMode.useItemOn(this.player, this.level, interactionHand, blockHitResult);
+                        if (interactionResult2.consumesAction()) {
+                            if (interactionResult2.shouldSwing()) {
+                                this.player.swing(interactionHand);
+                                if (!itemStack.isEmpty() && (itemStack.getCount() != i || this.gameMode.hasInfiniteItems())) {
+                                    this.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);
+                                }
                             }
                             return;
                         }
-                        if (interactionResult != InteractionResult.FAIL) break;
+                        if (interactionResult2 != InteractionResult.FAIL) break;
                         return;
                     }
                 }
             }
-            if (itemStack.isEmpty() || (interactionResultHolder = this.gameMode.useItem(this.player, this.level, interactionHand)).getResult() != InteractionResult.SUCCESS) continue;
-            if (interactionResultHolder.shouldSwingOnSuccess()) {
+            if (itemStack.isEmpty() || !(interactionResult3 = this.gameMode.useItem(this.player, this.level, interactionHand)).consumesAction()) continue;
+            if (interactionResult3.shouldSwing()) {
                 this.player.swing(interactionHand);
             }
             this.gameRenderer.itemInHandRenderer.itemUsed(interactionHand);

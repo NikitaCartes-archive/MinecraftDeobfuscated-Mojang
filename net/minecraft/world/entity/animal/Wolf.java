@@ -58,6 +58,7 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -330,26 +331,37 @@ extends TamableAnimal {
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
+        if (itemStack.getItem() instanceof SpawnEggItem) {
+            return super.mobInteract(player, interactionHand);
+        }
+        if (this.level.isClientSide) {
+            return this.isOwnedBy(player) || item == Items.BONE && !this.isAngry();
+        }
         if (this.isTame()) {
-            if (!itemStack.isEmpty()) {
-                DyeColor dyeColor;
-                if (item.isEdible()) {
-                    if (item.getFoodProperties().isMeat() && this.entityData.get(DATA_HEALTH_ID).floatValue() < 20.0f) {
-                        if (!player.abilities.instabuild) {
-                            itemStack.shrink(1);
-                        }
-                        this.heal(item.getFoodProperties().getNutrition());
-                        return true;
-                    }
-                } else if (item instanceof DyeItem && (dyeColor = ((DyeItem)item).getDyeColor()) != this.getCollarColor()) {
+            if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < 20.0f) {
+                if (!player.abilities.instabuild) {
+                    itemStack.shrink(1);
+                }
+                this.heal(item.getFoodProperties().getNutrition());
+                return true;
+            }
+            if (item instanceof DyeItem) {
+                DyeColor dyeColor = ((DyeItem)item).getDyeColor();
+                if (dyeColor != this.getCollarColor()) {
                     this.setCollarColor(dyeColor);
                     if (!player.abilities.instabuild) {
                         itemStack.shrink(1);
                     }
                     return true;
                 }
+            } else {
+                boolean bl = super.mobInteract(player, interactionHand);
+                if (!bl || this.isBaby()) {
+                    this.sitGoal.wantToSit(!this.isSitting());
+                }
+                return bl;
             }
-            if (this.isOwnedBy(player) && !this.level.isClientSide && !this.isFood(itemStack)) {
+            if (this.isOwnedBy(player) && !this.isFood(itemStack)) {
                 this.sitGoal.wantToSit(!this.isSitting());
                 this.jumping = false;
                 this.navigation.stop();
@@ -359,19 +371,15 @@ extends TamableAnimal {
             if (!player.abilities.instabuild) {
                 itemStack.shrink(1);
             }
-            if (!this.level.isClientSide) {
-                if (this.random.nextInt(3) == 0) {
-                    this.tame(player);
-                    this.navigation.stop();
-                    this.setTarget(null);
-                    this.sitGoal.wantToSit(true);
-                    this.setHealth(20.0f);
-                    this.spawnTamingParticles(true);
-                    this.level.broadcastEntityEvent(this, (byte)7);
-                } else {
-                    this.spawnTamingParticles(false);
-                    this.level.broadcastEntityEvent(this, (byte)6);
-                }
+            if (this.random.nextInt(3) == 0) {
+                this.tame(player);
+                this.navigation.stop();
+                this.setTarget(null);
+                this.sitGoal.wantToSit(true);
+                this.setHealth(20.0f);
+                this.level.broadcastEntityEvent(this, (byte)7);
+            } else {
+                this.level.broadcastEntityEvent(this, (byte)6);
             }
             return true;
         }

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
@@ -55,10 +56,13 @@ extends CrossCollisionBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
-            return itemStack.getItem() == Items.LEAD || itemStack.isEmpty();
+            if (itemStack.getItem() == Items.LEAD) {
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.PASS;
         }
         return LeadItem.bindPlayerMobs(player, level, blockPos);
     }

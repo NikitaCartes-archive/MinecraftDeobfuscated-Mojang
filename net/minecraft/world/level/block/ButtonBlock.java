@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -95,13 +96,13 @@ extends FaceAttachedHorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (blockState.getValue(POWERED).booleanValue()) {
-            return true;
+            return InteractionResult.CONSUME;
         }
         this.press(blockState, level, blockPos);
         this.playSound(player, level, blockPos, true);
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     public void press(BlockState blockState, Level level, BlockPos blockPos) {

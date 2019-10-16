@@ -62,11 +62,9 @@ extends Block {
         if (blockState2.getBlock() == blockState.getBlock()) {
             return;
         }
-        if (!level.isClientSide) {
-            blockState = this.updateDir(level, blockPos, blockState, true);
-            if (this.isStraight) {
-                blockState.neighborChanged(level, blockPos, this, blockPos, bl);
-            }
+        blockState = this.updateDir(level, blockPos, blockState, true);
+        if (this.isStraight) {
+            blockState.neighborChanged(level, blockPos, this, blockPos, bl);
         }
     }
 

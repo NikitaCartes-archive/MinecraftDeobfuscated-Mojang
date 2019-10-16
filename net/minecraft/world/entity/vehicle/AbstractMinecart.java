@@ -250,7 +250,7 @@ extends Entity {
                 this.setPos(d, e, f);
                 this.setRot(this.yRot, this.xRot);
             } else {
-                this.refreshBoundingBox();
+                this.reapplyPosition();
                 this.setRot(this.yRot, this.xRot);
             }
             return;

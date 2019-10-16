@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
@@ -178,7 +179,7 @@ implements WorldlyContainerHolder {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         int i = blockState.getValue(LEVEL);
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (i < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
@@ -189,7 +190,7 @@ implements WorldlyContainerHolder {
                     itemStack.shrink(1);
                 }
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (i == 8) {
             if (!level.isClientSide) {
@@ -203,9 +204,9 @@ implements WorldlyContainerHolder {
             }
             ComposterBlock.empty(blockState, level, blockPos);
             level.playSound(null, blockPos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-            return true;
+            return InteractionResult.SUCCESS;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     private static void empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {

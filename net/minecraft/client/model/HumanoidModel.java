@@ -40,7 +40,11 @@ HeadedModel {
     private float itemUseTicks;
 
     public HumanoidModel(float f) {
-        this(RenderType::entitySolid, f, 0.0f, 64, 32);
+        this(RenderType::entityCutoutNoCull, f, 0.0f, 64, 32);
+    }
+
+    protected HumanoidModel(float f, float g, int i, int j) {
+        this(RenderType::entityCutoutNoCull, f, g, i, j);
     }
 
     public HumanoidModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {

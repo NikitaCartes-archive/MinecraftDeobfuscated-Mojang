@@ -4,36 +4,22 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -42,17 +28,14 @@ extends RenderStateShard {
     private static final RenderType SOLID = new CompositeRenderType("solid", DefaultVertexFormat.BLOCK, 7, 0x200000, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET_MIPPED).createCompositeState(false));
     private static final RenderType CUTOUT_MIPPED = new CompositeRenderType("cutout_mipped", DefaultVertexFormat.BLOCK, 7, 131072, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET_MIPPED).setAlphaState(MIDWAY_ALPHA).createCompositeState(false));
     private static final RenderType CUTOUT = new CompositeRenderType("cutout", DefaultVertexFormat.BLOCK, 7, 131072, true, false, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET).setAlphaState(MIDWAY_ALPHA).createCompositeState(false));
-    private static final RenderType TRANSLUCENT = new CompositeRenderType("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET).setTransparencyState(TRANSLUCENT_TRANSPARENCY).createCompositeState(false));
+    private static final RenderType TRANSLUCENT = new CompositeRenderType("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, CompositeState.builder().setShadeModelState(SMOOTH_SHADE).setLightmapState(LIGHTMAP).setTextureState(BLOCK_SHEET_MIPPED).setTransparencyState(TRANSLUCENT_TRANSPARENCY).createCompositeState(false));
     private static final RenderType TRANSLUCENT_NO_CRUMBLING = new RenderType("translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 256, false, true, TRANSLUCENT::setupRenderState, TRANSLUCENT::clearRenderState);
-    private static final RenderType LEASH = new CompositeRenderType("leash", DefaultVertexFormat.POSITION_COLOR, 7, 256, CompositeState.builder().setTextureState(NO_TEXTURE).setCullState(NO_CULL).createCompositeState(false));
+    private static final RenderType LEASH = new CompositeRenderType("leash", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP, 7, 256, CompositeState.builder().setTextureState(NO_TEXTURE).setCullState(NO_CULL).setLightmapState(LIGHTMAP).createCompositeState(false));
     private static final RenderType WATER_MASK = new CompositeRenderType("water_mask", DefaultVertexFormat.POSITION, 7, 256, CompositeState.builder().setTextureState(NO_TEXTURE).setWriteMaskState(DEPTH_WRITE).createCompositeState(false));
-    private static final RenderType GLINT = new CompositeRenderType("glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(GLINT_TEXTURING).createCompositeState(false));
-    private static final RenderType ENTITY_GLINT = new CompositeRenderType("entity_glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(ENTITY_GLINT_TEXTURING).createCompositeState(false));
+    private static final RenderType GLINT = new CompositeRenderType("glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setCullState(NO_CULL).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(GLINT_TEXTURING).createCompositeState(false));
+    private static final RenderType ENTITY_GLINT = new CompositeRenderType("entity_glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setCullState(NO_CULL).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(ENTITY_GLINT_TEXTURING).createCompositeState(false));
     private static final RenderType BEACON_BEAM = new CompositeRenderType("beacon_beam", DefaultVertexFormat.BLOCK, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(BeaconRenderer.BEAM_LOCATION, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setWriteMaskState(COLOR_WRITE).setFogState(NO_FOG).createCompositeState(false));
     private static final RenderType LIGHTNING = new CompositeRenderType("lightning", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, true, CompositeState.builder().setWriteMaskState(COLOR_WRITE).setTransparencyState(LIGHTNING_TRANSPARENCY).setShadeModelState(SMOOTH_SHADE).createCompositeState(false));
-    private static boolean renderCutout;
-    private static final Map<Block, RenderType> TYPE_BY_BLOCK;
-    private static final Map<Fluid, RenderType> TYPE_BY_FLUID;
     private final VertexFormat format;
     private final int mode;
     private final int bufferSize;
@@ -81,22 +64,27 @@ extends RenderStateShard {
 
     public static RenderType entitySolid(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
-        return new CompositeRenderType("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+        return new CompositeRenderType("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
     }
 
     public static RenderType entityCutout(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
-        return new CompositeRenderType("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+        return new CompositeRenderType("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
     }
 
     public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
-        return new CompositeRenderType("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+        return new CompositeRenderType("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+    }
+
+    public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+        return new CompositeRenderType("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
     }
 
     public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
-        return new CompositeRenderType("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+        return new CompositeRenderType("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
     }
 
     public static RenderType entityForceTranslucent(ResourceLocation resourceLocation) {
@@ -129,8 +117,8 @@ extends RenderStateShard {
         return new CompositeRenderType("eyes", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, CompositeState.builder().setTextureState(textureStateShard).setTransparencyState(ADDITIVE_TRANSPARENCY).setWriteMaskState(COLOR_WRITE).setFogState(BLACK_FOG).createCompositeState(false));
     }
 
-    public static RenderType powerSwirl(ResourceLocation resourceLocation, float f, float g) {
-        return new CompositeRenderType("power_swirl", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTexturingState(new RenderStateShard.SwirlTexturingStateShard(f, g)).setFogState(BLACK_FOG).setTransparencyState(ADDITIVE_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(false));
+    public static RenderType energySwirl(ResourceLocation resourceLocation, float f, float g) {
+        return new CompositeRenderType("energy_swirl", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTexturingState(new RenderStateShard.OffsetTexturingStateShard(f, g)).setFogState(BLACK_FOG).setTransparencyState(ADDITIVE_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(false));
     }
 
     public static RenderType leash() {
@@ -200,10 +188,6 @@ extends RenderStateShard {
         this.sortOnUpload = bl2;
     }
 
-    public static void setFancy(boolean bl) {
-        renderCutout = bl;
-    }
-
     public void end(BufferBuilder bufferBuilder) {
         if (!bufferBuilder.building()) {
             return;
@@ -216,46 +200,6 @@ extends RenderStateShard {
 
     public String toString() {
         return this.name;
-    }
-
-    public static RenderType getChunkRenderType(BlockState blockState) {
-        Block block = blockState.getBlock();
-        if (block instanceof LeavesBlock) {
-            return renderCutout ? RenderType.cutoutMipped() : RenderType.solid();
-        }
-        RenderType renderType = TYPE_BY_BLOCK.get(block);
-        if (renderType != null) {
-            return renderType;
-        }
-        return RenderType.solid();
-    }
-
-    public static RenderType getRenderType(BlockState blockState) {
-        RenderType renderType = RenderType.getChunkRenderType(blockState);
-        if (renderType == RenderType.translucent()) {
-            return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-        }
-        if (renderType == RenderType.cutout() || renderType == RenderType.cutoutMipped()) {
-            return RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
-        }
-        return RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
-    }
-
-    public static RenderType getRenderType(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-        if (item instanceof BlockItem) {
-            Block block = ((BlockItem)item).getBlock();
-            return RenderType.getRenderType(block.defaultBlockState());
-        }
-        return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-    }
-
-    public static RenderType getRenderLayer(FluidState fluidState) {
-        RenderType renderType = TYPE_BY_FLUID.get(fluidState.getType());
-        if (renderType != null) {
-            return renderType;
-        }
-        return RenderType.solid();
     }
 
     public static List<RenderType> chunkBufferLayers() {
@@ -280,230 +224,6 @@ extends RenderStateShard {
 
     public boolean affectsCrumbling() {
         return this.affectsCrumbling;
-    }
-
-    static {
-        TYPE_BY_BLOCK = Util.make(Maps.newHashMap(), hashMap -> {
-            hashMap.put(Blocks.GRASS_BLOCK, CUTOUT_MIPPED);
-            hashMap.put(Blocks.IRON_BARS, CUTOUT_MIPPED);
-            hashMap.put(Blocks.GLASS_PANE, CUTOUT_MIPPED);
-            hashMap.put(Blocks.TRIPWIRE_HOOK, CUTOUT_MIPPED);
-            hashMap.put(Blocks.HOPPER, CUTOUT_MIPPED);
-            hashMap.put(Blocks.JUNGLE_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.OAK_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.SPRUCE_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.ACACIA_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.BIRCH_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.DARK_OAK_LEAVES, CUTOUT_MIPPED);
-            hashMap.put(Blocks.OAK_SAPLING, CUTOUT);
-            hashMap.put(Blocks.SPRUCE_SAPLING, CUTOUT);
-            hashMap.put(Blocks.BIRCH_SAPLING, CUTOUT);
-            hashMap.put(Blocks.JUNGLE_SAPLING, CUTOUT);
-            hashMap.put(Blocks.ACACIA_SAPLING, CUTOUT);
-            hashMap.put(Blocks.DARK_OAK_SAPLING, CUTOUT);
-            hashMap.put(Blocks.GLASS, CUTOUT);
-            hashMap.put(Blocks.WHITE_BED, CUTOUT);
-            hashMap.put(Blocks.ORANGE_BED, CUTOUT);
-            hashMap.put(Blocks.MAGENTA_BED, CUTOUT);
-            hashMap.put(Blocks.LIGHT_BLUE_BED, CUTOUT);
-            hashMap.put(Blocks.YELLOW_BED, CUTOUT);
-            hashMap.put(Blocks.LIME_BED, CUTOUT);
-            hashMap.put(Blocks.PINK_BED, CUTOUT);
-            hashMap.put(Blocks.GRAY_BED, CUTOUT);
-            hashMap.put(Blocks.LIGHT_GRAY_BED, CUTOUT);
-            hashMap.put(Blocks.CYAN_BED, CUTOUT);
-            hashMap.put(Blocks.PURPLE_BED, CUTOUT);
-            hashMap.put(Blocks.BLUE_BED, CUTOUT);
-            hashMap.put(Blocks.BROWN_BED, CUTOUT);
-            hashMap.put(Blocks.GREEN_BED, CUTOUT);
-            hashMap.put(Blocks.RED_BED, CUTOUT);
-            hashMap.put(Blocks.BLACK_BED, CUTOUT);
-            hashMap.put(Blocks.POWERED_RAIL, CUTOUT);
-            hashMap.put(Blocks.DETECTOR_RAIL, CUTOUT);
-            hashMap.put(Blocks.COBWEB, CUTOUT);
-            hashMap.put(Blocks.GRASS, CUTOUT);
-            hashMap.put(Blocks.FERN, CUTOUT);
-            hashMap.put(Blocks.DEAD_BUSH, CUTOUT);
-            hashMap.put(Blocks.SEAGRASS, CUTOUT);
-            hashMap.put(Blocks.TALL_SEAGRASS, CUTOUT);
-            hashMap.put(Blocks.DANDELION, CUTOUT);
-            hashMap.put(Blocks.POPPY, CUTOUT);
-            hashMap.put(Blocks.BLUE_ORCHID, CUTOUT);
-            hashMap.put(Blocks.ALLIUM, CUTOUT);
-            hashMap.put(Blocks.AZURE_BLUET, CUTOUT);
-            hashMap.put(Blocks.RED_TULIP, CUTOUT);
-            hashMap.put(Blocks.ORANGE_TULIP, CUTOUT);
-            hashMap.put(Blocks.WHITE_TULIP, CUTOUT);
-            hashMap.put(Blocks.PINK_TULIP, CUTOUT);
-            hashMap.put(Blocks.OXEYE_DAISY, CUTOUT);
-            hashMap.put(Blocks.CORNFLOWER, CUTOUT);
-            hashMap.put(Blocks.WITHER_ROSE, CUTOUT);
-            hashMap.put(Blocks.LILY_OF_THE_VALLEY, CUTOUT);
-            hashMap.put(Blocks.BROWN_MUSHROOM, CUTOUT);
-            hashMap.put(Blocks.RED_MUSHROOM, CUTOUT);
-            hashMap.put(Blocks.TORCH, CUTOUT);
-            hashMap.put(Blocks.WALL_TORCH, CUTOUT);
-            hashMap.put(Blocks.FIRE, CUTOUT);
-            hashMap.put(Blocks.SPAWNER, CUTOUT);
-            hashMap.put(Blocks.REDSTONE_WIRE, CUTOUT);
-            hashMap.put(Blocks.WHEAT, CUTOUT);
-            hashMap.put(Blocks.OAK_DOOR, CUTOUT);
-            hashMap.put(Blocks.LADDER, CUTOUT);
-            hashMap.put(Blocks.RAIL, CUTOUT);
-            hashMap.put(Blocks.IRON_DOOR, CUTOUT);
-            hashMap.put(Blocks.REDSTONE_TORCH, CUTOUT);
-            hashMap.put(Blocks.REDSTONE_WALL_TORCH, CUTOUT);
-            hashMap.put(Blocks.CACTUS, CUTOUT);
-            hashMap.put(Blocks.SUGAR_CANE, CUTOUT);
-            hashMap.put(Blocks.REPEATER, CUTOUT);
-            hashMap.put(Blocks.OAK_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.SPRUCE_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.BIRCH_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.JUNGLE_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.ACACIA_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.DARK_OAK_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.ATTACHED_PUMPKIN_STEM, CUTOUT);
-            hashMap.put(Blocks.ATTACHED_MELON_STEM, CUTOUT);
-            hashMap.put(Blocks.PUMPKIN_STEM, CUTOUT);
-            hashMap.put(Blocks.MELON_STEM, CUTOUT);
-            hashMap.put(Blocks.VINE, CUTOUT);
-            hashMap.put(Blocks.LILY_PAD, CUTOUT);
-            hashMap.put(Blocks.NETHER_WART, CUTOUT);
-            hashMap.put(Blocks.BREWING_STAND, CUTOUT);
-            hashMap.put(Blocks.COCOA, CUTOUT);
-            hashMap.put(Blocks.BEACON, CUTOUT);
-            hashMap.put(Blocks.FLOWER_POT, CUTOUT);
-            hashMap.put(Blocks.POTTED_OAK_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_SPRUCE_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_BIRCH_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_JUNGLE_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_ACACIA_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_DARK_OAK_SAPLING, CUTOUT);
-            hashMap.put(Blocks.POTTED_FERN, CUTOUT);
-            hashMap.put(Blocks.POTTED_DANDELION, CUTOUT);
-            hashMap.put(Blocks.POTTED_POPPY, CUTOUT);
-            hashMap.put(Blocks.POTTED_BLUE_ORCHID, CUTOUT);
-            hashMap.put(Blocks.POTTED_ALLIUM, CUTOUT);
-            hashMap.put(Blocks.POTTED_AZURE_BLUET, CUTOUT);
-            hashMap.put(Blocks.POTTED_RED_TULIP, CUTOUT);
-            hashMap.put(Blocks.POTTED_ORANGE_TULIP, CUTOUT);
-            hashMap.put(Blocks.POTTED_WHITE_TULIP, CUTOUT);
-            hashMap.put(Blocks.POTTED_PINK_TULIP, CUTOUT);
-            hashMap.put(Blocks.POTTED_OXEYE_DAISY, CUTOUT);
-            hashMap.put(Blocks.POTTED_CORNFLOWER, CUTOUT);
-            hashMap.put(Blocks.POTTED_LILY_OF_THE_VALLEY, CUTOUT);
-            hashMap.put(Blocks.POTTED_WITHER_ROSE, CUTOUT);
-            hashMap.put(Blocks.POTTED_RED_MUSHROOM, CUTOUT);
-            hashMap.put(Blocks.POTTED_BROWN_MUSHROOM, CUTOUT);
-            hashMap.put(Blocks.POTTED_DEAD_BUSH, CUTOUT);
-            hashMap.put(Blocks.POTTED_CACTUS, CUTOUT);
-            hashMap.put(Blocks.CARROTS, CUTOUT);
-            hashMap.put(Blocks.POTATOES, CUTOUT);
-            hashMap.put(Blocks.COMPARATOR, CUTOUT);
-            hashMap.put(Blocks.ACTIVATOR_RAIL, CUTOUT);
-            hashMap.put(Blocks.IRON_TRAPDOOR, CUTOUT);
-            hashMap.put(Blocks.SUNFLOWER, CUTOUT);
-            hashMap.put(Blocks.LILAC, CUTOUT);
-            hashMap.put(Blocks.ROSE_BUSH, CUTOUT);
-            hashMap.put(Blocks.PEONY, CUTOUT);
-            hashMap.put(Blocks.TALL_GRASS, CUTOUT);
-            hashMap.put(Blocks.LARGE_FERN, CUTOUT);
-            hashMap.put(Blocks.SPRUCE_DOOR, CUTOUT);
-            hashMap.put(Blocks.BIRCH_DOOR, CUTOUT);
-            hashMap.put(Blocks.JUNGLE_DOOR, CUTOUT);
-            hashMap.put(Blocks.ACACIA_DOOR, CUTOUT);
-            hashMap.put(Blocks.DARK_OAK_DOOR, CUTOUT);
-            hashMap.put(Blocks.END_ROD, CUTOUT);
-            hashMap.put(Blocks.CHORUS_PLANT, CUTOUT);
-            hashMap.put(Blocks.CHORUS_FLOWER, CUTOUT);
-            hashMap.put(Blocks.BEETROOTS, CUTOUT);
-            hashMap.put(Blocks.KELP, CUTOUT);
-            hashMap.put(Blocks.KELP_PLANT, CUTOUT);
-            hashMap.put(Blocks.TURTLE_EGG, CUTOUT);
-            hashMap.put(Blocks.DEAD_TUBE_CORAL, CUTOUT);
-            hashMap.put(Blocks.DEAD_BRAIN_CORAL, CUTOUT);
-            hashMap.put(Blocks.DEAD_BUBBLE_CORAL, CUTOUT);
-            hashMap.put(Blocks.DEAD_FIRE_CORAL, CUTOUT);
-            hashMap.put(Blocks.DEAD_HORN_CORAL, CUTOUT);
-            hashMap.put(Blocks.TUBE_CORAL, CUTOUT);
-            hashMap.put(Blocks.BRAIN_CORAL, CUTOUT);
-            hashMap.put(Blocks.BUBBLE_CORAL, CUTOUT);
-            hashMap.put(Blocks.FIRE_CORAL, CUTOUT);
-            hashMap.put(Blocks.HORN_CORAL, CUTOUT);
-            hashMap.put(Blocks.DEAD_TUBE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_BRAIN_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_BUBBLE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_FIRE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_HORN_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.TUBE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.BRAIN_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.BUBBLE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.FIRE_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.HORN_CORAL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_TUBE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_BRAIN_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_BUBBLE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_FIRE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.DEAD_HORN_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.TUBE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.BRAIN_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.BUBBLE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.FIRE_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.HORN_CORAL_WALL_FAN, CUTOUT);
-            hashMap.put(Blocks.SEA_PICKLE, CUTOUT);
-            hashMap.put(Blocks.CONDUIT, CUTOUT);
-            hashMap.put(Blocks.BAMBOO_SAPLING, CUTOUT);
-            hashMap.put(Blocks.BAMBOO, CUTOUT);
-            hashMap.put(Blocks.POTTED_BAMBOO, CUTOUT);
-            hashMap.put(Blocks.SCAFFOLDING, CUTOUT);
-            hashMap.put(Blocks.STONECUTTER, CUTOUT);
-            hashMap.put(Blocks.LANTERN, CUTOUT);
-            hashMap.put(Blocks.CAMPFIRE, CUTOUT);
-            hashMap.put(Blocks.SWEET_BERRY_BUSH, CUTOUT);
-            hashMap.put(Blocks.ICE, TRANSLUCENT);
-            hashMap.put(Blocks.NETHER_PORTAL, TRANSLUCENT);
-            hashMap.put(Blocks.WHITE_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.ORANGE_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.MAGENTA_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.LIGHT_BLUE_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.YELLOW_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.LIME_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.PINK_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.GRAY_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.LIGHT_GRAY_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.CYAN_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.PURPLE_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.BLUE_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.BROWN_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.GREEN_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.RED_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.BLACK_STAINED_GLASS, TRANSLUCENT);
-            hashMap.put(Blocks.TRIPWIRE, TRANSLUCENT);
-            hashMap.put(Blocks.WHITE_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.ORANGE_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.MAGENTA_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.YELLOW_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.LIME_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.PINK_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.GRAY_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.LIGHT_GRAY_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.CYAN_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.PURPLE_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.BLUE_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.BROWN_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.GREEN_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.RED_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.BLACK_STAINED_GLASS_PANE, TRANSLUCENT);
-            hashMap.put(Blocks.SLIME_BLOCK, TRANSLUCENT);
-            hashMap.put(Blocks.HONEY_BLOCK, TRANSLUCENT);
-            hashMap.put(Blocks.FROSTED_ICE, TRANSLUCENT);
-            hashMap.put(Blocks.BUBBLE_COLUMN, TRANSLUCENT);
-        });
-        TYPE_BY_FLUID = Util.make(Maps.newHashMap(), hashMap -> {
-            hashMap.put(Fluids.FLOWING_WATER, TRANSLUCENT);
-            hashMap.put(Fluids.WATER, TRANSLUCENT);
-        });
     }
 
     @Environment(value=EnvType.CLIENT)

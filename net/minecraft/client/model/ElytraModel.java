@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -21,7 +20,6 @@ extends AgeableListModel<T> {
     private final ModelPart leftWing = new ModelPart(this, 22, 0);
 
     public ElytraModel() {
-        super(RenderType::entityCutoutNoCull, false, 5.0f, 2.0f, 2.0f, 2.0f, 24.0f);
         this.leftWing.addBox(-10.0f, 0.0f, 0.0f, 10.0f, 20.0f, 2.0f, 1.0f);
         this.rightWing = new ModelPart(this, 22, 0);
         this.rightWing.mirror = true;

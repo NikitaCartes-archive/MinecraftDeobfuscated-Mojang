@@ -55,13 +55,16 @@ extends DiggerItem {
                 level.levelEvent(null, 1009, blockPos, 0);
                 blockState3 = (BlockState)blockState.setValue(CampfireBlock.LIT, false);
             }
-            if (!level.isClientSide && blockState3 != null) {
-                level.setBlock(blockPos, blockState3, 11);
-                if (player2 != null) {
-                    useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
+            if (blockState3 != null) {
+                if (!level.isClientSide) {
+                    level.setBlock(blockPos, blockState3, 11);
+                    if (player2 != null) {
+                        useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
+                    }
                 }
+                return InteractionResult.SUCCESS;
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
         }
         return InteractionResult.PASS;
     }

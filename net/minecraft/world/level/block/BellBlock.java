@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -84,20 +85,23 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-        return this.onHit(level, blockState, blockHitResult, player, true);
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     public boolean onHit(Level level, BlockState blockState, BlockHitResult blockHitResult, @Nullable Player player, boolean bl) {
-        boolean bl3;
         boolean bl2;
         Direction direction = blockHitResult.getDirection();
         BlockPos blockPos = blockHitResult.getBlockPos();
-        boolean bl4 = bl2 = !bl || this.isProperHit(blockState, direction, blockHitResult.getLocation().y - (double)blockPos.getY());
-        if (bl2 && (bl3 = this.attemptToRing(level, blockPos, direction)) && player != null) {
-            player.awardStat(Stats.BELL_RING);
+        boolean bl3 = bl2 = !bl || this.isProperHit(blockState, direction, blockHitResult.getLocation().y - (double)blockPos.getY());
+        if (bl2) {
+            boolean bl32 = this.attemptToRing(level, blockPos, direction);
+            if (bl32 && player != null) {
+                player.awardStat(Stats.BELL_RING);
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     private boolean isProperHit(BlockState blockState, Direction direction, double d) {

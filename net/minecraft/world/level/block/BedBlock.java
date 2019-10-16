@@ -13,6 +13,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -90,12 +91,12 @@ implements EntityBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
-            return true;
+            return InteractionResult.CONSUME;
         }
         if (blockState.getValue(PART) != BedPart.HEAD && (blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).getBlock() != this) {
-            return true;
+            return InteractionResult.CONSUME;
         }
         if (!level.dimension.mayRespawn() || level.getBiome(blockPos) == Biomes.NETHER) {
             level.removeBlock(blockPos, false);
@@ -104,20 +105,20 @@ implements EntityBlock {
                 level.removeBlock(blockPos2, false);
             }
             level.explode(null, DamageSource.netherBedExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (blockState.getValue(OCCUPIED).booleanValue()) {
             if (!this.kickVillagerOutOfBed(level, blockPos)) {
                 player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied", new Object[0]), true);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         player.startSleepInBed(blockPos).ifLeft(bedSleepingProblem -> {
             if (bedSleepingProblem != null) {
                 player.displayClientMessage(bedSleepingProblem.getMessage(), true);
             }
         });
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {

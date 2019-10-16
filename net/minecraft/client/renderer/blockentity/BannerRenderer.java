@@ -90,7 +90,7 @@ extends BlockEntityRenderer<BannerBlockEntity> {
         this.flag.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
         List<BannerPattern> list = bannerBlockEntity.getPatterns();
         List<DyeColor> list2 = bannerBlockEntity.getColors();
-        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
         if (list == null) {
             LOGGER.error("patterns are null");
         } else if (list2 == null) {

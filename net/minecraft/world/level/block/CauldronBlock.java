@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
@@ -69,11 +70,11 @@ extends Block {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         DyeableLeatherItem dyeableLeatherItem;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.isEmpty()) {
-            return true;
+            return InteractionResult.PASS;
         }
         int i = blockState.getValue(LEVEL);
         Item item = itemStack.getItem();
@@ -86,7 +87,7 @@ extends Block {
                 this.setWaterLevel(level, blockPos, blockState, 3);
                 level.playSound(null, blockPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (item == Items.BUCKET) {
             if (i == 3 && !level.isClientSide) {
@@ -102,7 +103,7 @@ extends Block {
                 this.setWaterLevel(level, blockPos, blockState, 0);
                 level.playSound(null, blockPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (item == Items.GLASS_BOTTLE) {
             if (i > 0 && !level.isClientSide) {
@@ -121,7 +122,7 @@ extends Block {
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 this.setWaterLevel(level, blockPos, blockState, i - 1);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (item == Items.POTION && PotionUtils.getPotion(itemStack) == Potions.WATER) {
             if (i < 3 && !level.isClientSide) {
@@ -136,13 +137,13 @@ extends Block {
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                 this.setWaterLevel(level, blockPos, blockState, i + 1);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (i > 0 && item instanceof DyeableLeatherItem && (dyeableLeatherItem = (DyeableLeatherItem)((Object)item)).hasCustomColor(itemStack) && !level.isClientSide) {
             dyeableLeatherItem.clearColor(itemStack);
             this.setWaterLevel(level, blockPos, blockState, i - 1);
             player.awardStat(Stats.CLEAN_ARMOR);
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (i > 0 && item instanceof BannerItem) {
             if (BannerBlockEntity.getPatternCount(itemStack) > 0 && !level.isClientSide) {
@@ -162,7 +163,7 @@ extends Block {
                     ((ServerPlayer)player).refreshContainer(player.inventoryMenu);
                 }
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (i > 0 && item instanceof BlockItem) {
             Block block = ((BlockItem)item).getBlock();
@@ -174,10 +175,11 @@ extends Block {
                 player.setItemInHand(interactionHand, itemStack3);
                 this.setWaterLevel(level, blockPos, blockState, i - 1);
                 player.awardStat(Stats.CLEAN_SHULKER_BOX);
+                return InteractionResult.SUCCESS;
             }
-            return true;
+            return InteractionResult.CONSUME;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     public void setWaterLevel(Level level, BlockPos blockPos, BlockState blockState, int i) {

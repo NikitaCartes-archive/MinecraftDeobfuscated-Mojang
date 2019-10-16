@@ -654,7 +654,7 @@ PlayerRideableJumping {
             g = 0.0f;
         }
         if (this.playerJumpPendingScale > 0.0f && !this.isJumping() && this.onGround) {
-            d = this.getCustomJump() * (double)this.playerJumpPendingScale;
+            d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
             e = this.hasEffect(MobEffects.JUMP) ? d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1f) : d;
             Vec3 vec32 = this.getDeltaMovement();
             this.setDeltaMovement(vec32.x, e, vec32.z);

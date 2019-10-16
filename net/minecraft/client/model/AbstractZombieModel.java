@@ -3,20 +3,17 @@
  */
 package net.minecraft.client.model;
 
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Monster;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractZombieModel<T extends Monster>
 extends HumanoidModel<T> {
-    protected AbstractZombieModel(Function<ResourceLocation, RenderType> function, float f, float g, int i, int j) {
-        super(function, f, g, i, j);
+    protected AbstractZombieModel(float f, float g, int i, int j) {
+        super(f, g, i, j);
     }
 
     @Override

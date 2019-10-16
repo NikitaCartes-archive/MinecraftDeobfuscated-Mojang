@@ -79,8 +79,15 @@ extends GuiComponent {
             this.scrollY = 56 - (this.maxY + this.minY) / 2;
             this.centered = true;
         }
+        RenderSystem.pushMatrix();
+        RenderSystem.enableDepthTest();
+        RenderSystem.translatef(0.0f, 0.0f, 950.0f);
+        RenderSystem.colorMask(false, false, false, false);
+        AdvancementTab.fill(468, 226, -234, -113, -16777216);
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.translatef(0.0f, 0.0f, -950.0f);
         RenderSystem.depthFunc(518);
-        AdvancementTab.fill(0, 0, 234, 113, -16777216);
+        AdvancementTab.fill(234, 113, 0, 0, -16777216);
         RenderSystem.depthFunc(515);
         ResourceLocation resourceLocation = this.display.getBackground();
         if (resourceLocation != null) {
@@ -88,7 +95,6 @@ extends GuiComponent {
         } else {
             this.minecraft.getTextureManager().bind(TextureManager.INTENTIONAL_MISSING_TEXTURE);
         }
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         int i = Mth.floor(this.scrollX);
         int j = Mth.floor(this.scrollY);
         int k = i % 16;
@@ -101,6 +107,14 @@ extends GuiComponent {
         this.root.drawConnectivity(i, j, true);
         this.root.drawConnectivity(i, j, false);
         this.root.draw(i, j);
+        RenderSystem.depthFunc(518);
+        RenderSystem.translatef(0.0f, 0.0f, -950.0f);
+        RenderSystem.colorMask(false, false, false, false);
+        AdvancementTab.fill(468, 226, -234, -113, -16777216);
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.translatef(0.0f, 0.0f, 950.0f);
+        RenderSystem.depthFunc(515);
+        RenderSystem.popMatrix();
     }
 
     public void drawTooltips(int i, int j, int k, int l) {

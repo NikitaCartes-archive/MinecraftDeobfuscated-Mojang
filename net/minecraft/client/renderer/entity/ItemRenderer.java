@@ -16,6 +16,7 @@ import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -28,6 +29,7 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -88,19 +90,24 @@ implements ResourceManagerReloadListener {
     }
 
     public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
+        boolean bl3;
         if (itemStack.isEmpty()) {
             return;
         }
         poseStack.pushPose();
-        if (itemStack.getItem() == Items.TRIDENT && transformType == ItemTransforms.TransformType.GUI) {
+        boolean bl2 = transformType == ItemTransforms.TransformType.GUI;
+        boolean bl4 = bl3 = bl2 || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
+        if (itemStack.getItem() == Items.TRIDENT && bl3) {
             bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
         poseStack.translate(-0.5, -0.5, -0.5);
-        if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && transformType != ItemTransforms.TransformType.GUI) {
+        if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl3) {
             EntityBlockRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
         } else {
-            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.getRenderType(itemStack), true, itemStack.hasFoil());
+            RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
+            RenderType renderType2 = bl2 && Objects.equals(renderType, RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)) ? RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS) : renderType;
+            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, renderType2, true, itemStack.hasFoil());
             this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
         }
         poseStack.popPose();
@@ -177,6 +184,7 @@ implements ResourceManagerReloadListener {
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
+        RenderSystem.enableDepthTest();
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         RenderSystem.popMatrix();

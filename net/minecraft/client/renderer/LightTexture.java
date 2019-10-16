@@ -163,5 +163,17 @@ implements AutoCloseable {
     private float getBrightness(Level level, int i) {
         return level.dimension.getBrightnessRamp()[i];
     }
+
+    public static int pack(int i, int j) {
+        return i | j << 16;
+    }
+
+    public static int block(int i) {
+        return i & 0xFFFF;
+    }
+
+    public static int sky(int i) {
+        return i >> 16 & 0xFFFF;
+    }
 }
 

@@ -12,6 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
@@ -71,24 +72,24 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         PlayerEnderChestContainer playerEnderChestContainer = player2.getEnderChestInventory();
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (playerEnderChestContainer == null || !(blockEntity instanceof EnderChestBlockEntity)) {
-            return true;
+            return InteractionResult.SUCCESS;
         }
         BlockPos blockPos2 = blockPos.above();
         if (level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
-            return true;
+            return InteractionResult.SUCCESS;
         }
         if (level.isClientSide) {
-            return true;
+            return InteractionResult.SUCCESS;
         }
         EnderChestBlockEntity enderChestBlockEntity = (EnderChestBlockEntity)blockEntity;
         playerEnderChestContainer.setActiveChest(enderChestBlockEntity);
         player2.openMenu(new SimpleMenuProvider((i, inventory, player) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
         player2.awardStat(Stats.OPEN_ENDERCHEST);
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

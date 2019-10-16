@@ -93,7 +93,7 @@ extends Slime {
     @Override
     protected void jumpFromGround() {
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x, 0.42f + (float)this.getSize() * 0.1f, vec3.z);
+        this.setDeltaMovement(vec3.x, this.getJumpPower() + (float)this.getSize() * 0.1f, vec3.z);
         this.hasImpulse = true;
     }
 

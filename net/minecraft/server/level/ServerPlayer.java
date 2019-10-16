@@ -1187,15 +1187,6 @@ implements ContainerListener {
         this.isChangingDimension = false;
     }
 
-    public void startFallFlying() {
-        this.setSharedFlag(7, true);
-    }
-
-    public void stopFallFlying() {
-        this.setSharedFlag(7, true);
-        this.setSharedFlag(7, false);
-    }
-
     public PlayerAdvancements getAdvancements() {
         return this.advancements;
     }

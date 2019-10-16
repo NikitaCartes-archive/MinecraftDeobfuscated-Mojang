@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 @Environment(value=EnvType.CLIENT)
 public class HorseArmorLayer
 extends RenderLayer<Horse, HorseModel<Horse>> {
-    private final HorseModel<Horse> model = new HorseModel(RenderType::entitySolid, 0.1f);
+    private final HorseModel<Horse> model = new HorseModel(0.1f);
 
     public HorseArmorLayer(RenderLayerParent<Horse, HorseModel<Horse>> renderLayerParent) {
         super(renderLayerParent);

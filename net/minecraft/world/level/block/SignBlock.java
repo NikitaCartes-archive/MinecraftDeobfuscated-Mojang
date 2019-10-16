@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
@@ -60,21 +61,23 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        boolean bl;
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        boolean bl2 = bl = itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild;
         if (level.isClientSide) {
-            return true;
+            return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof SignBlockEntity) {
-            boolean bl;
+            boolean bl22;
             SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
-            ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild && (bl = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor())) && !player.isCreative()) {
+            if (bl && (bl22 = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor())) && !player.isCreative()) {
                 itemStack.shrink(1);
             }
-            return signBlockEntity.executeClickCommands(player);
+            return signBlockEntity.executeClickCommands(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     @Override

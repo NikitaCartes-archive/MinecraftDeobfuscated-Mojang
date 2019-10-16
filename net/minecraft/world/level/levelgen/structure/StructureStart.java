@@ -152,6 +152,10 @@ public abstract class StructureStart {
         ++this.references;
     }
 
+    public int getReferences() {
+        return this.references;
+    }
+
     protected int getMaxReferences() {
         return 1;
     }

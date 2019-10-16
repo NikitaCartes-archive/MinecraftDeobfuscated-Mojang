@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -22,7 +21,7 @@ import net.minecraft.world.item.Items;
 public class DrownedModel<T extends Zombie>
 extends ZombieModel<T> {
     public DrownedModel(float f, float g, int i, int j) {
-        super(RenderType::entityCutoutNoCull, f, g, i, j);
+        super(f, g, i, j);
         this.rightArm = new ModelPart(this, 32, 48);
         this.rightArm.addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
         this.rightArm.setPos(-5.0f, 2.0f + g, 0.0f);
@@ -32,7 +31,7 @@ extends ZombieModel<T> {
     }
 
     public DrownedModel(float f, boolean bl) {
-        super(RenderType::entityCutoutNoCull, f, 0.0f, 64, bl ? 32 : 64);
+        super(f, 0.0f, 64, bl ? 32 : 64);
     }
 
     @Override

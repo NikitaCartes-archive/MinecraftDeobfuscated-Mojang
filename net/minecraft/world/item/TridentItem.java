@@ -110,7 +110,7 @@ extends Item {
             return InteractionResultHolder.fail(itemStack);
         }
         player.startUsingItem(interactionHand);
-        return InteractionResultHolder.successNoSwing(itemStack);
+        return InteractionResultHolder.consume(itemStack);
     }
 
     @Override

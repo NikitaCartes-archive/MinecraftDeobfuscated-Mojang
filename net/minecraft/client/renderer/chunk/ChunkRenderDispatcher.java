@@ -33,6 +33,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ChunkBufferBuilderPack;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -558,7 +559,7 @@ public class ChunkRenderDispatcher {
                             this.handleBlockEntity(compiledChunk, set, blockEntity);
                         }
                         if (!(fluidState = renderChunkRegion.getFluidState(blockPos3)).isEmpty()) {
-                            renderType = RenderType.getRenderLayer(fluidState);
+                            renderType = ItemBlockRenderTypes.getRenderLayer(fluidState);
                             bufferBuilder = chunkBufferBuilderPack.builder(renderType);
                             if (compiledChunk.hasLayer.add(renderType)) {
                                 RenderChunk.this.beginLayer(bufferBuilder);
@@ -569,14 +570,18 @@ public class ChunkRenderDispatcher {
                             }
                         }
                         if (blockState.getRenderShape() == RenderShape.INVISIBLE) continue;
-                        renderType = RenderType.getChunkRenderType(blockState);
+                        renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
                         bufferBuilder = chunkBufferBuilderPack.builder(renderType);
                         if (compiledChunk.hasLayer.add(renderType)) {
                             RenderChunk.this.beginLayer(bufferBuilder);
                         }
-                        if (!blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, random)) continue;
-                        compiledChunk.isCompletelyEmpty = false;
-                        compiledChunk.hasBlocks.add(renderType);
+                        poseStack.pushPose();
+                        poseStack.translate(blockPos3.getX() & 0xF, blockPos3.getY() & 0xF, blockPos3.getZ() & 0xF);
+                        if (blockRenderDispatcher.renderBatched(blockState, blockPos3, renderChunkRegion, poseStack, bufferBuilder, true, random)) {
+                            compiledChunk.isCompletelyEmpty = false;
+                            compiledChunk.hasBlocks.add(renderType);
+                        }
+                        poseStack.popPose();
                     }
                     if (compiledChunk.hasBlocks.contains(RenderType.translucent())) {
                         BufferBuilder bufferBuilder2 = chunkBufferBuilderPack.builder(RenderType.translucent());

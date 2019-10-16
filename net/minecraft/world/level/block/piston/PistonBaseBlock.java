@@ -4,10 +4,11 @@
 package net.minecraft.world.level.block.piston;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -251,11 +252,10 @@ extends DirectionalBlock {
     }
 
     private boolean moveBlocks(Level level, BlockPos blockPos, Direction direction, boolean bl) {
+        int l;
+        BlockPos blockPos6;
+        BlockPos blockPos4;
         int k;
-        BlockState blockState2;
-        BlockState blockState;
-        BlockPos blockPos42;
-        int k2;
         PistonStructureResolver pistonStructureResolver;
         BlockPos blockPos2 = blockPos.relative(direction);
         if (!bl && level.getBlockState(blockPos2).getBlock() == Blocks.PISTON_HEAD) {
@@ -264,53 +264,63 @@ extends DirectionalBlock {
         if (!(pistonStructureResolver = new PistonStructureResolver(level, blockPos, direction, bl)).resolve()) {
             return false;
         }
+        HashMap<BlockPos, BlockState> map = Maps.newHashMap();
         List<BlockPos> list = pistonStructureResolver.getToPush();
         ArrayList<BlockState> list2 = Lists.newArrayList();
         for (int i = 0; i < list.size(); ++i) {
             BlockPos blockPos3 = list.get(i);
-            list2.add(level.getBlockState(blockPos3));
+            BlockState blockState = level.getBlockState(blockPos3);
+            list2.add(blockState);
+            map.put(blockPos3, blockState);
         }
         List<BlockPos> list3 = pistonStructureResolver.getToDestroy();
         int j = list.size() + list3.size();
         BlockState[] blockStates = new BlockState[j];
         Direction direction2 = bl ? direction : direction.getOpposite();
-        HashSet<BlockPos> set = Sets.newHashSet(list);
-        for (k2 = list3.size() - 1; k2 >= 0; --k2) {
-            blockPos42 = list3.get(k2);
-            blockState = level.getBlockState(blockPos42);
-            BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos42) : null;
-            PistonBaseBlock.dropResources(blockState, level, blockPos42, blockEntity);
-            level.setBlock(blockPos42, Blocks.AIR.defaultBlockState(), 18);
+        for (k = list3.size() - 1; k >= 0; --k) {
+            blockPos4 = list3.get(k);
+            BlockState blockState = level.getBlockState(blockPos4);
+            BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos4) : null;
+            PistonBaseBlock.dropResources(blockState, level, blockPos4, blockEntity);
+            level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
             blockStates[--j] = blockState;
         }
-        for (k2 = list.size() - 1; k2 >= 0; --k2) {
-            blockPos42 = list.get(k2);
-            blockState = level.getBlockState(blockPos42);
-            blockPos42 = blockPos42.relative(direction2);
-            set.remove(blockPos42);
-            level.setBlock(blockPos42, (BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
-            level.setBlockEntity(blockPos42, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k2), direction, bl, false));
+        for (k = list.size() - 1; k >= 0; --k) {
+            blockPos4 = list.get(k);
+            BlockState blockState = level.getBlockState(blockPos4);
+            blockPos4 = blockPos4.relative(direction2);
+            map.remove(blockPos4);
+            level.setBlock(blockPos4, (BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
+            level.setBlockEntity(blockPos4, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k), direction, bl, false));
             blockStates[--j] = blockState;
         }
         if (bl) {
             PistonType pistonType = this.isSticky ? PistonType.STICKY : PistonType.DEFAULT;
-            blockState2 = (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction)).setValue(PistonHeadBlock.TYPE, pistonType);
-            blockState = (BlockState)((BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(MovingPistonBlock.FACING, direction)).setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
-            set.remove(blockPos2);
+            BlockState blockState3 = (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, direction)).setValue(PistonHeadBlock.TYPE, pistonType);
+            BlockState blockState = (BlockState)((BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(MovingPistonBlock.FACING, direction)).setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
+            map.remove(blockPos2);
             level.setBlock(blockPos2, blockState, 68);
-            level.setBlockEntity(blockPos2, MovingPistonBlock.newMovingBlockEntity(blockState2, direction, true, true));
+            level.setBlockEntity(blockPos2, MovingPistonBlock.newMovingBlockEntity(blockState3, direction, true, true));
         }
-        for (BlockPos blockPos42 : set) {
-            level.setBlock(blockPos42, Blocks.AIR.defaultBlockState(), 66);
+        BlockState blockState4 = Blocks.AIR.defaultBlockState();
+        for (BlockPos blockPos3 : map.keySet()) {
+            level.setBlock(blockPos3, blockState4, 82);
         }
-        for (k = list3.size() - 1; k >= 0; --k) {
-            blockState2 = blockStates[j++];
-            BlockPos blockPos5 = list3.get(k);
-            blockState2.updateIndirectNeighbourShapes(level, blockPos5, 2);
-            level.updateNeighborsAt(blockPos5, blockState2.getBlock());
+        for (Map.Entry entry : map.entrySet()) {
+            blockPos6 = (BlockPos)entry.getKey();
+            BlockState blockState5 = (BlockState)entry.getValue();
+            blockState5.updateIndirectNeighbourShapes(level, blockPos6, 2);
+            blockState4.updateNeighbourShapes(level, blockPos6, 2);
+            blockState4.updateIndirectNeighbourShapes(level, blockPos6, 2);
         }
-        for (k = list.size() - 1; k >= 0; --k) {
-            level.updateNeighborsAt(list.get(k), blockStates[j++].getBlock());
+        for (l = list3.size() - 1; l >= 0; --l) {
+            BlockState blockState = blockStates[j++];
+            blockPos6 = list3.get(l);
+            blockState.updateIndirectNeighbourShapes(level, blockPos6, 2);
+            level.updateNeighborsAt(blockPos6, blockState.getBlock());
+        }
+        for (l = list.size() - 1; l >= 0; --l) {
+            level.updateNeighborsAt(list.get(l), blockStates[j++].getBlock());
         }
         if (bl) {
             level.updateNeighborsAt(blockPos2, Blocks.PISTON_HEAD);

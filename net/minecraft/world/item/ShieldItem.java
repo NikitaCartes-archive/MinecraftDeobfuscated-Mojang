@@ -59,7 +59,7 @@ extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         player.startUsingItem(interactionHand);
-        return InteractionResultHolder.successNoSwing(itemStack);
+        return InteractionResultHolder.consume(itemStack);
     }
 
     @Override

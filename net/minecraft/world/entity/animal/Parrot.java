@@ -57,6 +57,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -235,6 +236,9 @@ implements FlyingAnimal {
     @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
+        if (itemStack.getItem() instanceof SpawnEggItem) {
+            return super.mobInteract(player, interactionHand);
+        }
         if (!this.isTame() && TAME_FOOD.contains(itemStack.getItem())) {
             if (!player.abilities.instabuild) {
                 itemStack.shrink(1);
@@ -245,10 +249,8 @@ implements FlyingAnimal {
             if (!this.level.isClientSide) {
                 if (this.random.nextInt(10) == 0) {
                     this.tame(player);
-                    this.spawnTamingParticles(true);
                     this.level.broadcastEntityEvent(this, (byte)7);
                 } else {
-                    this.spawnTamingParticles(false);
                     this.level.broadcastEntityEvent(this, (byte)6);
                 }
             }
@@ -266,6 +268,7 @@ implements FlyingAnimal {
         }
         if (!this.level.isClientSide && !this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
             this.sitGoal.wantToSit(!this.isSitting());
+            return true;
         }
         return super.mobInteract(player, interactionHand);
     }

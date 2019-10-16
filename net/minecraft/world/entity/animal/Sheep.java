@@ -243,6 +243,7 @@ extends Animal {
             if (!this.level.isClientSide) {
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
+            return true;
         }
         return super.mobInteract(player2, interactionHand);
     }

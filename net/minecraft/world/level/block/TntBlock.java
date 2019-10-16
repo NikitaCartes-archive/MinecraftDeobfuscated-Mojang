@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -86,7 +87,7 @@ extends Block {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
         if (item == Items.FLINT_AND_STEEL || item == Items.FIRE_CHARGE) {
@@ -97,7 +98,7 @@ extends Block {
             } else {
                 itemStack.shrink(1);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);
     }

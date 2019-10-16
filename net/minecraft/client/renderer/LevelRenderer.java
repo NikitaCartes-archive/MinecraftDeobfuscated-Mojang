@@ -56,6 +56,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
@@ -576,7 +577,7 @@ ResourceManagerReloadListener {
         }
         this.needsUpdate = true;
         this.generateClouds = true;
-        RenderType.setFancy(this.minecraft.options.fancyGraphics);
+        ItemBlockRenderTypes.setFancy(this.minecraft.options.fancyGraphics);
         this.lastViewDistance = this.minecraft.options.renderDistance;
         if (this.viewArea != null) {
             this.viewArea.releaseAllBuffers();
@@ -923,16 +924,15 @@ ResourceManagerReloadListener {
         }
         profilerFiller.popPush("destroyProgress");
         for (Long2ObjectMap.Entry entry : this.destructionProgress.long2ObjectEntrySet()) {
+            SortedSet sortedSet2;
             double q;
             double p;
             BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
             double o = (double)blockPos3.getX() - d;
-            if (o * o + (p = (double)blockPos3.getY() - e) * p + (q = (double)blockPos3.getZ() - g) * q > 1024.0) continue;
-            poseStack.pushPose();
-            poseStack.translate((double)(blockPos3.getX() & 0xFFFFFFF0) - d, (double)(blockPos3.getY() & 0xFFFFFFF0) - e, (double)(blockPos3.getZ() & 0xFFFFFFF0) - g);
-            SortedSet sortedSet2 = (SortedSet)entry.getValue();
-            if (sortedSet2 == null || sortedSet2.isEmpty()) continue;
+            if (o * o + (p = (double)blockPos3.getY() - e) * p + (q = (double)blockPos3.getZ() - g) * q > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
             int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+            poseStack.pushPose();
+            poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
             BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.effectBufferSource().getBuffer(RenderType.crumbling(r)), poseStack.getPose());
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
@@ -949,6 +949,8 @@ ResourceManagerReloadListener {
                 this.renderHitOutline(poseStack, vertexConsumer3, camera.getEntity(), d, e, g, blockPos, blockState);
             }
         }
+        bufferSource.endBatch(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
         bufferSource.endBatch();
         this.renderBuffers.effectBufferSource().endBatch();
         RenderSystem.pushMatrix();

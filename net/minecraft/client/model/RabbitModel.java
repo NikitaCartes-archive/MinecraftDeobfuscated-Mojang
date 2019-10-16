@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Rabbit;
 
@@ -32,7 +31,6 @@ extends EntityModel<T> {
     private float jumpRotation;
 
     public RabbitModel() {
-        super(RenderType::entitySolid);
         this.rearFootLeft.addBox(-1.0f, 5.5f, -3.7f, 2.0f, 1.0f, 7.0f);
         this.rearFootLeft.setPos(3.0f, 17.5f, 3.7f);
         this.rearFootLeft.mirror = true;

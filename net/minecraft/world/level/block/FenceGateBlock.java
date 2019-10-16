@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -111,7 +112,7 @@ extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (blockState.getValue(OPEN).booleanValue()) {
             blockState = (BlockState)blockState.setValue(OPEN, false);
             level.setBlock(blockPos, blockState, 10);
@@ -124,7 +125,7 @@ extends HorizontalDirectionalBlock {
             level.setBlock(blockPos, blockState, 10);
         }
         level.levelEvent(player, blockState.getValue(OPEN) != false ? 1008 : 1014, blockPos, 0);
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

@@ -62,7 +62,7 @@ extends HalfTransparentBlock {
         if (entity.getY() > (double)blockPos.getY() + 0.9375 - 1.0E-7) {
             return false;
         }
-        if (entity.getDeltaMovement().y >= 0.0) {
+        if (entity.getDeltaMovement().y >= -0.04) {
             return false;
         }
         double d = Math.abs((double)blockPos.getX() + 0.5 - entity.getX());

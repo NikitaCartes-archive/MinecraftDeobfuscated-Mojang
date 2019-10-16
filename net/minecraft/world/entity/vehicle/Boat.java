@@ -636,9 +636,9 @@ extends Entity {
             return false;
         }
         if (!this.level.isClientSide && this.outOfControlTicks < 60.0f) {
-            player.startRiding(this);
+            return player.startRiding(this);
         }
-        return true;
+        return false;
     }
 
     @Override

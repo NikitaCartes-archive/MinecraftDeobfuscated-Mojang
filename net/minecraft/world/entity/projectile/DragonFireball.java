@@ -37,6 +37,7 @@ extends AbstractHurtingProjectile {
 
     @Override
     protected void onHit(HitResult hitResult) {
+        super.onHit(hitResult);
         if (hitResult.getType() == HitResult.Type.ENTITY && ((EntityHitResult)hitResult).getEntity().is(this.owner)) {
             return;
         }

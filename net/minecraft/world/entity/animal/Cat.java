@@ -61,6 +61,7 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -375,11 +376,24 @@ extends TamableAnimal {
         return spawnGroupData;
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         boolean bl;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
+        if (itemStack.getItem() instanceof SpawnEggItem) {
+            return super.mobInteract(player, interactionHand);
+        }
+        if (this.level.isClientSide) {
+            if (this.isTame()) {
+                if (this.isOwnedBy(player)) return true;
+            }
+            if (this.isFood(itemStack)) return true;
+            return false;
+        }
         if (this.isTame()) {
             if (this.isOwnedBy(player)) {
                 if (item instanceof DyeItem) {
@@ -392,35 +406,34 @@ extends TamableAnimal {
                         this.setPersistenceRequired();
                         return true;
                     }
-                } else if (this.isFood(itemStack)) {
-                    if (this.getHealth() < this.getMaxHealth() && item.isEdible()) {
+                } else {
+                    if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
                         this.usePlayerItem(player, itemStack);
                         this.heal(item.getFoodProperties().getNutrition());
                         return true;
                     }
-                } else if (!this.level.isClientSide) {
+                    boolean bl2 = super.mobInteract(player, interactionHand);
+                    if (bl2) {
+                        if (!this.isBaby()) return bl2;
+                    }
                     this.sitGoal.wantToSit(!this.isSitting());
+                    return bl2;
                 }
             }
         } else if (this.isFood(itemStack)) {
             this.usePlayerItem(player, itemStack);
-            if (!this.level.isClientSide) {
-                if (this.random.nextInt(3) == 0) {
-                    this.tame(player);
-                    this.spawnTamingParticles(true);
-                    this.sitGoal.wantToSit(true);
-                    this.level.broadcastEntityEvent(this, (byte)7);
-                } else {
-                    this.spawnTamingParticles(false);
-                    this.level.broadcastEntityEvent(this, (byte)6);
-                }
+            if (this.random.nextInt(3) == 0) {
+                this.tame(player);
+                this.sitGoal.wantToSit(true);
+                this.level.broadcastEntityEvent(this, (byte)7);
+            } else {
+                this.level.broadcastEntityEvent(this, (byte)6);
             }
             this.setPersistenceRequired();
             return true;
         }
-        if (bl = super.mobInteract(player, interactionHand)) {
-            this.setPersistenceRequired();
-        }
+        if (!(bl = super.mobInteract(player, interactionHand))) return bl;
+        this.setPersistenceRequired();
         return bl;
     }
 

@@ -183,7 +183,6 @@ extends EntityRenderer<EnderDragon> {
         private float a;
 
         public DragonModel(float f) {
-            super(RenderType::entityCutoutNoCull);
             this.texWidth = 256;
             this.texHeight = 256;
             float g = -16.0f;

@@ -119,10 +119,7 @@ extends ProjectileWeaponItem {
         boolean bl2 = bl = !player.getProjectile(itemStack).isEmpty();
         if (player.abilities.instabuild || bl) {
             player.startUsingItem(interactionHand);
-            return InteractionResultHolder.successNoSwing(itemStack);
-        }
-        if (bl) {
-            return InteractionResultHolder.pass(itemStack);
+            return InteractionResultHolder.consume(itemStack);
         }
         return InteractionResultHolder.fail(itemStack);
     }

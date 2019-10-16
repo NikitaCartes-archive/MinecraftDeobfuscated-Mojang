@@ -79,7 +79,7 @@ extends Cow {
     @Override
     public boolean mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.BOWL && this.getAge() >= 0 && !player2.abilities.instabuild) {
+        if (itemStack.getItem() == Items.BOWL && !this.isBaby() && !player2.abilities.instabuild) {
             ItemStack itemStack2;
             itemStack.shrink(1);
             boolean bl = false;
@@ -101,7 +101,7 @@ extends Cow {
             this.playSound(soundEvent, 1.0f, 1.0f);
             return true;
         }
-        if (itemStack.getItem() == Items.SHEARS && this.getAge() >= 0) {
+        if (itemStack.getItem() == Items.SHEARS && !this.isBaby()) {
             this.level.addParticle(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 0.0, 0.0, 0.0);
             if (!this.level.isClientSide) {
                 this.remove();

@@ -450,13 +450,13 @@ public class RenderStateShard {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static final class SwirlTexturingStateShard
+    public static final class OffsetTexturingStateShard
     extends TexturingStateShard {
         private final float uOffset;
         private final float vOffset;
 
-        public SwirlTexturingStateShard(float f, float g) {
-            super("swirl_texturing", () -> {
+        public OffsetTexturingStateShard(float f, float g) {
+            super("offset_texturing", () -> {
                 RenderSystem.matrixMode(5890);
                 RenderSystem.pushMatrix();
                 RenderSystem.loadIdentity();
@@ -479,8 +479,8 @@ public class RenderStateShard {
             if (object == null || this.getClass() != object.getClass()) {
                 return false;
             }
-            SwirlTexturingStateShard swirlTexturingStateShard = (SwirlTexturingStateShard)object;
-            return Float.compare(swirlTexturingStateShard.uOffset, this.uOffset) == 0 && Float.compare(swirlTexturingStateShard.vOffset, this.vOffset) == 0;
+            OffsetTexturingStateShard offsetTexturingStateShard = (OffsetTexturingStateShard)object;
+            return Float.compare(offsetTexturingStateShard.uOffset, this.uOffset) == 0 && Float.compare(offsetTexturingStateShard.vOffset, this.vOffset) == 0;
         }
 
         @Override

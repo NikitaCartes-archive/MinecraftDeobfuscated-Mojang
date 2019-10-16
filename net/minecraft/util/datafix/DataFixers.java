@@ -107,6 +107,7 @@ import net.minecraft.util.datafix.fixes.RenamedCoralFix;
 import net.minecraft.util.datafix.fixes.ReorganizePoi;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
+import net.minecraft.util.datafix.fixes.StructureReferenceCountFix;
 import net.minecraft.util.datafix.fixes.SwimStatsRenameFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
@@ -424,6 +425,8 @@ public class DataFixers {
         dataFixerBuilder.addFixer(ItemRenameFix.create(schema98, "Rename bee_hive item to beehive", string -> Objects.equals(string, "minecraft:bee_hive") ? "minecraft:beehive" : string));
         dataFixerBuilder.addFixer(new BeehivePoiRenameFix(schema98));
         dataFixerBuilder.addFixer(BlockRenameFix.create(schema98, "Rename bee_hive block to beehive", string -> ImmutableMap.of("minecraft:bee_hive", "minecraft:beehive").getOrDefault(string, (String)string)));
+        Schema schema99 = dataFixerBuilder.addSchema(2211, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new StructureReferenceCountFix(schema99, false));
     }
 }
 

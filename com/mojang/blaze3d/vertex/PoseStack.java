@@ -54,9 +54,7 @@ public class PoseStack {
     public void mulPose(Quaternion quaternion) {
         Pose pose = this.poseStack.getLast();
         pose.pose.multiply(quaternion);
-        Quaternion quaternion2 = quaternion.copy();
-        quaternion2.conj();
-        pose.normal.mul(quaternion2);
+        pose.normal.mul(quaternion);
     }
 
     public void pushPose() {

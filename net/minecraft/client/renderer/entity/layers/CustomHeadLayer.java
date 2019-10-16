@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.ZombieVillager;
@@ -48,9 +47,6 @@ extends RenderLayer<T, M> {
         }
         Item item = itemStack.getItem();
         poseStack.pushPose();
-        if (((Entity)livingEntity).isCrouching()) {
-            poseStack.translate(0.0, 0.2f, 0.0);
-        }
         boolean bl2 = bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
         if (((LivingEntity)livingEntity).isBaby() && !(livingEntity instanceof Villager)) {
             n = 2.0f;

@@ -59,7 +59,7 @@ extends EntityRenderer<ItemFrame> {
         poseStack.pushPose();
         poseStack.translate(-0.5, -0.5, -0.5);
         int j = itemFrame.getLightColor();
-        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.solid()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, j, OverlayTexture.NO_OVERLAY);
+        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS)), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, j, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         ItemStack itemStack = itemFrame.getItem();
         if (!itemStack.isEmpty()) {

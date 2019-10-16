@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -86,9 +87,9 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (this.material == Material.METAL) {
-            return false;
+            return InteractionResult.PASS;
         }
         blockState = (BlockState)blockState.cycle(OPEN);
         level.setBlock(blockPos, blockState, 2);
@@ -96,7 +97,7 @@ implements SimpleWaterloggedBlock {
             level.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         this.playSound(player, level, blockPos, blockState.getValue(OPEN));
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     protected void playSound(@Nullable Player player, Level level, BlockPos blockPos, boolean bl) {

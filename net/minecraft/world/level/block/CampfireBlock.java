@@ -16,11 +16,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -65,7 +67,7 @@ implements SimpleWaterloggedBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack;
         CampfireBlockEntity campfireBlockEntity;
         Optional<CampfireCookingRecipe> optional;
@@ -73,10 +75,11 @@ implements SimpleWaterloggedBlock {
         if (blockState.getValue(LIT).booleanValue() && (blockEntity = level.getBlockEntity(blockPos)) instanceof CampfireBlockEntity && (optional = (campfireBlockEntity = (CampfireBlockEntity)blockEntity).getCookableRecipe(itemStack = player.getItemInHand(interactionHand))).isPresent()) {
             if (!level.isClientSide && campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, optional.get().getCookingTime())) {
                 player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
+                return InteractionResult.SUCCESS;
             }
-            return true;
+            return InteractionResult.CONSUME;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -180,10 +183,13 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-        AbstractArrow abstractArrow;
-        if (!level.isClientSide && entity instanceof AbstractArrow && (abstractArrow = (AbstractArrow)entity).isOnFire() && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
-            BlockPos blockPos = blockHitResult.getBlockPos();
-            level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
+        if (!level.isClientSide) {
+            boolean bl;
+            boolean bl2 = bl = entity instanceof Fireball || entity instanceof AbstractArrow && entity.isOnFire();
+            if (bl && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
+                BlockPos blockPos = blockHitResult.getBlockPos();
+                level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
+            }
         }
     }
 

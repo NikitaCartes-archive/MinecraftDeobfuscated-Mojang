@@ -269,6 +269,7 @@ public class ServerPlayerGameMode {
     }
 
     public InteractionResult useItemOn(Player player, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        InteractionResult interactionResult;
         boolean bl2;
         BlockPos blockPos = blockHitResult.getBlockPos();
         BlockState blockState = level.getBlockState(blockPos);
@@ -282,8 +283,8 @@ public class ServerPlayerGameMode {
         }
         boolean bl = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
         boolean bl3 = bl2 = player.isSecondaryUseActive() && bl;
-        if (!bl2 && blockState.use(level, player, interactionHand, blockHitResult)) {
-            return InteractionResult.SUCCESS;
+        if (!bl2 && (interactionResult = blockState.use(level, player, interactionHand, blockHitResult)).consumesAction()) {
+            return interactionResult;
         }
         if (itemStack.isEmpty() || player.getCooldowns().isOnCooldown(itemStack.getItem())) {
             return InteractionResult.PASS;
@@ -291,9 +292,9 @@ public class ServerPlayerGameMode {
         UseOnContext useOnContext = new UseOnContext(player, interactionHand, blockHitResult);
         if (this.isCreative()) {
             int i = itemStack.getCount();
-            InteractionResult interactionResult = itemStack.useOn(useOnContext);
+            InteractionResult interactionResult2 = itemStack.useOn(useOnContext);
             itemStack.setCount(i);
-            return interactionResult;
+            return interactionResult2;
         }
         return itemStack.useOn(useOnContext);
     }

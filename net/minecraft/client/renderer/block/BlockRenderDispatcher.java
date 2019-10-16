@@ -14,8 +14,8 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -107,7 +107,7 @@ implements ResourceManagerReloadListener {
                 float f = (float)(k >> 16 & 0xFF) / 255.0f;
                 float g = (float)(k >> 8 & 0xFF) / 255.0f;
                 float h = (float)(k & 0xFF) / 255.0f;
-                this.modelRenderer.renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j);
+                this.modelRenderer.renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j);
                 poseStack.popPose();
                 break;
             }

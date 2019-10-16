@@ -577,6 +577,7 @@ extends Animal {
             } else {
                 return false;
             }
+            player.swing(interactionHand, true);
             return true;
         }
         return false;

@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -25,7 +24,6 @@ extends AgeableListModel<T> {
     private final ModelPart redThing;
 
     public ChickenModel() {
-        super(RenderType::entityCutoutNoCull, false, 5.0f, 2.0f, 2.0f, 2.0f, 24.0f);
         int i = 16;
         this.head = new ModelPart(this, 0, 0);
         this.head.addBox(-2.0f, -6.0f, -2.0f, 4.0f, 6.0f, 3.0f, 0.0f);

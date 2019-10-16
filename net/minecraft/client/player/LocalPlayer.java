@@ -681,7 +681,7 @@ extends AbstractClientPlayer {
                 }
             }
         }
-        if (this.input.jumping && !bl && !this.onGround && this.getDeltaMovement().y < 0.0 && !this.isFallFlying() && !this.abilities.flying && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
+        if (this.input.jumping && !bl && !this.abilities.flying && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();
@@ -899,7 +899,7 @@ extends AbstractClientPlayer {
     }
 
     private boolean canAutoJump() {
-        return this.isAutoJumpEnabled() && this.autoJumpTime <= 0 && this.onGround && !this.isStayingOnGroundSurface() && !this.isPassenger() && this.isMoving() && (double)this.getJumpFactor() >= 1.0;
+        return this.isAutoJumpEnabled() && this.autoJumpTime <= 0 && this.onGround && !this.isStayingOnGroundSurface() && !this.isPassenger() && this.isMoving() && (double)this.getBlockJumpFactor() >= 1.0;
     }
 
     private boolean isMoving() {

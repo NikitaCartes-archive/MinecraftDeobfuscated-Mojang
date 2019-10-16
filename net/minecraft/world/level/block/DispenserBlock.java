@@ -20,6 +20,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -67,9 +68,9 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
-            return true;
+            return InteractionResult.SUCCESS;
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof DispenserBlockEntity) {
@@ -80,7 +81,7 @@ extends BaseEntityBlock {
                 player.awardStat(Stats.INSPECT_DISPENSER);
             }
         }
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     protected void dispenseFrom(Level level, BlockPos blockPos) {

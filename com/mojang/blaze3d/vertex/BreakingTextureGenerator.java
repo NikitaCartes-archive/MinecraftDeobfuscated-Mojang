@@ -83,7 +83,7 @@ extends DefaultedVertexConsumer {
                 g = vector4f.y();
             }
         }
-        this.delegate.vertex(this.x, this.y, this.z).color(this.r, this.g, this.b, this.a).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
+        this.delegate.vertex(this.x, this.y, this.z).color(this.r, this.g, this.b, this.a).uv(f, -g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
         this.resetState();
     }
 

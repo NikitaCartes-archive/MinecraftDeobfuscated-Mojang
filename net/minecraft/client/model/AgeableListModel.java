@@ -29,7 +29,7 @@ extends EntityModel<E> {
     }
 
     protected AgeableListModel(boolean bl, float f, float g, float h, float i, float j) {
-        this(RenderType::entitySolid, bl, f, g, h, i, j);
+        this(RenderType::entityCutoutNoCull, bl, f, g, h, i, j);
     }
 
     protected AgeableListModel(Function<ResourceLocation, RenderType> function, boolean bl, float f, float g, float h, float i, float j) {

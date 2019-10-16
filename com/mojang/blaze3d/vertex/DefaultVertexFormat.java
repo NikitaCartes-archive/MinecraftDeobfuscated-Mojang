@@ -24,6 +24,7 @@ public class DefaultVertexFormat {
     public static final VertexFormat PARTICLE = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).add(ELEMENT_UV0)).add(ELEMENT_COLOR)).add(ELEMENT_UV2)).build());
     public static final VertexFormat POSITION = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).build());
     public static final VertexFormat POSITION_COLOR = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).add(ELEMENT_COLOR)).build());
+    public static final VertexFormat POSITION_COLOR_LIGHTMAP = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).add(ELEMENT_COLOR)).add(ELEMENT_UV2)).build());
     public static final VertexFormat POSITION_TEX = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).add(ELEMENT_UV0)).build());
     public static final VertexFormat POSITION_COLOR_TEX = new VertexFormat((ImmutableList<VertexFormatElement>)((ImmutableList.Builder)((ImmutableList.Builder)((ImmutableList.Builder)ImmutableList.builder().add(ELEMENT_POSITION)).add(ELEMENT_COLOR)).add(ELEMENT_UV0)).build());
     @Deprecated

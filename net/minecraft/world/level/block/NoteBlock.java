@@ -9,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -65,15 +66,15 @@ extends Block {
     }
 
     @Override
-    public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
-            return true;
+            return InteractionResult.SUCCESS;
         }
         blockState = (BlockState)blockState.cycle(NOTE);
         level.setBlock(blockPos, blockState, 3);
         this.playNote(level, blockPos);
         player.awardStat(Stats.TUNE_NOTEBLOCK);
-        return true;
+        return InteractionResult.SUCCESS;
     }
 
     @Override

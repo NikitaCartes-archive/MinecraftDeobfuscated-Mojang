@@ -346,11 +346,12 @@ public class EntityRenderDispatcher {
             poseStack.pushPose();
             poseStack.translate(i, j, k);
             entityRenderer.render(entity, i, j, k, g, h, poseStack, multiBufferSource);
-            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (m = (float)((1.0 - (l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
-                EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
-            }
             if (entity.displayFireAnimation()) {
                 this.renderFlame(poseStack, multiBufferSource, entity);
+            }
+            poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
+            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (m = (float)((1.0 - (l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
+                EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
             }
             if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
                 this.renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);

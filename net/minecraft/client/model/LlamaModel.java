@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
@@ -28,7 +27,6 @@ extends EntityModel<T> {
     private final ModelPart chest2;
 
     public LlamaModel(float f) {
-        super(RenderType::entitySolid);
         this.texWidth = 128;
         this.texHeight = 64;
         this.head = new ModelPart(this, 0, 0);

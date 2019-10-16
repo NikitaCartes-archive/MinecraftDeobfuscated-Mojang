@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -25,7 +24,7 @@ extends HumanoidModel<T> {
     }
 
     public SkeletonModel(float f, boolean bl) {
-        super(RenderType::entityCutoutNoCull, f, 0.0f, 64, 32);
+        super(f);
         if (!bl) {
             this.rightArm = new ModelPart(this, 40, 16);
             this.rightArm.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 12.0f, 2.0f, f);

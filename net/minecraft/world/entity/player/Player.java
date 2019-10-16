@@ -520,7 +520,7 @@ extends LivingEntity {
     @Override
     public void die(DamageSource damageSource) {
         super.die(damageSource);
-        this.setPos(this.getX(), this.getY(), this.getZ());
+        this.reapplyPosition();
         if (!this.isSpectator()) {
             this.dropAllDeathLoot(damageSource);
         }
@@ -1404,6 +1404,24 @@ extends LivingEntity {
             this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
         }
         return super.causeFallDamage(f, g);
+    }
+
+    public boolean tryToStartFallFlying() {
+        ItemStack itemStack;
+        if (!this.onGround && !this.isFallFlying() && !this.isInWater() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
+            this.startFallFlying();
+            return true;
+        }
+        return false;
+    }
+
+    public void startFallFlying() {
+        this.setSharedFlag(7, true);
+    }
+
+    public void stopFallFlying() {
+        this.setSharedFlag(7, true);
+        this.setSharedFlag(7, false);
     }
 
     @Override

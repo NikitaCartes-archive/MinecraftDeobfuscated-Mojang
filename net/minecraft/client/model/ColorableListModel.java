@@ -5,12 +5,9 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
@@ -19,10 +16,6 @@ extends ListModel<E> {
     private float r = 1.0f;
     private float g = 1.0f;
     private float b = 1.0f;
-
-    public ColorableListModel(Function<ResourceLocation, RenderType> function) {
-        super(function);
-    }
 
     public void setColor(float f, float g, float h) {
         this.r = f;

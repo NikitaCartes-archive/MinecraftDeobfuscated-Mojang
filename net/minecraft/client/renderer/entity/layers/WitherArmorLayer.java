@@ -8,14 +8,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.client.renderer.entity.layers.SpinnyLayer;
+import net.minecraft.client.renderer.entity.layers.EnergySwirlLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(value=EnvType.CLIENT)
 public class WitherArmorLayer
-extends SpinnyLayer<WitherBoss, WitherBossModel<WitherBoss>> {
+extends EnergySwirlLayer<WitherBoss, WitherBossModel<WitherBoss>> {
     private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
     private final WitherBossModel<WitherBoss> model = new WitherBossModel(0.5f);
 

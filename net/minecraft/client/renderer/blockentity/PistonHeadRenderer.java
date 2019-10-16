@@ -9,6 +9,7 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -46,7 +47,7 @@ extends BlockEntityRenderer<PistonMovingBlockEntity> {
         }
         ModelBlockRenderer.enableCaching();
         poseStack.pushPose();
-        poseStack.translate((float)(-(blockPos.getX() & 0xF)) + pistonMovingBlockEntity.getXOff(g), (float)(-(blockPos.getY() & 0xF)) + pistonMovingBlockEntity.getYOff(g), (float)(-(blockPos.getZ() & 0xF)) + pistonMovingBlockEntity.getZOff(g));
+        poseStack.translate(pistonMovingBlockEntity.getXOff(g), pistonMovingBlockEntity.getYOff(g), pistonMovingBlockEntity.getZOff(g));
         if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(g) <= 4.0f) {
             blockState = (BlockState)blockState.setValue(PistonHeadBlock.SHORT, true);
             this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
@@ -57,10 +58,9 @@ extends BlockEntityRenderer<PistonMovingBlockEntity> {
             this.renderBlock(blockPos, blockState2, poseStack, multiBufferSource, level, false, j);
             BlockPos blockPos2 = blockPos.relative(pistonMovingBlockEntity.getMovementDirection());
             poseStack.popPose();
-            poseStack.translate(-(blockPos2.getX() & 0xF), -(blockPos2.getY() & 0xF), -(blockPos2.getZ() & 0xF));
+            poseStack.pushPose();
             blockState = (BlockState)blockState.setValue(PistonBaseBlock.EXTENDED, true);
             this.renderBlock(blockPos2, blockState, poseStack, multiBufferSource, level, true, j);
-            poseStack.pushPose();
         } else {
             this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
         }
@@ -69,7 +69,7 @@ extends BlockEntityRenderer<PistonMovingBlockEntity> {
     }
 
     private void renderBlock(BlockPos blockPos, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, Level level, boolean bl, int i) {
-        RenderType renderType = RenderType.getChunkRenderType(blockState);
+        RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
         this.blockRenderer.getModelRenderer().tesselateBlock(level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, new Random(), blockState.getSeed(blockPos), i);
     }

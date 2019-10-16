@@ -352,12 +352,8 @@ extends NodeEvaluator {
                                 blockPathTypes = BlockPathTypes.DANGER_FIRE;
                                 continue;
                             }
-                            if (block == Blocks.SWEET_BERRY_BUSH) {
-                                blockPathTypes = BlockPathTypes.DANGER_OTHER;
-                                continue;
-                            }
-                            if (block != Blocks.HONEY_BLOCK) continue;
-                            blockPathTypes = BlockPathTypes.STICKY_HONEY;
+                            if (block != Blocks.SWEET_BERRY_BUSH) continue;
+                            blockPathTypes = BlockPathTypes.DANGER_OTHER;
                         }
                     }
                 }

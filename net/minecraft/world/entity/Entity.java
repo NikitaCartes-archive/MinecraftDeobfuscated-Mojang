@@ -331,13 +331,13 @@ CommandSource {
 
     public void setPos(double d, double e, double f) {
         this.setPosRaw(d, e, f);
-        this.refreshBoundingBox();
+        float g = this.dimensions.width / 2.0f;
+        float h = this.dimensions.height;
+        this.setBoundingBox(new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)h, f + (double)g));
     }
 
-    protected void refreshBoundingBox() {
-        float f = this.dimensions.width / 2.0f;
-        float g = this.dimensions.height;
-        this.setBoundingBox(new AABB(this.x - (double)f, this.y, this.z - (double)f, this.x + (double)f, this.y + (double)g, this.z + (double)f));
+    protected void reapplyPosition() {
+        this.setPos(this.x, this.y, this.z);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -535,7 +535,7 @@ CommandSource {
             this.fillCrashReportCategory(crashReportCategory);
             throw new ReportedException(crashReport);
         }
-        this.setDeltaMovement(this.getDeltaMovement().multiply(this.getSpeedFactor(), 1.0, this.getSpeedFactor()));
+        this.setDeltaMovement(this.getDeltaMovement().multiply(this.getBlockSpeedFactor(), 1.0, this.getBlockSpeedFactor()));
         boolean bl = this.isInWaterRainOrBubble();
         if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001))) {
             if (!bl) {
@@ -569,20 +569,20 @@ CommandSource {
         return blockPos;
     }
 
-    protected float getJumpFactor() {
+    protected float getBlockJumpFactor() {
         float f = this.level.getBlockState(new BlockPos(this)).getBlock().getJumpFactor();
         float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getJumpFactor();
         return (double)f == 1.0 ? g : f;
     }
 
-    private float getSpeedFactor() {
+    private float getBlockSpeedFactor() {
         float f = this.level.getBlockState(new BlockPos(this)).getBlock().getSpeedFactor();
         float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor();
         return (double)f == 1.0 ? g : f;
     }
 
     protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
-        return new BlockPos(this.x, this.getBoundingBox().minY - 0.5 - 1.0E-7, this.z);
+        return new BlockPos(this.x, this.getBoundingBox().minY - 0.5000001, this.z);
     }
 
     protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
@@ -1045,7 +1045,7 @@ CommandSource {
         this.setPosAndOldPos(d, e, f);
         this.yRot = g;
         this.xRot = h;
-        this.refreshBoundingBox();
+        this.reapplyPosition();
     }
 
     public void setPosAndOldPos(double d, double e, double f) {
@@ -1332,7 +1332,7 @@ CommandSource {
             if (!Double.isFinite(this.yRot) || !Double.isFinite(this.xRot)) {
                 throw new IllegalStateException("Entity has invalid rotation");
             }
-            this.refreshBoundingBox();
+            this.reapplyPosition();
             this.setRot(this.yRot, this.xRot);
             if (compoundTag.contains("CustomName", 8)) {
                 this.setCustomName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
@@ -1351,7 +1351,7 @@ CommandSource {
             }
             this.readAdditionalSaveData(compoundTag);
             if (this.repositionEntityAfterLoad()) {
-                this.setPos(this.getX(), this.getY(), this.getZ());
+                this.reapplyPosition();
             }
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Loading entity NBT");
