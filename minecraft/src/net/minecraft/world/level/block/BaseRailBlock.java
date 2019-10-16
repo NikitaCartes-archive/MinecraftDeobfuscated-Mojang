@@ -50,11 +50,9 @@ public abstract class BaseRailBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (blockState2.getBlock() != blockState.getBlock()) {
-			if (!level.isClientSide) {
-				blockState = this.updateDir(level, blockPos, blockState, true);
-				if (this.isStraight) {
-					blockState.neighborChanged(level, blockPos, this, blockPos, bl);
-				}
+			blockState = this.updateDir(level, blockPos, blockState, true);
+			if (this.isStraight) {
+				blockState.neighborChanged(level, blockPos, this, blockPos, bl);
 			}
 		}
 	}

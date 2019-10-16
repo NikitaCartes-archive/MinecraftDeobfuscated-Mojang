@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -26,7 +25,6 @@ public class VillagerModel<T extends Entity> extends ListModel<T> implements Hea
 	}
 
 	public VillagerModel(float f, int i, int j) {
-		super(RenderType::entityCutoutNoCull);
 		float g = 0.5F;
 		this.head = new ModelPart(this).setTexSize(i, j);
 		this.head.setPos(0.0F, 0.0F, 0.0F);

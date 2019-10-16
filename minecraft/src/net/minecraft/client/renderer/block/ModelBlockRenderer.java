@@ -51,27 +51,19 @@ public class ModelBlockRenderer {
 	) {
 		boolean bl2 = Minecraft.useAmbientOcclusion() && blockState.getLightEmission() == 0 && bakedModel.useAmbientOcclusion();
 		Vec3 vec3 = blockState.getOffset(blockAndBiomeGetter, blockPos);
-		poseStack.pushPose();
-		poseStack.translate((double)(blockPos.getX() & 15) + vec3.x, (double)(blockPos.getY() & 15) + vec3.y, (double)(blockPos.getZ() & 15) + vec3.z);
+		poseStack.translate(vec3.x, vec3.y, vec3.z);
 
-		boolean throwable;
 		try {
-			if (!bl2) {
-				return this.tesselateWithoutAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i);
-			}
-
-			throwable = this.tesselateWithAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i);
-		} catch (Throwable var20) {
-			CrashReport crashReport = CrashReport.forThrowable(var20, "Tesselating block model");
+			return bl2
+				? this.tesselateWithAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i)
+				: this.tesselateWithoutAO(blockAndBiomeGetter, bakedModel, blockState, blockPos, poseStack, vertexConsumer, bl, random, l, i);
+		} catch (Throwable var17) {
+			CrashReport crashReport = CrashReport.forThrowable(var17, "Tesselating block model");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block model being tesselated");
 			CrashReportCategory.populateBlockDetails(crashReportCategory, blockPos, blockState);
 			crashReportCategory.setDetail("Using AO", bl2);
 			throw new ReportedException(crashReport);
-		} finally {
-			poseStack.popPose();
 		}
-
-		return throwable;
 	}
 
 	public boolean tesselateWithAO(

@@ -39,10 +39,6 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		if (!itemStack.isEmpty()) {
 			Item item = itemStack.getItem();
 			poseStack.pushPose();
-			if (livingEntity.isCrouching()) {
-				poseStack.translate(0.0, 0.2F, 0.0);
-			}
-
 			boolean bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
 			if (livingEntity.isBaby() && !(livingEntity instanceof Villager)) {
 				float n = 2.0F;

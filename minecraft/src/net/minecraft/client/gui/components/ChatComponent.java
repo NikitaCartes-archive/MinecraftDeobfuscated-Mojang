@@ -33,7 +33,7 @@ public class ChatComponent extends GuiComponent {
 	}
 
 	public void render(int i) {
-		if (this.minecraft.options.chatVisibility != ChatVisiblity.HIDDEN) {
+		if (this.isChatVisible()) {
 			int j = this.getLinesPerPage();
 			int k = this.trimmedMessages.size();
 			if (k > 0) {
@@ -92,6 +92,10 @@ public class ChatComponent extends GuiComponent {
 				RenderSystem.popMatrix();
 			}
 		}
+	}
+
+	private boolean isChatVisible() {
+		return this.minecraft.options.chatVisibility != ChatVisiblity.HIDDEN;
 	}
 
 	private static double getTimeFactor(int i) {
@@ -190,9 +194,7 @@ public class ChatComponent extends GuiComponent {
 
 	@Nullable
 	public Component getClickedComponentAt(double d, double e) {
-		if (!this.isChatFocused()) {
-			return null;
-		} else {
+		if (this.isChatFocused() && !this.minecraft.options.hideGui && this.isChatVisible()) {
 			double f = this.getScale();
 			double g = d - 2.0;
 			double h = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
@@ -223,6 +225,8 @@ public class ChatComponent extends GuiComponent {
 			} else {
 				return null;
 			}
+		} else {
+			return null;
 		}
 	}
 

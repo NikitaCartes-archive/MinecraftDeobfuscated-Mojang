@@ -9,7 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Creeper;
 
 @Environment(EnvType.CLIENT)
-public class CreeperPowerLayer extends SpinnyLayer<Creeper, CreeperModel<Creeper>> {
+public class CreeperPowerLayer extends EnergySwirlLayer<Creeper, CreeperModel<Creeper>> {
 	private static final ResourceLocation POWER_LOCATION = new ResourceLocation("textures/entity/creeper/creeper_armor.png");
 	private final CreeperModel<Creeper> model = new CreeperModel<>(2.0F);
 

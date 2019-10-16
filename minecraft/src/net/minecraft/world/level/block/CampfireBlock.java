@@ -14,11 +14,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -60,7 +62,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof CampfireBlockEntity) {
@@ -71,14 +75,15 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 					if (!level.isClientSide
 						&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
 						player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
+						return InteractionResult.SUCCESS;
 					}
 
-					return true;
+					return InteractionResult.CONSUME;
 				}
 			}
 		}
 
-		return false;
+		return InteractionResult.PASS;
 	}
 
 	@Override
@@ -209,9 +214,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (!level.isClientSide && entity instanceof AbstractArrow) {
-			AbstractArrow abstractArrow = (AbstractArrow)entity;
-			if (abstractArrow.isOnFire() && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
+		if (!level.isClientSide) {
+			boolean bl = entity instanceof Fireball || entity instanceof AbstractArrow && entity.isOnFire();
+			if (bl && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
 				BlockPos blockPos = blockHitResult.getBlockPos();
 				level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
 			}

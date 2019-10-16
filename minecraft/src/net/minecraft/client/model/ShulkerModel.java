@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Shulker;
 
@@ -15,7 +14,6 @@ public class ShulkerModel<T extends Shulker> extends ListModel<T> {
 	private final ModelPart head;
 
 	public ShulkerModel() {
-		super(RenderType::entityCutoutNoCull);
 		this.base = new ModelPart(64, 64, 0, 28);
 		this.head = new ModelPart(64, 64, 0, 52);
 		this.lid.addBox(-8.0F, -16.0F, -8.0F, 16.0F, 12.0F, 16.0F);

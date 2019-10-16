@@ -28,6 +28,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -608,8 +609,10 @@ public class Block implements ItemLike {
 	}
 
 	@Deprecated
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-		return false;
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		return InteractionResult.PASS;
 	}
 
 	public void stepOn(Level level, BlockPos blockPos, Entity entity) {

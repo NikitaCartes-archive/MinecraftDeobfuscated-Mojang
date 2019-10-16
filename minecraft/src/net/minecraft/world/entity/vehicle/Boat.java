@@ -700,11 +700,7 @@ public class Boat extends Entity {
 		if (player.isSecondaryUseActive()) {
 			return false;
 		} else {
-			if (!this.level.isClientSide && this.outOfControlTicks < 60.0F) {
-				player.startRiding(this);
-			}
-
-			return true;
+			return !this.level.isClientSide && this.outOfControlTicks < 60.0F ? player.startRiding(this) : false;
 		}
 	}
 

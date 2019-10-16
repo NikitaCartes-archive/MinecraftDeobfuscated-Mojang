@@ -425,8 +425,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 									blockPathTypes = BlockPathTypes.DANGER_FIRE;
 								} else if (block == Blocks.SWEET_BERRY_BUSH) {
 									blockPathTypes = BlockPathTypes.DANGER_OTHER;
-								} else if (block == Blocks.HONEY_BLOCK) {
-									blockPathTypes = BlockPathTypes.STICKY_HONEY;
 								}
 							}
 						}

@@ -13,6 +13,10 @@ public abstract class EntityModel<T extends Entity> extends Model {
 	public boolean riding;
 	public boolean young = true;
 
+	protected EntityModel() {
+		this(RenderType::entityCutoutNoCull);
+	}
+
 	protected EntityModel(Function<ResourceLocation, RenderType> function) {
 		super(function);
 	}

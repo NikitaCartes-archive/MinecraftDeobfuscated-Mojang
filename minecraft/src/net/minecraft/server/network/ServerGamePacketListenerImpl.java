@@ -96,9 +96,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
@@ -114,7 +114,6 @@ import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WritableBookItem;
@@ -924,7 +923,10 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 			if (this.awaitingPositionFromClient == null
 				&& this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0
 				&& serverLevel.mayInteract(this.player, blockPos)) {
-				this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+				InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+				if (interactionResult.shouldSwing()) {
+					this.player.swing(interactionHand, true);
+				}
 			}
 		} else {
 			Component component = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
@@ -1113,12 +1115,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 				}
 				break;
 			case START_FALL_FLYING:
-				if (!this.player.onGround && this.player.getDeltaMovement().y < 0.0 && !this.player.isFallFlying() && !this.player.isInWater()) {
-					ItemStack itemStack = this.player.getItemBySlot(EquipmentSlot.CHEST);
-					if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
-						this.player.startFallFlying();
-					}
-				} else {
+				if (!this.player.tryToStartFallFlying()) {
 					this.player.stopFallFlying();
 				}
 				break;

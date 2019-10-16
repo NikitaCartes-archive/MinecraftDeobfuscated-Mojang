@@ -3,7 +3,6 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
@@ -12,7 +11,7 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 	public boolean creepy;
 
 	public EndermanModel(float f) {
-		super(RenderType::entityCutoutNoCull, 0.0F, -14.0F, 64, 32);
+		super(0.0F, -14.0F, 64, 32);
 		float g = -14.0F;
 		this.hat = new ModelPart(this, 0, 16);
 		this.hat.addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, f - 0.5F);

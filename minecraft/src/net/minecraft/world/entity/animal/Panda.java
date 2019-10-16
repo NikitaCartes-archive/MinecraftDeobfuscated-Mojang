@@ -620,6 +620,7 @@ public class Panda extends Animal {
 				this.usePlayerItem(player, itemStack);
 			}
 
+			player.swing(interactionHand, true);
 			return true;
 		} else {
 			return false;

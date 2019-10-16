@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -77,8 +78,10 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-		return this.onHit(level, blockState, blockHitResult, player, true);
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 	}
 
 	public boolean onHit(Level level, BlockState blockState, BlockHitResult blockHitResult, @Nullable Player player, boolean bl) {
@@ -90,9 +93,11 @@ public class BellBlock extends BaseEntityBlock {
 			if (bl3 && player != null) {
 				player.awardStat(Stats.BELL_RING);
 			}
-		}
 
-		return true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean isProperHit(BlockState blockState, Direction direction, double d) {

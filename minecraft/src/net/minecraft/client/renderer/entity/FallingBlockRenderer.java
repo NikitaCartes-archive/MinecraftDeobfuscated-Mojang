@@ -5,8 +5,8 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -33,7 +33,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 			if (blockState != level.getBlockState(new BlockPos(fallingBlockEntity)) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
 				poseStack.pushPose();
 				BlockPos blockPos = new BlockPos(fallingBlockEntity.getX(), fallingBlockEntity.getBoundingBox().maxY, fallingBlockEntity.getZ());
-				poseStack.translate((double)(-(blockPos.getX() & 15)) - 0.5, (double)(-(blockPos.getY() & 15)), (double)(-(blockPos.getZ() & 15)) - 0.5);
+				poseStack.translate(-0.5, 0.0, -0.5);
 				BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
 				blockRenderDispatcher.getModelRenderer()
 					.tesselateBlock(
@@ -42,7 +42,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 						blockState,
 						blockPos,
 						poseStack,
-						multiBufferSource.getBuffer(RenderType.getChunkRenderType(blockState)),
+						multiBufferSource.getBuffer(ItemBlockRenderTypes.getChunkRenderType(blockState)),
 						false,
 						new Random(),
 						blockState.getSeed(fallingBlockEntity.getStartPos()),

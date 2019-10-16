@@ -52,6 +52,7 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -331,60 +332,67 @@ public class Wolf extends TamableAnimal {
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (this.isTame()) {
-			if (!itemStack.isEmpty()) {
-				if (item.isEdible()) {
-					if (item.getFoodProperties().isMeat() && this.entityData.get(DATA_HEALTH_ID) < 20.0F) {
-						if (!player.abilities.instabuild) {
-							itemStack.shrink(1);
-						}
-
-						this.heal((float)item.getFoodProperties().getNutrition());
-						return true;
+		if (itemStack.getItem() instanceof SpawnEggItem) {
+			return super.mobInteract(player, interactionHand);
+		} else if (this.level.isClientSide) {
+			return this.isOwnedBy(player) || item == Items.BONE && !this.isAngry();
+		} else {
+			if (this.isTame()) {
+				if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < 20.0F) {
+					if (!player.abilities.instabuild) {
+						itemStack.shrink(1);
 					}
-				} else if (item instanceof DyeItem) {
-					DyeColor dyeColor = ((DyeItem)item).getDyeColor();
-					if (dyeColor != this.getCollarColor()) {
-						this.setCollarColor(dyeColor);
-						if (!player.abilities.instabuild) {
-							itemStack.shrink(1);
-						}
 
-						return true;
-					}
+					this.heal((float)item.getFoodProperties().getNutrition());
+					return true;
 				}
-			}
 
-			if (this.isOwnedBy(player) && !this.level.isClientSide && !this.isFood(itemStack)) {
-				this.sitGoal.wantToSit(!this.isSitting());
-				this.jumping = false;
-				this.navigation.stop();
-				this.setTarget(null);
-			}
-		} else if (item == Items.BONE && !this.isAngry()) {
-			if (!player.abilities.instabuild) {
-				itemStack.shrink(1);
-			}
+				if (!(item instanceof DyeItem)) {
+					boolean bl = super.mobInteract(player, interactionHand);
+					if (!bl || this.isBaby()) {
+						this.sitGoal.wantToSit(!this.isSitting());
+					}
 
-			if (!this.level.isClientSide) {
+					return bl;
+				}
+
+				DyeColor dyeColor = ((DyeItem)item).getDyeColor();
+				if (dyeColor != this.getCollarColor()) {
+					this.setCollarColor(dyeColor);
+					if (!player.abilities.instabuild) {
+						itemStack.shrink(1);
+					}
+
+					return true;
+				}
+
+				if (this.isOwnedBy(player) && !this.isFood(itemStack)) {
+					this.sitGoal.wantToSit(!this.isSitting());
+					this.jumping = false;
+					this.navigation.stop();
+					this.setTarget(null);
+				}
+			} else if (item == Items.BONE && !this.isAngry()) {
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
+				}
+
 				if (this.random.nextInt(3) == 0) {
 					this.tame(player);
 					this.navigation.stop();
 					this.setTarget(null);
 					this.sitGoal.wantToSit(true);
 					this.setHealth(20.0F);
-					this.spawnTamingParticles(true);
 					this.level.broadcastEntityEvent(this, (byte)7);
 				} else {
-					this.spawnTamingParticles(false);
 					this.level.broadcastEntityEvent(this, (byte)6);
 				}
+
+				return true;
 			}
 
-			return true;
+			return super.mobInteract(player, interactionHand);
 		}
-
-		return super.mobInteract(player, interactionHand);
 	}
 
 	@Environment(EnvType.CLIENT)

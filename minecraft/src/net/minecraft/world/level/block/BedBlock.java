@@ -11,6 +11,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -77,15 +78,17 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		if (level.isClientSide) {
-			return true;
+			return InteractionResult.CONSUME;
 		} else {
 			if (blockState.getValue(PART) != BedPart.HEAD) {
 				blockPos = blockPos.relative(blockState.getValue(FACING));
 				blockState = level.getBlockState(blockPos);
 				if (blockState.getBlock() != this) {
-					return true;
+					return InteractionResult.CONSUME;
 				}
 			}
 
@@ -106,20 +109,20 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 					true,
 					Explosion.BlockInteraction.DESTROY
 				);
-				return true;
+				return InteractionResult.SUCCESS;
 			} else if ((Boolean)blockState.getValue(OCCUPIED)) {
 				if (!this.kickVillagerOutOfBed(level, blockPos)) {
 					player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied"), true);
 				}
 
-				return true;
+				return InteractionResult.SUCCESS;
 			} else {
 				player.startSleepInBed(blockPos).ifLeft(bedSleepingProblem -> {
 					if (bedSleepingProblem != null) {
 						player.displayClientMessage(bedSleepingProblem.getMessage(), true);
 					}
 				});
-				return true;
+				return InteractionResult.SUCCESS;
 			}
 		}
 	}

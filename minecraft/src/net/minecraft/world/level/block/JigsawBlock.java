@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -43,13 +44,15 @@ public class JigsawBlock extends DirectionalBlock implements EntityBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof JigsawBlockEntity && player.canUseGameMasterBlocks()) {
 			player.openJigsawBlock((JigsawBlockEntity)blockEntity);
-			return true;
+			return InteractionResult.SUCCESS;
 		} else {
-			return false;
+			return InteractionResult.PASS;
 		}
 	}
 

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
@@ -55,24 +56,27 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		boolean bl = itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild;
 		if (level.isClientSide) {
-			return true;
+			return bl ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
 		} else {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof SignBlockEntity) {
 				SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
-				ItemStack itemStack = player.getItemInHand(interactionHand);
-				if (itemStack.getItem() instanceof DyeItem && player.abilities.mayBuild) {
-					boolean bl = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor());
-					if (bl && !player.isCreative()) {
+				if (bl) {
+					boolean bl2 = signBlockEntity.setColor(((DyeItem)itemStack.getItem()).getDyeColor());
+					if (bl2 && !player.isCreative()) {
 						itemStack.shrink(1);
 					}
 				}
 
-				return signBlockEntity.executeClickCommands(player);
+				return signBlockEntity.executeClickCommands(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 			} else {
-				return false;
+				return InteractionResult.PASS;
 			}
 		}
 	}

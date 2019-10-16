@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -17,7 +16,6 @@ public class TropicalFishModelA<T extends Entity> extends ColorableListModel<T> 
 	private final ModelPart topFin;
 
 	public TropicalFishModelA(float f) {
-		super(RenderType::entityCutoutNoCull);
 		this.texWidth = 32;
 		this.texHeight = 32;
 		int i = 22;

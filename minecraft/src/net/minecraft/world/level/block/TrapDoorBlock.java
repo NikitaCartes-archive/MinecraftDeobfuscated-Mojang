@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -83,9 +84,11 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		if (this.material == Material.METAL) {
-			return false;
+			return InteractionResult.PASS;
 		} else {
 			blockState = blockState.cycle(OPEN);
 			level.setBlock(blockPos, blockState, 2);
@@ -94,7 +97,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 			}
 
 			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
-			return true;
+			return InteractionResult.SUCCESS;
 		}
 	}
 

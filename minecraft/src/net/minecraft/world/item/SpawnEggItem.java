@@ -89,32 +89,30 @@ public class SpawnEggItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (level.isClientSide) {
+		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+		if (hitResult.getType() != HitResult.Type.BLOCK) {
 			return InteractionResultHolder.pass(itemStack);
+		} else if (level.isClientSide) {
+			return InteractionResultHolder.success(itemStack);
 		} else {
-			HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-			if (hitResult.getType() != HitResult.Type.BLOCK) {
+			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+			BlockPos blockPos = blockHitResult.getBlockPos();
+			if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
 				return InteractionResultHolder.pass(itemStack);
-			} else {
-				BlockHitResult blockHitResult = (BlockHitResult)hitResult;
-				BlockPos blockPos = blockHitResult.getBlockPos();
-				if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
+			} else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
+				EntityType<?> entityType = this.getType(itemStack.getTag());
+				if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
 					return InteractionResultHolder.pass(itemStack);
-				} else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
-					EntityType<?> entityType = this.getType(itemStack.getTag());
-					if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
-						return InteractionResultHolder.pass(itemStack);
-					} else {
-						if (!player.abilities.instabuild) {
-							itemStack.shrink(1);
-						}
-
-						player.awardStat(Stats.ITEM_USED.get(this));
-						return InteractionResultHolder.success(itemStack);
-					}
 				} else {
-					return InteractionResultHolder.fail(itemStack);
+					if (!player.abilities.instabuild) {
+						itemStack.shrink(1);
+					}
+
+					player.awardStat(Stats.ITEM_USED.get(this));
+					return InteractionResultHolder.success(itemStack);
 				}
+			} else {
+				return InteractionResultHolder.fail(itemStack);
 			}
 		}
 	}

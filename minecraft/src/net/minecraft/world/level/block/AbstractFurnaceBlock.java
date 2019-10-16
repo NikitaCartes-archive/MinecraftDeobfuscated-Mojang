@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -33,12 +34,15 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-		if (!level.isClientSide) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		if (level.isClientSide) {
+			return InteractionResult.SUCCESS;
+		} else {
 			this.openContainer(level, blockPos, player);
+			return InteractionResult.SUCCESS;
 		}
-
-		return true;
 	}
 
 	protected abstract void openContainer(Level level, BlockPos blockPos, Player player);

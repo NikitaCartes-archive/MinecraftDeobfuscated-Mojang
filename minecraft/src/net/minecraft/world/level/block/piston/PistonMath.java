@@ -1,26 +1,10 @@
 package net.minecraft.world.level.block.piston;
 
-import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 
 public class PistonMath {
-	public static List<AABB> getEntityMovementAreas(boolean bl, AABB aABB, Direction direction, double d) {
-		ArrayList<AABB> arrayList = Lists.newArrayList(getEntityMovementAreaInFront(aABB, direction, d));
-		if (bl && direction.getAxis().isHorizontal()) {
-			arrayList.add(getEntityMovementAreaOnTop(aABB));
-		}
-
-		return arrayList;
-	}
-
-	public static AABB getEntityMovementAreaOnTop(AABB aABB) {
-		return new AABB(aABB.minX, aABB.maxY, aABB.minZ, aABB.maxX, aABB.maxY + 1.0E-7, aABB.maxZ);
-	}
-
-	public static AABB getEntityMovementAreaInFront(AABB aABB, Direction direction, double d) {
+	public static AABB getMovementArea(AABB aABB, Direction direction, double d) {
 		double e = d * (double)direction.getAxisDirection().getStep();
 		double f = Math.min(e, 0.0);
 		double g = Math.max(e, 0.0);

@@ -13,6 +13,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
@@ -181,6 +182,19 @@ public interface DispenseItemBehavior {
 			DispenserBlock.registerBehavior(spawnEggItem, defaultDispenseItemBehavior);
 		}
 
+		DispenserBlock.registerBehavior(Items.ARMOR_STAND, new DefaultDispenseItemBehavior() {
+			@Override
+			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.getPos().relative(direction);
+				Level level = blockSource.getLevel();
+				ArmorStand armorStand = new ArmorStand(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
+				EntityType.updateCustomEntityTag(level, null, armorStand, itemStack.getTag());
+				level.addFreshEntity(armorStand);
+				itemStack.shrink(1);
+				return itemStack;
+			}
+		});
 		DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -372,11 +386,14 @@ public interface DispenseItemBehavior {
 						}
 
 						itemStack.shrink(1);
-					} else if (ArmorItem.dispenseArmor(blockSource, itemStack).isEmpty()) {
-						this.success = false;
+					} else {
+						ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
+						if (itemStack.getCount() < itemStack2.getCount()) {
+							this.success = false;
+						}
 					}
 
-					return itemStack;
+					return super.execute(blockSource, itemStack);
 				}
 			}
 		);
@@ -395,12 +412,12 @@ public interface DispenseItemBehavior {
 					itemStack.shrink(1);
 				} else {
 					ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-					if (itemStack2.isEmpty()) {
+					if (itemStack.getCount() < itemStack2.getCount()) {
 						this.success = false;
 					}
 				}
 
-				return itemStack;
+				return super.execute(blockSource, itemStack);
 			}
 		});
 		DispenserBlock.registerBehavior(Blocks.SHULKER_BOX.asItem(), new ShulkerBoxDispenseBehavior());
@@ -411,7 +428,7 @@ public interface DispenseItemBehavior {
 
 		DispenserBlock.registerBehavior(
 			Items.GLASS_BOTTLE.asItem(),
-			new DefaultDispenseItemBehavior() {
+			new OptionalDispenseItemBehavior() {
 				private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
 
 				private ItemStack takeLiquid(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
@@ -429,6 +446,7 @@ public interface DispenseItemBehavior {
 
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					this.success = false;
 					LevelAccessor levelAccessor = blockSource.getLevel();
 					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 					BlockState blockState = levelAccessor.getBlockState(blockPos);
@@ -436,11 +454,13 @@ public interface DispenseItemBehavior {
 					if (block.is(BlockTags.BEEHIVES) && (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
 							.releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+						this.success = true;
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
+					} else if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
+						this.success = true;
+						return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
 					} else {
-						return levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)
-							? this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER))
-							: itemStack;
+						return super.execute(blockSource, itemStack);
 					}
 				}
 			}

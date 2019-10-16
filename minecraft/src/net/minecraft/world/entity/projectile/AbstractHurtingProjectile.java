@@ -16,6 +16,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -49,6 +51,7 @@ public abstract class AbstractHurtingProjectile extends Entity {
 		this(entityType, level);
 		this.owner = livingEntity;
 		this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
+		this.reapplyPosition();
 		this.setDeltaMovement(Vec3.ZERO);
 		d += this.random.nextGaussian() * 0.4;
 		e += this.random.nextGaussian() * 0.4;
@@ -124,7 +127,14 @@ public abstract class AbstractHurtingProjectile extends Entity {
 		return 0.95F;
 	}
 
-	protected abstract void onHit(HitResult hitResult);
+	protected void onHit(HitResult hitResult) {
+		HitResult.Type type = hitResult.getType();
+		if (type == HitResult.Type.BLOCK) {
+			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+			BlockState blockState = this.level.getBlockState(blockHitResult.getBlockPos());
+			blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
+		}
+	}
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {

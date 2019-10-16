@@ -692,7 +692,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				}
 
 				if (this.playerJumpPendingScale > 0.0F && !this.isJumping() && this.onGround) {
-					double d = this.getCustomJump() * (double)this.playerJumpPendingScale;
+					double d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
 					double e;
 					if (this.hasEffect(MobEffects.JUMP)) {
 						e = d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1F);

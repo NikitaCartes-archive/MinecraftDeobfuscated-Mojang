@@ -133,8 +133,6 @@ public class AdvancementWidget extends GuiComponent {
 			}
 
 			this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
-			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.enableBlend();
 			this.blit(i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
 			this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
 		}

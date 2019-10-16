@@ -401,6 +401,45 @@ public class RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static final class OffsetTexturingStateShard extends RenderStateShard.TexturingStateShard {
+		private final float uOffset;
+		private final float vOffset;
+
+		public OffsetTexturingStateShard(float f, float g) {
+			super("offset_texturing", () -> {
+				RenderSystem.matrixMode(5890);
+				RenderSystem.pushMatrix();
+				RenderSystem.loadIdentity();
+				RenderSystem.translatef(f, g, 0.0F);
+				RenderSystem.matrixMode(5888);
+			}, () -> {
+				RenderSystem.matrixMode(5890);
+				RenderSystem.popMatrix();
+				RenderSystem.matrixMode(5888);
+			});
+			this.uOffset = f;
+			this.vOffset = g;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			if (this == object) {
+				return true;
+			} else if (object != null && this.getClass() == object.getClass()) {
+				RenderStateShard.OffsetTexturingStateShard offsetTexturingStateShard = (RenderStateShard.OffsetTexturingStateShard)object;
+				return Float.compare(offsetTexturingStateShard.uOffset, this.uOffset) == 0 && Float.compare(offsetTexturingStateShard.vOffset, this.vOffset) == 0;
+			} else {
+				return false;
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(new Object[]{this.uOffset, this.vOffset});
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class OutputStateShard extends RenderStateShard {
 		public OutputStateShard(String string, Runnable runnable, Runnable runnable2) {
 			super(string, runnable, runnable2);
@@ -490,45 +529,6 @@ public class RenderStateShard {
 		@Override
 		public int hashCode() {
 			return Boolean.hashCode(this.smooth);
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static final class SwirlTexturingStateShard extends RenderStateShard.TexturingStateShard {
-		private final float uOffset;
-		private final float vOffset;
-
-		public SwirlTexturingStateShard(float f, float g) {
-			super("swirl_texturing", () -> {
-				RenderSystem.matrixMode(5890);
-				RenderSystem.pushMatrix();
-				RenderSystem.loadIdentity();
-				RenderSystem.translatef(f, g, 0.0F);
-				RenderSystem.matrixMode(5888);
-			}, () -> {
-				RenderSystem.matrixMode(5890);
-				RenderSystem.popMatrix();
-				RenderSystem.matrixMode(5888);
-			});
-			this.uOffset = f;
-			this.vOffset = g;
-		}
-
-		@Override
-		public boolean equals(Object object) {
-			if (this == object) {
-				return true;
-			} else if (object != null && this.getClass() == object.getClass()) {
-				RenderStateShard.SwirlTexturingStateShard swirlTexturingStateShard = (RenderStateShard.SwirlTexturingStateShard)object;
-				return Float.compare(swirlTexturingStateShard.uOffset, this.uOffset) == 0 && Float.compare(swirlTexturingStateShard.vOffset, this.vOffset) == 0;
-			} else {
-				return false;
-			}
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(new Object[]{this.uOffset, this.vOffset});
 		}
 	}
 

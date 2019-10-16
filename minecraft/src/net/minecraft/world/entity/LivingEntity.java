@@ -36,6 +36,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -196,7 +197,7 @@ public abstract class LivingEntity extends Entity {
 		this.setHealth(this.getMaxHealth());
 		this.blocksBuilding = true;
 		this.rotA = (float)((Math.random() + 1.0) * 0.01F);
-		this.refreshBoundingBox();
+		this.reapplyPosition();
 		this.timeOffs = (float)Math.random() * 12398.0F;
 		this.yRot = (float)(Math.random() * (float) (Math.PI * 2));
 		this.yHeadRot = this.yRot;
@@ -1384,12 +1385,22 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public void swing(InteractionHand interactionHand) {
+		this.swing(interactionHand, false);
+	}
+
+	public void swing(InteractionHand interactionHand, boolean bl) {
 		if (!this.swinging || this.swingTime >= this.getCurrentSwingDuration() / 2 || this.swingTime < 0) {
 			this.swingTime = -1;
 			this.swinging = true;
 			this.swingingArm = interactionHand;
 			if (this.level instanceof ServerLevel) {
-				((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundAnimatePacket(this, interactionHand == InteractionHand.MAIN_HAND ? 0 : 3));
+				ClientboundAnimatePacket clientboundAnimatePacket = new ClientboundAnimatePacket(this, interactionHand == InteractionHand.MAIN_HAND ? 0 : 3);
+				ServerChunkCache serverChunkCache = ((ServerLevel)this.level).getChunkSource();
+				if (bl) {
+					serverChunkCache.broadcastAndSend(this, clientboundAnimatePacket);
+				} else {
+					serverChunkCache.broadcast(this, clientboundAnimatePacket);
+				}
 			}
 		}
 	}
@@ -1743,18 +1754,15 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected float getJumpPower() {
-		return 0.42F;
+		return 0.42F * this.getBlockJumpFactor();
 	}
 
 	protected void jumpFromGround() {
-		float f;
+		float f = this.getJumpPower();
 		if (this.hasEffect(MobEffects.JUMP)) {
-			f = this.getJumpPower() + 0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1);
-		} else {
-			f = this.getJumpPower();
+			f += 0.1F * (float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1);
 		}
 
-		f *= this.getJumpFactor();
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(vec3.x, (double)f, vec3.z);
 		if (this.isSprinting()) {

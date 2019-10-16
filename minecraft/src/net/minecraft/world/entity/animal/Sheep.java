@@ -224,9 +224,11 @@ public class Sheep extends Animal {
 			if (!this.level.isClientSide) {
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 			}
-		}
 
-		return super.mobInteract(player, interactionHand);
+			return true;
+		} else {
+			return super.mobInteract(player, interactionHand);
+		}
 	}
 
 	public void shear() {

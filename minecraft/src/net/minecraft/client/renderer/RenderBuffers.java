@@ -14,6 +14,7 @@ public class RenderBuffers {
 	private final SortedMap<RenderType, BufferBuilder> fixedBuffers = Util.make(new Object2ObjectLinkedOpenHashMap<>(), object2ObjectLinkedOpenHashMap -> {
 		object2ObjectLinkedOpenHashMap.put(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.solid()));
 		object2ObjectLinkedOpenHashMap.put(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutout()));
+		object2ObjectLinkedOpenHashMap.put(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
 		object2ObjectLinkedOpenHashMap.put(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.translucent()));
 		object2ObjectLinkedOpenHashMap.put(RenderType.translucentNoCrumbling(), new BufferBuilder(RenderType.translucentNoCrumbling().bufferSize()));
 		object2ObjectLinkedOpenHashMap.put(RenderType.glint(), new BufferBuilder(RenderType.glint().bufferSize()));

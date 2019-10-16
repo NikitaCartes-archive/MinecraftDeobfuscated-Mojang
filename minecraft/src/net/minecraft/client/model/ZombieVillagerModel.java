@@ -1,11 +1,8 @@
 package net.minecraft.client.model;
 
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Zombie;
 
@@ -13,8 +10,8 @@ import net.minecraft.world.entity.monster.Zombie;
 public class ZombieVillagerModel<T extends Zombie> extends HumanoidModel<T> implements VillagerHeadModel {
 	private ModelPart hatRim;
 
-	public ZombieVillagerModel(Function<ResourceLocation, RenderType> function, float f, boolean bl) {
-		super(function, f, 0.0F, 64, bl ? 32 : 64);
+	public ZombieVillagerModel(float f, boolean bl) {
+		super(f, 0.0F, 64, bl ? 32 : 64);
 		if (bl) {
 			this.head = new ModelPart(this, 0, 0);
 			this.head.addBox(-4.0F, -10.0F, -4.0F, 8.0F, 8.0F, 8.0F, f);

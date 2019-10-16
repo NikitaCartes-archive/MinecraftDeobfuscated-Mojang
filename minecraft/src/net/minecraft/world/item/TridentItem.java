@@ -116,7 +116,7 @@ public class TridentItem extends Item {
 			return InteractionResultHolder.fail(itemStack);
 		} else {
 			player.startUsingItem(interactionHand);
-			return InteractionResultHolder.successNoSwing(itemStack);
+			return InteractionResultHolder.consume(itemStack);
 		}
 	}
 

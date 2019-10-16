@@ -75,8 +75,15 @@ public class AdvancementTab extends GuiComponent {
 			this.centered = true;
 		}
 
+		RenderSystem.pushMatrix();
+		RenderSystem.enableDepthTest();
+		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
+		RenderSystem.colorMask(false, false, false, false);
+		fill(468, 226, -234, -113, -16777216);
+		RenderSystem.colorMask(true, true, true, true);
+		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
 		RenderSystem.depthFunc(518);
-		fill(0, 0, 234, 113, -16777216);
+		fill(234, 113, 0, 0, -16777216);
 		RenderSystem.depthFunc(515);
 		ResourceLocation resourceLocation = this.display.getBackground();
 		if (resourceLocation != null) {
@@ -85,7 +92,6 @@ public class AdvancementTab extends GuiComponent {
 			this.minecraft.getTextureManager().bind(TextureManager.INTENTIONAL_MISSING_TEXTURE);
 		}
 
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		int i = Mth.floor(this.scrollX);
 		int j = Mth.floor(this.scrollY);
 		int k = i % 16;
@@ -100,6 +106,14 @@ public class AdvancementTab extends GuiComponent {
 		this.root.drawConnectivity(i, j, true);
 		this.root.drawConnectivity(i, j, false);
 		this.root.draw(i, j);
+		RenderSystem.depthFunc(518);
+		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
+		RenderSystem.colorMask(false, false, false, false);
+		fill(468, 226, -234, -113, -16777216);
+		RenderSystem.colorMask(true, true, true, true);
+		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
+		RenderSystem.depthFunc(515);
+		RenderSystem.popMatrix();
 	}
 
 	public void drawTooltips(int i, int j, int k, int l) {

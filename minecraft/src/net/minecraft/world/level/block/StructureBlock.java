@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -31,9 +32,15 @@ public class StructureBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		return blockEntity instanceof StructureBlockEntity ? ((StructureBlockEntity)blockEntity).usedBy(player) : false;
+		if (blockEntity instanceof StructureBlockEntity) {
+			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		} else {
+			return InteractionResult.PASS;
+		}
 	}
 
 	@Override

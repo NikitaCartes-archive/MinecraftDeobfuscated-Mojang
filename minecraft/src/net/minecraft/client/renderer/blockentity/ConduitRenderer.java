@@ -24,7 +24,7 @@ public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
 	public static final ResourceLocation VERTICAL_WIND_TEXTURE = new ResourceLocation("entity/conduit/wind_vertical");
 	public static final ResourceLocation OPEN_EYE_TEXTURE = new ResourceLocation("entity/conduit/open_eye");
 	public static final ResourceLocation CLOSED_EYE_TEXTURE = new ResourceLocation("entity/conduit/closed_eye");
-	private final ModelPart eye = new ModelPart(8, 8, 0, 0);
+	private final ModelPart eye = new ModelPart(16, 16, 0, 0);
 	private final ModelPart wind;
 	private final ModelPart shell;
 	private final ModelPart cage;

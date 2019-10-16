@@ -6,6 +6,7 @@ import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -74,43 +75,53 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		float v = Mth.fastInvSqrt(r * r + t * t) * 0.025F / 2.0F;
 		float w = t * v;
 		float x = r * v;
-		renderSide(vertexConsumer, matrix4f, r, s, t, 0.025F, 0.025F, w, x);
-		renderSide(vertexConsumer, matrix4f, r, s, t, 0.025F, 0.0F, w, x);
+		int y = mob.getLightColor();
+		int z = entity.getLightColor();
+		renderSide(vertexConsumer, matrix4f, y, z, r, s, t, 0.025F, 0.025F, w, x);
+		renderSide(vertexConsumer, matrix4f, y, z, r, s, t, 0.025F, 0.0F, w, x);
 		poseStack.popPose();
 	}
 
-	public static void renderSide(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, float i, float j, float k, float l) {
-		int m = 24;
+	public static void renderSide(VertexConsumer vertexConsumer, Matrix4f matrix4f, int i, int j, float f, float g, float h, float k, float l, float m, float n) {
+		int o = 24;
+		int p = LightTexture.block(i);
+		int q = LightTexture.block(j);
+		int r = LightTexture.sky(i);
+		int s = LightTexture.sky(j);
 
-		for (int n = 0; n < 24; n++) {
-			addVertexPair(vertexConsumer, matrix4f, f, g, h, i, j, 24, n, false, k, l);
-			addVertexPair(vertexConsumer, matrix4f, f, g, h, i, j, 24, n + 1, true, k, l);
+		for (int t = 0; t < 24; t++) {
+			float u = (float)t / 23.0F;
+			int v = (int)Mth.lerp(u, (float)p, (float)q);
+			int w = (int)Mth.lerp(u, (float)r, (float)s);
+			int x = LightTexture.pack(v, w);
+			addVertexPair(vertexConsumer, matrix4f, x, f, g, h, k, l, 24, t, false, m, n);
+			addVertexPair(vertexConsumer, matrix4f, x, f, g, h, k, l, 24, t + 1, true, m, n);
 		}
 	}
 
 	public static void addVertexPair(
-		VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, float i, float j, int k, int l, boolean bl, float m, float n
+		VertexConsumer vertexConsumer, Matrix4f matrix4f, int i, float f, float g, float h, float j, float k, int l, int m, boolean bl, float n, float o
 	) {
-		float o = 0.5F;
-		float p = 0.4F;
-		float q = 0.3F;
-		if (l % 2 == 0) {
-			o *= 0.7F;
+		float p = 0.5F;
+		float q = 0.4F;
+		float r = 0.3F;
+		if (m % 2 == 0) {
 			p *= 0.7F;
 			q *= 0.7F;
+			r *= 0.7F;
 		}
 
-		float r = (float)l / (float)k;
-		float s = f * r;
-		float t = g * (r * r + r) * 0.5F + ((float)k - (float)l) / ((float)k * 0.75F) + 0.125F;
-		float u = h * r;
+		float s = (float)m / (float)l;
+		float t = f * s;
+		float u = g * (s * s + s) * 0.5F + ((float)l - (float)m) / ((float)l * 0.75F) + 0.125F;
+		float v = h * s;
 		if (!bl) {
-			vertexConsumer.vertex(matrix4f, s + m, t + i - j, u - n).color(o, p, q, 1.0F).endVertex();
+			vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0F).uv2(i).endVertex();
 		}
 
-		vertexConsumer.vertex(matrix4f, s - m, t + j, u + n).color(o, p, q, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix4f, t - n, u + k, v + o).color(p, q, r, 1.0F).uv2(i).endVertex();
 		if (bl) {
-			vertexConsumer.vertex(matrix4f, s + m, t + i - j, u - n).color(o, p, q, 1.0F).endVertex();
+			vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0F).uv2(i).endVertex();
 		}
 	}
 }

@@ -10,11 +10,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RenderShape;
 
 @Environment(EnvType.CLIENT)
 public class WitchItemLayer<T extends LivingEntity> extends RenderLayer<T, WitchModel<T>> {
@@ -26,42 +23,13 @@ public class WitchItemLayer<T extends LivingEntity> extends RenderLayer<T, Witch
 		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
 	) {
 		ItemStack itemStack = livingEntity.getMainHandItem();
-		if (!itemStack.isEmpty()) {
+		if (itemStack.getItem() == Items.POTION) {
 			poseStack.pushPose();
-			if (this.getParentModel().young) {
-				poseStack.translate(0.0, 0.625, 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
-				float n = 0.5F;
-				poseStack.scale(0.5F, 0.5F, 0.5F);
-			}
-
+			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
 			this.getParentModel().getNose().translateAndRotate(poseStack, 0.0625F);
-			poseStack.translate(-0.0625, 0.53125, 0.21875);
-			Item item = itemStack.getItem();
-			if (Block.byItem(item).defaultBlockState().getRenderShape() == RenderShape.ENTITYBLOCK_ANIMATED) {
-				poseStack.translate(0.0, 0.0625, -0.25);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(30.0F));
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(-5.0F));
-				float o = 0.375F;
-				poseStack.scale(0.375F, -0.375F, 0.375F);
-			} else if (item == Items.BOW) {
-				poseStack.translate(0.0, 0.125, -0.125);
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(-45.0F));
-				float o = 0.625F;
-				poseStack.scale(0.625F, -0.625F, 0.625F);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-100.0F));
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(-20.0F));
-			} else {
-				poseStack.translate(0.1875, 0.1875, 0.0);
-				float o = 0.875F;
-				poseStack.scale(0.875F, 0.875F, 0.875F);
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-20.0F));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-60.0F));
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-30.0F));
-			}
-
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(-15.0F));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F));
+			poseStack.translate(0.0, 0.375, -0.03125);
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(-35.0F));
 			Minecraft.getInstance()
 				.getItemInHandRenderer()
 				.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, multiBufferSource);

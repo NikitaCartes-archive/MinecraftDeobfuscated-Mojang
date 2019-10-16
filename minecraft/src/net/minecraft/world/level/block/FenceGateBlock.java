@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -116,7 +117,9 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		if ((Boolean)blockState.getValue(OPEN)) {
 			blockState = blockState.setValue(OPEN, Boolean.valueOf(false));
 			level.setBlock(blockPos, blockState, 10);
@@ -131,7 +134,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 		}
 
 		level.levelEvent(player, blockState.getValue(OPEN) ? 1008 : 1014, blockPos, 0);
-		return true;
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

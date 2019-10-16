@@ -643,7 +643,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 			this.needsUpdate = true;
 			this.generateClouds = true;
-			RenderType.setFancy(this.minecraft.options.fancyGraphics);
+			ItemBlockRenderTypes.setFancy(this.minecraft.options.fancyGraphics);
 			this.lastViewDistance = this.minecraft.options.renderDistance;
 			if (this.viewArea != null) {
 				this.viewArea.releaseAllBuffers();
@@ -1053,11 +1053,11 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 			double p = (double)blockPos3.getY() - e;
 			double q = (double)blockPos3.getZ() - g;
 			if (!(o * o + p * p + q * q > 1024.0)) {
-				poseStack.pushPose();
-				poseStack.translate((double)(blockPos3.getX() & -16) - d, (double)(blockPos3.getY() & -16) - e, (double)(blockPos3.getZ() & -16) - g);
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
 					int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+					poseStack.pushPose();
+					poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
 					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(
 						this.renderBuffers.effectBufferSource().getBuffer(RenderType.crumbling(r)), poseStack.getPose()
 					);
@@ -1080,6 +1080,8 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 			}
 		}
 
+		bufferSource.endBatch(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
+		bufferSource.endBatch(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
 		bufferSource.endBatch();
 		this.renderBuffers.effectBufferSource().endBatch();
 		RenderSystem.pushMatrix();

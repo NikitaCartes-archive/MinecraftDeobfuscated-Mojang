@@ -83,14 +83,18 @@ public class ShovelItem extends DiggerItem {
 				blockState3 = blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
 			}
 
-			if (!level.isClientSide && blockState3 != null) {
-				level.setBlock(blockPos, blockState3, 11);
-				if (player != null) {
-					useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+			if (blockState3 != null) {
+				if (!level.isClientSide) {
+					level.setBlock(blockPos, blockState3, 11);
+					if (player != null) {
+						useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+					}
 				}
-			}
 
-			return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.PASS;
+			}
 		}
 	}
 }

@@ -255,16 +255,17 @@ public class EntityRenderDispatcher {
 			poseStack.pushPose();
 			poseStack.translate(i, j, k);
 			entityRenderer.render(entity, i, j, k, g, h, poseStack, multiBufferSource);
+			if (entity.displayFireAnimation()) {
+				this.renderFlame(poseStack, multiBufferSource, entity);
+			}
+
+			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
 			if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
 				double l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
 				float m = (float)((1.0 - l / 256.0) * (double)entityRenderer.shadowStrength);
 				if (m > 0.0F) {
 					renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
 				}
-			}
-
-			if (entity.displayFireAnimation()) {
-				this.renderFlame(poseStack, multiBufferSource, entity);
 			}
 
 			if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {

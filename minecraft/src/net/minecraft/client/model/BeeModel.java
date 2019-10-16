@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Bee;
 
@@ -23,7 +22,7 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 	private float rollAmount;
 
 	public BeeModel() {
-		super(RenderType::entityCutoutNoCull, false, 24.0F, 0.0F, 2.0F, 2.0F, 24.0F);
+		super(false, 24.0F, 0.0F);
 		this.texWidth = 64;
 		this.texHeight = 64;
 		this.bone = new ModelPart(this);

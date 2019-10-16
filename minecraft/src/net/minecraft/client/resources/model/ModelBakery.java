@@ -113,12 +113,15 @@ public class ModelBakery {
 		hashSet.add(FIRE_1);
 		hashSet.add(BellRenderer.BELL_RESOURCE_LOCATION);
 		hashSet.addAll(Arrays.asList(BedRenderer.TEXTURES));
-		hashSet.add(ChestRenderer.CHEST_LARGE_TRAP_LOCATION);
-		hashSet.add(ChestRenderer.CHEST_LARGE_XMAS_LOCATION);
-		hashSet.add(ChestRenderer.CHEST_LARGE_LOCATION);
 		hashSet.add(ChestRenderer.CHEST_TRAP_LOCATION);
+		hashSet.add(ChestRenderer.CHEST_TRAP_LOCATION_LEFT);
+		hashSet.add(ChestRenderer.CHEST_TRAP_LOCATION_RIGHT);
 		hashSet.add(ChestRenderer.CHEST_XMAS_LOCATION);
+		hashSet.add(ChestRenderer.CHEST_XMAS_LOCATION_LEFT);
+		hashSet.add(ChestRenderer.CHEST_XMAS_LOCATION_RIGHT);
 		hashSet.add(ChestRenderer.CHEST_LOCATION);
+		hashSet.add(ChestRenderer.CHEST_LOCATION_LEFT);
+		hashSet.add(ChestRenderer.CHEST_LOCATION_RIGHT);
 		hashSet.add(ChestRenderer.ENDER_CHEST_LOCATION);
 		hashSet.add(ConduitRenderer.SHELL_TEXTURE);
 		hashSet.add(ConduitRenderer.ACTIVE_SHELL_TEXTURE);

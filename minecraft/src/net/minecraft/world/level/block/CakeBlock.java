@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -42,18 +43,26 @@ public class CakeBlock extends Block {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
-		if (!level.isClientSide) {
-			return this.eat(level, blockPos, blockState, player);
-		} else {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		if (level.isClientSide) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			return this.eat(level, blockPos, blockState, player) || itemStack.isEmpty();
+			if (this.eat(level, blockPos, blockState, player) == InteractionResult.SUCCESS) {
+				return InteractionResult.SUCCESS;
+			}
+
+			if (itemStack.isEmpty()) {
+				return InteractionResult.CONSUME;
+			}
 		}
+
+		return this.eat(level, blockPos, blockState, player);
 	}
 
-	private boolean eat(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Player player) {
+	private InteractionResult eat(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!player.canEat(false)) {
-			return false;
+			return InteractionResult.PASS;
 		} else {
 			player.awardStat(Stats.EAT_CAKE_SLICE);
 			player.getFoodData().eat(2, 0.1F);
@@ -64,7 +73,7 @@ public class CakeBlock extends Block {
 				levelAccessor.removeBlock(blockPos, false);
 			}
 
-			return true;
+			return InteractionResult.SUCCESS;
 		}
 	}
 

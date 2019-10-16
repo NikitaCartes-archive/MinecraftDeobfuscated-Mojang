@@ -305,15 +305,20 @@ public class ServerPlayerGameMode {
 		} else {
 			boolean bl = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
 			boolean bl2 = player.isSecondaryUseActive() && bl;
-			if (!bl2 && blockState.use(level, player, interactionHand, blockHitResult)) {
-				return InteractionResult.SUCCESS;
-			} else if (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+			if (!bl2) {
+				InteractionResult interactionResult = blockState.use(level, player, interactionHand, blockHitResult);
+				if (interactionResult.consumesAction()) {
+					return interactionResult;
+				}
+			}
+
+			if (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				UseOnContext useOnContext = new UseOnContext(player, interactionHand, blockHitResult);
 				if (this.isCreative()) {
 					int i = itemStack.getCount();
-					InteractionResult interactionResult = itemStack.useOn(useOnContext);
+					InteractionResult interactionResult2 = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
-					return interactionResult;
+					return interactionResult2;
 				} else {
 					return itemStack.useOn(useOnContext);
 				}

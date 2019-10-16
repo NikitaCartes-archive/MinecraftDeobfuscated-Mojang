@@ -6,6 +6,7 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -45,11 +46,7 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 			if (!blockState.isAir() && !(pistonMovingBlockEntity.getProgress(g) >= 1.0F)) {
 				ModelBlockRenderer.enableCaching();
 				poseStack.pushPose();
-				poseStack.translate(
-					(double)((float)(-(blockPos.getX() & 15)) + pistonMovingBlockEntity.getXOff(g)),
-					(double)((float)(-(blockPos.getY() & 15)) + pistonMovingBlockEntity.getYOff(g)),
-					(double)((float)(-(blockPos.getZ() & 15)) + pistonMovingBlockEntity.getZOff(g))
-				);
+				poseStack.translate((double)pistonMovingBlockEntity.getXOff(g), (double)pistonMovingBlockEntity.getYOff(g), (double)pistonMovingBlockEntity.getZOff(g));
 				if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(g) <= 4.0F) {
 					blockState = blockState.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(true));
 					this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
@@ -63,10 +60,9 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 					this.renderBlock(blockPos, blockState2, poseStack, multiBufferSource, level, false, j);
 					BlockPos blockPos2 = blockPos.relative(pistonMovingBlockEntity.getMovementDirection());
 					poseStack.popPose();
-					poseStack.translate((double)(-(blockPos2.getX() & 15)), (double)(-(blockPos2.getY() & 15)), (double)(-(blockPos2.getZ() & 15)));
+					poseStack.pushPose();
 					blockState = blockState.setValue(PistonBaseBlock.EXTENDED, Boolean.valueOf(true));
 					this.renderBlock(blockPos2, blockState, poseStack, multiBufferSource, level, true, j);
-					poseStack.pushPose();
 				} else {
 					this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
 				}
@@ -78,7 +74,7 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 	}
 
 	private void renderBlock(BlockPos blockPos, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, Level level, boolean bl, int i) {
-		RenderType renderType = RenderType.getChunkRenderType(blockState);
+		RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
 		this.blockRenderer
 			.getModelRenderer()

@@ -1,6 +1,5 @@
 package com.mojang.math;
 
-import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
@@ -13,23 +12,26 @@ public final class Vector3f {
 	public static Vector3f YP = new Vector3f(0.0F, 1.0F, 0.0F);
 	public static Vector3f ZN = new Vector3f(0.0F, 0.0F, -1.0F);
 	public static Vector3f ZP = new Vector3f(0.0F, 0.0F, 1.0F);
-	private final float[] values;
-
-	@Environment(EnvType.CLIENT)
-	public Vector3f(Vector3f vector3f) {
-		this.values = Arrays.copyOf(vector3f.values, 3);
-	}
+	private float x;
+	private float y;
+	private float z;
 
 	public Vector3f() {
-		this.values = new float[3];
 	}
 
 	public Vector3f(float f, float g, float h) {
-		this.values = new float[]{f, g, h};
+		this.x = f;
+		this.y = g;
+		this.z = h;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Vector3f(Vector3f vector3f) {
+		this(vector3f.x, vector3f.y, vector3f.z);
 	}
 
 	public Vector3f(Vec3 vec3) {
-		this.values = new float[]{(float)vec3.x, (float)vec3.y, (float)vec3.z};
+		this((float)vec3.x, (float)vec3.y, (float)vec3.z);
 	}
 
 	public boolean equals(Object object) {
@@ -37,33 +39,39 @@ public final class Vector3f {
 			return true;
 		} else if (object != null && this.getClass() == object.getClass()) {
 			Vector3f vector3f = (Vector3f)object;
-			return Arrays.equals(this.values, vector3f.values);
+			if (Float.compare(vector3f.x, this.x) != 0) {
+				return false;
+			} else {
+				return Float.compare(vector3f.y, this.y) != 0 ? false : Float.compare(vector3f.z, this.z) == 0;
+			}
 		} else {
 			return false;
 		}
 	}
 
 	public int hashCode() {
-		return Arrays.hashCode(this.values);
+		int i = Float.floatToIntBits(this.x);
+		i = 31 * i + Float.floatToIntBits(this.y);
+		return 31 * i + Float.floatToIntBits(this.z);
 	}
 
 	public float x() {
-		return this.values[0];
+		return this.x;
 	}
 
 	public float y() {
-		return this.values[1];
+		return this.y;
 	}
 
 	public float z() {
-		return this.values[2];
+		return this.z;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void mul(float f) {
-		for (int i = 0; i < 3; i++) {
-			this.values[i] = this.values[i] * f;
-		}
+		this.x *= f;
+		this.y *= f;
+		this.z *= f;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -77,89 +85,76 @@ public final class Vector3f {
 
 	@Environment(EnvType.CLIENT)
 	public void clamp(float f, float g) {
-		this.values[0] = clamp(this.values[0], f, g);
-		this.values[1] = clamp(this.values[1], f, g);
-		this.values[2] = clamp(this.values[2], f, g);
+		this.x = clamp(this.x, f, g);
+		this.y = clamp(this.y, f, g);
+		this.z = clamp(this.z, f, g);
 	}
 
 	public void set(float f, float g, float h) {
-		this.values[0] = f;
-		this.values[1] = g;
-		this.values[2] = h;
+		this.x = f;
+		this.y = g;
+		this.z = h;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void add(float f, float g, float h) {
-		this.values[0] = this.values[0] + f;
-		this.values[1] = this.values[1] + g;
-		this.values[2] = this.values[2] + h;
+		this.x += f;
+		this.y += g;
+		this.z += h;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void sub(Vector3f vector3f) {
-		for (int i = 0; i < 3; i++) {
-			this.values[i] = this.values[i] - vector3f.values[i];
-		}
+		this.x = this.x - vector3f.x;
+		this.y = this.y - vector3f.y;
+		this.z = this.z - vector3f.z;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public float dot(Vector3f vector3f) {
-		float f = 0.0F;
-
-		for (int i = 0; i < 3; i++) {
-			f += this.values[i] * vector3f.values[i];
-		}
-
-		return f;
+		return this.x * vector3f.x + this.y * vector3f.y + this.z * vector3f.z;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public boolean normalize() {
-		float f = 0.0F;
-
-		for (int i = 0; i < 3; i++) {
-			f += this.values[i] * this.values[i];
-		}
-
+		float f = this.x * this.x + this.y * this.y + this.z * this.z;
 		if ((double)f < 1.0E-5) {
 			return false;
 		} else {
 			float g = Mth.fastInvSqrt(f);
-
-			for (int j = 0; j < 3; j++) {
-				this.values[j] = this.values[j] * g;
-			}
-
+			this.x *= g;
+			this.y *= g;
+			this.z *= g;
 			return true;
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void cross(Vector3f vector3f) {
-		float f = this.values[0];
-		float g = this.values[1];
-		float h = this.values[2];
+		float f = this.x;
+		float g = this.y;
+		float h = this.z;
 		float i = vector3f.x();
 		float j = vector3f.y();
 		float k = vector3f.z();
-		this.values[0] = g * k - h * j;
-		this.values[1] = h * i - f * k;
-		this.values[2] = f * j - g * i;
+		this.x = g * k - h * j;
+		this.y = h * i - f * k;
+		this.z = f * j - g * i;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void transform(Matrix3f matrix3f) {
-		float f = this.values[0];
-		float g = this.values[1];
-		float h = this.values[2];
+		float f = this.x;
+		float g = this.y;
+		float h = this.z;
+		this.x = multiplyRow(0, matrix3f, f, g, h);
+		this.y = multiplyRow(1, matrix3f, f, g, h);
+		this.z = multiplyRow(2, matrix3f, f, g, h);
+	}
 
-		for (int i = 0; i < 3; i++) {
-			float j = 0.0F;
-			j += matrix3f.get(i, 0) * f;
-			j += matrix3f.get(i, 1) * g;
-			j += matrix3f.get(i, 2) * h;
-			this.values[i] = j;
-		}
+	@Environment(EnvType.CLIENT)
+	private static float multiplyRow(int i, Matrix3f matrix3f, float f, float g, float h) {
+		return matrix3f.get(i, 0) * f + matrix3f.get(i, 1) * g + matrix3f.get(i, 2) * h;
 	}
 
 	public void transform(Quaternion quaternion) {

@@ -11,8 +11,8 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -121,7 +121,16 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 					float h = (float)(k & 0xFF) / 255.0F;
 					this.modelRenderer
 						.renderModel(
-							poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j
+							poseStack.getPose(),
+							poseStack.getNormal(),
+							multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState)),
+							blockState,
+							bakedModel,
+							f,
+							g,
+							h,
+							i,
+							j
 						);
 					poseStack.popPose();
 					break;

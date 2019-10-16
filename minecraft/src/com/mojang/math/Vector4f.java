@@ -1,24 +1,28 @@
 package com.mojang.math;
 
-import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class Vector4f {
-	private final float[] values;
+	private float x;
+	private float y;
+	private float z;
+	private float w;
 
 	public Vector4f() {
-		this.values = new float[4];
 	}
 
 	public Vector4f(float f, float g, float h, float i) {
-		this.values = new float[]{f, g, h, i};
+		this.x = f;
+		this.y = g;
+		this.z = h;
+		this.w = i;
 	}
 
 	public Vector4f(Vector3f vector3f) {
-		this.values = new float[]{vector3f.x(), vector3f.y(), vector3f.z(), 1.0F};
+		this(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F);
 	}
 
 	public boolean equals(Object object) {
@@ -26,84 +30,80 @@ public class Vector4f {
 			return true;
 		} else if (object != null && this.getClass() == object.getClass()) {
 			Vector4f vector4f = (Vector4f)object;
-			return Arrays.equals(this.values, vector4f.values);
+			if (Float.compare(vector4f.x, this.x) != 0) {
+				return false;
+			} else if (Float.compare(vector4f.y, this.y) != 0) {
+				return false;
+			} else {
+				return Float.compare(vector4f.z, this.z) != 0 ? false : Float.compare(vector4f.w, this.w) == 0;
+			}
 		} else {
 			return false;
 		}
 	}
 
 	public int hashCode() {
-		return Arrays.hashCode(this.values);
+		int i = Float.floatToIntBits(this.x);
+		i = 31 * i + Float.floatToIntBits(this.y);
+		i = 31 * i + Float.floatToIntBits(this.z);
+		return 31 * i + Float.floatToIntBits(this.w);
 	}
 
 	public float x() {
-		return this.values[0];
+		return this.x;
 	}
 
 	public float y() {
-		return this.values[1];
+		return this.y;
 	}
 
 	public float z() {
-		return this.values[2];
+		return this.z;
 	}
 
 	public void mul(Vector3f vector3f) {
-		this.values[0] = this.values[0] * vector3f.x();
-		this.values[1] = this.values[1] * vector3f.y();
-		this.values[2] = this.values[2] * vector3f.z();
+		this.x = this.x * vector3f.x();
+		this.y = this.y * vector3f.y();
+		this.z = this.z * vector3f.z();
 	}
 
 	public float dot(Vector4f vector4f) {
-		float f = 0.0F;
-
-		for (int i = 0; i < 4; i++) {
-			f += this.values[i] * vector4f.values[i];
-		}
-
-		return f;
+		return this.x * vector4f.x + this.y * vector4f.y + this.z * vector4f.z + this.w * vector4f.w;
 	}
 
 	public boolean normalize() {
-		float f = 0.0F;
-
-		for (int i = 0; i < 4; i++) {
-			f += this.values[i] * this.values[i];
-		}
-
+		float f = this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
 		if ((double)f < 1.0E-5) {
 			return false;
 		} else {
 			float g = Mth.fastInvSqrt(f);
-
-			for (int j = 0; j < 4; j++) {
-				this.values[j] = this.values[j] * g;
-			}
-
+			this.x *= g;
+			this.y *= g;
+			this.z *= g;
+			this.w *= g;
 			return true;
 		}
 	}
 
 	public void transform(Matrix4f matrix4f) {
-		float f = this.values[0];
-		float g = this.values[1];
-		float h = this.values[2];
-		float i = this.values[3];
+		float f = this.x;
+		float g = this.y;
+		float h = this.z;
+		float i = this.w;
+		this.x = multiplyRow(0, matrix4f, f, g, h, i);
+		this.y = multiplyRow(1, matrix4f, f, g, h, i);
+		this.z = multiplyRow(2, matrix4f, f, g, h, i);
+		this.w = multiplyRow(3, matrix4f, f, g, h, i);
+	}
 
-		for (int j = 0; j < 4; j++) {
-			float k = 0.0F;
-			k += matrix4f.get(j, 0) * f;
-			k += matrix4f.get(j, 1) * g;
-			k += matrix4f.get(j, 2) * h;
-			k += matrix4f.get(j, 3) * i;
-			this.values[j] = k;
-		}
+	private static float multiplyRow(int i, Matrix4f matrix4f, float f, float g, float h, float j) {
+		return matrix4f.get(i, 0) * f + matrix4f.get(i, 1) * g + matrix4f.get(i, 2) * h + matrix4f.get(i, 3) * j;
 	}
 
 	public void perspectiveDivide() {
-		this.values[0] = this.values[0] / this.values[3];
-		this.values[1] = this.values[1] / this.values[3];
-		this.values[2] = this.values[2] / this.values[3];
-		this.values[3] = 1.0F;
+		this.x = this.x / this.w;
+		this.y = this.y / this.w;
+		this.z = this.z / this.w;
+		this.w = 1.0F;
 	}
 }

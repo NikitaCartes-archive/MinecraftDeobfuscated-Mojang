@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -80,12 +81,14 @@ public class MovingPistonBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult use(
+		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
 		if (!level.isClientSide && level.getBlockEntity(blockPos) == null) {
 			level.removeBlock(blockPos, false);
-			return true;
+			return InteractionResult.CONSUME;
 		} else {
-			return false;
+			return InteractionResult.PASS;
 		}
 	}
 

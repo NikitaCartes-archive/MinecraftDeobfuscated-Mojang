@@ -80,7 +80,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 		if (isCharged(itemStack)) {
 			performShooting(level, player, interactionHand, itemStack, getShootingPower(itemStack), 1.0F);
 			setCharged(itemStack, false);
-			return InteractionResultHolder.successNoSwing(itemStack);
+			return InteractionResultHolder.consume(itemStack);
 		} else if (!player.getProjectile(itemStack).isEmpty()) {
 			if (!isCharged(itemStack)) {
 				this.startSoundPlayed = false;
@@ -88,7 +88,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 				player.startUsingItem(interactionHand);
 			}
 
-			return InteractionResultHolder.successNoSwing(itemStack);
+			return InteractionResultHolder.consume(itemStack);
 		} else {
 			return InteractionResultHolder.fail(itemStack);
 		}

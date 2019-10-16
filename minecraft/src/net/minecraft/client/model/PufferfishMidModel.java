@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -23,7 +22,6 @@ public class PufferfishMidModel<T extends Entity> extends ListModel<T> {
 	private final ModelPart finBottom1;
 
 	public PufferfishMidModel() {
-		super(RenderType::entityCutoutNoCull);
 		this.texWidth = 32;
 		this.texHeight = 32;
 		int i = 22;

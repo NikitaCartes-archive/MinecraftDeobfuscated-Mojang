@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(EnvType.CLIENT)
-public class WitherArmorLayer extends SpinnyLayer<WitherBoss, WitherBossModel<WitherBoss>> {
+public class WitherArmorLayer extends EnergySwirlLayer<WitherBoss, WitherBossModel<WitherBoss>> {
 	private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
 	private final WitherBossModel<WitherBoss> model = new WitherBossModel<>(0.5F);
 

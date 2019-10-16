@@ -6,7 +6,6 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HorseModel;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -23,7 +22,7 @@ public class UndeadHorseRenderer extends AbstractHorseRenderer<AbstractHorse, Ho
 	);
 
 	public UndeadHorseRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new HorseModel<>(RenderType::entityCutoutNoCull, 0.0F), 1.0F);
+		super(entityRenderDispatcher, new HorseModel<>(0.0F), 1.0F);
 	}
 
 	public ResourceLocation getTextureLocation(AbstractHorse abstractHorse) {
