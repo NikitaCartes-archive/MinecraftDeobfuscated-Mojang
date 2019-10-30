@@ -39,6 +39,13 @@ extends Item {
         if (itemStack.isEmpty()) {
             return new ItemStack(Items.GLASS_BOTTLE);
         }
+        if (livingEntity instanceof Player && !((Player)livingEntity).abilities.instabuild) {
+            ItemStack itemStack2 = new ItemStack(Items.GLASS_BOTTLE);
+            Player player = (Player)livingEntity;
+            if (!player.inventory.add(itemStack2)) {
+                player.drop(itemStack2, false);
+            }
+        }
         return itemStack;
     }
 

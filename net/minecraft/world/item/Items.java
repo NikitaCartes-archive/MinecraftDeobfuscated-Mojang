@@ -982,7 +982,7 @@ public class Items {
     public static final Item HONEYCOMB = Items.registerItem("honeycomb", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item BEE_NEST = Items.registerBlock(Blocks.BEE_NEST, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BEEHIVE = Items.registerBlock(Blocks.BEEHIVE, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item HONEY_BOTTLE = Items.registerItem("honey_bottle", (Item)new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).tab(CreativeModeTab.TAB_FOOD).stacksTo(1)));
+    public static final Item HONEY_BOTTLE = Items.registerItem("honey_bottle", (Item)new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).tab(CreativeModeTab.TAB_FOOD).stacksTo(16)));
     public static final Item HONEY_BLOCK = Items.registerBlock(Blocks.HONEY_BLOCK, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEYCOMB_BLOCK = Items.registerBlock(Blocks.HONEYCOMB_BLOCK, CreativeModeTab.TAB_DECORATIONS);
 

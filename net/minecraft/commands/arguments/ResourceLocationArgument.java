@@ -16,13 +16,15 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.storage.loot.PredicateManager;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ResourceLocationArgument
 implements ArgumentType<ResourceLocation> {
     private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ID = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.id.unknown", object));
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(object -> new TranslatableComponent("advancement.advancementNotFound", object));
-    public static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("recipe.notFound", object));
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(object -> new TranslatableComponent("advancement.advancementNotFound", object));
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("recipe.notFound", object));
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(object -> new TranslatableComponent("predicate.unknown", object));
 
     public static ResourceLocationArgument id() {
         return new ResourceLocationArgument();
@@ -41,6 +43,16 @@ implements ArgumentType<ResourceLocation> {
         RecipeManager recipeManager = commandContext.getSource().getServer().getRecipeManager();
         ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
         return recipeManager.byKey(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_RECIPE.create(resourceLocation));
+    }
+
+    public static LootItemCondition getPredicate(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
+        PredicateManager predicateManager = commandContext.getSource().getServer().getPredicateManager();
+        LootItemCondition lootItemCondition = predicateManager.get(resourceLocation);
+        if (lootItemCondition == null) {
+            throw ERROR_UNKNOWN_PREDICATE.create(resourceLocation);
+        }
+        return lootItemCondition;
     }
 
     public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

@@ -13,6 +13,7 @@ public class Lighting {
     public static void turnBackOn() {
         RenderSystem.enableLighting();
         RenderSystem.enableColorMaterial();
+        RenderSystem.colorMaterial(1032, 5634);
     }
 
     public static void turnOff() {

@@ -192,10 +192,6 @@ extends Entity {
         }
     }
 
-    public void setShortLifeTime() {
-        this.age = 4800;
-    }
-
     @Override
     protected void burn(int i) {
         this.hurt(DamageSource.IN_FIRE, i);

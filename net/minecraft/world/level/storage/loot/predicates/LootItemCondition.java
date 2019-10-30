@@ -17,7 +17,6 @@ import net.minecraft.world.level.storage.loot.predicates.InvertedLootItemConditi
 public interface LootItemCondition
 extends LootContextUser,
 Predicate<LootContext> {
-    public static final LootItemCondition FALSE = lootContext -> false;
 
     public static abstract class Serializer<T extends LootItemCondition> {
         private final ResourceLocation name;

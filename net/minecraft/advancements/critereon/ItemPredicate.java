@@ -219,11 +219,6 @@ public class ItemPredicate {
             return this;
         }
 
-        public Builder withCount(MinMaxBounds.Ints ints) {
-            this.count = ints;
-            return this;
-        }
-
         public Builder hasNbt(CompoundTag compoundTag) {
             this.nbt = new NbtPredicate(compoundTag);
             return this;

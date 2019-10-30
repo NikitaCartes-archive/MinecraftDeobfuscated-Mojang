@@ -420,7 +420,10 @@ public class EntitySelectorOptions {
                     return false;
                 }
                 ServerLevel serverLevel = (ServerLevel)entity.level;
-                LootItemCondition lootItemCondition = serverLevel.getServer().getPredicateManager().get(resourceLocation, LootItemCondition.FALSE);
+                LootItemCondition lootItemCondition = serverLevel.getServer().getPredicateManager().get(resourceLocation);
+                if (lootItemCondition == null) {
+                    return false;
+                }
                 LootContext lootContext = new LootContext.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, new BlockPos((Entity)entity)).create(LootContextParamSets.SELECTOR);
                 return bl ^ lootItemCondition.test(lootContext);
             });

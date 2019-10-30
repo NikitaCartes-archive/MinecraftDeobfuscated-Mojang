@@ -484,7 +484,6 @@ public class SoundEvents {
     public static final SoundEvent PARROT_IMITATE_MAGMA_CUBE = SoundEvents.register("entity.parrot.imitate.magma_cube");
     public static final SoundEvent PARROT_IMITATE_PHANTOM = SoundEvents.register("entity.parrot.imitate.phantom");
     public static final SoundEvent PARROT_IMITATE_PILLAGER = SoundEvents.register("entity.parrot.imitate.pillager");
-    public static final SoundEvent PARROT_IMITATE_POLAR_BEAR = SoundEvents.register("entity.parrot.imitate.polar_bear");
     public static final SoundEvent PARROT_IMITATE_RAVAGER = SoundEvents.register("entity.parrot.imitate.ravager");
     public static final SoundEvent PARROT_IMITATE_SHULKER = SoundEvents.register("entity.parrot.imitate.shulker");
     public static final SoundEvent PARROT_IMITATE_SILVERFISH = SoundEvents.register("entity.parrot.imitate.silverfish");
@@ -497,9 +496,7 @@ public class SoundEvents {
     public static final SoundEvent PARROT_IMITATE_WITCH = SoundEvents.register("entity.parrot.imitate.witch");
     public static final SoundEvent PARROT_IMITATE_WITHER = SoundEvents.register("entity.parrot.imitate.wither");
     public static final SoundEvent PARROT_IMITATE_WITHER_SKELETON = SoundEvents.register("entity.parrot.imitate.wither_skeleton");
-    public static final SoundEvent PARROT_IMITATE_WOLF = SoundEvents.register("entity.parrot.imitate.wolf");
     public static final SoundEvent PARROT_IMITATE_ZOMBIE = SoundEvents.register("entity.parrot.imitate.zombie");
-    public static final SoundEvent PARROT_IMITATE_ZOMBIE_PIGMAN = SoundEvents.register("entity.parrot.imitate.zombie_pigman");
     public static final SoundEvent PARROT_IMITATE_ZOMBIE_VILLAGER = SoundEvents.register("entity.parrot.imitate.zombie_villager");
     public static final SoundEvent PARROT_STEP = SoundEvents.register("entity.parrot.step");
     public static final SoundEvent PHANTOM_AMBIENT = SoundEvents.register("entity.phantom.ambient");

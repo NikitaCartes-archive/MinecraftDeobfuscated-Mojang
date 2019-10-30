@@ -115,6 +115,10 @@ implements ContextAwareComponent {
             this.id = resourceLocation;
         }
 
+        public ResourceLocation getId() {
+            return this.id;
+        }
+
         @Override
         public Component copy() {
             return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);

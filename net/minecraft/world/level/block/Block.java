@@ -273,7 +273,7 @@ implements ItemLike {
     }
 
     public static boolean isExceptionForConnection(Block block) {
-        return block instanceof LeavesBlock || block == Blocks.BARRIER || block == Blocks.CARVED_PUMPKIN || block == Blocks.JACK_O_LANTERN || block == Blocks.MELON || block == Blocks.PUMPKIN;
+        return block instanceof LeavesBlock || block == Blocks.BARRIER || block == Blocks.CARVED_PUMPKIN || block == Blocks.JACK_O_LANTERN || block == Blocks.MELON || block == Blocks.PUMPKIN || block.is(BlockTags.SHULKER_BOXES);
     }
 
     @Deprecated

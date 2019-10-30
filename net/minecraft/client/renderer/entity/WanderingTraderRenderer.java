@@ -9,8 +9,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.VillagerTradeItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.WanderingTrader;
 
@@ -22,7 +22,7 @@ extends MobRenderer<WanderingTrader, VillagerModel<WanderingTrader>> {
     public WanderingTraderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new VillagerModel(0.0f), 0.5f);
         this.addLayer(new CustomHeadLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this));
-        this.addLayer(new VillagerTradeItemLayer<WanderingTrader>(this));
+        this.addLayer(new CrossedArmsItemLayer<WanderingTrader, VillagerModel<WanderingTrader>>(this));
     }
 
     @Override

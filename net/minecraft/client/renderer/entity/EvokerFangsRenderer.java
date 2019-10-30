@@ -41,6 +41,7 @@ extends EntityRenderer<EvokerFangs> {
         poseStack.scale(-j, -j, j);
         float k = 0.03125f;
         poseStack.translate(0.0, -0.626f, 0.0);
+        poseStack.scale(0.5f, 0.5f, 0.5f);
         int l = evokerFangs.getLightColor();
         this.model.setupAnim(evokerFangs, i, 0.0f, 0.0f, evokerFangs.yRot, evokerFangs.xRot, 0.03125f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));

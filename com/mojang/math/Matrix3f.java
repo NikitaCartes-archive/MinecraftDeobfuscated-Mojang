@@ -116,7 +116,7 @@ public final class Matrix3f {
         Float float_;
         Pair<Float, Float> pair;
         Matrix3f matrix3f2 = new Matrix3f();
-        Quaternion quaternion = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+        Quaternion quaternion = Quaternion.ONE.copy();
         if (matrix3f.get(0, 1) * matrix3f.get(0, 1) + matrix3f.get(1, 0) * matrix3f.get(1, 0) > 1.0E-6f) {
             pair = Matrix3f.approxGivensQuat(matrix3f.get(0, 0), 0.5f * (matrix3f.get(0, 1) + matrix3f.get(1, 0)), matrix3f.get(1, 1));
             float_ = pair.getFirst();
@@ -193,8 +193,8 @@ public final class Matrix3f {
     }
 
     public Triple<Quaternion, Vector3f, Quaternion> svdDecompose() {
-        Quaternion quaternion = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-        Quaternion quaternion2 = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+        Quaternion quaternion = Quaternion.ONE.copy();
+        Quaternion quaternion2 = Quaternion.ONE.copy();
         Matrix3f matrix3f = new Matrix3f(this, true);
         matrix3f.mul(this);
         for (int i = 0; i < 5; ++i) {

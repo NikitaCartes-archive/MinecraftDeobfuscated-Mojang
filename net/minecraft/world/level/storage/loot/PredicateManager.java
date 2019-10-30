@@ -43,10 +43,6 @@ extends SimpleJsonResourceReloadListener {
         return this.conditions.get(resourceLocation);
     }
 
-    public LootItemCondition get(ResourceLocation resourceLocation, LootItemCondition lootItemCondition) {
-        return this.conditions.getOrDefault(resourceLocation, lootItemCondition);
-    }
-
     @Override
     protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         ImmutableMap.Builder builder = ImmutableMap.builder();

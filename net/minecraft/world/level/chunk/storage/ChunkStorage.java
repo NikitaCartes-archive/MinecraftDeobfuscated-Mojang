@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
@@ -19,14 +20,15 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkStorage
-extends RegionFileStorage {
+implements AutoCloseable {
+    private final IOWorker worker;
     protected final DataFixer fixerUpper;
     @Nullable
     private LegacyStructureDataHandler legacyStructureHandler;
 
     public ChunkStorage(File file, DataFixer dataFixer) {
-        super(file);
         this.fixerUpper = dataFixer;
+        this.worker = new IOWorker(new RegionFileStorage(file), "chunk");
     }
 
     public CompoundTag upgradeChunkTag(DimensionType dimensionType, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {
@@ -49,12 +51,25 @@ extends RegionFileStorage {
         return compoundTag.contains("DataVersion", 99) ? compoundTag.getInt("DataVersion") : -1;
     }
 
-    @Override
-    public void write(ChunkPos chunkPos, CompoundTag compoundTag) throws IOException {
-        super.write(chunkPos, compoundTag);
+    @Nullable
+    public CompoundTag read(ChunkPos chunkPos) throws IOException {
+        return this.worker.load(chunkPos);
+    }
+
+    public void write(ChunkPos chunkPos, CompoundTag compoundTag) {
+        this.worker.store(chunkPos, compoundTag);
         if (this.legacyStructureHandler != null) {
             this.legacyStructureHandler.removeIndex(chunkPos.toLong());
         }
+    }
+
+    public void flushWorker() {
+        this.worker.synchronize().join();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.worker.close();
     }
 }
 

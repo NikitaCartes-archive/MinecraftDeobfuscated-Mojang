@@ -29,14 +29,16 @@ import net.minecraft.util.Serializable;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.storage.IOWorker;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class SectionStorage<R extends Serializable>
-extends RegionFileStorage {
+implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
+    private final IOWorker worker;
     private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<Optional<R>>();
     private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
     private final BiFunction<Runnable, Dynamic<?>, R> deserializer;
@@ -45,11 +47,11 @@ extends RegionFileStorage {
     private final DataFixTypes type;
 
     public SectionStorage(File file, BiFunction<Runnable, Dynamic<?>, R> biFunction, Function<Runnable, R> function, DataFixer dataFixer, DataFixTypes dataFixTypes) {
-        super(file);
         this.deserializer = biFunction;
         this.factory = function;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
+        this.worker = new IOWorker(new RegionFileStorage(file), file.getName());
     }
 
     protected void tick(BooleanSupplier booleanSupplier) {
@@ -102,7 +104,7 @@ extends RegionFileStorage {
     @Nullable
     private CompoundTag tryRead(ChunkPos chunkPos) {
         try {
-            return this.read(chunkPos);
+            return this.worker.load(chunkPos);
         } catch (IOException iOException) {
             LOGGER.error("Error reading chunk {} data from disk", (Object)chunkPos, (Object)iOException);
             return null;
@@ -139,11 +141,7 @@ extends RegionFileStorage {
         Dynamic<Tag> dynamic = this.writeColumn(chunkPos, NbtOps.INSTANCE);
         Tag tag = dynamic.getValue();
         if (tag instanceof CompoundTag) {
-            try {
-                this.write(chunkPos, (CompoundTag)tag);
-            } catch (IOException iOException) {
-                LOGGER.error("Error writing data to disk", (Throwable)iOException);
-            }
+            this.worker.store(chunkPos, (CompoundTag)tag);
         } else {
             LOGGER.error("Expected compound tag, got {}", (Object)tag);
         }
@@ -186,6 +184,11 @@ extends RegionFileStorage {
                 return;
             }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.worker.close();
     }
 }
 

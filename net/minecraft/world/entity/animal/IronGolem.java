@@ -3,6 +3,10 @@
  */
 package net.minecraft.world.entity.animal;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -171,17 +175,7 @@ extends AbstractGolem {
     }
 
     public Crackiness getCrackiness() {
-        float f = this.getHealth();
-        if (f < 25.0f) {
-            return Crackiness.HIGH;
-        }
-        if (f < 50.0f) {
-            return Crackiness.MEDIUM;
-        }
-        if (f < 75.0f) {
-            return Crackiness.LOW;
-        }
-        return Crackiness.NONE;
+        return Crackiness.byFraction(this.getHealth() / this.getMaxHealth());
     }
 
     @Override
@@ -290,11 +284,29 @@ extends AbstractGolem {
     }
 
     public static enum Crackiness {
-        NONE,
-        LOW,
-        MEDIUM,
-        HIGH;
+        NONE(1.0f),
+        LOW(0.75f),
+        MEDIUM(0.5f),
+        HIGH(0.25f);
 
+        private static final List<Crackiness> BY_DAMAGE;
+        private final float fraction;
+
+        private Crackiness(float f) {
+            this.fraction = f;
+        }
+
+        public static Crackiness byFraction(float f) {
+            for (Crackiness crackiness : BY_DAMAGE) {
+                if (!(f < crackiness.fraction)) continue;
+                return crackiness;
+            }
+            return NONE;
+        }
+
+        static {
+            BY_DAMAGE = Stream.of(Crackiness.values()).sorted(Comparator.comparingDouble(crackiness -> crackiness.fraction)).collect(ImmutableList.toImmutableList());
+        }
     }
 }
 

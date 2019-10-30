@@ -14,12 +14,12 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class RegionFileStorage
+public final class RegionFileStorage
 implements AutoCloseable {
-    protected final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap();
+    private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap();
     private final File folder;
 
-    protected RegionFileStorage(File file) {
+    RegionFileStorage(File file) {
         this.folder = file;
     }
 

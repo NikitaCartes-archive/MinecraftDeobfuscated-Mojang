@@ -342,7 +342,7 @@ ResourceManagerReloadListener {
         if (this.panoramicMode) {
             return;
         }
-        this.resetProjectionMatrix(camera, f, false, false, 2.0f);
+        this.resetProjectionMatrix(this.getProjectionMatrix(camera, f, false));
         poseStack.getPose().setIdentity();
         poseStack.pushPose();
         this.bobHurt(poseStack, f);
@@ -365,21 +365,21 @@ ResourceManagerReloadListener {
         }
     }
 
-    public void resetProjectionMatrix(Camera camera, float f, boolean bl, boolean bl2, float g) {
+    public void resetProjectionMatrix(Matrix4f matrix4f) {
         RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
-        RenderSystem.multMatrix(this.getProjectionMatrix(camera, f, bl, bl2, g));
+        RenderSystem.multMatrix(matrix4f);
         RenderSystem.matrixMode(5888);
     }
 
-    public Matrix4f getProjectionMatrix(Camera camera, float f, boolean bl, boolean bl2, float g) {
+    public Matrix4f getProjectionMatrix(Camera camera, float f, boolean bl) {
         PoseStack poseStack = new PoseStack();
         poseStack.getPose().setIdentity();
-        if (bl2 && this.zoom != 1.0f) {
+        if (this.zoom != 1.0f) {
             poseStack.translate(this.zoomX, -this.zoomY, 0.0);
             poseStack.scale(this.zoom, this.zoom, 1.0f);
         }
-        poseStack.getPose().multiply(Matrix4f.perspective(this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * g));
+        poseStack.getPose().multiply(Matrix4f.perspective(this.getFov(camera, f, bl), (float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(), 0.05f, this.renderDistance * 4.0f));
         return poseStack.getPose();
     }
 
@@ -539,7 +539,8 @@ ResourceManagerReloadListener {
         this.minecraft.getProfiler().popPush("camera");
         Camera camera = this.mainCamera;
         this.renderDistance = this.minecraft.options.renderDistance * 16;
-        this.resetProjectionMatrix(camera, f, true, true, Mth.SQRT_OF_TWO);
+        Matrix4f matrix4f = this.getProjectionMatrix(camera, f, true);
+        this.resetProjectionMatrix(matrix4f);
         this.bobHurt(poseStack, f);
         if (this.minecraft.options.bobView) {
             this.bobView(poseStack, f);
@@ -560,7 +561,7 @@ ResourceManagerReloadListener {
         camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), this.minecraft.options.thirdPersonView > 0, this.minecraft.options.thirdPersonView == 2, f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0f));
-        this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture);
+        this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture, matrix4f);
         this.minecraft.getProfiler().popPush("hand");
         if (this.renderHand) {
             RenderSystem.clear(256, Minecraft.ON_OSX);

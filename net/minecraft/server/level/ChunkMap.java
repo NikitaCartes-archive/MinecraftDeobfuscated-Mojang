@@ -323,6 +323,7 @@ implements ChunkHolder.PlayerProvider {
                 }).filter(chunkAccess -> chunkAccess instanceof ImposterProtoChunk || chunkAccess instanceof LevelChunk).filter(this::save).forEach(chunkAccess -> mutableBoolean.setTrue());
             } while (mutableBoolean.isTrue());
             this.processUnloads(() -> true);
+            this.flushWorker();
             LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", (Object)this.storageFolder.getName());
         } else {
             this.visibleChunkMap.values().stream().filter(ChunkHolder::wasAccessibleSinceLastSave).forEach(chunkHolder -> {

@@ -9,9 +9,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
-import net.minecraft.client.renderer.entity.layers.VillagerTradeItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.entity.npc.Villager;
@@ -25,7 +25,7 @@ extends MobRenderer<Villager, VillagerModel<Villager>> {
         super(entityRenderDispatcher, new VillagerModel(0.0f), 0.5f);
         this.addLayer(new CustomHeadLayer<Villager, VillagerModel<Villager>>(this));
         this.addLayer(new VillagerProfessionLayer<Villager, VillagerModel<Villager>>(this, reloadableResourceManager, "villager"));
-        this.addLayer(new VillagerTradeItemLayer<Villager>(this));
+        this.addLayer(new CrossedArmsItemLayer<Villager, VillagerModel<Villager>>(this));
     }
 
     @Override

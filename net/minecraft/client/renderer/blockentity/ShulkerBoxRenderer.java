@@ -44,12 +44,11 @@ extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
         ResourceLocation resourceLocation = (dyeColor = shulkerBoxBlockEntity.getColor()) == null ? ModelBakery.DEFAULT_SHULKER_TEXTURE_LOCATION : ModelBakery.SHULKER_TEXTURE_LOCATION.get(dyeColor.getId());
         TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
         poseStack.pushPose();
-        poseStack.translate(0.5, 1.5, 0.5);
-        poseStack.scale(1.0f, -1.0f, -1.0f);
-        poseStack.translate(0.0, 1.0, 0.0);
+        poseStack.translate(0.5, 0.5, 0.5);
         float h = 0.9995f;
         poseStack.scale(0.9995f, 0.9995f, 0.9995f);
         poseStack.mulPose(direction.getRotation());
+        poseStack.scale(1.0f, -1.0f, -1.0f);
         poseStack.translate(0.0, -1.0, 0.0);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
         this.model.getBase().render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);

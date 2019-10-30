@@ -47,13 +47,7 @@ extends FoliagePlacer {
 
     @Override
     public int getTreeRadiusForHeight(int i, int j, int k, int l) {
-        if (l == 0) {
-            return 0;
-        }
-        if (l >= 1 + j - 2) {
-            return k;
-        }
-        return 1;
+        return l == 0 ? 0 : 2;
     }
 }
 
