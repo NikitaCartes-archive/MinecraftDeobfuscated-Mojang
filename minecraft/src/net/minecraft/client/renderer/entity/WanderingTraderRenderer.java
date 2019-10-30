@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
+import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.VillagerTradeItemLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.WanderingTrader;
 
@@ -16,7 +16,7 @@ public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, Villag
 	public WanderingTraderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		super(entityRenderDispatcher, new VillagerModel<>(0.0F), 0.5F);
 		this.addLayer(new CustomHeadLayer<>(this));
-		this.addLayer(new VillagerTradeItemLayer<>(this));
+		this.addLayer(new CrossedArmsItemLayer<>(this));
 	}
 
 	public ResourceLocation getTextureLocation(WanderingTrader wanderingTrader) {

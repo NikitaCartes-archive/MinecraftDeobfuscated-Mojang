@@ -363,13 +363,16 @@ public interface Component extends Message, Iterable<Component> {
 				if (component instanceof NbtComponent.BlockNbtComponent) {
 					NbtComponent.BlockNbtComponent blockNbtComponent = (NbtComponent.BlockNbtComponent)component;
 					jsonObject.addProperty("block", blockNbtComponent.getPos());
+				} else if (component instanceof NbtComponent.EntityNbtComponent) {
+					NbtComponent.EntityNbtComponent entityNbtComponent = (NbtComponent.EntityNbtComponent)component;
+					jsonObject.addProperty("entity", entityNbtComponent.getSelector());
 				} else {
-					if (!(component instanceof NbtComponent.EntityNbtComponent)) {
+					if (!(component instanceof NbtComponent.StorageNbtComponent)) {
 						throw new IllegalArgumentException("Don't know how to serialize " + component + " as a Component");
 					}
 
-					NbtComponent.EntityNbtComponent entityNbtComponent = (NbtComponent.EntityNbtComponent)component;
-					jsonObject.addProperty("entity", entityNbtComponent.getSelector());
+					NbtComponent.StorageNbtComponent storageNbtComponent = (NbtComponent.StorageNbtComponent)component;
+					jsonObject.addProperty("storage", storageNbtComponent.getId().toString());
 				}
 			}
 

@@ -10,8 +10,6 @@ import net.minecraft.world.level.storage.loot.LootContextUser;
 
 @FunctionalInterface
 public interface LootItemCondition extends LootContextUser, Predicate<LootContext> {
-	LootItemCondition FALSE = lootContext -> false;
-
 	@FunctionalInterface
 	public interface Builder {
 		LootItemCondition build();

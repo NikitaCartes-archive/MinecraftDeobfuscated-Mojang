@@ -690,10 +690,12 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 		}
 
+		boolean bl6 = false;
 		if (this.abilities.mayfly) {
 			if (this.minecraft.gameMode.isAlwaysFlying()) {
 				if (!this.abilities.flying) {
 					this.abilities.flying = true;
+					bl6 = true;
 					this.onUpdateAbilities();
 				}
 			} else if (!bl && this.input.jumping && !bl4) {
@@ -701,13 +703,14 @@ public class LocalPlayer extends AbstractClientPlayer {
 					this.jumpTriggerTime = 7;
 				} else if (!this.isSwimming()) {
 					this.abilities.flying = !this.abilities.flying;
+					bl6 = true;
 					this.onUpdateAbilities();
 					this.jumpTriggerTime = 0;
 				}
 			}
 		}
 
-		if (this.input.jumping && !bl && !this.abilities.flying) {
+		if (this.input.jumping && !bl6 && !bl && !this.abilities.flying) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
 				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));

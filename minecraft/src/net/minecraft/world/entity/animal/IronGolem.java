@@ -1,5 +1,9 @@
 package net.minecraft.world.entity.animal;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -183,14 +187,7 @@ public class IronGolem extends AbstractGolem {
 	}
 
 	public IronGolem.Crackiness getCrackiness() {
-		float f = this.getHealth();
-		if (f < 25.0F) {
-			return IronGolem.Crackiness.HIGH;
-		} else if (f < 50.0F) {
-			return IronGolem.Crackiness.MEDIUM;
-		} else {
-			return f < 75.0F ? IronGolem.Crackiness.LOW : IronGolem.Crackiness.NONE;
-		}
+		return IronGolem.Crackiness.byFraction(this.getHealth() / this.getMaxHealth());
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -306,9 +303,28 @@ public class IronGolem extends AbstractGolem {
 	}
 
 	public static enum Crackiness {
-		NONE,
-		LOW,
-		MEDIUM,
-		HIGH;
+		NONE(1.0F),
+		LOW(0.75F),
+		MEDIUM(0.5F),
+		HIGH(0.25F);
+
+		private static final List<IronGolem.Crackiness> BY_DAMAGE = (List<IronGolem.Crackiness>)Stream.of(values())
+			.sorted(Comparator.comparingDouble(crackiness -> (double)crackiness.fraction))
+			.collect(ImmutableList.toImmutableList());
+		private final float fraction;
+
+		private Crackiness(float f) {
+			this.fraction = f;
+		}
+
+		public static IronGolem.Crackiness byFraction(float f) {
+			for (IronGolem.Crackiness crackiness : BY_DAMAGE) {
+				if (f < crackiness.fraction) {
+					return crackiness;
+				}
+			}
+
+			return NONE;
+		}
 	}
 }

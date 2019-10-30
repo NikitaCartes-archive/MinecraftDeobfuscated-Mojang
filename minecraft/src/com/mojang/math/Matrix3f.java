@@ -106,7 +106,7 @@ public final class Matrix3f {
 
 	private static Quaternion stepJacobi(Matrix3f matrix3f) {
 		Matrix3f matrix3f2 = new Matrix3f();
-		Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternion quaternion = Quaternion.ONE.copy();
 		if (matrix3f.get(0, 1) * matrix3f.get(0, 1) + matrix3f.get(1, 0) * matrix3f.get(1, 0) > 1.0E-6F) {
 			Pair<Float, Float> pair = approxGivensQuat(matrix3f.get(0, 0), 0.5F * (matrix3f.get(0, 1) + matrix3f.get(1, 0)), matrix3f.get(1, 1));
 			Float float_ = pair.getFirst();
@@ -186,8 +186,8 @@ public final class Matrix3f {
 	}
 
 	public Triple<Quaternion, Vector3f, Quaternion> svdDecompose() {
-		Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-		Quaternion quaternion2 = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternion quaternion = Quaternion.ONE.copy();
+		Quaternion quaternion2 = Quaternion.ONE.copy();
 		Matrix3f matrix3f = new Matrix3f(this, true);
 		matrix3f.mul(this);
 

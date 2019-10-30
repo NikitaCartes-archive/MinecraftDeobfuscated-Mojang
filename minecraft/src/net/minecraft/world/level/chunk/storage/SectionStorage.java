@@ -30,8 +30,9 @@ import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SectionStorage<R extends Serializable> extends RegionFileStorage {
+public class SectionStorage<R extends Serializable> implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private final IOWorker worker;
 	private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<>();
 	private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
 	private final BiFunction<Runnable, Dynamic<?>, R> deserializer;
@@ -42,11 +43,11 @@ public class SectionStorage<R extends Serializable> extends RegionFileStorage {
 	public SectionStorage(
 		File file, BiFunction<Runnable, Dynamic<?>, R> biFunction, Function<Runnable, R> function, DataFixer dataFixer, DataFixTypes dataFixTypes
 	) {
-		super(file);
 		this.deserializer = biFunction;
 		this.factory = function;
 		this.fixerUpper = dataFixer;
 		this.type = dataFixTypes;
+		this.worker = new IOWorker(new RegionFileStorage(file), file.getName());
 	}
 
 	protected void tick(BooleanSupplier booleanSupplier) {
@@ -103,7 +104,7 @@ public class SectionStorage<R extends Serializable> extends RegionFileStorage {
 	@Nullable
 	private CompoundTag tryRead(ChunkPos chunkPos) {
 		try {
-			return this.read(chunkPos);
+			return this.worker.load(chunkPos);
 		} catch (IOException var3) {
 			LOGGER.error("Error reading chunk {} data from disk", chunkPos, var3);
 			return null;
@@ -143,11 +144,7 @@ public class SectionStorage<R extends Serializable> extends RegionFileStorage {
 		Dynamic<Tag> dynamic = this.writeColumn(chunkPos, NbtOps.INSTANCE);
 		Tag tag = dynamic.getValue();
 		if (tag instanceof CompoundTag) {
-			try {
-				this.write(chunkPos, (CompoundTag)tag);
-			} catch (IOException var5) {
-				LOGGER.error("Error writing data to disk", (Throwable)var5);
-			}
+			this.worker.store(chunkPos, (CompoundTag)tag);
 		} else {
 			LOGGER.error("Expected compound tag, got {}", tag);
 		}
@@ -204,5 +201,9 @@ public class SectionStorage<R extends Serializable> extends RegionFileStorage {
 				}
 			}
 		}
+	}
+
+	public void close() throws IOException {
+		this.worker.close();
 	}
 }

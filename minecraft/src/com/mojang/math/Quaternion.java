@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public final class Quaternion {
+	public static final Quaternion ONE = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
 	private final float[] values;
 
 	private Quaternion(float[] fs) {
@@ -150,5 +151,10 @@ public final class Quaternion {
 			this.values[2] = 0.0F;
 			this.values[3] = 0.0F;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Quaternion copy() {
+		return new Quaternion((float[])this.values.clone());
 	}
 }

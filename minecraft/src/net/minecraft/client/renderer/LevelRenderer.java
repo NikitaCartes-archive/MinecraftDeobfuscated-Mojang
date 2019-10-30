@@ -893,7 +893,9 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		}
 	}
 
-	public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture) {
+	public void renderLevel(
+		PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f
+	) {
 		BlockEntityRenderDispatcher.instance.prepare(this.level, this.minecraft.getTextureManager(), this.minecraft.font, camera, this.minecraft.hitResult);
 		this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
 		ProfilerFiller profilerFiller = this.level.getProfiler();
@@ -903,8 +905,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		double d = vec3.x();
 		double e = vec3.y();
 		double g = vec3.z();
-		Matrix4f matrix4f = poseStack.getPose();
-		Matrix4f matrix4f2 = gameRenderer.getProjectionMatrix(camera, f, true, true, Mth.SQRT_OF_TWO);
+		Matrix4f matrix4f2 = poseStack.getPose();
 		profilerFiller.popPush("culling");
 		boolean bl2 = this.capturedFrustum != null;
 		Frustum frustum;
@@ -912,13 +913,13 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 			frustum = this.capturedFrustum;
 			frustum.prepare(this.frustumPos.x, this.frustumPos.y, this.frustumPos.z);
 		} else {
-			frustum = new Frustum(matrix4f, matrix4f2);
+			frustum = new Frustum(matrix4f2, matrix4f);
 			frustum.prepare(d, e, g);
 		}
 
 		this.minecraft.getProfiler().popPush("captureFrustum");
 		if (this.captureFrustum) {
-			this.captureFrustum(matrix4f, matrix4f2, vec3.x, vec3.y, vec3.z, bl2 ? new Frustum(matrix4f, matrix4f2) : frustum);
+			this.captureFrustum(matrix4f2, matrix4f, vec3.x, vec3.y, vec3.z, bl2 ? new Frustum(matrix4f2, matrix4f) : frustum);
 			this.captureFrustum = false;
 		}
 
@@ -930,9 +931,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		if (this.minecraft.options.renderDistance >= 4) {
 			FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3);
 			profilerFiller.popPush("sky");
-			gameRenderer.resetProjectionMatrix(camera, f, true, false, 2.0F);
 			this.renderSky(poseStack, f);
-			gameRenderer.resetProjectionMatrix(camera, f, true, false, Mth.SQRT_OF_TWO);
 		}
 
 		profilerFiller.popPush("fog");
@@ -1103,7 +1102,6 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		profilerFiller.popPush("cloudsLayers");
 		if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
 			profilerFiller.popPush("clouds");
-			gameRenderer.resetProjectionMatrix(camera, f, true, false, 4.0F);
 			FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, gameRenderer.getRenderDistance(), bl3);
 			RenderSystem.disableCull();
 			RenderSystem.enableBlend();
@@ -1117,7 +1115,6 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 			RenderSystem.enableCull();
 			RenderSystem.disableBlend();
 			RenderSystem.disableFog();
-			gameRenderer.resetProjectionMatrix(camera, f, true, false, Mth.SQRT_OF_TWO);
 		}
 
 		RenderSystem.depthMask(false);

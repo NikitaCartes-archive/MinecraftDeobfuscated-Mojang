@@ -270,7 +270,8 @@ public class Block implements ItemLike {
 			|| block == Blocks.CARVED_PUMPKIN
 			|| block == Blocks.JACK_O_LANTERN
 			|| block == Blocks.MELON
-			|| block == Blocks.PUMPKIN;
+			|| block == Blocks.PUMPKIN
+			|| block.is(BlockTags.SHULKER_BOXES);
 	}
 
 	@Deprecated

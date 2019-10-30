@@ -262,6 +262,10 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			this.id = resourceLocation;
 		}
 
+		public ResourceLocation getId() {
+			return this.id;
+		}
+
 		@Override
 		public Component copy() {
 			return new NbtComponent.StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);

@@ -2,7 +2,7 @@ package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Quaternion;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
@@ -26,36 +26,13 @@ public class ShulkerHeadLayer extends RenderLayer<Shulker, ShulkerModel<Shulker>
 		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l, float m
 	) {
 		poseStack.pushPose();
-		switch (shulker.getAttachFace()) {
-			case DOWN:
-			default:
-				break;
-			case EAST:
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				poseStack.translate(1.0, -1.0, 0.0);
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-				break;
-			case WEST:
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				poseStack.translate(-1.0, -1.0, 0.0);
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-				break;
-			case NORTH:
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				poseStack.translate(0.0, -1.0, -1.0);
-				break;
-			case SOUTH:
-				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-				poseStack.translate(0.0, -1.0, 1.0);
-				break;
-			case UP:
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-				poseStack.translate(0.0, -2.0, 0.0);
-		}
-
+		poseStack.translate(0.0, 1.0, 0.0);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		Quaternion quaternion = shulker.getAttachFace().getOpposite().getRotation();
+		quaternion.conj();
+		poseStack.mulPose(quaternion);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		poseStack.translate(0.0, -1.0, 0.0);
 		ModelPart modelPart = this.getParentModel().getHead();
 		modelPart.yRot = k * (float) (Math.PI / 180.0);
 		modelPart.xRot = l * (float) (Math.PI / 180.0);

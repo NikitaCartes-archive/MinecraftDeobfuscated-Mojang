@@ -660,6 +660,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 
 	@Override
 	public void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundEditBookPacket, this, this.player.getLevel());
 		ItemStack itemStack = serverboundEditBookPacket.getBook();
 		if (!itemStack.isEmpty()) {
 			if (WritableBookItem.makeSureTagIsValid(itemStack.getTag())) {
@@ -1296,10 +1297,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 				this.player.inventoryMenu.broadcastChanges();
 			} else if (bl && bl3 && this.dropSpamTickCount < 200) {
 				this.dropSpamTickCount += 20;
-				ItemEntity itemEntity = this.player.drop(itemStack, true);
-				if (itemEntity != null) {
-					itemEntity.setShortLifeTime();
-				}
+				this.player.drop(itemStack, true);
 			}
 		}
 	}

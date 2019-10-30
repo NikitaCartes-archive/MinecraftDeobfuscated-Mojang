@@ -21,7 +21,7 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, int j, int k, BlockPos blockPos, Set<BlockPos> set
 	) {
 		for (int l = i; l >= j; l--) {
-			int m = this.getTreeRadiusForHeight(j, i, k, l);
+			int m = Math.max(k - 1 - (l - i) / 2, 0);
 			this.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, i, blockPos, l, m, set);
 		}
 	}
@@ -38,6 +38,6 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	public int getTreeRadiusForHeight(int i, int j, int k, int l) {
-		return Math.max(k - 1 - (l - j) / 2, 0);
+		return l == 0 ? 0 : 1;
 	}
 }

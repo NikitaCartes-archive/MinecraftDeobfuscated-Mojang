@@ -44,6 +44,6 @@ public class PineFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	public int getTreeRadiusForHeight(int i, int j, int k, int l) {
-		return l < i ? 0 : k;
+		return l <= 1 ? 0 : 2;
 	}
 }

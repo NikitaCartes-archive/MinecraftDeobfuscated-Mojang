@@ -39,9 +39,9 @@ public final class Transformation {
 	public Transformation(@Nullable Vector3f vector3f, @Nullable Quaternion quaternion, @Nullable Vector3f vector3f2, @Nullable Quaternion quaternion2) {
 		this.matrix = compose(vector3f, quaternion, vector3f2, quaternion2);
 		this.translation = vector3f != null ? vector3f : new Vector3f();
-		this.leftRotation = quaternion != null ? quaternion : new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		this.leftRotation = quaternion != null ? quaternion : Quaternion.ONE.copy();
 		this.scale = vector3f2 != null ? vector3f2 : new Vector3f(1.0F, 1.0F, 1.0F);
-		this.rightRotation = quaternion2 != null ? quaternion2 : new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		this.rightRotation = quaternion2 != null ? quaternion2 : Quaternion.ONE.copy();
 		this.decomposed = true;
 	}
 

@@ -49,7 +49,6 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
@@ -553,7 +552,7 @@ public class ExecuteCommand {
 							commandNode,
 							Commands.argument("predicate", ResourceLocationArgument.id()).suggests(SUGGEST_PREDICATE),
 							bl,
-							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceLocationArgument.getId(commandContext, "predicate"))
+							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceLocationArgument.getPredicate(commandContext, "predicate"))
 						)
 					)
 			);
@@ -629,10 +628,8 @@ public class ExecuteCommand {
 		return !scoreboard.hasPlayerScore(string, objective) ? false : ints.matches(scoreboard.getOrCreatePlayerScore(string, objective).getScore());
 	}
 
-	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation) {
+	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		PredicateManager predicateManager = serverLevel.getServer().getPredicateManager();
-		LootItemCondition lootItemCondition = predicateManager.get(resourceLocation, LootItemCondition.FALSE);
 		LootContext.Builder builder = new LootContext.Builder(serverLevel)
 			.withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()))
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity());

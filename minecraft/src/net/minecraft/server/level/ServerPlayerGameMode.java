@@ -242,10 +242,10 @@ public class ServerPlayerGameMode {
 					return true;
 				} else {
 					ItemStack itemStack = this.player.getMainHandItem();
+					ItemStack itemStack2 = itemStack.copy();
 					boolean bl2 = this.player.canDestroy(blockState);
 					itemStack.mineBlock(this.level, blockState, blockPos, this.player);
 					if (bl && bl2) {
-						ItemStack itemStack2 = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();
 						block.playerDestroy(this.level, this.player, blockPos, blockState, blockEntity, itemStack2);
 					}
 

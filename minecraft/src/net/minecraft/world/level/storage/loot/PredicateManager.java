@@ -39,10 +39,6 @@ public class PredicateManager extends SimpleJsonResourceReloadListener {
 		return (LootItemCondition)this.conditions.get(resourceLocation);
 	}
 
-	public LootItemCondition get(ResourceLocation resourceLocation, LootItemCondition lootItemCondition) {
-		return (LootItemCondition)this.conditions.getOrDefault(resourceLocation, lootItemCondition);
-	}
-
 	protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		Builder<ResourceLocation, LootItemCondition> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonObject) -> {

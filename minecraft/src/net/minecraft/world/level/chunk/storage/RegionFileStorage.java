@@ -10,11 +10,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.world.level.ChunkPos;
 
-public abstract class RegionFileStorage implements AutoCloseable {
-	protected final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap<>();
+public final class RegionFileStorage implements AutoCloseable {
+	private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap<>();
 	private final File folder;
 
-	protected RegionFileStorage(File file) {
+	RegionFileStorage(File file) {
 		this.folder = file;
 	}
 
