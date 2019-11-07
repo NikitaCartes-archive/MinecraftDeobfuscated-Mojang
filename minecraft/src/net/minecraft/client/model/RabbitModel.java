@@ -100,14 +100,13 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 			poseStack.pushPose();
 			poseStack.scale(0.56666666F, 0.56666666F, 0.56666666F);
 			poseStack.translate(0.0, 1.375, 0.125);
-			ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+			ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 			poseStack.popPose();
 			poseStack.pushPose();
 			poseStack.scale(0.4F, 0.4F, 0.4F);
 			poseStack.translate(0.0, 2.25, 0.0);
 			ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 			poseStack.popPose();
 		} else {
 			poseStack.pushPose();
@@ -127,13 +126,13 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 					this.tail,
 					this.nose
 				)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 			poseStack.popPose();
 		}
 	}
 
-	public void setupAnim(T rabbit, float f, float g, float h, float i, float j, float k) {
-		float l = h - (float)rabbit.tickCount;
+	public void setupAnim(T rabbit, float f, float g, float h, float i, float j) {
+		float k = h - (float)rabbit.tickCount;
 		this.nose.xRot = j * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.earRight.xRot = j * (float) (Math.PI / 180.0);
@@ -142,7 +141,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.earRight.yRot = this.nose.yRot - (float) (Math.PI / 12);
 		this.earLeft.yRot = this.nose.yRot + (float) (Math.PI / 12);
-		this.jumpRotation = Mth.sin(rabbit.getJumpCompletion(l) * (float) Math.PI);
+		this.jumpRotation = Mth.sin(rabbit.getJumpCompletion(k) * (float) Math.PI);
 		this.haunchLeft.xRot = (this.jumpRotation * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
 		this.haunchRight.xRot = (this.jumpRotation * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
 		this.rearFootLeft.xRot = this.jumpRotation * 50.0F * (float) (Math.PI / 180.0);

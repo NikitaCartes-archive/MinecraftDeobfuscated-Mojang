@@ -54,9 +54,7 @@ public class BedRenderer extends BlockEntityRenderer<BedBlockEntity> {
 		this.legs[3].zRot = (float) Math.PI;
 	}
 
-	public void render(
-		BedBlockEntity bedBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
-	) {
+	public void render(BedBlockEntity bedBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
 		if (bedBlockEntity.hasLevel()) {
@@ -86,12 +84,12 @@ public class BedRenderer extends BlockEntityRenderer<BedBlockEntity> {
 		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F + direction.toYRot()));
 		poseStack.translate(-0.5, -0.5, -0.5);
 		TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
-		this.headPiece.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.footPiece.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.legs[0].render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.legs[1].render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.legs[2].render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.legs[3].render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
+		this.headPiece.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		this.footPiece.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		this.legs[0].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		this.legs[1].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		this.legs[2].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		this.legs[3].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 		poseStack.popPose();
 	}
 }

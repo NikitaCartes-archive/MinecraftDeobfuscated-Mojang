@@ -1,7 +1,5 @@
 package net.minecraft.world.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -16,7 +14,6 @@ public class ExperienceBottleItem extends Item {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
 		return true;

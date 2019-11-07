@@ -19,21 +19,21 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Fox fox, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Fox fox, float f, float g, float h, float j, float k, float l) {
 		boolean bl = fox.isSleeping();
 		boolean bl2 = fox.isBaby();
 		poseStack.pushPose();
 		if (bl2) {
-			float n = 0.75F;
+			float m = 0.75F;
 			poseStack.scale(0.75F, 0.75F, 0.75F);
-			poseStack.translate(0.0, (double)(8.0F * m), (double)(3.35F * m));
+			poseStack.translate(0.0, 0.5, 0.209375F);
 		}
 
 		poseStack.translate(
 			(double)(this.getParentModel().head.x / 16.0F), (double)(this.getParentModel().head.y / 16.0F), (double)(this.getParentModel().head.z / 16.0F)
 		);
-		float n = fox.getHeadRollAngle(h);
-		poseStack.mulPose(Vector3f.ZP.rotation(n));
+		float m = fox.getHeadRollAngle(h);
+		poseStack.mulPose(Vector3f.ZP.rotation(m));
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(l));
 		if (fox.isBaby()) {
@@ -54,7 +54,7 @@ public class FoxHeldItemLayer extends RenderLayer<Fox, FoxModel<Fox>> {
 		}
 
 		ItemStack itemStack = fox.getItemBySlot(EquipmentSlot.MAINHAND);
-		Minecraft.getInstance().getItemInHandRenderer().renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+		Minecraft.getInstance().getItemInHandRenderer().renderItem(fox, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 }

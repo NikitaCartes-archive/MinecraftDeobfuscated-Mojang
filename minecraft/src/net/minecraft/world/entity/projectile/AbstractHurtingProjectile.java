@@ -204,8 +204,8 @@ public abstract class AbstractHurtingProjectile extends Entity {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getLightColor() {
-		return 15728880;
+	public int getBlockLightLevel() {
+		return 15;
 	}
 
 	@Override

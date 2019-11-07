@@ -1,6 +1,8 @@
 package net.minecraft.world.level;
 
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
-public interface LevelReader extends BlockAndBiomeGetter, CollisionGetter, BiomeManager.NoiseBiomeSource {
+public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeManager.NoiseBiomeSource {
 	@Nullable
 	ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl);
 
@@ -24,6 +26,18 @@ public interface LevelReader extends BlockAndBiomeGetter, CollisionGetter, Biome
 	int getHeight(Heightmap.Types types, int i, int j);
 
 	int getSkyDarken();
+
+	BiomeManager getBiomeManager();
+
+	default Biome getBiome(BlockPos blockPos) {
+		return this.getBiomeManager().getBiome(blockPos);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	default int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
+		return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());
+	}
 
 	@Override
 	default Biome getNoiseBiome(int i, int j, int k) {
@@ -67,8 +81,9 @@ public interface LevelReader extends BlockAndBiomeGetter, CollisionGetter, Biome
 		}
 	}
 
+	@Deprecated
 	default float getBrightness(BlockPos blockPos) {
-		return this.getDimension().getBrightnessRamp()[this.getMaxLocalRawBrightness(blockPos)];
+		return this.getDimension().getBrightness(this.getMaxLocalRawBrightness(blockPos));
 	}
 
 	default int getDirectSignal(BlockPos blockPos, Direction direction) {

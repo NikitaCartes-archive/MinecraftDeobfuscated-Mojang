@@ -46,28 +46,28 @@ public class PolarBearModel<T extends PolarBear> extends QuadrupedModel<T> {
 		this.leg3.z--;
 	}
 
-	public void setupAnim(T polarBear, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(polarBear, f, g, h, i, j, k);
-		float l = h - (float)polarBear.tickCount;
-		float m = polarBear.getStandingAnimationScale(l);
-		m *= m;
-		float n = 1.0F - m;
-		this.body.xRot = (float) (Math.PI / 2) - m * (float) Math.PI * 0.35F;
-		this.body.y = 9.0F * n + 11.0F * m;
-		this.leg2.y = 14.0F * n - 6.0F * m;
-		this.leg2.z = -8.0F * n - 4.0F * m;
-		this.leg2.xRot -= m * (float) Math.PI * 0.45F;
+	public void setupAnim(T polarBear, float f, float g, float h, float i, float j) {
+		super.setupAnim(polarBear, f, g, h, i, j);
+		float k = h - (float)polarBear.tickCount;
+		float l = polarBear.getStandingAnimationScale(k);
+		l *= l;
+		float m = 1.0F - l;
+		this.body.xRot = (float) (Math.PI / 2) - l * (float) Math.PI * 0.35F;
+		this.body.y = 9.0F * m + 11.0F * l;
+		this.leg2.y = 14.0F * m - 6.0F * l;
+		this.leg2.z = -8.0F * m - 4.0F * l;
+		this.leg2.xRot -= l * (float) Math.PI * 0.45F;
 		this.leg3.y = this.leg2.y;
 		this.leg3.z = this.leg2.z;
-		this.leg3.xRot -= m * (float) Math.PI * 0.45F;
+		this.leg3.xRot -= l * (float) Math.PI * 0.45F;
 		if (this.young) {
-			this.head.y = 10.0F * n - 9.0F * m;
-			this.head.z = -16.0F * n - 7.0F * m;
+			this.head.y = 10.0F * m - 9.0F * l;
+			this.head.z = -16.0F * m - 7.0F * l;
 		} else {
-			this.head.y = 10.0F * n - 14.0F * m;
-			this.head.z = -16.0F * n - 3.0F * m;
+			this.head.y = 10.0F * m - 14.0F * l;
+			this.head.z = -16.0F * m - 3.0F * l;
 		}
 
-		this.head.xRot += m * (float) Math.PI * 0.15F;
+		this.head.xRot += l * (float) Math.PI * 0.15F;
 	}
 }

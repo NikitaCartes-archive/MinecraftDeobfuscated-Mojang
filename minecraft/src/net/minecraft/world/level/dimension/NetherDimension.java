@@ -19,7 +19,7 @@ public class NetherDimension extends Dimension {
 	private static final Vec3 NETHER_FOG_COLOR = new Vec3(0.2F, 0.03F, 0.03F);
 
 	public NetherDimension(Level level, DimensionType dimensionType) {
-		super(level, dimensionType);
+		super(level, dimensionType, 0.1F);
 		this.ultraWarm = true;
 		this.hasCeiling = true;
 	}
@@ -28,16 +28,6 @@ public class NetherDimension extends Dimension {
 	@Override
 	public Vec3 getFogColor(float f, float g) {
 		return NETHER_FOG_COLOR;
-	}
-
-	@Override
-	protected void updateLightRamp() {
-		float f = 0.1F;
-
-		for (int i = 0; i <= 15; i++) {
-			float g = 1.0F - (float)i / 15.0F;
-			this.brightnessRamp[i] = (1.0F - g) / (g * 3.0F + 1.0F) * 0.9F + 0.1F;
-		}
 	}
 
 	@Override

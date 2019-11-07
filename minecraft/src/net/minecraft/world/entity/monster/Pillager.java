@@ -129,7 +129,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Rang
 		} else if (this.isHolding(Items.CROSSBOW)) {
 			return AbstractIllager.IllagerArmPose.CROSSBOW_HOLD;
 		} else {
-			return this.isAggressive() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.CROSSED;
+			return this.isAggressive() ? AbstractIllager.IllagerArmPose.ATTACKING : AbstractIllager.IllagerArmPose.NEUTRAL;
 		}
 	}
 

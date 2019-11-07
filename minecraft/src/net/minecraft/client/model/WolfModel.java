@@ -80,9 +80,9 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 			this.body.setPos(0.0F, 18.0F, 0.0F);
 			this.body.xRot = (float) (Math.PI / 4);
 			this.tail.setPos(-1.0F, 21.0F, 6.0F);
-			this.leg0.setPos(-2.5F, 22.0F, 2.0F);
+			this.leg0.setPos(-2.5F, 22.7F, 2.0F);
 			this.leg0.xRot = (float) (Math.PI * 3.0 / 2.0);
-			this.leg1.setPos(0.5F, 22.0F, 2.0F);
+			this.leg1.setPos(0.5F, 22.7F, 2.0F);
 			this.leg1.xRot = (float) (Math.PI * 3.0 / 2.0);
 			this.leg2.xRot = 5.811947F;
 			this.leg2.setPos(-2.49F, 17.0F, -4.0F);
@@ -110,7 +110,7 @@ public class WolfModel<T extends Wolf> extends ColorableAgeableListModel<T> {
 		this.realTail.zRot = wolf.getBodyRollAngle(h, -0.2F);
 	}
 
-	public void setupAnim(T wolf, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T wolf, float f, float g, float h, float i, float j) {
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.tail.xRot = h;

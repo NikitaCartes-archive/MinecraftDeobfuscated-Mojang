@@ -21,11 +21,11 @@ public class PigSaddleLayer extends RenderLayer<Pig, PigModel<Pig>> {
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Pig pig, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Pig pig, float f, float g, float h, float j, float k, float l) {
 		if (pig.hasSaddle()) {
 			this.getParentModel().copyPropertiesTo(this.model);
 			this.model.prepareMobModel(pig, f, g, h);
-			this.model.setupAnim(pig, f, g, j, k, l, m);
+			this.model.setupAnim(pig, f, g, j, k, l);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(SADDLE_LOCATION));
 			this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 		}

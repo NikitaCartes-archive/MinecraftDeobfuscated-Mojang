@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.util.List;
@@ -22,16 +23,14 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		super(blockEntityRenderDispatcher);
 	}
 
-	public void render(
-		BeaconBlockEntity beaconBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
-	) {
+	public void render(BeaconBlockEntity beaconBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		long l = beaconBlockEntity.getLevel().getGameTime();
 		List<BeaconBlockEntity.BeaconBeamSection> list = beaconBlockEntity.getBeamSections();
 		int k = 0;
 
 		for (int m = 0; m < list.size(); m++) {
 			BeaconBlockEntity.BeaconBeamSection beaconBeamSection = (BeaconBlockEntity.BeaconBeamSection)list.get(m);
-			renderBeaconBeam(poseStack, multiBufferSource, g, l, k, m == list.size() - 1 ? 1024 : beaconBeamSection.getHeight(), beaconBeamSection.getColor());
+			renderBeaconBeam(poseStack, multiBufferSource, f, l, k, m == list.size() - 1 ? 1024 : beaconBeamSection.getHeight(), beaconBeamSection.getColor());
 			k += beaconBeamSection.getHeight();
 		}
 	}
@@ -76,7 +75,7 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		float ae = (float)j * g * (0.5F / h) + ad;
 		renderPart(
 			poseStack,
-			multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation)),
+			multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, false)),
 			q,
 			r,
 			s,
@@ -105,7 +104,9 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		ac = 1.0F;
 		ad = -1.0F + p;
 		ae = (float)j * g + ad;
-		renderPart(poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam()), q, r, s, 0.125F, i, m, t, u, k, w, x, k, k, k, 0.0F, 1.0F, ae, ad);
+		renderPart(
+			poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, true)), q, r, s, 0.125F, i, m, t, u, k, w, x, k, k, k, 0.0F, 1.0F, ae, ad
+		);
 		poseStack.popPose();
 	}
 
@@ -131,15 +132,18 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		float v,
 		float w
 	) {
-		Matrix4f matrix4f = poseStack.getPose();
-		renderQuad(matrix4f, vertexConsumer, f, g, h, i, j, k, l, m, n, o, t, u, v, w);
-		renderQuad(matrix4f, vertexConsumer, f, g, h, i, j, k, r, s, p, q, t, u, v, w);
-		renderQuad(matrix4f, vertexConsumer, f, g, h, i, j, k, n, o, r, s, t, u, v, w);
-		renderQuad(matrix4f, vertexConsumer, f, g, h, i, j, k, p, q, l, m, t, u, v, w);
+		PoseStack.Pose pose = poseStack.last();
+		Matrix4f matrix4f = pose.pose();
+		Matrix3f matrix3f = pose.normal();
+		renderQuad(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, k, l, m, n, o, t, u, v, w);
+		renderQuad(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, k, r, s, p, q, t, u, v, w);
+		renderQuad(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, k, n, o, r, s, t, u, v, w);
+		renderQuad(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, k, p, q, l, m, t, u, v, w);
 	}
 
 	private static void renderQuad(
 		Matrix4f matrix4f,
+		Matrix3f matrix3f,
 		VertexConsumer vertexConsumer,
 		float f,
 		float g,
@@ -156,19 +160,21 @@ public class BeaconRenderer extends BlockEntityRenderer<BeaconBlockEntity> {
 		float r,
 		float s
 	) {
-		addVertex(matrix4f, vertexConsumer, f, g, h, i, k, l, m, q, r);
-		addVertex(matrix4f, vertexConsumer, f, g, h, i, j, l, m, q, s);
-		addVertex(matrix4f, vertexConsumer, f, g, h, i, j, n, o, p, s);
-		addVertex(matrix4f, vertexConsumer, f, g, h, i, k, n, o, p, r);
+		addVertex(matrix4f, matrix3f, vertexConsumer, f, g, h, i, k, l, m, q, r);
+		addVertex(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, l, m, q, s);
+		addVertex(matrix4f, matrix3f, vertexConsumer, f, g, h, i, j, n, o, p, s);
+		addVertex(matrix4f, matrix3f, vertexConsumer, f, g, h, i, k, n, o, p, r);
 	}
 
-	private static void addVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j, float k, float l, float m, float n) {
+	private static void addVertex(
+		Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j, float k, float l, float m, float n
+	) {
 		vertexConsumer.vertex(matrix4f, k, (float)j, l)
 			.color(f, g, h, i)
 			.uv(m, n)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(15728880)
-			.normal(0.0F, 1.0F, 0.0F)
+			.normal(matrix3f, 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 

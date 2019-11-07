@@ -1,8 +1,6 @@
 package net.minecraft.client.renderer.debug;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Collections;
 import java.util.List;
@@ -10,11 +8,11 @@ import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
@@ -28,36 +26,20 @@ public class CollisionBoxRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
-		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		double d = (double)Util.getNanos();
-		if (d - this.lastUpdateTime > 1.0E8) {
-			this.lastUpdateTime = d;
-			this.shapes = (List<VoxelShape>)camera.getEntity()
-				.level
-				.getCollisions(camera.getEntity(), camera.getEntity().getBoundingBox().inflate(6.0), Collections.emptySet())
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+		double g = (double)Util.getNanos();
+		if (g - this.lastUpdateTime > 1.0E8) {
+			this.lastUpdateTime = g;
+			Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
+			this.shapes = (List<VoxelShape>)entity.level
+				.getCollisions(entity, entity.getBoundingBox().inflate(6.0), Collections.emptySet())
 				.collect(Collectors.toList());
 		}
 
-		double e = camera.getPosition().x;
-		double f = camera.getPosition().y;
-		double g = camera.getPosition().z;
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.lineWidth(2.0F);
-		RenderSystem.disableTexture();
-		RenderSystem.depthMask(false);
-		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
-		PoseStack poseStack = new PoseStack();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 
 		for (VoxelShape voxelShape : this.shapes) {
-			LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, voxelShape, -e, -f, -g, 1.0F, 1.0F, 1.0F, 1.0F);
+			LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, voxelShape, -d, -e, -f, 1.0F, 1.0F, 1.0F, 1.0F);
 		}
-
-		bufferSource.endBatch();
-		RenderSystem.depthMask(true);
-		RenderSystem.enableTexture();
-		RenderSystem.disableBlend();
 	}
 }

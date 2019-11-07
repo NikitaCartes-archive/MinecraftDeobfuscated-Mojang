@@ -83,9 +83,12 @@ public class PresetFlatWorldScreen extends Screen {
 	public void render(int i, int j, float f) {
 		this.renderBackground();
 		this.list.render(i, j, f);
+		RenderSystem.pushMatrix();
+		RenderSystem.translatef(0.0F, 0.0F, 400.0F);
 		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 8, 16777215);
 		this.drawString(this.font, this.shareText, 50, 30, 10526880);
 		this.drawString(this.font, this.listText, 50, 70, 10526880);
+		RenderSystem.popMatrix();
 		this.export.render(i, j, f);
 		super.render(i, j, f);
 	}

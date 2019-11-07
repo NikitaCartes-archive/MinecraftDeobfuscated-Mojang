@@ -25,25 +25,25 @@ public class FlintAndSteelItem extends Item {
 		Player player = useOnContext.getPlayer();
 		LevelAccessor levelAccessor = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
-		BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
-		if (canUse(levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos2)) {
-			levelAccessor.playSound(player, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.4F + 0.8F);
-			BlockState blockState = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos2);
-			levelAccessor.setBlock(blockPos2, blockState, 11);
-			ItemStack itemStack = useOnContext.getItemInHand();
-			if (player instanceof ServerPlayer) {
-				CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos2, itemStack);
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		if (canLightCampFire(blockState)) {
+			levelAccessor.playSound(player, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.4F + 0.8F);
+			levelAccessor.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
+			if (player != null) {
+				useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
 			}
 
 			return InteractionResult.SUCCESS;
 		} else {
-			BlockState blockState = levelAccessor.getBlockState(blockPos);
-			if (canLightCampFire(blockState)) {
-				levelAccessor.playSound(player, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.4F + 0.8F);
-				levelAccessor.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
-				if (player != null) {
-					useOnContext.getItemInHand().hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
+			BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
+			if (canUse(levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos2)) {
+				levelAccessor.playSound(player, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.4F + 0.8F);
+				BlockState blockState2 = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos2);
+				levelAccessor.setBlock(blockPos2, blockState2, 11);
+				ItemStack itemStack = useOnContext.getItemInHand();
+				if (player instanceof ServerPlayer) {
+					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos2, itemStack);
+					itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(useOnContext.getHand()));
 				}
 
 				return InteractionResult.SUCCESS;

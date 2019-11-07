@@ -30,6 +30,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
@@ -121,22 +122,42 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		if (bl) {
-			this.releaseBeesAndResetState(level, blockState, blockPos, player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+			if (!isCampfireBelow(level, blockPos)) {
+				this.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+			} else {
+				this.resetHoneyLevel(level, blockState, blockPos);
+			}
+
 			return InteractionResult.SUCCESS;
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
 	}
 
-	public void releaseBeesAndResetState(
+	public static boolean isCampfireBelow(Level level, BlockPos blockPos) {
+		for (int i = 1; i <= 5; i++) {
+			BlockState blockState = level.getBlockState(blockPos.below(i));
+			if (!blockState.isAir()) {
+				return blockState.getBlock() == Blocks.CAMPFIRE;
+			}
+		}
+
+		return false;
+	}
+
+	public void releaseBeesAndResetHoneyLevel(
 		Level level, BlockState blockState, BlockPos blockPos, @Nullable Player player, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
 	) {
-		level.setBlock(blockPos, blockState.setValue(HONEY_LEVEL, Integer.valueOf(0)), 3);
+		this.resetHoneyLevel(level, blockState, blockPos);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof BeehiveBlockEntity) {
 			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
 			beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, beeReleaseStatus);
 		}
+	}
+
+	public void resetHoneyLevel(Level level, BlockState blockState, BlockPos blockPos) {
+		level.setBlock(blockPos, blockState.setValue(HONEY_LEVEL, Integer.valueOf(0)), 3);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -211,7 +232,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		if (!level.isClientSide && player.isCreative()) {
+		if (!level.isClientSide && player.isCreative() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof BeehiveBlockEntity) {
 				ItemStack itemStack = new ItemStack(this);

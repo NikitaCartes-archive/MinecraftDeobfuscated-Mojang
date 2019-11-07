@@ -19,35 +19,34 @@ public class MushroomCowMushroomLayer<T extends MushroomCow> extends RenderLayer
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mushroomCow, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mushroomCow, float f, float g, float h, float j, float k, float l) {
 		if (!mushroomCow.isBaby() && !mushroomCow.isInvisible()) {
 			BlockRenderDispatcher blockRenderDispatcher = Minecraft.getInstance().getBlockRenderer();
 			BlockState blockState = mushroomCow.getMushroomType().getBlockState();
+			int m = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0F);
 			poseStack.pushPose();
+			poseStack.translate(0.2F, -0.35F, 0.5);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0F));
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
-			poseStack.translate(-0.2F, 0.35F, 0.5);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-42.0F));
-			int n = LivingEntityRenderer.getOverlayCoords(mushroomCow, 0.0F);
-			poseStack.pushPose();
-			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
+			poseStack.translate(-0.5, -0.5, -0.5);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, m);
 			poseStack.popPose();
 			poseStack.pushPose();
-			poseStack.translate(-0.1F, 0.0, -0.6F);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-42.0F));
-			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
-			poseStack.popPose();
-			poseStack.popPose();
-			poseStack.pushPose();
-			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
+			poseStack.translate(0.2F, -0.35F, 0.5);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(42.0F));
+			poseStack.translate(0.1F, 0.0, -0.6F);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-48.0F));
 			poseStack.scale(-1.0F, -1.0F, 1.0F);
-			poseStack.translate(0.0, 0.7F, -0.2F);
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-12.0F));
-			poseStack.translate(-0.5, -0.5, 0.5);
-			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, n);
+			poseStack.translate(-0.5, -0.5, -0.5);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, m);
+			poseStack.popPose();
+			poseStack.pushPose();
+			this.getParentModel().getHead().translateAndRotate(poseStack);
+			poseStack.translate(0.0, -0.7F, -0.2F);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-78.0F));
+			poseStack.scale(-1.0F, -1.0F, 1.0F);
+			poseStack.translate(-0.5, -0.5, -0.5);
+			blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, m);
 			poseStack.popPose();
 		}
 	}

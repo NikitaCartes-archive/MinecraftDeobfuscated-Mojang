@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -54,7 +53,7 @@ public class DefaultClientResourcePack extends VanillaPack {
 	@Nullable
 	@Override
 	protected InputStream getResourceAsStream(String string) {
-		File file = this.assetIndex.getFile(string);
+		File file = this.assetIndex.getRootFile(string);
 		if (file != null && file.exists()) {
 			try {
 				return new FileInputStream(file);
@@ -66,9 +65,9 @@ public class DefaultClientResourcePack extends VanillaPack {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, int i, Predicate<String> predicate) {
-		Collection<ResourceLocation> collection = super.getResources(packType, string, i, predicate);
-		collection.addAll((Collection)this.assetIndex.getFiles(string, i, predicate).stream().map(ResourceLocation::new).collect(Collectors.toList()));
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
+		Collection<ResourceLocation> collection = super.getResources(packType, string, string2, i, predicate);
+		collection.addAll(this.assetIndex.getFiles(string2, string, i, predicate));
 		return collection;
 	}
 }

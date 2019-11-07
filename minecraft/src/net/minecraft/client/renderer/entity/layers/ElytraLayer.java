@@ -27,9 +27,7 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
 		if (itemStack.getItem() == Items.ELYTRA) {
 			ResourceLocation resourceLocation;
@@ -51,7 +49,7 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 			poseStack.pushPose();
 			poseStack.translate(0.0, 0.0, 0.125);
 			this.getParentModel().copyPropertiesTo(this.elytraModel);
-			this.elytraModel.setupAnim(livingEntity, f, g, j, k, l, m);
+			this.elytraModel.setupAnim(livingEntity, f, g, j, k, l);
 			VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.elytraModel.renderType(resourceLocation), false, itemStack.hasFoil());
 			this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 			poseStack.popPose();

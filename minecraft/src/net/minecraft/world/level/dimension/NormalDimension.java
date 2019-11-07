@@ -48,7 +48,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class NormalDimension extends Dimension {
 	public NormalDimension(Level level, DimensionType dimensionType) {
-		super(level, dimensionType);
+		super(level, dimensionType, 0.0F);
 	}
 
 	@Override

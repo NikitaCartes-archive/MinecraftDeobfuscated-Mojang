@@ -3,7 +3,6 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -47,6 +46,7 @@ public final class DarkForestBiome extends Biome {
 							Feature.HUGE_BROWN_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_BROWN_MUSHROOM_CONFIG).weighted(0.025F),
 							Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG).weighted(0.05F),
 							Feature.DARK_OAK_TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG).weighted(0.6666667F),
+							Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_CONFIG).weighted(0.2F),
 							Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_CONFIG).weighted(0.1F)
 						),
 						Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_CONFIG)
@@ -81,8 +81,8 @@ public final class DarkForestBiome extends Biome {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getGrassColor(BlockPos blockPos) {
-		int i = super.getGrassColor(blockPos);
+	public int getGrassColor(double d, double e) {
+		int i = super.getGrassColor(d, e);
 		return (i & 16711422) + 2634762 >> 1;
 	}
 }

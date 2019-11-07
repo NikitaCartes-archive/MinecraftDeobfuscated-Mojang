@@ -481,14 +481,18 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	@Override
-	protected void checkDespawn() {
-		this.noActionTime = 0;
+	public void checkDespawn() {
+		if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+			this.remove();
+		} else {
+			this.noActionTime = 0;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getLightColor() {
-		return 15728880;
+	public int getBlockLightLevel() {
+		return 15;
 	}
 
 	@Override

@@ -178,7 +178,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 			PoseStack poseStack = new PoseStack();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
 			poseStack.translate(0.0, 0.0, (double)this.itemRenderer.blitOffset);
-			Matrix4f matrix4f = poseStack.getPose();
+			Matrix4f matrix4f = poseStack.last().pose();
 
 			for (int s = 0; s < list.size(); s++) {
 				String string2 = (String)list.get(s);
@@ -361,7 +361,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Wi
 	}
 
 	public void renderDirtBackground(int i) {
-		RenderSystem.disableFog();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		this.minecraft.getTextureManager().bind(BACKGROUND_LOCATION);

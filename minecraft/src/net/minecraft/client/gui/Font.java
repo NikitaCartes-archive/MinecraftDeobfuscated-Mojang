@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -94,7 +95,9 @@ public class Font implements AutoCloseable {
 			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
 		}
 
-		f = this.renderText(string, f, g, i, false, matrix4f, multiBufferSource, bl2, j, k);
+		Matrix4f matrix4f2 = matrix4f.copy();
+		matrix4f2.translate(new Vector3f(0.0F, 0.0F, 0.001F));
+		f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
 		return (int)f + (bl ? 1 : 0);
 	}
 

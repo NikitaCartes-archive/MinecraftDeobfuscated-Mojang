@@ -1,12 +1,13 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 
 @Environment(EnvType.CLIENT)
@@ -23,18 +24,7 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
-		RenderSystem.pushMatrix();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableTexture();
-		this.doRender();
-		RenderSystem.enableTexture();
-		RenderSystem.disableBlend();
-		RenderSystem.popMatrix();
-	}
-
-	private void doRender() {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
 		BlockPos blockPos = this.getCamera().getBlockPosition();
 
 		for (BlockPos blockPos2 : this.raidCenters) {

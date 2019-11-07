@@ -1433,7 +1433,9 @@ public class Blocks {
 		"purpur_pillar", new RotatedPillarBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).strength(1.5F, 6.0F))
 	);
 	public static final Block PURPUR_STAIRS = register("purpur_stairs", new StairBlock(PURPUR_BLOCK.defaultBlockState(), Block.Properties.copy(PURPUR_BLOCK)));
-	public static final Block END_STONE_BRICKS = register("end_stone_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(0.8F)));
+	public static final Block END_STONE_BRICKS = register(
+		"end_stone_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(3.0F, 9.0F))
+	);
 	public static final Block BEETROOTS = register(
 		"beetroots", new BeetrootBlock(Block.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP))
 	);

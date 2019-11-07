@@ -48,7 +48,7 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.body.xRot = (float) (Math.PI / 2);

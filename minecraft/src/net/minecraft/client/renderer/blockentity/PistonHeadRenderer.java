@@ -28,26 +28,16 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 		super(blockEntityRenderDispatcher);
 	}
 
-	public void render(
-		PistonMovingBlockEntity pistonMovingBlockEntity,
-		double d,
-		double e,
-		double f,
-		float g,
-		PoseStack poseStack,
-		MultiBufferSource multiBufferSource,
-		int i,
-		int j
-	) {
+	public void render(PistonMovingBlockEntity pistonMovingBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		Level level = pistonMovingBlockEntity.getLevel();
 		if (level != null) {
 			BlockPos blockPos = pistonMovingBlockEntity.getBlockPos().relative(pistonMovingBlockEntity.getMovementDirection().getOpposite());
 			BlockState blockState = pistonMovingBlockEntity.getMovedState();
-			if (!blockState.isAir() && !(pistonMovingBlockEntity.getProgress(g) >= 1.0F)) {
+			if (!blockState.isAir() && !(pistonMovingBlockEntity.getProgress(f) >= 1.0F)) {
 				ModelBlockRenderer.enableCaching();
 				poseStack.pushPose();
-				poseStack.translate((double)pistonMovingBlockEntity.getXOff(g), (double)pistonMovingBlockEntity.getYOff(g), (double)pistonMovingBlockEntity.getZOff(g));
-				if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(g) <= 4.0F) {
+				poseStack.translate((double)pistonMovingBlockEntity.getXOff(f), (double)pistonMovingBlockEntity.getYOff(f), (double)pistonMovingBlockEntity.getZOff(f));
+				if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(f) <= 4.0F) {
 					blockState = blockState.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(true));
 					this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
 				} else if (pistonMovingBlockEntity.isSourcePiston() && !pistonMovingBlockEntity.isExtending()) {
@@ -56,7 +46,7 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 						.defaultBlockState()
 						.setValue(PistonHeadBlock.TYPE, pistonType)
 						.setValue(PistonHeadBlock.FACING, blockState.getValue(PistonBaseBlock.FACING));
-					blockState2 = blockState2.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(pistonMovingBlockEntity.getProgress(g) >= 0.5F));
+					blockState2 = blockState2.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(pistonMovingBlockEntity.getProgress(f) >= 0.5F));
 					this.renderBlock(blockPos, blockState2, poseStack, multiBufferSource, level, false, j);
 					BlockPos blockPos2 = blockPos.relative(pistonMovingBlockEntity.getMovementDirection());
 					poseStack.popPose();

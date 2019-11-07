@@ -51,17 +51,17 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 			}
 
 			poseStack.translate(0.0, (double)(this.yHeadOffset / 16.0F), (double)(this.zHeadOffset / 16.0F));
-			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 			poseStack.popPose();
 			poseStack.pushPose();
 			float k = 1.0F / this.babyBodyScale;
 			poseStack.scale(k, k, k);
 			poseStack.translate(0.0, (double)(this.bodyYOffset / 16.0F), 0.0);
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 			poseStack.popPose();
 		} else {
-			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h));
+			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
 		}
 	}
 

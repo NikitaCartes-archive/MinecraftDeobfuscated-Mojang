@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.HttpTexture;
@@ -26,11 +26,11 @@ public abstract class AbstractClientPlayer extends Player {
 	public float elytraRotX;
 	public float elytraRotY;
 	public float elytraRotZ;
-	public final MultiPlayerLevel clientLevel;
+	public final ClientLevel clientLevel;
 
-	public AbstractClientPlayer(MultiPlayerLevel multiPlayerLevel, GameProfile gameProfile) {
-		super(multiPlayerLevel, gameProfile);
-		this.clientLevel = multiPlayerLevel;
+	public AbstractClientPlayer(ClientLevel clientLevel, GameProfile gameProfile) {
+		super(clientLevel, gameProfile);
+		this.clientLevel = clientLevel;
 	}
 
 	@Override

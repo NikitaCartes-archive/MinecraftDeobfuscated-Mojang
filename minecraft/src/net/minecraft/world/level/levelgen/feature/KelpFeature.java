@@ -38,7 +38,7 @@ public class KelpFeature extends Feature<NoneFeatureConfiguration> {
 					&& levelAccessor.getBlockState(blockPos2.above()).getBlock() == Blocks.WATER
 					&& blockState2.canSurvive(levelAccessor, blockPos2)) {
 					if (l == k) {
-						levelAccessor.setBlock(blockPos2, blockState.setValue(KelpBlock.AGE, Integer.valueOf(random.nextInt(23))), 2);
+						levelAccessor.setBlock(blockPos2, blockState.setValue(KelpBlock.AGE, Integer.valueOf(random.nextInt(4) + 20)), 2);
 						i++;
 					} else {
 						levelAccessor.setBlock(blockPos2, blockState2, 2);
@@ -46,7 +46,7 @@ public class KelpFeature extends Feature<NoneFeatureConfiguration> {
 				} else if (l > 0) {
 					BlockPos blockPos3 = blockPos2.below();
 					if (blockState.canSurvive(levelAccessor, blockPos3) && levelAccessor.getBlockState(blockPos3.below()).getBlock() != Blocks.KELP) {
-						levelAccessor.setBlock(blockPos3, blockState.setValue(KelpBlock.AGE, Integer.valueOf(random.nextInt(23))), 2);
+						levelAccessor.setBlock(blockPos3, blockState.setValue(KelpBlock.AGE, Integer.valueOf(random.nextInt(4) + 20)), 2);
 						i++;
 					}
 					break;

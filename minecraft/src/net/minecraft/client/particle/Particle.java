@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RewindableStream;
@@ -45,9 +46,6 @@ public abstract class Particle {
 	protected float alpha = 1.0F;
 	protected float roll;
 	protected float oRoll;
-	public static double xOff;
-	public static double yOff;
-	public static double zOff;
 
 	protected Particle(Level level, double d, double e, double f) {
 		this.level = level;
@@ -120,7 +118,7 @@ public abstract class Particle {
 		}
 	}
 
-	public abstract void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k);
+	public abstract void render(VertexConsumer vertexConsumer, Camera camera, float f);
 
 	public abstract ParticleRenderType getRenderType();
 
@@ -213,7 +211,7 @@ public abstract class Particle {
 
 	protected int getLightColor(float f) {
 		BlockPos blockPos = new BlockPos(this.x, this.y, this.z);
-		return this.level.hasChunkAt(blockPos) ? this.level.getLightColor(blockPos) : 0;
+		return this.level.hasChunkAt(blockPos) ? LevelRenderer.getLightColor(this.level, blockPos) : 0;
 	}
 
 	public boolean isAlive() {

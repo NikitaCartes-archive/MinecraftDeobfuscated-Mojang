@@ -7,5 +7,5 @@ import net.minecraft.world.entity.HumanoidArm;
 
 @Environment(EnvType.CLIENT)
 public interface ArmedModel {
-	void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack);
+	void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack);
 }

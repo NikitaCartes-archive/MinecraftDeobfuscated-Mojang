@@ -30,42 +30,42 @@ public class ElytraModel<T extends LivingEntity> extends AgeableListModel<T> {
 		return ImmutableList.<ModelPart>of(this.leftWing, this.rightWing);
 	}
 
-	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		float l = (float) (Math.PI / 12);
-		float m = (float) (-Math.PI / 12);
+	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
+		float k = (float) (Math.PI / 12);
+		float l = (float) (-Math.PI / 12);
+		float m = 0.0F;
 		float n = 0.0F;
-		float o = 0.0F;
 		if (livingEntity.isFallFlying()) {
-			float p = 1.0F;
+			float o = 1.0F;
 			Vec3 vec3 = livingEntity.getDeltaMovement();
 			if (vec3.y < 0.0) {
 				Vec3 vec32 = vec3.normalize();
-				p = 1.0F - (float)Math.pow(-vec32.y, 1.5);
+				o = 1.0F - (float)Math.pow(-vec32.y, 1.5);
 			}
 
-			l = p * (float) (Math.PI / 9) + (1.0F - p) * l;
-			m = p * (float) (-Math.PI / 2) + (1.0F - p) * m;
+			k = o * (float) (Math.PI / 9) + (1.0F - o) * k;
+			l = o * (float) (-Math.PI / 2) + (1.0F - o) * l;
 		} else if (livingEntity.isCrouching()) {
-			l = (float) (Math.PI * 2.0 / 9.0);
-			m = (float) (-Math.PI / 4);
-			n = 3.0F;
-			o = 0.08726646F;
+			k = (float) (Math.PI * 2.0 / 9.0);
+			l = (float) (-Math.PI / 4);
+			m = 3.0F;
+			n = 0.08726646F;
 		}
 
 		this.leftWing.x = 5.0F;
-		this.leftWing.y = n;
+		this.leftWing.y = m;
 		if (livingEntity instanceof AbstractClientPlayer) {
 			AbstractClientPlayer abstractClientPlayer = (AbstractClientPlayer)livingEntity;
-			abstractClientPlayer.elytraRotX = (float)((double)abstractClientPlayer.elytraRotX + (double)(l - abstractClientPlayer.elytraRotX) * 0.1);
-			abstractClientPlayer.elytraRotY = (float)((double)abstractClientPlayer.elytraRotY + (double)(o - abstractClientPlayer.elytraRotY) * 0.1);
-			abstractClientPlayer.elytraRotZ = (float)((double)abstractClientPlayer.elytraRotZ + (double)(m - abstractClientPlayer.elytraRotZ) * 0.1);
+			abstractClientPlayer.elytraRotX = (float)((double)abstractClientPlayer.elytraRotX + (double)(k - abstractClientPlayer.elytraRotX) * 0.1);
+			abstractClientPlayer.elytraRotY = (float)((double)abstractClientPlayer.elytraRotY + (double)(n - abstractClientPlayer.elytraRotY) * 0.1);
+			abstractClientPlayer.elytraRotZ = (float)((double)abstractClientPlayer.elytraRotZ + (double)(l - abstractClientPlayer.elytraRotZ) * 0.1);
 			this.leftWing.xRot = abstractClientPlayer.elytraRotX;
 			this.leftWing.yRot = abstractClientPlayer.elytraRotY;
 			this.leftWing.zRot = abstractClientPlayer.elytraRotZ;
 		} else {
-			this.leftWing.xRot = l;
-			this.leftWing.zRot = m;
-			this.leftWing.yRot = o;
+			this.leftWing.xRot = k;
+			this.leftWing.zRot = l;
+			this.leftWing.yRot = n;
 		}
 
 		this.rightWing.x = -this.leftWing.x;

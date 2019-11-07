@@ -51,9 +51,7 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 		reloadableResourceManager.registerReloadListener(this);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
 		if (!livingEntity.isInvisible()) {
 			VillagerData villagerData = livingEntity.getVillagerData();
 			VillagerType villagerType = villagerData.getType();

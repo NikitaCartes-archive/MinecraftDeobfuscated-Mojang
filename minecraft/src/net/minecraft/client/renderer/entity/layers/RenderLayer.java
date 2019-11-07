@@ -37,14 +37,13 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
 		float l,
 		float m,
 		float n,
-		float o,
-		float p
+		float o
 	) {
 		if (!livingEntity.isInvisible()) {
 			entityModel.copyPropertiesTo(entityModel2);
-			entityModel2.prepareMobModel(livingEntity, f, g, m);
-			entityModel2.setupAnim(livingEntity, f, g, h, j, k, l);
-			renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, n, o, p);
+			entityModel2.prepareMobModel(livingEntity, f, g, l);
+			entityModel2.setupAnim(livingEntity, f, g, h, j, k);
+			renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, m, n, o);
 		}
 	}
 
@@ -71,7 +70,5 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
 		return this.renderer.getTextureLocation(entity);
 	}
 
-	public abstract void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l, float m
-	);
+	public abstract void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l);
 }

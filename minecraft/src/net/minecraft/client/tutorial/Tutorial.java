@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -37,15 +37,15 @@ public class Tutorial {
 		}
 	}
 
-	public void onLookAt(@Nullable MultiPlayerLevel multiPlayerLevel, @Nullable HitResult hitResult) {
-		if (this.instance != null && hitResult != null && multiPlayerLevel != null) {
-			this.instance.onLookAt(multiPlayerLevel, hitResult);
+	public void onLookAt(@Nullable ClientLevel clientLevel, @Nullable HitResult hitResult) {
+		if (this.instance != null && hitResult != null && clientLevel != null) {
+			this.instance.onLookAt(clientLevel, hitResult);
 		}
 	}
 
-	public void onDestroyBlock(MultiPlayerLevel multiPlayerLevel, BlockPos blockPos, BlockState blockState, float f) {
+	public void onDestroyBlock(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, float f) {
 		if (this.instance != null) {
-			this.instance.onDestroyBlock(multiPlayerLevel, blockPos, blockState, f);
+			this.instance.onDestroyBlock(clientLevel, blockPos, blockState, f);
 		}
 	}
 

@@ -43,7 +43,7 @@ public class BookModel extends Model {
 	public void render(
 		PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, @Nullable TextureAtlasSprite textureAtlasSprite
 	) {
-		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite, f, g, h));
+		this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, textureAtlasSprite, f, g, h));
 	}
 
 	public void setupAnim(float f, float g, float h, float i) {

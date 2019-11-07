@@ -21,7 +21,7 @@ public abstract class EntityModel<T extends Entity> extends Model {
 		super(function);
 	}
 
-	public abstract void setupAnim(T entity, float f, float g, float h, float i, float j, float k);
+	public abstract void setupAnim(T entity, float f, float g, float h, float i, float j);
 
 	public void prepareMobModel(T entity, float f, float g, float h) {
 	}

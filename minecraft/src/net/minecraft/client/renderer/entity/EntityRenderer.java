@@ -39,13 +39,13 @@ public abstract class EntityRenderer<T extends Entity> {
 		}
 	}
 
-	public Vec3 getRenderOffset(T entity, double d, double e, double f, float g) {
+	public Vec3 getRenderOffset(T entity, float f) {
 		return Vec3.ZERO;
 	}
 
-	public void render(T entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		if (this.shouldShowName(entity)) {
-			this.renderNameTag(entity, entity.getDisplayName().getColoredString(), poseStack, multiBufferSource);
+			this.renderNameTag(entity, entity.getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
 		}
 	}
 
@@ -59,14 +59,9 @@ public abstract class EntityRenderer<T extends Entity> {
 		return this.entityRenderDispatcher.getFont();
 	}
 
-	protected void renderNameTag(T entity, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	protected void renderNameTag(T entity, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(entity);
 		if (!(d > 4096.0)) {
-			int i = entity.getLightColor();
-			if (entity.isOnFire()) {
-				i = 15728880;
-			}
-
 			boolean bl = !entity.isDiscrete();
 			float f = entity.getBbHeight() + 0.5F;
 			int j = "deadmau5".equals(string) ? -10 : 0;
@@ -75,7 +70,7 @@ public abstract class EntityRenderer<T extends Entity> {
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(this.entityRenderDispatcher.playerRotX));
 			poseStack.scale(-0.025F, -0.025F, 0.025F);
-			Matrix4f matrix4f = poseStack.getPose();
+			Matrix4f matrix4f = poseStack.last().pose();
 			float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
 			int k = (int)(g * 255.0F) << 24;
 			Font font = this.getFont();

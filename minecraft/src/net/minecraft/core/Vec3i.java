@@ -2,6 +2,8 @@ package net.minecraft.core;
 
 import com.google.common.base.MoreObjects;
 import javax.annotation.concurrent.Immutable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 @Immutable
@@ -116,5 +118,10 @@ public class Vec3i implements Comparable<Vec3i> {
 
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("x", this.getX()).add("y", this.getY()).add("z", this.getZ()).toString();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public String toShortString() {
+		return "" + this.getX() + ", " + this.getY() + ", " + this.getZ();
 	}
 }

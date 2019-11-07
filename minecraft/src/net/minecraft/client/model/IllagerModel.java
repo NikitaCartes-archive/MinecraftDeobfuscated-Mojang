@@ -66,7 +66,7 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 		return ImmutableList.<ModelPart>of(this.head, this.body, this.leftLeg, this.rightLeg, this.arms, this.rightArm, this.leftArm);
 	}
 
-	public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j) {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.arms.y = 3.0F;
@@ -102,8 +102,8 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 
 		AbstractIllager.IllagerArmPose illagerArmPose = abstractIllager.getArmPose();
 		if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-			float l = Mth.sin(this.attackTime * (float) Math.PI);
-			float m = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
+			float k = Mth.sin(this.attackTime * (float) Math.PI);
+			float l = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
 			this.rightArm.zRot = 0.0F;
 			this.leftArm.zRot = 0.0F;
 			this.rightArm.yRot = (float) (Math.PI / 20);
@@ -111,13 +111,13 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 			if (abstractIllager.getMainArm() == HumanoidArm.RIGHT) {
 				this.rightArm.xRot = -1.8849558F + Mth.cos(h * 0.09F) * 0.15F;
 				this.leftArm.xRot = -0.0F + Mth.cos(h * 0.19F) * 0.5F;
-				this.rightArm.xRot += l * 2.2F - m * 0.4F;
-				this.leftArm.xRot += l * 1.2F - m * 0.4F;
+				this.rightArm.xRot += k * 2.2F - l * 0.4F;
+				this.leftArm.xRot += k * 1.2F - l * 0.4F;
 			} else {
 				this.rightArm.xRot = -0.0F + Mth.cos(h * 0.19F) * 0.5F;
 				this.leftArm.xRot = -1.8849558F + Mth.cos(h * 0.09F) * 0.15F;
-				this.rightArm.xRot += l * 1.2F - m * 0.4F;
-				this.leftArm.xRot += l * 2.2F - m * 0.4F;
+				this.rightArm.xRot += k * 1.2F - l * 0.4F;
+				this.leftArm.xRot += k * 2.2F - l * 0.4F;
 			}
 
 			this.rightArm.zRot = this.rightArm.zRot + Mth.cos(h * 0.09F) * 0.05F + 0.05F;
@@ -150,9 +150,9 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 			this.rightArm.yRot = -0.8F;
 			this.rightArm.xRot = -0.97079635F;
 			this.leftArm.xRot = -0.97079635F;
-			float l = Mth.clamp(this.itemUseTicks, 0.0F, 25.0F);
-			this.leftArm.yRot = Mth.lerp(l / 25.0F, 0.4F, 0.85F);
-			this.leftArm.xRot = Mth.lerp(l / 25.0F, this.leftArm.xRot, (float) (-Math.PI / 2));
+			float k = Mth.clamp(this.itemUseTicks, 0.0F, 25.0F);
+			this.leftArm.yRot = Mth.lerp(k / 25.0F, 0.4F, 0.85F);
+			this.leftArm.xRot = Mth.lerp(k / 25.0F, this.leftArm.xRot, (float) (-Math.PI / 2));
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.CELEBRATING) {
 			this.rightArm.z = 0.0F;
 			this.rightArm.x = -5.0F;
@@ -191,7 +191,7 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
-		this.getArm(humanoidArm).translateAndRotate(poseStack, 0.0625F);
+	public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+		this.getArm(humanoidArm).translateAndRotate(poseStack);
 	}
 }

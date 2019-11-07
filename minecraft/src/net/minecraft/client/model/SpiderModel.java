@@ -65,10 +65,10 @@ public class SpiderModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
-		float l = (float) (Math.PI / 4);
+		float k = (float) (Math.PI / 4);
 		this.leg0.zRot = (float) (-Math.PI / 4);
 		this.leg1.zRot = (float) (Math.PI / 4);
 		this.leg2.zRot = -0.58119464F;
@@ -77,8 +77,8 @@ public class SpiderModel<T extends Entity> extends ListModel<T> {
 		this.leg5.zRot = 0.58119464F;
 		this.leg6.zRot = (float) (-Math.PI / 4);
 		this.leg7.zRot = (float) (Math.PI / 4);
-		float m = -0.0F;
-		float n = (float) (Math.PI / 8);
+		float l = -0.0F;
+		float m = (float) (Math.PI / 8);
 		this.leg0.yRot = (float) (Math.PI / 4);
 		this.leg1.yRot = (float) (-Math.PI / 4);
 		this.leg2.yRot = (float) (Math.PI / 8);
@@ -87,29 +87,29 @@ public class SpiderModel<T extends Entity> extends ListModel<T> {
 		this.leg5.yRot = (float) (Math.PI / 8);
 		this.leg6.yRot = (float) (-Math.PI / 4);
 		this.leg7.yRot = (float) (Math.PI / 4);
-		float o = -(Mth.cos(f * 0.6662F * 2.0F + 0.0F) * 0.4F) * g;
-		float p = -(Mth.cos(f * 0.6662F * 2.0F + (float) Math.PI) * 0.4F) * g;
-		float q = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI / 2)) * 0.4F) * g;
-		float r = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
-		float s = Math.abs(Mth.sin(f * 0.6662F + 0.0F) * 0.4F) * g;
-		float t = Math.abs(Mth.sin(f * 0.6662F + (float) Math.PI) * 0.4F) * g;
-		float u = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI / 2)) * 0.4F) * g;
-		float v = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
-		this.leg0.yRot += o;
-		this.leg1.yRot += -o;
-		this.leg2.yRot += p;
-		this.leg3.yRot += -p;
-		this.leg4.yRot += q;
-		this.leg5.yRot += -q;
-		this.leg6.yRot += r;
-		this.leg7.yRot += -r;
-		this.leg0.zRot += s;
-		this.leg1.zRot += -s;
-		this.leg2.zRot += t;
-		this.leg3.zRot += -t;
-		this.leg4.zRot += u;
-		this.leg5.zRot += -u;
-		this.leg6.zRot += v;
-		this.leg7.zRot += -v;
+		float n = -(Mth.cos(f * 0.6662F * 2.0F + 0.0F) * 0.4F) * g;
+		float o = -(Mth.cos(f * 0.6662F * 2.0F + (float) Math.PI) * 0.4F) * g;
+		float p = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI / 2)) * 0.4F) * g;
+		float q = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
+		float r = Math.abs(Mth.sin(f * 0.6662F + 0.0F) * 0.4F) * g;
+		float s = Math.abs(Mth.sin(f * 0.6662F + (float) Math.PI) * 0.4F) * g;
+		float t = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI / 2)) * 0.4F) * g;
+		float u = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
+		this.leg0.yRot += n;
+		this.leg1.yRot += -n;
+		this.leg2.yRot += o;
+		this.leg3.yRot += -o;
+		this.leg4.yRot += p;
+		this.leg5.yRot += -p;
+		this.leg6.yRot += q;
+		this.leg7.yRot += -q;
+		this.leg0.zRot += r;
+		this.leg1.zRot += -r;
+		this.leg2.zRot += s;
+		this.leg3.zRot += -s;
+		this.leg4.zRot += t;
+		this.leg5.zRot += -t;
+		this.leg6.zRot += u;
+		this.leg7.zRot += -u;
 	}
 }

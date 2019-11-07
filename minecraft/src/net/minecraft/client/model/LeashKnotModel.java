@@ -24,7 +24,7 @@ public class LeashKnotModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.knot.yRot = i * (float) (Math.PI / 180.0);
 		this.knot.xRot = j * (float) (Math.PI / 180.0);
 	}

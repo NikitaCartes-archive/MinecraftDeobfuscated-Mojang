@@ -22,9 +22,9 @@ public class ItemTransform {
 	public final Vector3f scale;
 
 	public ItemTransform(Vector3f vector3f, Vector3f vector3f2, Vector3f vector3f3) {
-		this.rotation = new Vector3f(vector3f);
-		this.translation = new Vector3f(vector3f2);
-		this.scale = new Vector3f(vector3f3);
+		this.rotation = vector3f.copy();
+		this.translation = vector3f2.copy();
+		this.scale = vector3f3.copy();
 	}
 
 	public void apply(boolean bl, PoseStack poseStack) {

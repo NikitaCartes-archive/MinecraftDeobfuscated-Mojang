@@ -4,14 +4,14 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.pathfinder.Node;
@@ -20,14 +20,9 @@ import net.minecraft.world.phys.AABB;
 
 @Environment(EnvType.CLIENT)
 public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
-	private final Minecraft minecraft;
 	private final Map<Integer, Path> pathMap = Maps.<Integer, Path>newHashMap();
 	private final Map<Integer, Float> pathMaxDist = Maps.<Integer, Float>newHashMap();
 	private final Map<Integer, Long> creationMap = Maps.<Integer, Long>newHashMap();
-
-	public PathfindingRenderer(Minecraft minecraft) {
-		this.minecraft = minecraft;
-	}
 
 	public void addPath(int i, Path path, float f) {
 		this.pathMap.put(i, path);
@@ -36,14 +31,14 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
 		if (!this.pathMap.isEmpty()) {
 			long m = Util.getMillis();
 
 			for (Integer integer : this.pathMap.keySet()) {
 				Path path = (Path)this.pathMap.get(integer);
-				float f = (Float)this.pathMaxDist.get(integer);
-				renderPath(this.getCamera(), path, f, true, true);
+				float g = (Float)this.pathMaxDist.get(integer);
+				renderPath(path, g, true, true, d, e, f);
 			}
 
 			for (Integer integer2 : (Integer[])this.creationMap.keySet().toArray(new Integer[0])) {
@@ -55,26 +50,23 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	public static void renderPath(Camera camera, Path path, float f, boolean bl, boolean bl2) {
+	public static void renderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
 		RenderSystem.pushMatrix();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.color4f(0.0F, 1.0F, 0.0F, 0.75F);
 		RenderSystem.disableTexture();
 		RenderSystem.lineWidth(6.0F);
-		doRenderPath(camera, path, f, bl, bl2);
+		doRenderPath(path, f, bl, bl2, d, e, g);
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 		RenderSystem.popMatrix();
 	}
 
-	private static void doRenderPath(Camera camera, Path path, float f, boolean bl, boolean bl2) {
-		renderPathLine(camera, path);
-		double d = camera.getPosition().x;
-		double e = camera.getPosition().y;
-		double g = camera.getPosition().z;
+	private static void doRenderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
+		renderPathLine(path, d, e, g);
 		BlockPos blockPos = path.getTarget();
-		if (distanceToCamera(camera, blockPos) <= 40.0F) {
+		if (distanceToCamera(blockPos, d, e, g) <= 40.0F) {
 			DebugRenderer.renderFilledBox(
 				new AABB(
 						(double)((float)blockPos.getX() + 0.25F),
@@ -93,7 +85,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 			for (int i = 0; i < path.getSize(); i++) {
 				Node node = path.get(i);
-				if (distanceToCamera(camera, node.asBlockPos()) <= 40.0F) {
+				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 40.0F) {
 					float h = i == path.getIndex() ? 1.0F : 0.0F;
 					float j = i == path.getIndex() ? 0.0F : 1.0F;
 					DebugRenderer.renderFilledBox(
@@ -117,7 +109,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		if (bl) {
 			for (Node node2 : path.getClosedSet()) {
-				if (distanceToCamera(camera, node2.asBlockPos()) <= 40.0F) {
+				if (distanceToCamera(node2.asBlockPos(), d, e, g) <= 40.0F) {
 					DebugRenderer.renderFloatingText(String.format("%s", node2.type), (double)node2.x + 0.5, (double)node2.y + 0.75, (double)node2.z + 0.5, -65536);
 					DebugRenderer.renderFloatingText(
 						String.format(Locale.ROOT, "%.2f", node2.costMalus), (double)node2.x + 0.5, (double)node2.y + 0.25, (double)node2.z + 0.5, -65536
@@ -126,7 +118,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 
 			for (Node node2x : path.getOpenSet()) {
-				if (distanceToCamera(camera, node2x.asBlockPos()) <= 40.0F) {
+				if (distanceToCamera(node2x.asBlockPos(), d, e, g) <= 40.0F) {
 					DebugRenderer.renderFloatingText(String.format("%s", node2x.type), (double)node2x.x + 0.5, (double)node2x.y + 0.75, (double)node2x.z + 0.5, -16776961);
 					DebugRenderer.renderFloatingText(
 						String.format(Locale.ROOT, "%.2f", node2x.costMalus), (double)node2x.x + 0.5, (double)node2x.y + 0.25, (double)node2x.z + 0.5, -16776961
@@ -138,7 +130,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (bl2) {
 			for (int ix = 0; ix < path.getSize(); ix++) {
 				Node node = path.get(ix);
-				if (distanceToCamera(camera, node.asBlockPos()) <= 40.0F) {
+				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 40.0F) {
 					DebugRenderer.renderFloatingText(String.format("%s", node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1);
 					DebugRenderer.renderFloatingText(String.format(Locale.ROOT, "%.2f", node.costMalus), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1);
 				}
@@ -146,17 +138,14 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 	}
 
-	public static void renderPathLine(Camera camera, Path path) {
+	public static void renderPathLine(Path path, double d, double e, double f) {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		double d = camera.getPosition().x;
-		double e = camera.getPosition().y;
-		double f = camera.getPosition().z;
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int i = 0; i < path.getSize(); i++) {
 			Node node = path.get(i);
-			if (!(distanceToCamera(camera, node.asBlockPos()) > 40.0F)) {
+			if (!(distanceToCamera(node.asBlockPos(), d, e, f) > 40.0F)) {
 				float g = (float)i / (float)path.getSize() * 0.33F;
 				int j = i == 0 ? 0 : Mth.hsvToRgb(g, 0.9F, 0.9F);
 				int k = j >> 16 & 0xFF;
@@ -169,15 +158,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		tesselator.end();
 	}
 
-	private static float distanceToCamera(Camera camera, BlockPos blockPos) {
-		return (float)(
-			Math.abs((double)blockPos.getX() - camera.getPosition().x)
-				+ Math.abs((double)blockPos.getY() - camera.getPosition().y)
-				+ Math.abs((double)blockPos.getZ() - camera.getPosition().z)
-		);
-	}
-
-	private Camera getCamera() {
-		return this.minecraft.gameRenderer.getMainCamera();
+	private static float distanceToCamera(BlockPos blockPos, double d, double e, double f) {
+		return (float)(Math.abs((double)blockPos.getX() - d) + Math.abs((double)blockPos.getY() - e) + Math.abs((double)blockPos.getZ() - f));
 	}
 }

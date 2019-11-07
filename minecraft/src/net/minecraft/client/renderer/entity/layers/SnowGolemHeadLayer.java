@@ -20,13 +20,11 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, SnowGolem snowGolem, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, SnowGolem snowGolem, float f, float g, float h, float j, float k, float l) {
 		if (!snowGolem.isInvisible() && snowGolem.hasPumpkin()) {
 			poseStack.pushPose();
-			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
-			float n = 0.625F;
+			this.getParentModel().getHead().translateAndRotate(poseStack);
+			float m = 0.625F;
 			poseStack.translate(0.0, -0.34375, 0.0);
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 			poseStack.scale(0.625F, -0.625F, -0.625F);
@@ -41,7 +39,7 @@ public class SnowGolemHeadLayer extends RenderLayer<SnowGolem, SnowGolemModel<Sn
 					poseStack,
 					multiBufferSource,
 					snowGolem.level,
-					snowGolem.getLightColor(),
+					i,
 					LivingEntityRenderer.getOverlayCoords(snowGolem, 0.0F)
 				);
 			poseStack.popPose();

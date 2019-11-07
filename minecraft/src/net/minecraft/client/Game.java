@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.FrameTimer;
 
 @Environment(EnvType.CLIENT)
@@ -43,8 +43,8 @@ public class Game implements RunningGame {
 	@Nullable
 	@Override
 	public GameSession getCurrentSession() {
-		MultiPlayerLevel multiPlayerLevel = this.minecraft.level;
-		return multiPlayerLevel == null ? null : new Session(multiPlayerLevel, this.minecraft.player, this.minecraft.player.connection);
+		ClientLevel clientLevel = this.minecraft.level;
+		return clientLevel == null ? null : new Session(clientLevel, this.minecraft.player, this.minecraft.player.connection);
 	}
 
 	@Override

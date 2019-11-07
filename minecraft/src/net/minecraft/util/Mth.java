@@ -314,20 +314,6 @@ public class Mth {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static int colorMultiply(int i, int j) {
-		int k = (i & 0xFF0000) >> 16;
-		int l = (j & 0xFF0000) >> 16;
-		int m = (i & 0xFF00) >> 8;
-		int n = (j & 0xFF00) >> 8;
-		int o = (i & 0xFF) >> 0;
-		int p = (j & 0xFF) >> 0;
-		int q = (int)((float)k * (float)l / 255.0F);
-		int r = (int)((float)m * (float)n / 255.0F);
-		int s = (int)((float)o * (float)p / 255.0F);
-		return i & 0xFF000000 | q << 16 | r << 8 | s;
-	}
-
-	@Environment(EnvType.CLIENT)
 	public static float frac(float f) {
 		return f - (float)floor(f);
 	}

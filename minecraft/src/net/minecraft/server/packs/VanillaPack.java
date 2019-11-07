@@ -1,7 +1,6 @@
 package net.minecraft.server.packs;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.io.File;
@@ -23,11 +22,10 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
@@ -95,29 +93,29 @@ public class VanillaPack implements Pack {
 	}
 
 	@Override
-	public Collection<ResourceLocation> getResources(PackType packType, String string, int i, Predicate<String> predicate) {
+	public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		if (generatedDir != null) {
 			try {
-				set.addAll(this.getResources(i, "minecraft", generatedDir.resolve(packType.getDirectory()).resolve("minecraft"), string, predicate));
-			} catch (IOException var14) {
+				getResources(set, i, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
+			} catch (IOException var15) {
 			}
 
 			if (packType == PackType.CLIENT_RESOURCES) {
 				Enumeration<URL> enumeration = null;
 
 				try {
-					enumeration = clientObject.getClassLoader().getResources(packType.getDirectory() + "/minecraft");
-				} catch (IOException var13) {
+					enumeration = clientObject.getClassLoader().getResources(packType.getDirectory() + "/");
+				} catch (IOException var14) {
 				}
 
 				while (enumeration != null && enumeration.hasMoreElements()) {
 					try {
 						URI uRI = ((URL)enumeration.nextElement()).toURI();
 						if ("file".equals(uRI.getScheme())) {
-							set.addAll(this.getResources(i, "minecraft", Paths.get(uRI), string, predicate));
+							getResources(set, i, string, Paths.get(uRI), string2, predicate);
 						}
-					} catch (IOException | URISyntaxException var12) {
+					} catch (IOException | URISyntaxException var13) {
 					}
 				}
 			}
@@ -132,39 +130,48 @@ public class VanillaPack implements Pack {
 
 			URI uRI = uRL.toURI();
 			if ("file".equals(uRI.getScheme())) {
-				URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()) + "minecraft");
-				if (uRL2 == null) {
-					return set;
-				}
-
+				URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()));
 				Path path = Paths.get(uRL2.toURI());
-				set.addAll(this.getResources(i, "minecraft", path, string, predicate));
+				getResources(set, i, string, path, string2, predicate);
 			} else if ("jar".equals(uRI.getScheme())) {
-				Path path2 = ((FileSystem)JAR_FILESYSTEM_BY_TYPE.get(packType)).getPath("/" + packType.getDirectory() + "/minecraft");
-				set.addAll(this.getResources(i, "minecraft", path2, string, predicate));
+				Path path2 = ((FileSystem)JAR_FILESYSTEM_BY_TYPE.get(packType)).getPath("/" + packType.getDirectory());
+				getResources(set, i, "minecraft", path2, string2, predicate);
 			} else {
 				LOGGER.error("Unsupported scheme {} trying to list vanilla resources (NYI?)", uRI);
 			}
-		} catch (NoSuchFileException | FileNotFoundException var10) {
-		} catch (IOException | URISyntaxException var11) {
-			LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)var11);
+		} catch (NoSuchFileException | FileNotFoundException var11) {
+		} catch (IOException | URISyntaxException var12) {
+			LOGGER.error("Couldn't get a list of all vanilla resources", (Throwable)var12);
 		}
 
 		return set;
 	}
 
-	private Collection<ResourceLocation> getResources(int i, String string, Path path, String string2, Predicate<String> predicate) throws IOException {
-		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
-		Iterator<Path> iterator = Files.walk(path.resolve(string2), i, new FileVisitOption[0]).iterator();
+	private static void getResources(Collection<ResourceLocation> collection, int i, String string, Path path, String string2, Predicate<String> predicate) throws IOException {
+		Path path2 = path.resolve(string);
+		Stream<Path> stream = Files.walk(path2.resolve(string2), i, new FileVisitOption[0]);
+		Throwable var8 = null;
 
-		while (iterator.hasNext()) {
-			Path path2 = (Path)iterator.next();
-			if (!path2.endsWith(".mcmeta") && Files.isRegularFile(path2, new LinkOption[0]) && predicate.test(path2.getFileName().toString())) {
-				list.add(new ResourceLocation(string, path.relativize(path2).toString().replaceAll("\\\\", "/")));
+		try {
+			stream.filter(pathx -> !pathx.endsWith(".mcmeta") && Files.isRegularFile(pathx, new LinkOption[0]) && predicate.test(pathx.getFileName().toString()))
+				.map(path2x -> new ResourceLocation(string, path2.relativize(path2x).toString().replaceAll("\\\\", "/")))
+				.forEach(collection::add);
+		} catch (Throwable var17) {
+			var8 = var17;
+			throw var17;
+		} finally {
+			if (stream != null) {
+				if (var8 != null) {
+					try {
+						stream.close();
+					} catch (Throwable var16) {
+						var8.addSuppressed(var16);
+					}
+				} else {
+					stream.close();
+				}
 			}
 		}
-
-		return list;
 	}
 
 	@Nullable

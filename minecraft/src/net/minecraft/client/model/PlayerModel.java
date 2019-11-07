@@ -78,20 +78,20 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket));
 	}
 
-	public void renderEars(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j) {
+	public void renderEars(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
 		this.ear.copyFrom(this.head);
 		this.ear.x = 0.0F;
 		this.ear.y = 0.0F;
-		this.ear.render(poseStack, vertexConsumer, f, i, j, null);
+		this.ear.render(poseStack, vertexConsumer, i, j, null);
 	}
 
-	public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, float f, int i, int j) {
-		this.cloak.render(poseStack, vertexConsumer, f, i, j, null);
+	public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
+		this.cloak.render(poseStack, vertexConsumer, i, j, null);
 	}
 
 	@Override
-	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(livingEntity, f, g, h, i, j, k);
+	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
+		super.setupAnim(livingEntity, f, g, h, i, j);
 		this.leftPants.copyFrom(this.leftLeg);
 		this.rightPants.copyFrom(this.rightLeg);
 		this.leftSleeve.copyFrom(this.leftArm);
@@ -117,15 +117,15 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
+	public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
 		ModelPart modelPart = this.getArm(humanoidArm);
 		if (this.slim) {
-			float g = 0.5F * (float)(humanoidArm == HumanoidArm.RIGHT ? 1 : -1);
-			modelPart.x += g;
-			modelPart.translateAndRotate(poseStack, f);
-			modelPart.x -= g;
+			float f = 0.5F * (float)(humanoidArm == HumanoidArm.RIGHT ? 1 : -1);
+			modelPart.x += f;
+			modelPart.translateAndRotate(poseStack);
+			modelPart.x -= f;
 		} else {
-			modelPart.translateAndRotate(poseStack, f);
+			modelPart.translateAndRotate(poseStack);
 		}
 	}
 

@@ -39,17 +39,29 @@ public class ItemPickupParticle extends Particle {
 	}
 
 	@Override
-	public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
-		float l = ((float)this.life + f) / 3.0F;
-		l *= l;
+	public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
+		float g = ((float)this.life + f) / 3.0F;
+		g *= g;
 		double d = Mth.lerp((double)f, this.target.xOld, this.target.getX());
 		double e = Mth.lerp((double)f, this.target.yOld, this.target.getY()) + 0.5;
-		double m = Mth.lerp((double)f, this.target.zOld, this.target.getZ());
-		double n = Mth.lerp((double)l, this.itemEntity.getX(), d);
-		double o = Mth.lerp((double)l, this.itemEntity.getY(), e);
-		double p = Mth.lerp((double)l, this.itemEntity.getZ(), m);
+		double h = Mth.lerp((double)f, this.target.zOld, this.target.getZ());
+		double i = Mth.lerp((double)g, this.itemEntity.getX(), d);
+		double j = Mth.lerp((double)g, this.itemEntity.getY(), e);
+		double k = Mth.lerp((double)g, this.itemEntity.getZ(), h);
 		MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
-		this.entityRenderDispatcher.render(this.itemEntity, n - xOff, o - yOff, p - zOff, this.itemEntity.yRot, f, new PoseStack(), bufferSource);
+		Vec3 vec3 = camera.getPosition();
+		this.entityRenderDispatcher
+			.render(
+				this.itemEntity,
+				i - vec3.x(),
+				j - vec3.y(),
+				k - vec3.z(),
+				this.itemEntity.yRot,
+				f,
+				new PoseStack(),
+				bufferSource,
+				EntityRenderDispatcher.getPackedLightCoords(this.itemEntity)
+			);
 		bufferSource.endBatch();
 	}
 

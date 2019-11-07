@@ -36,20 +36,20 @@ public class SnowGolemModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.piece1.yRot = i * (float) (Math.PI / 180.0) * 0.25F;
-		float l = Mth.sin(this.piece1.yRot);
-		float m = Mth.cos(this.piece1.yRot);
+		float k = Mth.sin(this.piece1.yRot);
+		float l = Mth.cos(this.piece1.yRot);
 		this.arm1.zRot = 1.0F;
 		this.arm2.zRot = -1.0F;
 		this.arm1.yRot = 0.0F + this.piece1.yRot;
 		this.arm2.yRot = (float) Math.PI + this.piece1.yRot;
-		this.arm1.x = m * 5.0F;
-		this.arm1.z = -l * 5.0F;
-		this.arm2.x = -m * 5.0F;
-		this.arm2.z = l * 5.0F;
+		this.arm1.x = l * 5.0F;
+		this.arm1.z = -k * 5.0F;
+		this.arm2.x = -l * 5.0F;
+		this.arm2.z = k * 5.0F;
 	}
 
 	@Override

@@ -255,7 +255,6 @@ public class Item implements ItemLike {
 		return new TranslatableComponent(this.getDescriptionId(itemStack));
 	}
 
-	@Environment(EnvType.CLIENT)
 	public boolean isFoil(ItemStack itemStack) {
 		return itemStack.isEnchanted();
 	}

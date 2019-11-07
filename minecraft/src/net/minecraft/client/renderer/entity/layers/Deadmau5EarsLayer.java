@@ -29,26 +29,25 @@ public class Deadmau5EarsLayer extends RenderLayer<AbstractClientPlayer, PlayerM
 		float h,
 		float j,
 		float k,
-		float l,
-		float m
+		float l
 	) {
 		if ("deadmau5".equals(abstractClientPlayer.getName().getString()) && abstractClientPlayer.isSkinLoaded() && !abstractClientPlayer.isInvisible()) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation()));
-			int n = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0F);
+			int m = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0F);
 
-			for (int o = 0; o < 2; o++) {
-				float p = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
-				float q = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
+			for (int n = 0; n < 2; n++) {
+				float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
+				float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
 				poseStack.pushPose();
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(p));
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(q));
-				poseStack.translate((double)(0.375F * (float)(o * 2 - 1)), 0.0, 0.0);
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(p));
+				poseStack.translate((double)(0.375F * (float)(n * 2 - 1)), 0.0, 0.0);
 				poseStack.translate(0.0, -0.375, 0.0);
-				poseStack.mulPose(Vector3f.XP.rotationDegrees(-q));
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(-p));
-				float r = 1.3333334F;
+				poseStack.mulPose(Vector3f.XP.rotationDegrees(-p));
+				poseStack.mulPose(Vector3f.YP.rotationDegrees(-o));
+				float q = 1.3333334F;
 				poseStack.scale(1.3333334F, 1.3333334F, 1.3333334F);
-				this.getParentModel().renderEars(poseStack, vertexConsumer, 0.0625F, i, n);
+				this.getParentModel().renderEars(poseStack, vertexConsumer, i, m);
 				poseStack.popPose();
 			}
 		}

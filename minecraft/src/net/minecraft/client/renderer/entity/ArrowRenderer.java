@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
@@ -18,12 +19,12 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 		super(entityRenderDispatcher);
 	}
 
-	public void render(T abstractArrow, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(T abstractArrow, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(h, abstractArrow.yRotO, abstractArrow.yRot) - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(h, abstractArrow.xRotO, abstractArrow.xRot)));
-		int i = 0;
-		float j = 0.0F;
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, abstractArrow.yRotO, abstractArrow.yRot) - 90.0F));
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, abstractArrow.xRotO, abstractArrow.xRot)));
+		int j = 0;
+		float h = 0.0F;
 		float k = 0.5F;
 		float l = 0.0F;
 		float m = 0.15625F;
@@ -32,7 +33,7 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 		float p = 0.15625F;
 		float q = 0.3125F;
 		float r = 0.05625F;
-		float s = (float)abstractArrow.shakeTime - h;
+		float s = (float)abstractArrow.shakeTime - g;
 		if (s > 0.0F) {
 			float t = -Mth.sin(s * 3.0F) * s;
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees(t));
@@ -41,37 +42,38 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(45.0F));
 		poseStack.scale(0.05625F, 0.05625F, 0.05625F);
 		poseStack.translate(-4.0, 0.0, 0.0);
-		int u = abstractArrow.getLightColor();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(abstractArrow)));
-		Matrix4f matrix4f = poseStack.getPose();
-		this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0F, 0.15625F, 1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625F, 0.15625F, 1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, 2, 2, 0.15625F, 0.3125F, 1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, 2, -2, 0.0F, 0.3125F, 1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, 2, -2, 0.0F, 0.15625F, -1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, 2, 2, 0.15625F, 0.15625F, -1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, -2, 2, 0.15625F, 0.3125F, -1, 0, 0, u);
-		this.vertex(matrix4f, vertexConsumer, -7, -2, -2, 0.0F, 0.3125F, -1, 0, 0, u);
+		PoseStack.Pose pose = poseStack.last();
+		Matrix4f matrix4f = pose.pose();
+		Matrix3f matrix3f = pose.normal();
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, -2, -2, 0.0F, 0.15625F, 1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, -2, 2, 0.15625F, 0.15625F, 1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, 2, 2, 0.15625F, 0.3125F, 1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, 2, -2, 0.0F, 0.3125F, 1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, 2, -2, 0.0F, 0.15625F, -1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, 2, 2, 0.15625F, 0.15625F, -1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, -2, 2, 0.15625F, 0.3125F, -1, 0, 0, i);
+		this.vertex(matrix4f, matrix3f, vertexConsumer, -7, -2, -2, 0.0F, 0.3125F, -1, 0, 0, i);
 
-		for (int v = 0; v < 4; v++) {
+		for (int u = 0; u < 4; u++) {
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-			this.vertex(matrix4f, vertexConsumer, -8, -2, 0, 0.0F, 0.0F, 0, 1, 0, u);
-			this.vertex(matrix4f, vertexConsumer, 8, -2, 0, 0.5F, 0.0F, 0, 1, 0, u);
-			this.vertex(matrix4f, vertexConsumer, 8, 2, 0, 0.5F, 0.15625F, 0, 1, 0, u);
-			this.vertex(matrix4f, vertexConsumer, -8, 2, 0, 0.0F, 0.15625F, 0, 1, 0, u);
+			this.vertex(matrix4f, matrix3f, vertexConsumer, -8, -2, 0, 0.0F, 0.0F, 0, 1, 0, i);
+			this.vertex(matrix4f, matrix3f, vertexConsumer, 8, -2, 0, 0.5F, 0.0F, 0, 1, 0, i);
+			this.vertex(matrix4f, matrix3f, vertexConsumer, 8, 2, 0, 0.5F, 0.15625F, 0, 1, 0, i);
+			this.vertex(matrix4f, matrix3f, vertexConsumer, -8, 2, 0, 0.0F, 0.15625F, 0, 1, 0, i);
 		}
 
 		poseStack.popPose();
-		super.render(abstractArrow, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(abstractArrow, f, g, poseStack, multiBufferSource, i);
 	}
 
-	public void vertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
+	public void vertex(Matrix4f matrix4f, Matrix3f matrix3f, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
 		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)k)
 			.color(255, 255, 255, 255)
 			.uv(f, g)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(o)
-			.normal((float)l, (float)n, (float)m)
+			.normal(matrix3f, (float)l, (float)n, (float)m)
 			.endVertex();
 	}
 }

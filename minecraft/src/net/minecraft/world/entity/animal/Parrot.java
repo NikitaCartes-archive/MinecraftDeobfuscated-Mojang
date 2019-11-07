@@ -58,6 +58,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LogBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
 public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
@@ -76,7 +77,6 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		hashMap.put(EntityType.DROWNED, SoundEvents.PARROT_IMITATE_DROWNED);
 		hashMap.put(EntityType.ELDER_GUARDIAN, SoundEvents.PARROT_IMITATE_ELDER_GUARDIAN);
 		hashMap.put(EntityType.ENDER_DRAGON, SoundEvents.PARROT_IMITATE_ENDER_DRAGON);
-		hashMap.put(EntityType.ENDERMAN, SoundEvents.PARROT_IMITATE_ENDERMAN);
 		hashMap.put(EntityType.ENDERMITE, SoundEvents.PARROT_IMITATE_ENDERMITE);
 		hashMap.put(EntityType.EVOKER, SoundEvents.PARROT_IMITATE_EVOKER);
 		hashMap.put(EntityType.GHAST, SoundEvents.PARROT_IMITATE_GHAST);
@@ -112,6 +112,9 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	public Parrot(EntityType<? extends Parrot> entityType, Level level) {
 		super(entityType, level);
 		this.moveControl = new FlyingMoveControl(this, 10, false);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0F);
 	}
 
 	@Nullable

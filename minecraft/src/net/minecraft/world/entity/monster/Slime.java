@@ -122,11 +122,12 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	@Override
-	public void tick() {
-		if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL && this.getSize() > 0) {
-			this.removed = true;
-		}
+	protected boolean shouldDespawnInPeaceful() {
+		return this.getSize() > 0;
+	}
 
+	@Override
+	public void tick() {
 		this.squish = this.squish + (this.targetSquish - this.squish) * 0.5F;
 		this.oSquish = this.squish;
 		super.tick();

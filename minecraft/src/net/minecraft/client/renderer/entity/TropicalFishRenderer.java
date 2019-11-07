@@ -28,12 +28,12 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFish, EntityModel<
 		return tropicalFish.getBaseTextureLocation();
 	}
 
-	public void render(TropicalFish tropicalFish, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(TropicalFish tropicalFish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		ColorableListModel<TropicalFish> colorableListModel = (ColorableListModel<TropicalFish>)(tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB);
 		this.model = colorableListModel;
 		float[] fs = tropicalFish.getBaseColor();
 		colorableListModel.setColor(fs[0], fs[1], fs[2]);
-		super.render(tropicalFish, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(tropicalFish, f, g, poseStack, multiBufferSource, i);
 		colorableListModel.setColor(1.0F, 1.0F, 1.0F);
 	}
 

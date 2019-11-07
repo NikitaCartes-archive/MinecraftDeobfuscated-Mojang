@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap.Entry;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +20,17 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintCache;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
@@ -45,11 +50,13 @@ import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
@@ -64,11 +71,12 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 
 @Environment(EnvType.CLIENT)
-public class MultiPlayerLevel extends Level {
+public class ClientLevel extends Level {
 	private final List<Entity> globalEntities = Lists.<Entity>newArrayList();
 	private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectOpenHashMap<>();
 	private final ClientPacketListener connection;
@@ -78,8 +86,14 @@ public class MultiPlayerLevel extends Level {
 	private int delayUntilNextMoodSound = this.random.nextInt(12000);
 	private Scoreboard scoreboard = new Scoreboard();
 	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
+	private int skyFlashTime;
+	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(new Object2ObjectArrayMap<>(3), object2ObjectArrayMap -> {
+		object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache());
+		object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache());
+		object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
+	});
 
-	public MultiPlayerLevel(
+	public ClientLevel(
 		ClientPacketListener clientPacketListener,
 		LevelSettings levelSettings,
 		DimensionType dimensionType,
@@ -87,7 +101,7 @@ public class MultiPlayerLevel extends Level {
 		ProfilerFiller profilerFiller,
 		LevelRenderer levelRenderer
 	) {
-		super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((MultiPlayerLevel)level, i), profilerFiller, true);
+		super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), profilerFiller, true);
 		this.connection = clientPacketListener;
 		this.levelRenderer = levelRenderer;
 		this.setSpawnPos(new BlockPos(8, 64, 8));
@@ -217,6 +231,14 @@ public class MultiPlayerLevel extends Level {
 	public void unload(LevelChunk levelChunk) {
 		this.blockEntitiesToUnload.addAll(levelChunk.getBlockEntities().values());
 		this.chunkSource.getLightEngine().enableLightSources(levelChunk.getPos(), false);
+	}
+
+	public void onChunkLoaded(int i, int j) {
+		this.tintCaches.forEach((colorResolver, blockTintCache) -> blockTintCache.invalidateForChunk(i, j));
+	}
+
+	public void clearTintCaches() {
+		this.tintCaches.forEach((colorResolver, blockTintCache) -> blockTintCache.invalidateAll());
 	}
 
 	@Override
@@ -593,5 +615,146 @@ public class MultiPlayerLevel extends Level {
 	@Override
 	public Biome getUncachedNoiseBiome(int i, int j, int k) {
 		return Biomes.PLAINS;
+	}
+
+	public float getSkyDarken(float f) {
+		float g = this.getTimeOfDay(f);
+		float h = 1.0F - (Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.2F);
+		h = Mth.clamp(h, 0.0F, 1.0F);
+		h = 1.0F - h;
+		h = (float)((double)h * (1.0 - (double)(this.getRainLevel(f) * 5.0F) / 16.0));
+		h = (float)((double)h * (1.0 - (double)(this.getThunderLevel(f) * 5.0F) / 16.0));
+		return h * 0.8F + 0.2F;
+	}
+
+	public Vec3 getSkyColor(BlockPos blockPos, float f) {
+		float g = this.getTimeOfDay(f);
+		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
+		h = Mth.clamp(h, 0.0F, 1.0F);
+		Biome biome = this.getBiome(blockPos);
+		int i = biome.getSkyColor();
+		float j = (float)(i >> 16 & 0xFF) / 255.0F;
+		float k = (float)(i >> 8 & 0xFF) / 255.0F;
+		float l = (float)(i & 0xFF) / 255.0F;
+		j *= h;
+		k *= h;
+		l *= h;
+		float m = this.getRainLevel(f);
+		if (m > 0.0F) {
+			float n = (j * 0.3F + k * 0.59F + l * 0.11F) * 0.6F;
+			float o = 1.0F - m * 0.75F;
+			j = j * o + n * (1.0F - o);
+			k = k * o + n * (1.0F - o);
+			l = l * o + n * (1.0F - o);
+		}
+
+		float n = this.getThunderLevel(f);
+		if (n > 0.0F) {
+			float o = (j * 0.3F + k * 0.59F + l * 0.11F) * 0.2F;
+			float p = 1.0F - n * 0.75F;
+			j = j * p + o * (1.0F - p);
+			k = k * p + o * (1.0F - p);
+			l = l * p + o * (1.0F - p);
+		}
+
+		if (this.skyFlashTime > 0) {
+			float o = (float)this.skyFlashTime - f;
+			if (o > 1.0F) {
+				o = 1.0F;
+			}
+
+			o *= 0.45F;
+			j = j * (1.0F - o) + 0.8F * o;
+			k = k * (1.0F - o) + 0.8F * o;
+			l = l * (1.0F - o) + 1.0F * o;
+		}
+
+		return new Vec3((double)j, (double)k, (double)l);
+	}
+
+	public Vec3 getCloudColor(float f) {
+		float g = this.getTimeOfDay(f);
+		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
+		h = Mth.clamp(h, 0.0F, 1.0F);
+		float i = 1.0F;
+		float j = 1.0F;
+		float k = 1.0F;
+		float l = this.getRainLevel(f);
+		if (l > 0.0F) {
+			float m = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.6F;
+			float n = 1.0F - l * 0.95F;
+			i = i * n + m * (1.0F - n);
+			j = j * n + m * (1.0F - n);
+			k = k * n + m * (1.0F - n);
+		}
+
+		i *= h * 0.9F + 0.1F;
+		j *= h * 0.9F + 0.1F;
+		k *= h * 0.85F + 0.15F;
+		float m = this.getThunderLevel(f);
+		if (m > 0.0F) {
+			float n = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.2F;
+			float o = 1.0F - m * 0.95F;
+			i = i * o + n * (1.0F - o);
+			j = j * o + n * (1.0F - o);
+			k = k * o + n * (1.0F - o);
+		}
+
+		return new Vec3((double)i, (double)j, (double)k);
+	}
+
+	public Vec3 getFogColor(float f) {
+		float g = this.getTimeOfDay(f);
+		return this.dimension.getFogColor(g, f);
+	}
+
+	public float getStarBrightness(float f) {
+		float g = this.getTimeOfDay(f);
+		float h = 1.0F - (Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.25F);
+		h = Mth.clamp(h, 0.0F, 1.0F);
+		return h * h * 0.5F;
+	}
+
+	public double getHorizonHeight() {
+		return this.levelData.getGeneratorType() == LevelType.FLAT ? 0.0 : 63.0;
+	}
+
+	public int getSkyFlashTime() {
+		return this.skyFlashTime;
+	}
+
+	@Override
+	public void setSkyFlashTime(int i) {
+		this.skyFlashTime = i;
+	}
+
+	@Override
+	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
+		BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
+		return blockTintCache.getColor(blockPos, () -> this.calculateBlockTint(blockPos, colorResolver));
+	}
+
+	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
+		int i = Minecraft.getInstance().options.biomeBlendRadius;
+		if (i == 0) {
+			return colorResolver.getColor(this.getBiome(blockPos), (double)blockPos.getX(), (double)blockPos.getZ());
+		} else {
+			int j = (i * 2 + 1) * (i * 2 + 1);
+			int k = 0;
+			int l = 0;
+			int m = 0;
+			Cursor3D cursor3D = new Cursor3D(blockPos.getX() - i, blockPos.getY(), blockPos.getZ() - i, blockPos.getX() + i, blockPos.getY(), blockPos.getZ() + i);
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			while (cursor3D.advance()) {
+				mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
+				int n = colorResolver.getColor(this.getBiome(mutableBlockPos), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
+				k += (n & 0xFF0000) >> 16;
+				l += (n & 0xFF00) >> 8;
+				m += n & 0xFF;
+			}
+
+			return (k / j & 0xFF) << 16 | (l / j & 0xFF) << 8 | m / j & 0xFF;
+		}
 	}
 }

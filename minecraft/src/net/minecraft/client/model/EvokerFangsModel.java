@@ -25,18 +25,18 @@ public class EvokerFangsModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		float l = f * 2.0F;
-		if (l > 1.0F) {
-			l = 1.0F;
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		float k = f * 2.0F;
+		if (k > 1.0F) {
+			k = 1.0F;
 		}
 
-		l = 1.0F - l * l * l;
-		this.upperJaw.zRot = (float) Math.PI - l * 0.35F * (float) Math.PI;
-		this.lowerJaw.zRot = (float) Math.PI + l * 0.35F * (float) Math.PI;
+		k = 1.0F - k * k * k;
+		this.upperJaw.zRot = (float) Math.PI - k * 0.35F * (float) Math.PI;
+		this.lowerJaw.zRot = (float) Math.PI + k * 0.35F * (float) Math.PI;
 		this.lowerJaw.yRot = (float) Math.PI;
-		float m = (f + Mth.sin(f * 2.7F)) * 0.6F * 12.0F;
-		this.upperJaw.y = 24.0F - m;
+		float l = (f + Mth.sin(f * 2.7F)) * 0.6F * 12.0F;
+		this.upperJaw.y = 24.0F - l;
 		this.lowerJaw.y = this.upperJaw.y;
 		this.base.y = this.upperJaw.y;
 	}

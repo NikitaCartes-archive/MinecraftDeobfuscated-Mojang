@@ -48,11 +48,11 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 		this.rollAmount = panda.isBaby() ? 0.0F : panda.getRollAmount(h);
 	}
 
-	public void setupAnim(T panda, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(panda, f, g, h, i, j, k);
+	public void setupAnim(T panda, float f, float g, float h, float i, float j) {
+		super.setupAnim(panda, f, g, h, i, j);
 		boolean bl = panda.getUnhappyCounter() > 0;
 		boolean bl2 = panda.isSneezing();
-		int l = panda.getSneezeCounter();
+		int k = panda.getSneezeCounter();
 		boolean bl3 = panda.isEating();
 		boolean bl4 = panda.isScared();
 		if (bl) {
@@ -65,11 +65,11 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 		}
 
 		if (bl2) {
-			if (l < 15) {
-				this.head.xRot = (float) (-Math.PI / 4) * (float)l / 14.0F;
-			} else if (l < 20) {
-				float m = (float)((l - 15) / 5);
-				this.head.xRot = (float) (-Math.PI / 4) + (float) (Math.PI / 4) * m;
+			if (k < 15) {
+				this.head.xRot = (float) (-Math.PI / 4) * (float)k / 14.0F;
+			} else if (k < 20) {
+				float l = (float)((k - 15) / 5);
+				this.head.xRot = (float) (-Math.PI / 4) + (float) (Math.PI / 4) * l;
 			}
 		}
 

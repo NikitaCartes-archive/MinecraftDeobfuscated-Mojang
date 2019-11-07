@@ -50,18 +50,8 @@ public class ExperienceOrb extends Entity {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getLightColor() {
-		float f = 0.5F;
-		f = Mth.clamp(f, 0.0F, 1.0F);
-		int i = super.getLightColor();
-		int j = i & 0xFF;
-		int k = i >> 16 & 0xFF;
-		j += (int)(f * 15.0F * 16.0F);
-		if (j > 240) {
-			j = 240;
-		}
-
-		return j | k << 16;
+	public int getBlockLightLevel() {
+		return Mth.clamp(super.getBlockLightLevel() + 7, 0, 15);
 	}
 
 	@Override

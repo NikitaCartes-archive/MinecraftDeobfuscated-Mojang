@@ -2,7 +2,6 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -54,13 +53,13 @@ public final class ModifiedBadlandsPlateauBiome extends Biome {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getFoliageColor(BlockPos blockPos) {
+	public int getFoliageColor() {
 		return 10387789;
 	}
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getGrassColor(BlockPos blockPos) {
+	public int getGrassColor(double d, double e) {
 		return 9470285;
 	}
 }

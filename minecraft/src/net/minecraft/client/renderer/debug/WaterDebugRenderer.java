@@ -1,10 +1,11 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.LevelReader;
@@ -20,11 +21,7 @@ public class WaterDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
-		Camera camera = this.minecraft.gameRenderer.getMainCamera();
-		double d = camera.getPosition().x;
-		double e = camera.getPosition().y;
-		double f = camera.getPosition().z;
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
 		BlockPos blockPos = this.minecraft.player.getCommandSenderBlockPosition();
 		LevelReader levelReader = this.minecraft.player.level;
 		RenderSystem.enableBlend();

@@ -91,7 +91,9 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		RenderSystem.matrixMode(5888);
 		PoseStack poseStack = new PoseStack();
 		poseStack.pushPose();
-		poseStack.getPose().setIdentity();
+		PoseStack.Pose pose = poseStack.last();
+		pose.pose().setIdentity();
+		pose.normal().setIdentity();
 		poseStack.translate(0.0, 3.3F, 1984.0);
 		float g = 5.0F;
 		poseStack.scale(5.0F, 5.0F, 5.0F);

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.realmsclient.RealmsMainScreen;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -148,6 +149,7 @@ public class TextureManager implements Tickable, PreparableReloadListener {
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(void_ -> {
 				MissingTextureAtlasSprite.getTexture();
+				RealmsMainScreen.updateTeaserImages(this.resourceManager);
 				Iterator<Entry<ResourceLocation, AbstractTexture>> iterator = this.byPath.entrySet().iterator();
 
 				while (iterator.hasNext()) {

@@ -470,7 +470,6 @@ public class SoundEvents {
 	public static final SoundEvent PARROT_IMITATE_DROWNED = register("entity.parrot.imitate.drowned");
 	public static final SoundEvent PARROT_IMITATE_ELDER_GUARDIAN = register("entity.parrot.imitate.elder_guardian");
 	public static final SoundEvent PARROT_IMITATE_ENDER_DRAGON = register("entity.parrot.imitate.ender_dragon");
-	public static final SoundEvent PARROT_IMITATE_ENDERMAN = register("entity.parrot.imitate.enderman");
 	public static final SoundEvent PARROT_IMITATE_ENDERMITE = register("entity.parrot.imitate.endermite");
 	public static final SoundEvent PARROT_IMITATE_EVOKER = register("entity.parrot.imitate.evoker");
 	public static final SoundEvent PARROT_IMITATE_GHAST = register("entity.parrot.imitate.ghast");

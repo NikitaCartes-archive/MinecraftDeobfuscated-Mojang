@@ -56,14 +56,14 @@ public class SalmonModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		float k = 1.0F;
 		float l = 1.0F;
-		float m = 1.0F;
 		if (!entity.isInWater()) {
-			l = 1.3F;
-			m = 1.7F;
+			k = 1.3F;
+			l = 1.7F;
 		}
 
-		this.bodyBack.yRot = -l * 0.25F * Mth.sin(m * 0.6F * h);
+		this.bodyBack.yRot = -k * 0.25F * Mth.sin(l * 0.6F * h);
 	}
 }

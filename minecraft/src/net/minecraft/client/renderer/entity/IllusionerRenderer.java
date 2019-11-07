@@ -20,10 +20,10 @@ public class IllusionerRenderer extends IllagerRenderer<Illusioner> {
 		this.addLayer(
 			new ItemInHandLayer<Illusioner, IllagerModel<Illusioner>>(this) {
 				public void render(
-					PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Illusioner illusioner, float f, float g, float h, float j, float k, float l, float m
+					PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Illusioner illusioner, float f, float g, float h, float j, float k, float l
 				) {
 					if (illusioner.isCastingSpell() || illusioner.isAggressive()) {
-						super.render(poseStack, multiBufferSource, i, illusioner, f, g, h, j, k, l, m);
+						super.render(poseStack, multiBufferSource, i, illusioner, f, g, h, j, k, l);
 					}
 				}
 			}
@@ -35,23 +35,23 @@ public class IllusionerRenderer extends IllagerRenderer<Illusioner> {
 		return ILLUSIONER;
 	}
 
-	public void render(Illusioner illusioner, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(Illusioner illusioner, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		if (illusioner.isInvisible()) {
-			Vec3[] vec3s = illusioner.getIllusionOffsets(h);
-			float i = this.getBob(illusioner, h);
+			Vec3[] vec3s = illusioner.getIllusionOffsets(g);
+			float h = this.getBob(illusioner, g);
 
 			for (int j = 0; j < vec3s.length; j++) {
 				poseStack.pushPose();
 				poseStack.translate(
-					vec3s[j].x + (double)Mth.cos((float)j + i * 0.5F) * 0.025,
-					vec3s[j].y + (double)Mth.cos((float)j + i * 0.75F) * 0.0125,
-					vec3s[j].z + (double)Mth.cos((float)j + i * 0.7F) * 0.025
+					vec3s[j].x + (double)Mth.cos((float)j + h * 0.5F) * 0.025,
+					vec3s[j].y + (double)Mth.cos((float)j + h * 0.75F) * 0.0125,
+					vec3s[j].z + (double)Mth.cos((float)j + h * 0.7F) * 0.025
 				);
-				super.render(illusioner, d, e, f, g, h, poseStack, multiBufferSource);
+				super.render(illusioner, f, g, poseStack, multiBufferSource, i);
 				poseStack.popPose();
 			}
 		} else {
-			super.render(illusioner, d, e, f, g, h, poseStack, multiBufferSource);
+			super.render(illusioner, f, g, poseStack, multiBufferSource, i);
 		}
 	}
 

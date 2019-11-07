@@ -371,6 +371,12 @@ public class ServerLevel extends Level {
 					entity2.remove();
 				}
 
+				profilerFiller.push("checkDespawn");
+				if (!entity2.removed) {
+					entity2.checkDespawn();
+				}
+
+				profilerFiller.pop();
 				if (entity3 != null) {
 					if (!entity3.removed && entity3.hasPassenger(entity2)) {
 						continue;

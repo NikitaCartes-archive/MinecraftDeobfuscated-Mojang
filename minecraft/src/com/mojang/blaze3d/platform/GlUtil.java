@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class GlUtil {
 	public static String getVendor() {
-		return "GLU.getVendor";
+		return GlStateManager._getString(7936);
 	}
 
 	public static String getCpuInfo() {
@@ -14,10 +14,10 @@ public class GlUtil {
 	}
 
 	public static String getRenderer() {
-		return "GLU.getRenderer";
+		return GlStateManager._getString(7937);
 	}
 
 	public static String getOpenGLVersion() {
-		return "GLU.getOpenGLVersion";
+		return GlStateManager._getString(7938);
 	}
 }

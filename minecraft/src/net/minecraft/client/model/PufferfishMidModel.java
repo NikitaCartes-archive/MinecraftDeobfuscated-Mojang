@@ -86,7 +86,7 @@ public class PufferfishMidModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.finBlue0.zRot = -0.2F + 0.4F * Mth.sin(h * 0.2F);
 		this.finBlue1.zRot = 0.2F - 0.4F * Mth.sin(h * 0.2F);
 	}

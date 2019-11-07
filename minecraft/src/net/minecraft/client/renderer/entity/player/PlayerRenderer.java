@@ -58,15 +58,13 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(new BeeStingerLayer<>(this));
 	}
 
-	public void render(
-		AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource
-	) {
+	public void render(AbstractClientPlayer abstractClientPlayer, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		this.setModelProperties(abstractClientPlayer);
-		super.render(abstractClientPlayer, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(abstractClientPlayer, f, g, poseStack, multiBufferSource, i);
 	}
 
-	public Vec3 getRenderOffset(AbstractClientPlayer abstractClientPlayer, double d, double e, double f, float g) {
-		return abstractClientPlayer.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(abstractClientPlayer, d, e, f, g);
+	public Vec3 getRenderOffset(AbstractClientPlayer abstractClientPlayer, float f) {
+		return abstractClientPlayer.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(abstractClientPlayer, f);
 	}
 
 	private void setModelProperties(AbstractClientPlayer abstractClientPlayer) {
@@ -141,7 +139,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
-	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
 		poseStack.pushPose();
 		if (d < 100.0) {
@@ -149,46 +147,39 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			Objective objective = scoreboard.getDisplayObjective(2);
 			if (objective != null) {
 				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
-				super.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), poseStack, multiBufferSource);
+				super.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
 				poseStack.translate(0.0, (double)(9.0F * 1.15F * 0.025F), 0.0);
 			}
 		}
 
-		super.renderNameTag(abstractClientPlayer, string, poseStack, multiBufferSource);
+		super.renderNameTag(abstractClientPlayer, string, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 
-	public void renderRightHand(PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer) {
-		this.renderHand(poseStack, multiBufferSource, abstractClientPlayer, this.model.rightArm, this.model.rightSleeve);
+	public void renderRightHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer) {
+		this.renderHand(poseStack, multiBufferSource, i, abstractClientPlayer, this.model.rightArm, this.model.rightSleeve);
 	}
 
-	public void renderLeftHand(PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer) {
-		this.renderHand(poseStack, multiBufferSource, abstractClientPlayer, this.model.leftArm, this.model.leftSleeve);
+	public void renderLeftHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer) {
+		this.renderHand(poseStack, multiBufferSource, i, abstractClientPlayer, this.model.leftArm, this.model.leftSleeve);
 	}
 
 	private void renderHand(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, AbstractClientPlayer abstractClientPlayer, ModelPart modelPart, ModelPart modelPart2
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer, ModelPart modelPart, ModelPart modelPart2
 	) {
-		float f = 0.0625F;
 		PlayerModel<AbstractClientPlayer> playerModel = this.getModel();
 		this.setModelProperties(abstractClientPlayer);
-		int i = abstractClientPlayer.getLightColor();
 		playerModel.attackTime = 0.0F;
 		playerModel.crouching = false;
 		playerModel.swimAmount = 0.0F;
-		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+		playerModel.setupAnim(abstractClientPlayer, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		modelPart.xRot = 0.0F;
 		modelPart.render(
-			poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), 0.0625F, i, OverlayTexture.NO_OVERLAY, null
+			poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY, null
 		);
 		modelPart2.xRot = 0.0F;
 		modelPart2.render(
-			poseStack,
-			multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())),
-			0.0625F,
-			i,
-			OverlayTexture.NO_OVERLAY,
-			null
+			poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY, null
 		);
 	}
 

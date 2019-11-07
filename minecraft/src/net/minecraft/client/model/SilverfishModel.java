@@ -54,10 +54,10 @@ public class SilverfishModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		for (int l = 0; l < this.bodyParts.length; l++) {
-			this.bodyParts[l].yRot = Mth.cos(h * 0.9F + (float)l * 0.15F * (float) Math.PI) * (float) Math.PI * 0.05F * (float)(1 + Math.abs(l - 2));
-			this.bodyParts[l].x = Mth.sin(h * 0.9F + (float)l * 0.15F * (float) Math.PI) * (float) Math.PI * 0.2F * (float)Math.abs(l - 2);
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		for (int k = 0; k < this.bodyParts.length; k++) {
+			this.bodyParts[k].yRot = Mth.cos(h * 0.9F + (float)k * 0.15F * (float) Math.PI) * (float) Math.PI * 0.05F * (float)(1 + Math.abs(k - 2));
+			this.bodyParts[k].x = Mth.sin(h * 0.9F + (float)k * 0.15F * (float) Math.PI) * (float) Math.PI * 0.2F * (float)Math.abs(k - 2);
 		}
 
 		this.bodyLayers[0].yRot = this.bodyParts[2].yRot;

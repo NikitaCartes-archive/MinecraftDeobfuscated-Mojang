@@ -16,8 +16,8 @@ import net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.MinecartCommandBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.resources.sounds.AmbientSoundHandler;
 import net.minecraft.client.resources.sounds.BubbleColumnAmbientSoundHandler;
 import net.minecraft.client.resources.sounds.ElytraOnPlayerSoundInstance;
@@ -117,13 +117,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean showDeathScreen = true;
 
 	public LocalPlayer(
-		Minecraft minecraft,
-		MultiPlayerLevel multiPlayerLevel,
-		ClientPacketListener clientPacketListener,
-		StatsCounter statsCounter,
-		ClientRecipeBook clientRecipeBook
+		Minecraft minecraft, ClientLevel clientLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook
 	) {
-		super(multiPlayerLevel, clientPacketListener.getLocalGameProfile());
+		super(clientLevel, clientPacketListener.getLocalGameProfile());
 		this.connection = clientPacketListener;
 		this.stats = statsCounter;
 		this.recipeBook = clientRecipeBook;

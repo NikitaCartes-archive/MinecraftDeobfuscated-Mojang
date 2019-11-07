@@ -24,9 +24,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 		this.shadowRadius = 0.5F;
 	}
 
-	public void render(
-		FallingBlockEntity fallingBlockEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource
-	) {
+	public void render(FallingBlockEntity fallingBlockEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		BlockState blockState = fallingBlockEntity.getBlockState();
 		if (blockState.getRenderShape() == RenderShape.MODEL) {
 			Level level = fallingBlockEntity.getLevel();
@@ -49,7 +47,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 						OverlayTexture.NO_OVERLAY
 					);
 				poseStack.popPose();
-				super.render(fallingBlockEntity, d, e, f, g, h, poseStack, multiBufferSource);
+				super.render(fallingBlockEntity, f, g, poseStack, multiBufferSource, i);
 			}
 		}
 	}

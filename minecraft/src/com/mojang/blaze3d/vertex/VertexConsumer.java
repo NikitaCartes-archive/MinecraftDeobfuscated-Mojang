@@ -44,15 +44,16 @@ public interface VertexConsumer {
 		return this.overlayCoords(i & 65535, i >> 16 & 65535);
 	}
 
-	default void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float f, float g, float h, int i, int j) {
-		this.putBulkData(matrix4f, matrix3f, bakedQuad, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, f, g, h, new int[]{i, i, i, i}, j, false);
+	default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float f, float g, float h, int i, int j) {
+		this.putBulkData(pose, bakedQuad, new float[]{1.0F, 1.0F, 1.0F, 1.0F}, f, g, h, new int[]{i, i, i, i}, j, false);
 	}
 
-	default void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
+	default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
 		int[] js = bakedQuad.getVertices();
 		Vec3i vec3i = bakedQuad.getDirection().getNormal();
 		Vector3f vector3f = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
-		vector3f.transform(matrix3f);
+		Matrix4f matrix4f = pose.pose();
+		vector3f.transform(pose.normal());
 		int j = 8;
 		int k = js.length / 8;
 
@@ -100,5 +101,11 @@ public interface VertexConsumer {
 		Vector4f vector4f = new Vector4f(f, g, h, 1.0F);
 		vector4f.transform(matrix4f);
 		return this.vertex((double)vector4f.x(), (double)vector4f.y(), (double)vector4f.z());
+	}
+
+	default VertexConsumer normal(Matrix3f matrix3f, float f, float g, float h) {
+		Vector3f vector3f = new Vector3f(f, g, h);
+		vector3f.transform(matrix3f);
+		return this.normal(vector3f.x(), vector3f.y(), vector3f.z());
 	}
 }

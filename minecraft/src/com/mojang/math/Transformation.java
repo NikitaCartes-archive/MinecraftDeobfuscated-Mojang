@@ -114,12 +114,12 @@ public final class Transformation {
 	}
 
 	public Matrix4f getMatrix() {
-		return new Matrix4f(this.matrix);
+		return this.matrix.copy();
 	}
 
 	public Quaternion getLeftRotation() {
 		this.ensureDecomposed();
-		return new Quaternion(this.leftRotation);
+		return this.leftRotation.copy();
 	}
 
 	public boolean equals(Object object) {

@@ -43,7 +43,7 @@ public class SimpleReloadableResourceManager implements ReloadableResourceManage
 			this.namespaces.add(string);
 			FallbackResourceManager fallbackResourceManager = (FallbackResourceManager)this.namespacedPacks.get(string);
 			if (fallbackResourceManager == null) {
-				fallbackResourceManager = new FallbackResourceManager(this.type);
+				fallbackResourceManager = new FallbackResourceManager(this.type, string);
 				this.namespacedPacks.put(string, fallbackResourceManager);
 			}
 

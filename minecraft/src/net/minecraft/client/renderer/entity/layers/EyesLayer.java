@@ -19,7 +19,7 @@ public abstract class EyesLayer<T extends Entity, M extends EntityModel<T>> exte
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.eyes(this.getTextureLocation()));
 		this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 15728640, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 	}

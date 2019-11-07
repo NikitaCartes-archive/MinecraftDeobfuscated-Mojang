@@ -24,18 +24,18 @@ public class ShulkerModel<T extends Shulker> extends ListModel<T> {
 		this.head.setPos(0.0F, 12.0F, 0.0F);
 	}
 
-	public void setupAnim(T shulker, float f, float g, float h, float i, float j, float k) {
-		float l = h - (float)shulker.tickCount;
-		float m = (0.5F + shulker.getClientPeekAmount(l)) * (float) Math.PI;
-		float n = -1.0F + Mth.sin(m);
-		float o = 0.0F;
-		if (m > (float) Math.PI) {
-			o = Mth.sin(h * 0.1F) * 0.7F;
+	public void setupAnim(T shulker, float f, float g, float h, float i, float j) {
+		float k = h - (float)shulker.tickCount;
+		float l = (0.5F + shulker.getClientPeekAmount(k)) * (float) Math.PI;
+		float m = -1.0F + Mth.sin(l);
+		float n = 0.0F;
+		if (l > (float) Math.PI) {
+			n = Mth.sin(h * 0.1F) * 0.7F;
 		}
 
-		this.lid.setPos(0.0F, 16.0F + Mth.sin(m) * 8.0F + o, 0.0F);
-		if (shulker.getClientPeekAmount(l) > 0.3F) {
-			this.lid.yRot = n * n * n * n * (float) Math.PI * 0.125F;
+		this.lid.setPos(0.0F, 16.0F + Mth.sin(l) * 8.0F + n, 0.0F);
+		if (shulker.getClientPeekAmount(k) > 0.3F) {
+			this.lid.yRot = m * m * m * m * (float) Math.PI * 0.125F;
 		} else {
 			this.lid.yRot = 0.0F;
 		}

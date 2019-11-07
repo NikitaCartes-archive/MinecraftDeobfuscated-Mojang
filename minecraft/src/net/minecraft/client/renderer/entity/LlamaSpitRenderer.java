@@ -21,17 +21,16 @@ public class LlamaSpitRenderer extends EntityRenderer<LlamaSpit> {
 		super(entityRenderDispatcher);
 	}
 
-	public void render(LlamaSpit llamaSpit, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(LlamaSpit llamaSpit, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.translate(0.0, 0.15F, 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(h, llamaSpit.yRotO, llamaSpit.yRot) - 90.0F));
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(h, llamaSpit.xRotO, llamaSpit.xRot)));
-		int i = llamaSpit.getLightColor();
-		this.model.setupAnim(llamaSpit, h, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, llamaSpit.yRotO, llamaSpit.yRot) - 90.0F));
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, llamaSpit.xRotO, llamaSpit.xRot)));
+		this.model.setupAnim(llamaSpit, g, 0.0F, -0.1F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(LLAMA_SPIT_LOCATION));
 		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();
-		super.render(llamaSpit, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(llamaSpit, f, g, poseStack, multiBufferSource, i);
 	}
 
 	public ResourceLocation getTextureLocation(LlamaSpit llamaSpit) {

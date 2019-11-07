@@ -14,7 +14,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -32,12 +31,12 @@ public class ClientChunkCache extends ChunkSource {
 	private final LevelChunk emptyChunk;
 	private final LevelLightEngine lightEngine;
 	private volatile ClientChunkCache.Storage storage;
-	private final MultiPlayerLevel level;
+	private final ClientLevel level;
 
-	public ClientChunkCache(MultiPlayerLevel multiPlayerLevel, int i) {
-		this.level = multiPlayerLevel;
-		this.emptyChunk = new EmptyLevelChunk(multiPlayerLevel, new ChunkPos(0, 0));
-		this.lightEngine = new LevelLightEngine(this, true, multiPlayerLevel.getDimension().isHasSkyLight());
+	public ClientChunkCache(ClientLevel clientLevel, int i) {
+		this.level = clientLevel;
+		this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0));
+		this.lightEngine = new LevelLightEngine(this, true, clientLevel.getDimension().isHasSkyLight());
 		this.storage = new ClientChunkCache.Storage(calculateStorageRange(i));
 	}
 
@@ -84,7 +83,7 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Nullable
 	public LevelChunk replaceWithPacketData(
-		Level level, int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k
+		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k
 	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
@@ -98,7 +97,7 @@ public class ClientChunkCache extends ChunkSource {
 					return null;
 				}
 
-				levelChunk = new LevelChunk(level, new ChunkPos(i, j), chunkBiomeContainer);
+				levelChunk = new LevelChunk(this.level, new ChunkPos(i, j), chunkBiomeContainer);
 				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
 				this.storage.replace(l, levelChunk);
 			} else {
@@ -114,6 +113,7 @@ public class ClientChunkCache extends ChunkSource {
 				levelLightEngine.updateSectionStatus(SectionPos.of(i, m, j), LevelChunkSection.isEmpty(levelChunkSection));
 			}
 
+			this.level.onChunkLoaded(i, j);
 			return levelChunk;
 		}
 	}

@@ -26,7 +26,8 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class AssetIndex {
 	protected static final Logger LOGGER = LogManager.getLogger();
-	private final Map<String, File> mapping = Maps.<String, File>newHashMap();
+	private final Map<String, File> rootFiles = Maps.<String, File>newHashMap();
+	private final Map<ResourceLocation, File> namespacedFiles = Maps.<ResourceLocation, File>newHashMap();
 
 	protected AssetIndex() {
 	}
@@ -45,15 +46,18 @@ public class AssetIndex {
 					JsonObject jsonObject3 = (JsonObject)entry.getValue();
 					String string2 = (String)entry.getKey();
 					String[] strings = string2.split("/", 2);
-					String string3 = strings.length == 1 ? strings[0] : strings[0] + ":" + strings[1];
-					String string4 = GsonHelper.getAsString(jsonObject3, "hash");
-					File file4 = new File(file2, string4.substring(0, 2) + "/" + string4);
-					this.mapping.put(string3, file4);
+					String string3 = GsonHelper.getAsString(jsonObject3, "hash");
+					File file4 = new File(file2, string3.substring(0, 2) + "/" + string3);
+					if (strings.length == 1) {
+						this.rootFiles.put(strings[0], file4);
+					} else {
+						this.namespacedFiles.put(new ResourceLocation(strings[0], strings[1]), file4);
+					}
 				}
 			}
-		} catch (JsonParseException var20) {
+		} catch (JsonParseException var19) {
 			LOGGER.error("Unable to parse resource index file: {}", file3);
-		} catch (FileNotFoundException var21) {
+		} catch (FileNotFoundException var20) {
 			LOGGER.error("Can't find the resource index file: {}", file3);
 		} finally {
 			IOUtils.closeQuietly(bufferedReader);
@@ -62,23 +66,18 @@ public class AssetIndex {
 
 	@Nullable
 	public File getFile(ResourceLocation resourceLocation) {
-		return this.getFile(resourceLocation.toString());
+		return (File)this.namespacedFiles.get(resourceLocation);
 	}
 
 	@Nullable
-	public File getFile(String string) {
-		return (File)this.mapping.get(string);
+	public File getRootFile(String string) {
+		return (File)this.rootFiles.get(string);
 	}
 
-	public Collection<String> getFiles(String string, int i, Predicate<String> predicate) {
-		return (Collection<String>)this.mapping
-			.keySet()
-			.stream()
-			.filter(stringx -> !stringx.endsWith(".mcmeta"))
-			.map(ResourceLocation::new)
-			.map(ResourceLocation::getPath)
-			.filter(string2 -> string2.startsWith(string + "/"))
-			.filter(predicate)
-			.collect(Collectors.toList());
+	public Collection<ResourceLocation> getFiles(String string, String string2, int i, Predicate<String> predicate) {
+		return (Collection<ResourceLocation>)this.namespacedFiles.keySet().stream().filter(resourceLocation -> {
+			String string3 = resourceLocation.getPath();
+			return resourceLocation.getNamespace().equals(string2) && !string3.endsWith(".mcmeta") && string3.startsWith(string + "/") && predicate.test(string3);
+		}).collect(Collectors.toList());
 	}
 }

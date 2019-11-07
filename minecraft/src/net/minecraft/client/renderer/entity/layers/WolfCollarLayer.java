@@ -17,7 +17,7 @@ public class WolfCollarLayer extends RenderLayer<Wolf, WolfModel<Wolf>> {
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l) {
 		if (wolf.isTame() && !wolf.isInvisible()) {
 			float[] fs = wolf.getCollarColor().getTextureDiffuseColors();
 			renderColoredCutoutModel(this.getParentModel(), WOLF_COLLAR_LOCATION, poseStack, multiBufferSource, i, wolf, fs[0], fs[1], fs[2]);

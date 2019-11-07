@@ -1,5 +1,6 @@
 package com.mojang.realmsclient;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -28,6 +29,7 @@ import com.mojang.realmsclient.util.RealmsTasks;
 import com.mojang.realmsclient.util.RealmsTextureManager;
 import com.mojang.realmsclient.util.RealmsUtil;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -40,6 +42,8 @@ import net.minecraft.realms.RealmsButton;
 import net.minecraft.realms.RealmsMth;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,25 +53,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	private static boolean overrideConfigure;
 	private final RateLimiter inviteNarrationLimiter;
 	private boolean dontSetConnectedToRealms;
-	private static final String[] IMAGES_LOCATION = new String[]{
-		"realms:textures/gui/realms/images/sand_castle.png",
-		"realms:textures/gui/realms/images/factory_floor.png",
-		"realms:textures/gui/realms/images/escher_tunnel.png",
-		"realms:textures/gui/realms/images/tree_houses.png",
-		"realms:textures/gui/realms/images/balloon_trip.png",
-		"realms:textures/gui/realms/images/halloween_woods.png",
-		"realms:textures/gui/realms/images/flower_mountain.png",
-		"realms:textures/gui/realms/images/dornenstein_estate.png",
-		"realms:textures/gui/realms/images/desert.png",
-		"realms:textures/gui/realms/images/gray.png",
-		"realms:textures/gui/realms/images/imperium.png",
-		"realms:textures/gui/realms/images/ludo.png",
-		"realms:textures/gui/realms/images/makersspleef.png",
-		"realms:textures/gui/realms/images/negentropy.png",
-		"realms:textures/gui/realms/images/pumpkin_party.png",
-		"realms:textures/gui/realms/images/sparrenhout.png",
-		"realms:textures/gui/realms/images/spindlewood.png"
-	};
+	private static List<ResourceLocation> teaserImages = ImmutableList.of();
 	private static final RealmsDataFetcher realmsDataFetcher = new RealmsDataFetcher();
 	private static int lastScrollYPosition = -1;
 	private final RealmsScreen lastScreen;
@@ -806,23 +792,20 @@ public class RealmsMainScreen extends RealmsScreen {
 		RenderSystem.pushMatrix();
 		RealmsScreen.blit(k, l, 0.0F, 0.0F, 310, 166, 310, 166);
 		RenderSystem.popMatrix();
-		RealmsScreen.bind(IMAGES_LOCATION[this.carouselIndex]);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.pushMatrix();
-		RealmsScreen.blit(k + 7, l + 7, 0.0F, 0.0F, 195, 152, 195, 152);
-		RenderSystem.popMatrix();
-		if (this.carouselTick % 95 < 5) {
-			if (!this.hasSwitchedCarouselImage) {
-				if (this.carouselIndex == IMAGES_LOCATION.length - 1) {
-					this.carouselIndex = 0;
-				} else {
-					this.carouselIndex++;
+		if (!teaserImages.isEmpty()) {
+			RealmsScreen.bind(((ResourceLocation)teaserImages.get(this.carouselIndex)).toString());
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.pushMatrix();
+			RealmsScreen.blit(k + 7, l + 7, 0.0F, 0.0F, 195, 152, 195, 152);
+			RenderSystem.popMatrix();
+			if (this.carouselTick % 95 < 5) {
+				if (!this.hasSwitchedCarouselImage) {
+					this.carouselIndex = (this.carouselIndex + 1) % teaserImages.size();
+					this.hasSwitchedCarouselImage = true;
 				}
-
-				this.hasSwitchedCarouselImage = true;
+			} else {
+				this.hasSwitchedCarouselImage = false;
 			}
-		} else {
-			this.hasSwitchedCarouselImage = false;
 		}
 
 		int o = 0;
@@ -1124,6 +1107,13 @@ public class RealmsMainScreen extends RealmsScreen {
 		if (this.shouldShowPopup() && this.popupOpenedByUser) {
 			this.popupOpenedByUser = false;
 		}
+	}
+
+	public static void updateTeaserImages(ResourceManager resourceManager) {
+		Collection<ResourceLocation> collection = resourceManager.listResources("textures/gui/images", string -> string.endsWith(".png"));
+		teaserImages = (List<ResourceLocation>)collection.stream()
+			.filter(resourceLocation -> resourceLocation.getNamespace().equals("realms"))
+			.collect(ImmutableList.toImmutableList());
 	}
 
 	@Environment(EnvType.CLIENT)

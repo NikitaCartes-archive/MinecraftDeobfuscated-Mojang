@@ -18,6 +18,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -41,6 +42,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -63,6 +65,10 @@ public class EntityRenderDispatcher {
 	public final Options options;
 	private boolean shouldRenderShadow = true;
 	private boolean renderHitBoxes;
+
+	public static int getPackedLightCoords(Entity entity) {
+		return LightTexture.pack(entity.getBlockLightLevel(), entity.level.getBrightness(LightLayer.SKY, new BlockPos(entity)));
+	}
 
 	private <T extends Entity> void register(EntityType<T> entityType, EntityRenderer<? super T> entityRenderer) {
 		this.renderers.put(entityType, entityRenderer);
@@ -238,33 +244,29 @@ public class EntityRenderDispatcher {
 		return entityRenderer.shouldRender(entity, frustum, d, e, f);
 	}
 
-	public void render(Entity entity, float f) {
-		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-		this.render(entity, 0.0, 0.0, 0.0, 0.0F, f, new PoseStack(), bufferSource);
-		bufferSource.endBatch();
-	}
-
-	public <E extends Entity> void render(E entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public <E extends Entity> void render(
+		E entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
+	) {
 		EntityRenderer<? super E> entityRenderer = this.getRenderer(entity);
 
 		try {
-			Vec3 vec3 = entityRenderer.getRenderOffset(entity, d, e, f, h);
-			double i = d + vec3.x();
-			double j = e + vec3.y();
-			double k = f + vec3.z();
+			Vec3 vec3 = entityRenderer.getRenderOffset(entity, h);
+			double j = d + vec3.x();
+			double k = e + vec3.y();
+			double l = f + vec3.z();
 			poseStack.pushPose();
-			poseStack.translate(i, j, k);
-			entityRenderer.render(entity, i, j, k, g, h, poseStack, multiBufferSource);
+			poseStack.translate(j, k, l);
+			entityRenderer.render(entity, g, h, poseStack, multiBufferSource, i);
 			if (entity.displayFireAnimation()) {
 				this.renderFlame(poseStack, multiBufferSource, entity);
 			}
 
 			poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
 			if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0F && !entity.isInvisible()) {
-				double l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
-				float m = (float)((1.0 - l / 256.0) * (double)entityRenderer.shadowStrength);
-				if (m > 0.0F) {
-					renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
+				double m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ());
+				float n = (float)((1.0 - m / 256.0) * (double)entityRenderer.shadowStrength);
+				if (n > 0.0F) {
+					renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, entityRenderer.shadowRadius);
 				}
 			}
 
@@ -273,8 +275,8 @@ public class EntityRenderDispatcher {
 			}
 
 			poseStack.popPose();
-		} catch (Throwable var23) {
-			CrashReport crashReport = CrashReport.forThrowable(var23, "Rendering entity in world");
+		} catch (Throwable var24) {
+			CrashReport crashReport = CrashReport.forThrowable(var24, "Rendering entity in world");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Entity being rendered");
 			entity.fillCrashReportCategory(crashReportCategory);
 			CrashReportCategory crashReportCategory2 = crashReport.addCategory("Renderer details");
@@ -324,7 +326,7 @@ public class EntityRenderDispatcher {
 		}
 
 		Vec3 vec3 = entity.getViewVector(f);
-		Matrix4f matrix4f = poseStack.getPose();
+		Matrix4f matrix4f = poseStack.last().pose();
 		vertexConsumer.vertex(matrix4f, 0.0F, entity.getEyeHeight(), 0.0F).color(0, 0, 255, 255).endVertex();
 		vertexConsumer.vertex(matrix4f, (float)(vec3.x * 2.0), (float)((double)entity.getEyeHeight() + vec3.y * 2.0), (float)(vec3.z * 2.0))
 			.color(0, 0, 255, 255)
@@ -353,7 +355,7 @@ public class EntityRenderDispatcher {
 		int l = 0;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
 
-		for (Matrix4f matrix4f = poseStack.getPose(); i > 0.0F; l++) {
+		for (PoseStack.Pose pose = poseStack.last(); i > 0.0F; l++) {
 			TextureAtlasSprite textureAtlasSprite3 = l % 2 == 0 ? textureAtlasSprite : textureAtlasSprite2;
 			float m = textureAtlasSprite3.getU0();
 			float n = textureAtlasSprite3.getV0();
@@ -365,10 +367,10 @@ public class EntityRenderDispatcher {
 				m = q;
 			}
 
-			fireVertex(matrix4f, vertexConsumer, g - 0.0F, 0.0F - j, k, o, p);
-			fireVertex(matrix4f, vertexConsumer, -g - 0.0F, 0.0F - j, k, m, p);
-			fireVertex(matrix4f, vertexConsumer, -g - 0.0F, 1.4F - j, k, m, n);
-			fireVertex(matrix4f, vertexConsumer, g - 0.0F, 1.4F - j, k, o, n);
+			fireVertex(pose, vertexConsumer, g - 0.0F, 0.0F - j, k, o, p);
+			fireVertex(pose, vertexConsumer, -g - 0.0F, 0.0F - j, k, m, p);
+			fireVertex(pose, vertexConsumer, -g - 0.0F, 1.4F - j, k, m, n);
+			fireVertex(pose, vertexConsumer, g - 0.0F, 1.4F - j, k, o, n);
 			i -= 0.45F;
 			j -= 0.45F;
 			g *= 0.9F;
@@ -378,8 +380,14 @@ public class EntityRenderDispatcher {
 		poseStack.popPose();
 	}
 
-	private static void fireVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
-		vertexConsumer.vertex(matrix4f, f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(0.0F, 1.0F, 0.0F).endVertex();
+	private static void fireVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
+		vertexConsumer.vertex(pose.pose(), f, g, h)
+			.color(255, 255, 255, 255)
+			.uv(i, j)
+			.overlayCoords(0, 10)
+			.uv2(240)
+			.normal(pose.normal(), 0.0F, 1.0F, 0.0F)
+			.endVertex();
 	}
 
 	private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {
@@ -400,16 +408,16 @@ public class EntityRenderDispatcher {
 		int n = Mth.floor(e);
 		int o = Mth.floor(j - (double)i);
 		int p = Mth.floor(j + (double)i);
-		Matrix4f matrix4f = poseStack.getPose();
+		PoseStack.Pose pose = poseStack.last();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(SHADOW_LOCATION));
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
-			renderBlockShadow(matrix4f, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
+			renderBlockShadow(pose, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
 		}
 	}
 
 	private static void renderBlockShadow(
-		Matrix4f matrix4f, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h
+		PoseStack.Pose pose, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h
 	) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState = levelReader.getBlockState(blockPos2);
@@ -438,23 +446,23 @@ public class EntityRenderDispatcher {
 						float u = -p / 2.0F / g + 0.5F;
 						float v = -r / 2.0F / g + 0.5F;
 						float w = -s / 2.0F / g + 0.5F;
-						shadowVertex(matrix4f, vertexConsumer, i, o, q, r, t, v);
-						shadowVertex(matrix4f, vertexConsumer, i, o, q, s, t, w);
-						shadowVertex(matrix4f, vertexConsumer, i, p, q, s, u, w);
-						shadowVertex(matrix4f, vertexConsumer, i, p, q, r, u, v);
+						shadowVertex(pose, vertexConsumer, i, o, q, r, t, v);
+						shadowVertex(pose, vertexConsumer, i, o, q, s, t, w);
+						shadowVertex(pose, vertexConsumer, i, p, q, s, u, w);
+						shadowVertex(pose, vertexConsumer, i, p, q, r, u, v);
 					}
 				}
 			}
 		}
 	}
 
-	private static void shadowVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
-		vertexConsumer.vertex(matrix4f, g, h, i)
+	private static void shadowVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
+		vertexConsumer.vertex(pose.pose(), g, h, i)
 			.color(1.0F, 1.0F, 1.0F, f)
 			.uv(j, k)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(15728880)
-			.normal(0.0F, 1.0F, 0.0F)
+			.normal(pose.normal(), 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 

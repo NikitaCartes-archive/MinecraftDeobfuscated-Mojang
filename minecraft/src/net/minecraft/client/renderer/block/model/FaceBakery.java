@@ -41,15 +41,13 @@ public class FaceBakery {
 
 		float[] fs = new float[blockFaceUV.uvs.length];
 		System.arraycopy(blockFaceUV.uvs, 0, fs, 0, fs.length);
-		float f = (float)textureAtlasSprite.getWidth() / (textureAtlasSprite.getU1() - textureAtlasSprite.getU0());
-		float g = (float)textureAtlasSprite.getHeight() / (textureAtlasSprite.getV1() - textureAtlasSprite.getV0());
-		float h = 4.0F / Math.max(g, f);
-		float i = (blockFaceUV.uvs[0] + blockFaceUV.uvs[0] + blockFaceUV.uvs[2] + blockFaceUV.uvs[2]) / 4.0F;
-		float j = (blockFaceUV.uvs[1] + blockFaceUV.uvs[1] + blockFaceUV.uvs[3] + blockFaceUV.uvs[3]) / 4.0F;
-		blockFaceUV.uvs[0] = Mth.lerp(h, blockFaceUV.uvs[0], i);
-		blockFaceUV.uvs[2] = Mth.lerp(h, blockFaceUV.uvs[2], i);
-		blockFaceUV.uvs[1] = Mth.lerp(h, blockFaceUV.uvs[1], j);
-		blockFaceUV.uvs[3] = Mth.lerp(h, blockFaceUV.uvs[3], j);
+		float f = textureAtlasSprite.uvShrinkRatio();
+		float g = (blockFaceUV.uvs[0] + blockFaceUV.uvs[0] + blockFaceUV.uvs[2] + blockFaceUV.uvs[2]) / 4.0F;
+		float h = (blockFaceUV.uvs[1] + blockFaceUV.uvs[1] + blockFaceUV.uvs[3] + blockFaceUV.uvs[3]) / 4.0F;
+		blockFaceUV.uvs[0] = Mth.lerp(f, blockFaceUV.uvs[0], g);
+		blockFaceUV.uvs[2] = Mth.lerp(f, blockFaceUV.uvs[2], g);
+		blockFaceUV.uvs[1] = Mth.lerp(f, blockFaceUV.uvs[1], h);
+		blockFaceUV.uvs[3] = Mth.lerp(f, blockFaceUV.uvs[3], h);
 		int[] is = this.makeVertices(
 			blockFaceUV, textureAtlasSprite, direction, this.setupShape(vector3f, vector3f2), modelState.getRotation(), blockElementRotation, bl
 		);
@@ -220,7 +218,7 @@ public class FaceBakery {
 				vector3f3.set(1.0F, 1.0F, 1.0F);
 			}
 
-			this.rotateVertexBy(vector3f, new Vector3f(blockElementRotation.origin), new Matrix4f(quaternion), vector3f3);
+			this.rotateVertexBy(vector3f, blockElementRotation.origin.copy(), new Matrix4f(quaternion), vector3f3);
 		}
 	}
 
@@ -241,11 +239,11 @@ public class FaceBakery {
 		Vector3f vector3f = new Vector3f(Float.intBitsToFloat(is[0]), Float.intBitsToFloat(is[1]), Float.intBitsToFloat(is[2]));
 		Vector3f vector3f2 = new Vector3f(Float.intBitsToFloat(is[8]), Float.intBitsToFloat(is[9]), Float.intBitsToFloat(is[10]));
 		Vector3f vector3f3 = new Vector3f(Float.intBitsToFloat(is[16]), Float.intBitsToFloat(is[17]), Float.intBitsToFloat(is[18]));
-		Vector3f vector3f4 = new Vector3f(vector3f);
+		Vector3f vector3f4 = vector3f.copy();
 		vector3f4.sub(vector3f2);
-		Vector3f vector3f5 = new Vector3f(vector3f3);
+		Vector3f vector3f5 = vector3f3.copy();
 		vector3f5.sub(vector3f2);
-		Vector3f vector3f6 = new Vector3f(vector3f5);
+		Vector3f vector3f6 = vector3f5.copy();
 		vector3f6.cross(vector3f4);
 		vector3f6.normalize();
 		Direction direction = null;

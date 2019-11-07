@@ -6,6 +6,7 @@ import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -21,12 +22,9 @@ import net.minecraft.world.level.block.WallBannerBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
-	private static final Logger LOGGER = LogManager.getLogger();
 	private final ModelPart flag = new ModelPart(64, 64, 0, 0);
 	private final ModelPart pole;
 	private final ModelPart bar;
@@ -40,68 +38,68 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 		this.bar.addBox(-10.0F, -32.0F, -1.0F, 20.0F, 2.0F, 2.0F, 0.0F);
 	}
 
-	public void render(
-		BannerBlockEntity bannerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
-	) {
-		float h = 0.6666667F;
-		boolean bl = bannerBlockEntity.getLevel() == null;
-		poseStack.pushPose();
-		long l;
-		if (bl) {
-			l = 0L;
-			poseStack.translate(0.5, 0.5, f + 0.5);
-			this.pole.visible = !bannerBlockEntity.onlyRenderPattern();
-		} else {
-			l = bannerBlockEntity.getLevel().getGameTime();
-			BlockState blockState = bannerBlockEntity.getBlockState();
-			if (blockState.getBlock() instanceof BannerBlock) {
+	public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+		if (bannerBlockEntity.getPatterns() != null) {
+			float g = 0.6666667F;
+			boolean bl = bannerBlockEntity.getLevel() == null;
+			poseStack.pushPose();
+			long l;
+			if (bl) {
+				l = 0L;
 				poseStack.translate(0.5, 0.5, 0.5);
-				float k = (float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F;
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-				this.pole.visible = true;
+				this.pole.visible = !bannerBlockEntity.onlyRenderPattern();
 			} else {
-				poseStack.translate(0.5, -0.16666667F, 0.5);
-				float k = -((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot();
-				poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-				poseStack.translate(0.0, -0.3125, -0.4375);
-				this.pole.visible = false;
+				l = bannerBlockEntity.getLevel().getGameTime();
+				BlockState blockState = bannerBlockEntity.getBlockState();
+				if (blockState.getBlock() instanceof BannerBlock) {
+					poseStack.translate(0.5, 0.5, 0.5);
+					float h = (float)(-(Integer)blockState.getValue(BannerBlock.ROTATION) * 360) / 16.0F;
+					poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+					this.pole.visible = true;
+				} else {
+					poseStack.translate(0.5, -0.16666667F, 0.5);
+					float h = -((Direction)blockState.getValue(WallBannerBlock.FACING)).toYRot();
+					poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+					poseStack.translate(0.0, -0.3125, -0.4375);
+					this.pole.visible = false;
+				}
 			}
-		}
 
-		TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
-		poseStack.pushPose();
-		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		float k = 0.0625F;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-		this.pole.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		this.bar.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		if (bannerBlockEntity.onlyRenderPattern()) {
-			this.flag.xRot = 0.0F;
-		} else {
-			BlockPos blockPos = bannerBlockEntity.getBlockPos();
-			float m = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + g;
-			this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(m * (float) Math.PI * 0.02F)) * (float) Math.PI;
-		}
+			TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
+			poseStack.pushPose();
+			poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+			this.pole.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+			this.bar.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+			if (bannerBlockEntity.onlyRenderPattern()) {
+				this.flag.xRot = 0.0F;
+			} else {
+				BlockPos blockPos = bannerBlockEntity.getBlockPos();
+				float k = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + f;
+				this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(k * (float) Math.PI * 0.02F)) * (float) Math.PI;
+			}
 
-		this.flag.y = -32.0F;
-		this.flag.render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
+			this.flag.y = -32.0F;
+			this.flag.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+			renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, true);
+			poseStack.popPose();
+			poseStack.popPose();
+		}
+	}
+
+	public static void renderPatterns(
+		BannerBlockEntity bannerBlockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, boolean bl
+	) {
 		List<BannerPattern> list = bannerBlockEntity.getPatterns();
 		List<DyeColor> list2 = bannerBlockEntity.getColors();
-		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
-		if (list == null) {
-			LOGGER.error("patterns are null");
-		} else if (list2 == null) {
-			LOGGER.error("colors are null");
-		} else {
-			for (int n = 0; n < 17 && n < list.size() && n < list2.size(); n++) {
-				BannerPattern bannerPattern = (BannerPattern)list.get(n);
-				DyeColor dyeColor = (DyeColor)list2.get(n);
-				float[] fs = dyeColor.getTextureDiffuseColors();
-				this.flag.render(poseStack, vertexConsumer2, 0.0625F, i, j, this.getSprite(bannerPattern.location()), fs[0], fs[1], fs[2]);
-			}
-		}
+		TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
 
-		poseStack.popPose();
-		poseStack.popPose();
+		for (int k = 0; k < 17 && k < list.size() && k < list2.size(); k++) {
+			BannerPattern bannerPattern = (BannerPattern)list.get(k);
+			DyeColor dyeColor = (DyeColor)list2.get(k);
+			float[] fs = dyeColor.getTextureDiffuseColors();
+			modelPart.render(poseStack, vertexConsumer, i, j, textureAtlas.getSprite(bannerPattern.location(bl)), fs[0], fs[1], fs[2]);
+		}
 	}
 }

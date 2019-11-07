@@ -22,39 +22,29 @@ public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBl
 		super(blockEntityRenderDispatcher);
 	}
 
-	public void render(
-		EnchantmentTableBlockEntity enchantmentTableBlockEntity,
-		double d,
-		double e,
-		double f,
-		float g,
-		PoseStack poseStack,
-		MultiBufferSource multiBufferSource,
-		int i,
-		int j
-	) {
+	public void render(EnchantmentTableBlockEntity enchantmentTableBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0.75, 0.5);
-		float h = (float)enchantmentTableBlockEntity.time + g;
-		poseStack.translate(0.0, (double)(0.1F + Mth.sin(h * 0.1F) * 0.01F), 0.0);
-		float k = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot;
+		float g = (float)enchantmentTableBlockEntity.time + f;
+		poseStack.translate(0.0, (double)(0.1F + Mth.sin(g * 0.1F) * 0.01F), 0.0);
+		float h = enchantmentTableBlockEntity.rot - enchantmentTableBlockEntity.oRot;
 
-		while (k >= (float) Math.PI) {
-			k -= (float) (Math.PI * 2);
+		while (h >= (float) Math.PI) {
+			h -= (float) (Math.PI * 2);
 		}
 
-		while (k < (float) -Math.PI) {
-			k += (float) (Math.PI * 2);
+		while (h < (float) -Math.PI) {
+			h += (float) (Math.PI * 2);
 		}
 
-		float l = enchantmentTableBlockEntity.oRot + k * g;
-		poseStack.mulPose(Vector3f.YP.rotation(-l));
+		float k = enchantmentTableBlockEntity.oRot + h * f;
+		poseStack.mulPose(Vector3f.YP.rotation(-k));
 		poseStack.mulPose(Vector3f.ZP.rotationDegrees(80.0F));
-		float m = Mth.lerp(g, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip);
-		float n = Mth.frac(m + 0.25F) * 1.6F - 0.3F;
-		float o = Mth.frac(m + 0.75F) * 1.6F - 0.3F;
-		float p = Mth.lerp(g, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
-		this.bookModel.setupAnim(h, Mth.clamp(n, 0.0F, 1.0F), Mth.clamp(o, 0.0F, 1.0F), p);
+		float l = Mth.lerp(f, enchantmentTableBlockEntity.oFlip, enchantmentTableBlockEntity.flip);
+		float m = Mth.frac(l + 0.25F) * 1.6F - 0.3F;
+		float n = Mth.frac(l + 0.75F) * 1.6F - 0.3F;
+		float o = Mth.lerp(f, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
+		this.bookModel.setupAnim(g, Mth.clamp(m, 0.0F, 1.0F), Mth.clamp(n, 0.0F, 1.0F), o);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
 		this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, this.getSprite(BOOK_LOCATION));
 		poseStack.popPose();

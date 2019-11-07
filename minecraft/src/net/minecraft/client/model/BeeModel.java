@@ -77,7 +77,7 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 		this.stinger.visible = !bee.hasStung();
 	}
 
-	public void setupAnim(T bee, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T bee, float f, float g, float h, float i, float j) {
 		this.rightWing.xRot = 0.0F;
 		this.leftAntenna.xRot = 0.0F;
 		this.rightAntenna.xRot = 0.0F;
@@ -94,9 +94,9 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 			this.midLeg.xRot = 0.0F;
 			this.backLeg.xRot = 0.0F;
 		} else {
-			float l = h * 2.1F;
+			float k = h * 2.1F;
 			this.rightWing.yRot = 0.0F;
-			this.rightWing.zRot = Mth.cos(l) * (float) Math.PI * 0.15F;
+			this.rightWing.zRot = Mth.cos(k) * (float) Math.PI * 0.15F;
 			this.leftWing.xRot = this.rightWing.xRot;
 			this.leftWing.yRot = this.rightWing.yRot;
 			this.leftWing.zRot = -this.rightWing.zRot;
@@ -113,12 +113,12 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 			this.bone.yRot = 0.0F;
 			this.bone.zRot = 0.0F;
 			if (!bl) {
-				float l = Mth.cos(h * 0.18F);
-				this.bone.xRot = 0.1F + l * (float) Math.PI * 0.025F;
-				this.leftAntenna.xRot = l * (float) Math.PI * 0.03F;
-				this.rightAntenna.xRot = l * (float) Math.PI * 0.03F;
-				this.frontLeg.xRot = -l * (float) Math.PI * 0.1F + (float) (Math.PI / 8);
-				this.backLeg.xRot = -l * (float) Math.PI * 0.05F + (float) (Math.PI / 4);
+				float k = Mth.cos(h * 0.18F);
+				this.bone.xRot = 0.1F + k * (float) Math.PI * 0.025F;
+				this.leftAntenna.xRot = k * (float) Math.PI * 0.03F;
+				this.rightAntenna.xRot = k * (float) Math.PI * 0.03F;
+				this.frontLeg.xRot = -k * (float) Math.PI * 0.1F + (float) (Math.PI / 8);
+				this.backLeg.xRot = -k * (float) Math.PI * 0.05F + (float) (Math.PI / 4);
 				this.bone.y = 19.0F - Mth.cos(h * 0.18F) * 0.9F;
 			}
 		}

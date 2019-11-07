@@ -70,7 +70,7 @@ public class ParrotModel extends ListModel<Parrot> {
 		return ImmutableList.<ModelPart>of(this.body, this.wingLeft, this.wingRight, this.tail, this.head, this.legLeft, this.legRight);
 	}
 
-	public void setupAnim(Parrot parrot, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(Parrot parrot, float f, float g, float h, float i, float j) {
 		this.setupAnim(getState(parrot), parrot.tickCount, f, g, h, i, j);
 	}
 
@@ -78,10 +78,10 @@ public class ParrotModel extends ListModel<Parrot> {
 		this.prepare(getState(parrot));
 	}
 
-	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, float l, int m) {
+	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, int l) {
 		this.prepare(ParrotModel.State.ON_SHOULDER);
-		this.setupAnim(ParrotModel.State.ON_SHOULDER, m, f, g, 0.0F, h, k);
-		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, l, i, j, null));
+		this.setupAnim(ParrotModel.State.ON_SHOULDER, l, f, g, 0.0F, h, k);
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null));
 	}
 
 	private void setupAnim(ParrotModel.State state, int i, float f, float g, float h, float j, float k) {

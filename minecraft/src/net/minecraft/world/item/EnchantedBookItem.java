@@ -19,7 +19,6 @@ public class EnchantedBookItem extends Item {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
 		return true;

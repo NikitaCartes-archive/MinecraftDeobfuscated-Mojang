@@ -52,7 +52,7 @@ public class CreeperModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.leg0.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;

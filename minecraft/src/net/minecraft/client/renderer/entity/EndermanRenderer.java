@@ -24,20 +24,20 @@ public class EndermanRenderer extends MobRenderer<EnderMan, EndermanModel<EnderM
 		this.addLayer(new CarriedBlockLayer(this));
 	}
 
-	public void render(EnderMan enderMan, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(EnderMan enderMan, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		BlockState blockState = enderMan.getCarriedBlock();
 		EndermanModel<EnderMan> endermanModel = this.getModel();
 		endermanModel.carrying = blockState != null;
 		endermanModel.creepy = enderMan.isCreepy();
-		super.render(enderMan, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(enderMan, f, g, poseStack, multiBufferSource, i);
 	}
 
-	public Vec3 getRenderOffset(EnderMan enderMan, double d, double e, double f, float g) {
+	public Vec3 getRenderOffset(EnderMan enderMan, float f) {
 		if (enderMan.isCreepy()) {
-			double h = 0.02;
+			double d = 0.02;
 			return new Vec3(this.random.nextGaussian() * 0.02, 0.0, this.random.nextGaussian() * 0.02);
 		} else {
-			return super.getRenderOffset(enderMan, d, e, f, g);
+			return super.getRenderOffset(enderMan, f);
 		}
 	}
 

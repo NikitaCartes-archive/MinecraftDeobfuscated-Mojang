@@ -47,18 +47,18 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		return this.model;
 	}
 
-	public void render(T livingEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(T livingEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		this.model.attackTime = this.getAttackAnim(livingEntity, h);
+		this.model.attackTime = this.getAttackAnim(livingEntity, g);
 		this.model.riding = livingEntity.isPassenger();
 		this.model.young = livingEntity.isBaby();
-		float i = Mth.rotLerp(h, livingEntity.yBodyRotO, livingEntity.yBodyRot);
-		float j = Mth.rotLerp(h, livingEntity.yHeadRotO, livingEntity.yHeadRot);
-		float k = j - i;
+		float h = Mth.rotLerp(g, livingEntity.yBodyRotO, livingEntity.yBodyRot);
+		float j = Mth.rotLerp(g, livingEntity.yHeadRotO, livingEntity.yHeadRot);
+		float k = j - h;
 		if (livingEntity.isPassenger() && livingEntity.getVehicle() instanceof LivingEntity) {
 			LivingEntity livingEntity2 = (LivingEntity)livingEntity.getVehicle();
-			i = Mth.rotLerp(h, livingEntity2.yBodyRotO, livingEntity2.yBodyRot);
-			k = j - i;
+			h = Mth.rotLerp(g, livingEntity2.yBodyRotO, livingEntity2.yBodyRot);
+			k = j - h;
 			float l = Mth.wrapDegrees(k);
 			if (l < -85.0F) {
 				l = -85.0F;
@@ -68,15 +68,15 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 				l = 85.0F;
 			}
 
-			i = j - l;
+			h = j - l;
 			if (l * l > 2500.0F) {
-				i += l * 0.2F;
+				h += l * 0.2F;
 			}
 
-			k = j - i;
+			k = j - h;
 		}
 
-		float m = Mth.lerp(h, livingEntity.xRotO, livingEntity.xRot);
+		float m = Mth.lerp(g, livingEntity.xRotO, livingEntity.xRot);
 		if (livingEntity.getPose() == Pose.SLEEPING) {
 			Direction direction = livingEntity.getBedOrientation();
 			if (direction != null) {
@@ -85,47 +85,45 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 			}
 		}
 
-		float lx = this.getBob(livingEntity, h);
-		this.setupRotations(livingEntity, poseStack, lx, i, h);
+		float lx = this.getBob(livingEntity, g);
+		this.setupRotations(livingEntity, poseStack, lx, h, g);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		this.scale(livingEntity, poseStack, h);
-		float n = 0.0625F;
+		this.scale(livingEntity, poseStack, g);
 		poseStack.translate(0.0, -1.501F, 0.0);
+		float n = 0.0F;
 		float o = 0.0F;
-		float p = 0.0F;
 		if (!livingEntity.isPassenger() && livingEntity.isAlive()) {
-			o = Mth.lerp(h, livingEntity.animationSpeedOld, livingEntity.animationSpeed);
-			p = livingEntity.animationPosition - livingEntity.animationSpeed * (1.0F - h);
+			n = Mth.lerp(g, livingEntity.animationSpeedOld, livingEntity.animationSpeed);
+			o = livingEntity.animationPosition - livingEntity.animationSpeed * (1.0F - g);
 			if (livingEntity.isBaby()) {
-				p *= 3.0F;
+				o *= 3.0F;
 			}
 
-			if (o > 1.0F) {
-				o = 1.0F;
+			if (n > 1.0F) {
+				n = 1.0F;
 			}
 		}
 
-		this.model.prepareMobModel(livingEntity, p, o, h);
+		this.model.prepareMobModel(livingEntity, o, n, g);
 		boolean bl = this.isVisible(livingEntity, false);
 		boolean bl2 = !bl && !livingEntity.isInvisibleTo(Minecraft.getInstance().player);
-		int q = livingEntity.getLightColor();
-		this.model.setupAnim(livingEntity, p, o, lx, k, m, 0.0625F);
+		this.model.setupAnim(livingEntity, o, n, lx, k, m);
 		if (bl || bl2) {
 			ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
 				bl2 ? RenderType.entityForceTranslucent(resourceLocation) : this.model.renderType(resourceLocation)
 			);
-			this.model.renderToBuffer(poseStack, vertexConsumer, q, getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, h)), 1.0F, 1.0F, 1.0F);
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0F, 1.0F, 1.0F);
 		}
 
 		if (!livingEntity.isSpectator()) {
 			for (RenderLayer<T, M> renderLayer : this.layers) {
-				renderLayer.render(poseStack, multiBufferSource, q, livingEntity, p, o, h, lx, k, m, 0.0625F);
+				renderLayer.render(poseStack, multiBufferSource, i, livingEntity, o, n, g, lx, k, m);
 			}
 		}
 
 		poseStack.popPose();
-		super.render(livingEntity, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(livingEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
 	public static int getOverlayCoords(LivingEntity livingEntity, float f) {

@@ -52,12 +52,12 @@ public class CodModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		float l = 1.0F;
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		float k = 1.0F;
 		if (!entity.isInWater()) {
-			l = 1.5F;
+			k = 1.5F;
 		}
 
-		this.tailFin.yRot = -l * 0.45F * Mth.sin(0.6F * h);
+		this.tailFin.yRot = -k * 0.45F * Mth.sin(0.6F * h);
 	}
 }

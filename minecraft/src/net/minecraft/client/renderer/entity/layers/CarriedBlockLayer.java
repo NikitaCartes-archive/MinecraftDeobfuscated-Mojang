@@ -18,9 +18,7 @@ public class CarriedBlockLayer extends RenderLayer<EnderMan, EndermanModel<Ender
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, EnderMan enderMan, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, EnderMan enderMan, float f, float g, float h, float j, float k, float l) {
 		BlockState blockState = enderMan.getCarriedBlock();
 		if (blockState != null) {
 			poseStack.pushPose();
@@ -28,8 +26,9 @@ public class CarriedBlockLayer extends RenderLayer<EnderMan, EndermanModel<Ender
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0F));
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(45.0F));
 			poseStack.translate(0.25, 0.1875, 0.25);
-			float n = 0.5F;
+			float m = 0.5F;
 			poseStack.scale(-0.5F, -0.5F, 0.5F);
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
 			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
 			poseStack.popPose();
 		}

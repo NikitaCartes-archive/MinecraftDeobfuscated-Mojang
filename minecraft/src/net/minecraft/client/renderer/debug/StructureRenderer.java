@@ -1,8 +1,7 @@
 package net.minecraft.client.renderer.debug;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import java.util.Map;
@@ -31,21 +30,12 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
 		LevelAccessor levelAccessor = this.minecraft.level;
 		DimensionType dimensionType = levelAccessor.getDimension().getType();
-		double d = camera.getPosition().x;
-		double e = camera.getPosition().y;
-		double f = camera.getPosition().z;
-		RenderSystem.pushMatrix();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableTexture();
-		RenderSystem.disableDepthTest();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
-		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-		VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 		if (this.postMainBoxes.containsKey(dimensionType)) {
 			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(dimensionType)).values()) {
 				if (blockPos.closerThan(boundingBox.getCenter(), 500.0)) {
@@ -104,11 +94,6 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 				}
 			}
 		}
-
-		bufferSource.endBatch();
-		RenderSystem.enableDepthTest();
-		RenderSystem.enableTexture();
-		RenderSystem.popMatrix();
 	}
 
 	public void addBoundingBox(BoundingBox boundingBox, List<BoundingBox> list, List<Boolean> list2, DimensionType dimensionType) {

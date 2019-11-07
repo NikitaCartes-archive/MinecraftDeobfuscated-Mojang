@@ -22,9 +22,7 @@ public class ShulkerHeadLayer extends RenderLayer<Shulker, ShulkerModel<Shulker>
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l) {
 		poseStack.pushPose();
 		poseStack.translate(0.0, 1.0, 0.0);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
@@ -45,7 +43,7 @@ public class ShulkerHeadLayer extends RenderLayer<Shulker, ShulkerModel<Shulker>
 		}
 
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation));
-		modelPart.render(poseStack, vertexConsumer, m, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0F), null);
+		modelPart.render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0F), null);
 		poseStack.popPose();
 	}
 }

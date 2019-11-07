@@ -43,31 +43,31 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 		return i;
 	}
 
-	public void render(ItemEntity itemEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(ItemEntity itemEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		ItemStack itemStack = itemEntity.getItem();
-		int i = itemStack.isEmpty() ? 187 : Item.getId(itemStack.getItem()) + itemStack.getDamageValue();
-		this.random.setSeed((long)i);
+		int j = itemStack.isEmpty() ? 187 : Item.getId(itemStack.getItem()) + itemStack.getDamageValue();
+		this.random.setSeed((long)j);
 		BakedModel bakedModel = this.itemRenderer.getModel(itemStack, itemEntity.level, null);
 		boolean bl = bakedModel.isGui3d();
-		int j = this.getRenderAmount(itemStack);
-		float k = 0.25F;
-		float l = Mth.sin(((float)itemEntity.getAge() + h) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
+		int k = this.getRenderAmount(itemStack);
+		float h = 0.25F;
+		float l = Mth.sin(((float)itemEntity.getAge() + g) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
 		float m = bakedModel.getTransforms().getTransform(ItemTransforms.TransformType.GROUND).scale.y();
 		poseStack.translate(0.0, (double)(l + 0.25F * m), 0.0);
-		float n = ((float)itemEntity.getAge() + h) / 20.0F + itemEntity.bobOffs;
+		float n = ((float)itemEntity.getAge() + g) / 20.0F + itemEntity.bobOffs;
 		poseStack.mulPose(Vector3f.YP.rotation(n));
 		float o = bakedModel.getTransforms().ground.scale.x();
 		float p = bakedModel.getTransforms().ground.scale.y();
 		float q = bakedModel.getTransforms().ground.scale.z();
 		if (!bl) {
-			float r = -0.0F * (float)(j - 1) * 0.5F * o;
-			float s = -0.0F * (float)(j - 1) * 0.5F * p;
-			float t = -0.09375F * (float)(j - 1) * 0.5F * q;
+			float r = -0.0F * (float)(k - 1) * 0.5F * o;
+			float s = -0.0F * (float)(k - 1) * 0.5F * p;
+			float t = -0.09375F * (float)(k - 1) * 0.5F * q;
 			poseStack.translate((double)r, (double)s, (double)t);
 		}
 
-		for (int u = 0; u < j; u++) {
+		for (int u = 0; u < k; u++) {
 			poseStack.pushPose();
 			if (u > 0) {
 				if (bl) {
@@ -82,10 +82,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 				}
 			}
 
-			this.itemRenderer
-				.render(
-					itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, itemEntity.getLightColor(), OverlayTexture.NO_OVERLAY, bakedModel
-				);
+			this.itemRenderer.render(itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);
 			poseStack.popPose();
 			if (!bl) {
 				poseStack.translate((double)(0.0F * o), (double)(0.0F * p), (double)(0.09375F * q));
@@ -93,7 +90,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 		}
 
 		poseStack.popPose();
-		super.render(itemEntity, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(itemEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
 	public ResourceLocation getTextureLocation(ItemEntity itemEntity) {

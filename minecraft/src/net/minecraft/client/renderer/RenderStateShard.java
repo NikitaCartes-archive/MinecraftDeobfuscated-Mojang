@@ -81,7 +81,7 @@ public class RenderStateShard {
 		}, () -> RenderSystem.disableBlend()
 	);
 	protected static final RenderStateShard.AlphaStateShard NO_ALPHA = new RenderStateShard.AlphaStateShard(0.0F);
-	protected static final RenderStateShard.AlphaStateShard DEFAULT_ALPHA = new RenderStateShard.AlphaStateShard(0.1F);
+	protected static final RenderStateShard.AlphaStateShard DEFAULT_ALPHA = new RenderStateShard.AlphaStateShard(0.003921569F);
 	protected static final RenderStateShard.AlphaStateShard MIDWAY_ALPHA = new RenderStateShard.AlphaStateShard(0.5F);
 	protected static final RenderStateShard.ShadeModelStateShard FLAT_SHADE = new RenderStateShard.ShadeModelStateShard(false);
 	protected static final RenderStateShard.ShadeModelStateShard SMOOTH_SHADE = new RenderStateShard.ShadeModelStateShard(true);
@@ -146,15 +146,20 @@ public class RenderStateShard {
 		RenderSystem.popMatrix();
 		RenderSystem.matrixMode(5888);
 	});
-	protected static final RenderStateShard.FogStateShard NO_FOG = new RenderStateShard.FogStateShard(
-		"no_fog", () -> RenderSystem.disableFog(), () -> RenderSystem.enableFog()
-	);
-	protected static final RenderStateShard.FogStateShard FOG = new RenderStateShard.FogStateShard("fog", () -> {
+	protected static final RenderStateShard.FogStateShard NO_FOG = new RenderStateShard.FogStateShard("no_fog", () -> {
 	}, () -> {
 	});
-	protected static final RenderStateShard.FogStateShard BLACK_FOG = new RenderStateShard.FogStateShard(
-		"black_fog", () -> FogRenderer.resetFogColor(true), () -> FogRenderer.resetFogColor(false)
-	);
+	protected static final RenderStateShard.FogStateShard FOG = new RenderStateShard.FogStateShard("fog", () -> {
+		FogRenderer.levelFogColor();
+		RenderSystem.enableFog();
+	}, () -> RenderSystem.disableFog());
+	protected static final RenderStateShard.FogStateShard BLACK_FOG = new RenderStateShard.FogStateShard("black_fog", () -> {
+		RenderSystem.fog(2918, 0.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.enableFog();
+	}, () -> {
+		FogRenderer.levelFogColor();
+		RenderSystem.disableFog();
+	});
 	protected static final RenderStateShard.OutputStateShard MAIN_TARGET = new RenderStateShard.OutputStateShard("main_target", () -> {
 	}, () -> {
 	});

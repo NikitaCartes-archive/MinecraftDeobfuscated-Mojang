@@ -247,7 +247,7 @@ public class MultiPlayerGameMode {
 		}
 	}
 
-	public InteractionResult useItemOn(LocalPlayer localPlayer, MultiPlayerLevel multiPlayerLevel, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult useItemOn(LocalPlayer localPlayer, ClientLevel clientLevel, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		this.ensureHasSentCarriedItem();
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		if (!this.minecraft.level.getWorldBorder().isWithinBounds(blockPos)) {
@@ -261,7 +261,7 @@ public class MultiPlayerGameMode {
 				boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
 				boolean bl2 = localPlayer.isSecondaryUseActive() && bl;
 				if (!bl2) {
-					InteractionResult interactionResult = multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult);
+					InteractionResult interactionResult = clientLevel.getBlockState(blockPos).use(clientLevel, localPlayer, interactionHand, blockHitResult);
 					if (interactionResult.consumesAction()) {
 						this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
 						return interactionResult;
@@ -310,8 +310,8 @@ public class MultiPlayerGameMode {
 		}
 	}
 
-	public LocalPlayer createPlayer(MultiPlayerLevel multiPlayerLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
-		return new LocalPlayer(this.minecraft, multiPlayerLevel, this.connection, statsCounter, clientRecipeBook);
+	public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
+		return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook);
 	}
 
 	public void attack(Player player, Entity entity) {
@@ -411,12 +411,10 @@ public class MultiPlayerGameMode {
 		this.connection.send(new ServerboundPlayerActionPacket(action, blockPos, direction));
 	}
 
-	public void handleBlockBreakAck(
-		MultiPlayerLevel multiPlayerLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl
-	) {
+	public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
 		PosAndRot posAndRot = this.unAckedActions.remove(Pair.of(blockPos, action));
-		if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && multiPlayerLevel.getBlockState(blockPos) != blockState) {
-			multiPlayerLevel.setKnownState(blockPos, blockState);
+		if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && clientLevel.getBlockState(blockPos) != blockState) {
+			clientLevel.setKnownState(blockPos, blockState);
 			if (posAndRot != null) {
 				Vec3 vec3 = posAndRot.pos();
 				this.minecraft.player.absMoveTo(vec3.x, vec3.y, vec3.z, posAndRot.yRot(), posAndRot.xRot());

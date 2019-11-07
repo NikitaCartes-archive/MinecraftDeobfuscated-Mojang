@@ -23,11 +23,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class SignBlockEntity extends BlockEntity {
 	public final Component[] messages = new Component[]{new TextComponent(""), new TextComponent(""), new TextComponent(""), new TextComponent("")};
-	@Environment(EnvType.CLIENT)
-	private boolean showCursor;
-	private int selectedLine = -1;
-	private int cursorPos = -1;
-	private int selectionPos = -1;
 	private boolean isEditable = true;
 	private Player playerWhoMayEdit;
 	private final String[] renderMessages = new String[4];
@@ -172,41 +167,5 @@ public class SignBlockEntity extends BlockEntity {
 		} else {
 			return false;
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setCursorInfo(int i, int j, int k, boolean bl) {
-		this.selectedLine = i;
-		this.cursorPos = j;
-		this.selectionPos = k;
-		this.showCursor = bl;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void resetCursorInfo() {
-		this.selectedLine = -1;
-		this.cursorPos = -1;
-		this.selectionPos = -1;
-		this.showCursor = false;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public boolean isShowCursor() {
-		return this.showCursor;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public int getSelectedLine() {
-		return this.selectedLine;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public int getCursorPos() {
-		return this.cursorPos;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public int getSelectionPos() {
-		return this.selectionPos;
 	}
 }

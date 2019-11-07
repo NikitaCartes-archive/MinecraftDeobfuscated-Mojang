@@ -1,5 +1,6 @@
 package com.mojang.math;
 
+import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
@@ -23,11 +24,6 @@ public final class Vector3f {
 		this.x = f;
 		this.y = g;
 		this.z = h;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public Vector3f(Vector3f vector3f) {
-		this(vector3f.x, vector3f.y, vector3f.z);
 	}
 
 	public Vector3f(Vec3 vec3) {
@@ -75,19 +71,17 @@ public final class Vector3f {
 	}
 
 	@Environment(EnvType.CLIENT)
-	private static float clamp(float f, float g, float h) {
-		if (f < g) {
-			return g;
-		} else {
-			return f > h ? h : f;
-		}
+	public void mul(float f, float g, float h) {
+		this.x *= f;
+		this.y *= g;
+		this.z *= h;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void clamp(float f, float g) {
-		this.x = clamp(this.x, f, g);
-		this.y = clamp(this.y, f, g);
-		this.z = clamp(this.z, f, g);
+		this.x = Mth.clamp(this.x, f, g);
+		this.y = Mth.clamp(this.y, f, g);
+		this.z = Mth.clamp(this.z, f, g);
 	}
 
 	public void set(float f, float g, float h) {
@@ -101,6 +95,13 @@ public final class Vector3f {
 		this.x += f;
 		this.y += g;
 		this.z += h;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void add(Vector3f vector3f) {
+		this.x = this.x + vector3f.x;
+		this.y = this.y + vector3f.y;
+		this.z = this.z + vector3f.z;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -167,6 +168,14 @@ public final class Vector3f {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public void lerp(Vector3f vector3f, float f) {
+		float g = 1.0F - f;
+		this.x = this.x * g + vector3f.x * f;
+		this.y = this.y * g + vector3f.y * f;
+		this.z = this.z * g + vector3f.z * f;
+	}
+
+	@Environment(EnvType.CLIENT)
 	public Quaternion rotation(float f) {
 		return new Quaternion(this, f, false);
 	}
@@ -174,5 +183,17 @@ public final class Vector3f {
 	@Environment(EnvType.CLIENT)
 	public Quaternion rotationDegrees(float f) {
 		return new Quaternion(this, f, true);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Vector3f copy() {
+		return new Vector3f(this.x, this.y, this.z);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void map(Float2FloatFunction float2FloatFunction) {
+		this.x = float2FloatFunction.get(this.x);
+		this.y = float2FloatFunction.get(this.y);
+		this.z = float2FloatFunction.get(this.z);
 	}
 }

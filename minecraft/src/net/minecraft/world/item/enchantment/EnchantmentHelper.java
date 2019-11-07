@@ -41,7 +41,7 @@ public class EnchantmentHelper {
 				CompoundTag compoundTag = listTag.getCompound(i);
 				ResourceLocation resourceLocation2 = ResourceLocation.tryParse(compoundTag.getString("id"));
 				if (resourceLocation2 != null && resourceLocation2.equals(resourceLocation)) {
-					return compoundTag.getInt("lvl");
+					return Mth.clamp(compoundTag.getInt("lvl"), 0, 255);
 				}
 			}
 

@@ -31,6 +31,6 @@ public class SkullModel extends Model {
 
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-		this.head.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h);
+		this.head.render(poseStack, vertexConsumer, i, j, null, f, g, h);
 	}
 }

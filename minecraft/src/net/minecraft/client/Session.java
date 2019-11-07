@@ -4,8 +4,8 @@ import com.mojang.bridge.game.GameSession;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 
@@ -17,10 +17,10 @@ public class Session implements GameSession {
 	private final String gameMode;
 	private final UUID id;
 
-	public Session(MultiPlayerLevel multiPlayerLevel, LocalPlayer localPlayer, ClientPacketListener clientPacketListener) {
+	public Session(ClientLevel clientLevel, LocalPlayer localPlayer, ClientPacketListener clientPacketListener) {
 		this.players = clientPacketListener.getOnlinePlayers().size();
 		this.isRemoteServer = !clientPacketListener.getConnection().isMemoryConnection();
-		this.difficulty = multiPlayerLevel.getDifficulty().getKey();
+		this.difficulty = clientLevel.getDifficulty().getKey();
 		PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(localPlayer.getUUID());
 		if (playerInfo != null) {
 			this.gameMode = playerInfo.getGameMode().getName();

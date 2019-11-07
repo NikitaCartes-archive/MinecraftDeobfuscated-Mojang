@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
@@ -106,6 +105,11 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	@Override
+	protected boolean shouldDespawnInPeaceful() {
+		return true;
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		if (this.level.isClientSide) {
@@ -131,10 +135,6 @@ public class Phantom extends FlyingMob implements Enemy {
 			float k = (0.3F + f * 0.45F) * ((float)i * 0.2F + 1.0F);
 			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() + (double)h, this.getY() + (double)k, this.getZ() + (double)j, 0.0, 0.0, 0.0);
 			this.level.addParticle(ParticleTypes.MYCELIUM, this.getX() - (double)h, this.getY() + (double)k, this.getZ() - (double)j, 0.0, 0.0, 0.0);
-		}
-
-		if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
-			this.remove();
 		}
 	}
 

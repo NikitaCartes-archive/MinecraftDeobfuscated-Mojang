@@ -26,6 +26,6 @@ public class HumanoidHeadModel extends SkullModel {
 	@Override
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
 		super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h);
-		this.hat.render(poseStack, vertexConsumer, 0.0625F, i, j, null, f, g, h);
+		this.hat.render(poseStack, vertexConsumer, i, j, null, f, g, h);
 	}
 }

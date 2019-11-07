@@ -18,22 +18,22 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 		super(entityRenderDispatcher);
 	}
 
-	public void render(LightningBolt lightningBolt, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+	public void render(LightningBolt lightningBolt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		float[] fs = new float[8];
 		float[] gs = new float[8];
-		float i = 0.0F;
+		float h = 0.0F;
 		float j = 0.0F;
 		Random random = new Random(lightningBolt.seed);
 
 		for (int k = 7; k >= 0; k--) {
-			fs[k] = i;
+			fs[k] = h;
 			gs[k] = j;
-			i += (float)(random.nextInt(11) - 5);
+			h += (float)(random.nextInt(11) - 5);
 			j += (float)(random.nextInt(11) - 5);
 		}
 
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lightning());
-		Matrix4f matrix4f = poseStack.getPose();
+		Matrix4f matrix4f = poseStack.last().pose();
 
 		for (int l = 0; l < 4; l++) {
 			Random random2 = new Random(lightningBolt.seed);
@@ -49,7 +49,7 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 					o = n - 2;
 				}
 
-				float p = fs[n] - i;
+				float p = fs[n] - h;
 				float q = gs[n] - j;
 
 				for (int r = n; r >= o; r--) {

@@ -190,6 +190,7 @@ public interface DispenseItemBehavior {
 				Level level = blockSource.getLevel();
 				ArmorStand armorStand = new ArmorStand(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 				EntityType.updateCustomEntityTag(level, null, armorStand, itemStack.getTag());
+				armorStand.yRot = direction.toYRot();
 				level.addFreshEntity(armorStand);
 				itemStack.shrink(1);
 				return itemStack;
@@ -453,7 +454,7 @@ public interface DispenseItemBehavior {
 					Block block = blockState.getBlock();
 					if (block.is(BlockTags.BEEHIVES) && (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
-							.releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+							.releaseBeesAndResetHoneyLevel(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
 						this.success = true;
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
 					} else if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
@@ -465,45 +466,49 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new OptionalDispenseItemBehavior() {
-			@Override
-			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Level level = blockSource.getLevel();
-				if (!level.isClientSide()) {
-					this.success = false;
-					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+		DispenserBlock.registerBehavior(
+			Items.SHEARS.asItem(),
+			new OptionalDispenseItemBehavior() {
+				@Override
+				protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					Level level = blockSource.getLevel();
+					if (!level.isClientSide()) {
+						this.success = false;
+						BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 
-					for (Sheep sheep : level.getEntitiesOfClass(Sheep.class, new AABB(blockPos))) {
-						if (sheep.isAlive() && !sheep.isSheared() && !sheep.isBaby()) {
-							sheep.shear();
-							if (itemStack.hurt(1, level.random, null)) {
-								itemStack.setCount(0);
-							}
-
-							this.success = true;
-							break;
-						}
-					}
-
-					if (!this.success) {
-						BlockState blockState = level.getBlockState(blockPos);
-						if (blockState.is(BlockTags.BEEHIVES)) {
-							int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
-							if (i >= 5) {
+						for (Sheep sheep : level.getEntitiesOfClass(Sheep.class, new AABB(blockPos))) {
+							if (sheep.isAlive() && !sheep.isSheared() && !sheep.isBaby()) {
+								sheep.shear();
 								if (itemStack.hurt(1, level.random, null)) {
 									itemStack.setCount(0);
 								}
 
-								BeehiveBlock.dropHoneycomb(level, blockPos);
-								((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
 								this.success = true;
+								break;
+							}
+						}
+
+						if (!this.success) {
+							BlockState blockState = level.getBlockState(blockPos);
+							if (blockState.is(BlockTags.BEEHIVES)) {
+								int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
+								if (i >= 5) {
+									if (itemStack.hurt(1, level.random, null)) {
+										itemStack.setCount(0);
+									}
+
+									BeehiveBlock.dropHoneycomb(level, blockPos);
+									((BeehiveBlock)blockState.getBlock())
+										.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+									this.success = true;
+								}
 							}
 						}
 					}
-				}
 
-				return itemStack;
+					return itemStack;
+				}
 			}
-		});
+		);
 	}
 }

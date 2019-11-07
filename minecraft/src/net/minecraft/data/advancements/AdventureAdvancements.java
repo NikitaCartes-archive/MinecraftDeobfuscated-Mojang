@@ -207,7 +207,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				"shot_arrow",
 				PlayerHurtEntityTrigger.TriggerInstance.playerHurtEntity(
 					DamagePredicate.Builder.damageInstance()
-						.type(DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityType.ARROW)))
+						.type(DamageSourcePredicate.Builder.damageType().isProjectile(true).direct(EntityPredicate.Builder.entity().of(EntityTypeTags.ARROWS)))
 				)
 			)
 			.save(consumer, "adventure/shoot_arrow");

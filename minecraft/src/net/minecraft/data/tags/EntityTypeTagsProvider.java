@@ -19,6 +19,7 @@ public class EntityTypeTagsProvider extends TagsProvider<EntityType<?>> {
 		this.tag(EntityTypeTags.RAIDERS)
 			.add(EntityType.EVOKER, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.VINDICATOR, EntityType.ILLUSIONER, EntityType.WITCH);
 		this.tag(EntityTypeTags.BEEHIVE_INHABITORS).add(EntityType.BEE);
+		this.tag(EntityTypeTags.ARROWS).add(EntityType.ARROW, EntityType.SPECTRAL_ARROW);
 	}
 
 	@Override

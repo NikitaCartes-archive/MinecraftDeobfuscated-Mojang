@@ -18,9 +18,9 @@ public class DrownedOuterLayer<T extends Zombie> extends RenderLayer<T, DrownedM
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l) {
 		coloredCutoutModelCopyLayerRender(
-			this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, m, h, 1.0F, 1.0F, 1.0F
+			this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, h, 1.0F, 1.0F, 1.0F
 		);
 	}
 }

@@ -214,79 +214,82 @@ public class ShulkerBullet extends Entity {
 	}
 
 	@Override
-	public void tick() {
-		if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
+	public void checkDespawn() {
+		if (this.level.getDifficulty() == Difficulty.PEACEFUL) {
 			this.remove();
-		} else {
-			super.tick();
-			if (!this.level.isClientSide) {
-				if (this.finalTarget == null && this.targetId != null) {
-					for (LivingEntity livingEntity : this.level
-						.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownTargetPos.offset(-2, -2, -2), this.lastKnownTargetPos.offset(2, 2, 2)))) {
-						if (livingEntity.getUUID().equals(this.targetId)) {
-							this.finalTarget = livingEntity;
-							break;
-						}
-					}
+		}
+	}
 
-					this.targetId = null;
+	@Override
+	public void tick() {
+		super.tick();
+		if (!this.level.isClientSide) {
+			if (this.finalTarget == null && this.targetId != null) {
+				for (LivingEntity livingEntity : this.level
+					.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownTargetPos.offset(-2, -2, -2), this.lastKnownTargetPos.offset(2, 2, 2)))) {
+					if (livingEntity.getUUID().equals(this.targetId)) {
+						this.finalTarget = livingEntity;
+						break;
+					}
 				}
 
-				if (this.owner == null && this.ownerId != null) {
-					for (LivingEntity livingEntityx : this.level
-						.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownOwnerPos.offset(-2, -2, -2), this.lastKnownOwnerPos.offset(2, 2, 2)))) {
-						if (livingEntityx.getUUID().equals(this.ownerId)) {
-							this.owner = livingEntityx;
-							break;
-						}
-					}
+				this.targetId = null;
+			}
 
-					this.ownerId = null;
+			if (this.owner == null && this.ownerId != null) {
+				for (LivingEntity livingEntityx : this.level
+					.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownOwnerPos.offset(-2, -2, -2), this.lastKnownOwnerPos.offset(2, 2, 2)))) {
+					if (livingEntityx.getUUID().equals(this.ownerId)) {
+						this.owner = livingEntityx;
+						break;
+					}
 				}
 
-				if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator()) {
-					if (!this.isNoGravity()) {
-						this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
-					}
-				} else {
-					this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
-					this.targetDeltaY = Mth.clamp(this.targetDeltaY * 1.025, -1.0, 1.0);
-					this.targetDeltaZ = Mth.clamp(this.targetDeltaZ * 1.025, -1.0, 1.0);
-					Vec3 vec3 = this.getDeltaMovement();
-					this.setDeltaMovement(vec3.add((this.targetDeltaX - vec3.x) * 0.2, (this.targetDeltaY - vec3.y) * 0.2, (this.targetDeltaZ - vec3.z) * 0.2));
-				}
+				this.ownerId = null;
+			}
 
-				HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, false, this.owner, ClipContext.Block.COLLIDER);
-				if (hitResult.getType() != HitResult.Type.MISS) {
-					this.onHit(hitResult);
+			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator()) {
+				if (!this.isNoGravity()) {
+					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+				}
+			} else {
+				this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
+				this.targetDeltaY = Mth.clamp(this.targetDeltaY * 1.025, -1.0, 1.0);
+				this.targetDeltaZ = Mth.clamp(this.targetDeltaZ * 1.025, -1.0, 1.0);
+				Vec3 vec3 = this.getDeltaMovement();
+				this.setDeltaMovement(vec3.add((this.targetDeltaX - vec3.x) * 0.2, (this.targetDeltaY - vec3.y) * 0.2, (this.targetDeltaZ - vec3.z) * 0.2));
+			}
+
+			HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, false, this.owner, ClipContext.Block.COLLIDER);
+			if (hitResult.getType() != HitResult.Type.MISS) {
+				this.onHit(hitResult);
+			}
+		}
+
+		Vec3 vec3 = this.getDeltaMovement();
+		this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
+		ProjectileUtil.rotateTowardsMovement(this, 0.5F);
+		if (this.level.isClientSide) {
+			this.level.addParticle(ParticleTypes.END_ROD, this.getX() - vec3.x, this.getY() - vec3.y + 0.15, this.getZ() - vec3.z, 0.0, 0.0, 0.0);
+		} else if (this.finalTarget != null && !this.finalTarget.removed) {
+			if (this.flightSteps > 0) {
+				this.flightSteps--;
+				if (this.flightSteps == 0) {
+					this.selectNextMoveDirection(this.currentMoveDirection == null ? null : this.currentMoveDirection.getAxis());
 				}
 			}
 
-			Vec3 vec3 = this.getDeltaMovement();
-			this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
-			ProjectileUtil.rotateTowardsMovement(this, 0.5F);
-			if (this.level.isClientSide) {
-				this.level.addParticle(ParticleTypes.END_ROD, this.getX() - vec3.x, this.getY() - vec3.y + 0.15, this.getZ() - vec3.z, 0.0, 0.0, 0.0);
-			} else if (this.finalTarget != null && !this.finalTarget.removed) {
-				if (this.flightSteps > 0) {
-					this.flightSteps--;
-					if (this.flightSteps == 0) {
-						this.selectNextMoveDirection(this.currentMoveDirection == null ? null : this.currentMoveDirection.getAxis());
-					}
-				}
-
-				if (this.currentMoveDirection != null) {
-					BlockPos blockPos = new BlockPos(this);
-					Direction.Axis axis = this.currentMoveDirection.getAxis();
-					if (this.level.loadedAndEntityCanStandOn(blockPos.relative(this.currentMoveDirection), this)) {
+			if (this.currentMoveDirection != null) {
+				BlockPos blockPos = new BlockPos(this);
+				Direction.Axis axis = this.currentMoveDirection.getAxis();
+				if (this.level.loadedAndEntityCanStandOn(blockPos.relative(this.currentMoveDirection), this)) {
+					this.selectNextMoveDirection(axis);
+				} else {
+					BlockPos blockPos2 = new BlockPos(this.finalTarget);
+					if (axis == Direction.Axis.X && blockPos.getX() == blockPos2.getX()
+						|| axis == Direction.Axis.Z && blockPos.getZ() == blockPos2.getZ()
+						|| axis == Direction.Axis.Y && blockPos.getY() == blockPos2.getY()) {
 						this.selectNextMoveDirection(axis);
-					} else {
-						BlockPos blockPos2 = new BlockPos(this.finalTarget);
-						if (axis == Direction.Axis.X && blockPos.getX() == blockPos2.getX()
-							|| axis == Direction.Axis.Z && blockPos.getZ() == blockPos2.getZ()
-							|| axis == Direction.Axis.Y && blockPos.getY() == blockPos2.getY()) {
-							this.selectNextMoveDirection(axis);
-						}
 					}
 				}
 			}
@@ -311,8 +314,8 @@ public class ShulkerBullet extends Entity {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getLightColor() {
-		return 15728880;
+	public int getBlockLightLevel() {
+		return 15;
 	}
 
 	protected void onHit(HitResult hitResult) {

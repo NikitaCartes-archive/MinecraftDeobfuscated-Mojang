@@ -20,9 +20,9 @@ public class StrayClothingLayer<T extends Mob & RangedAttackMob, M extends Entit
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l) {
 		coloredCutoutModelCopyLayerRender(
-			this.getParentModel(), this.layerModel, STRAY_CLOTHES_LOCATION, poseStack, multiBufferSource, i, mob, f, g, j, k, l, m, h, 1.0F, 1.0F, 1.0F
+			this.getParentModel(), this.layerModel, STRAY_CLOTHES_LOCATION, poseStack, multiBufferSource, i, mob, f, g, j, k, l, h, 1.0F, 1.0F, 1.0F
 		);
 	}
 }

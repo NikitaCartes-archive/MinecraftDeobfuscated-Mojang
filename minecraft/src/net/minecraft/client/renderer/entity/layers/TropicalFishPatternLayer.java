@@ -20,7 +20,7 @@ public class TropicalFishPatternLayer extends RenderLayer<TropicalFish, EntityMo
 	}
 
 	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, TropicalFish tropicalFish, float f, float g, float h, float j, float k, float l, float m
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, TropicalFish tropicalFish, float f, float g, float h, float j, float k, float l
 	) {
 		EntityModel<TropicalFish> entityModel = (EntityModel<TropicalFish>)(tropicalFish.getBaseVariant() == 0 ? this.modelA : this.modelB);
 		float[] fs = tropicalFish.getPatternColor();
@@ -37,7 +37,6 @@ public class TropicalFishPatternLayer extends RenderLayer<TropicalFish, EntityMo
 			j,
 			k,
 			l,
-			m,
 			h,
 			fs[0],
 			fs[1],

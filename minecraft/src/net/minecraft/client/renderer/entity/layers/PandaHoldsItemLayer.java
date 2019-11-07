@@ -19,19 +19,19 @@ public class PandaHoldsItemLayer extends RenderLayer<Panda, PandaModel<Panda>> {
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Panda panda, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Panda panda, float f, float g, float h, float j, float k, float l) {
 		ItemStack itemStack = panda.getItemBySlot(EquipmentSlot.MAINHAND);
 		if (panda.isSitting() && !panda.isScared()) {
-			float n = -0.6F;
-			float o = 1.4F;
+			float m = -0.6F;
+			float n = 1.4F;
 			if (panda.isEating()) {
-				n -= 0.2F * Mth.sin(j * 0.6F) + 0.2F;
-				o -= 0.09F * Mth.sin(j * 0.6F);
+				m -= 0.2F * Mth.sin(j * 0.6F) + 0.2F;
+				n -= 0.09F * Mth.sin(j * 0.6F);
 			}
 
 			poseStack.pushPose();
-			poseStack.translate(0.1F, (double)o, (double)n);
-			Minecraft.getInstance().getItemInHandRenderer().renderItem(panda, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+			poseStack.translate(0.1F, (double)n, (double)m);
+			Minecraft.getInstance().getItemInHandRenderer().renderItem(panda, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}
 	}

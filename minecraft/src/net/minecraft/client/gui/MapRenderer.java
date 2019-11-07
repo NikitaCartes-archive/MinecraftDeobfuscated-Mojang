@@ -103,7 +103,7 @@ public class MapRenderer implements AutoCloseable {
 			int j = 0;
 			int k = 0;
 			float f = 0.0F;
-			Matrix4f matrix4f = poseStack.getPose();
+			Matrix4f matrix4f = poseStack.last().pose();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(this.location));
 			vertexConsumer.vertex(matrix4f, 0.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
 			vertexConsumer.vertex(matrix4f, 128.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(i).endVertex();
@@ -123,7 +123,7 @@ public class MapRenderer implements AutoCloseable {
 					float h = (float)(b / 16 + 0) / 16.0F;
 					float m = (float)(b % 16 + 1) / 16.0F;
 					float n = (float)(b / 16 + 1) / 16.0F;
-					Matrix4f matrix4f2 = poseStack.getPose();
+					Matrix4f matrix4f2 = poseStack.last().pose();
 					float o = -0.001F;
 					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_ICONS_LOCATION));
 					vertexConsumer2.vertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, h).uv2(i).endVertex();
@@ -142,7 +142,7 @@ public class MapRenderer implements AutoCloseable {
 						);
 						poseStack.scale(q, q, 1.0F);
 						poseStack.translate(0.0, 0.0, -0.1F);
-						font.drawInBatch(string, 0.0F, 0.0F, -1, false, poseStack.getPose(), multiBufferSource, false, Integer.MIN_VALUE, i);
+						font.drawInBatch(string, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
 						poseStack.popPose();
 					}
 

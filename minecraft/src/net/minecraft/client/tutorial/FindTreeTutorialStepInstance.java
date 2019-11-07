@@ -5,7 +5,7 @@ import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -89,9 +89,9 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 	}
 
 	@Override
-	public void onLookAt(MultiPlayerLevel multiPlayerLevel, HitResult hitResult) {
+	public void onLookAt(ClientLevel clientLevel, HitResult hitResult) {
 		if (hitResult.getType() == HitResult.Type.BLOCK) {
-			BlockState blockState = multiPlayerLevel.getBlockState(((BlockHitResult)hitResult).getBlockPos());
+			BlockState blockState = clientLevel.getBlockState(((BlockHitResult)hitResult).getBlockPos());
 			if (TREE_BLOCKS.contains(blockState.getBlock())) {
 				this.tutorial.setStep(TutorialSteps.PUNCH_TREE);
 			}

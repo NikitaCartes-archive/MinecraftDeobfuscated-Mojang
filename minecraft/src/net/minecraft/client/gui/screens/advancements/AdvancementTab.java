@@ -79,7 +79,7 @@ public class AdvancementTab extends GuiComponent {
 		RenderSystem.enableDepthTest();
 		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
 		RenderSystem.colorMask(false, false, false, false);
-		fill(468, 226, -234, -113, -16777216);
+		fill(4680, 2260, -4680, -2260, -16777216);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
 		RenderSystem.depthFunc(518);
@@ -109,7 +109,7 @@ public class AdvancementTab extends GuiComponent {
 		RenderSystem.depthFunc(518);
 		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
 		RenderSystem.colorMask(false, false, false, false);
-		fill(468, 226, -234, -113, -16777216);
+		fill(4680, 2260, -4680, -2260, -16777216);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
 		RenderSystem.depthFunc(515);

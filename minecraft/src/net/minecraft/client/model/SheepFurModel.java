@@ -38,8 +38,8 @@ public class SheepFurModel<T extends Sheep> extends QuadrupedModel<T> {
 		this.headXRot = sheep.getHeadEatAngleScale(h);
 	}
 
-	public void setupAnim(T sheep, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(sheep, f, g, h, i, j, k);
+	public void setupAnim(T sheep, float f, float g, float h, float i, float j) {
+		super.setupAnim(sheep, f, g, h, i, j);
 		this.head.xRot = this.headXRot;
 	}
 }

@@ -40,7 +40,7 @@ public class LlamaDecorLayer extends RenderLayer<Llama, LlamaModel<Llama>> {
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l, float m) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l) {
 		DyeColor dyeColor = llama.getSwag();
 		ResourceLocation resourceLocation;
 		if (dyeColor != null) {
@@ -54,7 +54,7 @@ public class LlamaDecorLayer extends RenderLayer<Llama, LlamaModel<Llama>> {
 		}
 
 		this.getParentModel().copyPropertiesTo(this.model);
-		this.model.setupAnim(llama, f, g, j, k, l, m);
+		this.model.setupAnim(llama, f, g, j, k, l);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
 		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 	}

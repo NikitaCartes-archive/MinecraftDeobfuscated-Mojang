@@ -59,9 +59,9 @@ public class BoatModel extends ListModel<Boat> {
 		this.parts = builder.build();
 	}
 
-	public void setupAnim(Boat boat, float f, float g, float h, float i, float j, float k) {
-		this.animatePaddle(boat, 0, k, f);
-		this.animatePaddle(boat, 1, k, f);
+	public void setupAnim(Boat boat, float f, float g, float h, float i, float j) {
+		this.animatePaddle(boat, 0, f);
+		this.animatePaddle(boat, 1, f);
 	}
 
 	public ImmutableList<ModelPart> parts() {
@@ -83,11 +83,11 @@ public class BoatModel extends ListModel<Boat> {
 		return modelPart;
 	}
 
-	protected void animatePaddle(Boat boat, int i, float f, float g) {
-		float h = boat.getRowingTime(i, g);
+	protected void animatePaddle(Boat boat, int i, float f) {
+		float g = boat.getRowingTime(i, f);
 		ModelPart modelPart = this.paddles[i];
-		modelPart.xRot = (float)Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (double)((Mth.sin(-h) + 1.0F) / 2.0F));
-		modelPart.yRot = (float)Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (double)((Mth.sin(-h + 1.0F) + 1.0F) / 2.0F));
+		modelPart.xRot = (float)Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (double)((Mth.sin(-g) + 1.0F) / 2.0F));
+		modelPart.yRot = (float)Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (double)((Mth.sin(-g + 1.0F) + 1.0F) / 2.0F));
 		if (i == 1) {
 			modelPart.yRot = (float) Math.PI - modelPart.yRot;
 		}

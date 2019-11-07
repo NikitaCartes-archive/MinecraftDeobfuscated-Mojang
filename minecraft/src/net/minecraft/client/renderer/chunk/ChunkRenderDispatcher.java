@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -214,8 +215,8 @@ public class ChunkRenderDispatcher {
 				return false;
 			}
 		};
-		private final Set<RenderType> hasBlocks = Sets.<RenderType>newHashSet();
-		private final Set<RenderType> hasLayer = Sets.<RenderType>newHashSet();
+		private final Set<RenderType> hasBlocks = new ObjectArraySet<>();
+		private final Set<RenderType> hasLayer = new ObjectArraySet<>();
 		private boolean isCompletelyEmpty = true;
 		private final List<BlockEntity> renderableBlockEntities = Lists.<BlockEntity>newArrayList();
 		private VisibilitySet visibilitySet = new VisibilitySet();

@@ -29,21 +29,21 @@ public class PufferfishRenderer extends MobRenderer<Pufferfish, EntityModel<Puff
 		return PUFFER_LOCATION;
 	}
 
-	public void render(Pufferfish pufferfish, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-		int i = pufferfish.getPuffState();
-		if (i != this.puffStateO) {
-			if (i == 0) {
+	public void render(Pufferfish pufferfish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		int j = pufferfish.getPuffState();
+		if (j != this.puffStateO) {
+			if (j == 0) {
 				this.model = this.small;
-			} else if (i == 1) {
+			} else if (j == 1) {
 				this.model = this.mid;
 			} else {
 				this.model = this.big;
 			}
 		}
 
-		this.puffStateO = i;
-		this.shadowRadius = 0.1F + 0.1F * (float)i;
-		super.render(pufferfish, d, e, f, g, h, poseStack, multiBufferSource);
+		this.puffStateO = j;
+		this.shadowRadius = 0.1F + 0.1F * (float)j;
+		super.render(pufferfish, f, g, poseStack, multiBufferSource, i);
 	}
 
 	protected void setupRotations(Pufferfish pufferfish, PoseStack poseStack, float f, float g, float h) {

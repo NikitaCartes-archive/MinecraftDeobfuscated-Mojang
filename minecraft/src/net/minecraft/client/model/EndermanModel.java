@@ -36,10 +36,10 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(livingEntity, f, g, h, i, j, k);
+	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
+		super.setupAnim(livingEntity, f, g, h, i, j);
 		this.head.visible = true;
-		float l = -14.0F;
+		float k = -14.0F;
 		this.body.xRot = 0.0F;
 		this.body.y = -14.0F;
 		this.body.z = -0.0F;
@@ -49,7 +49,7 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.leftArm.xRot = (float)((double)this.leftArm.xRot * 0.5);
 		this.rightLeg.xRot = (float)((double)this.rightLeg.xRot * 0.5);
 		this.leftLeg.xRot = (float)((double)this.leftLeg.xRot * 0.5);
-		float m = 0.4F;
+		float l = 0.4F;
 		if (this.rightArm.xRot > 0.4F) {
 			this.rightArm.xRot = 0.4F;
 		}
@@ -104,11 +104,11 @@ public class EndermanModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.hat.yRot = this.head.yRot;
 		this.hat.zRot = this.head.zRot;
 		if (this.creepy) {
-			float n = 1.0F;
+			float m = 1.0F;
 			this.head.y -= 5.0F;
 		}
 
-		float n = -14.0F;
+		float m = -14.0F;
 		this.rightArm.setPos(-5.0F, -12.0F, 0.0F);
 		this.leftArm.setPos(5.0F, -12.0F, 0.0F);
 	}

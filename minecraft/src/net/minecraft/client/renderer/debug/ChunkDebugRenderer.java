@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -10,10 +11,10 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientChunkCache;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -34,27 +35,26 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(long l) {
-		double d = (double)Util.getNanos();
-		if (d - this.lastUpdateTime > 3.0E9) {
-			this.lastUpdateTime = d;
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+		double g = (double)Util.getNanos();
+		if (g - this.lastUpdateTime > 3.0E9) {
+			this.lastUpdateTime = g;
 			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 			if (integratedServer != null) {
-				this.data = new ChunkDebugRenderer.ChunkData(integratedServer);
+				this.data = new ChunkDebugRenderer.ChunkData(integratedServer, d, f);
 			} else {
 				this.data = null;
 			}
 		}
 
 		if (this.data != null) {
-			RenderSystem.disableFog();
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.lineWidth(2.0F);
 			RenderSystem.disableTexture();
 			RenderSystem.depthMask(false);
 			Map<ChunkPos, String> map = (Map<ChunkPos, String>)this.data.serverData.getNow(null);
-			double e = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
+			double h = this.minecraft.gameRenderer.getMainCamera().getPosition().y * 0.85;
 
 			for (Entry<ChunkPos, String> entry : this.data.clientData.entrySet()) {
 				ChunkPos chunkPos = (ChunkPos)entry.getKey();
@@ -67,7 +67,7 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				int i = 0;
 
 				for (String string2 : strings) {
-					DebugRenderer.renderFloatingText(string2, (double)((chunkPos.x << 4) + 8), e + (double)i, (double)((chunkPos.z << 4) + 8), -1, 0.15F);
+					DebugRenderer.renderFloatingText(string2, (double)((chunkPos.x << 4) + 8), h + (double)i, (double)((chunkPos.z << 4) + 8), -1, 0.15F);
 					i -= 2;
 				}
 			}
@@ -75,7 +75,6 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			RenderSystem.depthMask(true);
 			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
-			RenderSystem.enableFog();
 		}
 	}
 
@@ -84,8 +83,8 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		private final Map<ChunkPos, String> clientData;
 		private final CompletableFuture<Map<ChunkPos, String>> serverData;
 
-		private ChunkData(IntegratedServer integratedServer) {
-			MultiPlayerLevel multiPlayerLevel = ChunkDebugRenderer.this.minecraft.level;
+		private ChunkData(IntegratedServer integratedServer, double d, double e) {
+			ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
 			DimensionType dimensionType = ChunkDebugRenderer.this.minecraft.level.dimension.getType();
 			ServerLevel serverLevel;
 			if (integratedServer.getLevel(dimensionType) != null) {
@@ -94,11 +93,10 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				serverLevel = null;
 			}
 
-			Camera camera = ChunkDebugRenderer.this.minecraft.gameRenderer.getMainCamera();
-			int i = (int)camera.getPosition().x >> 4;
-			int j = (int)camera.getPosition().z >> 4;
+			int i = (int)d >> 4;
+			int j = (int)e >> 4;
 			Builder<ChunkPos, String> builder = ImmutableMap.builder();
-			ClientChunkCache clientChunkCache = multiPlayerLevel.getChunkSource();
+			ClientChunkCache clientChunkCache = clientLevel.getChunkSource();
 
 			for (int k = i - 12; k <= i + 12; k++) {
 				for (int l = j - 12; l <= j + 12; l++) {

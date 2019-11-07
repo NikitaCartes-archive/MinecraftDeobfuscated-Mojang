@@ -22,13 +22,14 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class BaseCommandBlock implements CommandSource {
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+	private static final Component DEFAULT_NAME = new TextComponent("@");
 	private long lastExecution = -1L;
 	private boolean updateLastExecution = true;
 	private int successCount;
 	private boolean trackOutput = true;
 	private Component lastOutput;
 	private String command = "";
-	private Component name = new TextComponent("@");
+	private Component name = DEFAULT_NAME;
 
 	public int getSuccessCount() {
 		return this.successCount;
@@ -63,7 +64,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 		this.command = compoundTag.getString("Command");
 		this.successCount = compoundTag.getInt("SuccessCount");
 		if (compoundTag.contains("CustomName", 8)) {
-			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+			this.setName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
 		}
 
 		if (compoundTag.contains("TrackOutput", 1)) {
@@ -142,8 +143,12 @@ public abstract class BaseCommandBlock implements CommandSource {
 		return this.name;
 	}
 
-	public void setName(Component component) {
-		this.name = component;
+	public void setName(@Nullable Component component) {
+		if (component != null) {
+			this.name = component;
+		} else {
+			this.name = DEFAULT_NAME;
+		}
 	}
 
 	@Override

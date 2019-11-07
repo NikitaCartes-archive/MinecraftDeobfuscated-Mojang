@@ -48,8 +48,8 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.eggBelly));
 	}
 
-	public void setupAnim(T turtle, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(turtle, f, g, h, i, j, k);
+	public void setupAnim(T turtle, float f, float g, float h, float i, float j) {
+		super.setupAnim(turtle, f, g, h, i, j);
 		this.leg0.xRot = Mth.cos(f * 0.6662F * 0.6F) * 0.5F * g;
 		this.leg1.xRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
 		this.leg2.zRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
@@ -62,12 +62,12 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		this.leg1.yRot = 0.0F;
 		this.eggBelly.xRot = (float) (Math.PI / 2);
 		if (!turtle.isInWater() && turtle.onGround) {
-			float l = turtle.isLayingEgg() ? 4.0F : 1.0F;
-			float m = turtle.isLayingEgg() ? 2.0F : 1.0F;
-			float n = 5.0F;
-			this.leg2.yRot = Mth.cos(l * f * 5.0F + (float) Math.PI) * 8.0F * g * m;
+			float k = turtle.isLayingEgg() ? 4.0F : 1.0F;
+			float l = turtle.isLayingEgg() ? 2.0F : 1.0F;
+			float m = 5.0F;
+			this.leg2.yRot = Mth.cos(k * f * 5.0F + (float) Math.PI) * 8.0F * g * l;
 			this.leg2.zRot = 0.0F;
-			this.leg3.yRot = Mth.cos(l * f * 5.0F) * 8.0F * g * m;
+			this.leg3.yRot = Mth.cos(k * f * 5.0F) * 8.0F * g * l;
 			this.leg3.zRot = 0.0F;
 			this.leg0.yRot = Mth.cos(f * 5.0F + (float) Math.PI) * 3.0F * g;
 			this.leg0.xRot = 0.0F;

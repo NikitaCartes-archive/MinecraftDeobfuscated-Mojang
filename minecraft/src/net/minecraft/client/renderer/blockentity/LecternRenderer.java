@@ -22,15 +22,13 @@ public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
 		super(blockEntityRenderDispatcher);
 	}
 
-	public void render(
-		LecternBlockEntity lecternBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
-	) {
+	public void render(LecternBlockEntity lecternBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		BlockState blockState = lecternBlockEntity.getBlockState();
 		if ((Boolean)blockState.getValue(LecternBlock.HAS_BOOK)) {
 			poseStack.pushPose();
 			poseStack.translate(0.5, 1.0625, 0.5);
-			float h = ((Direction)blockState.getValue(LecternBlock.FACING)).getClockWise().toYRot();
-			poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+			float g = ((Direction)blockState.getValue(LecternBlock.FACING)).getClockWise().toYRot();
+			poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees(67.5F));
 			poseStack.translate(0.0, -0.125, 0.0);
 			this.bookModel.setupAnim(0.0F, 0.1F, 0.9F, 1.2F);

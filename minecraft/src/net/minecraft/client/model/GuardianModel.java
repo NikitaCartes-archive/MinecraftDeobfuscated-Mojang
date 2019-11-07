@@ -61,19 +61,19 @@ public class GuardianModel extends ListModel<Guardian> {
 		return ImmutableList.<ModelPart>of(this.head);
 	}
 
-	public void setupAnim(Guardian guardian, float f, float g, float h, float i, float j, float k) {
-		float l = h - (float)guardian.tickCount;
+	public void setupAnim(Guardian guardian, float f, float g, float h, float i, float j) {
+		float k = h - (float)guardian.tickCount;
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
-		float m = (1.0F - guardian.getSpikesAnimation(l)) * 0.55F;
+		float l = (1.0F - guardian.getSpikesAnimation(k)) * 0.55F;
 
-		for (int n = 0; n < 12; n++) {
-			this.spikeParts[n].xRot = (float) Math.PI * SPIKE_X_ROT[n];
-			this.spikeParts[n].yRot = (float) Math.PI * SPIKE_Y_ROT[n];
-			this.spikeParts[n].zRot = (float) Math.PI * SPIKE_Z_ROT[n];
-			this.spikeParts[n].x = SPIKE_X[n] * (1.0F + Mth.cos(h * 1.5F + (float)n) * 0.01F - m);
-			this.spikeParts[n].y = 16.0F + SPIKE_Y[n] * (1.0F + Mth.cos(h * 1.5F + (float)n) * 0.01F - m);
-			this.spikeParts[n].z = SPIKE_Z[n] * (1.0F + Mth.cos(h * 1.5F + (float)n) * 0.01F - m);
+		for (int m = 0; m < 12; m++) {
+			this.spikeParts[m].xRot = (float) Math.PI * SPIKE_X_ROT[m];
+			this.spikeParts[m].yRot = (float) Math.PI * SPIKE_Y_ROT[m];
+			this.spikeParts[m].zRot = (float) Math.PI * SPIKE_Z_ROT[m];
+			this.spikeParts[m].x = SPIKE_X[m] * (1.0F + Mth.cos(h * 1.5F + (float)m) * 0.01F - l);
+			this.spikeParts[m].y = 16.0F + SPIKE_Y[m] * (1.0F + Mth.cos(h * 1.5F + (float)m) * 0.01F - l);
+			this.spikeParts[m].z = SPIKE_Z[m] * (1.0F + Mth.cos(h * 1.5F + (float)m) * 0.01F - l);
 		}
 
 		this.eye.z = -8.25F;
@@ -100,13 +100,13 @@ public class GuardianModel extends ListModel<Guardian> {
 		}
 
 		this.eye.visible = true;
-		float o = guardian.getTailAnimation(l);
-		this.tailParts[0].yRot = Mth.sin(o) * (float) Math.PI * 0.05F;
-		this.tailParts[1].yRot = Mth.sin(o) * (float) Math.PI * 0.1F;
+		float n = guardian.getTailAnimation(k);
+		this.tailParts[0].yRot = Mth.sin(n) * (float) Math.PI * 0.05F;
+		this.tailParts[1].yRot = Mth.sin(n) * (float) Math.PI * 0.1F;
 		this.tailParts[1].x = -1.5F;
 		this.tailParts[1].y = 0.5F;
 		this.tailParts[1].z = 14.0F;
-		this.tailParts[2].yRot = Mth.sin(o) * (float) Math.PI * 0.15F;
+		this.tailParts[2].yRot = Mth.sin(n) * (float) Math.PI * 0.15F;
 		this.tailParts[2].x = 0.5F;
 		this.tailParts[2].y = 0.5F;
 		this.tailParts[2].z = 6.0F;

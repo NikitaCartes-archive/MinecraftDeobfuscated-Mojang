@@ -781,12 +781,11 @@ public class RecipeProvider implements DataProvider {
 			.unlocks("has_water_bucket", this.has(Items.WATER_BUCKET))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.COMPOSTER)
-			.define('F', ItemTags.WOODEN_FENCES)
-			.define('#', ItemTags.PLANKS)
-			.pattern("F F")
-			.pattern("F F")
+			.define('#', ItemTags.WOODEN_SLABS)
+			.pattern("# #")
+			.pattern("# #")
 			.pattern("###")
-			.unlocks("has_wooden_fences", this.has(ItemTags.WOODEN_FENCES))
+			.unlocks("has_wood_slab", this.has(ItemTags.WOODEN_SLABS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.CHEST)
 			.define('#', ItemTags.PLANKS)

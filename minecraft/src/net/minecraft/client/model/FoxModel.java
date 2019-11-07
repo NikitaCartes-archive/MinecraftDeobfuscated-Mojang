@@ -131,7 +131,7 @@ public class FoxModel<T extends Fox> extends AgeableListModel<T> {
 		return ImmutableList.<ModelPart>of(this.body, this.leg0, this.leg1, this.leg2, this.leg3);
 	}
 
-	public void setupAnim(T fox, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(T fox, float f, float g, float h, float i, float j) {
 		if (!fox.isSleeping() && !fox.isFaceplanted() && !fox.isCrouching()) {
 			this.head.xRot = j * (float) (Math.PI / 180.0);
 			this.head.yRot = i * (float) (Math.PI / 180.0);
@@ -144,16 +144,16 @@ public class FoxModel<T extends Fox> extends AgeableListModel<T> {
 		}
 
 		if (fox.isCrouching()) {
-			float l = Mth.cos(h) * 0.01F;
-			this.body.yRot = l;
-			this.leg0.zRot = l;
-			this.leg1.zRot = l;
-			this.leg2.zRot = l / 2.0F;
-			this.leg3.zRot = l / 2.0F;
+			float k = Mth.cos(h) * 0.01F;
+			this.body.yRot = k;
+			this.leg0.zRot = k;
+			this.leg1.zRot = k;
+			this.leg2.zRot = k / 2.0F;
+			this.leg3.zRot = k / 2.0F;
 		}
 
 		if (fox.isFaceplanted()) {
-			float l = 0.1F;
+			float k = 0.1F;
 			this.legMotionPos += 0.67F;
 			this.leg0.xRot = Mth.cos(this.legMotionPos * 0.4662F) * 0.1F;
 			this.leg1.xRot = Mth.cos(this.legMotionPos * 0.4662F + (float) Math.PI) * 0.1F;

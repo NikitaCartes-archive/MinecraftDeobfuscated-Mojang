@@ -18,10 +18,10 @@ public class EvokerRenderer<T extends SpellcasterIllager> extends IllagerRendere
 		this.addLayer(
 			new ItemInHandLayer<T, IllagerModel<T>>(this) {
 				public void render(
-					PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l, float m
+					PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l
 				) {
 					if (spellcasterIllager.isCastingSpell()) {
-						super.render(poseStack, multiBufferSource, i, spellcasterIllager, f, g, h, j, k, l, m);
+						super.render(poseStack, multiBufferSource, i, spellcasterIllager, f, g, h, j, k, l);
 					}
 				}
 			}

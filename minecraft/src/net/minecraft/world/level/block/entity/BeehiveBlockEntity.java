@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -18,9 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -70,7 +69,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 				if (entity instanceof Bee) {
 					Bee bee = (Bee)entity;
 					if (player.position().distanceToSqr(entity.position()) <= 16.0) {
-						if (!this.isCampfireBelow(this.level, this.getBlockPos())) {
+						if (!BeehiveBlock.isCampfireBelow(this.level, this.getBlockPos())) {
 							bee.makeAngry(player);
 						} else {
 							bee.setCannotEnterHiveTicks(400);
@@ -81,17 +80,6 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		}
 	}
 
-	private boolean isCampfireBelow(Level level, BlockPos blockPos) {
-		for (int i = 1; i <= 5; i++) {
-			BlockState blockState = level.getBlockState(blockPos.below(i));
-			if (!blockState.isAir()) {
-				return blockState.getBlock() == Blocks.CAMPFIRE;
-			}
-		}
-
-		return false;
-	}
-
 	private List<Entity> releaseAllOccupants(BlockState blockState, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
 		List<Entity> list = Lists.<Entity>newArrayList();
 		this.stored.removeIf(beeData -> this.releaseOccupant(blockState, beeData.entityData, list, beeReleaseStatus));
@@ -100,6 +88,10 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	public void addOccupant(Entity entity, boolean bl) {
 		this.addOccupantWithPresetTicks(entity, bl, 0);
+	}
+
+	protected void sendDebugPackets() {
+		DebugPackets.sendHiveInfo(this);
 	}
 
 	public void addOccupantWithPresetTicks(Entity entity, boolean bl, int i) {
@@ -247,6 +239,8 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 				double f = (double)blockPos.getZ() + 0.5;
 				this.level.playSound(null, d, e, f, SoundEvents.BEEHIVE_WORK, SoundSource.BLOCKS, 1.0F, 1.0F);
 			}
+
+			this.sendDebugPackets();
 		}
 	}
 

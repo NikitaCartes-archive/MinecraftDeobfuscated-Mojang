@@ -1091,26 +1091,32 @@ public abstract class LivingEntity extends Entity {
 			this.getCombatTracker().recheckStatus();
 			if (!this.level.isClientSide) {
 				this.dropAllDeathLoot(damageSource);
-				boolean bl = false;
-				if (livingEntity instanceof WitherBoss) {
-					if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-						BlockPos blockPos = new BlockPos(this);
-						BlockState blockState = Blocks.WITHER_ROSE.defaultBlockState();
-						if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
-							this.level.setBlock(blockPos, blockState, 3);
-							bl = true;
-						}
-					}
-
-					if (!bl) {
-						ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WITHER_ROSE));
-						this.level.addFreshEntity(itemEntity);
-					}
-				}
+				this.createWitherRose(livingEntity);
 			}
 
 			this.level.broadcastEntityEvent(this, (byte)3);
 			this.setPose(Pose.DYING);
+		}
+	}
+
+	protected void createWitherRose(@Nullable LivingEntity livingEntity) {
+		if (!this.level.isClientSide) {
+			boolean bl = false;
+			if (livingEntity instanceof WitherBoss) {
+				if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+					BlockPos blockPos = new BlockPos(this);
+					BlockState blockState = Blocks.WITHER_ROSE.defaultBlockState();
+					if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
+						this.level.setBlock(blockPos, blockState, 3);
+						bl = true;
+					}
+				}
+
+				if (!bl) {
+					ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WITHER_ROSE));
+					this.level.addFreshEntity(itemEntity);
+				}
+			}
 		}
 	}
 
@@ -1451,8 +1457,10 @@ public abstract class LivingEntity extends Entity {
 					this.playSound(soundEvent2, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				}
 
-				this.setHealth(0.0F);
-				this.die(DamageSource.GENERIC);
+				if (!(this instanceof Player)) {
+					this.setHealth(0.0F);
+					this.die(DamageSource.GENERIC);
+				}
 				break;
 			case 4:
 			case 5:
@@ -2827,7 +2835,7 @@ public abstract class LivingEntity extends Entity {
 				1.0F + (level.random.nextFloat() - level.random.nextFloat()) * 0.4F
 			);
 			this.addEatEffect(itemStack, level, this);
-			if (this instanceof Player && !((Player)this).abilities.instabuild) {
+			if (!(this instanceof Player) || !((Player)this).abilities.instabuild) {
 				itemStack.shrink(1);
 			}
 		}

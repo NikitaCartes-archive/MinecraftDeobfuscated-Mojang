@@ -131,12 +131,6 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public String getTextureHashName() {
-		this.createPatternList();
-		return this.textureHashName;
-	}
-
-	@Environment(EnvType.CLIENT)
 	private void createPatternList() {
 		if (this.patterns == null || this.colors == null || this.textureHashName == null) {
 			if (!this.receivedData) {

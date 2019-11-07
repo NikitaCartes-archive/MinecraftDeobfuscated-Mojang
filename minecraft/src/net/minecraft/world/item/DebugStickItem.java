@@ -2,8 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.Collection;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -27,7 +25,6 @@ public class DebugStickItem extends Item {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
 		return true;

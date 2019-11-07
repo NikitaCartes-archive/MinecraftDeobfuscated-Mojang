@@ -71,15 +71,15 @@ public class RavagerModel extends ListModel<Ravager> {
 		return ImmutableList.<ModelPart>of(this.neck, this.body, this.leg0, this.leg1, this.leg2, this.leg3);
 	}
 
-	public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j, float k) {
+	public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j) {
 		this.head.xRot = j * (float) (Math.PI / 180.0);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.body.xRot = (float) (Math.PI / 2);
-		float l = 0.4F * g;
-		this.leg0.xRot = Mth.cos(f * 0.6662F) * l;
-		this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * l;
-		this.leg2.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * l;
-		this.leg3.xRot = Mth.cos(f * 0.6662F) * l;
+		float k = 0.4F * g;
+		this.leg0.xRot = Mth.cos(f * 0.6662F) * k;
+		this.leg1.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * k;
+		this.leg2.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * k;
+		this.leg3.xRot = Mth.cos(f * 0.6662F) * k;
 	}
 
 	public void prepareMobModel(Ravager ravager, float f, float g, float h) {

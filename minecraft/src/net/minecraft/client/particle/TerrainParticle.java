@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.level.Level;
@@ -89,7 +90,7 @@ public class TerrainParticle extends TextureSheetParticle {
 		int i = super.getLightColor(f);
 		int j = 0;
 		if (this.level.hasChunkAt(this.pos)) {
-			j = this.level.getLightColor(this.pos);
+			j = LevelRenderer.getLightColor(this.level, this.pos);
 		}
 
 		return i == 0 ? j : i;

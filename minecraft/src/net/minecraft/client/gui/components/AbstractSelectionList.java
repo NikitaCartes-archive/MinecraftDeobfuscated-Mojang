@@ -160,7 +160,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.renderBackground();
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
-		RenderSystem.disableFog();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);

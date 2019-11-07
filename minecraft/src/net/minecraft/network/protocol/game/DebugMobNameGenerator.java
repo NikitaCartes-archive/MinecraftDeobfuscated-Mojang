@@ -6,7 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-public class DebugVillagerNameGenerator {
+public class DebugMobNameGenerator {
 	private static final String[] NAMES_FIRST_PART = new String[]{
 		"Slim", "Far", "River", "Silly", "Fat", "Thin", "Fish", "Bat", "Dark", "Oak", "Sly", "Bush", "Zen", "Bark", "Cry", "Slack", "Soup", "Grim", "Hook"
 	};
@@ -14,7 +14,7 @@ public class DebugVillagerNameGenerator {
 		"Fox", "Tail", "Jaw", "Whisper", "Twig", "Root", "Finder", "Nose", "Brow", "Blade", "Fry", "Seek", "Tooth", "Foot", "Leaf", "Stone", "Fall", "Face", "Tongue"
 	};
 
-	public static String getVillagerName(UUID uUID) {
+	public static String getMobName(UUID uUID) {
 		Random random = getRandom(uUID);
 		return getRandomString(random, NAMES_FIRST_PART) + getRandomString(random, NAMES_SECOND_PART);
 	}

@@ -27,9 +27,7 @@ public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntit
 		this.model = shulkerModel;
 	}
 
-	public void render(
-		ShulkerBoxBlockEntity shulkerBoxBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j
-	) {
+	public void render(ShulkerBoxBlockEntity shulkerBoxBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		Direction direction = Direction.UP;
 		if (shulkerBoxBlockEntity.hasLevel()) {
 			BlockState blockState = shulkerBoxBlockEntity.getLevel().getBlockState(shulkerBoxBlockEntity.getBlockPos());
@@ -49,16 +47,16 @@ public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntit
 		TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0.5, 0.5);
-		float h = 0.9995F;
+		float g = 0.9995F;
 		poseStack.scale(0.9995F, 0.9995F, 0.9995F);
 		poseStack.mulPose(direction.getRotation());
 		poseStack.scale(1.0F, -1.0F, -1.0F);
 		poseStack.translate(0.0, -1.0, 0.0);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
-		this.model.getBase().render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
-		poseStack.translate(0.0, (double)(-shulkerBoxBlockEntity.getProgress(g) * 0.5F), 0.0);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F * shulkerBoxBlockEntity.getProgress(g)));
-		this.model.getLid().render(poseStack, vertexConsumer, 0.0625F, i, j, textureAtlasSprite);
+		this.model.getBase().render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		poseStack.translate(0.0, (double)(-shulkerBoxBlockEntity.getProgress(f) * 0.5F), 0.0);
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F * shulkerBoxBlockEntity.getProgress(f)));
+		this.model.getLid().render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 		poseStack.popPose();
 	}
 }

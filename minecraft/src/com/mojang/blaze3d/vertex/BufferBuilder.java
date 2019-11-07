@@ -85,7 +85,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			is[k] = k++;
 		}
 
-		IntArrays.quickSort(is, (ix, j) -> Floats.compare(fs[j], fs[ix]));
+		IntArrays.mergeSort(is, (ix, j) -> Floats.compare(fs[j], fs[ix]));
 		BitSet bitSet = new BitSet();
 		FloatBuffer floatBuffer2 = MemoryTracker.createFloatBuffer(this.format.getIntegerSize() * 4);
 

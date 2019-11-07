@@ -45,13 +45,13 @@ public class WitchModel<T extends Entity> extends VillagerModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(entity, f, g, h, i, j, k);
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		super.setupAnim(entity, f, g, h, i, j);
 		this.nose.setPos(0.0F, -2.0F, 0.0F);
-		float l = 0.01F * (float)(entity.getId() % 10);
-		this.nose.xRot = Mth.sin((float)entity.tickCount * l) * 4.5F * (float) (Math.PI / 180.0);
+		float k = 0.01F * (float)(entity.getId() % 10);
+		this.nose.xRot = Mth.sin((float)entity.tickCount * k) * 4.5F * (float) (Math.PI / 180.0);
 		this.nose.yRot = 0.0F;
-		this.nose.zRot = Mth.cos((float)entity.tickCount * l) * 2.5F * (float) (Math.PI / 180.0);
+		this.nose.zRot = Mth.cos((float)entity.tickCount * k) * 2.5F * (float) (Math.PI / 180.0);
 		if (this.holdingItem) {
 			this.nose.setPos(0.0F, 1.0F, -1.5F);
 			this.nose.xRot = -0.9F;

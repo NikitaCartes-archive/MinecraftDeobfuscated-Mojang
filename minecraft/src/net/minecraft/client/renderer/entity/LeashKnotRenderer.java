@@ -19,18 +19,14 @@ public class LeashKnotRenderer extends EntityRenderer<LeashFenceKnotEntity> {
 		super(entityRenderDispatcher);
 	}
 
-	public void render(
-		LeashFenceKnotEntity leashFenceKnotEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource
-	) {
+	public void render(LeashFenceKnotEntity leashFenceKnotEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		float i = 0.0625F;
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		int j = leashFenceKnotEntity.getLightColor();
-		this.model.setupAnim(leashFenceKnotEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+		this.model.setupAnim(leashFenceKnotEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(KNOT_LOCATION));
-		this.model.renderToBuffer(poseStack, vertexConsumer, j, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();
-		super.render(leashFenceKnotEntity, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(leashFenceKnotEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
 	public ResourceLocation getTextureLocation(LeashFenceKnotEntity leashFenceKnotEntity) {

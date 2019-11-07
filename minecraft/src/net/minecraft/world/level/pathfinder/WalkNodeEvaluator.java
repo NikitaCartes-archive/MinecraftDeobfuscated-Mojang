@@ -408,24 +408,26 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			}
 		}
 
-		return checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+		if (blockPathTypes == BlockPathTypes.WALKABLE) {
+			blockPathTypes = checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+		}
+
+		return blockPathTypes;
 	}
 
 	public static BlockPathTypes checkNeighbourBlocks(BlockGetter blockGetter, int i, int j, int k, BlockPathTypes blockPathTypes) {
-		if (blockPathTypes == BlockPathTypes.WALKABLE) {
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (int l = -1; l <= 1; l++) {
-					for (int m = -1; m <= 1; m++) {
-						for (int n = -1; n <= 1; n++) {
-							if (l != 0 || n != 0) {
-								Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, m + j, n + k)).getBlock();
-								if (block == Blocks.CACTUS) {
-									blockPathTypes = BlockPathTypes.DANGER_CACTUS;
-								} else if (block == Blocks.FIRE || block == Blocks.LAVA) {
-									blockPathTypes = BlockPathTypes.DANGER_FIRE;
-								} else if (block == Blocks.SWEET_BERRY_BUSH) {
-									blockPathTypes = BlockPathTypes.DANGER_OTHER;
-								}
+		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
+			for (int l = -1; l <= 1; l++) {
+				for (int m = -1; m <= 1; m++) {
+					for (int n = -1; n <= 1; n++) {
+						if (l != 0 || n != 0) {
+							Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, m + j, n + k)).getBlock();
+							if (block == Blocks.CACTUS) {
+								blockPathTypes = BlockPathTypes.DANGER_CACTUS;
+							} else if (block == Blocks.FIRE || block == Blocks.LAVA) {
+								blockPathTypes = BlockPathTypes.DANGER_FIRE;
+							} else if (block == Blocks.SWEET_BERRY_BUSH) {
+								blockPathTypes = BlockPathTypes.DANGER_OTHER;
 							}
 						}
 					}
@@ -453,6 +455,8 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			return BlockPathTypes.DAMAGE_OTHER;
 		} else if (block == Blocks.HONEY_BLOCK) {
 			return BlockPathTypes.STICKY_HONEY;
+		} else if (block == Blocks.COCOA) {
+			return BlockPathTypes.COCOA;
 		} else if (block instanceof DoorBlock && material == Material.WOOD && !(Boolean)blockState.getValue(DoorBlock.OPEN)) {
 			return BlockPathTypes.DOOR_WOOD_CLOSED;
 		} else if (block instanceof DoorBlock && material == Material.METAL && !(Boolean)blockState.getValue(DoorBlock.OPEN)) {

@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.audio;
 
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.phys.Vec3;
@@ -7,15 +8,14 @@ import org.lwjgl.openal.AL10;
 
 @Environment(EnvType.CLIENT)
 public class Listener {
-	public static final Vec3 UP = new Vec3(0.0, 1.0, 0.0);
 	private float gain = 1.0F;
 
 	public void setListenerPosition(Vec3 vec3) {
 		AL10.alListener3f(4100, (float)vec3.x, (float)vec3.y, (float)vec3.z);
 	}
 
-	public void setListenerOrientation(Vec3 vec3, Vec3 vec32) {
-		AL10.alListenerfv(4111, new float[]{(float)vec3.x, (float)vec3.y, (float)vec3.z, (float)vec32.x, (float)vec32.y, (float)vec32.z});
+	public void setListenerOrientation(Vector3f vector3f, Vector3f vector3f2) {
+		AL10.alListenerfv(4111, new float[]{vector3f.x(), vector3f.y(), vector3f.z(), vector3f2.x(), vector3f2.y(), vector3f2.z()});
 	}
 
 	public void setGain(float f) {
@@ -29,6 +29,6 @@ public class Listener {
 
 	public void reset() {
 		this.setListenerPosition(Vec3.ZERO);
-		this.setListenerOrientation(new Vec3(0.0, 0.0, -1.0), UP);
+		this.setListenerOrientation(Vector3f.ZN, Vector3f.YP);
 	}
 }

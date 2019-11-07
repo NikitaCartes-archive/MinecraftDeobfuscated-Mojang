@@ -22,20 +22,18 @@ public class ParrotOnShoulderLayer<T extends Player> extends RenderLayer<T, Play
 		super(renderLayerParent);
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T player, float f, float g, float h, float j, float k, float l, float m) {
-		this.render(poseStack, multiBufferSource, i, player, f, g, h, k, l, m, true);
-		this.render(poseStack, multiBufferSource, i, player, f, g, h, k, l, m, false);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T player, float f, float g, float h, float j, float k, float l) {
+		this.render(poseStack, multiBufferSource, i, player, f, g, k, l, true);
+		this.render(poseStack, multiBufferSource, i, player, f, g, k, l, false);
 	}
 
-	private void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T player, float f, float g, float h, float j, float k, float l, boolean bl
-	) {
+	private void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T player, float f, float g, float h, float j, boolean bl) {
 		CompoundTag compoundTag = bl ? player.getShoulderEntityLeft() : player.getShoulderEntityRight();
 		EntityType.byString(compoundTag.getString("id")).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> {
 			poseStack.pushPose();
 			poseStack.translate(bl ? 0.4F : -0.4F, player.isCrouching() ? -1.3F : -1.5, 0.0);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(ParrotRenderer.PARROT_LOCATIONS[compoundTag.getInt("Variant")]));
-			this.model.renderOnShoulder(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, j, k, l, player.tickCount);
+			this.model.renderOnShoulder(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, j, player.tickCount);
 			poseStack.popPose();
 		});
 	}

@@ -53,20 +53,20 @@ public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidMode
 		super.prepareMobModel(mob, f, g, h);
 	}
 
-	public void setupAnim(T mob, float f, float g, float h, float i, float j, float k) {
-		super.setupAnim(mob, f, g, h, i, j, k);
+	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
+		super.setupAnim(mob, f, g, h, i, j);
 		ItemStack itemStack = mob.getMainHandItem();
 		if (mob.isAggressive() && (itemStack.isEmpty() || itemStack.getItem() != Items.BOW)) {
-			float l = Mth.sin(this.attackTime * (float) Math.PI);
-			float m = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
+			float k = Mth.sin(this.attackTime * (float) Math.PI);
+			float l = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
 			this.rightArm.zRot = 0.0F;
 			this.leftArm.zRot = 0.0F;
-			this.rightArm.yRot = -(0.1F - l * 0.6F);
-			this.leftArm.yRot = 0.1F - l * 0.6F;
+			this.rightArm.yRot = -(0.1F - k * 0.6F);
+			this.leftArm.yRot = 0.1F - k * 0.6F;
 			this.rightArm.xRot = (float) (-Math.PI / 2);
 			this.leftArm.xRot = (float) (-Math.PI / 2);
-			this.rightArm.xRot -= l * 1.2F - m * 0.4F;
-			this.leftArm.xRot -= l * 1.2F - m * 0.4F;
+			this.rightArm.xRot -= k * 1.2F - l * 0.4F;
+			this.leftArm.xRot -= k * 1.2F - l * 0.4F;
 			this.rightArm.zRot = this.rightArm.zRot + Mth.cos(h * 0.09F) * 0.05F + 0.05F;
 			this.leftArm.zRot = this.leftArm.zRot - (Mth.cos(h * 0.09F) * 0.05F + 0.05F);
 			this.rightArm.xRot = this.rightArm.xRot + Mth.sin(h * 0.067F) * 0.05F;
@@ -75,11 +75,11 @@ public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidMode
 	}
 
 	@Override
-	public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
-		float g = humanoidArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
+	public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+		float f = humanoidArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		ModelPart modelPart = this.getArm(humanoidArm);
-		modelPart.x += g;
-		modelPart.translateAndRotate(poseStack, f);
-		modelPart.x -= g;
+		modelPart.x += f;
+		modelPart.translateAndRotate(poseStack);
+		modelPart.x -= f;
 	}
 }

@@ -29,6 +29,10 @@ public abstract class Goal {
 		this.flags.addAll(enumSet);
 	}
 
+	public String toString() {
+		return this.getClass().getSimpleName();
+	}
+
 	public EnumSet<Goal.Flag> getFlags() {
 		return this.flags;
 	}

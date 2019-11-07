@@ -66,14 +66,14 @@ public class PhantomModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		float l = ((float)(entity.getId() * 3) + h) * 0.13F;
-		float m = 16.0F;
-		this.leftWingBase.zRot = Mth.cos(l) * 16.0F * (float) (Math.PI / 180.0);
-		this.leftWingTip.zRot = Mth.cos(l) * 16.0F * (float) (Math.PI / 180.0);
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		float k = ((float)(entity.getId() * 3) + h) * 0.13F;
+		float l = 16.0F;
+		this.leftWingBase.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);
+		this.leftWingTip.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);
 		this.rightWingBase.zRot = -this.leftWingBase.zRot;
 		this.rightWingTip.zRot = -this.leftWingTip.zRot;
-		this.tailBase.xRot = -(5.0F + Mth.cos(l * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
-		this.tailTip.xRot = -(5.0F + Mth.cos(l * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
+		this.tailBase.xRot = -(5.0F + Mth.cos(k * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
+		this.tailTip.xRot = -(5.0F + Mth.cos(k * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
 	}
 }

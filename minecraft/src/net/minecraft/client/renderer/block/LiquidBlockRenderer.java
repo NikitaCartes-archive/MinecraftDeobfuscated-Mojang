@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -12,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockAndBiomeGetter;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -57,20 +58,20 @@ public class LiquidBlockRenderer {
 		}
 	}
 
-	public boolean tesselate(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos, VertexConsumer vertexConsumer, FluidState fluidState) {
+	public boolean tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, FluidState fluidState) {
 		boolean bl = fluidState.is(FluidTags.LAVA);
 		TextureAtlasSprite[] textureAtlasSprites = bl ? this.lavaIcons : this.waterIcons;
-		int i = bl ? 16777215 : BiomeColors.getAverageWaterColor(blockAndBiomeGetter, blockPos);
+		int i = bl ? 16777215 : BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
 		float f = (float)(i >> 16 & 0xFF) / 255.0F;
 		float g = (float)(i >> 8 & 0xFF) / 255.0F;
 		float h = (float)(i & 0xFF) / 255.0F;
-		boolean bl2 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.UP, fluidState);
-		boolean bl3 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.DOWN, fluidState)
-			&& !isFaceOccluded(blockAndBiomeGetter, blockPos, Direction.DOWN, 0.8888889F);
-		boolean bl4 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.NORTH, fluidState);
-		boolean bl5 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.SOUTH, fluidState);
-		boolean bl6 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.WEST, fluidState);
-		boolean bl7 = !isNeighborSameFluid(blockAndBiomeGetter, blockPos, Direction.EAST, fluidState);
+		boolean bl2 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.UP, fluidState);
+		boolean bl3 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.DOWN, fluidState)
+			&& !isFaceOccluded(blockAndTintGetter, blockPos, Direction.DOWN, 0.8888889F);
+		boolean bl4 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.NORTH, fluidState);
+		boolean bl5 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.SOUTH, fluidState);
+		boolean bl6 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.WEST, fluidState);
+		boolean bl7 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.EAST, fluidState);
 		if (!bl2 && !bl3 && !bl7 && !bl6 && !bl4 && !bl5) {
 			return false;
 		} else {
@@ -79,21 +80,21 @@ public class LiquidBlockRenderer {
 			float k = 1.0F;
 			float l = 0.8F;
 			float m = 0.6F;
-			float n = this.getWaterHeight(blockAndBiomeGetter, blockPos, fluidState.getType());
-			float o = this.getWaterHeight(blockAndBiomeGetter, blockPos.south(), fluidState.getType());
-			float p = this.getWaterHeight(blockAndBiomeGetter, blockPos.east().south(), fluidState.getType());
-			float q = this.getWaterHeight(blockAndBiomeGetter, blockPos.east(), fluidState.getType());
+			float n = this.getWaterHeight(blockAndTintGetter, blockPos, fluidState.getType());
+			float o = this.getWaterHeight(blockAndTintGetter, blockPos.south(), fluidState.getType());
+			float p = this.getWaterHeight(blockAndTintGetter, blockPos.east().south(), fluidState.getType());
+			float q = this.getWaterHeight(blockAndTintGetter, blockPos.east(), fluidState.getType());
 			double d = (double)(blockPos.getX() & 15);
 			double e = (double)(blockPos.getY() & 15);
 			double r = (double)(blockPos.getZ() & 15);
 			float s = 0.001F;
-			if (bl2 && !isFaceOccluded(blockAndBiomeGetter, blockPos, Direction.UP, Math.min(Math.min(n, o), Math.min(p, q)))) {
+			if (bl2 && !isFaceOccluded(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(n, o), Math.min(p, q)))) {
 				bl8 = true;
 				n -= 0.001F;
 				o -= 0.001F;
 				p -= 0.001F;
 				q -= 0.001F;
-				Vec3 vec3 = fluidState.getFlow(blockAndBiomeGetter, blockPos);
+				Vec3 vec3 = fluidState.getFlow(blockAndTintGetter, blockPos);
 				float t;
 				float v;
 				float x;
@@ -141,7 +142,7 @@ public class LiquidBlockRenderer {
 				w = Mth.lerp(ae, w, ab);
 				y = Mth.lerp(ae, y, ab);
 				aa = Mth.lerp(ae, aa, ab);
-				int ag = this.getLightColor(blockAndBiomeGetter, blockPos);
+				int ag = this.getLightColor(blockAndTintGetter, blockPos);
 				float ah = 1.0F * f;
 				float ai = 1.0F * g;
 				float aj = 1.0F * h;
@@ -149,7 +150,7 @@ public class LiquidBlockRenderer {
 				this.vertex(vertexConsumer, d + 0.0, e + (double)o, r + 1.0, ah, ai, aj, v, w, ag);
 				this.vertex(vertexConsumer, d + 1.0, e + (double)p, r + 1.0, ah, ai, aj, x, y, ag);
 				this.vertex(vertexConsumer, d + 1.0, e + (double)q, r + 0.0, ah, ai, aj, z, aa, ag);
-				if (fluidState.shouldRenderBackwardUpFace(blockAndBiomeGetter, blockPos.above())) {
+				if (fluidState.shouldRenderBackwardUpFace(blockAndTintGetter, blockPos.above())) {
 					this.vertex(vertexConsumer, d + 0.0, e + (double)n, r + 0.0, ah, ai, aj, t, u, ag);
 					this.vertex(vertexConsumer, d + 1.0, e + (double)q, r + 0.0, ah, ai, aj, z, aa, ag);
 					this.vertex(vertexConsumer, d + 1.0, e + (double)p, r + 1.0, ah, ai, aj, x, y, ag);
@@ -162,7 +163,7 @@ public class LiquidBlockRenderer {
 				float vx = textureAtlasSprites[0].getU1();
 				float xx = textureAtlasSprites[0].getV0();
 				float zx = textureAtlasSprites[0].getV1();
-				int ak = this.getLightColor(blockAndBiomeGetter, blockPos.below());
+				int ak = this.getLightColor(blockAndTintGetter, blockPos.below());
 				float wx = 0.5F * f;
 				float yx = 0.5F * g;
 				float aax = 0.5F * h;
@@ -220,12 +221,12 @@ public class LiquidBlockRenderer {
 					bl9 = bl7;
 				}
 
-				if (bl9 && !isFaceOccluded(blockAndBiomeGetter, blockPos, direction, Math.max(vx, xx))) {
+				if (bl9 && !isFaceOccluded(blockAndTintGetter, blockPos, direction, Math.max(vx, xx))) {
 					bl8 = true;
 					BlockPos blockPos2 = blockPos.relative(direction);
 					TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
 					if (!bl) {
-						Block block = blockAndBiomeGetter.getBlockState(blockPos2).getBlock();
+						Block block = blockAndTintGetter.getBlockState(blockPos2).getBlock();
 						if (block == Blocks.GLASS || block instanceof StainedGlassBlock) {
 							textureAtlasSprite2 = this.waterOverlay;
 						}
@@ -236,7 +237,7 @@ public class LiquidBlockRenderer {
 					float aj = textureAtlasSprite2.getV((double)((1.0F - vx) * 16.0F * 0.5F));
 					float aq = textureAtlasSprite2.getV((double)((1.0F - xx) * 16.0F * 0.5F));
 					float ar = textureAtlasSprite2.getV(8.0);
-					int as = this.getLightColor(blockAndBiomeGetter, blockPos2);
+					int as = this.getLightColor(blockAndTintGetter, blockPos2);
 					float at = al < 2 ? 0.8F : 0.6F;
 					float au = 1.0F * at * f;
 					float av = 1.0F * at * g;
@@ -262,9 +263,9 @@ public class LiquidBlockRenderer {
 		vertexConsumer.vertex(d, e, f).color(g, h, i, 1.0F).uv(j, k).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
 	}
 
-	private int getLightColor(BlockAndBiomeGetter blockAndBiomeGetter, BlockPos blockPos) {
-		int i = blockAndBiomeGetter.getLightColor(blockPos);
-		int j = blockAndBiomeGetter.getLightColor(blockPos.above());
+	private int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {
+		int i = LevelRenderer.getLightColor(blockAndTintGetter, blockPos);
+		int j = LevelRenderer.getLightColor(blockAndTintGetter, blockPos.above());
 		int k = i & 0xFF;
 		int l = j & 0xFF;
 		int m = i >> 16 & 0xFF;

@@ -274,7 +274,7 @@ public class VillagerTrades {
 							new VillagerTrades.ItemListing[]{
 								new VillagerTrades.EmeraldForItems(Items.PAPER, 24, 16, 2),
 								new VillagerTrades.EnchantBookForEmeralds(1),
-								new VillagerTrades.ItemsForEmeralds(Blocks.BOOKSHELF, 6, 3, 12, 1)
+								new VillagerTrades.ItemsForEmeralds(Blocks.BOOKSHELF, 9, 1, 12, 1)
 							}
 						)
 						.put(

@@ -46,11 +46,8 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 	}
 
 	@Override
-	public void tick() {
-		super.tick();
-		if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
-			this.remove();
-		}
+	protected boolean shouldDespawnInPeaceful() {
+		return true;
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +53,6 @@ public class EndCrystalItem extends Item {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
 		return true;

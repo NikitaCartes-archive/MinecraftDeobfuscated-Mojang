@@ -20,13 +20,11 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity>
 		this.itemRenderer = itemRenderer;
 	}
 
-	public void render(
-		FireworkRocketEntity fireworkRocketEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource
-	) {
+	public void render(FireworkRocketEntity fireworkRocketEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
-		float i = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
+		float h = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(h));
 		if (fireworkRocketEntity.isShotAtAngle()) {
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 		} else {
@@ -34,16 +32,9 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity>
 		}
 
 		this.itemRenderer
-			.renderStatic(
-				fireworkRocketEntity.getItem(),
-				ItemTransforms.TransformType.GROUND,
-				fireworkRocketEntity.getLightColor(),
-				OverlayTexture.NO_OVERLAY,
-				poseStack,
-				multiBufferSource
-			);
+			.renderStatic(fireworkRocketEntity.getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
 		poseStack.popPose();
-		super.render(fireworkRocketEntity, d, e, f, g, h, poseStack, multiBufferSource);
+		super.render(fireworkRocketEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
 	public ResourceLocation getTextureLocation(FireworkRocketEntity fireworkRocketEntity) {

@@ -36,32 +36,32 @@ public class BlazeModel<T extends Entity> extends ListModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-		float l = h * (float) Math.PI * -0.1F;
+	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+		float k = h * (float) Math.PI * -0.1F;
 
-		for (int m = 0; m < 4; m++) {
-			this.upperBodyParts[m].y = -2.0F + Mth.cos(((float)(m * 2) + h) * 0.25F);
-			this.upperBodyParts[m].x = Mth.cos(l) * 9.0F;
-			this.upperBodyParts[m].z = Mth.sin(l) * 9.0F;
-			l++;
+		for (int l = 0; l < 4; l++) {
+			this.upperBodyParts[l].y = -2.0F + Mth.cos(((float)(l * 2) + h) * 0.25F);
+			this.upperBodyParts[l].x = Mth.cos(k) * 9.0F;
+			this.upperBodyParts[l].z = Mth.sin(k) * 9.0F;
+			k++;
 		}
 
-		l = (float) (Math.PI / 4) + h * (float) Math.PI * 0.03F;
+		k = (float) (Math.PI / 4) + h * (float) Math.PI * 0.03F;
 
-		for (int m = 4; m < 8; m++) {
-			this.upperBodyParts[m].y = 2.0F + Mth.cos(((float)(m * 2) + h) * 0.25F);
-			this.upperBodyParts[m].x = Mth.cos(l) * 7.0F;
-			this.upperBodyParts[m].z = Mth.sin(l) * 7.0F;
-			l++;
+		for (int l = 4; l < 8; l++) {
+			this.upperBodyParts[l].y = 2.0F + Mth.cos(((float)(l * 2) + h) * 0.25F);
+			this.upperBodyParts[l].x = Mth.cos(k) * 7.0F;
+			this.upperBodyParts[l].z = Mth.sin(k) * 7.0F;
+			k++;
 		}
 
-		l = 0.47123894F + h * (float) Math.PI * -0.05F;
+		k = 0.47123894F + h * (float) Math.PI * -0.05F;
 
-		for (int m = 8; m < 12; m++) {
-			this.upperBodyParts[m].y = 11.0F + Mth.cos(((float)m * 1.5F + h) * 0.5F);
-			this.upperBodyParts[m].x = Mth.cos(l) * 5.0F;
-			this.upperBodyParts[m].z = Mth.sin(l) * 5.0F;
-			l++;
+		for (int l = 8; l < 12; l++) {
+			this.upperBodyParts[l].y = 11.0F + Mth.cos(((float)l * 1.5F + h) * 0.5F);
+			this.upperBodyParts[l].x = Mth.cos(k) * 5.0F;
+			this.upperBodyParts[l].z = Mth.sin(k) * 5.0F;
+			k++;
 		}
 
 		this.head.yRot = i * (float) (Math.PI / 180.0);

@@ -32,25 +32,23 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 		super(renderLayerParent);
 	}
 
-	public void render(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m
-	) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
 		ItemStack itemStack = livingEntity.getItemBySlot(EquipmentSlot.HEAD);
 		if (!itemStack.isEmpty()) {
 			Item item = itemStack.getItem();
 			poseStack.pushPose();
 			boolean bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
 			if (livingEntity.isBaby() && !(livingEntity instanceof Villager)) {
-				float n = 2.0F;
-				float o = 1.4F;
-				poseStack.translate(0.0, (double)(0.5F * m), 0.0);
+				float m = 2.0F;
+				float n = 1.4F;
+				poseStack.translate(0.0, 0.03125, 0.0);
 				poseStack.scale(0.7F, 0.7F, 0.7F);
-				poseStack.translate(0.0, (double)(16.0F * m), 0.0);
+				poseStack.translate(0.0, 1.0, 0.0);
 			}
 
-			this.getParentModel().getHead().translateAndRotate(poseStack, 0.0625F);
+			this.getParentModel().getHead().translateAndRotate(poseStack);
 			if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
-				float n = 1.1875F;
+				float m = 1.1875F;
 				poseStack.scale(1.1875F, -1.1875F, -1.1875F);
 				if (bl) {
 					poseStack.translate(0.0, 0.0625, 0.0);
@@ -73,7 +71,7 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				poseStack.translate(-0.5, 0.0, -0.5);
 				SkullBlockRenderer.renderSkull(null, 180.0F, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, f, poseStack, multiBufferSource, i);
 			} else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
-				float nx = 0.625F;
+				float mx = 0.625F;
 				poseStack.translate(0.0, -0.25, 0.0);
 				poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 				poseStack.scale(0.625F, -0.625F, -0.625F);
@@ -81,7 +79,9 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 					poseStack.translate(0.0, 0.1875, 0.0);
 				}
 
-				Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource);
+				Minecraft.getInstance()
+					.getItemInHandRenderer()
+					.renderItem(livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
 			}
 
 			poseStack.popPose();

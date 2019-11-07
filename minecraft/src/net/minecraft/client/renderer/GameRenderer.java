@@ -25,6 +25,7 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -370,7 +371,9 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 	private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
 		if (!this.panoramicMode) {
 			this.resetProjectionMatrix(this.getProjectionMatrix(camera, f, false));
-			poseStack.getPose().setIdentity();
+			PoseStack.Pose pose = poseStack.last();
+			pose.pose().setIdentity();
+			pose.normal().setIdentity();
 			poseStack.pushPose();
 			this.bobHurt(poseStack, f);
 			if (this.minecraft.options.bobView) {
@@ -380,7 +383,10 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			boolean bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
 			if (this.minecraft.options.thirdPersonView == 0 && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
 				this.lightTexture.turnOnLightLayer();
-				this.itemInHandRenderer.renderHandsWithItems(f, poseStack, this.renderBuffers.bufferSource());
+				this.itemInHandRenderer
+					.renderHandsWithItems(
+						f, poseStack, this.renderBuffers.bufferSource(), this.minecraft.player, EntityRenderDispatcher.getPackedLightCoords(this.minecraft.player)
+					);
 				this.lightTexture.turnOffLightLayer();
 			}
 
@@ -405,13 +411,14 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 
 	public Matrix4f getProjectionMatrix(Camera camera, float f, boolean bl) {
 		PoseStack poseStack = new PoseStack();
-		poseStack.getPose().setIdentity();
+		poseStack.last().pose().setIdentity();
 		if (this.zoom != 1.0F) {
 			poseStack.translate((double)this.zoomX, (double)(-this.zoomY), 0.0);
 			poseStack.scale(this.zoom, this.zoom, 1.0F);
 		}
 
-		poseStack.getPose()
+		poseStack.last()
+			.pose()
 			.multiply(
 				Matrix4f.perspective(
 					this.getFov(camera, f, bl),
@@ -420,7 +427,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 					this.renderDistance * 4.0F
 				)
 			);
-		return poseStack.getPose();
+		return poseStack.last().pose();
 	}
 
 	public static float getNightVisionScale(LivingEntity livingEntity, float f) {
@@ -468,7 +475,6 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 					RenderSystem.disableBlend();
 					RenderSystem.disableDepthTest();
 					RenderSystem.disableAlphaTest();
-					RenderSystem.disableFog();
 					RenderSystem.enableTexture();
 					RenderSystem.matrixMode(5890);
 					RenderSystem.pushMatrix();
@@ -488,7 +494,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			RenderSystem.matrixMode(5888);
 			RenderSystem.loadIdentity();
 			RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
-			Lighting.setupGui(poseStack.getPose());
+			Lighting.setupGui(poseStack.last().pose());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {

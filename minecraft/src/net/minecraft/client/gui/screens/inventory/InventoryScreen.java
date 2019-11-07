@@ -1,12 +1,15 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -94,30 +97,33 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		int k = this.leftPos;
 		int l = this.topPos;
 		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-		renderPlayerModel(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
+		renderEntityInInventory(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
 	}
 
-	public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
+	public static void renderEntityInInventory(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
 		RenderSystem.pushMatrix();
-		RenderSystem.translatef((float)i, (float)j, 50.0F);
-		RenderSystem.scalef((float)(-k), (float)k, (float)k);
-		RenderSystem.rotatef(180.0F, 0.0F, 0.0F, 1.0F);
+		RenderSystem.scalef(-1.0F, 1.0F, 1.0F);
+		PoseStack poseStack = new PoseStack();
+		poseStack.translate((double)(-i), (double)j, 50.0);
+		poseStack.scale((float)k, (float)k, (float)k);
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(-((float)Math.atan((double)(g / 40.0F))) * 20.0F));
 		float h = livingEntity.yBodyRot;
 		float l = livingEntity.yRot;
 		float m = livingEntity.xRot;
 		float n = livingEntity.yHeadRotO;
 		float o = livingEntity.yHeadRot;
-		RenderSystem.rotatef(-((float)Math.atan((double)(g / 40.0F))) * 20.0F, 1.0F, 0.0F, 0.0F);
 		livingEntity.yBodyRot = (float)Math.atan((double)(f / 40.0F)) * 20.0F;
 		livingEntity.yRot = (float)Math.atan((double)(f / 40.0F)) * 40.0F;
 		livingEntity.xRot = -((float)Math.atan((double)(g / 40.0F))) * 20.0F;
 		livingEntity.yHeadRot = livingEntity.yRot;
 		livingEntity.yHeadRotO = livingEntity.yRot;
-		RenderSystem.translatef(0.0F, 0.0F, 0.0F);
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		entityRenderDispatcher.setPlayerRotY(180.0F);
 		entityRenderDispatcher.setRenderShadow(false);
-		entityRenderDispatcher.render(livingEntity, 1.0F);
+		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880);
+		bufferSource.endBatch(-i, j, 1000);
 		entityRenderDispatcher.setRenderShadow(true);
 		livingEntity.yBodyRot = h;
 		livingEntity.yRot = l;
@@ -125,7 +131,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.yHeadRotO = n;
 		livingEntity.yHeadRot = o;
 		RenderSystem.popMatrix();
-		RenderSystem.disableRescaleNormal();
 	}
 
 	@Override

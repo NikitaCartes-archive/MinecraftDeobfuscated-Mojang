@@ -202,7 +202,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 				this.life = 0;
 				this.flightTime = 0;
 			} else if (!this.level.isClientSide) {
-				this.checkDespawn();
+				this.tickDespawn();
 			}
 
 			this.inGroundTime++;
@@ -308,7 +308,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 		}
 	}
 
-	protected void checkDespawn() {
+	protected void tickDespawn() {
 		this.life++;
 		if (this.life >= 1200) {
 			this.remove();
