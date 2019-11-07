@@ -38,8 +38,8 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
-        float n;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
+        float m;
         boolean bl;
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.HEAD);
         if (itemStack.isEmpty()) {
@@ -49,15 +49,15 @@ extends RenderLayer<T, M> {
         poseStack.pushPose();
         boolean bl2 = bl = livingEntity instanceof Villager || livingEntity instanceof ZombieVillager;
         if (((LivingEntity)livingEntity).isBaby() && !(livingEntity instanceof Villager)) {
-            n = 2.0f;
-            float o = 1.4f;
-            poseStack.translate(0.0, 0.5f * m, 0.0);
+            m = 2.0f;
+            float n = 1.4f;
+            poseStack.translate(0.0, 0.03125, 0.0);
             poseStack.scale(0.7f, 0.7f, 0.7f);
-            poseStack.translate(0.0, 16.0f * m, 0.0);
+            poseStack.translate(0.0, 1.0, 0.0);
         }
-        ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack, 0.0625f);
+        ((HeadedModel)this.getParentModel()).getHead().translateAndRotate(poseStack);
         if (item instanceof BlockItem && ((BlockItem)item).getBlock() instanceof AbstractSkullBlock) {
-            n = 1.1875f;
+            m = 1.1875f;
             poseStack.scale(1.1875f, -1.1875f, -1.1875f);
             if (bl) {
                 poseStack.translate(0.0, 0.0625, 0.0);
@@ -76,14 +76,14 @@ extends RenderLayer<T, M> {
             poseStack.translate(-0.5, 0.0, -0.5);
             SkullBlockRenderer.renderSkull(null, 180.0f, ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType(), gameProfile, f, poseStack, multiBufferSource, i);
         } else if (!(item instanceof ArmorItem) || ((ArmorItem)item).getSlot() != EquipmentSlot.HEAD) {
-            n = 0.625f;
+            m = 0.625f;
             poseStack.translate(0.0, -0.25, 0.0);
             poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
             poseStack.scale(0.625f, -0.625f, -0.625f);
             if (bl) {
                 poseStack.translate(0.0, 0.1875, 0.0);
             }
-            Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource);
+            Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.HEAD, false, poseStack, multiBufferSource, i);
         }
         poseStack.popPose();
     }

@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.IronGolemModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -24,19 +25,19 @@ extends RenderLayer<IronGolem, IronGolemModel<IronGolem>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, IronGolem ironGolem, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, IronGolem ironGolem, float f, float g, float h, float j, float k, float l) {
         if (ironGolem.getOfferFlowerTick() == 0) {
             return;
         }
         poseStack.pushPose();
-        poseStack.scale(-1.0f, -1.0f, 1.0f);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(5.0f + 180.0f * ((IronGolemModel)this.getParentModel()).getFlowerHoldingArm().xRot / (float)Math.PI));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
-        poseStack.translate(0.6875, -0.3125, 1.0625);
-        float n = 0.5f;
+        ModelPart modelPart = ((IronGolemModel)this.getParentModel()).getFlowerHoldingArm();
+        modelPart.translateAndRotate(poseStack);
+        poseStack.translate(-1.1875, 1.0625, -0.9375);
+        poseStack.translate(0.5, 0.5, 0.5);
+        float m = 0.5f;
         poseStack.scale(0.5f, 0.5f, 0.5f);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
-        poseStack.translate(-0.5, -0.5, 0.5);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
+        poseStack.translate(-0.5, -0.5, -0.5);
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(Blocks.POPPY.defaultBlockState(), poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

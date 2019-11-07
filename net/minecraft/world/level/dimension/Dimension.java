@@ -25,17 +25,13 @@ public abstract class Dimension {
     protected final float[] brightnessRamp = new float[16];
     private final float[] sunriseCol = new float[4];
 
-    public Dimension(Level level, DimensionType dimensionType) {
+    public Dimension(Level level, DimensionType dimensionType, float f) {
         this.level = level;
         this.type = dimensionType;
-        this.updateLightRamp();
-    }
-
-    protected void updateLightRamp() {
-        float f = 0.0f;
         for (int i = 0; i <= 15; ++i) {
-            float g = 1.0f - (float)i / 15.0f;
-            this.brightnessRamp[i] = (1.0f - g) / (g * 3.0f + 1.0f) * 1.0f + 0.0f;
+            float g = (float)i / 15.0f;
+            float h = g / (4.0f - 3.0f * g);
+            this.brightnessRamp[i] = Mth.lerp(f, h, 1.0f);
         }
     }
 
@@ -97,8 +93,8 @@ public abstract class Dimension {
         return this.hasCeiling;
     }
 
-    public float[] getBrightnessRamp() {
-        return this.brightnessRamp;
+    public float getBrightness(int i) {
+        return this.brightnessRamp[i];
     }
 
     public WorldBorder createWorldBorder() {

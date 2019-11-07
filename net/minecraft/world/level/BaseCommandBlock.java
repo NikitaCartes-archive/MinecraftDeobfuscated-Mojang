@@ -27,13 +27,14 @@ import org.jetbrains.annotations.Nullable;
 public abstract class BaseCommandBlock
 implements CommandSource {
     private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+    private static final Component DEFAULT_NAME = new TextComponent("@");
     private long lastExecution = -1L;
     private boolean updateLastExecution = true;
     private int successCount;
     private boolean trackOutput = true;
     private Component lastOutput;
     private String command = "";
-    private Component name = new TextComponent("@");
+    private Component name = DEFAULT_NAME;
 
     public int getSuccessCount() {
         return this.successCount;
@@ -66,7 +67,7 @@ implements CommandSource {
         this.command = compoundTag.getString("Command");
         this.successCount = compoundTag.getInt("SuccessCount");
         if (compoundTag.contains("CustomName", 8)) {
-            this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+            this.setName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
         }
         if (compoundTag.contains("TrackOutput", 1)) {
             this.trackOutput = compoundTag.getBoolean("TrackOutput");
@@ -131,8 +132,8 @@ implements CommandSource {
         return this.name;
     }
 
-    public void setName(Component component) {
-        this.name = component;
+    public void setName(@Nullable Component component) {
+        this.name = component != null ? component : DEFAULT_NAME;
     }
 
     @Override

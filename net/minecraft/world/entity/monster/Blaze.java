@@ -91,8 +91,8 @@ extends Monster {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getLightColor() {
-        return 0xF000F0;
+    public int getBlockLightLevel() {
+        return 15;
     }
 
     @Override

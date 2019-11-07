@@ -55,7 +55,7 @@ import org.jetbrains.annotations.Nullable;
 public class NormalDimension
 extends Dimension {
     public NormalDimension(Level level, DimensionType dimensionType) {
-        super(level, dimensionType);
+        super(level, dimensionType, 0.0f);
     }
 
     @Override

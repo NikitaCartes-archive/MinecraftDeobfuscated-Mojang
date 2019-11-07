@@ -57,7 +57,7 @@ implements ResourceManagerReloadListener {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         if (((Entity)livingEntity).isInvisible()) {
             return;
         }

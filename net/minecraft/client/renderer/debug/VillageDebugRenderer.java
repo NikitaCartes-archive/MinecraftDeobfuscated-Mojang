@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,16 +19,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.debug.PathfindingRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.protocol.game.DebugVillagerNameGenerator;
+import net.minecraft.network.protocol.game.DebugMobNameGenerator;
 import net.minecraft.world.level.pathfinder.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,12 +86,12 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
         RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableTexture();
-        this.doRender();
+        this.doRender(d, e, f);
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         RenderSystem.popMatrix();
@@ -99,8 +100,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
     }
 
-    private void doRender() {
-        BlockPos blockPos = this.getCamera().getBlockPosition();
+    private void doRender(double d, double e, double f) {
+        BlockPos blockPos = new BlockPos(d, e, f);
         this.villageSections.forEach(sectionPos -> {
             if (blockPos.closerThan(sectionPos.center(), 60.0)) {
                 VillageDebugRenderer.highlightVillageSection(sectionPos);
@@ -108,7 +109,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         });
         this.brainDumpsPerEntity.values().forEach(brainDump -> {
             if (this.isPlayerCloseEnoughToMob((BrainDump)brainDump)) {
-                this.renderVillagerInfo((BrainDump)brainDump);
+                this.renderVillagerInfo((BrainDump)brainDump, d, e, f);
             }
         });
         for (BlockPos blockPos22 : this.pois.keySet()) {
@@ -137,11 +138,15 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     private static void highlightPoi(BlockPos blockPos) {
         float f = 0.05f;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         DebugRenderer.renderFilledBox(blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
     }
 
     private void renderGhostPoi(BlockPos blockPos, List<String> list) {
         float f = 0.05f;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         DebugRenderer.renderFilledBox(blockPos, 0.05f, 0.2f, 0.2f, 1.0f, 0.3f);
         VillageDebugRenderer.renderTextOverPos("" + list, blockPos, 0, -256);
         VillageDebugRenderer.renderTextOverPos("Ghost POI", blockPos, 1, -65536);
@@ -158,13 +163,13 @@ implements DebugRenderer.SimpleDebugRenderer {
         VillageDebugRenderer.renderTextOverPoi(poiInfo.type, poiInfo, ++i, -1);
     }
 
-    private void renderPath(BrainDump brainDump) {
+    private void renderPath(BrainDump brainDump, double d, double e, double f) {
         if (brainDump.path != null) {
-            PathfindingRenderer.renderPath(this.getCamera(), brainDump.path, 0.5f, false, false);
+            PathfindingRenderer.renderPath(brainDump.path, 0.5f, false, false, d, e, f);
         }
     }
 
-    private void renderVillagerInfo(BrainDump brainDump) {
+    private void renderVillagerInfo(BrainDump brainDump, double d, double e, double f) {
         boolean bl = this.isVillagerSelected(brainDump);
         int i = 0;
         VillageDebugRenderer.renderTextOverMob(brainDump.pos, i, brainDump.name, -1, 0.03f);
@@ -210,7 +215,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             }
         }
         if (bl) {
-            this.renderPath(brainDump);
+            this.renderPath(brainDump, d, e, f);
         }
     }
 
@@ -239,12 +244,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         DebugRenderer.renderFloatingText(string, g, h, k, j, f, false, 0.5f, true);
     }
 
-    private Camera getCamera() {
-        return this.minecraft.gameRenderer.getMainCamera();
-    }
-
     private Set<String> getTicketHolderNames(PoiInfo poiInfo) {
-        return this.getTicketHolders(poiInfo.pos).stream().map(DebugVillagerNameGenerator::getVillagerName).collect(Collectors.toSet());
+        return this.getTicketHolders(poiInfo.pos).stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet());
     }
 
     private boolean isVillagerSelected(BrainDump brainDump) {

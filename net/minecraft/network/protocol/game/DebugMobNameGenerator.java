@@ -9,13 +9,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
-public class DebugVillagerNameGenerator {
+public class DebugMobNameGenerator {
     private static final String[] NAMES_FIRST_PART = new String[]{"Slim", "Far", "River", "Silly", "Fat", "Thin", "Fish", "Bat", "Dark", "Oak", "Sly", "Bush", "Zen", "Bark", "Cry", "Slack", "Soup", "Grim", "Hook"};
     private static final String[] NAMES_SECOND_PART = new String[]{"Fox", "Tail", "Jaw", "Whisper", "Twig", "Root", "Finder", "Nose", "Brow", "Blade", "Fry", "Seek", "Tooth", "Foot", "Leaf", "Stone", "Fall", "Face", "Tongue"};
 
-    public static String getVillagerName(UUID uUID) {
-        Random random = DebugVillagerNameGenerator.getRandom(uUID);
-        return DebugVillagerNameGenerator.getRandomString(random, NAMES_FIRST_PART) + DebugVillagerNameGenerator.getRandomString(random, NAMES_SECOND_PART);
+    public static String getMobName(UUID uUID) {
+        Random random = DebugMobNameGenerator.getRandom(uUID);
+        return DebugMobNameGenerator.getRandomString(random, NAMES_FIRST_PART) + DebugMobNameGenerator.getRandomString(random, NAMES_SECOND_PART);
     }
 
     private static String getRandomString(Random random, String[] strings) {

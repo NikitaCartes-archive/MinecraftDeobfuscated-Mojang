@@ -24,8 +24,8 @@ extends RenderLayer<T, DrownedModel<T>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l, float m) {
-        DrownedOuterLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, m, h, 1.0f, 1.0f, 1.0f);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l) {
+        DrownedOuterLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, h, 1.0f, 1.0f, 1.0f);
     }
 }
 

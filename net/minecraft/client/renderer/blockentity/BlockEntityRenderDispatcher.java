@@ -15,6 +15,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BeaconRenderer;
@@ -36,7 +37,6 @@ import net.minecraft.client.renderer.blockentity.TheEndGatewayRenderer;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -95,7 +95,7 @@ public class BlockEntityRenderDispatcher {
         this.cameraHitResult = hitResult;
     }
 
-    public <E extends BlockEntity> void render(E blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double g) {
+    public <E extends BlockEntity> void render(E blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         if (!(blockEntity.distanceToSqr(this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z) < blockEntity.getViewDistance())) {
             return;
         }
@@ -106,14 +106,13 @@ public class BlockEntityRenderDispatcher {
         if (!blockEntity.hasLevel() || !blockEntity.getType().isValid(blockEntity.getBlockState().getBlock())) {
             return;
         }
-        BlockPos blockPos = blockEntity.getBlockPos();
-        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> BlockEntityRenderDispatcher.setupAndRender(blockEntityRenderer, blockEntity, (double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g, f, poseStack, multiBufferSource));
+        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> BlockEntityRenderDispatcher.setupAndRender(blockEntityRenderer, blockEntity, f, poseStack, multiBufferSource));
     }
 
-    private static <T extends BlockEntity> void setupAndRender(BlockEntityRenderer<T> blockEntityRenderer, T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    private static <T extends BlockEntity> void setupAndRender(BlockEntityRenderer<T> blockEntityRenderer, T blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource) {
         Level level = blockEntity.getLevel();
-        int i = level != null ? level.getLightColor(blockEntity.getBlockPos()) : 0xF000F0;
-        blockEntityRenderer.render(blockEntity, d, e, f, g, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
+        int i = level != null ? LevelRenderer.getLightColor(level, blockEntity.getBlockPos()) : 0xF000F0;
+        blockEntityRenderer.render(blockEntity, f, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
     }
 
     @Deprecated
@@ -128,7 +127,7 @@ public class BlockEntityRenderDispatcher {
         if (blockEntityRenderer == null) {
             return true;
         }
-        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0, 0.0, 0.0, 0.0f, poseStack, multiBufferSource, i, j));
+        BlockEntityRenderDispatcher.tryRender(blockEntity, () -> blockEntityRenderer.render(blockEntity, 0.0f, poseStack, multiBufferSource, i, j));
         return false;
     }
 

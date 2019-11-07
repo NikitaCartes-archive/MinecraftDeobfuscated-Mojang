@@ -24,12 +24,12 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
         this.renderer = renderLayerParent;
     }
 
-    protected static <T extends LivingEntity> void coloredCutoutModelCopyLayerRender(EntityModel<T> entityModel, EntityModel<T> entityModel2, ResourceLocation resourceLocation, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m, float n, float o, float p) {
+    protected static <T extends LivingEntity> void coloredCutoutModelCopyLayerRender(EntityModel<T> entityModel, EntityModel<T> entityModel2, ResourceLocation resourceLocation, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m, float n, float o) {
         if (!livingEntity.isInvisible()) {
             entityModel.copyPropertiesTo(entityModel2);
-            entityModel2.prepareMobModel(livingEntity, f, g, m);
-            entityModel2.setupAnim(livingEntity, f, g, h, j, k, l);
-            RenderLayer.renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, n, o, p);
+            entityModel2.prepareMobModel(livingEntity, f, g, l);
+            entityModel2.setupAnim(livingEntity, f, g, h, j, k);
+            RenderLayer.renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, m, n, o);
         }
     }
 
@@ -46,6 +46,6 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
         return this.renderer.getTextureLocation(entity);
     }
 
-    public abstract void render(PoseStack var1, MultiBufferSource var2, int var3, T var4, float var5, float var6, float var7, float var8, float var9, float var10, float var11);
+    public abstract void render(PoseStack var1, MultiBufferSource var2, int var3, T var4, float var5, float var6, float var7, float var8, float var9, float var10);
 }
 

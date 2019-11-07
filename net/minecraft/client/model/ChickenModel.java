@@ -62,7 +62,7 @@ extends AgeableListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
         this.beak.xRot = this.head.xRot;

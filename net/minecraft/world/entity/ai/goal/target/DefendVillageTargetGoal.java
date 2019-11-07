@@ -39,7 +39,10 @@ extends TargetGoal {
                 this.potentialTarget = player;
             }
         }
-        return this.potentialTarget != null;
+        if (this.potentialTarget == null) {
+            return false;
+        }
+        return !(this.potentialTarget instanceof Player) || !this.potentialTarget.isSpectator() && !((Player)this.potentialTarget).isCreative();
     }
 
     @Override

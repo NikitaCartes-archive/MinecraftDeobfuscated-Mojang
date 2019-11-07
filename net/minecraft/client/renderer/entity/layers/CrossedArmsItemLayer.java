@@ -25,12 +25,12 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         poseStack.pushPose();
         poseStack.translate(0.0, 0.4f, -0.4f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.MAINHAND);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

@@ -191,7 +191,7 @@ implements Projectile {
                 this.life = 0;
                 this.flightTime = 0;
             } else if (!this.level.isClientSide) {
-                this.checkDespawn();
+                this.tickDespawn();
             }
             ++this.inGroundTime;
             return;
@@ -270,7 +270,7 @@ implements Projectile {
         this.checkInsideBlocks();
     }
 
-    protected void checkDespawn() {
+    protected void tickDespawn() {
         ++this.life;
         if (this.life >= 1200) {
             this.remove();

@@ -103,7 +103,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean isFoil(ItemStack itemStack) {
         return super.isFoil(itemStack) || !PotionUtils.getMobEffects(itemStack).isEmpty();
     }

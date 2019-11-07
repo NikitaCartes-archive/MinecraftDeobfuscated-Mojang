@@ -3,13 +3,16 @@
  */
 package net.minecraft.world.level;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockAndBiomeGetter;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.CollisionGetter;
+import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +24,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 public interface LevelReader
-extends BlockAndBiomeGetter,
+extends BlockAndTintGetter,
 CollisionGetter,
 BiomeManager.NoiseBiomeSource {
     @Nullable
@@ -33,6 +36,18 @@ BiomeManager.NoiseBiomeSource {
     public int getHeight(Heightmap.Types var1, int var2, int var3);
 
     public int getSkyDarken();
+
+    public BiomeManager getBiomeManager();
+
+    default public Biome getBiome(BlockPos blockPos) {
+        return this.getBiomeManager().getBiome(blockPos);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    default public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
+        return colorResolver.getColor(this.getBiome(blockPos), blockPos.getX(), blockPos.getZ());
+    }
 
     @Override
     default public Biome getNoiseBiome(int i, int j, int k) {
@@ -78,8 +93,9 @@ BiomeManager.NoiseBiomeSource {
         return true;
     }
 
+    @Deprecated
     default public float getBrightness(BlockPos blockPos) {
-        return this.getDimension().getBrightnessRamp()[this.getMaxLocalRawBrightness(blockPos)];
+        return this.getDimension().getBrightness(this.getMaxLocalRawBrightness(blockPos));
     }
 
     default public int getDirectSignal(BlockPos blockPos, Direction direction) {

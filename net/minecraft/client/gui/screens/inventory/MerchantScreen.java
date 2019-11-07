@@ -118,7 +118,7 @@ extends AbstractContainerScreen<MerchantMenu> {
         }
         int n = 100;
         float f = 100 / (VillagerData.getMaxXpPerLevel(k) - m);
-        int o = Mth.floor(f * (float)(l - m));
+        int o = Math.min(Mth.floor(f * (float)(l - m)), 100);
         MerchantScreen.blit(i + 136, j + 16, this.getBlitOffset(), 0.0f, 191.0f, o + 1, 5, 256, 512);
         int p = ((MerchantMenu)this.menu).getFutureTraderXp();
         if (p > 0) {

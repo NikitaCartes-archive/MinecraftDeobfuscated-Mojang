@@ -25,31 +25,31 @@ extends RenderLayer<T, M> {
 
     protected abstract int numStuck(T var1);
 
-    protected abstract void renderStuckItem(PoseStack var1, MultiBufferSource var2, Entity var3, float var4, float var5, float var6, float var7);
+    protected abstract void renderStuckItem(PoseStack var1, MultiBufferSource var2, int var3, Entity var4, float var5, float var6, float var7, float var8);
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
-        int n = this.numStuck(livingEntity);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
+        int m = this.numStuck(livingEntity);
         Random random = new Random(((Entity)livingEntity).getId());
-        if (n <= 0) {
+        if (m <= 0) {
             return;
         }
-        for (int o = 0; o < n; ++o) {
+        for (int n = 0; n < m; ++n) {
             poseStack.pushPose();
             ModelPart modelPart = ((PlayerModel)this.getParentModel()).getRandomModelPart(random);
             ModelPart.Cube cube = modelPart.getRandomCube(random);
-            modelPart.translateAndRotate(poseStack, 0.0625f);
+            modelPart.translateAndRotate(poseStack);
+            float o = random.nextFloat();
             float p = random.nextFloat();
             float q = random.nextFloat();
-            float r = random.nextFloat();
-            float s = Mth.lerp(p, cube.minX, cube.maxX) / 16.0f;
-            float t = Mth.lerp(q, cube.minY, cube.maxY) / 16.0f;
-            float u = Mth.lerp(r, cube.minZ, cube.maxZ) / 16.0f;
-            poseStack.translate(s, t, u);
+            float r = Mth.lerp(o, cube.minX, cube.maxX) / 16.0f;
+            float s = Mth.lerp(p, cube.minY, cube.maxY) / 16.0f;
+            float t = Mth.lerp(q, cube.minZ, cube.maxZ) / 16.0f;
+            poseStack.translate(r, s, t);
+            o = -1.0f * (o * 2.0f - 1.0f);
             p = -1.0f * (p * 2.0f - 1.0f);
             q = -1.0f * (q * 2.0f - 1.0f);
-            r = -1.0f * (r * 2.0f - 1.0f);
-            this.renderStuckItem(poseStack, multiBufferSource, (Entity)livingEntity, p, q, r, h);
+            this.renderStuckItem(poseStack, multiBufferSource, i, (Entity)livingEntity, o, p, q, h);
             poseStack.popPose();
         }
     }

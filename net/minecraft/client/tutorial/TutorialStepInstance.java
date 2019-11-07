@@ -5,7 +5,7 @@ package net.minecraft.client.tutorial;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.Input;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +26,10 @@ public interface TutorialStepInstance {
     default public void onMouse(double d, double e) {
     }
 
-    default public void onLookAt(MultiPlayerLevel multiPlayerLevel, HitResult hitResult) {
+    default public void onLookAt(ClientLevel clientLevel, HitResult hitResult) {
     }
 
-    default public void onDestroyBlock(MultiPlayerLevel multiPlayerLevel, BlockPos blockPos, BlockState blockState, float f) {
+    default public void onDestroyBlock(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, float f) {
     }
 
     default public void onOpenInventory() {

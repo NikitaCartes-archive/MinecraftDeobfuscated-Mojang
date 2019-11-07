@@ -31,7 +31,7 @@ extends Biome {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getSkyColor(float f) {
+    public int getSkyColor() {
         return 0;
     }
 }

@@ -236,9 +236,23 @@ extends WalkNodeEvaluator {
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
             BlockPathTypes blockPathTypes2 = FlyNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
-            blockPathTypes = blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block == Blocks.CAMPFIRE ? BlockPathTypes.DAMAGE_FIRE : (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS ? BlockPathTypes.DAMAGE_CACTUS : (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER ? BlockPathTypes.DAMAGE_OTHER : (blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE)));
+            if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block == Blocks.CAMPFIRE) {
+                blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
+            } else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
+                blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;
+            } else if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
+                blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
+            } else if (blockPathTypes2 == BlockPathTypes.COCOA) {
+                blockPathTypes = BlockPathTypes.COCOA;
+            } else if (blockPathTypes2 == BlockPathTypes.FENCE) {
+                blockPathTypes = BlockPathTypes.FENCE;
+            } else {
+                BlockPathTypes blockPathTypes3 = blockPathTypes = blockPathTypes2 == BlockPathTypes.WALKABLE || blockPathTypes2 == BlockPathTypes.OPEN || blockPathTypes2 == BlockPathTypes.WATER ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
+            }
         }
-        blockPathTypes = FlyNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        if (blockPathTypes == BlockPathTypes.WALKABLE || blockPathTypes == BlockPathTypes.OPEN) {
+            blockPathTypes = FlyNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        }
         return blockPathTypes;
     }
 

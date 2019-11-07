@@ -30,19 +30,19 @@ extends RenderLayer<T, PlayerModel<T>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         if (!((LivingEntity)livingEntity).isAutoSpinAttack()) {
             return;
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
-        for (int n = 0; n < 3; ++n) {
+        for (int m = 0; m < 3; ++m) {
             poseStack.pushPose();
-            float o = j * (float)(-(45 + n * 5));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
-            float p = 0.75f * (float)n;
-            poseStack.scale(p, p, p);
-            poseStack.translate(0.0, -0.2f + 0.6f * (float)n, 0.0);
-            this.box.render(poseStack, vertexConsumer, m, i, OverlayTexture.NO_OVERLAY, null);
+            float n = j * (float)(-(45 + m * 5));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(n));
+            float o = 0.75f * (float)m;
+            poseStack.scale(o, o, o);
+            poseStack.translate(0.0, -0.2f + 0.6f * (float)m, 0.0);
+            this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, null);
             poseStack.popPose();
         }
     }

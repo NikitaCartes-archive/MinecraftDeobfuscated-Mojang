@@ -33,14 +33,14 @@ extends StuckInBodyLayer<T, M> {
     }
 
     @Override
-    protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, float h, float i) {
-        float j = Mth.sqrt(f * f + h * h);
+    protected void renderStuckItem(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Entity entity, float f, float g, float h, float j) {
+        float k = Mth.sqrt(f * f + h * h);
         this.arrow = new Arrow(entity.level, entity.getX(), entity.getY(), entity.getZ());
         this.arrow.yRot = (float)(Math.atan2(f, h) * 57.2957763671875);
-        this.arrow.xRot = (float)(Math.atan2(g, j) * 57.2957763671875);
+        this.arrow.xRot = (float)(Math.atan2(g, k) * 57.2957763671875);
         this.arrow.yRotO = this.arrow.yRot;
         this.arrow.xRotO = this.arrow.xRot;
-        this.dispatcher.render(this.arrow, 0.0, 0.0, 0.0, 0.0f, i, poseStack, multiBufferSource);
+        this.dispatcher.render(this.arrow, 0.0, 0.0, 0.0, 0.0f, j, poseStack, multiBufferSource, i);
     }
 }
 

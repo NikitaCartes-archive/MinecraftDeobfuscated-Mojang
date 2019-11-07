@@ -52,7 +52,8 @@ extends Raider {
         BOW_AND_ARROW,
         CROSSBOW_HOLD,
         CROSSBOW_CHARGE,
-        CELEBRATING;
+        CELEBRATING,
+        NEUTRAL;
 
     }
 }

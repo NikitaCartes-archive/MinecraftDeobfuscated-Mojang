@@ -87,31 +87,31 @@ extends BlockEntityRenderer<T> {
     }
 
     @Override
-    public void render(T blockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+    public void render(T blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         boolean bl;
         BlockState blockState = ((BlockEntity)blockEntity).hasLevel() ? ((BlockEntity)blockEntity).getBlockState() : (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
         ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
         boolean bl2 = bl = chestType != ChestType.SINGLE;
         ResourceLocation resourceLocation = this.xmasTextures ? this.chooseTexture(chestType, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT) : (blockEntity instanceof TrappedChestBlockEntity ? this.chooseTexture(chestType, CHEST_TRAP_LOCATION, CHEST_TRAP_LOCATION_LEFT, CHEST_TRAP_LOCATION_RIGHT) : (blockEntity instanceof EnderChestBlockEntity ? ENDER_CHEST_LOCATION : this.chooseTexture(chestType, CHEST_LOCATION, CHEST_LOCATION_LEFT, CHEST_LOCATION_RIGHT)));
         poseStack.pushPose();
-        float h = blockState.getValue(ChestBlock.FACING).toYRot();
+        float g = blockState.getValue(ChestBlock.FACING).toYRot();
         poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-h));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
         poseStack.translate(-0.5, -0.5, -0.5);
-        float k = ((LidBlockEntity)blockEntity).getOpenNess(g);
-        k = 1.0f - k;
-        k = 1.0f - k * k * k;
+        float h = ((LidBlockEntity)blockEntity).getOpenNess(f);
+        h = 1.0f - h;
+        h = 1.0f - h * h * h;
         TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
         if (bl) {
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
             if (chestType == ChestType.LEFT) {
-                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, k, i, j, textureAtlasSprite);
+                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, i, j, textureAtlasSprite);
             } else {
-                this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, k, i, j, textureAtlasSprite);
+                this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, i, j, textureAtlasSprite);
             }
         } else {
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-            this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, k, i, j, textureAtlasSprite);
+            this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, i, j, textureAtlasSprite);
         }
         poseStack.popPose();
     }
@@ -130,9 +130,9 @@ extends BlockEntityRenderer<T> {
 
     private void render(PoseStack poseStack, VertexConsumer vertexConsumer, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, int j, TextureAtlasSprite textureAtlasSprite) {
         modelPart2.xRot = modelPart.xRot = -(f * 1.5707964f);
-        modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
-        modelPart2.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
-        modelPart3.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        modelPart.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        modelPart2.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        modelPart3.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
     }
 }
 

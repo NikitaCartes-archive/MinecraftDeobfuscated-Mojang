@@ -47,7 +47,7 @@ extends SkullModel {
         poseStack.pushPose();
         poseStack.translate(0.0, -0.374375f, 0.0);
         poseStack.scale(0.75f, 0.75f, 0.75f);
-        this.head.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
+        this.head.render(poseStack, vertexConsumer, i, j, null, f, g, h);
         poseStack.popPose();
     }
 }

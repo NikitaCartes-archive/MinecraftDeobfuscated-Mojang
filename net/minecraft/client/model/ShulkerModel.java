@@ -30,16 +30,16 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T shulker, float f, float g, float h, float i, float j, float k) {
-        float l = h - (float)((Shulker)shulker).tickCount;
-        float m = (0.5f + ((Shulker)shulker).getClientPeekAmount(l)) * (float)Math.PI;
-        float n = -1.0f + Mth.sin(m);
-        float o = 0.0f;
-        if (m > (float)Math.PI) {
-            o = Mth.sin(h * 0.1f) * 0.7f;
+    public void setupAnim(T shulker, float f, float g, float h, float i, float j) {
+        float k = h - (float)((Shulker)shulker).tickCount;
+        float l = (0.5f + ((Shulker)shulker).getClientPeekAmount(k)) * (float)Math.PI;
+        float m = -1.0f + Mth.sin(l);
+        float n = 0.0f;
+        if (l > (float)Math.PI) {
+            n = Mth.sin(h * 0.1f) * 0.7f;
         }
-        this.lid.setPos(0.0f, 16.0f + Mth.sin(m) * 8.0f + o, 0.0f);
-        this.lid.yRot = ((Shulker)shulker).getClientPeekAmount(l) > 0.3f ? n * n * n * n * (float)Math.PI * 0.125f : 0.0f;
+        this.lid.setPos(0.0f, 16.0f + Mth.sin(l) * 8.0f + n, 0.0f);
+        this.lid.yRot = ((Shulker)shulker).getClientPeekAmount(k) > 0.3f ? m * m * m * m * (float)Math.PI * 0.125f : 0.0f;
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
     }

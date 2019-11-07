@@ -24,12 +24,12 @@ extends RenderLayer<Cat, CatModel<Cat>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l) {
         if (!cat.isTame()) {
             return;
         }
         float[] fs = cat.getCollarColor().getTextureDiffuseColors();
-        CatCollarLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, m, h, fs[0], fs[1], fs[2]);
+        CatCollarLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, h, fs[0], fs[1], fs[2]);
     }
 }
 

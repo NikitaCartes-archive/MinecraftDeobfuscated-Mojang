@@ -55,8 +55,8 @@ extends QuadrupedModel<T> {
     }
 
     @Override
-    public void setupAnim(T turtle, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(turtle, f, g, h, i, j, k);
+    public void setupAnim(T turtle, float f, float g, float h, float i, float j) {
+        super.setupAnim(turtle, f, g, h, i, j);
         this.leg0.xRot = Mth.cos(f * 0.6662f * 0.6f) * 0.5f * g;
         this.leg1.xRot = Mth.cos(f * 0.6662f * 0.6f + (float)Math.PI) * 0.5f * g;
         this.leg2.zRot = Mth.cos(f * 0.6662f * 0.6f + (float)Math.PI) * 0.5f * g;
@@ -69,12 +69,12 @@ extends QuadrupedModel<T> {
         this.leg1.yRot = 0.0f;
         this.eggBelly.xRot = 1.5707964f;
         if (!((Entity)turtle).isInWater() && ((Turtle)turtle).onGround) {
-            float l = ((Turtle)turtle).isLayingEgg() ? 4.0f : 1.0f;
-            float m = ((Turtle)turtle).isLayingEgg() ? 2.0f : 1.0f;
-            float n = 5.0f;
-            this.leg2.yRot = Mth.cos(l * f * 5.0f + (float)Math.PI) * 8.0f * g * m;
+            float k = ((Turtle)turtle).isLayingEgg() ? 4.0f : 1.0f;
+            float l = ((Turtle)turtle).isLayingEgg() ? 2.0f : 1.0f;
+            float m = 5.0f;
+            this.leg2.yRot = Mth.cos(k * f * 5.0f + (float)Math.PI) * 8.0f * g * l;
             this.leg2.zRot = 0.0f;
-            this.leg3.yRot = Mth.cos(l * f * 5.0f) * 8.0f * g * m;
+            this.leg3.yRot = Mth.cos(k * f * 5.0f) * 8.0f * g * l;
             this.leg3.zRot = 0.0f;
             this.leg0.yRot = Mth.cos(f * 5.0f + (float)Math.PI) * 3.0f * g;
             this.leg0.xRot = 0.0f;

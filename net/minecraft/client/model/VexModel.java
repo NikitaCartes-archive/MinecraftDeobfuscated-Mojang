@@ -39,8 +39,8 @@ extends HumanoidModel<Vex> {
     }
 
     @Override
-    public void setupAnim(Vex vex, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(vex, f, g, h, i, j, k);
+    public void setupAnim(Vex vex, float f, float g, float h, float i, float j) {
+        super.setupAnim(vex, f, g, h, i, j);
         if (vex.isCharging()) {
             if (vex.getMainArm() == HumanoidArm.RIGHT) {
                 this.rightArm.xRot = 3.7699115f;

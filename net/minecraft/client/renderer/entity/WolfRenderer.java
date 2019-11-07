@@ -32,12 +32,12 @@ extends MobRenderer<Wolf, WolfModel<Wolf>> {
     }
 
     @Override
-    public void render(Wolf wolf, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(Wolf wolf, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         if (wolf.isWet()) {
-            float i = wolf.getBrightness() * wolf.getWetShade(h);
-            ((WolfModel)this.model).setColor(i, i, i);
+            float h = wolf.getBrightness() * wolf.getWetShade(g);
+            ((WolfModel)this.model).setColor(h, h, h);
         }
-        super.render(wolf, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(wolf, f, g, poseStack, multiBufferSource, i);
         if (wolf.isWet()) {
             ((WolfModel)this.model).setColor(1.0f, 1.0f, 1.0f);
         }

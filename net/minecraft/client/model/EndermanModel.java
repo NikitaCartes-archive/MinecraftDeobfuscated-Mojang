@@ -41,11 +41,11 @@ extends HumanoidModel<T> {
     }
 
     @Override
-    public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-        float n;
-        super.setupAnim(livingEntity, f, g, h, i, j, k);
+    public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
+        float m;
+        super.setupAnim(livingEntity, f, g, h, i, j);
         this.head.visible = true;
-        float l = -14.0f;
+        float k = -14.0f;
         this.body.xRot = 0.0f;
         this.body.y = -14.0f;
         this.body.z = -0.0f;
@@ -55,7 +55,7 @@ extends HumanoidModel<T> {
         this.leftArm.xRot = (float)((double)this.leftArm.xRot * 0.5);
         this.rightLeg.xRot = (float)((double)this.rightLeg.xRot * 0.5);
         this.leftLeg.xRot = (float)((double)this.leftLeg.xRot * 0.5);
-        float m = 0.4f;
+        float l = 0.4f;
         if (this.rightArm.xRot > 0.4f) {
             this.rightArm.xRot = 0.4f;
         }
@@ -101,10 +101,10 @@ extends HumanoidModel<T> {
         this.hat.yRot = this.head.yRot;
         this.hat.zRot = this.head.zRot;
         if (this.creepy) {
-            n = 1.0f;
+            m = 1.0f;
             this.head.y -= 5.0f;
         }
-        n = -14.0f;
+        m = -14.0f;
         this.rightArm.setPos(-5.0f, -12.0f, 0.0f);
         this.leftArm.setPos(5.0f, -12.0f, 0.0f);
     }

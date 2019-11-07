@@ -26,16 +26,14 @@ extends EntityRenderer<LeashFenceKnotEntity> {
     }
 
     @Override
-    public void render(LeashFenceKnotEntity leashFenceKnotEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(LeashFenceKnotEntity leashFenceKnotEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        float i = 0.0625f;
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        int j = leashFenceKnotEntity.getLightColor();
-        this.model.setupAnim(leashFenceKnotEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f);
+        this.model.setupAnim(leashFenceKnotEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(KNOT_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, j, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
-        super.render(leashFenceKnotEntity, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(leashFenceKnotEntity, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

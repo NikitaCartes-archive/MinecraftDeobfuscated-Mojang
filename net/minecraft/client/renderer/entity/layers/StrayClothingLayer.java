@@ -25,8 +25,8 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l, float m) {
-        StrayClothingLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.layerModel, STRAY_CLOTHES_LOCATION, poseStack, multiBufferSource, i, mob, f, g, j, k, l, m, h, 1.0f, 1.0f, 1.0f);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l) {
+        StrayClothingLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.layerModel, STRAY_CLOTHES_LOCATION, poseStack, multiBufferSource, i, mob, f, g, j, k, l, h, 1.0f, 1.0f, 1.0f);
     }
 }
 

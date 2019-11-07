@@ -15,11 +15,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.level.LightLayer;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>>
@@ -46,13 +48,13 @@ extends LivingEntityRenderer<T, M> {
     }
 
     @Override
-    public void render(T mob, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        super.render(mob, d, e, f, g, h, poseStack, multiBufferSource);
+    public void render(T mob, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        super.render(mob, f, g, poseStack, multiBufferSource, i);
         Entity entity = ((Mob)mob).getLeashHolder();
         if (entity == null) {
             return;
         }
-        MobRenderer.renderLeash(mob, h, poseStack, multiBufferSource, entity);
+        MobRenderer.renderLeash(mob, g, poseStack, multiBufferSource, entity);
     }
 
     public static void renderLeash(Mob mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
@@ -83,30 +85,28 @@ extends LivingEntityRenderer<T, M> {
         float t = (float)(m - q);
         float u = 0.025f;
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.leash());
-        Matrix4f matrix4f = poseStack.getPose();
+        Matrix4f matrix4f = poseStack.last().pose();
         float v = Mth.fastInvSqrt(r * r + t * t) * 0.025f / 2.0f;
         float w = t * v;
         float x = r * v;
-        int y = mob.getLightColor();
-        int z = entity.getLightColor();
-        MobRenderer.renderSide(vertexConsumer, matrix4f, y, z, r, s, t, 0.025f, 0.025f, w, x);
-        MobRenderer.renderSide(vertexConsumer, matrix4f, y, z, r, s, t, 0.025f, 0.0f, w, x);
+        int y = mob.getBlockLightLevel();
+        int z = entity.getBlockLightLevel();
+        int aa = mob.level.getBrightness(LightLayer.SKY, new BlockPos(mob));
+        int ab = mob.level.getBrightness(LightLayer.SKY, new BlockPos(entity));
+        MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.025f, w, x);
+        MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.0f, w, x);
         poseStack.popPose();
     }
 
-    public static void renderSide(VertexConsumer vertexConsumer, Matrix4f matrix4f, int i, int j, float f, float g, float h, float k, float l, float m, float n) {
-        int o = 24;
-        int p = LightTexture.block(i);
-        int q = LightTexture.block(j);
-        int r = LightTexture.sky(i);
-        int s = LightTexture.sky(j);
-        for (int t = 0; t < 24; ++t) {
-            float u = (float)t / 23.0f;
-            int v = (int)Mth.lerp(u, p, q);
-            int w = (int)Mth.lerp(u, r, s);
-            int x = LightTexture.pack(v, w);
-            MobRenderer.addVertexPair(vertexConsumer, matrix4f, x, f, g, h, k, l, 24, t, false, m, n);
-            MobRenderer.addVertexPair(vertexConsumer, matrix4f, x, f, g, h, k, l, 24, t + 1, true, m, n);
+    public static void renderSide(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, float h, int i, int j, int k, int l, float m, float n, float o, float p) {
+        int q = 24;
+        for (int r = 0; r < 24; ++r) {
+            float s = (float)r / 23.0f;
+            int t = (int)Mth.lerp(s, i, j);
+            int u = (int)Mth.lerp(s, k, l);
+            int v = LightTexture.pack(t, u);
+            MobRenderer.addVertexPair(vertexConsumer, matrix4f, v, f, g, h, m, n, 24, r, false, o, p);
+            MobRenderer.addVertexPair(vertexConsumer, matrix4f, v, f, g, h, m, n, 24, r + 1, true, o, p);
         }
     }
 

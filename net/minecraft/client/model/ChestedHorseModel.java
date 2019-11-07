@@ -45,8 +45,8 @@ extends HorseModel<T> {
     }
 
     @Override
-    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(abstractChestedHorse, f, g, h, i, j, k);
+    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j) {
+        super.setupAnim(abstractChestedHorse, f, g, h, i, j);
         if (((AbstractChestedHorse)abstractChestedHorse).hasChest()) {
             this.boxL.visible = true;
             this.boxR.visible = true;

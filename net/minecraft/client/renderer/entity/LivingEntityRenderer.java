@@ -58,20 +58,20 @@ implements RenderLayerParent<T, M> {
     }
 
     @Override
-    public void render(T livingEntity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(T livingEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         float n;
         Direction direction;
         poseStack.pushPose();
-        ((EntityModel)this.model).attackTime = this.getAttackAnim(livingEntity, h);
+        ((EntityModel)this.model).attackTime = this.getAttackAnim(livingEntity, g);
         ((EntityModel)this.model).riding = ((Entity)livingEntity).isPassenger();
         ((EntityModel)this.model).young = ((LivingEntity)livingEntity).isBaby();
-        float i = Mth.rotLerp(h, ((LivingEntity)livingEntity).yBodyRotO, ((LivingEntity)livingEntity).yBodyRot);
-        float j = Mth.rotLerp(h, ((LivingEntity)livingEntity).yHeadRotO, ((LivingEntity)livingEntity).yHeadRot);
-        float k = j - i;
+        float h = Mth.rotLerp(g, ((LivingEntity)livingEntity).yBodyRotO, ((LivingEntity)livingEntity).yBodyRot);
+        float j = Mth.rotLerp(g, ((LivingEntity)livingEntity).yHeadRotO, ((LivingEntity)livingEntity).yHeadRot);
+        float k = j - h;
         if (((Entity)livingEntity).isPassenger() && ((Entity)livingEntity).getVehicle() instanceof LivingEntity) {
             LivingEntity livingEntity2 = (LivingEntity)((Entity)livingEntity).getVehicle();
-            i = Mth.rotLerp(h, livingEntity2.yBodyRotO, livingEntity2.yBodyRot);
-            k = j - i;
+            h = Mth.rotLerp(g, livingEntity2.yBodyRotO, livingEntity2.yBodyRot);
+            k = j - h;
             float l = Mth.wrapDegrees(k);
             if (l < -85.0f) {
                 l = -85.0f;
@@ -79,52 +79,50 @@ implements RenderLayerParent<T, M> {
             if (l >= 85.0f) {
                 l = 85.0f;
             }
-            i = j - l;
+            h = j - l;
             if (l * l > 2500.0f) {
-                i += l * 0.2f;
+                h += l * 0.2f;
             }
-            k = j - i;
+            k = j - h;
         }
-        float m = Mth.lerp(h, ((LivingEntity)livingEntity).xRotO, ((LivingEntity)livingEntity).xRot);
+        float m = Mth.lerp(g, ((LivingEntity)livingEntity).xRotO, ((LivingEntity)livingEntity).xRot);
         if (((Entity)livingEntity).getPose() == Pose.SLEEPING && (direction = ((LivingEntity)livingEntity).getBedOrientation()) != null) {
             n = ((Entity)livingEntity).getEyeHeight(Pose.STANDING) - 0.1f;
             poseStack.translate((float)(-direction.getStepX()) * n, 0.0, (float)(-direction.getStepZ()) * n);
         }
-        float l = this.getBob(livingEntity, h);
-        this.setupRotations(livingEntity, poseStack, l, i, h);
+        float l = this.getBob(livingEntity, g);
+        this.setupRotations(livingEntity, poseStack, l, h, g);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        this.scale(livingEntity, poseStack, h);
-        n = 0.0625f;
+        this.scale(livingEntity, poseStack, g);
         poseStack.translate(0.0, -1.501f, 0.0);
+        n = 0.0f;
         float o = 0.0f;
-        float p = 0.0f;
         if (!((Entity)livingEntity).isPassenger() && ((LivingEntity)livingEntity).isAlive()) {
-            o = Mth.lerp(h, ((LivingEntity)livingEntity).animationSpeedOld, ((LivingEntity)livingEntity).animationSpeed);
-            p = ((LivingEntity)livingEntity).animationPosition - ((LivingEntity)livingEntity).animationSpeed * (1.0f - h);
+            n = Mth.lerp(g, ((LivingEntity)livingEntity).animationSpeedOld, ((LivingEntity)livingEntity).animationSpeed);
+            o = ((LivingEntity)livingEntity).animationPosition - ((LivingEntity)livingEntity).animationSpeed * (1.0f - g);
             if (((LivingEntity)livingEntity).isBaby()) {
-                p *= 3.0f;
+                o *= 3.0f;
             }
-            if (o > 1.0f) {
-                o = 1.0f;
+            if (n > 1.0f) {
+                n = 1.0f;
             }
         }
-        ((EntityModel)this.model).prepareMobModel(livingEntity, p, o, h);
+        ((EntityModel)this.model).prepareMobModel(livingEntity, o, n, g);
         boolean bl = this.isVisible(livingEntity, false);
         boolean bl2 = !bl && !((Entity)livingEntity).isInvisibleTo(Minecraft.getInstance().player);
-        int q = ((Entity)livingEntity).getLightColor();
-        ((EntityModel)this.model).setupAnim(livingEntity, p, o, l, k, m, 0.0625f);
+        ((EntityModel)this.model).setupAnim(livingEntity, o, n, l, k, m);
         if (bl || bl2) {
             ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.entityForceTranslucent(resourceLocation) : ((Model)this.model).renderType(resourceLocation));
-            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, q, LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, h)), 1.0f, 1.0f, 1.0f);
+            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0f, 1.0f, 1.0f);
         }
         if (!((Entity)livingEntity).isSpectator()) {
             for (RenderLayer<T, M> renderLayer : this.layers) {
-                renderLayer.render(poseStack, multiBufferSource, q, livingEntity, p, o, h, l, k, m, 0.0625f);
+                renderLayer.render(poseStack, multiBufferSource, i, livingEntity, o, n, g, l, k, m);
             }
         }
         poseStack.popPose();
-        super.render(livingEntity, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(livingEntity, f, g, poseStack, multiBufferSource, i);
     }
 
     public static int getOverlayCoords(LivingEntity livingEntity, float f) {

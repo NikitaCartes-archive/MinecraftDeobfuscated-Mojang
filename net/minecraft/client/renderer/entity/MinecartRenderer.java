@@ -35,64 +35,64 @@ extends EntityRenderer<T> {
     }
 
     @Override
-    public void render(T abstractMinecart, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        super.render(abstractMinecart, d, e, f, g, h, poseStack, multiBufferSource);
+    public void render(T abstractMinecart, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        super.render(abstractMinecart, f, g, poseStack, multiBufferSource, i);
         poseStack.pushPose();
         long l = (long)((Entity)abstractMinecart).getId() * 493286711L;
         l = l * l * 4392167121L + l * 98761L;
-        float i = (((float)(l >> 16 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
+        float h = (((float)(l >> 16 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         float j = (((float)(l >> 20 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
         float k = (((float)(l >> 24 & 7L) + 0.5f) / 8.0f - 0.5f) * 0.004f;
-        poseStack.translate(i, j, k);
-        double m = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).xOld, ((Entity)abstractMinecart).getX());
-        double n = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).yOld, ((Entity)abstractMinecart).getY());
-        double o = Mth.lerp((double)h, ((AbstractMinecart)abstractMinecart).zOld, ((Entity)abstractMinecart).getZ());
-        double p = 0.3f;
-        Vec3 vec3 = ((AbstractMinecart)abstractMinecart).getPos(m, n, o);
-        float q = Mth.lerp(h, ((AbstractMinecart)abstractMinecart).xRotO, ((AbstractMinecart)abstractMinecart).xRot);
+        poseStack.translate(h, j, k);
+        double d = Mth.lerp((double)g, ((AbstractMinecart)abstractMinecart).xOld, ((Entity)abstractMinecart).getX());
+        double e = Mth.lerp((double)g, ((AbstractMinecart)abstractMinecart).yOld, ((Entity)abstractMinecart).getY());
+        double m = Mth.lerp((double)g, ((AbstractMinecart)abstractMinecart).zOld, ((Entity)abstractMinecart).getZ());
+        double n = 0.3f;
+        Vec3 vec3 = ((AbstractMinecart)abstractMinecart).getPos(d, e, m);
+        float o = Mth.lerp(g, ((AbstractMinecart)abstractMinecart).xRotO, ((AbstractMinecart)abstractMinecart).xRot);
         if (vec3 != null) {
-            Vec3 vec32 = ((AbstractMinecart)abstractMinecart).getPosOffs(m, n, o, 0.3f);
-            Vec3 vec33 = ((AbstractMinecart)abstractMinecart).getPosOffs(m, n, o, -0.3f);
+            Vec3 vec32 = ((AbstractMinecart)abstractMinecart).getPosOffs(d, e, m, 0.3f);
+            Vec3 vec33 = ((AbstractMinecart)abstractMinecart).getPosOffs(d, e, m, -0.3f);
             if (vec32 == null) {
                 vec32 = vec3;
             }
             if (vec33 == null) {
                 vec33 = vec3;
             }
-            poseStack.translate(vec3.x - m, (vec32.y + vec33.y) / 2.0 - n, vec3.z - o);
+            poseStack.translate(vec3.x - d, (vec32.y + vec33.y) / 2.0 - e, vec3.z - m);
             Vec3 vec34 = vec33.add(-vec32.x, -vec32.y, -vec32.z);
             if (vec34.length() != 0.0) {
                 vec34 = vec34.normalize();
-                g = (float)(Math.atan2(vec34.z, vec34.x) * 180.0 / Math.PI);
-                q = (float)(Math.atan(vec34.y) * 73.0);
+                f = (float)(Math.atan2(vec34.z, vec34.x) * 180.0 / Math.PI);
+                o = (float)(Math.atan(vec34.y) * 73.0);
             }
         }
         poseStack.translate(0.0, 0.375, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-q));
-        float r = (float)((AbstractMinecart)abstractMinecart).getHurtTime() - h;
-        float s = ((AbstractMinecart)abstractMinecart).getDamage() - h;
-        if (s < 0.0f) {
-            s = 0.0f;
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(-o));
+        float p = (float)((AbstractMinecart)abstractMinecart).getHurtTime() - g;
+        float q = ((AbstractMinecart)abstractMinecart).getDamage() - g;
+        if (q < 0.0f) {
+            q = 0.0f;
         }
-        if (r > 0.0f) {
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(r) * r * s / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir()));
+        if (p > 0.0f) {
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(Mth.sin(p) * p * q / 10.0f * (float)((AbstractMinecart)abstractMinecart).getHurtDir()));
         }
-        int t = ((AbstractMinecart)abstractMinecart).getDisplayOffset();
-        int u = ((Entity)abstractMinecart).getLightColor();
+        int r = ((AbstractMinecart)abstractMinecart).getDisplayOffset();
         BlockState blockState = ((AbstractMinecart)abstractMinecart).getDisplayBlockState();
         if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
             poseStack.pushPose();
-            float v = 0.75f;
+            float s = 0.75f;
             poseStack.scale(0.75f, 0.75f, 0.75f);
-            poseStack.translate(-0.5, (float)(t - 8) / 16.0f, 0.5);
-            this.renderMinecartContents(abstractMinecart, h, blockState, poseStack, multiBufferSource, u);
+            poseStack.translate(-0.5, (float)(r - 8) / 16.0f, 0.5);
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
+            this.renderMinecartContents(abstractMinecart, g, blockState, poseStack, multiBufferSource, i);
             poseStack.popPose();
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        this.model.setupAnim(abstractMinecart, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f, 0.0625f);
+        this.model.setupAnim(abstractMinecart, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(abstractMinecart)));
-        this.model.renderToBuffer(poseStack, vertexConsumer, u, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 

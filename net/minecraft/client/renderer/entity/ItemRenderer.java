@@ -13,8 +13,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -122,8 +120,7 @@ implements ResourceManagerReloadListener {
 
     private void renderQuadList(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j) {
         boolean bl = !itemStack.isEmpty();
-        Matrix4f matrix4f = poseStack.getPose();
-        Matrix3f matrix3f = poseStack.getNormal();
+        PoseStack.Pose pose = poseStack.last();
         for (BakedQuad bakedQuad : list) {
             int k = -1;
             if (bl && bakedQuad.isTinted()) {
@@ -132,7 +129,7 @@ implements ResourceManagerReloadListener {
             float f = (float)(k >> 16 & 0xFF) / 255.0f;
             float g = (float)(k >> 8 & 0xFF) / 255.0f;
             float h = (float)(k & 0xFF) / 255.0f;
-            vertexConsumer.putBulkData(matrix4f, matrix3f, bakedQuad, f, g, h, i, j);
+            vertexConsumer.putBulkData(pose, bakedQuad, f, g, h, i, j);
         }
     }
 
@@ -228,7 +225,7 @@ implements ResourceManagerReloadListener {
             String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
             poseStack.translate(0.0, 0.0, this.blitOffset + 200.0f);
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            font.drawInBatch(string2, i + 19 - 2 - font.width(string2), j + 6 + 3, 0xFFFFFF, true, poseStack.getPose(), bufferSource, false, 0, 0xF000F0);
+            font.drawInBatch(string2, i + 19 - 2 - font.width(string2), j + 6 + 3, 0xFFFFFF, true, poseStack.last().pose(), bufferSource, false, 0, 0xF000F0);
             bufferSource.endBatch();
         }
         if (itemStack.isDamaged()) {

@@ -88,12 +88,13 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -277,7 +278,7 @@ WindowEventHandler {
     @Nullable
     public MultiPlayerGameMode gameMode;
     @Nullable
-    public MultiPlayerLevel level;
+    public ClientLevel level;
     @Nullable
     public LocalPlayer player;
     @Nullable
@@ -767,6 +768,7 @@ WindowEventHandler {
         RenderSystem.pushMatrix();
         RenderSystem.clear(16640, ON_OSX);
         this.mainRenderTarget.bindWrite(true);
+        FogRenderer.setupNoFog();
         this.profiler.push("display");
         RenderSystem.enableTexture();
         this.profiler.pop();
@@ -1363,12 +1365,12 @@ WindowEventHandler {
         this.pendingConnection = connection;
     }
 
-    public void setLevel(MultiPlayerLevel multiPlayerLevel) {
+    public void setLevel(ClientLevel clientLevel) {
         ProgressScreen progressScreen = new ProgressScreen();
         progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining", new Object[0]));
         this.updateScreenAndTick(progressScreen);
-        this.level = multiPlayerLevel;
-        this.updateLevelInEngines(multiPlayerLevel);
+        this.level = clientLevel;
+        this.updateLevelInEngines(clientLevel);
         if (!this.isLocalServer) {
             YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
             MinecraftSessionService minecraftSessionService = authenticationService.createMinecraftSessionService();
@@ -1422,10 +1424,10 @@ WindowEventHandler {
         this.runTick(false);
     }
 
-    private void updateLevelInEngines(@Nullable MultiPlayerLevel multiPlayerLevel) {
-        this.levelRenderer.setLevel(multiPlayerLevel);
-        this.particleEngine.setLevel(multiPlayerLevel);
-        BlockEntityRenderDispatcher.instance.setLevel(multiPlayerLevel);
+    private void updateLevelInEngines(@Nullable ClientLevel clientLevel) {
+        this.levelRenderer.setLevel(clientLevel);
+        this.particleEngine.setLevel(clientLevel);
+        BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
     }
 
     public final boolean isDemo() {

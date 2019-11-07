@@ -60,7 +60,7 @@ extends ListModel<Bat> {
     }
 
     @Override
-    public void setupAnim(Bat bat, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(Bat bat, float f, float g, float h, float i, float j) {
         if (bat.isResting()) {
             this.head.xRot = j * ((float)Math.PI / 180);
             this.head.yRot = (float)Math.PI - i * ((float)Math.PI / 180);

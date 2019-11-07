@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.BlockAndBiomeGetter;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.Level;
@@ -36,43 +36,43 @@ public class BlockColors {
 
     public static BlockColors createDefault() {
         BlockColors blockColors = new BlockColors();
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return -1;
             }
-            return BiomeColors.getAverageGrassColor(blockAndBiomeGetter, blockState.getValue(ShearableDoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos);
+            return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockState.getValue(ShearableDoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos);
         }, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
         blockColors.addColoringState(ShearableDoublePlantBlock.HALF, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return GrassColor.get(0.5, 1.0);
             }
-            return BiomeColors.getAverageGrassColor(blockAndBiomeGetter, blockPos);
+            return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos);
         }, Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> FoliageColor.getEvergreenColor(), Blocks.SPRUCE_LEAVES);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> FoliageColor.getBirchColor(), Blocks.BIRCH_LEAVES);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> FoliageColor.getEvergreenColor(), Blocks.SPRUCE_LEAVES);
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> FoliageColor.getBirchColor(), Blocks.BIRCH_LEAVES);
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return FoliageColor.getDefaultColor();
             }
-            return BiomeColors.getAverageFoliageColor(blockAndBiomeGetter, blockPos);
+            return BiomeColors.getAverageFoliageColor(blockAndTintGetter, blockPos);
         }, Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.VINE);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return -1;
             }
-            return BiomeColors.getAverageWaterColor(blockAndBiomeGetter, blockPos);
+            return BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
         }, Blocks.WATER, Blocks.BUBBLE_COLUMN, Blocks.CAULDRON);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> RedStoneWireBlock.getColorForData(blockState.getValue(RedStoneWireBlock.POWER)), Blocks.REDSTONE_WIRE);
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForData(blockState.getValue(RedStoneWireBlock.POWER)), Blocks.REDSTONE_WIRE);
         blockColors.addColoringState(RedStoneWireBlock.POWER, Blocks.REDSTONE_WIRE);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return -1;
             }
-            return BiomeColors.getAverageGrassColor(blockAndBiomeGetter, blockPos);
+            return BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos);
         }, Blocks.SUGAR_CANE);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> 14731036, Blocks.ATTACHED_MELON_STEM, Blocks.ATTACHED_PUMPKIN_STEM);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> 14731036, Blocks.ATTACHED_MELON_STEM, Blocks.ATTACHED_PUMPKIN_STEM);
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
             int j = blockState.getValue(StemBlock.AGE);
             int k = j * 32;
             int l = 255 - j * 8;
@@ -80,8 +80,8 @@ public class BlockColors {
             return k << 16 | l << 8 | m;
         }, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
         blockColors.addColoringState(StemBlock.AGE, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
-        blockColors.register((blockState, blockAndBiomeGetter, blockPos, i) -> {
-            if (blockAndBiomeGetter == null || blockPos == null) {
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+            if (blockAndTintGetter == null || blockPos == null) {
                 return 7455580;
             }
             return 2129968;
@@ -98,9 +98,9 @@ public class BlockColors {
         return materialColor != null ? materialColor.col : -1;
     }
 
-    public int getColor(BlockState blockState, @Nullable BlockAndBiomeGetter blockAndBiomeGetter, @Nullable BlockPos blockPos, int i) {
+    public int getColor(BlockState blockState, @Nullable BlockAndTintGetter blockAndTintGetter, @Nullable BlockPos blockPos, int i) {
         BlockColor blockColor = this.blockColors.byId(Registry.BLOCK.getId(blockState.getBlock()));
-        return blockColor == null ? -1 : blockColor.getColor(blockState, blockAndBiomeGetter, blockPos, i);
+        return blockColor == null ? -1 : blockColor.getColor(blockState, blockAndTintGetter, blockPos, i);
     }
 
     public void register(BlockColor blockColor, Block ... blocks) {

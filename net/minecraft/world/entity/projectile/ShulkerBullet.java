@@ -211,12 +211,15 @@ extends Entity {
     }
 
     @Override
+    public void checkDespawn() {
+        if (this.level.getDifficulty() == Difficulty.PEACEFUL) {
+            this.remove();
+        }
+    }
+
+    @Override
     public void tick() {
         Vec3 vec3;
-        if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL) {
-            this.remove();
-            return;
-        }
         super.tick();
         if (!this.level.isClientSide) {
             List<LivingEntity> list;
@@ -297,8 +300,8 @@ extends Entity {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getLightColor() {
-        return 0xF000F0;
+    public int getBlockLightLevel() {
+        return 15;
     }
 
     protected void onHit(HitResult hitResult) {

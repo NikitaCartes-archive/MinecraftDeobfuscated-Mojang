@@ -397,6 +397,9 @@ implements Enemy {
     }
 
     public boolean hurt(EnderDragonPart enderDragonPart, DamageSource damageSource, float f) {
+        if (this.phaseManager.getCurrentPhase().getPhase() == EnderDragonPhase.DYING) {
+            return false;
+        }
         f = this.phaseManager.getCurrentPhase().onHurt(damageSource, f);
         if (enderDragonPart != this.head) {
             f = f / 4.0f + Math.min(f, 1.0f);
@@ -653,7 +656,7 @@ implements Enemy {
     }
 
     @Override
-    protected void checkDespawn() {
+    public void checkDespawn() {
     }
 
     public EnderDragonPart[] getSubEntities() {

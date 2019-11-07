@@ -26,7 +26,7 @@ extends Model {
         super(function);
     }
 
-    public abstract void setupAnim(T var1, float var2, float var3, float var4, float var5, float var6, float var7);
+    public abstract void setupAnim(T var1, float var2, float var3, float var4, float var5, float var6);
 
     public void prepareMobModel(T entity, float f, float g, float h) {
     }

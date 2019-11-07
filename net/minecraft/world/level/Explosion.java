@@ -23,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ClipContext;
@@ -259,6 +260,9 @@ public class Explosion {
         }
         if (this.source instanceof LivingEntity) {
             return (LivingEntity)this.source;
+        }
+        if (this.source instanceof AbstractHurtingProjectile) {
+            return ((AbstractHurtingProjectile)this.source).owner;
         }
         return null;
     }

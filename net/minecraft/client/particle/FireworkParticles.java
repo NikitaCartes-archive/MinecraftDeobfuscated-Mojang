@@ -80,9 +80,9 @@ public class FireworkParticles {
         }
 
         @Override
-        public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
+        public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
             this.setAlpha(0.6f - ((float)this.age + f - 1.0f) * 0.25f * 0.5f);
-            super.render(vertexConsumer, camera, f, g, h, i, j, k);
+            super.render(vertexConsumer, camera, f);
         }
 
         @Override
@@ -122,9 +122,9 @@ public class FireworkParticles {
         }
 
         @Override
-        public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
+        public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
             if (!this.flicker || this.age < this.lifetime / 3 || (this.age + this.lifetime) / 3 % 2 == 0) {
-                super.render(vertexConsumer, camera, f, g, h, i, j, k);
+                super.render(vertexConsumer, camera, f);
             }
         }
 

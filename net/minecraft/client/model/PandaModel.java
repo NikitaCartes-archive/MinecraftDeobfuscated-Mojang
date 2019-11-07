@@ -57,11 +57,11 @@ extends QuadrupedModel<T> {
     }
 
     @Override
-    public void setupAnim(T panda, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(panda, f, g, h, i, j, k);
+    public void setupAnim(T panda, float f, float g, float h, float i, float j) {
+        super.setupAnim(panda, f, g, h, i, j);
         boolean bl = ((Panda)panda).getUnhappyCounter() > 0;
         boolean bl2 = ((Panda)panda).isSneezing();
-        int l = ((Panda)panda).getSneezeCounter();
+        int k = ((Panda)panda).getSneezeCounter();
         boolean bl3 = ((Panda)panda).isEating();
         boolean bl4 = ((Panda)panda).isScared();
         if (bl) {
@@ -73,11 +73,11 @@ extends QuadrupedModel<T> {
             this.head.zRot = 0.0f;
         }
         if (bl2) {
-            if (l < 15) {
-                this.head.xRot = -0.7853982f * (float)l / 14.0f;
-            } else if (l < 20) {
-                float m = (l - 15) / 5;
-                this.head.xRot = -0.7853982f + 0.7853982f * m;
+            if (k < 15) {
+                this.head.xRot = -0.7853982f * (float)k / 14.0f;
+            } else if (k < 20) {
+                float l = (k - 15) / 5;
+                this.head.xRot = -0.7853982f + 0.7853982f * l;
             }
         }
         if (this.sitAmount > 0.0f) {

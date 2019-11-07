@@ -126,10 +126,12 @@ implements Enemy {
     }
 
     @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return this.getSize() > 0;
+    }
+
+    @Override
     public void tick() {
-        if (!this.level.isClientSide && this.level.getDifficulty() == Difficulty.PEACEFUL && this.getSize() > 0) {
-            this.removed = true;
-        }
         this.squish += (this.targetSquish - this.squish) * 0.5f;
         this.oSquish = this.squish;
         super.tick();

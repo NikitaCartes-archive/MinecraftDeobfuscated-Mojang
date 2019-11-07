@@ -24,7 +24,7 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, EnderMan enderMan, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, EnderMan enderMan, float f, float g, float h, float j, float k, float l) {
         BlockState blockState = enderMan.getCarriedBlock();
         if (blockState == null) {
             return;
@@ -34,8 +34,9 @@ extends RenderLayer<EnderMan, EndermanModel<EnderMan>> {
         poseStack.mulPose(Vector3f.XP.rotationDegrees(20.0f));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(45.0f));
         poseStack.translate(0.25, 0.1875, 0.25);
-        float n = 0.5f;
+        float m = 0.5f;
         poseStack.scale(-0.5f, -0.5f, 0.5f);
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

@@ -646,7 +646,6 @@ public final class ItemStack {
         return Lists.newArrayList(new TextComponent("missingno").withStyle(ChatFormatting.DARK_GRAY));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public boolean hasFoil() {
         return this.getItem().isFoil(this);
     }

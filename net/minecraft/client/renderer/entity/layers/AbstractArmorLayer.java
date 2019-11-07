@@ -39,14 +39,14 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.CHEST, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.LEGS, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.FEET, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, m, EquipmentSlot.HEAD, i);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.CHEST, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.LEGS, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.FEET, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.HEAD, i);
     }
 
-    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, float f, float g, float h, float i, float j, float k, float l, EquipmentSlot equipmentSlot, int m) {
+    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, float f, float g, float h, float i, float j, float k, EquipmentSlot equipmentSlot, int l) {
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(equipmentSlot);
         if (!(itemStack.getItem() instanceof ArmorItem)) {
             return;
@@ -59,18 +59,18 @@ extends RenderLayer<T, M> {
         ((HumanoidModel)this.getParentModel()).copyPropertiesTo(humanoidModel);
         ((HumanoidModel)humanoidModel).prepareMobModel(livingEntity, f, g, h);
         this.setPartVisibility(humanoidModel, equipmentSlot);
-        ((HumanoidModel)humanoidModel).setupAnim(livingEntity, f, g, i, j, k, l);
+        ((HumanoidModel)humanoidModel).setupAnim(livingEntity, f, g, i, j, k);
         boolean bl = this.usesInnerModel(equipmentSlot);
         boolean bl2 = itemStack.hasFoil();
         if (armorItem instanceof DyeableArmorItem) {
-            int n = ((DyeableArmorItem)armorItem).getColor(itemStack);
-            float o = (float)(n >> 16 & 0xFF) / 255.0f;
-            float p = (float)(n >> 8 & 0xFF) / 255.0f;
-            float q = (float)(n & 0xFF) / 255.0f;
-            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, o, p, q, null);
-            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, "overlay");
+            int m = ((DyeableArmorItem)armorItem).getColor(itemStack);
+            float n = (float)(m >> 16 & 0xFF) / 255.0f;
+            float o = (float)(m >> 8 & 0xFF) / 255.0f;
+            float p = (float)(m & 0xFF) / 255.0f;
+            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, n, o, p, null);
+            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, "overlay");
         } else {
-            this.renderModel(poseStack, multiBufferSource, m, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, null);
+            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, null);
         }
     }
 

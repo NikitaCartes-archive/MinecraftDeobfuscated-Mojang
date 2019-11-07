@@ -70,8 +70,8 @@ extends OcelotModel<T> {
     }
 
     @Override
-    public void setupAnim(T cat, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(cat, f, g, h, i, j, k);
+    public void setupAnim(T cat, float f, float g, float h, float i, float j) {
+        super.setupAnim(cat, f, g, h, i, j);
         if (this.lieDownAmount > 0.0f) {
             this.head.zRot = ModelUtils.rotlerpRad(this.head.zRot, -1.2707963f, this.lieDownAmount);
             this.head.yRot = ModelUtils.rotlerpRad(this.head.yRot, 1.2707963f, this.lieDownAmount);

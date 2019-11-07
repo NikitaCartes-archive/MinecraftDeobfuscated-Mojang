@@ -29,7 +29,7 @@ extends Dimension {
     private final EndDragonFight dragonFight;
 
     public TheEndDimension(Level level, DimensionType dimensionType) {
-        super(level, dimensionType);
+        super(level, dimensionType, 0.0f);
         CompoundTag compoundTag = level.getLevelData().getDimensionData(DimensionType.THE_END);
         this.dragonFight = level instanceof ServerLevel ? new EndDragonFight((ServerLevel)level, compoundTag.getCompound("DragonFight")) : null;
     }

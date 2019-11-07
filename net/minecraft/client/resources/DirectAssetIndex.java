@@ -35,7 +35,7 @@ extends AssetIndex {
     }
 
     @Override
-    public File getFile(String string) {
+    public File getRootFile(String string) {
         return new File(this.assetsDirectory, string);
     }
 
@@ -45,15 +45,15 @@ extends AssetIndex {
      * Enabled aggressive exception aggregation
      */
     @Override
-    public Collection<String> getFiles(String string2, int i, Predicate<String> predicate) {
-        Path path2 = this.assetsDirectory.toPath().resolve("minecraft/");
-        try (Stream<Path> stream2222 = Files.walk(path2.resolve(string2), i, new FileVisitOption[0]);){
-            Collection collection = stream2222.filter(path -> Files.isRegularFile(path, new LinkOption[0])).filter(path -> !path.endsWith(".mcmeta")).map(path2::relativize).map(Object::toString).map(string -> string.replaceAll("\\\\", "/")).filter(predicate).collect(Collectors.toList());
+    public Collection<ResourceLocation> getFiles(String string, String string2, int i, Predicate<String> predicate) {
+        Path path3 = this.assetsDirectory.toPath().resolve(string2);
+        try (Stream<Path> stream2222 = Files.walk(path3.resolve(string), i, new FileVisitOption[0]);){
+            Collection collection = stream2222.filter(path -> Files.isRegularFile(path, new LinkOption[0])).filter(path -> !path.endsWith(".mcmeta")).filter(path -> predicate.test(path.getFileName().toString())).map(path2 -> new ResourceLocation(string2, path3.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).collect(Collectors.toList());
             return collection;
         } catch (NoSuchFileException stream2222) {
             return Collections.emptyList();
         } catch (IOException iOException) {
-            LOGGER.warn("Unable to getFiles on {}", (Object)string2, (Object)iOException);
+            LOGGER.warn("Unable to getFiles on {}", (Object)string, (Object)iOException);
         }
         return Collections.emptyList();
     }

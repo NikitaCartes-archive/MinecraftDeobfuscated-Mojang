@@ -140,7 +140,7 @@ RangedAttackMob {
         if (this.isAggressive()) {
             return AbstractIllager.IllagerArmPose.ATTACKING;
         }
-        return AbstractIllager.IllagerArmPose.CROSSED;
+        return AbstractIllager.IllagerArmPose.NEUTRAL;
     }
 
     @Override

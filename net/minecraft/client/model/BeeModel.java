@@ -87,8 +87,8 @@ extends AgeableListModel<T> {
     }
 
     @Override
-    public void setupAnim(T bee, float f, float g, float h, float i, float j, float k) {
-        float l;
+    public void setupAnim(T bee, float f, float g, float h, float i, float j) {
+        float k;
         boolean bl;
         this.rightWing.xRot = 0.0f;
         this.leftAntenna.xRot = 0.0f;
@@ -106,9 +106,9 @@ extends AgeableListModel<T> {
             this.midLeg.xRot = 0.0f;
             this.backLeg.xRot = 0.0f;
         } else {
-            l = h * 2.1f;
+            k = h * 2.1f;
             this.rightWing.yRot = 0.0f;
-            this.rightWing.zRot = Mth.cos(l) * (float)Math.PI * 0.15f;
+            this.rightWing.zRot = Mth.cos(k) * (float)Math.PI * 0.15f;
             this.leftWing.xRot = this.rightWing.xRot;
             this.leftWing.yRot = this.rightWing.yRot;
             this.leftWing.zRot = -this.rightWing.zRot;
@@ -124,12 +124,12 @@ extends AgeableListModel<T> {
             this.bone.yRot = 0.0f;
             this.bone.zRot = 0.0f;
             if (!bl) {
-                l = Mth.cos(h * 0.18f);
-                this.bone.xRot = 0.1f + l * (float)Math.PI * 0.025f;
-                this.leftAntenna.xRot = l * (float)Math.PI * 0.03f;
-                this.rightAntenna.xRot = l * (float)Math.PI * 0.03f;
-                this.frontLeg.xRot = -l * (float)Math.PI * 0.1f + 0.3926991f;
-                this.backLeg.xRot = -l * (float)Math.PI * 0.05f + 0.7853982f;
+                k = Mth.cos(h * 0.18f);
+                this.bone.xRot = 0.1f + k * (float)Math.PI * 0.025f;
+                this.leftAntenna.xRot = k * (float)Math.PI * 0.03f;
+                this.rightAntenna.xRot = k * (float)Math.PI * 0.03f;
+                this.frontLeg.xRot = -k * (float)Math.PI * 0.1f + 0.3926991f;
+                this.backLeg.xRot = -k * (float)Math.PI * 0.05f + 0.7853982f;
                 this.bone.y = 19.0f - Mth.cos(h * 0.18f) * 0.9f;
             }
         }

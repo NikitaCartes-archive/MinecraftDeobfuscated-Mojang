@@ -29,7 +29,7 @@ extends RenderLayer<Llama, LlamaModel<Llama>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Llama llama, float f, float g, float h, float j, float k, float l) {
         ResourceLocation resourceLocation;
         DyeColor dyeColor = llama.getSwag();
         if (dyeColor != null) {
@@ -40,7 +40,7 @@ extends RenderLayer<Llama, LlamaModel<Llama>> {
             return;
         }
         ((LlamaModel)this.getParentModel()).copyPropertiesTo(this.model);
-        this.model.setupAnim(llama, f, g, j, k, l, m);
+        this.model.setupAnim(llama, f, g, j, k, l);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
         this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
     }

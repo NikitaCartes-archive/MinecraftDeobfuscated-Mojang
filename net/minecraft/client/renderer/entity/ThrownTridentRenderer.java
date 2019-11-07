@@ -12,6 +12,7 @@ import net.minecraft.client.model.TridentModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -28,15 +29,14 @@ extends EntityRenderer<ThrownTrident> {
     }
 
     @Override
-    public void render(ThrownTrident thrownTrident, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(ThrownTrident thrownTrident, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(h, thrownTrident.yRotO, thrownTrident.yRot) - 90.0f));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(h, thrownTrident.xRotO, thrownTrident.xRot) + 90.0f));
-        int i = thrownTrident.getLightColor();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(thrownTrident)));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(Mth.lerp(g, thrownTrident.yRotO, thrownTrident.yRot) - 90.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, thrownTrident.xRotO, thrownTrident.xRot) + 90.0f));
+        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.model.renderType(this.getTextureLocation(thrownTrident)), false, thrownTrident.isFoil());
         this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
-        super.render(thrownTrident, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(thrownTrident, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

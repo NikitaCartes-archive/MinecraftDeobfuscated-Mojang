@@ -201,6 +201,7 @@ public interface DispenseItemBehavior {
                 Level level = blockSource.getLevel();
                 ArmorStand armorStand = new ArmorStand(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
                 EntityType.updateCustomEntityTag(level, null, armorStand, itemStack.getTag());
+                armorStand.yRot = direction.toYRot();
                 level.addFreshEntity(armorStand);
                 itemStack.shrink(1);
                 return itemStack;
@@ -448,7 +449,7 @@ public interface DispenseItemBehavior {
                 BlockState blockState = levelAccessor.getBlockState(blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING)));
                 Block block = blockState.getBlock();
                 if (block.is(BlockTags.BEEHIVES) && blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
-                    ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+                    ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetHoneyLevel(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
                     this.success = true;
                     return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
                 }
@@ -484,7 +485,7 @@ public interface DispenseItemBehavior {
                             itemStack.setCount(0);
                         }
                         BeehiveBlock.dropHoneycomb(level, blockPos);
-                        ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetState(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+                        ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetHoneyLevel(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
                         this.success = true;
                     }
                 }

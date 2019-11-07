@@ -322,6 +322,11 @@ extends Level {
                 if (!this.server.isNpcsEnabled() && entity22 instanceof Npc) {
                     entity22.remove();
                 }
+                profilerFiller.push("checkDespawn");
+                if (!entity22.removed) {
+                    entity22.checkDespawn();
+                }
+                profilerFiller.pop();
                 if (entity3 != null) {
                     if (!entity3.removed && entity3.hasPassenger(entity22)) continue;
                     entity22.stopRiding();

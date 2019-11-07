@@ -10,6 +10,7 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.world.level.Level;
@@ -95,7 +96,7 @@ extends TextureSheetParticle {
         int i = super.getLightColor(f);
         int j = 0;
         if (this.level.hasChunkAt(this.pos)) {
-            j = this.level.getLightColor(this.pos);
+            j = LevelRenderer.getLightColor(this.level, this.pos);
         }
         return i == 0 ? j : i;
     }

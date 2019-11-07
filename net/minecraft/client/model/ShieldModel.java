@@ -27,10 +27,18 @@ extends Model {
         this.handle.addBox(-1.0f, -3.0f, -1.0f, 2.0f, 6.0f, 6.0f, 0.0f);
     }
 
+    public ModelPart plate() {
+        return this.plate;
+    }
+
+    public ModelPart handle() {
+        return this.handle;
+    }
+
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-        this.plate.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
-        this.handle.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
+        this.plate.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+        this.handle.render(poseStack, vertexConsumer, i, j, null, f, g, h);
     }
 }
 

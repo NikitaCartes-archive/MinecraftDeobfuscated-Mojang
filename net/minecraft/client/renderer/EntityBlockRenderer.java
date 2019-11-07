@@ -10,16 +10,19 @@ import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.TridentModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.banner.BannerTextures;
+import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -99,17 +102,18 @@ public class EntityBlockRenderer {
             return;
         }
         if (item == Items.SHIELD) {
-            ResourceLocation resourceLocation;
-            if (itemStack.getTagElement("BlockEntityTag") != null) {
-                this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
-                resourceLocation = BannerTextures.SHIELD_CACHE.getTextureLocation(this.banner.getTextureHashName(), this.banner.getPatterns(), this.banner.getColors());
-            } else {
-                resourceLocation = BannerTextures.NO_PATTERN_SHIELD;
-            }
+            boolean bl = itemStack.getTagElement("BlockEntityTag") != null;
+            TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
             poseStack.pushPose();
             poseStack.scale(1.0f, -1.0f, -1.0f);
-            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(resourceLocation), false, itemStack.hasFoil());
-            this.shieldModel.renderToBuffer(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f);
+            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(TextureAtlas.LOCATION_BLOCKS), false, itemStack.hasFoil());
+            TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD);
+            this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, textureAtlasSprite, 1.0f, 1.0f, 1.0f);
+            this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, textureAtlasSprite, 1.0f, 1.0f, 1.0f);
+            if (bl) {
+                this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
+                BannerRenderer.renderPatterns(this.banner, poseStack, multiBufferSource, i, j, this.shieldModel.plate(), false);
+            }
             poseStack.popPose();
         } else if (item == Items.TRIDENT) {
             poseStack.pushPose();

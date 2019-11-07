@@ -525,7 +525,16 @@ extends LivingEntity {
         return false;
     }
 
-    protected void checkDespawn() {
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
+    }
+
+    @Override
+    public void checkDespawn() {
+        if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.remove();
+            return;
+        }
         if (this.isPersistenceRequired() || this.requiresCustomPersistence()) {
             this.noActionTime = 0;
             return;
@@ -547,9 +556,6 @@ extends LivingEntity {
     @Override
     protected final void serverAiStep() {
         ++this.noActionTime;
-        this.level.getProfiler().push("checkDespawn");
-        this.checkDespawn();
-        this.level.getProfiler().pop();
         this.level.getProfiler().push("sensing");
         this.sensing.tick();
         this.level.getProfiler().pop();

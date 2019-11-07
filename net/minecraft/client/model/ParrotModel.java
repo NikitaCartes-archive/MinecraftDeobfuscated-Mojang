@@ -76,7 +76,7 @@ extends ListModel<Parrot> {
     }
 
     @Override
-    public void setupAnim(Parrot parrot, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(Parrot parrot, float f, float g, float h, float i, float j) {
         this.setupAnim(ParrotModel.getState(parrot), parrot.tickCount, f, g, h, i, j);
     }
 
@@ -85,10 +85,10 @@ extends ListModel<Parrot> {
         this.prepare(ParrotModel.getState(parrot));
     }
 
-    public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, float l, int m) {
+    public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, int l) {
         this.prepare(State.ON_SHOULDER);
-        this.setupAnim(State.ON_SHOULDER, m, f, g, 0.0f, h, k);
-        this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, l, i, j, null));
+        this.setupAnim(State.ON_SHOULDER, l, f, g, 0.0f, h, k);
+        this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null));
     }
 
     private void setupAnim(State state, int i, float f, float g, float h, float j, float k) {

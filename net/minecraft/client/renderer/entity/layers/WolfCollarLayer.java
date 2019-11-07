@@ -23,7 +23,7 @@ extends RenderLayer<Wolf, WolfModel<Wolf>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l) {
         if (!wolf.isTame() || wolf.isInvisible()) {
             return;
         }

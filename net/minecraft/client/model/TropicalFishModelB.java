@@ -53,12 +53,12 @@ extends ColorableListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-        float l = 1.0f;
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        float k = 1.0f;
         if (!((Entity)entity).isInWater()) {
-            l = 1.5f;
+            k = 1.5f;
         }
-        this.tail.yRot = -l * 0.45f * Mth.sin(0.6f * h);
+        this.tail.yRot = -k * 0.45f * Mth.sin(0.6f * h);
     }
 }
 

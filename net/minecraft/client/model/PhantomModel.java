@@ -71,15 +71,15 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-        float l = ((float)(((Entity)entity).getId() * 3) + h) * 0.13f;
-        float m = 16.0f;
-        this.leftWingBase.zRot = Mth.cos(l) * 16.0f * ((float)Math.PI / 180);
-        this.leftWingTip.zRot = Mth.cos(l) * 16.0f * ((float)Math.PI / 180);
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        float k = ((float)(((Entity)entity).getId() * 3) + h) * 0.13f;
+        float l = 16.0f;
+        this.leftWingBase.zRot = Mth.cos(k) * 16.0f * ((float)Math.PI / 180);
+        this.leftWingTip.zRot = Mth.cos(k) * 16.0f * ((float)Math.PI / 180);
         this.rightWingBase.zRot = -this.leftWingBase.zRot;
         this.rightWingTip.zRot = -this.leftWingTip.zRot;
-        this.tailBase.xRot = -(5.0f + Mth.cos(l * 2.0f) * 5.0f) * ((float)Math.PI / 180);
-        this.tailTip.xRot = -(5.0f + Mth.cos(l * 2.0f) * 5.0f) * ((float)Math.PI / 180);
+        this.tailBase.xRot = -(5.0f + Mth.cos(k * 2.0f) * 5.0f) * ((float)Math.PI / 180);
+        this.tailTip.xRot = -(5.0f + Mth.cos(k * 2.0f) * 5.0f) * ((float)Math.PI / 180);
     }
 }
 

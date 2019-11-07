@@ -136,8 +136,8 @@ extends AgeableListModel<T> {
     }
 
     @Override
-    public void setupAnim(T fox, float f, float g, float h, float i, float j, float k) {
-        float l;
+    public void setupAnim(T fox, float f, float g, float h, float i, float j) {
+        float k;
         if (!(((Fox)fox).isSleeping() || ((Fox)fox).isFaceplanted() || ((Fox)fox).isCrouching())) {
             this.head.xRot = j * ((float)Math.PI / 180);
             this.head.yRot = i * ((float)Math.PI / 180);
@@ -148,14 +148,14 @@ extends AgeableListModel<T> {
             this.head.zRot = Mth.cos(h * 0.027f) / 22.0f;
         }
         if (((Fox)fox).isCrouching()) {
-            this.body.yRot = l = Mth.cos(h) * 0.01f;
-            this.leg0.zRot = l;
-            this.leg1.zRot = l;
-            this.leg2.zRot = l / 2.0f;
-            this.leg3.zRot = l / 2.0f;
+            this.body.yRot = k = Mth.cos(h) * 0.01f;
+            this.leg0.zRot = k;
+            this.leg1.zRot = k;
+            this.leg2.zRot = k / 2.0f;
+            this.leg3.zRot = k / 2.0f;
         }
         if (((Fox)fox).isFaceplanted()) {
-            l = 0.1f;
+            k = 0.1f;
             this.legMotionPos += 0.67f;
             this.leg0.xRot = Mth.cos(this.legMotionPos * 0.4662f) * 0.1f;
             this.leg1.xRot = Mth.cos(this.legMotionPos * 0.4662f + (float)Math.PI) * 0.1f;

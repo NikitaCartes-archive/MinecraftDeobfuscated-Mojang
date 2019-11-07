@@ -26,7 +26,7 @@ extends BlockEntityRenderer<CampfireBlockEntity> {
     }
 
     @Override
-    public void render(CampfireBlockEntity campfireBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+    public void render(CampfireBlockEntity campfireBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         Direction direction = campfireBlockEntity.getBlockState().getValue(CampfireBlock.FACING);
         NonNullList<ItemStack> nonNullList = campfireBlockEntity.getItems();
         for (int k = 0; k < nonNullList.size(); ++k) {
@@ -35,8 +35,8 @@ extends BlockEntityRenderer<CampfireBlockEntity> {
             poseStack.pushPose();
             poseStack.translate(0.5, 0.44921875, 0.5);
             Direction direction2 = Direction.from2DDataValue((k + direction.get2DDataValue()) % 4);
-            float h = -direction2.toYRot();
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+            float g = -direction2.toYRot();
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(g));
             poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
             poseStack.translate(-0.3125, -0.3125, 0.0);
             poseStack.scale(0.375f, 0.375f, 0.375f);

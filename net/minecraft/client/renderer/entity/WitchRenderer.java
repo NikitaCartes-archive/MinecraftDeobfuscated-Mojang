@@ -25,9 +25,9 @@ extends MobRenderer<Witch, WitchModel<Witch>> {
     }
 
     @Override
-    public void render(Witch witch, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(Witch witch, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         ((WitchModel)this.model).setHoldingItem(!witch.getMainHandItem().isEmpty());
-        super.render(witch, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(witch, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

@@ -64,8 +64,8 @@ extends ArmorStandArmorModel {
     }
 
     @Override
-    public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(armorStand, f, g, h, i, j, k);
+    public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {
+        super.setupAnim(armorStand, f, g, h, i, j);
         this.leftArm.visible = armorStand.isShowArms();
         this.rightArm.visible = armorStand.isShowArms();
         this.basePlate.visible = !armorStand.isNoBasePlate();
@@ -91,11 +91,11 @@ extends ArmorStandArmorModel {
     }
 
     @Override
-    public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
+    public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
         ModelPart modelPart = this.getArm(humanoidArm);
         boolean bl = modelPart.visible;
         modelPart.visible = true;
-        super.translateToHand(f, humanoidArm, poseStack);
+        super.translateToHand(humanoidArm, poseStack);
         modelPart.visible = bl;
     }
 }

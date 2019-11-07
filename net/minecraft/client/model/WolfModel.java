@@ -82,9 +82,9 @@ extends ColorableAgeableListModel<T> {
             this.body.setPos(0.0f, 18.0f, 0.0f);
             this.body.xRot = 0.7853982f;
             this.tail.setPos(-1.0f, 21.0f, 6.0f);
-            this.leg0.setPos(-2.5f, 22.0f, 2.0f);
+            this.leg0.setPos(-2.5f, 22.7f, 2.0f);
             this.leg0.xRot = 4.712389f;
-            this.leg1.setPos(0.5f, 22.0f, 2.0f);
+            this.leg1.setPos(0.5f, 22.7f, 2.0f);
             this.leg1.xRot = 4.712389f;
             this.leg2.xRot = 5.811947f;
             this.leg2.setPos(-2.49f, 17.0f, -4.0f);
@@ -112,7 +112,7 @@ extends ColorableAgeableListModel<T> {
     }
 
     @Override
-    public void setupAnim(T wolf, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T wolf, float f, float g, float h, float i, float j) {
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
         this.tail.xRot = h;

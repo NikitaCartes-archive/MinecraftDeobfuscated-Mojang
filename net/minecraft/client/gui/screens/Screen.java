@@ -177,7 +177,7 @@ implements Widget {
         PoseStack poseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0, 0.0, this.itemRenderer.blitOffset);
-        Matrix4f matrix4f = poseStack.getPose();
+        Matrix4f matrix4f = poseStack.last().pose();
         for (int s = 0; s < list.size(); ++s) {
             String string2 = list.get(s);
             if (string2 != null) {
@@ -348,7 +348,6 @@ implements Widget {
     }
 
     public void renderDirtBackground(int i) {
-        RenderSystem.disableFog();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         this.minecraft.getTextureManager().bind(BACKGROUND_LOCATION);

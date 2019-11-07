@@ -30,17 +30,17 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-        float l = f * 2.0f;
-        if (l > 1.0f) {
-            l = 1.0f;
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        float k = f * 2.0f;
+        if (k > 1.0f) {
+            k = 1.0f;
         }
-        l = 1.0f - l * l * l;
-        this.upperJaw.zRot = (float)Math.PI - l * 0.35f * (float)Math.PI;
-        this.lowerJaw.zRot = (float)Math.PI + l * 0.35f * (float)Math.PI;
+        k = 1.0f - k * k * k;
+        this.upperJaw.zRot = (float)Math.PI - k * 0.35f * (float)Math.PI;
+        this.lowerJaw.zRot = (float)Math.PI + k * 0.35f * (float)Math.PI;
         this.lowerJaw.yRot = (float)Math.PI;
-        float m = (f + Mth.sin(f * 2.7f)) * 0.6f * 12.0f;
-        this.lowerJaw.y = this.upperJaw.y = 24.0f - m;
+        float l = (f + Mth.sin(f * 2.7f)) * 0.6f * 12.0f;
+        this.lowerJaw.y = this.upperJaw.y = 24.0f - l;
         this.base.y = this.upperJaw.y;
     }
 

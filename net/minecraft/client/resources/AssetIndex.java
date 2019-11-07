@@ -28,7 +28,8 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class AssetIndex {
     protected static final Logger LOGGER = LogManager.getLogger();
-    private final Map<String, File> mapping = Maps.newHashMap();
+    private final Map<String, File> rootFiles = Maps.newHashMap();
+    private final Map<ResourceLocation, File> namespacedFiles = Maps.newHashMap();
 
     protected AssetIndex() {
     }
@@ -49,10 +50,13 @@ public class AssetIndex {
                     JsonObject jsonObject3 = (JsonObject)entry.getValue();
                     String string2 = entry.getKey();
                     String[] strings = string2.split("/", 2);
-                    String string3 = strings.length == 1 ? strings[0] : strings[0] + ":" + strings[1];
-                    String string4 = GsonHelper.getAsString(jsonObject3, "hash");
-                    File file4 = new File(file2, string4.substring(0, 2) + "/" + string4);
-                    this.mapping.put(string3, file4);
+                    String string3 = GsonHelper.getAsString(jsonObject3, "hash");
+                    File file4 = new File(file2, string3.substring(0, 2) + "/" + string3);
+                    if (strings.length == 1) {
+                        this.rootFiles.put(strings[0], file4);
+                        continue;
+                    }
+                    this.namespacedFiles.put(new ResourceLocation(strings[0], strings[1]), file4);
                 }
             }
         } catch (JsonParseException jsonParseException) {
@@ -66,16 +70,19 @@ public class AssetIndex {
 
     @Nullable
     public File getFile(ResourceLocation resourceLocation) {
-        return this.getFile(resourceLocation.toString());
+        return this.namespacedFiles.get(resourceLocation);
     }
 
     @Nullable
-    public File getFile(String string) {
-        return this.mapping.get(string);
+    public File getRootFile(String string) {
+        return this.rootFiles.get(string);
     }
 
-    public Collection<String> getFiles(String string3, int i, Predicate<String> predicate) {
-        return this.mapping.keySet().stream().filter(string -> !string.endsWith(".mcmeta")).map(ResourceLocation::new).map(ResourceLocation::getPath).filter(string2 -> string2.startsWith(string3 + "/")).filter(predicate).collect(Collectors.toList());
+    public Collection<ResourceLocation> getFiles(String string, String string2, int i, Predicate<String> predicate) {
+        return this.namespacedFiles.keySet().stream().filter(resourceLocation -> {
+            String string3 = resourceLocation.getPath();
+            return resourceLocation.getNamespace().equals(string2) && !string3.endsWith(".mcmeta") && string3.startsWith(string + "/") && predicate.test(string3);
+        }).collect(Collectors.toList());
     }
 }
 

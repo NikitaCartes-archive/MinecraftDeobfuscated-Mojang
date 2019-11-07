@@ -215,7 +215,9 @@ extends WalkNodeEvaluator {
                 blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
             }
         }
-        blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        if (blockPathTypes == BlockPathTypes.WALKABLE) {
+            blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+        }
         return blockPathTypes;
     }
 }

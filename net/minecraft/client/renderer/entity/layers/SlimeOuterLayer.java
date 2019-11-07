@@ -27,13 +27,13 @@ extends RenderLayer<T, SlimeModel<T>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         if (((Entity)livingEntity).isInvisible()) {
             return;
         }
         ((SlimeModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.prepareMobModel(livingEntity, f, g, h);
-        this.model.setupAnim(livingEntity, f, g, j, k, l, m);
+        this.model.setupAnim(livingEntity, f, g, j, k, l);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(livingEntity)));
         this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), 1.0f, 1.0f, 1.0f);
     }

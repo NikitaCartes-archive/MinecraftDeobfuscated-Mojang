@@ -130,7 +130,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public boolean isFoil(ItemStack itemStack) {
         return true;
     }

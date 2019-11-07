@@ -7,7 +7,7 @@ import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -16,8 +16,8 @@ import net.minecraft.world.damagesource.DamageSource;
 @Environment(value=EnvType.CLIENT)
 public class RemotePlayer
 extends AbstractClientPlayer {
-    public RemotePlayer(MultiPlayerLevel multiPlayerLevel, GameProfile gameProfile) {
-        super(multiPlayerLevel, gameProfile);
+    public RemotePlayer(ClientLevel clientLevel, GameProfile gameProfile) {
+        super(clientLevel, gameProfile);
         this.maxUpStep = 1.0f;
         this.noPhysics = true;
     }

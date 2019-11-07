@@ -105,25 +105,25 @@ extends EntityModel<T> {
             poseStack.pushPose();
             poseStack.scale(0.56666666f, 0.56666666f, 0.56666666f);
             poseStack.translate(0.0, 1.375, 0.125);
-            ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.scale(0.4f, 0.4f, 0.4f);
             poseStack.translate(0.0, 2.25, 0.0);
-            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
         } else {
             poseStack.pushPose();
             poseStack.scale(0.6f, 0.6f, 0.6f);
             poseStack.translate(0.0, 1.0, 0.0);
-            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.head, this.earRight, this.earLeft, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.head, this.earRight, this.earLeft, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
         }
     }
 
     @Override
-    public void setupAnim(T rabbit, float f, float g, float h, float i, float j, float k) {
-        float l = h - (float)((Rabbit)rabbit).tickCount;
+    public void setupAnim(T rabbit, float f, float g, float h, float i, float j) {
+        float k = h - (float)((Rabbit)rabbit).tickCount;
         this.nose.xRot = j * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
         this.earRight.xRot = j * ((float)Math.PI / 180);
@@ -132,7 +132,7 @@ extends EntityModel<T> {
         this.head.yRot = i * ((float)Math.PI / 180);
         this.earRight.yRot = this.nose.yRot - 0.2617994f;
         this.earLeft.yRot = this.nose.yRot + 0.2617994f;
-        this.jumpRotation = Mth.sin(((Rabbit)rabbit).getJumpCompletion(l) * (float)Math.PI);
+        this.jumpRotation = Mth.sin(((Rabbit)rabbit).getJumpCompletion(k) * (float)Math.PI);
         this.haunchLeft.xRot = (this.jumpRotation * 50.0f - 21.0f) * ((float)Math.PI / 180);
         this.haunchRight.xRot = (this.jumpRotation * 50.0f - 21.0f) * ((float)Math.PI / 180);
         this.rearFootLeft.xRot = this.jumpRotation * 50.0f * ((float)Math.PI / 180);

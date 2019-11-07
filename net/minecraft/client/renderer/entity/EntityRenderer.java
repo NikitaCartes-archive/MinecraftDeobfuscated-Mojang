@@ -42,15 +42,15 @@ public abstract class EntityRenderer<T extends Entity> {
         return frustum.isVisible(aABB);
     }
 
-    public Vec3 getRenderOffset(T entity, double d, double e, double f, float g) {
+    public Vec3 getRenderOffset(T entity, float f) {
         return Vec3.ZERO;
     }
 
-    public void render(T entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         if (!this.shouldShowName(entity)) {
             return;
         }
-        this.renderNameTag(entity, ((Entity)entity).getDisplayName().getColoredString(), poseStack, multiBufferSource);
+        this.renderNameTag(entity, ((Entity)entity).getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
     }
 
     protected boolean shouldShowName(T entity) {
@@ -63,14 +63,10 @@ public abstract class EntityRenderer<T extends Entity> {
         return this.entityRenderDispatcher.getFont();
     }
 
-    protected void renderNameTag(T entity, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    protected void renderNameTag(T entity, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         double d = this.entityRenderDispatcher.distanceToSqr((Entity)entity);
         if (d > 4096.0) {
             return;
-        }
-        int i = ((Entity)entity).getLightColor();
-        if (((Entity)entity).isOnFire()) {
-            i = 0xF000F0;
         }
         boolean bl = !((Entity)entity).isDiscrete();
         float f = ((Entity)entity).getBbHeight() + 0.5f;
@@ -80,7 +76,7 @@ public abstract class EntityRenderer<T extends Entity> {
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(this.entityRenderDispatcher.playerRotX));
         poseStack.scale(-0.025f, -0.025f, 0.025f);
-        Matrix4f matrix4f = poseStack.getPose();
+        Matrix4f matrix4f = poseStack.last().pose();
         float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25f);
         int k = (int)(g * 255.0f) << 24;
         Font font = this.getFont();

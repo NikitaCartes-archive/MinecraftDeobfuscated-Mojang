@@ -68,7 +68,7 @@ public class RenderStateShard {
         RenderSystem.defaultBlendFunc();
     }, () -> RenderSystem.disableBlend());
     protected static final AlphaStateShard NO_ALPHA = new AlphaStateShard(0.0f);
-    protected static final AlphaStateShard DEFAULT_ALPHA = new AlphaStateShard(0.1f);
+    protected static final AlphaStateShard DEFAULT_ALPHA = new AlphaStateShard(0.003921569f);
     protected static final AlphaStateShard MIDWAY_ALPHA = new AlphaStateShard(0.5f);
     protected static final ShadeModelStateShard FLAT_SHADE = new ShadeModelStateShard(false);
     protected static final ShadeModelStateShard SMOOTH_SHADE = new ShadeModelStateShard(true);
@@ -119,9 +119,18 @@ public class RenderStateShard {
         RenderSystem.popMatrix();
         RenderSystem.matrixMode(5888);
     });
-    protected static final FogStateShard NO_FOG = new FogStateShard("no_fog", () -> RenderSystem.disableFog(), () -> RenderSystem.enableFog());
-    protected static final FogStateShard FOG = new FogStateShard("fog", () -> {}, () -> {});
-    protected static final FogStateShard BLACK_FOG = new FogStateShard("black_fog", () -> FogRenderer.resetFogColor(true), () -> FogRenderer.resetFogColor(false));
+    protected static final FogStateShard NO_FOG = new FogStateShard("no_fog", () -> {}, () -> {});
+    protected static final FogStateShard FOG = new FogStateShard("fog", () -> {
+        FogRenderer.levelFogColor();
+        RenderSystem.enableFog();
+    }, () -> RenderSystem.disableFog());
+    protected static final FogStateShard BLACK_FOG = new FogStateShard("black_fog", () -> {
+        RenderSystem.fog(2918, 0.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.enableFog();
+    }, () -> {
+        FogRenderer.levelFogColor();
+        RenderSystem.disableFog();
+    });
     protected static final OutputStateShard MAIN_TARGET = new OutputStateShard("main_target", () -> {}, () -> {});
     protected static final OutputStateShard OUTLINE_TARGET = new OutputStateShard("outline_target", () -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false), () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
     protected static final LineStateShard DEFAULT_LINE = new LineStateShard(1.0f);

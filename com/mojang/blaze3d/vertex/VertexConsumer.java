@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -48,15 +49,16 @@ public interface VertexConsumer {
         return this.overlayCoords(i & 0xFFFF, i >> 16 & 0xFFFF);
     }
 
-    default public void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float f, float g, float h, int i, int j) {
-        this.putBulkData(matrix4f, matrix3f, bakedQuad, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, f, g, h, new int[]{i, i, i, i}, j, false);
+    default public void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float f, float g, float h, int i, int j) {
+        this.putBulkData(pose, bakedQuad, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, f, g, h, new int[]{i, i, i, i}, j, false);
     }
 
-    default public void putBulkData(Matrix4f matrix4f, Matrix3f matrix3f, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
+    default public void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float[] fs, float f, float g, float h, int[] is, int i, boolean bl) {
         int[] js = bakedQuad.getVertices();
         Vec3i vec3i = bakedQuad.getDirection().getNormal();
         Vector3f vector3f = new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-        vector3f.transform(matrix3f);
+        Matrix4f matrix4f = pose.pose();
+        vector3f.transform(pose.normal());
         int j = 8;
         int k = js.length / 8;
         try (MemoryStack memoryStack = MemoryStack.stackPush();){
@@ -102,6 +104,12 @@ public interface VertexConsumer {
         Vector4f vector4f = new Vector4f(f, g, h, 1.0f);
         vector4f.transform(matrix4f);
         return this.vertex(vector4f.x(), vector4f.y(), vector4f.z());
+    }
+
+    default public VertexConsumer normal(Matrix3f matrix3f, float f, float g, float h) {
+        Vector3f vector3f = new Vector3f(f, g, h);
+        vector3f.transform(matrix3f);
+        return this.normal(vector3f.x(), vector3f.y(), vector3f.z());
     }
 }
 

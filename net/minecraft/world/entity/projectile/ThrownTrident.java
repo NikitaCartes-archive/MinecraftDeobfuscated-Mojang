@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 public class ThrownTrident
 extends AbstractArrow {
     private static final EntityDataAccessor<Byte> ID_LOYALTY = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Boolean> ID_FOIL = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BOOLEAN);
     private ItemStack tridentItem = new ItemStack(Items.TRIDENT);
     private boolean dealtDamage;
     public int clientSideReturnTridentTickCount;
@@ -44,6 +45,7 @@ extends AbstractArrow {
         super(EntityType.TRIDENT, livingEntity, level);
         this.tridentItem = itemStack.copy();
         this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(itemStack));
+        this.entityData.set(ID_FOIL, itemStack.hasFoil());
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -55,6 +57,7 @@ extends AbstractArrow {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ID_LOYALTY, (byte)0);
+        this.entityData.define(ID_FOIL, false);
     }
 
     @Override
@@ -99,6 +102,11 @@ extends AbstractArrow {
     @Override
     protected ItemStack getPickupItem() {
         return this.tridentItem.copy();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean isFoil() {
+        return this.entityData.get(ID_FOIL);
     }
 
     @Override
@@ -175,10 +183,10 @@ extends AbstractArrow {
     }
 
     @Override
-    protected void checkDespawn() {
+    public void tickDespawn() {
         byte i = this.entityData.get(ID_LOYALTY);
         if (this.pickup != AbstractArrow.Pickup.ALLOWED || i <= 0) {
-            super.checkDespawn();
+            super.tickDespawn();
         }
     }
 

@@ -4,10 +4,11 @@
 package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
@@ -25,12 +26,8 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
         FluidState fluidState;
-        Camera camera = this.minecraft.gameRenderer.getMainCamera();
-        double d = camera.getPosition().x;
-        double e = camera.getPosition().y;
-        double f = camera.getPosition().z;
         BlockPos blockPos = this.minecraft.player.getCommandSenderBlockPosition();
         Level levelReader = this.minecraft.player.level;
         RenderSystem.enableBlend();

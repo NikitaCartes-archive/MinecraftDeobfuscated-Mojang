@@ -78,9 +78,9 @@ HeadedModel {
     }
 
     @Override
-    public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j) {
         boolean bl;
-        float l;
+        float k;
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
         this.arms.y = 3.0f;
@@ -115,8 +115,8 @@ HeadedModel {
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-            l = Mth.sin(this.attackTime * (float)Math.PI);
-            float m = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
+            k = Mth.sin(this.attackTime * (float)Math.PI);
+            float l = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
             this.rightArm.zRot = 0.0f;
             this.leftArm.zRot = 0.0f;
             this.rightArm.yRot = 0.15707964f;
@@ -124,13 +124,13 @@ HeadedModel {
             if (((Mob)abstractIllager).getMainArm() == HumanoidArm.RIGHT) {
                 this.rightArm.xRot = -1.8849558f + Mth.cos(h * 0.09f) * 0.15f;
                 this.leftArm.xRot = -0.0f + Mth.cos(h * 0.19f) * 0.5f;
-                this.rightArm.xRot += l * 2.2f - m * 0.4f;
-                this.leftArm.xRot += l * 1.2f - m * 0.4f;
+                this.rightArm.xRot += k * 2.2f - l * 0.4f;
+                this.leftArm.xRot += k * 1.2f - l * 0.4f;
             } else {
                 this.rightArm.xRot = -0.0f + Mth.cos(h * 0.19f) * 0.5f;
                 this.leftArm.xRot = -1.8849558f + Mth.cos(h * 0.09f) * 0.15f;
-                this.rightArm.xRot += l * 1.2f - m * 0.4f;
-                this.leftArm.xRot += l * 2.2f - m * 0.4f;
+                this.rightArm.xRot += k * 1.2f - l * 0.4f;
+                this.leftArm.xRot += k * 2.2f - l * 0.4f;
             }
             this.rightArm.zRot += Mth.cos(h * 0.09f) * 0.05f + 0.05f;
             this.leftArm.zRot -= Mth.cos(h * 0.09f) * 0.05f + 0.05f;
@@ -162,9 +162,9 @@ HeadedModel {
             this.rightArm.yRot = -0.8f;
             this.rightArm.xRot = -0.97079635f;
             this.leftArm.xRot = -0.97079635f;
-            l = Mth.clamp(this.itemUseTicks, 0.0f, 25.0f);
-            this.leftArm.yRot = Mth.lerp(l / 25.0f, 0.4f, 0.85f);
-            this.leftArm.xRot = Mth.lerp(l / 25.0f, this.leftArm.xRot, -1.5707964f);
+            k = Mth.clamp(this.itemUseTicks, 0.0f, 25.0f);
+            this.leftArm.yRot = Mth.lerp(k / 25.0f, 0.4f, 0.85f);
+            this.leftArm.xRot = Mth.lerp(k / 25.0f, this.leftArm.xRot, -1.5707964f);
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.CELEBRATING) {
             this.rightArm.z = 0.0f;
             this.rightArm.x = -5.0f;
@@ -205,8 +205,8 @@ HeadedModel {
     }
 
     @Override
-    public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
-        this.getArm(humanoidArm).translateAndRotate(poseStack, 0.0625f);
+    public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+        this.getArm(humanoidArm).translateAndRotate(poseStack);
     }
 }
 

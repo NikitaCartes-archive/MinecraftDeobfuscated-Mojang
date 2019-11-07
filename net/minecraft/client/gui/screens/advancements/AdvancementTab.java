@@ -83,7 +83,7 @@ extends GuiComponent {
         RenderSystem.enableDepthTest();
         RenderSystem.translatef(0.0f, 0.0f, 950.0f);
         RenderSystem.colorMask(false, false, false, false);
-        AdvancementTab.fill(468, 226, -234, -113, -16777216);
+        AdvancementTab.fill(4680, 2260, -4680, -2260, -16777216);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.translatef(0.0f, 0.0f, -950.0f);
         RenderSystem.depthFunc(518);
@@ -110,7 +110,7 @@ extends GuiComponent {
         RenderSystem.depthFunc(518);
         RenderSystem.translatef(0.0f, 0.0f, -950.0f);
         RenderSystem.colorMask(false, false, false, false);
-        AdvancementTab.fill(468, 226, -234, -113, -16777216);
+        AdvancementTab.fill(4680, 2260, -4680, -2260, -16777216);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.translatef(0.0f, 0.0f, 950.0f);
         RenderSystem.depthFunc(515);

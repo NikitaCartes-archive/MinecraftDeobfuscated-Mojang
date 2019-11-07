@@ -47,56 +47,58 @@ extends BlockEntityRenderer<ConduitBlockEntity> {
     }
 
     @Override
-    public void render(ConduitBlockEntity conduitBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        float h = (float)conduitBlockEntity.tickCount + g;
+    public void render(ConduitBlockEntity conduitBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+        float g = (float)conduitBlockEntity.tickCount + f;
         if (!conduitBlockEntity.isActive()) {
-            float k = conduitBlockEntity.getActiveRotation(0.0f);
+            float h = conduitBlockEntity.getActiveRotation(0.0f);
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
             poseStack.pushPose();
             poseStack.translate(0.5, 0.5, 0.5);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-            this.shell.render(poseStack, vertexConsumer, 0.0625f, i, j, this.getSprite(SHELL_TEXTURE));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+            this.shell.render(poseStack, vertexConsumer, i, j, this.getSprite(SHELL_TEXTURE));
             poseStack.popPose();
             return;
         }
         VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
-        float l = conduitBlockEntity.getActiveRotation(g) * 57.295776f;
-        float m = Mth.sin(h * 0.1f) / 2.0f + 0.5f;
-        m = m * m + m;
+        float k = conduitBlockEntity.getActiveRotation(f) * 57.295776f;
+        float l = Mth.sin(g * 0.1f) / 2.0f + 0.5f;
+        l = l * l + l;
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.3f + m * 0.2f, 0.5);
+        poseStack.translate(0.5, 0.3f + l * 0.2f, 0.5);
         Vector3f vector3f = new Vector3f(0.5f, 1.0f, 0.5f);
         vector3f.normalize();
-        poseStack.mulPose(new Quaternion(vector3f, l, true));
-        this.cage.render(poseStack, vertexConsumer2, 0.0625f, i, j, this.getSprite(ACTIVE_SHELL_TEXTURE));
+        poseStack.mulPose(new Quaternion(vector3f, k, true));
+        this.cage.render(poseStack, vertexConsumer2, i, j, this.getSprite(ACTIVE_SHELL_TEXTURE));
         poseStack.popPose();
-        int n = conduitBlockEntity.tickCount / 66 % 3;
+        int m = conduitBlockEntity.tickCount / 66 % 3;
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
-        if (n == 1) {
+        if (m == 1) {
             poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0f));
-        } else if (n == 2) {
+        } else if (m == 2) {
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(90.0f));
         }
-        TextureAtlasSprite textureAtlasSprite = this.getSprite(n == 1 ? VERTICAL_WIND_TEXTURE : WIND_TEXTURE);
-        this.wind.render(poseStack, vertexConsumer2, 0.0625f, i, j, textureAtlasSprite);
+        TextureAtlasSprite textureAtlasSprite = this.getSprite(m == 1 ? VERTICAL_WIND_TEXTURE : WIND_TEXTURE);
+        this.wind.render(poseStack, vertexConsumer2, i, j, textureAtlasSprite);
         poseStack.popPose();
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.scale(0.875f, 0.875f, 0.875f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0f));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
-        this.wind.render(poseStack, vertexConsumer2, 0.0625f, i, j, textureAtlasSprite);
+        this.wind.render(poseStack, vertexConsumer2, i, j, textureAtlasSprite);
         poseStack.popPose();
         Camera camera = this.renderer.camera;
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.3f + m * 0.2f, 0.5);
+        poseStack.translate(0.5, 0.3f + l * 0.2f, 0.5);
         poseStack.scale(0.5f, 0.5f, 0.5f);
-        float o = -camera.getYRot();
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
+        float n = -camera.getYRot();
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(n));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
-        this.eye.render(poseStack, vertexConsumer2, 0.083333336f, i, j, this.getSprite(conduitBlockEntity.isHunting() ? OPEN_EYE_TEXTURE : CLOSED_EYE_TEXTURE));
+        float o = 1.3333334f;
+        poseStack.scale(1.3333334f, 1.3333334f, 1.3333334f);
+        this.eye.render(poseStack, vertexConsumer2, i, j, this.getSprite(conduitBlockEntity.isHunting() ? OPEN_EYE_TEXTURE : CLOSED_EYE_TEXTURE));
         poseStack.popPose();
     }
 }

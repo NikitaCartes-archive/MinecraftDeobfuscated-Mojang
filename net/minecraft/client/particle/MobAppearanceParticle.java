@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
@@ -48,32 +50,34 @@ extends Particle {
     }
 
     @Override
-    public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
+    public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
         if (this.displayEntity == null) {
             return;
         }
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        float l = 1.0f / ElderGuardian.ELDER_SIZE_SCALE;
-        float m = ((float)this.age + f) / (float)this.lifetime;
+        float g = 1.0f / ElderGuardian.ELDER_SIZE_SCALE;
+        float h = ((float)this.age + f) / (float)this.lifetime;
         RenderSystem.depthMask(true);
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        float n = 240.0f;
+        float i = 240.0f;
         RenderSystem.glMultiTexCoord2f(33986, 240.0f, 240.0f);
         RenderSystem.pushMatrix();
-        float o = 0.05f + 0.5f * Mth.sin(m * (float)Math.PI);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
+        float j = 0.05f + 0.5f * Mth.sin(h * (float)Math.PI);
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, j);
         RenderSystem.translatef(0.0f, 1.8f, 0.0f);
         RenderSystem.rotatef(180.0f - camera.getYRot(), 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(60.0f - 150.0f * m - camera.getXRot(), 1.0f, 0.0f, 0.0f);
+        RenderSystem.rotatef(60.0f - 150.0f * h - camera.getXRot(), 1.0f, 0.0f, 0.0f);
         RenderSystem.translatef(0.0f, -0.4f, -1.5f);
-        RenderSystem.scalef(l, l, l);
+        RenderSystem.scalef(g, g, g);
         this.displayEntity.yRot = 0.0f;
         this.displayEntity.yHeadRot = 0.0f;
         this.displayEntity.yRotO = 0.0f;
         this.displayEntity.yHeadRotO = 0.0f;
-        entityRenderDispatcher.render(this.displayEntity, f);
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        entityRenderDispatcher.render(this.displayEntity, 0.0, 0.0, 0.0, 0.0f, f, new PoseStack(), bufferSource, 0xF000F0);
+        bufferSource.endBatch();
         RenderSystem.popMatrix();
         RenderSystem.enableDepthTest();
     }

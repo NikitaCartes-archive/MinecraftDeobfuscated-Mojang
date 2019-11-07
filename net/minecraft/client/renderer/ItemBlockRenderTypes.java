@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -244,21 +243,6 @@ public class ItemBlockRenderTypes {
         hashMap.put(Blocks.FROSTED_ICE, renderType3);
         hashMap.put(Blocks.BUBBLE_COLUMN, renderType3);
     });
-    private static final Map<Item, RenderType> TYPE_BY_ITEM = Util.make(Maps.newHashMap(), hashMap -> {
-        RenderType renderType = RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
-        hashMap.put(Items.LEVER, renderType);
-        hashMap.put(Items.OAK_SIGN, renderType);
-        hashMap.put(Items.DARK_OAK_SIGN, renderType);
-        hashMap.put(Items.ACACIA_SIGN, renderType);
-        hashMap.put(Items.BIRCH_SIGN, renderType);
-        hashMap.put(Items.JUNGLE_SIGN, renderType);
-        hashMap.put(Items.SPRUCE_SIGN, renderType);
-        hashMap.put(Items.CAKE, renderType);
-        hashMap.put(Items.CAULDRON, renderType);
-        hashMap.put(Items.BELL, renderType);
-        hashMap.put(Items.BARRIER, renderType);
-        hashMap.put(Items.STRUCTURE_VOID, renderType);
-    });
     private static final Map<Fluid, RenderType> TYPE_BY_FLUID = Util.make(Maps.newHashMap(), hashMap -> {
         RenderType renderType = RenderType.translucent();
         hashMap.put(Fluids.FLOWING_WATER, renderType);
@@ -283,18 +267,11 @@ public class ItemBlockRenderTypes {
         if (renderType == RenderType.translucent()) {
             return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
         }
-        if (renderType == RenderType.cutout() || renderType == RenderType.cutoutMipped()) {
-            return RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
-        }
-        return RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
+        return RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
     }
 
     public static RenderType getRenderType(ItemStack itemStack) {
         Item item = itemStack.getItem();
-        RenderType renderType = TYPE_BY_ITEM.get(item);
-        if (renderType != null) {
-            return renderType;
-        }
         if (item instanceof BlockItem) {
             Block block = ((BlockItem)item).getBlock();
             return ItemBlockRenderTypes.getRenderType(block.defaultBlockState());

@@ -56,17 +56,17 @@ extends EntityModel<E> {
                 poseStack.scale(k, k, k);
             }
             poseStack.translate(0.0, this.yHeadOffset / 16.0f, this.zHeadOffset / 16.0f);
-            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
             poseStack.pushPose();
             k = 1.0f / this.babyBodyScale;
             poseStack.scale(k, k, k);
             poseStack.translate(0.0, this.bodyYOffset / 16.0f, 0.0);
-            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
         } else {
-            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
-            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
         }
     }
 

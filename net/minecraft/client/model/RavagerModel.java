@@ -77,15 +77,15 @@ extends ListModel<Ravager> {
     }
 
     @Override
-    public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j) {
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
         this.body.xRot = 1.5707964f;
-        float l = 0.4f * g;
-        this.leg0.xRot = Mth.cos(f * 0.6662f) * l;
-        this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * l;
-        this.leg2.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * l;
-        this.leg3.xRot = Mth.cos(f * 0.6662f) * l;
+        float k = 0.4f * g;
+        this.leg0.xRot = Mth.cos(f * 0.6662f) * k;
+        this.leg1.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * k;
+        this.leg2.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * k;
+        this.leg3.xRot = Mth.cos(f * 0.6662f) * k;
     }
 
     @Override

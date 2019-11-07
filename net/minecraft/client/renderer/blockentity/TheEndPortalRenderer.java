@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,15 +30,15 @@ extends BlockEntityRenderer<T> {
     }
 
     @Override
-    public void render(T theEndPortalBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+    public void render(T theEndPortalBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         RANDOM.setSeed(31100L);
-        double h = d * d + e * e + f * f;
-        int k = this.getPasses(h);
-        float l = this.getOffset();
-        Matrix4f matrix4f = poseStack.getPose();
-        this.renderCube(theEndPortalBlockEntity, l, 0.15f, matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(1)));
-        for (int m = 1; m < k; ++m) {
-            this.renderCube(theEndPortalBlockEntity, l, 2.0f / (float)(18 - m), matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(m + 1)));
+        double d = ((BlockEntity)theEndPortalBlockEntity).getBlockPos().distSqr(this.renderer.camera.getPosition(), true);
+        int k = this.getPasses(d);
+        float g = this.getOffset();
+        Matrix4f matrix4f = poseStack.last().pose();
+        this.renderCube(theEndPortalBlockEntity, g, 0.15f, matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(1)));
+        for (int l = 1; l < k; ++l) {
+            this.renderCube(theEndPortalBlockEntity, g, 2.0f / (float)(18 - l), matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(l + 1)));
         }
     }
 

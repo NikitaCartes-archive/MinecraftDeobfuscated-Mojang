@@ -94,10 +94,10 @@ HeadedModel {
     }
 
     @Override
-    public void setupAnim(T livingEntity, float f, float g, float h, float i, float j, float k) {
-        float o;
+    public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
         float n;
         float m;
+        float l;
         boolean bl = ((LivingEntity)livingEntity).getFallFlyingTicks() > 4;
         boolean bl2 = ((LivingEntity)livingEntity).isVisuallySwimming();
         this.head.yRot = i * ((float)Math.PI / 180);
@@ -107,21 +107,21 @@ HeadedModel {
         this.rightArm.x = -5.0f;
         this.leftArm.z = 0.0f;
         this.leftArm.x = 5.0f;
-        float l = 1.0f;
+        float k = 1.0f;
         if (bl) {
-            l = (float)((Entity)livingEntity).getDeltaMovement().lengthSqr();
-            l /= 0.2f;
-            l *= l * l;
+            k = (float)((Entity)livingEntity).getDeltaMovement().lengthSqr();
+            k /= 0.2f;
+            k *= k * k;
         }
-        if (l < 1.0f) {
-            l = 1.0f;
+        if (k < 1.0f) {
+            k = 1.0f;
         }
-        this.rightArm.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 2.0f * g * 0.5f / l;
-        this.leftArm.xRot = Mth.cos(f * 0.6662f) * 2.0f * g * 0.5f / l;
+        this.rightArm.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 2.0f * g * 0.5f / k;
+        this.leftArm.xRot = Mth.cos(f * 0.6662f) * 2.0f * g * 0.5f / k;
         this.rightArm.zRot = 0.0f;
         this.leftArm.zRot = 0.0f;
-        this.rightLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g / l;
-        this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g / l;
+        this.rightLeg.xRot = Mth.cos(f * 0.6662f) * 1.4f * g / k;
+        this.leftLeg.xRot = Mth.cos(f * 0.6662f + (float)Math.PI) * 1.4f * g / k;
         this.rightLeg.yRot = 0.0f;
         this.leftLeg.yRot = 0.0f;
         this.rightLeg.zRot = 0.0f;
@@ -180,8 +180,8 @@ HeadedModel {
         if (this.attackTime > 0.0f) {
             HumanoidArm humanoidArm = this.getAttackArm(livingEntity);
             ModelPart modelPart = this.getArm(humanoidArm);
-            m = this.attackTime;
-            this.body.yRot = Mth.sin(Mth.sqrt(m) * ((float)Math.PI * 2)) * 0.2f;
+            l = this.attackTime;
+            this.body.yRot = Mth.sin(Mth.sqrt(l) * ((float)Math.PI * 2)) * 0.2f;
             if (humanoidArm == HumanoidArm.LEFT) {
                 this.body.yRot *= -1.0f;
             }
@@ -192,13 +192,13 @@ HeadedModel {
             this.rightArm.yRot += this.body.yRot;
             this.leftArm.yRot += this.body.yRot;
             this.leftArm.xRot += this.body.yRot;
-            m = 1.0f - this.attackTime;
-            m *= m;
-            m *= m;
-            m = 1.0f - m;
-            n = Mth.sin(m * (float)Math.PI);
-            o = Mth.sin(this.attackTime * (float)Math.PI) * -(this.head.xRot - 0.7f) * 0.75f;
-            modelPart.xRot = (float)((double)modelPart.xRot - ((double)n * 1.2 + (double)o));
+            l = 1.0f - this.attackTime;
+            l *= l;
+            l *= l;
+            l = 1.0f - l;
+            m = Mth.sin(l * (float)Math.PI);
+            n = Mth.sin(this.attackTime * (float)Math.PI) * -(this.head.xRot - 0.7f) * 0.75f;
+            modelPart.xRot = (float)((double)modelPart.xRot - ((double)m * 1.2 + (double)n));
             modelPart.yRot += this.body.yRot * 2.0f;
             modelPart.zRot += Mth.sin(this.attackTime * (float)Math.PI) * -0.4f;
         }
@@ -240,21 +240,21 @@ HeadedModel {
             this.rightArm.xRot = -1.5707964f + this.head.xRot;
             this.leftArm.xRot = -1.5707964f + this.head.xRot;
         }
-        float p = CrossbowItem.getChargeDuration(((LivingEntity)livingEntity).getUseItem());
+        float o = CrossbowItem.getChargeDuration(((LivingEntity)livingEntity).getUseItem());
         if (this.rightArmPose == ArmPose.CROSSBOW_CHARGE) {
             this.rightArm.yRot = -0.8f;
             this.rightArm.xRot = -0.97079635f;
             this.leftArm.xRot = -0.97079635f;
-            float q = Mth.clamp(this.itemUseTicks, 0.0f, p);
-            this.leftArm.yRot = Mth.lerp(q / p, 0.4f, 0.85f);
-            this.leftArm.xRot = Mth.lerp(q / p, this.leftArm.xRot, -1.5707964f);
+            float p = Mth.clamp(this.itemUseTicks, 0.0f, o);
+            this.leftArm.yRot = Mth.lerp(p / o, 0.4f, 0.85f);
+            this.leftArm.xRot = Mth.lerp(p / o, this.leftArm.xRot, -1.5707964f);
         } else if (this.leftArmPose == ArmPose.CROSSBOW_CHARGE) {
             this.leftArm.yRot = 0.8f;
             this.rightArm.xRot = -0.97079635f;
             this.leftArm.xRot = -0.97079635f;
-            float q = Mth.clamp(this.itemUseTicks, 0.0f, p);
-            this.rightArm.yRot = Mth.lerp(q / p, -0.4f, -0.85f);
-            this.rightArm.xRot = Mth.lerp(q / p, this.rightArm.xRot, -1.5707964f);
+            float p = Mth.clamp(this.itemUseTicks, 0.0f, o);
+            this.rightArm.yRot = Mth.lerp(p / o, -0.4f, -0.85f);
+            this.rightArm.xRot = Mth.lerp(p / o, this.rightArm.xRot, -1.5707964f);
         }
         if (this.rightArmPose == ArmPose.CROSSBOW_HOLD && this.attackTime <= 0.0f) {
             this.rightArm.yRot = -0.3f + this.head.yRot;
@@ -268,34 +268,34 @@ HeadedModel {
             this.leftArm.xRot = -1.5707964f + this.head.xRot + 0.1f;
         }
         if (this.swimAmount > 0.0f) {
-            float q = f % 26.0f;
-            float f2 = m = this.attackTime > 0.0f ? 0.0f : this.swimAmount;
-            if (q < 14.0f) {
+            float p = f % 26.0f;
+            float f2 = l = this.attackTime > 0.0f ? 0.0f : this.swimAmount;
+            if (p < 14.0f) {
                 this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 0.0f, this.swimAmount);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 0.0f);
+                this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, 0.0f);
                 this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(q) / this.quadraticArmUpdate(14.0f), this.swimAmount);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI - 1.8707964f * this.quadraticArmUpdate(q) / this.quadraticArmUpdate(14.0f));
-            } else if (q >= 14.0f && q < 22.0f) {
-                n = (q - 14.0f) / 8.0f;
-                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f * n, this.swimAmount);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f * n);
+                this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float)Math.PI);
+                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(p) / this.quadraticArmUpdate(14.0f), this.swimAmount);
+                this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, (float)Math.PI - 1.8707964f * this.quadraticArmUpdate(p) / this.quadraticArmUpdate(14.0f));
+            } else if (p >= 14.0f && p < 22.0f) {
+                m = (p - 14.0f) / 8.0f;
+                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f * m, this.swimAmount);
+                this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, 1.5707964f * m);
                 this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 5.012389f - 1.8707964f * n, this.swimAmount);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963f + 1.8707964f * n);
-            } else if (q >= 22.0f && q < 26.0f) {
-                n = (q - 22.0f) / 4.0f;
-                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f - 1.5707964f * n, this.swimAmount);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f - 1.5707964f * n);
+                this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float)Math.PI);
+                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 5.012389f - 1.8707964f * m, this.swimAmount);
+                this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, 1.2707963f + 1.8707964f * m);
+            } else if (p >= 22.0f && p < 26.0f) {
+                m = (p - 22.0f) / 4.0f;
+                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f - 1.5707964f * m, this.swimAmount);
+                this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, 1.5707964f - 1.5707964f * m);
                 this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
-                this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
+                this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float)Math.PI);
                 this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float)Math.PI, this.swimAmount);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI);
+                this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, (float)Math.PI);
             }
-            n = 0.3f;
-            o = 0.33333334f;
+            m = 0.3f;
+            n = 0.33333334f;
             this.leftLeg.xRot = Mth.lerp(this.swimAmount, this.leftLeg.xRot, 0.3f * Mth.cos(f * 0.33333334f + (float)Math.PI));
             this.rightLeg.xRot = Mth.lerp(this.swimAmount, this.rightLeg.xRot, 0.3f * Mth.cos(f * 0.33333334f));
         }
@@ -336,8 +336,8 @@ HeadedModel {
     }
 
     @Override
-    public void translateToHand(float f, HumanoidArm humanoidArm, PoseStack poseStack) {
-        this.getArm(humanoidArm).translateAndRotate(poseStack, f);
+    public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+        this.getArm(humanoidArm).translateAndRotate(poseStack);
     }
 
     protected ModelPart getArm(HumanoidArm humanoidArm) {

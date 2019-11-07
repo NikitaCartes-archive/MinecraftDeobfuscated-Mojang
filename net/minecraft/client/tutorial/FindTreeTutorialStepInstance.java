@@ -8,7 +8,7 @@ import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.client.tutorial.TutorialStepInstance;
@@ -72,9 +72,9 @@ implements TutorialStepInstance {
     }
 
     @Override
-    public void onLookAt(MultiPlayerLevel multiPlayerLevel, HitResult hitResult) {
+    public void onLookAt(ClientLevel clientLevel, HitResult hitResult) {
         BlockState blockState;
-        if (hitResult.getType() == HitResult.Type.BLOCK && TREE_BLOCKS.contains((blockState = multiPlayerLevel.getBlockState(((BlockHitResult)hitResult).getBlockPos())).getBlock())) {
+        if (hitResult.getType() == HitResult.Type.BLOCK && TREE_BLOCKS.contains((blockState = clientLevel.getBlockState(((BlockHitResult)hitResult).getBlockPos())).getBlock())) {
             this.tutorial.setStep(TutorialSteps.PUNCH_TREE);
         }
     }

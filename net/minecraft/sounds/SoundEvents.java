@@ -474,7 +474,6 @@ public class SoundEvents {
     public static final SoundEvent PARROT_IMITATE_DROWNED = SoundEvents.register("entity.parrot.imitate.drowned");
     public static final SoundEvent PARROT_IMITATE_ELDER_GUARDIAN = SoundEvents.register("entity.parrot.imitate.elder_guardian");
     public static final SoundEvent PARROT_IMITATE_ENDER_DRAGON = SoundEvents.register("entity.parrot.imitate.ender_dragon");
-    public static final SoundEvent PARROT_IMITATE_ENDERMAN = SoundEvents.register("entity.parrot.imitate.enderman");
     public static final SoundEvent PARROT_IMITATE_ENDERMITE = SoundEvents.register("entity.parrot.imitate.endermite");
     public static final SoundEvent PARROT_IMITATE_EVOKER = SoundEvents.register("entity.parrot.imitate.evoker");
     public static final SoundEvent PARROT_IMITATE_GHAST = SoundEvents.register("entity.parrot.imitate.ghast");

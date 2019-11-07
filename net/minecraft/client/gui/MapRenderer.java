@@ -110,7 +110,7 @@ implements AutoCloseable {
             boolean j = false;
             boolean k = false;
             float f = 0.0f;
-            Matrix4f matrix4f = poseStack.getPose();
+            Matrix4f matrix4f = poseStack.last().pose();
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(this.location));
             vertexConsumer.vertex(matrix4f, 0.0f, 128.0f, -0.01f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
             vertexConsumer.vertex(matrix4f, 128.0f, 128.0f, -0.01f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(i).endVertex();
@@ -129,7 +129,7 @@ implements AutoCloseable {
                 float h = (float)(b / 16 + 0) / 16.0f;
                 float m = (float)(b % 16 + 1) / 16.0f;
                 float n = (float)(b / 16 + 1) / 16.0f;
-                Matrix4f matrix4f2 = poseStack.getPose();
+                Matrix4f matrix4f2 = poseStack.last().pose();
                 float o = -0.001f;
                 VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(MAP_ICONS_LOCATION));
                 vertexConsumer2.vertex(matrix4f2, -1.0f, 1.0f, (float)l * -0.001f).color(255, 255, 255, 255).uv(g, h).uv2(i).endVertex();
@@ -148,7 +148,7 @@ implements AutoCloseable {
                     poseStack.translate(0.0f + (float)mapDecoration.getX() / 2.0f + 64.0f - p * q / 2.0f, 0.0f + (float)mapDecoration.getY() / 2.0f + 64.0f + 4.0f, -0.025f);
                     poseStack.scale(q, q, 1.0f);
                     poseStack.translate(0.0, 0.0, -0.1f);
-                    font.drawInBatch(string, 0.0f, 0.0f, -1, false, poseStack.getPose(), multiBufferSource, false, Integer.MIN_VALUE, i);
+                    font.drawInBatch(string, 0.0f, 0.0f, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
                     poseStack.popPose();
                 }
                 ++l;

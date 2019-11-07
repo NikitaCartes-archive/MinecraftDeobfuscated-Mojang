@@ -25,18 +25,18 @@ extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
     }
 
     @Override
-    public void render(TheEndGatewayBlockEntity theEndGatewayBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+    public void render(TheEndGatewayBlockEntity theEndGatewayBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         if (theEndGatewayBlockEntity.isSpawning() || theEndGatewayBlockEntity.isCoolingDown()) {
-            float h = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(g) : theEndGatewayBlockEntity.getCooldownPercent(g);
-            double k = theEndGatewayBlockEntity.isSpawning() ? 256.0 - e : 50.0;
-            h = Mth.sin(h * (float)Math.PI);
-            int l = Mth.floor((double)h * k);
+            float g = theEndGatewayBlockEntity.isSpawning() ? theEndGatewayBlockEntity.getSpawnPercent(f) : theEndGatewayBlockEntity.getCooldownPercent(f);
+            double d = theEndGatewayBlockEntity.isSpawning() ? 256.0 : 50.0;
+            g = Mth.sin(g * (float)Math.PI);
+            int k = Mth.floor((double)g * d);
             float[] fs = theEndGatewayBlockEntity.isSpawning() ? DyeColor.MAGENTA.getTextureDiffuseColors() : DyeColor.PURPLE.getTextureDiffuseColors();
-            long m = theEndGatewayBlockEntity.getLevel().getGameTime();
-            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, m, 0, l, fs, 0.15f, 0.175f);
-            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, g, h, m, 0, -l, fs, 0.15f, 0.175f);
+            long l = theEndGatewayBlockEntity.getLevel().getGameTime();
+            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, g, l, 0, k, fs, 0.15f, 0.175f);
+            BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, g, l, 0, -k, fs, 0.15f, 0.175f);
         }
-        super.render(theEndGatewayBlockEntity, d, e, f, g, poseStack, multiBufferSource, i, j);
+        super.render(theEndGatewayBlockEntity, f, poseStack, multiBufferSource, i, j);
     }
 
     @Override

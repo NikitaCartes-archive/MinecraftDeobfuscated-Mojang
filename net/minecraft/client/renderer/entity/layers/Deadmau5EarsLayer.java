@@ -25,25 +25,25 @@ extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, AbstractClientPlayer abstractClientPlayer, float f, float g, float h, float j, float k, float l) {
         if (!"deadmau5".equals(abstractClientPlayer.getName().getString()) || !abstractClientPlayer.isSkinLoaded() || abstractClientPlayer.isInvisible()) {
             return;
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation()));
-        int n = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0f);
-        for (int o = 0; o < 2; ++o) {
-            float p = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
-            float q = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
+        int m = LivingEntityRenderer.getOverlayCoords(abstractClientPlayer, 0.0f);
+        for (int n = 0; n < 2; ++n) {
+            float o = Mth.lerp(h, abstractClientPlayer.yRotO, abstractClientPlayer.yRot) - Mth.lerp(h, abstractClientPlayer.yBodyRotO, abstractClientPlayer.yBodyRot);
+            float p = Mth.lerp(h, abstractClientPlayer.xRotO, abstractClientPlayer.xRot);
             poseStack.pushPose();
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(p));
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(q));
-            poseStack.translate(0.375f * (float)(o * 2 - 1), 0.0, 0.0);
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(o));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(p));
+            poseStack.translate(0.375f * (float)(n * 2 - 1), 0.0, 0.0);
             poseStack.translate(0.0, -0.375, 0.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(-q));
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(-p));
-            float r = 1.3333334f;
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(-p));
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(-o));
+            float q = 1.3333334f;
             poseStack.scale(1.3333334f, 1.3333334f, 1.3333334f);
-            ((PlayerModel)this.getParentModel()).renderEars(poseStack, vertexConsumer, 0.0625f, i, n);
+            ((PlayerModel)this.getParentModel()).renderEars(poseStack, vertexConsumer, i, m);
             poseStack.popPose();
         }
     }

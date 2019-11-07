@@ -90,9 +90,12 @@ extends Screen {
     public void render(int i, int j, float f) {
         this.renderBackground();
         this.list.render(i, j, f);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(0.0f, 0.0f, 400.0f);
         this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 8, 0xFFFFFF);
         this.drawString(this.font, this.shareText, 50, 30, 0xA0A0A0);
         this.drawString(this.font, this.listText, 50, 70, 0xA0A0A0);
+        RenderSystem.popMatrix();
         this.export.render(i, j, f);
         super.render(i, j, f);
     }

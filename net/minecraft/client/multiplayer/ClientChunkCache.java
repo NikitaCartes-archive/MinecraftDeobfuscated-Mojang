@@ -8,7 +8,7 @@ import java.util.function.BooleanSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -38,12 +38,12 @@ extends ChunkSource {
     private final LevelChunk emptyChunk;
     private final LevelLightEngine lightEngine;
     private volatile Storage storage;
-    private final MultiPlayerLevel level;
+    private final ClientLevel level;
 
-    public ClientChunkCache(MultiPlayerLevel multiPlayerLevel, int i) {
-        this.level = multiPlayerLevel;
-        this.emptyChunk = new EmptyLevelChunk((Level)multiPlayerLevel, new ChunkPos(0, 0));
-        this.lightEngine = new LevelLightEngine(this, true, multiPlayerLevel.getDimension().isHasSkyLight());
+    public ClientChunkCache(ClientLevel clientLevel, int i) {
+        this.level = clientLevel;
+        this.emptyChunk = new EmptyLevelChunk((Level)clientLevel, new ChunkPos(0, 0));
+        this.lightEngine = new LevelLightEngine(this, true, clientLevel.getDimension().isHasSkyLight());
         this.storage = new Storage(ClientChunkCache.calculateStorageRange(i));
     }
 
@@ -90,7 +90,7 @@ extends ChunkSource {
     }
 
     @Nullable
-    public LevelChunk replaceWithPacketData(Level level, int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k) {
+    public LevelChunk replaceWithPacketData(int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k) {
         if (!this.storage.inRange(i, j)) {
             LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", (Object)i, (Object)j);
             return null;
@@ -102,7 +102,7 @@ extends ChunkSource {
                 LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", (Object)i, (Object)j);
                 return null;
             }
-            levelChunk = new LevelChunk(level, new ChunkPos(i, j), chunkBiomeContainer);
+            levelChunk = new LevelChunk(this.level, new ChunkPos(i, j), chunkBiomeContainer);
             levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
             this.storage.replace(l, levelChunk);
         } else {
@@ -115,6 +115,7 @@ extends ChunkSource {
             LevelChunkSection levelChunkSection = levelChunkSections[m];
             levelLightEngine.updateSectionStatus(SectionPos.of(i, m, j), LevelChunkSection.isEmpty(levelChunkSection));
         }
+        this.level.onChunkLoaded(i, j);
         return levelChunk;
     }
 

@@ -50,13 +50,13 @@ extends VillagerModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(entity, f, g, h, i, j, k);
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        super.setupAnim(entity, f, g, h, i, j);
         this.nose.setPos(0.0f, -2.0f, 0.0f);
-        float l = 0.01f * (float)(((Entity)entity).getId() % 10);
-        this.nose.xRot = Mth.sin((float)((Entity)entity).tickCount * l) * 4.5f * ((float)Math.PI / 180);
+        float k = 0.01f * (float)(((Entity)entity).getId() % 10);
+        this.nose.xRot = Mth.sin((float)((Entity)entity).tickCount * k) * 4.5f * ((float)Math.PI / 180);
         this.nose.yRot = 0.0f;
-        this.nose.zRot = Mth.cos((float)((Entity)entity).tickCount * l) * 2.5f * ((float)Math.PI / 180);
+        this.nose.zRot = Mth.cos((float)((Entity)entity).tickCount * k) * 2.5f * ((float)Math.PI / 180);
         if (this.holdingItem) {
             this.nose.setPos(0.0f, 1.0f, -1.5f);
             this.nose.xRot = -0.9f;

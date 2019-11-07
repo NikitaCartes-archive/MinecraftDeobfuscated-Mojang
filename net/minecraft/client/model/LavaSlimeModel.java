@@ -42,7 +42,7 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T slime, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T slime, float f, float g, float h, float i, float j) {
     }
 
     @Override

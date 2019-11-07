@@ -50,8 +50,8 @@ extends ZombieModel<T> {
     }
 
     @Override
-    public void setupAnim(T zombie, float f, float g, float h, float i, float j, float k) {
-        super.setupAnim(zombie, f, g, h, i, j, k);
+    public void setupAnim(T zombie, float f, float g, float h, float i, float j) {
+        super.setupAnim(zombie, f, g, h, i, j);
         if (this.leftArmPose == HumanoidModel.ArmPose.THROW_SPEAR) {
             this.leftArm.xRot = this.leftArm.xRot * 0.5f - (float)Math.PI;
             this.leftArm.yRot = 0.0f;

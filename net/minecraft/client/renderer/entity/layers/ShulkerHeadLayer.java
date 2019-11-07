@@ -28,7 +28,7 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Shulker shulker, float f, float g, float h, float j, float k, float l) {
         poseStack.pushPose();
         poseStack.translate(0.0, 1.0, 0.0);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
@@ -43,7 +43,7 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
         DyeColor dyeColor = shulker.getColor();
         ResourceLocation resourceLocation = dyeColor == null ? ShulkerRenderer.DEFAULT_TEXTURE_LOCATION : ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()];
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation));
-        modelPart.render(poseStack, vertexConsumer, m, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f), null);
+        modelPart.render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f), null);
         poseStack.popPose();
     }
 }

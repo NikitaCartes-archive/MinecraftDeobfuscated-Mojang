@@ -4,6 +4,7 @@
 package com.mojang.math;
 
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,10 +71,21 @@ public class Vector4f {
         return this.z;
     }
 
+    public float w() {
+        return this.w;
+    }
+
     public void mul(Vector3f vector3f) {
         this.x *= vector3f.x();
         this.y *= vector3f.y();
         this.z *= vector3f.z();
+    }
+
+    public void set(float f, float g, float h, float i) {
+        this.x = f;
+        this.y = g;
+        this.z = h;
+        this.w = i;
     }
 
     public float dot(Vector4f vector4f) {
@@ -106,6 +118,15 @@ public class Vector4f {
 
     private static float multiplyRow(int i, Matrix4f matrix4f, float f, float g, float h, float j) {
         return matrix4f.get(i, 0) * f + matrix4f.get(i, 1) * g + matrix4f.get(i, 2) * h + matrix4f.get(i, 3) * j;
+    }
+
+    public void transform(Quaternion quaternion) {
+        Quaternion quaternion2 = new Quaternion(quaternion);
+        quaternion2.mul(new Quaternion(this.x(), this.y(), this.z(), 0.0f));
+        Quaternion quaternion3 = new Quaternion(quaternion);
+        quaternion3.conj();
+        quaternion2.mul(quaternion3);
+        this.set(quaternion2.i(), quaternion2.j(), quaternion2.k(), this.w());
     }
 
     public void perspectiveDivide() {

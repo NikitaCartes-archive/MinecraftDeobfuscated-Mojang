@@ -26,32 +26,32 @@ extends RenderLayer<Sheep, SheepModel<Sheep>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Sheep sheep, float f, float g, float h, float j, float k, float l, float m) {
-        float v;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Sheep sheep, float f, float g, float h, float j, float k, float l) {
         float u;
         float t;
+        float s;
         if (sheep.isSheared() || sheep.isInvisible()) {
             return;
         }
         if (sheep.hasCustomName() && "jeb_".equals(sheep.getName().getContents())) {
-            int n = 25;
-            int o = sheep.tickCount / 25 + sheep.getId();
-            int p = DyeColor.values().length;
-            int q = o % p;
-            int r = (o + 1) % p;
-            float s = ((float)(sheep.tickCount % 25) + h) / 25.0f;
-            float[] fs = Sheep.getColorArray(DyeColor.byId(q));
-            float[] gs = Sheep.getColorArray(DyeColor.byId(r));
-            t = fs[0] * (1.0f - s) + gs[0] * s;
-            u = fs[1] * (1.0f - s) + gs[1] * s;
-            v = fs[2] * (1.0f - s) + gs[2] * s;
+            int m = 25;
+            int n = sheep.tickCount / 25 + sheep.getId();
+            int o = DyeColor.values().length;
+            int p = n % o;
+            int q = (n + 1) % o;
+            float r = ((float)(sheep.tickCount % 25) + h) / 25.0f;
+            float[] fs = Sheep.getColorArray(DyeColor.byId(p));
+            float[] gs = Sheep.getColorArray(DyeColor.byId(q));
+            s = fs[0] * (1.0f - r) + gs[0] * r;
+            t = fs[1] * (1.0f - r) + gs[1] * r;
+            u = fs[2] * (1.0f - r) + gs[2] * r;
         } else {
             float[] hs = Sheep.getColorArray(sheep.getColor());
-            t = hs[0];
-            u = hs[1];
-            v = hs[2];
+            s = hs[0];
+            t = hs[1];
+            u = hs[2];
         }
-        SheepFurLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, m, h, t, u, v);
+        SheepFurLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, h, s, t, u);
     }
 }
 

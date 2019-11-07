@@ -35,26 +35,26 @@ extends BlockEntityRenderer<BellBlockEntity> {
     }
 
     @Override
-    public void render(BellBlockEntity bellBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        float h = (float)bellBlockEntity.ticks + g;
+    public void render(BellBlockEntity bellBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+        float g = (float)bellBlockEntity.ticks + f;
+        float h = 0.0f;
         float k = 0.0f;
-        float l = 0.0f;
         if (bellBlockEntity.shaking) {
-            float m = Mth.sin(h / (float)Math.PI) / (4.0f + h / 3.0f);
+            float l = Mth.sin(g / (float)Math.PI) / (4.0f + g / 3.0f);
             if (bellBlockEntity.clickDirection == Direction.NORTH) {
-                k = -m;
+                h = -l;
             } else if (bellBlockEntity.clickDirection == Direction.SOUTH) {
-                k = m;
+                h = l;
             } else if (bellBlockEntity.clickDirection == Direction.EAST) {
-                l = -m;
+                k = -l;
             } else if (bellBlockEntity.clickDirection == Direction.WEST) {
-                l = m;
+                k = l;
             }
         }
-        this.bellBody.xRot = k;
-        this.bellBody.zRot = l;
+        this.bellBody.xRot = h;
+        this.bellBody.zRot = k;
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-        this.bellBody.render(poseStack, vertexConsumer, 0.0625f, i, j, this.getSprite(BELL_RESOURCE_LOCATION));
+        this.bellBody.render(poseStack, vertexConsumer, i, j, this.getSprite(BELL_RESOURCE_LOCATION));
     }
 }
 

@@ -84,8 +84,9 @@ public enum BannerPattern {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ResourceLocation location() {
-        return new ResourceLocation("entity/banner/" + this.getFilename());
+    public ResourceLocation location(boolean bl) {
+        String string = bl ? "banner" : "shield";
+        return new ResourceLocation("entity/" + string + "/" + this.getFilename());
     }
 
     @Environment(value=EnvType.CLIENT)

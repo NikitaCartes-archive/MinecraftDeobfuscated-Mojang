@@ -4,7 +4,6 @@
 package net.minecraft.server.packs;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.io.File;
@@ -24,15 +23,14 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractResourcePack;
@@ -78,19 +76,19 @@ implements Pack {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
         URI uRI;
         HashSet<ResourceLocation> set = Sets.newHashSet();
         if (generatedDir != null) {
             try {
-                set.addAll(this.getResources(i, "minecraft", generatedDir.resolve(packType.getDirectory()).resolve("minecraft"), string, predicate));
+                VanillaPack.getResources(set, i, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
             } catch (IOException iOException) {
                 // empty catch block
             }
             if (packType == PackType.CLIENT_RESOURCES) {
                 Enumeration<URL> enumeration = null;
                 try {
-                    enumeration = clientObject.getClassLoader().getResources(packType.getDirectory() + "/minecraft");
+                    enumeration = clientObject.getClassLoader().getResources(packType.getDirectory() + "/");
                 } catch (IOException iOException) {
                     // empty catch block
                 }
@@ -98,7 +96,7 @@ implements Pack {
                     try {
                         uRI = ((URL)enumeration.nextElement()).toURI();
                         if (!"file".equals(uRI.getScheme())) continue;
-                        set.addAll(this.getResources(i, "minecraft", Paths.get(uRI), string, predicate));
+                        VanillaPack.getResources(set, i, string, Paths.get(uRI), string2, predicate);
                     } catch (IOException | URISyntaxException uRI2) {}
                 }
             }
@@ -111,15 +109,12 @@ implements Pack {
             }
             uRI = uRL.toURI();
             if ("file".equals(uRI.getScheme())) {
-                URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()) + "minecraft");
-                if (uRL2 == null) {
-                    return set;
-                }
+                URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()));
                 Path path = Paths.get(uRL2.toURI());
-                set.addAll(this.getResources(i, "minecraft", path, string, predicate));
+                VanillaPack.getResources(set, i, string, path, string2, predicate);
             } else if ("jar".equals(uRI.getScheme())) {
-                Path path2 = JAR_FILESYSTEM_BY_TYPE.get((Object)packType).getPath("/" + packType.getDirectory() + "/minecraft", new String[0]);
-                set.addAll(this.getResources(i, "minecraft", path2, string, predicate));
+                Path path2 = JAR_FILESYSTEM_BY_TYPE.get((Object)packType).getPath("/" + packType.getDirectory(), new String[0]);
+                VanillaPack.getResources(set, i, "minecraft", path2, string2, predicate);
             } else {
                 LOGGER.error("Unsupported scheme {} trying to list vanilla resources (NYI?)", (Object)uRI);
             }
@@ -130,15 +125,11 @@ implements Pack {
         return set;
     }
 
-    private Collection<ResourceLocation> getResources(int i, String string, Path path, String string2, Predicate<String> predicate) throws IOException {
-        ArrayList<ResourceLocation> list = Lists.newArrayList();
-        Iterator iterator = Files.walk(path.resolve(string2), i, new FileVisitOption[0]).iterator();
-        while (iterator.hasNext()) {
-            Path path2 = (Path)iterator.next();
-            if (path2.endsWith(".mcmeta") || !Files.isRegularFile(path2, new LinkOption[0]) || !predicate.test(path2.getFileName().toString())) continue;
-            list.add(new ResourceLocation(string, path.relativize(path2).toString().replaceAll("\\\\", "/")));
+    private static void getResources(Collection<ResourceLocation> collection, int i, String string, Path path3, String string2, Predicate<String> predicate) throws IOException {
+        Path path22 = path3.resolve(string);
+        try (Stream<Path> stream = Files.walk(path22.resolve(string2), i, new FileVisitOption[0]);){
+            stream.filter(path -> !path.endsWith(".mcmeta") && Files.isRegularFile(path, new LinkOption[0]) && predicate.test(path.getFileName().toString())).map(path2 -> new ResourceLocation(string, path22.relativize((Path)path2).toString().replaceAll("\\\\", "/"))).forEach(collection::add);
         }
-        return list;
     }
 
     @Nullable

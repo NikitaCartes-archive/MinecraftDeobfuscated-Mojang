@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
@@ -33,12 +34,12 @@ extends DefaultedVertexConsumer {
     private float ny;
     private float nz;
 
-    public BreakingTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f) {
+    public BreakingTextureGenerator(VertexConsumer vertexConsumer, PoseStack.Pose pose) {
         this.delegate = vertexConsumer;
-        this.cameraInversePose = matrix4f.copy();
+        this.cameraInversePose = pose.pose().copy();
         this.cameraInversePose.invert();
-        this.normalPose = new Matrix3f(matrix4f);
-        this.normalPose.transpose();
+        this.normalPose = pose.normal().copy();
+        this.normalPose.invert();
         this.resetState();
     }
 
@@ -60,30 +61,17 @@ extends DefaultedVertexConsumer {
 
     @Override
     public void endVertex() {
-        float g;
-        float f;
         Vector3f vector3f = new Vector3f(this.nx, this.ny, this.nz);
         vector3f.transform(this.normalPose);
         Direction direction = Direction.getNearest(vector3f.x(), vector3f.y(), vector3f.z());
         Vector4f vector4f = new Vector4f(this.x, this.y, this.z, 1.0f);
         vector4f.transform(this.cameraInversePose);
-        switch (direction.getAxis()) {
-            case X: {
-                f = vector4f.z();
-                g = vector4f.y();
-                break;
-            }
-            case Y: {
-                f = vector4f.x();
-                g = vector4f.z();
-                break;
-            }
-            default: {
-                f = vector4f.x();
-                g = vector4f.y();
-            }
-        }
-        this.delegate.vertex(this.x, this.y, this.z).color(this.r, this.g, this.b, this.a).uv(f, -g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
+        vector4f.transform(Vector3f.YP.rotationDegrees(180.0f));
+        vector4f.transform(Vector3f.XP.rotationDegrees(-90.0f));
+        vector4f.transform(direction.getRotation());
+        float f = -vector4f.x();
+        float g = -vector4f.y();
+        this.delegate.vertex(this.x, this.y, this.z).color(this.r, this.g, this.b, this.a).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
         this.resetState();
     }
 

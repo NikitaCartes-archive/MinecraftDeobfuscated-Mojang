@@ -88,6 +88,8 @@ public class ModelBakery {
     public static final ResourceLocation DEFAULT_SHULKER_TEXTURE_LOCATION = new ResourceLocation("entity/shulker/shulker");
     public static final List<ResourceLocation> SHULKER_TEXTURE_LOCATION = ImmutableList.of(new ResourceLocation("entity/shulker/shulker_white"), new ResourceLocation("entity/shulker/shulker_orange"), new ResourceLocation("entity/shulker/shulker_magenta"), new ResourceLocation("entity/shulker/shulker_light_blue"), new ResourceLocation("entity/shulker/shulker_yellow"), new ResourceLocation("entity/shulker/shulker_lime"), new ResourceLocation("entity/shulker/shulker_pink"), new ResourceLocation("entity/shulker/shulker_gray"), new ResourceLocation("entity/shulker/shulker_light_gray"), new ResourceLocation("entity/shulker/shulker_cyan"), new ResourceLocation("entity/shulker/shulker_purple"), new ResourceLocation("entity/shulker/shulker_blue"), new ResourceLocation[]{new ResourceLocation("entity/shulker/shulker_brown"), new ResourceLocation("entity/shulker/shulker_green"), new ResourceLocation("entity/shulker/shulker_red"), new ResourceLocation("entity/shulker/shulker_black")});
     public static final ResourceLocation BANNER_BASE = new ResourceLocation("entity/banner_base");
+    public static final ResourceLocation SHIELD_BASE = new ResourceLocation("entity/shield_base");
+    public static final ResourceLocation NO_PATTERN_SHIELD = new ResourceLocation("entity/shield_base_nopattern");
     public static final ResourceLocation OAK_SIGN_TEXTURE = new ResourceLocation("entity/signs/oak");
     public static final ResourceLocation SPRUCE_SIGN_TEXTURE = new ResourceLocation("entity/signs/spruce");
     public static final ResourceLocation BIRCH_SIGN_TEXTURE = new ResourceLocation("entity/signs/birch");
@@ -124,8 +126,11 @@ public class ModelBakery {
         hashSet.add(DEFAULT_SHULKER_TEXTURE_LOCATION);
         hashSet.addAll(SHULKER_TEXTURE_LOCATION);
         hashSet.add(BANNER_BASE);
+        hashSet.add(SHIELD_BASE);
+        hashSet.add(NO_PATTERN_SHIELD);
         for (BannerPattern bannerPattern : BannerPattern.values()) {
-            hashSet.add(bannerPattern.location());
+            hashSet.add(bannerPattern.location(true));
+            hashSet.add(bannerPattern.location(false));
         }
         hashSet.add(OAK_SIGN_TEXTURE);
         hashSet.add(SPRUCE_SIGN_TEXTURE);

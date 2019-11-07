@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.phys;
 
+import com.mojang.math.Vector3f;
 import java.util.EnumSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,6 +24,10 @@ implements Position {
         this.x = d;
         this.y = e;
         this.z = f;
+    }
+
+    public Vec3(Vector3f vector3f) {
+        this(vector3f.x(), vector3f.y(), vector3f.z());
     }
 
     public Vec3(Vec3i vec3i) {

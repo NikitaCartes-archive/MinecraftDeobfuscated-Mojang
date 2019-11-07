@@ -39,7 +39,7 @@ import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -368,7 +368,7 @@ extends GuiComponent {
             return ((EntityHitResult)hitResult).getEntity() instanceof MenuProvider;
         }
         if (hitResult.getType() == HitResult.Type.BLOCK) {
-            MultiPlayerLevel level = this.minecraft.level;
+            ClientLevel level = this.minecraft.level;
             BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
             return level.getBlockState(blockPos).getMenuProvider(level, blockPos) != null;
         }

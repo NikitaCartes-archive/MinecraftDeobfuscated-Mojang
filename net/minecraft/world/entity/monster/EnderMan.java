@@ -55,7 +55,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -330,8 +329,6 @@ extends Monster {
 
         @Override
         public void tick() {
-            boolean bl;
-            Vec3 vec32;
             Random random = this.enderman.getRandom();
             Level level = this.enderman.level;
             int i = Mth.floor(this.enderman.getX() - 2.0 + random.nextDouble() * 4.0);
@@ -341,8 +338,9 @@ extends Monster {
             BlockState blockState = level.getBlockState(blockPos);
             Block block = blockState.getBlock();
             Vec3 vec3 = new Vec3((double)Mth.floor(this.enderman.getX()) + 0.5, (double)j + 0.5, (double)Mth.floor(this.enderman.getZ()) + 0.5);
-            BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.enderman));
-            boolean bl2 = bl = blockHitResult.getType() != HitResult.Type.MISS && blockHitResult.getBlockPos().equals(blockPos);
+            Vec3 vec32 = new Vec3((double)i + 0.5, (double)j + 0.5, (double)k + 0.5);
+            BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
+            boolean bl = blockHitResult.getBlockPos().equals(blockPos);
             if (block.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
                 this.enderman.setCarriedBlock(blockState);
                 level.removeBlock(blockPos, false);
@@ -395,6 +393,7 @@ extends Monster {
     static class EndermanFreezeWhenLookedAt
     extends Goal {
         private final EnderMan enderman;
+        private LivingEntity target;
 
         public EndermanFreezeWhenLookedAt(EnderMan enderMan) {
             this.enderman = enderMan;
@@ -403,20 +402,25 @@ extends Monster {
 
         @Override
         public boolean canUse() {
-            LivingEntity livingEntity = this.enderman.getTarget();
-            if (!(livingEntity instanceof Player)) {
+            this.target = this.enderman.getTarget();
+            if (!(this.target instanceof Player)) {
                 return false;
             }
-            double d = livingEntity.distanceToSqr(this.enderman);
+            double d = this.target.distanceToSqr(this.enderman);
             if (d > 256.0) {
                 return false;
             }
-            return this.enderman.isLookingAtMe((Player)livingEntity);
+            return this.enderman.isLookingAtMe((Player)this.target);
         }
 
         @Override
         public void start() {
             this.enderman.getNavigation().stop();
+        }
+
+        @Override
+        public void tick() {
+            this.enderman.getLookControl().setLookAt(this.target.getX(), this.target.getEyeY(), this.target.getZ());
         }
     }
 

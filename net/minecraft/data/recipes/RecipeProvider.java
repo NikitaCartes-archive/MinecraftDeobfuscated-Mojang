@@ -106,7 +106,7 @@ implements DataProvider {
     }
 
     /*
-     * Opcode count of 15429 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
+     * Opcode count of 15425 triggered aggressive code reduction.  Override with --aggressivesizethreshold.
      */
     private void buildShapelessRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(Blocks.ACACIA_WOOD, 3).define(Character.valueOf('#'), Blocks.ACACIA_LOG).pattern("##").pattern("##").group("bark").unlocks("has_log", this.has(Blocks.ACACIA_LOG)).save(consumer);
@@ -201,7 +201,7 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.CAMPFIRE).define(Character.valueOf('L'), ItemTags.LOGS).define(Character.valueOf('S'), Items.STICK).define(Character.valueOf('C'), ItemTags.COALS).pattern(" S ").pattern("SCS").pattern("LLL").unlocks("has_stick", this.has(Items.STICK)).unlocks("has_coal", this.has(ItemTags.COALS)).save(consumer);
         ShapedRecipeBuilder.shaped(Items.CARROT_ON_A_STICK).define(Character.valueOf('#'), Items.FISHING_ROD).define(Character.valueOf('X'), Items.CARROT).pattern("# ").pattern(" X").unlocks("has_carrot", this.has(Items.CARROT)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CAULDRON).define(Character.valueOf('#'), Items.IRON_INGOT).pattern("# #").pattern("# #").pattern("###").unlocks("has_water_bucket", this.has(Items.WATER_BUCKET)).save(consumer);
-        ShapedRecipeBuilder.shaped(Blocks.COMPOSTER).define(Character.valueOf('F'), ItemTags.WOODEN_FENCES).define(Character.valueOf('#'), ItemTags.PLANKS).pattern("F F").pattern("F F").pattern("###").unlocks("has_wooden_fences", this.has(ItemTags.WOODEN_FENCES)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.COMPOSTER).define(Character.valueOf('#'), ItemTags.WOODEN_SLABS).pattern("# #").pattern("# #").pattern("###").unlocks("has_wood_slab", this.has(ItemTags.WOODEN_SLABS)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHEST).define(Character.valueOf('#'), ItemTags.PLANKS).pattern("###").pattern("# #").pattern("###").unlocks("has_lots_of_items", new InventoryChangeTrigger.TriggerInstance(MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0])).save(consumer);
         ShapedRecipeBuilder.shaped(Items.CHEST_MINECART).define(Character.valueOf('A'), Blocks.CHEST).define(Character.valueOf('B'), Items.MINECART).pattern("A").pattern("B").unlocks("has_minecart", this.has(Items.MINECART)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.CHISELED_QUARTZ_BLOCK).define(Character.valueOf('#'), Blocks.QUARTZ_SLAB).pattern("#").pattern("#").unlocks("has_chiseled_quartz_block", this.has(Blocks.CHISELED_QUARTZ_BLOCK)).unlocks("has_quartz_block", this.has(Blocks.QUARTZ_BLOCK)).unlocks("has_quartz_pillar", this.has(Blocks.QUARTZ_PILLAR)).save(consumer);

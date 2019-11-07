@@ -43,13 +43,13 @@ extends EntityRenderer<ItemFrame> {
     }
 
     @Override
-    public void render(ItemFrame itemFrame, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        super.render(itemFrame, d, e, f, g, h, poseStack, multiBufferSource);
+    public void render(ItemFrame itemFrame, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        super.render(itemFrame, f, g, poseStack, multiBufferSource, i);
         poseStack.pushPose();
         Direction direction = itemFrame.getDirection();
-        Vec3 vec3 = this.getRenderOffset(itemFrame, d, e, f, h);
+        Vec3 vec3 = this.getRenderOffset(itemFrame, g);
         poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-        double i = 0.46875;
+        double d = 0.46875;
         poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - itemFrame.yRot));
@@ -58,36 +58,35 @@ extends EntityRenderer<ItemFrame> {
         ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
         poseStack.pushPose();
         poseStack.translate(-0.5, -0.5, -0.5);
-        int j = itemFrame.getLightColor();
-        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.getPose(), poseStack.getNormal(), multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS)), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, j, OverlayTexture.NO_OVERLAY);
+        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS)), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         ItemStack itemStack = itemFrame.getItem();
         if (!itemStack.isEmpty()) {
             boolean bl = itemStack.getItem() == Items.FILLED_MAP;
             poseStack.translate(0.0, 0.0, 0.4375);
-            int k = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)k * 360.0f / 8.0f));
+            int j = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0f / 8.0f));
             if (bl) {
                 this.entityRenderDispatcher.textureManager.bind(MapRenderer.MAP_BACKGROUND_LOCATION);
                 poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
-                float l = 0.0078125f;
+                float h = 0.0078125f;
                 poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
                 poseStack.translate(-64.0, -64.0, 0.0);
                 MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, itemFrame.level);
                 poseStack.translate(0.0, 0.0, -1.0);
                 if (mapItemSavedData != null) {
-                    this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true, j);
+                    this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapItemSavedData, true, i);
                 }
             } else {
                 poseStack.scale(0.5f, 0.5f, 0.5f);
-                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, j, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
+                this.itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.FIXED, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
             }
         }
         poseStack.popPose();
     }
 
     @Override
-    public Vec3 getRenderOffset(ItemFrame itemFrame, double d, double e, double f, float g) {
+    public Vec3 getRenderOffset(ItemFrame itemFrame, float f) {
         return new Vec3((float)itemFrame.getDirection().getStepX() * 0.3f, -0.25, (float)itemFrame.getDirection().getStepZ() * 0.3f);
     }
 
@@ -107,8 +106,8 @@ extends EntityRenderer<ItemFrame> {
     }
 
     @Override
-    protected void renderNameTag(ItemFrame itemFrame, String string, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName().getColoredString(), poseStack, multiBufferSource);
+    protected void renderNameTag(ItemFrame itemFrame, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName().getColoredString(), poseStack, multiBufferSource, i);
     }
 }
 

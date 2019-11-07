@@ -26,23 +26,22 @@ extends EntityRenderer<PrimedTnt> {
     }
 
     @Override
-    public void render(PrimedTnt primedTnt, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(PrimedTnt primedTnt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.translate(0.0, 0.5, 0.0);
-        if ((float)primedTnt.getLife() - h + 1.0f < 10.0f) {
-            float i = 1.0f - ((float)primedTnt.getLife() - h + 1.0f) / 10.0f;
-            i = Mth.clamp(i, 0.0f, 1.0f);
-            i *= i;
-            i *= i;
-            float j = 1.0f + i * 0.3f;
+        if ((float)primedTnt.getLife() - g + 1.0f < 10.0f) {
+            float h = 1.0f - ((float)primedTnt.getLife() - g + 1.0f) / 10.0f;
+            h = Mth.clamp(h, 0.0f, 1.0f);
+            h *= h;
+            h *= h;
+            float j = 1.0f + h * 0.3f;
             poseStack.scale(j, j, j);
         }
-        int k = primedTnt.getLightColor();
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0f));
         poseStack.translate(-0.5, -0.5, 0.5);
-        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, k, primedTnt.getLife() / 5 % 2 == 0);
+        TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, primedTnt.getLife() / 5 % 2 == 0);
         poseStack.popPose();
-        super.render(primedTnt, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(primedTnt, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

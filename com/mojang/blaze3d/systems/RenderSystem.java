@@ -266,9 +266,9 @@ public class RenderSystem {
         GlStateManager._fogEnd(f);
     }
 
-    public static void fog(int i, FloatBuffer floatBuffer) {
+    public static void fog(int i, float f, float g, float h, float j) {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager._fog(i, floatBuffer);
+        GlStateManager._fog(i, new float[]{f, g, h, j});
     }
 
     public static void fogi(int i, int j) {
@@ -961,8 +961,8 @@ public class RenderSystem {
         GlStateManager._fogi(i, j);
     }
 
-    private static /* synthetic */ void lambda$fog$16(int i, FloatBuffer floatBuffer) {
-        GlStateManager._fog(i, floatBuffer);
+    private static /* synthetic */ void lambda$fog$16(int i, float f, float g, float h, float j) {
+        GlStateManager._fog(i, new float[]{f, g, h, j});
     }
 
     private static /* synthetic */ void lambda$fogEnd$15(float f) {

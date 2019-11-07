@@ -28,10 +28,10 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l, float m) {
-        float q;
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l) {
         float p;
         float o;
+        float n;
         ItemStack itemStack = horse.getArmor();
         if (!(itemStack.getItem() instanceof HorseArmorItem)) {
             return;
@@ -39,19 +39,19 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
         HorseArmorItem horseArmorItem = (HorseArmorItem)itemStack.getItem();
         ((HorseModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.prepareMobModel(horse, f, g, h);
-        this.model.setupAnim(horse, f, g, j, k, l, m);
+        this.model.setupAnim(horse, f, g, j, k, l);
         if (horseArmorItem instanceof DyeableHorseArmorItem) {
-            int n = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
-            o = (float)(n >> 16 & 0xFF) / 255.0f;
-            p = (float)(n >> 8 & 0xFF) / 255.0f;
-            q = (float)(n & 0xFF) / 255.0f;
+            int m = ((DyeableHorseArmorItem)horseArmorItem).getColor(itemStack);
+            n = (float)(m >> 16 & 0xFF) / 255.0f;
+            o = (float)(m >> 8 & 0xFF) / 255.0f;
+            p = (float)(m & 0xFF) / 255.0f;
         } else {
+            n = 1.0f;
             o = 1.0f;
             p = 1.0f;
-            q = 1.0f;
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(horseArmorItem.getTexture()));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, o, p, q);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, n, o, p);
     }
 }
 

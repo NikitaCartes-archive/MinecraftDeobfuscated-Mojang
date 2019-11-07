@@ -4,6 +4,8 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -101,30 +104,33 @@ implements RecipeUpdateListener {
         int k = this.leftPos;
         int l = this.topPos;
         this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-        InventoryScreen.renderPlayerModel(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
+        InventoryScreen.renderEntityInInventory(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
     }
 
-    public static void renderPlayerModel(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
+    public static void renderEntityInInventory(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
         RenderSystem.pushMatrix();
-        RenderSystem.translatef(i, j, 50.0f);
-        RenderSystem.scalef(-k, k, k);
-        RenderSystem.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
+        RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
+        PoseStack poseStack = new PoseStack();
+        poseStack.translate(-i, j, 50.0);
+        poseStack.scale(k, k, k);
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(-((float)Math.atan(g / 40.0f)) * 20.0f));
         float h = livingEntity.yBodyRot;
         float l = livingEntity.yRot;
         float m = livingEntity.xRot;
         float n = livingEntity.yHeadRotO;
         float o = livingEntity.yHeadRot;
-        RenderSystem.rotatef(-((float)Math.atan(g / 40.0f)) * 20.0f, 1.0f, 0.0f, 0.0f);
         livingEntity.yBodyRot = (float)Math.atan(f / 40.0f) * 20.0f;
         livingEntity.yRot = (float)Math.atan(f / 40.0f) * 40.0f;
         livingEntity.xRot = -((float)Math.atan(g / 40.0f)) * 20.0f;
         livingEntity.yHeadRot = livingEntity.yRot;
         livingEntity.yHeadRotO = livingEntity.yRot;
-        RenderSystem.translatef(0.0f, 0.0f, 0.0f);
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         entityRenderDispatcher.setPlayerRotY(180.0f);
         entityRenderDispatcher.setRenderShadow(false);
-        entityRenderDispatcher.render(livingEntity, 1.0f);
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack, bufferSource, 0xF000F0);
+        bufferSource.endBatch(-i, j, 1000);
         entityRenderDispatcher.setRenderShadow(true);
         livingEntity.yBodyRot = h;
         livingEntity.yRot = l;
@@ -132,7 +138,6 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRotO = n;
         livingEntity.yHeadRot = o;
         RenderSystem.popMatrix();
-        RenderSystem.disableRescaleNormal();
     }
 
     @Override

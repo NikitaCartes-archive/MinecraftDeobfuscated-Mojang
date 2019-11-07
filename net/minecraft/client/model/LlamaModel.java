@@ -71,7 +71,7 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j) {
         boolean bl;
         this.head.xRot = j * ((float)Math.PI / 180);
         this.head.yRot = i * ((float)Math.PI / 180);
@@ -92,21 +92,21 @@ extends EntityModel<T> {
             float l = 0.7f;
             poseStack.scale(0.71428573f, 0.64935064f, 0.7936508f);
             poseStack.translate(0.0, 1.3125, 0.22f);
-            this.head.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
+            this.head.render(poseStack, vertexConsumer, i, j, null, f, g, h);
             poseStack.popPose();
             poseStack.pushPose();
             float m = 1.1f;
             poseStack.scale(0.625f, 0.45454544f, 0.45454544f);
             poseStack.translate(0.0, 2.0625, 0.0);
-            this.body.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h);
+            this.body.render(poseStack, vertexConsumer, i, j, null, f, g, h);
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.scale(0.45454544f, 0.41322312f, 0.45454544f);
             poseStack.translate(0.0, 2.0625, 0.0);
-            ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
             poseStack.popPose();
         } else {
-            ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, 0.0625f, i, j, null, f, g, h));
+            ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
         }
     }
 }

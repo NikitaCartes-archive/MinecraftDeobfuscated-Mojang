@@ -10,6 +10,6 @@ import net.minecraft.world.entity.HumanoidArm;
 
 @Environment(value=EnvType.CLIENT)
 public interface ArmedModel {
-    public void translateToHand(float var1, HumanoidArm var2, PoseStack var3);
+    public void translateToHand(HumanoidArm var1, PoseStack var2);
 }
 

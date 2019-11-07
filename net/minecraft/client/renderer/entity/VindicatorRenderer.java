@@ -25,9 +25,9 @@ extends IllagerRenderer<Vindicator> {
         this.addLayer(new ItemInHandLayer<Vindicator, IllagerModel<Vindicator>>((RenderLayerParent)this){
 
             @Override
-            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Vindicator vindicator, float f, float g, float h, float j, float k, float l, float m) {
+            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Vindicator vindicator, float f, float g, float h, float j, float k, float l) {
                 if (vindicator.isAggressive()) {
-                    super.render(poseStack, multiBufferSource, i, vindicator, f, g, h, j, k, l, m);
+                    super.render(poseStack, multiBufferSource, i, vindicator, f, g, h, j, k, l);
                 }
             }
         });

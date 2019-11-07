@@ -50,11 +50,11 @@ public class ItemInHandRenderer {
         this.itemRenderer = minecraft.getItemRenderer();
     }
 
-    public void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void renderItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         if (itemStack.isEmpty()) {
             return;
         }
-        this.itemRenderer.renderStatic(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, livingEntity.level, livingEntity.getLightColor(), OverlayTexture.NO_OVERLAY);
+        this.itemRenderer.renderStatic(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, livingEntity.level, i, OverlayTexture.NO_OVERLAY);
     }
 
     private float calculateMapTilt(float f) {
@@ -64,7 +64,7 @@ public class ItemInHandRenderer {
         return g;
     }
 
-    private void renderMapHand(PoseStack poseStack, MultiBufferSource multiBufferSource, HumanoidArm humanoidArm) {
+    private void renderMapHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, HumanoidArm humanoidArm) {
         this.minecraft.getTextureManager().bind(this.minecraft.player.getSkinTextureLocation());
         PlayerRenderer playerRenderer = (PlayerRenderer)this.entityRenderDispatcher.getRenderer(this.minecraft.player);
         poseStack.pushPose();
@@ -74,9 +74,9 @@ public class ItemInHandRenderer {
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(f * -41.0f));
         poseStack.translate(f * 0.3f, -1.1f, 0.45f);
         if (humanoidArm == HumanoidArm.RIGHT) {
-            playerRenderer.renderRightHand(poseStack, multiBufferSource, this.minecraft.player);
+            playerRenderer.renderRightHand(poseStack, multiBufferSource, i, this.minecraft.player);
         } else {
-            playerRenderer.renderLeftHand(poseStack, multiBufferSource, this.minecraft.player);
+            playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, this.minecraft.player);
         }
         poseStack.popPose();
     }
@@ -87,7 +87,7 @@ public class ItemInHandRenderer {
         if (!this.minecraft.player.isInvisible()) {
             poseStack.pushPose();
             poseStack.mulPose(Vector3f.ZP.rotationDegrees(h * 10.0f));
-            this.renderPlayerArm(poseStack, multiBufferSource, f, g, humanoidArm);
+            this.renderPlayerArm(poseStack, multiBufferSource, i, f, g, humanoidArm);
             poseStack.popPose();
         }
         poseStack.pushPose();
@@ -115,8 +115,8 @@ public class ItemInHandRenderer {
         if (!this.minecraft.player.isInvisible()) {
             poseStack.pushPose();
             poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
-            this.renderMapHand(poseStack, multiBufferSource, HumanoidArm.RIGHT);
-            this.renderMapHand(poseStack, multiBufferSource, HumanoidArm.LEFT);
+            this.renderMapHand(poseStack, multiBufferSource, i, HumanoidArm.RIGHT);
+            this.renderMapHand(poseStack, multiBufferSource, i, HumanoidArm.LEFT);
             poseStack.popPose();
         }
         float n = Mth.sin(j * (float)Math.PI);
@@ -132,7 +132,7 @@ public class ItemInHandRenderer {
         poseStack.translate(-0.5, -0.5, 0.0);
         poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_BACKGROUND_LOCATION));
-        Matrix4f matrix4f = poseStack.getPose();
+        Matrix4f matrix4f = poseStack.last().pose();
         vertexConsumer.vertex(matrix4f, -7.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
         vertexConsumer.vertex(matrix4f, 135.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(i).endVertex();
         vertexConsumer.vertex(matrix4f, 135.0f, -7.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(i).endVertex();
@@ -143,19 +143,19 @@ public class ItemInHandRenderer {
         }
     }
 
-    private void renderPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, float g, HumanoidArm humanoidArm) {
+    private void renderPlayerArm(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, float f, float g, HumanoidArm humanoidArm) {
         boolean bl = humanoidArm != HumanoidArm.LEFT;
         float h = bl ? 1.0f : -1.0f;
-        float i = Mth.sqrt(g);
-        float j = -0.3f * Mth.sin(i * (float)Math.PI);
-        float k = 0.4f * Mth.sin(i * ((float)Math.PI * 2));
-        float l = -0.4f * Mth.sin(g * (float)Math.PI);
-        poseStack.translate(h * (j + 0.64000005f), k + -0.6f + f * -0.6f, l + -0.71999997f);
+        float j = Mth.sqrt(g);
+        float k = -0.3f * Mth.sin(j * (float)Math.PI);
+        float l = 0.4f * Mth.sin(j * ((float)Math.PI * 2));
+        float m = -0.4f * Mth.sin(g * (float)Math.PI);
+        poseStack.translate(h * (k + 0.64000005f), l + -0.6f + f * -0.6f, m + -0.71999997f);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(h * 45.0f));
-        float m = Mth.sin(g * g * (float)Math.PI);
-        float n = Mth.sin(i * (float)Math.PI);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(h * n * 70.0f));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(h * m * -20.0f));
+        float n = Mth.sin(g * g * (float)Math.PI);
+        float o = Mth.sin(j * (float)Math.PI);
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(h * o * 70.0f));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(h * n * -20.0f));
         LocalPlayer abstractClientPlayer = this.minecraft.player;
         this.minecraft.getTextureManager().bind(abstractClientPlayer.getSkinTextureLocation());
         poseStack.translate(h * -1.0f, 3.6f, 3.5);
@@ -165,9 +165,9 @@ public class ItemInHandRenderer {
         poseStack.translate(h * 5.6f, 0.0, 0.0);
         PlayerRenderer playerRenderer = (PlayerRenderer)this.entityRenderDispatcher.getRenderer(abstractClientPlayer);
         if (bl) {
-            playerRenderer.renderRightHand(poseStack, multiBufferSource, abstractClientPlayer);
+            playerRenderer.renderRightHand(poseStack, multiBufferSource, i, abstractClientPlayer);
         } else {
-            playerRenderer.renderLeftHand(poseStack, multiBufferSource, abstractClientPlayer);
+            playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, abstractClientPlayer);
         }
     }
 
@@ -202,10 +202,9 @@ public class ItemInHandRenderer {
         poseStack.translate((float)i * 0.56f, -0.52f + f * -0.6f, -0.72f);
     }
 
-    public void renderHandsWithItems(float f, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
-        float l;
+    public void renderHandsWithItems(float f, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LocalPlayer localPlayer, int i) {
+        float m;
         ItemStack itemStack;
-        LocalPlayer localPlayer = this.minecraft.player;
         float g = localPlayer.getAttackAnim(f);
         InteractionHand interactionHand = MoreObjects.firstNonNull(localPlayer.swingingArm, InteractionHand.MAIN_HAND);
         float h = Mth.lerp(f, localPlayer.xRotO, localPlayer.xRot);
@@ -233,33 +232,32 @@ public class ItemInHandRenderer {
                 bl2 = !bl;
             }
         }
-        float i = Mth.lerp(f, localPlayer.xBobO, localPlayer.xBob);
-        float j = Mth.lerp(f, localPlayer.yBobO, localPlayer.yBob);
-        poseStack.mulPose(Vector3f.XP.rotationDegrees((localPlayer.getViewXRot(f) - i) * 0.1f));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees((localPlayer.getViewYRot(f) - j) * 0.1f));
+        float j = Mth.lerp(f, localPlayer.xBobO, localPlayer.xBob);
+        float k = Mth.lerp(f, localPlayer.yBobO, localPlayer.yBob);
+        poseStack.mulPose(Vector3f.XP.rotationDegrees((localPlayer.getViewXRot(f) - j) * 0.1f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees((localPlayer.getViewYRot(f) - k) * 0.1f));
         if (bl) {
-            float k = interactionHand == InteractionHand.MAIN_HAND ? g : 0.0f;
-            l = 1.0f - Mth.lerp(f, this.oMainHandHeight, this.mainHandHeight);
-            this.renderArmWithItem(localPlayer, f, h, InteractionHand.MAIN_HAND, k, this.mainHandItem, l, poseStack, bufferSource);
+            float l = interactionHand == InteractionHand.MAIN_HAND ? g : 0.0f;
+            m = 1.0f - Mth.lerp(f, this.oMainHandHeight, this.mainHandHeight);
+            this.renderArmWithItem(localPlayer, f, h, InteractionHand.MAIN_HAND, l, this.mainHandItem, m, poseStack, bufferSource, i);
         }
         if (bl2) {
-            float k = interactionHand == InteractionHand.OFF_HAND ? g : 0.0f;
-            l = 1.0f - Mth.lerp(f, this.oOffHandHeight, this.offHandHeight);
-            this.renderArmWithItem(localPlayer, f, h, InteractionHand.OFF_HAND, k, this.offHandItem, l, poseStack, bufferSource);
+            float l = interactionHand == InteractionHand.OFF_HAND ? g : 0.0f;
+            m = 1.0f - Mth.lerp(f, this.oOffHandHeight, this.offHandHeight);
+            this.renderArmWithItem(localPlayer, f, h, InteractionHand.OFF_HAND, l, this.offHandItem, m, poseStack, bufferSource, i);
         }
         bufferSource.endBatch();
     }
 
-    private void renderArmWithItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    private void renderArmWithItem(AbstractClientPlayer abstractClientPlayer, float f, float g, InteractionHand interactionHand, float h, ItemStack itemStack, float i, PoseStack poseStack, MultiBufferSource multiBufferSource, int j) {
         boolean bl = interactionHand == InteractionHand.MAIN_HAND;
         HumanoidArm humanoidArm = bl ? abstractClientPlayer.getMainArm() : abstractClientPlayer.getMainArm().getOpposite();
         poseStack.pushPose();
         if (itemStack.isEmpty()) {
             if (bl && !abstractClientPlayer.isInvisible()) {
-                this.renderPlayerArm(poseStack, multiBufferSource, i, h, humanoidArm);
+                this.renderPlayerArm(poseStack, multiBufferSource, j, i, h, humanoidArm);
             }
         } else if (itemStack.getItem() == Items.FILLED_MAP) {
-            int j = abstractClientPlayer.getLightColor();
             if (bl && this.offHandItem.isEmpty()) {
                 this.renderTwoHandedMap(poseStack, multiBufferSource, j, g, i, h);
             } else {
@@ -302,7 +300,7 @@ public class ItemInHandRenderer {
                     poseStack.mulPose(Vector3f.YP.rotationDegrees((float)k * 10.0f));
                 }
             }
-            this.renderItem(abstractClientPlayer, itemStack, bl3 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !bl3, poseStack, multiBufferSource);
+            this.renderItem(abstractClientPlayer, itemStack, bl3 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !bl3, poseStack, multiBufferSource, j);
         } else {
             boolean bl2;
             boolean bl3 = bl2 = humanoidArm == HumanoidArm.RIGHT;
@@ -384,7 +382,7 @@ public class ItemInHandRenderer {
                 this.applyItemArmTransform(poseStack, humanoidArm, i);
                 this.applyItemArmAttackTransform(poseStack, humanoidArm, h);
             }
-            this.renderItem(abstractClientPlayer, itemStack, bl2 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !bl2, poseStack, multiBufferSource);
+            this.renderItem(abstractClientPlayer, itemStack, bl2 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND, !bl2, poseStack, multiBufferSource, j);
         }
         poseStack.popPose();
     }

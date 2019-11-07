@@ -5,7 +5,6 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
@@ -49,13 +48,13 @@ extends Biome {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getFoliageColor(BlockPos blockPos) {
+    public int getFoliageColor() {
         return 10387789;
     }
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getGrassColor(BlockPos blockPos) {
+    public int getGrassColor(double d, double e) {
         return 9470285;
     }
 }

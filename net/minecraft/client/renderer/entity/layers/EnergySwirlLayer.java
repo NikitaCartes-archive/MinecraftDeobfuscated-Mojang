@@ -25,16 +25,16 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
         if (!((PowerableMob)entity).isPowered()) {
             return;
         }
-        float n = (float)((Entity)entity).tickCount + h;
+        float m = (float)((Entity)entity).tickCount + h;
         EntityModel<T> entityModel = this.model();
         entityModel.prepareMobModel(entity, f, g, h);
         ((EntityModel)this.getParentModel()).copyPropertiesTo(entityModel);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.energySwirl(this.getTextureLocation(), this.xOffset(n), n * 0.01f));
-        entityModel.setupAnim(entity, f, g, j, k, l, m);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.energySwirl(this.getTextureLocation(), this.xOffset(m), m * 0.01f));
+        entityModel.setupAnim(entity, f, g, j, k, l);
         entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5f, 0.5f, 0.5f);
     }
 

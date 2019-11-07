@@ -4,6 +4,8 @@
 package net.minecraft.client.particle;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -28,32 +30,38 @@ extends Particle {
     }
 
     @Override
-    public void render(VertexConsumer vertexConsumer, Camera camera, float f, float g, float h, float i, float j, float k) {
-        float l = this.getQuadSize(f);
+    public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
+        Quaternion quaternion;
+        Vec3 vec3 = camera.getPosition();
+        float g = (float)(Mth.lerp((double)f, this.xo, this.x) - vec3.x());
+        float h = (float)(Mth.lerp((double)f, this.yo, this.y) - vec3.y());
+        float i = (float)(Mth.lerp((double)f, this.zo, this.z) - vec3.z());
+        if (this.roll == 0.0f) {
+            quaternion = camera.rotation();
+        } else {
+            quaternion = new Quaternion(camera.rotation());
+            float j = Mth.lerp(f, this.oRoll, this.roll);
+            quaternion.mul(Vector3f.ZP.rotation(j));
+        }
+        Vector3f vector3f = new Vector3f(-1.0f, -1.0f, 0.0f);
+        vector3f.transform(quaternion);
+        Vector3f[] vector3fs = new Vector3f[]{new Vector3f(-1.0f, -1.0f, 0.0f), new Vector3f(-1.0f, 1.0f, 0.0f), new Vector3f(1.0f, 1.0f, 0.0f), new Vector3f(1.0f, -1.0f, 0.0f)};
+        float k = this.getQuadSize(f);
+        for (int l = 0; l < 4; ++l) {
+            Vector3f vector3f2 = vector3fs[l];
+            vector3f2.transform(quaternion);
+            vector3f2.mul(k);
+            vector3f2.add(g, h, i);
+        }
         float m = this.getU0();
         float n = this.getU1();
         float o = this.getV0();
         float p = this.getV1();
-        float q = (float)(Mth.lerp((double)f, this.xo, this.x) - xOff);
-        float r = (float)(Mth.lerp((double)f, this.yo, this.y) - yOff);
-        float s = (float)(Mth.lerp((double)f, this.zo, this.z) - zOff);
-        int t = this.getLightColor(f);
-        Vec3[] vec3s = new Vec3[]{new Vec3(-g * l - j * l, -h * l, -i * l - k * l), new Vec3(-g * l + j * l, h * l, -i * l + k * l), new Vec3(g * l + j * l, h * l, i * l + k * l), new Vec3(g * l - j * l, -h * l, i * l - k * l)};
-        if (this.roll != 0.0f) {
-            float u = Mth.lerp(f, this.oRoll, this.roll);
-            float v = Mth.cos(u * 0.5f);
-            float w = (float)((double)Mth.sin(u * 0.5f) * camera.getLookVector().x);
-            float x = (float)((double)Mth.sin(u * 0.5f) * camera.getLookVector().y);
-            float y = (float)((double)Mth.sin(u * 0.5f) * camera.getLookVector().z);
-            Vec3 vec3 = new Vec3(w, x, y);
-            for (int z = 0; z < 4; ++z) {
-                vec3s[z] = vec3.scale(2.0 * vec3s[z].dot(vec3)).add(vec3s[z].scale((double)(v * v) - vec3.dot(vec3))).add(vec3.cross(vec3s[z]).scale(2.0f * v));
-            }
-        }
-        vertexConsumer.vertex((double)q + vec3s[0].x, (double)r + vec3s[0].y, (double)s + vec3s[0].z).uv(n, p).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(t).endVertex();
-        vertexConsumer.vertex((double)q + vec3s[1].x, (double)r + vec3s[1].y, (double)s + vec3s[1].z).uv(n, o).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(t).endVertex();
-        vertexConsumer.vertex((double)q + vec3s[2].x, (double)r + vec3s[2].y, (double)s + vec3s[2].z).uv(m, o).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(t).endVertex();
-        vertexConsumer.vertex((double)q + vec3s[3].x, (double)r + vec3s[3].y, (double)s + vec3s[3].z).uv(m, p).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(t).endVertex();
+        int q = this.getLightColor(f);
+        vertexConsumer.vertex(vector3fs[0].x(), vector3fs[0].y(), vector3fs[0].z()).uv(n, p).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(q).endVertex();
+        vertexConsumer.vertex(vector3fs[1].x(), vector3fs[1].y(), vector3fs[1].z()).uv(n, o).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(q).endVertex();
+        vertexConsumer.vertex(vector3fs[2].x(), vector3fs[2].y(), vector3fs[2].z()).uv(m, o).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(q).endVertex();
+        vertexConsumer.vertex(vector3fs[3].x(), vector3fs[3].y(), vector3fs[3].z()).uv(m, p).color(this.rCol, this.gCol, this.bCol, this.alpha).uv2(q).endVertex();
     }
 
     public float getQuadSize(float f) {

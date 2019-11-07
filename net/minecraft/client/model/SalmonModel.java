@@ -61,14 +61,14 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        float k = 1.0f;
         float l = 1.0f;
-        float m = 1.0f;
         if (!((Entity)entity).isInWater()) {
-            l = 1.3f;
-            m = 1.7f;
+            k = 1.3f;
+            l = 1.7f;
         }
-        this.bodyBack.yRot = -l * 0.25f * Mth.sin(m * 0.6f * h);
+        this.bodyBack.yRot = -k * 0.25f * Mth.sin(l * 0.6f * h);
     }
 }
 

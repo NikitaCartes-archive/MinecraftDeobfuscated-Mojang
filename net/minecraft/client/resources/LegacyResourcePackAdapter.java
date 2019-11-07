@@ -913,7 +913,7 @@ implements Pack {
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, int i, Predicate<String> predicate) {
+    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, int i, Predicate<String> predicate) {
         return Collections.emptyList();
     }
 

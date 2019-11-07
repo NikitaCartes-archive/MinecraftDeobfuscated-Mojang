@@ -14,6 +14,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,7 +97,9 @@ implements AutoCloseable {
         if (bl) {
             this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
         }
-        f = this.renderText(string, f, g, i, false, matrix4f, multiBufferSource, bl2, j, k);
+        Matrix4f matrix4f2 = matrix4f.copy();
+        matrix4f2.translate(new Vector3f(0.0f, 0.0f, 0.001f));
+        f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
         return (int)f + (bl ? 1 : 0);
     }
 

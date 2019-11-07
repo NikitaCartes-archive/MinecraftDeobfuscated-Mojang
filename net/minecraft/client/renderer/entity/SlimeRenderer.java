@@ -26,9 +26,9 @@ extends MobRenderer<Slime, SlimeModel<Slime>> {
     }
 
     @Override
-    public void render(Slime slime, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(Slime slime, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         this.shadowRadius = 0.25f * (float)slime.getSize();
-        super.render(slime, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(slime, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

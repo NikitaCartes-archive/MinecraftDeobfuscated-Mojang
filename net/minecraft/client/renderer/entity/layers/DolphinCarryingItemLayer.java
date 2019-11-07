@@ -25,19 +25,19 @@ extends RenderLayer<Dolphin, DolphinModel<Dolphin>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Dolphin dolphin, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Dolphin dolphin, float f, float g, float h, float j, float k, float l) {
         boolean bl = dolphin.getMainArm() == HumanoidArm.RIGHT;
         poseStack.pushPose();
-        float n = 1.0f;
-        float o = -1.0f;
-        float p = Mth.abs(dolphin.xRot) / 60.0f;
+        float m = 1.0f;
+        float n = -1.0f;
+        float o = Mth.abs(dolphin.xRot) / 60.0f;
         if (dolphin.xRot < 0.0f) {
-            poseStack.translate(0.0, 1.0f - p * 0.5f, -1.0f + p * 0.5f);
+            poseStack.translate(0.0, 1.0f - o * 0.5f, -1.0f + o * 0.5f);
         } else {
-            poseStack.translate(0.0, 1.0f + p * 0.8f, -1.0f + p * 0.2f);
+            poseStack.translate(0.0, 1.0f + o * 0.8f, -1.0f + o * 0.2f);
         }
         ItemStack itemStack = bl ? dolphin.getMainHandItem() : dolphin.getOffhandItem();
-        Minecraft.getInstance().getItemInHandRenderer().renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(dolphin, itemStack, ItemTransforms.TransformType.GROUND, false, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

@@ -20,7 +20,7 @@ extends HumanoidModel<ArmorStand> {
     }
 
     @Override
-    public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {
         this.head.xRot = (float)Math.PI / 180 * armorStand.getHeadPose().getX();
         this.head.yRot = (float)Math.PI / 180 * armorStand.getHeadPose().getY();
         this.head.zRot = (float)Math.PI / 180 * armorStand.getHeadPose().getZ();

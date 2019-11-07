@@ -35,16 +35,16 @@ extends EntityRenderer<T> {
     }
 
     @Override
-    public void render(T entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.scale(this.scale, this.scale, this.scale);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
-        float i = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(i));
+        float h = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(h));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
-        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, ((Entity)entity).getLightColor(), OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
+        this.itemRenderer.renderStatic(((ItemSupplier)entity).getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
         poseStack.popPose();
-        super.render(entity, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(entity, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

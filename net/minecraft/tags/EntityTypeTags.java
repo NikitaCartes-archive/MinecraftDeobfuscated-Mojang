@@ -16,6 +16,7 @@ public class EntityTypeTags {
     public static final Tag<EntityType<?>> SKELETONS;
     public static final Tag<EntityType<?>> RAIDERS;
     public static final Tag<EntityType<?>> BEEHIVE_INHABITORS;
+    public static final Tag<EntityType<?>> ARROWS;
 
     public static void reset(TagCollection<EntityType<?>> tagCollection) {
         source = tagCollection;
@@ -34,6 +35,7 @@ public class EntityTypeTags {
         SKELETONS = EntityTypeTags.bind("skeletons");
         RAIDERS = EntityTypeTags.bind("raiders");
         BEEHIVE_INHABITORS = EntityTypeTags.bind("beehive_inhabitors");
+        ARROWS = EntityTypeTags.bind("arrows");
     }
 
     public static class Wrapper

@@ -27,14 +27,14 @@ extends EntityRenderer<EvokerFangs> {
     }
 
     @Override
-    public void render(EvokerFangs evokerFangs, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        float i = evokerFangs.getAnimationProgress(h);
-        if (i == 0.0f) {
+    public void render(EvokerFangs evokerFangs, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        float h = evokerFangs.getAnimationProgress(g);
+        if (h == 0.0f) {
             return;
         }
         float j = 2.0f;
-        if (i > 0.9f) {
-            j = (float)((double)j * ((1.0 - (double)i) / (double)0.1f));
+        if (h > 0.9f) {
+            j = (float)((double)j * ((1.0 - (double)h) / (double)0.1f));
         }
         poseStack.pushPose();
         poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f - evokerFangs.yRot));
@@ -42,12 +42,11 @@ extends EntityRenderer<EvokerFangs> {
         float k = 0.03125f;
         poseStack.translate(0.0, -0.626f, 0.0);
         poseStack.scale(0.5f, 0.5f, 0.5f);
-        int l = evokerFangs.getLightColor();
-        this.model.setupAnim(evokerFangs, i, 0.0f, 0.0f, evokerFangs.yRot, evokerFangs.xRot, 0.03125f);
+        this.model.setupAnim(evokerFangs, h, 0.0f, 0.0f, evokerFangs.yRot, evokerFangs.xRot);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, l, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
-        super.render(evokerFangs, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(evokerFangs, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

@@ -38,28 +38,28 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
-        int m;
-        float l = h * (float)Math.PI * -0.1f;
-        for (m = 0; m < 4; ++m) {
-            this.upperBodyParts[m].y = -2.0f + Mth.cos(((float)(m * 2) + h) * 0.25f);
-            this.upperBodyParts[m].x = Mth.cos(l) * 9.0f;
-            this.upperBodyParts[m].z = Mth.sin(l) * 9.0f;
-            l += 1.5707964f;
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+        int l;
+        float k = h * (float)Math.PI * -0.1f;
+        for (l = 0; l < 4; ++l) {
+            this.upperBodyParts[l].y = -2.0f + Mth.cos(((float)(l * 2) + h) * 0.25f);
+            this.upperBodyParts[l].x = Mth.cos(k) * 9.0f;
+            this.upperBodyParts[l].z = Mth.sin(k) * 9.0f;
+            k += 1.5707964f;
         }
-        l = 0.7853982f + h * (float)Math.PI * 0.03f;
-        for (m = 4; m < 8; ++m) {
-            this.upperBodyParts[m].y = 2.0f + Mth.cos(((float)(m * 2) + h) * 0.25f);
-            this.upperBodyParts[m].x = Mth.cos(l) * 7.0f;
-            this.upperBodyParts[m].z = Mth.sin(l) * 7.0f;
-            l += 1.5707964f;
+        k = 0.7853982f + h * (float)Math.PI * 0.03f;
+        for (l = 4; l < 8; ++l) {
+            this.upperBodyParts[l].y = 2.0f + Mth.cos(((float)(l * 2) + h) * 0.25f);
+            this.upperBodyParts[l].x = Mth.cos(k) * 7.0f;
+            this.upperBodyParts[l].z = Mth.sin(k) * 7.0f;
+            k += 1.5707964f;
         }
-        l = 0.47123894f + h * (float)Math.PI * -0.05f;
-        for (m = 8; m < 12; ++m) {
-            this.upperBodyParts[m].y = 11.0f + Mth.cos(((float)m * 1.5f + h) * 0.5f);
-            this.upperBodyParts[m].x = Mth.cos(l) * 5.0f;
-            this.upperBodyParts[m].z = Mth.sin(l) * 5.0f;
-            l += 1.5707964f;
+        k = 0.47123894f + h * (float)Math.PI * -0.05f;
+        for (l = 8; l < 12; ++l) {
+            this.upperBodyParts[l].y = 11.0f + Mth.cos(((float)l * 1.5f + h) * 0.5f);
+            this.upperBodyParts[l].x = Mth.cos(k) * 5.0f;
+            this.upperBodyParts[l].z = Mth.sin(k) * 5.0f;
+            k += 1.5707964f;
         }
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);

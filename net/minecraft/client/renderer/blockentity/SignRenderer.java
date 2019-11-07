@@ -3,21 +3,15 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -38,81 +32,55 @@ import net.minecraft.world.level.block.state.BlockState;
 @Environment(value=EnvType.CLIENT)
 public class SignRenderer
 extends BlockEntityRenderer<SignBlockEntity> {
-    private final ModelPart sign = new ModelPart(64, 32, 0, 0);
-    private final ModelPart stick;
+    private final SignModel signModel = new SignModel();
 
     public SignRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
         super(blockEntityRenderDispatcher);
-        this.sign.addBox(-12.0f, -14.0f, -1.0f, 24.0f, 12.0f, 2.0f, 0.0f);
-        this.stick = new ModelPart(64, 32, 0, 14);
-        this.stick.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f, 0.0f);
     }
 
     @Override
-    public void render(SignBlockEntity signBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        float k;
+    public void render(SignBlockEntity signBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+        float h;
         BlockState blockState = signBlockEntity.getBlockState();
         poseStack.pushPose();
-        float h = 0.6666667f;
+        float g = 0.6666667f;
         if (blockState.getBlock() instanceof StandingSignBlock) {
             poseStack.translate(0.5, 0.5, 0.5);
-            k = -((float)(blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0f);
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
-            this.stick.visible = true;
+            h = -((float)(blockState.getValue(StandingSignBlock.ROTATION) * 360) / 16.0f);
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
+            this.signModel.stick.visible = true;
         } else {
             poseStack.translate(0.5, 0.5, 0.5);
-            k = -blockState.getValue(WallSignBlock.FACING).toYRot();
-            poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
+            h = -blockState.getValue(WallSignBlock.FACING).toYRot();
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
             poseStack.translate(0.0, -0.3125, -0.4375);
-            this.stick.visible = false;
+            this.signModel.stick.visible = false;
         }
-        TextureAtlasSprite textureAtlasSprite = this.getSprite(this.getTexture(blockState.getBlock()));
+        TextureAtlasSprite textureAtlasSprite = this.getSprite(SignRenderer.getTexture(blockState.getBlock()));
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-        this.sign.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
-        this.stick.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.signModel.sign.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        this.signModel.stick.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         poseStack.popPose();
         Font font = this.renderer.getFont();
-        float l = 0.010416667f;
+        float k = 0.010416667f;
         poseStack.translate(0.0, 0.3333333432674408, 0.046666666865348816);
         poseStack.scale(0.010416667f, -0.010416667f, 0.010416667f);
-        int m = signBlockEntity.getColor().getTextColor();
-        for (int n = 0; n < 4; ++n) {
-            String string = signBlockEntity.getRenderMessage(n, component -> {
+        int l = signBlockEntity.getColor().getTextColor();
+        for (int m = 0; m < 4; ++m) {
+            String string = signBlockEntity.getRenderMessage(m, component -> {
                 List<Component> list = ComponentRenderUtils.wrapComponents(component, 90, font, false, true);
                 return list.isEmpty() ? "" : list.get(0).getColoredString();
             });
             if (string == null) continue;
-            float o = -font.width(string) / 2;
-            font.drawInBatch(string, o, n * 10 - signBlockEntity.messages.length * 5, m, false, poseStack.getPose(), multiBufferSource, false, 0, i);
-            if (n != signBlockEntity.getSelectedLine() || signBlockEntity.getCursorPos() < 0) continue;
-            int p = font.width(string.substring(0, Math.max(Math.min(signBlockEntity.getCursorPos(), string.length()), 0)));
-            int q = font.isBidirectional() ? -1 : 1;
-            int r = (p - font.width(string) / 2) * q;
-            int s = n * 10 - signBlockEntity.messages.length * 5;
-            if (signBlockEntity.isShowCursor()) {
-                if (signBlockEntity.getCursorPos() < string.length()) {
-                    GuiComponent.fill(r, s - 1, r + 1, s + font.lineHeight, 0xFF000000 | m);
-                } else {
-                    font.drawInBatch("_", r, s, m, false, poseStack.getPose(), multiBufferSource, false, 0, i);
-                }
-            }
-            if (signBlockEntity.getSelectionPos() == signBlockEntity.getCursorPos()) continue;
-            int t = Math.min(signBlockEntity.getCursorPos(), signBlockEntity.getSelectionPos());
-            int u = Math.max(signBlockEntity.getCursorPos(), signBlockEntity.getSelectionPos());
-            int v = (font.width(string.substring(0, t)) - font.width(string) / 2) * q;
-            int w = (font.width(string.substring(0, u)) - font.width(string) / 2) * q;
-            RenderSystem.pushMatrix();
-            RenderSystem.multMatrix(poseStack.getPose());
-            this.renderHighlight(Math.min(v, w), s, Math.max(v, w), s + font.lineHeight);
-            RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-            RenderSystem.popMatrix();
+            float n = -font.width(string) / 2;
+            font.drawInBatch(string, n, m * 10 - signBlockEntity.messages.length * 5, l, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
     }
 
-    private ResourceLocation getTexture(Block block) {
+    public static ResourceLocation getTexture(Block block) {
         if (block == Blocks.OAK_SIGN || block == Blocks.OAK_WALL_SIGN) {
             return ModelBakery.OAK_SIGN_TEXTURE;
         }
@@ -134,22 +102,24 @@ extends BlockEntityRenderer<SignBlockEntity> {
         return ModelBakery.OAK_SIGN_TEXTURE;
     }
 
-    private void renderHighlight(int i, int j, int k, int l) {
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.color4f(0.0f, 0.0f, 1.0f, 1.0f);
-        RenderSystem.disableTexture();
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION);
-        bufferBuilder.vertex(i, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, l, 0.0).endVertex();
-        bufferBuilder.vertex(k, j, 0.0).endVertex();
-        bufferBuilder.vertex(i, j, 0.0).endVertex();
-        bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
-        RenderSystem.disableColorLogicOp();
-        RenderSystem.enableTexture();
+    @Environment(value=EnvType.CLIENT)
+    public static final class SignModel
+    extends Model {
+        public final ModelPart sign = new ModelPart(64, 32, 0, 0);
+        public final ModelPart stick;
+
+        public SignModel() {
+            super(RenderType::entityCutoutNoCull);
+            this.sign.addBox(-12.0f, -14.0f, -1.0f, 24.0f, 12.0f, 2.0f, 0.0f);
+            this.stick = new ModelPart(64, 32, 0, 14);
+            this.stick.addBox(-1.0f, -2.0f, -1.0f, 2.0f, 14.0f, 2.0f, 0.0f);
+        }
+
+        @Override
+        public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+            this.sign.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+            this.stick.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+        }
     }
 }
 

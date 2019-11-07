@@ -30,19 +30,19 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     }
 
     @Override
-    public Vec3 getRenderOffset(Shulker shulker, double d, double e, double f, float g) {
+    public Vec3 getRenderOffset(Shulker shulker, float f) {
         int i = shulker.getClientSideTeleportInterpolation();
         if (i > 0 && shulker.hasValidInterpolationPositions()) {
             BlockPos blockPos = shulker.getAttachPosition();
             BlockPos blockPos2 = shulker.getOldAttachPosition();
-            double h = (double)((float)i - g) / 6.0;
-            h *= h;
-            double j = (double)(blockPos.getX() - blockPos2.getX()) * h;
-            double k = (double)(blockPos.getY() - blockPos2.getY()) * h;
-            double l = (double)(blockPos.getZ() - blockPos2.getZ()) * h;
-            return new Vec3(-j, -k, -l);
+            double d = (double)((float)i - f) / 6.0;
+            d *= d;
+            double e = (double)(blockPos.getX() - blockPos2.getX()) * d;
+            double g = (double)(blockPos.getY() - blockPos2.getY()) * d;
+            double h = (double)(blockPos.getZ() - blockPos2.getZ()) * d;
+            return new Vec3(-e, -g, -h);
         }
-        return super.getRenderOffset(shulker, d, e, f, g);
+        return super.getRenderOffset(shulker, f);
     }
 
     @Override

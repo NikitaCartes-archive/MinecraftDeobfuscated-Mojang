@@ -67,7 +67,6 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,7 +82,6 @@ AutoCloseable {
     public final List<BlockEntity> tickableBlockEntities = Lists.newArrayList();
     protected final List<BlockEntity> pendingBlockEntities = Lists.newArrayList();
     protected final List<BlockEntity> blockEntitiesToUnload = Lists.newArrayList();
-    private final long cloudColor = 0xFFFFFFL;
     private final Thread thread;
     private int skyDarken;
     protected int randValue = new Random().nextInt();
@@ -92,7 +90,6 @@ AutoCloseable {
     protected float rainLevel;
     protected float oThunderLevel;
     protected float thunderLevel;
-    private int skyFlashTime;
     public final Random random = new Random();
     public final Dimension dimension;
     protected final ChunkSource chunkSource;
@@ -362,109 +359,9 @@ AutoCloseable {
     public void addAlwaysVisibleParticle(ParticleOptions particleOptions, boolean bl, double d, double e, double f, double g, double h, double i) {
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public float getSkyDarken(float f) {
-        float g = this.getTimeOfDay(f);
-        float h = 1.0f - (Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.2f);
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        h = 1.0f - h;
-        h = (float)((double)h * (1.0 - (double)(this.getRainLevel(f) * 5.0f) / 16.0));
-        h = (float)((double)h * (1.0 - (double)(this.getThunderLevel(f) * 5.0f) / 16.0));
-        return h * 0.8f + 0.2f;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getSkyColor(BlockPos blockPos, float f) {
-        float p;
-        float o;
-        float g = this.getTimeOfDay(f);
-        float h = Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.5f;
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        Biome biome = this.getBiome(blockPos);
-        float i = biome.getTemperature(blockPos);
-        int j = biome.getSkyColor(i);
-        float k = (float)(j >> 16 & 0xFF) / 255.0f;
-        float l = (float)(j >> 8 & 0xFF) / 255.0f;
-        float m = (float)(j & 0xFF) / 255.0f;
-        k *= h;
-        l *= h;
-        m *= h;
-        float n = this.getRainLevel(f);
-        if (n > 0.0f) {
-            o = (k * 0.3f + l * 0.59f + m * 0.11f) * 0.6f;
-            p = 1.0f - n * 0.75f;
-            k = k * p + o * (1.0f - p);
-            l = l * p + o * (1.0f - p);
-            m = m * p + o * (1.0f - p);
-        }
-        if ((o = this.getThunderLevel(f)) > 0.0f) {
-            p = (k * 0.3f + l * 0.59f + m * 0.11f) * 0.2f;
-            float q = 1.0f - o * 0.75f;
-            k = k * q + p * (1.0f - q);
-            l = l * q + p * (1.0f - q);
-            m = m * q + p * (1.0f - q);
-        }
-        if (this.skyFlashTime > 0) {
-            p = (float)this.skyFlashTime - f;
-            if (p > 1.0f) {
-                p = 1.0f;
-            }
-            k = k * (1.0f - (p *= 0.45f)) + 0.8f * p;
-            l = l * (1.0f - p) + 0.8f * p;
-            m = m * (1.0f - p) + 1.0f * p;
-        }
-        return new Vec3(k, l, m);
-    }
-
     public float getSunAngle(float f) {
         float g = this.getTimeOfDay(f);
         return g * ((float)Math.PI * 2);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getCloudColor(float f) {
-        float n;
-        float m;
-        float g = this.getTimeOfDay(f);
-        float h = Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.5f;
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        float i = 1.0f;
-        float j = 1.0f;
-        float k = 1.0f;
-        float l = this.getRainLevel(f);
-        if (l > 0.0f) {
-            m = (i * 0.3f + j * 0.59f + k * 0.11f) * 0.6f;
-            n = 1.0f - l * 0.95f;
-            i = i * n + m * (1.0f - n);
-            j = j * n + m * (1.0f - n);
-            k = k * n + m * (1.0f - n);
-        }
-        i *= h * 0.9f + 0.1f;
-        j *= h * 0.9f + 0.1f;
-        k *= h * 0.85f + 0.15f;
-        m = this.getThunderLevel(f);
-        if (m > 0.0f) {
-            n = (i * 0.3f + j * 0.59f + k * 0.11f) * 0.2f;
-            float o = 1.0f - m * 0.95f;
-            i = i * o + n * (1.0f - o);
-            j = j * o + n * (1.0f - o);
-            k = k * o + n * (1.0f - o);
-        }
-        return new Vec3(i, j, k);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getFogColor(float f) {
-        float g = this.getTimeOfDay(f);
-        return this.dimension.getFogColor(g, f);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public float getStarBrightness(float f) {
-        float g = this.getTimeOfDay(f);
-        float h = 1.0f - (Mth.cos(g * ((float)Math.PI * 2)) * 2.0f + 0.25f);
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        return h * h * 0.5f;
     }
 
     public boolean addBlockEntity(BlockEntity blockEntity) {
@@ -1087,14 +984,6 @@ AutoCloseable {
         return this.dimension.isHasCeiling() ? 128 : 256;
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public double getHorizonHeight() {
-        if (this.levelData.getGeneratorType() == LevelType.FLAT) {
-            return 0.0;
-        }
-        return 63.0;
-    }
-
     public CrashReportCategory fillReportDetails(CrashReport crashReport) {
         CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level", 1);
         crashReportCategory.setDetail("All players", () -> this.players().size() + " total; " + this.players());
@@ -1146,13 +1035,7 @@ AutoCloseable {
         return this.skyDarken;
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public int getSkyFlashTime() {
-        return this.skyFlashTime;
-    }
-
     public void setSkyFlashTime(int i) {
-        this.skyFlashTime = i;
     }
 
     @Override

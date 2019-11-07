@@ -26,7 +26,7 @@ extends RenderLayer<T, M> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l, float m) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
         ItemStack itemStack2;
         boolean bl = ((LivingEntity)livingEntity).getMainArm() == HumanoidArm.RIGHT;
         ItemStack itemStack = bl ? ((LivingEntity)livingEntity).getOffhandItem() : ((LivingEntity)livingEntity).getMainHandItem();
@@ -36,26 +36,26 @@ extends RenderLayer<T, M> {
         }
         poseStack.pushPose();
         if (((EntityModel)this.getParentModel()).young) {
-            float n = 0.5f;
+            float m = 0.5f;
             poseStack.translate(0.0, 0.75, 0.0);
             poseStack.scale(0.5f, 0.5f, 0.5f);
         }
-        this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource);
-        this.renderArmWithItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, poseStack, multiBufferSource);
+        this.renderArmWithItem((LivingEntity)livingEntity, itemStack2, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, HumanoidArm.RIGHT, poseStack, multiBufferSource, i);
+        this.renderArmWithItem((LivingEntity)livingEntity, itemStack, ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND, HumanoidArm.LEFT, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 
-    private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    private void renderArmWithItem(LivingEntity livingEntity, ItemStack itemStack, ItemTransforms.TransformType transformType, HumanoidArm humanoidArm, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         if (itemStack.isEmpty()) {
             return;
         }
         poseStack.pushPose();
-        ((ArmedModel)this.getParentModel()).translateToHand(0.0625f, humanoidArm, poseStack);
+        ((ArmedModel)this.getParentModel()).translateToHand(humanoidArm, poseStack);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(-90.0f));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         boolean bl = humanoidArm == HumanoidArm.LEFT;
         poseStack.translate((float)(bl ? -1 : 1) / 16.0f, 0.125, -0.625);
-        Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource);
+        Minecraft.getInstance().getItemInHandRenderer().renderItem(livingEntity, itemStack, transformType, bl, poseStack, multiBufferSource, i);
         poseStack.popPose();
     }
 }

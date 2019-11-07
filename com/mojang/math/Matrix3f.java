@@ -55,26 +55,11 @@ public final class Matrix3f {
         this.set(1, 2, 2.0f * (n - p));
     }
 
-    public Matrix3f(Matrix3f matrix3f, boolean bl) {
-        this(matrix3f.values, true);
-    }
-
     public Matrix3f(Matrix4f matrix4f) {
         this();
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 this.values[j + i * 3] = matrix4f.get(j, i);
-            }
-        }
-    }
-
-    public Matrix3f(float[] fs, boolean bl) {
-        this(bl ? new float[9] : Arrays.copyOf(fs, fs.length));
-        if (bl) {
-            for (int i = 0; i < 3; ++i) {
-                for (int j = 0; j < 3; ++j) {
-                    this.values[j + i * 3] = fs[i + j * 3];
-                }
             }
         }
     }
@@ -195,7 +180,8 @@ public final class Matrix3f {
     public Triple<Quaternion, Vector3f, Quaternion> svdDecompose() {
         Quaternion quaternion = Quaternion.ONE.copy();
         Quaternion quaternion2 = Quaternion.ONE.copy();
-        Matrix3f matrix3f = new Matrix3f(this, true);
+        Matrix3f matrix3f = this.copy();
+        matrix3f.transpose();
         matrix3f.mul(this);
         for (int i = 0; i < 5; ++i) {
             quaternion2.mul(Matrix3f.stepJacobi(matrix3f));
@@ -306,6 +292,42 @@ public final class Matrix3f {
         this.values[8] = 1.0f;
     }
 
+    public float adjugateAndDet() {
+        float f = this.det2(1, 2, 1, 2);
+        float g = -this.det2(1, 2, 0, 2);
+        float h = this.det2(1, 2, 0, 1);
+        float i = -this.det2(0, 2, 1, 2);
+        float j = this.det2(0, 2, 0, 2);
+        float k = -this.det2(0, 2, 0, 1);
+        float l = this.det2(0, 1, 1, 2);
+        float m = -this.det2(0, 1, 0, 2);
+        float n = this.det2(0, 1, 0, 1);
+        float o = this.get(0, 0) * f + this.get(0, 1) * g + this.get(0, 2) * h;
+        this.set(0, 0, f);
+        this.set(1, 0, g);
+        this.set(2, 0, h);
+        this.set(0, 1, i);
+        this.set(1, 1, j);
+        this.set(2, 1, k);
+        this.set(0, 2, l);
+        this.set(1, 2, m);
+        this.set(2, 2, n);
+        return o;
+    }
+
+    public boolean invert() {
+        float f = this.adjugateAndDet();
+        if (Math.abs(f) > 1.0E-6f) {
+            this.mul(f);
+            return true;
+        }
+        return false;
+    }
+
+    private float det2(int i, int j, int k, int l) {
+        return this.get(i, k) * this.get(j, l) - this.get(i, l) * this.get(j, k);
+    }
+
     public float get(int i, int j) {
         return this.values[3 * j + i];
     }
@@ -329,6 +351,14 @@ public final class Matrix3f {
 
     public void mul(Quaternion quaternion) {
         this.mul(new Matrix3f(quaternion));
+    }
+
+    public void mul(float f) {
+        int i = 0;
+        while (i < 9) {
+            int n = i++;
+            this.values[n] = this.values[n] * f;
+        }
     }
 
     public Matrix3f copy() {

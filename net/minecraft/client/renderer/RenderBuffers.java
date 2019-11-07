@@ -23,14 +23,22 @@ public class RenderBuffers {
         object2ObjectLinkedOpenHashMap.put(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutout()));
         object2ObjectLinkedOpenHashMap.put(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
         object2ObjectLinkedOpenHashMap.put(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.translucent()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.translucentNoCrumbling(), new BufferBuilder(RenderType.translucentNoCrumbling().bufferSize()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.glint(), new BufferBuilder(RenderType.glint().bufferSize()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.entityGlint(), new BufferBuilder(RenderType.entityGlint().bufferSize()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.waterMask(), new BufferBuilder(RenderType.waterMask().bufferSize()));
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.translucentNoCrumbling());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.glint());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
+        for (int i = 0; i < 10; ++i) {
+            RenderType renderType = RenderType.crumbling(i);
+            RenderBuffers.put(object2ObjectLinkedOpenHashMap, renderType);
+        }
     });
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediateWithBuffers(this.fixedBuffers, new BufferBuilder(256));
-    private final MultiBufferSource.BufferSource effectBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));
+    private final MultiBufferSource.BufferSource crumblingBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));
     private final OutlineBufferSource outlineBufferSource = new OutlineBufferSource(this.bufferSource);
+
+    private static void put(Object2ObjectLinkedOpenHashMap<RenderType, BufferBuilder> object2ObjectLinkedOpenHashMap, RenderType renderType) {
+        object2ObjectLinkedOpenHashMap.put(renderType, new BufferBuilder(renderType.bufferSize()));
+    }
 
     public ChunkBufferBuilderPack fixedBufferPack() {
         return this.fixedBufferPack;
@@ -40,8 +48,8 @@ public class RenderBuffers {
         return this.bufferSource;
     }
 
-    public MultiBufferSource.BufferSource effectBufferSource() {
-        return this.effectBufferSource;
+    public MultiBufferSource.BufferSource crumblingBufferSource() {
+        return this.crumblingBufferSource;
     }
 
     public OutlineBufferSource outlineBufferSource() {

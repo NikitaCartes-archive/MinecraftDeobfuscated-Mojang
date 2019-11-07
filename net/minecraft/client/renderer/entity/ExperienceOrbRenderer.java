@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
@@ -30,18 +31,18 @@ extends EntityRenderer<ExperienceOrb> {
     }
 
     @Override
-    public void render(ExperienceOrb experienceOrb, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public void render(ExperienceOrb experienceOrb, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
-        int i = experienceOrb.getIcon();
-        float j = (float)(i % 4 * 16 + 0) / 64.0f;
-        float k = (float)(i % 4 * 16 + 16) / 64.0f;
-        float l = (float)(i / 4 * 16 + 0) / 64.0f;
-        float m = (float)(i / 4 * 16 + 16) / 64.0f;
+        int j = experienceOrb.getIcon();
+        float h = (float)(j % 4 * 16 + 0) / 64.0f;
+        float k = (float)(j % 4 * 16 + 16) / 64.0f;
+        float l = (float)(j / 4 * 16 + 0) / 64.0f;
+        float m = (float)(j / 4 * 16 + 16) / 64.0f;
         float n = 1.0f;
         float o = 0.5f;
         float p = 0.25f;
         float q = 255.0f;
-        float r = ((float)experienceOrb.tickCount + h) / 2.0f;
+        float r = ((float)experienceOrb.tickCount + g) / 2.0f;
         int s = (int)((Mth.sin(r + 0.0f) + 1.0f) * 0.5f * 255.0f);
         int t = 255;
         int u = (int)((Mth.sin(r + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
@@ -51,19 +52,20 @@ extends EntityRenderer<ExperienceOrb> {
         poseStack.mulPose(Vector3f.XP.rotationDegrees(v));
         float w = 0.3f;
         poseStack.scale(0.3f, 0.3f, 0.3f);
-        int x = experienceOrb.getLightColor();
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(EXPERIENCE_ORB_LOCATION));
-        Matrix4f matrix4f = poseStack.getPose();
-        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, -0.5f, -0.25f, s, 255, u, j, m, x);
-        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, 0.5f, -0.25f, s, 255, u, k, m, x);
-        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, 0.5f, 0.75f, s, 255, u, k, l, x);
-        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, -0.5f, 0.75f, s, 255, u, j, l, x);
+        PoseStack.Pose pose = poseStack.last();
+        Matrix4f matrix4f = pose.pose();
+        Matrix3f matrix3f = pose.normal();
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, matrix3f, -0.5f, -0.25f, s, 255, u, h, m, i);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, matrix3f, 0.5f, -0.25f, s, 255, u, k, m, i);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, matrix3f, 0.5f, 0.75f, s, 255, u, k, l, i);
+        ExperienceOrbRenderer.vertex(vertexConsumer, matrix4f, matrix3f, -0.5f, 0.75f, s, 255, u, h, l, i);
         poseStack.popPose();
-        super.render(experienceOrb, d, e, f, g, h, poseStack, multiBufferSource);
+        super.render(experienceOrb, f, g, poseStack, multiBufferSource, i);
     }
 
-    private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, float f, float g, int i, int j, int k, float h, float l, int m) {
-        vertexConsumer.vertex(matrix4f, f, g, 0.0f).color(i, j, k, 128).uv(h, l).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(0.0f, 1.0f, 0.0f).endVertex();
+    private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f, float g, int i, int j, int k, float h, float l, int m) {
+        vertexConsumer.vertex(matrix4f, f, g, 0.0f).color(i, j, k, 128).uv(h, l).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(m).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
     }
 
     @Override

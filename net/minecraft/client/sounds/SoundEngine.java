@@ -12,6 +12,7 @@ import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.Library;
 import com.mojang.blaze3d.audio.Listener;
 import com.mojang.blaze3d.audio.SoundBuffer;
+import com.mojang.math.Vector3f;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -355,11 +356,11 @@ public class SoundEngine {
             return;
         }
         Vec3 vec3 = camera.getPosition();
-        Vec3 vec32 = camera.getLookVector();
-        Vec3 vec33 = camera.getUpVector();
+        Vector3f vector3f = camera.getLookVector();
+        Vector3f vector3f2 = camera.getUpVector();
         this.executor.execute(() -> {
             this.listener.setListenerPosition(vec3);
-            this.listener.setListenerOrientation(vec32, vec33);
+            this.listener.setListenerOrientation(vector3f, vector3f2);
         });
     }
 

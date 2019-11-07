@@ -57,7 +57,7 @@ implements ReloadableResourceManager {
             this.namespaces.add(string);
             FallbackResourceManager fallbackResourceManager = this.namespacedPacks.get(string);
             if (fallbackResourceManager == null) {
-                fallbackResourceManager = new FallbackResourceManager(this.type);
+                fallbackResourceManager = new FallbackResourceManager(this.type, string);
                 this.namespacedPacks.put(string, fallbackResourceManager);
             }
             fallbackResourceManager.add(pack);

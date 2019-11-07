@@ -6,8 +6,7 @@ package net.minecraft.client.renderer.debug;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +14,6 @@ import java.util.Iterator;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -48,23 +46,13 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
         long m = this.minecraft.level.getGameTime();
-        Camera camera = this.minecraft.gameRenderer.getMainCamera();
-        double d = camera.getPosition().x;
-        double e = camera.getPosition().y;
-        double f = camera.getPosition().z;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.lineWidth(2.0f);
-        RenderSystem.disableTexture();
-        RenderSystem.depthMask(false);
         int i = 200;
         double g = 0.0025;
         HashSet<BlockPos> set = Sets.newHashSet();
         HashMap<BlockPos, Integer> map = Maps.newHashMap();
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
         Iterator<Map.Entry<Long, Map<BlockPos, Integer>>> iterator = this.lastUpdate.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, Map<BlockPos, Integer>> entry = iterator.next();
@@ -84,15 +72,11 @@ implements DebugRenderer.SimpleDebugRenderer {
                 map.put(blockPos, integer);
             }
         }
-        bufferSource.endBatch();
         for (Map.Entry entry : map.entrySet()) {
             BlockPos blockPos2 = (BlockPos)entry.getKey();
             Integer integer2 = (Integer)entry.getValue();
             DebugRenderer.renderFloatingText(String.valueOf(integer2), blockPos2.getX(), blockPos2.getY(), blockPos2.getZ(), -1);
         }
-        RenderSystem.depthMask(true);
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
     }
 }
 

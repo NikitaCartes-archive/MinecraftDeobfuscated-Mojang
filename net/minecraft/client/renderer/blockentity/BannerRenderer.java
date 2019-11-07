@@ -9,6 +9,7 @@ import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -25,13 +26,10 @@ import net.minecraft.world.level.block.WallBannerBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Environment(value=EnvType.CLIENT)
 public class BannerRenderer
 extends BlockEntityRenderer<BannerBlockEntity> {
-    private static final Logger LOGGER = LogManager.getLogger();
     private final ModelPart flag = new ModelPart(64, 64, 0, 0);
     private final ModelPart pole;
     private final ModelPart bar;
@@ -46,28 +44,31 @@ extends BlockEntityRenderer<BannerBlockEntity> {
     }
 
     @Override
-    public void render(BannerBlockEntity bannerBlockEntity, double d, double e, double f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        float k;
+    public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         long l;
-        float h = 0.6666667f;
+        if (bannerBlockEntity.getPatterns() == null) {
+            return;
+        }
+        float g = 0.6666667f;
         boolean bl = bannerBlockEntity.getLevel() == null;
         poseStack.pushPose();
         if (bl) {
             l = 0L;
-            poseStack.translate(0.5, 0.5, f + 0.5);
+            poseStack.translate(0.5, 0.5, 0.5);
             this.pole.visible = !bannerBlockEntity.onlyRenderPattern();
         } else {
+            float h;
             l = bannerBlockEntity.getLevel().getGameTime();
             BlockState blockState = bannerBlockEntity.getBlockState();
             if (blockState.getBlock() instanceof BannerBlock) {
                 poseStack.translate(0.5, 0.5, 0.5);
-                k = (float)(-blockState.getValue(BannerBlock.ROTATION).intValue() * 360) / 16.0f;
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
+                h = (float)(-blockState.getValue(BannerBlock.ROTATION).intValue() * 360) / 16.0f;
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
                 this.pole.visible = true;
             } else {
                 poseStack.translate(0.5, -0.1666666716337204, 0.5);
-                k = -blockState.getValue(WallBannerBlock.FACING).toYRot();
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(k));
+                h = -blockState.getValue(WallBannerBlock.FACING).toYRot();
+                poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
                 poseStack.translate(0.0, -0.3125, -0.4375);
                 this.pole.visible = false;
             }
@@ -75,36 +76,34 @@ extends BlockEntityRenderer<BannerBlockEntity> {
         TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        k = 0.0625f;
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-        this.pole.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
-        this.bar.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.pole.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        this.bar.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         if (bannerBlockEntity.onlyRenderPattern()) {
             this.flag.xRot = 0.0f;
         } else {
             BlockPos blockPos = bannerBlockEntity.getBlockPos();
-            float m = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + g;
-            this.flag.xRot = (-0.0125f + 0.01f * Mth.cos(m * (float)Math.PI * 0.02f)) * (float)Math.PI;
+            float k = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + f;
+            this.flag.xRot = (-0.0125f + 0.01f * Mth.cos(k * (float)Math.PI * 0.02f)) * (float)Math.PI;
         }
         this.flag.y = -32.0f;
-        this.flag.render(poseStack, vertexConsumer, 0.0625f, i, j, textureAtlasSprite);
+        this.flag.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        BannerRenderer.renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, true);
+        poseStack.popPose();
+        poseStack.popPose();
+    }
+
+    public static void renderPatterns(BannerBlockEntity bannerBlockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, boolean bl) {
         List<BannerPattern> list = bannerBlockEntity.getPatterns();
         List<DyeColor> list2 = bannerBlockEntity.getColors();
-        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
-        if (list == null) {
-            LOGGER.error("patterns are null");
-        } else if (list2 == null) {
-            LOGGER.error("colors are null");
-        } else {
-            for (int n = 0; n < 17 && n < list.size() && n < list2.size(); ++n) {
-                BannerPattern bannerPattern = list.get(n);
-                DyeColor dyeColor = list2.get(n);
-                float[] fs = dyeColor.getTextureDiffuseColors();
-                this.flag.render(poseStack, vertexConsumer2, 0.0625f, i, j, this.getSprite(bannerPattern.location()), fs[0], fs[1], fs[2]);
-            }
+        TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
+        for (int k = 0; k < 17 && k < list.size() && k < list2.size(); ++k) {
+            BannerPattern bannerPattern = list.get(k);
+            DyeColor dyeColor = list2.get(k);
+            float[] fs = dyeColor.getTextureDiffuseColors();
+            modelPart.render(poseStack, vertexConsumer, i, j, textureAtlas.getSprite(bannerPattern.location(bl)), fs[0], fs[1], fs[2]);
         }
-        poseStack.popPose();
-        poseStack.popPose();
     }
 }
 

@@ -9,8 +9,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -97,7 +97,7 @@ public class MultiPlayerGameMode {
         if (this.minecraft.player.blockActionRestricted(this.minecraft.level, blockPos, this.localPlayerMode)) {
             return false;
         }
-        MultiPlayerLevel level = this.minecraft.level;
+        ClientLevel level = this.minecraft.level;
         BlockState blockState = level.getBlockState(blockPos);
         if (!this.minecraft.player.getMainHandItem().getItem().canAttackBlock(blockState, level, blockPos, this.minecraft.player)) {
             return false;
@@ -245,7 +245,7 @@ public class MultiPlayerGameMode {
         }
     }
 
-    public InteractionResult useItemOn(LocalPlayer localPlayer, MultiPlayerLevel multiPlayerLevel, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+    public InteractionResult useItemOn(LocalPlayer localPlayer, ClientLevel clientLevel, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         InteractionResult interactionResult;
         boolean bl2;
         this.ensureHasSentCarriedItem();
@@ -260,7 +260,7 @@ public class MultiPlayerGameMode {
         }
         boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
         boolean bl3 = bl2 = localPlayer.isSecondaryUseActive() && bl;
-        if (!bl2 && (interactionResult = multiPlayerLevel.getBlockState(blockPos).use(multiPlayerLevel, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
+        if (!bl2 && (interactionResult = clientLevel.getBlockState(blockPos).use(clientLevel, localPlayer, interactionHand, blockHitResult)).consumesAction()) {
             this.connection.send(new ServerboundUseItemOnPacket(interactionHand, blockHitResult));
             return interactionResult;
         }
@@ -298,8 +298,8 @@ public class MultiPlayerGameMode {
         return interactionResultHolder.getResult();
     }
 
-    public LocalPlayer createPlayer(MultiPlayerLevel multiPlayerLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
-        return new LocalPlayer(this.minecraft, multiPlayerLevel, this.connection, statsCounter, clientRecipeBook);
+    public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
+        return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook);
     }
 
     public void attack(Player player, Entity entity) {
@@ -405,10 +405,10 @@ public class MultiPlayerGameMode {
         this.connection.send(new ServerboundPlayerActionPacket(action, blockPos, direction));
     }
 
-    public void handleBlockBreakAck(MultiPlayerLevel multiPlayerLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
+    public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
         PosAndRot posAndRot = this.unAckedActions.remove(Pair.of(blockPos, action));
-        if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && multiPlayerLevel.getBlockState(blockPos) != blockState) {
-            multiPlayerLevel.setKnownState(blockPos, blockState);
+        if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && clientLevel.getBlockState(blockPos) != blockState) {
+            clientLevel.setKnownState(blockPos, blockState);
             if (posAndRot != null) {
                 Vec3 vec3 = posAndRot.pos();
                 this.minecraft.player.absMoveTo(vec3.x, vec3.y, vec3.z, posAndRot.yRot(), posAndRot.xRot());

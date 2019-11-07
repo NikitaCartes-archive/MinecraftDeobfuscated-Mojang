@@ -29,11 +29,6 @@ import org.jetbrains.annotations.Nullable;
 public class SignBlockEntity
 extends BlockEntity {
     public final Component[] messages = new Component[]{new TextComponent(""), new TextComponent(""), new TextComponent(""), new TextComponent("")};
-    @Environment(value=EnvType.CLIENT)
-    private boolean showCursor;
-    private int selectedLine = -1;
-    private int cursorPos = -1;
-    private int selectionPos = -1;
     private boolean isEditable = true;
     private Player playerWhoMayEdit;
     private final String[] renderMessages = new String[4];
@@ -159,42 +154,6 @@ extends BlockEntity {
             return true;
         }
         return false;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public void setCursorInfo(int i, int j, int k, boolean bl) {
-        this.selectedLine = i;
-        this.cursorPos = j;
-        this.selectionPos = k;
-        this.showCursor = bl;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public void resetCursorInfo() {
-        this.selectedLine = -1;
-        this.cursorPos = -1;
-        this.selectionPos = -1;
-        this.showCursor = false;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public boolean isShowCursor() {
-        return this.showCursor;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public int getSelectedLine() {
-        return this.selectedLine;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public int getCursorPos() {
-        return this.cursorPos;
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public int getSelectionPos() {
-        return this.selectionPos;
     }
 }
 

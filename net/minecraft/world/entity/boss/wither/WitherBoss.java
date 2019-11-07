@@ -435,14 +435,18 @@ RangedAttackMob {
     }
 
     @Override
-    protected void checkDespawn() {
+    public void checkDespawn() {
+        if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.shouldDespawnInPeaceful()) {
+            this.remove();
+            return;
+        }
         this.noActionTime = 0;
     }
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getLightColor() {
-        return 0xF000F0;
+    public int getBlockLightLevel() {
+        return 15;
     }
 
     @Override

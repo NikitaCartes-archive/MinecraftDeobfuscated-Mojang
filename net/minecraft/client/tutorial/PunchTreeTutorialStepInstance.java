@@ -6,7 +6,7 @@ package net.minecraft.client.tutorial;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.tutorial.FindTreeTutorialStepInstance;
 import net.minecraft.client.tutorial.Tutorial;
@@ -68,7 +68,7 @@ implements TutorialStepInstance {
     }
 
     @Override
-    public void onDestroyBlock(MultiPlayerLevel multiPlayerLevel, BlockPos blockPos, BlockState blockState, float f) {
+    public void onDestroyBlock(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, float f) {
         boolean bl = blockState.is(BlockTags.LOGS);
         if (bl && f > 0.0f) {
             if (this.toast != null) {

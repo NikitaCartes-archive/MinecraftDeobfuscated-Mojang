@@ -18,8 +18,8 @@ import net.minecraft.client.gui.screens.inventory.JigsawBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.MinecartCommandBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.client.gui.screens.inventory.StructureBlockEditScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.MultiPlayerLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.resources.sounds.AmbientSoundHandler;
@@ -122,8 +122,8 @@ extends AbstractClientPlayer {
     private int waterVisionTime;
     private boolean showDeathScreen = true;
 
-    public LocalPlayer(Minecraft minecraft, MultiPlayerLevel multiPlayerLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
-        super(multiPlayerLevel, clientPacketListener.getLocalGameProfile());
+    public LocalPlayer(Minecraft minecraft, ClientLevel clientLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
+        super(clientLevel, clientPacketListener.getLocalGameProfile());
         this.connection = clientPacketListener;
         this.stats = statsCounter;
         this.recipeBook = clientRecipeBook;

@@ -31,26 +31,26 @@ extends Item {
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         BlockPos blockPos;
-        BlockPos blockPos2;
         Player player2 = useOnContext.getPlayer();
         Level levelAccessor = useOnContext.getLevel();
-        if (FlintAndSteelItem.canUse(levelAccessor.getBlockState(blockPos2 = (blockPos = useOnContext.getClickedPos()).relative(useOnContext.getClickedFace())), levelAccessor, blockPos2)) {
-            levelAccessor.playSound(player2, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.4f + 0.8f);
-            BlockState blockState = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos2);
-            levelAccessor.setBlock(blockPos2, blockState, 11);
-            ItemStack itemStack = useOnContext.getItemInHand();
-            if (player2 instanceof ServerPlayer) {
-                CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player2, blockPos2, itemStack);
-                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
-            }
-            return InteractionResult.SUCCESS;
-        }
-        BlockState blockState = levelAccessor.getBlockState(blockPos);
+        BlockState blockState = levelAccessor.getBlockState(blockPos = useOnContext.getClickedPos());
         if (FlintAndSteelItem.canLightCampFire(blockState)) {
             levelAccessor.playSound(player2, blockPos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.4f + 0.8f);
             levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
             if (player2 != null) {
                 useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
+            }
+            return InteractionResult.SUCCESS;
+        }
+        BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
+        if (FlintAndSteelItem.canUse(levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos2)) {
+            levelAccessor.playSound(player2, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.4f + 0.8f);
+            BlockState blockState2 = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos2);
+            levelAccessor.setBlock(blockPos2, blockState2, 11);
+            ItemStack itemStack = useOnContext.getItemInHand();
+            if (player2 instanceof ServerPlayer) {
+                CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player2, blockPos2, itemStack);
+                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
             }
             return InteractionResult.SUCCESS;
         }

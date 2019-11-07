@@ -20,6 +20,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -132,6 +133,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -155,6 +157,10 @@ public class EntityRenderDispatcher {
     public final Options options;
     private boolean shouldRenderShadow = true;
     private boolean renderHitBoxes;
+
+    public static int getPackedLightCoords(Entity entity) {
+        return LightTexture.pack(entity.getBlockLightLevel(), entity.level.getBrightness(LightLayer.SKY, new BlockPos(entity)));
+    }
 
     private <T extends Entity> void register(EntityType<T> entityType, EntityRenderer<? super T> entityRenderer) {
         this.renderers.put(entityType, entityRenderer);
@@ -328,30 +334,24 @@ public class EntityRenderDispatcher {
         return entityRenderer.shouldRender(entity, frustum, d, e, f);
     }
 
-    public void render(Entity entity, float f) {
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        this.render(entity, 0.0, 0.0, 0.0, 0.0f, f, new PoseStack(), bufferSource);
-        bufferSource.endBatch();
-    }
-
-    public <E extends Entity> void render(E entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
+    public <E extends Entity> void render(E entity, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         EntityRenderer<E> entityRenderer = this.getRenderer(entity);
         try {
-            double l;
-            float m;
-            Vec3 vec3 = entityRenderer.getRenderOffset(entity, d, e, f, h);
-            double i = d + vec3.x();
-            double j = e + vec3.y();
-            double k = f + vec3.z();
+            double m;
+            float n;
+            Vec3 vec3 = entityRenderer.getRenderOffset(entity, h);
+            double j = d + vec3.x();
+            double k = e + vec3.y();
+            double l = f + vec3.z();
             poseStack.pushPose();
-            poseStack.translate(i, j, k);
-            entityRenderer.render(entity, i, j, k, g, h, poseStack, multiBufferSource);
+            poseStack.translate(j, k, l);
+            entityRenderer.render(entity, g, h, poseStack, multiBufferSource, i);
             if (entity.displayFireAnimation()) {
                 this.renderFlame(poseStack, multiBufferSource, entity);
             }
             poseStack.translate(-vec3.x(), -vec3.y(), -vec3.z());
-            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (m = (float)((1.0 - (l = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
-                EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, m, h, this.level, entityRenderer.shadowRadius);
+            if (this.options.entityShadows && this.shouldRenderShadow && entityRenderer.shadowRadius > 0.0f && !entity.isInvisible() && (n = (float)((1.0 - (m = this.distanceToSqr(entity.getX(), entity.getY(), entity.getZ())) / 256.0) * (double)entityRenderer.shadowStrength)) > 0.0f) {
+                EntityRenderDispatcher.renderShadow(poseStack, multiBufferSource, entity, n, h, this.level, entityRenderer.shadowRadius);
             }
             if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
                 this.renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
@@ -392,7 +392,7 @@ public class EntityRenderDispatcher {
             LevelRenderer.renderLineBox(poseStack, vertexConsumer, -g, entity.getEyeHeight() - 0.01f, -g, g, entity.getEyeHeight() + 0.01f, g, 1.0f, 0.0f, 0.0f, 1.0f);
         }
         Vec3 vec3 = entity.getViewVector(f);
-        Matrix4f matrix4f = poseStack.getPose();
+        Matrix4f matrix4f = poseStack.last().pose();
         vertexConsumer.vertex(matrix4f, 0.0f, entity.getEyeHeight(), 0.0f).color(0, 0, 255, 255).endVertex();
         vertexConsumer.vertex(matrix4f, (float)(vec3.x * 2.0), (float)((double)entity.getEyeHeight() + vec3.y * 2.0), (float)(vec3.z * 2.0)).color(0, 0, 255, 255).endVertex();
     }
@@ -418,7 +418,7 @@ public class EntityRenderDispatcher {
         float k = 0.0f;
         int l = 0;
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
-        Matrix4f matrix4f = poseStack.getPose();
+        PoseStack.Pose pose = poseStack.last();
         while (i > 0.0f) {
             TextureAtlasSprite textureAtlasSprite3 = l % 2 == 0 ? textureAtlasSprite : textureAtlasSprite2;
             float m = textureAtlasSprite3.getU0();
@@ -430,10 +430,10 @@ public class EntityRenderDispatcher {
                 o = m;
                 m = q;
             }
-            EntityRenderDispatcher.fireVertex(matrix4f, vertexConsumer, g - 0.0f, 0.0f - j, k, o, p);
-            EntityRenderDispatcher.fireVertex(matrix4f, vertexConsumer, -g - 0.0f, 0.0f - j, k, m, p);
-            EntityRenderDispatcher.fireVertex(matrix4f, vertexConsumer, -g - 0.0f, 1.4f - j, k, m, n);
-            EntityRenderDispatcher.fireVertex(matrix4f, vertexConsumer, g - 0.0f, 1.4f - j, k, o, n);
+            EntityRenderDispatcher.fireVertex(pose, vertexConsumer, g - 0.0f, 0.0f - j, k, o, p);
+            EntityRenderDispatcher.fireVertex(pose, vertexConsumer, -g - 0.0f, 0.0f - j, k, m, p);
+            EntityRenderDispatcher.fireVertex(pose, vertexConsumer, -g - 0.0f, 1.4f - j, k, m, n);
+            EntityRenderDispatcher.fireVertex(pose, vertexConsumer, g - 0.0f, 1.4f - j, k, o, n);
             i -= 0.45f;
             j -= 0.45f;
             g *= 0.9f;
@@ -443,8 +443,8 @@ public class EntityRenderDispatcher {
         poseStack.popPose();
     }
 
-    private static void fireVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
-        vertexConsumer.vertex(matrix4f, f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(0.0f, 1.0f, 0.0f).endVertex();
+    private static void fireVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
+        vertexConsumer.vertex(pose.pose(), f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(pose.normal(), 0.0f, 1.0f, 0.0f).endVertex();
     }
 
     private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {
@@ -462,14 +462,14 @@ public class EntityRenderDispatcher {
         int n = Mth.floor(e);
         int o = Mth.floor(j - (double)i);
         int p = Mth.floor(j + (double)i);
-        Matrix4f matrix4f = poseStack.getPose();
+        PoseStack.Pose pose = poseStack.last();
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(SHADOW_LOCATION));
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
-            EntityRenderDispatcher.renderBlockShadow(matrix4f, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
+            EntityRenderDispatcher.renderBlockShadow(pose, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
         }
     }
 
-    private static void renderBlockShadow(Matrix4f matrix4f, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h) {
+    private static void renderBlockShadow(PoseStack.Pose pose, VertexConsumer vertexConsumer, LevelReader levelReader, BlockPos blockPos, double d, double e, double f, float g, float h) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState = levelReader.getBlockState(blockPos2);
         if (blockState.getRenderShape() == RenderShape.INVISIBLE || levelReader.getMaxLocalRawBrightness(blockPos) <= 3) {
@@ -502,15 +502,15 @@ public class EntityRenderDispatcher {
             float u = -p / 2.0f / g + 0.5f;
             float v = -r / 2.0f / g + 0.5f;
             float w = -s / 2.0f / g + 0.5f;
-            EntityRenderDispatcher.shadowVertex(matrix4f, vertexConsumer, i, o, q, r, t, v);
-            EntityRenderDispatcher.shadowVertex(matrix4f, vertexConsumer, i, o, q, s, t, w);
-            EntityRenderDispatcher.shadowVertex(matrix4f, vertexConsumer, i, p, q, s, u, w);
-            EntityRenderDispatcher.shadowVertex(matrix4f, vertexConsumer, i, p, q, r, u, v);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, o, q, r, t, v);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, o, q, s, t, w);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, p, q, s, u, w);
+            EntityRenderDispatcher.shadowVertex(pose, vertexConsumer, i, p, q, r, u, v);
         }
     }
 
-    private static void shadowVertex(Matrix4f matrix4f, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
-        vertexConsumer.vertex(matrix4f, g, h, i).color(1.0f, 1.0f, 1.0f, f).uv(j, k).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(0.0f, 1.0f, 0.0f).endVertex();
+    private static void shadowVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
+        vertexConsumer.vertex(pose.pose(), g, h, i).color(1.0f, 1.0f, 1.0f, f).uv(j, k).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(0xF000F0).normal(pose.normal(), 0.0f, 1.0f, 0.0f).endVertex();
     }
 
     public void setLevel(@Nullable Level level) {

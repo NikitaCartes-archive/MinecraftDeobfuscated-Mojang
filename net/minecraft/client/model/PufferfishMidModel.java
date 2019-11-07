@@ -79,7 +79,7 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T entity, float f, float g, float h, float i, float j, float k) {
+    public void setupAnim(T entity, float f, float g, float h, float i, float j) {
         this.finBlue0.zRot = -0.2f + 0.4f * Mth.sin(h * 0.2f);
         this.finBlue1.zRot = 0.2f - 0.4f * Mth.sin(h * 0.2f);
     }

@@ -679,7 +679,7 @@ public class Blocks {
     public static final Block PURPUR_BLOCK = Blocks.register("purpur_block", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).strength(1.5f, 6.0f)));
     public static final Block PURPUR_PILLAR = Blocks.register("purpur_pillar", new RotatedPillarBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_MAGENTA).strength(1.5f, 6.0f)));
     public static final Block PURPUR_STAIRS = Blocks.register("purpur_stairs", new StairBlock(PURPUR_BLOCK.defaultBlockState(), Block.Properties.copy(PURPUR_BLOCK)));
-    public static final Block END_STONE_BRICKS = Blocks.register("end_stone_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(0.8f)));
+    public static final Block END_STONE_BRICKS = Blocks.register("end_stone_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(3.0f, 9.0f)));
     public static final Block BEETROOTS = Blocks.register("beetroots", new BeetrootBlock(Block.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP)));
     public static final Block GRASS_PATH = Blocks.register("grass_path", new GrassPathBlock(Block.Properties.of(Material.DIRT).strength(0.65f).sound(SoundType.GRASS)));
     public static final Block END_GATEWAY = Blocks.register("end_gateway", new EndGatewayBlock(Block.Properties.of(Material.PORTAL, MaterialColor.COLOR_BLACK).noCollission().lightLevel(15).strength(-1.0f, 3600000.0f).noDrops()));

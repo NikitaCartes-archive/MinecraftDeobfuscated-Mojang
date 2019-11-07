@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -78,6 +79,8 @@ import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.client.particle.WakeParticle;
 import net.minecraft.client.particle.WaterCurrentDownParticle;
 import net.minecraft.client.particle.WaterDropParticle;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -212,6 +215,7 @@ implements PreparableReloadListener {
             profilerFiller.endTick();
             return preparations;
         }, executor)).thenCompose(preparationBarrier::wait)).thenAcceptAsync(preparations -> {
+            this.particles.clear();
             profilerFiller2.startTick();
             profilerFiller2.push("upload");
             this.textureAtlas.reload((TextureAtlas.Preparations)preparations);
@@ -330,15 +334,14 @@ implements PreparableReloadListener {
         }
     }
 
-    public void render(Camera camera, float f) {
-        float g = Mth.cos(camera.getYRot() * ((float)Math.PI / 180));
-        float h = Mth.sin(camera.getYRot() * ((float)Math.PI / 180));
-        float i = -h * Mth.sin(camera.getXRot() * ((float)Math.PI / 180));
-        float j = g * Mth.sin(camera.getXRot() * ((float)Math.PI / 180));
-        float k = Mth.cos(camera.getXRot() * ((float)Math.PI / 180));
-        Particle.xOff = camera.getPosition().x;
-        Particle.yOff = camera.getPosition().y;
-        Particle.zOff = camera.getPosition().z;
+    public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
+        lightTexture.turnOnLightLayer();
+        RenderSystem.enableAlphaTest();
+        RenderSystem.defaultAlphaFunc();
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableFog();
+        RenderSystem.pushMatrix();
+        RenderSystem.multMatrix(poseStack.last().pose());
         for (ParticleRenderType particleRenderType : RENDER_ORDER) {
             Iterable iterable = this.particles.get(particleRenderType);
             if (iterable == null) continue;
@@ -348,7 +351,7 @@ implements PreparableReloadListener {
             particleRenderType.begin(bufferBuilder, this.textureManager);
             for (Particle particle : iterable) {
                 try {
-                    particle.render(bufferBuilder, camera, f, g, k, h, i, j);
+                    particle.render(bufferBuilder, camera, f);
                 } catch (Throwable throwable) {
                     CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Particle");
                     CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
@@ -359,9 +362,12 @@ implements PreparableReloadListener {
             }
             particleRenderType.end(tesselator);
         }
+        RenderSystem.popMatrix();
         RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
         RenderSystem.defaultAlphaFunc();
+        lightTexture.turnOffLightLayer();
+        RenderSystem.disableFog();
     }
 
     public void setLevel(@Nullable Level level) {

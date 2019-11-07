@@ -24,9 +24,9 @@ extends IllagerRenderer<T> {
         this.addLayer(new ItemInHandLayer<T, IllagerModel<T>>(this){
 
             @Override
-            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l, float m) {
+            public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T spellcasterIllager, float f, float g, float h, float j, float k, float l) {
                 if (((SpellcasterIllager)spellcasterIllager).isCastingSpell()) {
-                    super.render(poseStack, multiBufferSource, i, spellcasterIllager, f, g, h, j, k, l, m);
+                    super.render(poseStack, multiBufferSource, i, spellcasterIllager, f, g, h, j, k, l);
                 }
             }
         });

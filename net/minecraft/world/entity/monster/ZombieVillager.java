@@ -26,6 +26,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -172,6 +174,17 @@ implements VillagerDataHolder {
     private void finishConversion(ServerLevel serverLevel) {
         Player player;
         Villager villager = EntityType.VILLAGER.create(serverLevel);
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+            if (itemStack.isEmpty()) continue;
+            if (EnchantmentHelper.hasBindingCurse(itemStack)) {
+                villager.setSlot(equipmentSlot.getIndex() + 300, itemStack);
+                continue;
+            }
+            double d = this.getEquipmentDropChance(equipmentSlot);
+            if (!(d > 1.0)) continue;
+            this.spawnAtLocation(itemStack);
+        }
         villager.copyPosition(this);
         villager.setVillagerData(this.getVillagerData());
         if (this.gossips != null) {

@@ -36,14 +36,14 @@ extends MobRenderer<Pufferfish, EntityModel<Pufferfish>> {
     }
 
     @Override
-    public void render(Pufferfish pufferfish, double d, double e, double f, float g, float h, PoseStack poseStack, MultiBufferSource multiBufferSource) {
-        int i = pufferfish.getPuffState();
-        if (i != this.puffStateO) {
-            this.model = i == 0 ? this.small : (i == 1 ? this.mid : this.big);
+    public void render(Pufferfish pufferfish, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        int j = pufferfish.getPuffState();
+        if (j != this.puffStateO) {
+            this.model = j == 0 ? this.small : (j == 1 ? this.mid : this.big);
         }
-        this.puffStateO = i;
-        this.shadowRadius = 0.1f + 0.1f * (float)i;
-        super.render(pufferfish, d, e, f, g, h, poseStack, multiBufferSource);
+        this.puffStateO = j;
+        this.shadowRadius = 0.1f + 0.1f * (float)j;
+        super.render(pufferfish, f, g, poseStack, multiBufferSource, i);
     }
 
     @Override

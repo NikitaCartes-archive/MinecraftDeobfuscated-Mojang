@@ -6,12 +6,14 @@ package net.minecraft.client.renderer.debug;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
+import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
 public class ChunkBorderRenderer
@@ -23,23 +25,21 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
         int k;
+        RenderSystem.enableDepthTest();
         RenderSystem.shadeModel(7425);
         RenderSystem.enableAlphaTest();
         RenderSystem.defaultAlphaFunc();
-        Camera camera = this.minecraft.gameRenderer.getMainCamera();
+        Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        double d = camera.getPosition().x;
-        double e = camera.getPosition().y;
-        double f = camera.getPosition().z;
         double g = 0.0 - e;
         double h = 256.0 - e;
         RenderSystem.disableTexture();
         RenderSystem.disableBlend();
-        double i = (double)(camera.getEntity().xChunk << 4) - d;
-        double j = (double)(camera.getEntity().zChunk << 4) - f;
+        double i = (double)(entity.xChunk << 4) - d;
+        double j = (double)(entity.zChunk << 4) - f;
         RenderSystem.lineWidth(1.0f);
         bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
         for (k = -16; k <= 32; k += 16) {

@@ -136,12 +136,6 @@ implements Nameable {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public String getTextureHashName() {
-        this.createPatternList();
-        return this.textureHashName;
-    }
-
-    @Environment(value=EnvType.CLIENT)
     private void createPatternList() {
         if (this.patterns != null && this.colors != null && this.textureHashName != null) {
             return;

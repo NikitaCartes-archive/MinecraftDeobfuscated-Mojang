@@ -55,11 +55,11 @@ extends ListModel<T> {
     }
 
     @Override
-    public void setupAnim(T witherBoss, float f, float g, float h, float i, float j, float k) {
-        float l = Mth.cos(h * 0.1f);
-        this.upperBodyParts[1].xRot = (0.065f + 0.05f * l) * (float)Math.PI;
+    public void setupAnim(T witherBoss, float f, float g, float h, float i, float j) {
+        float k = Mth.cos(h * 0.1f);
+        this.upperBodyParts[1].xRot = (0.065f + 0.05f * k) * (float)Math.PI;
         this.upperBodyParts[2].setPos(-2.0f, 6.9f + Mth.cos(this.upperBodyParts[1].xRot) * 10.0f, -0.5f + Mth.sin(this.upperBodyParts[1].xRot) * 10.0f);
-        this.upperBodyParts[2].xRot = (0.265f + 0.1f * l) * (float)Math.PI;
+        this.upperBodyParts[2].xRot = (0.265f + 0.1f * k) * (float)Math.PI;
         this.heads[0].yRot = i * ((float)Math.PI / 180);
         this.heads[0].xRot = j * ((float)Math.PI / 180);
     }

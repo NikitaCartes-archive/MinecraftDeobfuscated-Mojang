@@ -6,9 +6,9 @@ package net.minecraft.client.renderer.chunk;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndBiomeGetter;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RenderChunkRegion
-implements BlockAndBiomeGetter {
+implements BlockAndTintGetter {
     protected final int centerX;
     protected final int centerZ;
     protected final BlockPos start;
@@ -108,11 +108,6 @@ implements BlockAndBiomeGetter {
     }
 
     @Override
-    public BiomeManager getBiomeManager() {
-        return this.level.getBiomeManager();
-    }
-
-    @Override
     @Nullable
     public BlockEntity getBlockEntity(BlockPos blockPos) {
         return this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
@@ -123,6 +118,11 @@ implements BlockAndBiomeGetter {
         int i = (blockPos.getX() >> 4) - this.centerX;
         int j = (blockPos.getZ() >> 4) - this.centerZ;
         return this.chunks[i][j].getBlockEntity(blockPos, entityCreationType);
+    }
+
+    @Override
+    public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
+        return this.level.getBlockTint(blockPos, colorResolver);
     }
 }
 
