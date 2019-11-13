@@ -47,12 +47,11 @@ extends EntityRenderer<ExperienceOrb> {
         int t = 255;
         int u = (int)((Mth.sin(r + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
         poseStack.translate(0.0, 0.1f, 0.0);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - this.entityRenderDispatcher.playerRotY));
-        float v = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX;
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(v));
-        float w = 0.3f;
+        poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        float v = 0.3f;
         poseStack.scale(0.3f, 0.3f, 0.3f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(EXPERIENCE_ORB_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(EXPERIENCE_ORB_LOCATION));
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
         Matrix3f matrix3f = pose.normal();

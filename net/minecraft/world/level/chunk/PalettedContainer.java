@@ -182,18 +182,24 @@ implements PaletteResize<T> {
     public void write(CompoundTag compoundTag, String string, String string2) {
         this.acquire();
         HashMapPalette<T> hashMapPalette = new HashMapPalette<T>(this.registry, this.bits, this.dummyPaletteResize, this.reader, this.writer);
-        hashMapPalette.idFor(this.defaultValue);
+        T object = this.defaultValue;
+        int i = hashMapPalette.idFor(this.defaultValue);
         int[] is = new int[4096];
-        for (int i = 0; i < 4096; ++i) {
-            is[i] = hashMapPalette.idFor(this.get(i));
+        for (int j = 0; j < 4096; ++j) {
+            T object2 = this.get(j);
+            if (object2 != object) {
+                object = object2;
+                i = hashMapPalette.idFor(object2);
+            }
+            is[j] = i;
         }
         ListTag listTag = new ListTag();
         hashMapPalette.write(listTag);
         compoundTag.put(string, listTag);
-        int j = Math.max(4, Mth.ceillog2(listTag.size()));
-        BitStorage bitStorage = new BitStorage(j, 4096);
-        for (int k = 0; k < is.length; ++k) {
-            bitStorage.set(k, is[k]);
+        int k = Math.max(4, Mth.ceillog2(listTag.size()));
+        BitStorage bitStorage = new BitStorage(k, 4096);
+        for (int l = 0; l < is.length; ++l) {
+            bitStorage.set(l, is[l]);
         }
         compoundTag.putLongArray(string2, bitStorage.getRaw());
         this.release();

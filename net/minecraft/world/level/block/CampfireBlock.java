@@ -49,7 +49,9 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +63,7 @@ implements SimpleWaterloggedBlock {
     public static final BooleanProperty SIGNAL_FIRE = BlockStateProperties.SIGNAL_FIRE;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
 
     public CampfireBlock(Block.Properties properties) {
         super(properties);
@@ -217,6 +220,25 @@ implements SimpleWaterloggedBlock {
         if (bl2) {
             level.addParticle(ParticleTypes.SMOKE, (double)blockPos.getX() + 0.25 + random.nextDouble() / 2.0 * (double)(random.nextBoolean() ? 1 : -1), (double)blockPos.getY() + 0.4, (double)blockPos.getZ() + 0.25 + random.nextDouble() / 2.0 * (double)(random.nextBoolean() ? 1 : -1), 0.0, 0.005, 0.0);
         }
+    }
+
+    public static boolean isSmokeyPos(Level level, BlockPos blockPos, int i) {
+        for (int j = 1; j <= i; ++j) {
+            BlockPos blockPos2 = blockPos.below(j);
+            BlockState blockState = level.getBlockState(blockPos2);
+            if (CampfireBlock.isLitCampfire(blockState)) {
+                return true;
+            }
+            boolean bl = Shapes.joinIsNotEmpty(VIRTUAL_FENCE_POST, blockState.getCollisionShape(level, blockPos, CollisionContext.empty()), BooleanOp.AND);
+            if (!bl) continue;
+            BlockState blockState2 = level.getBlockState(blockPos2.below());
+            return CampfireBlock.isLitCampfire(blockState2);
+        }
+        return false;
+    }
+
+    private static boolean isLitCampfire(BlockState blockState) {
+        return blockState.getBlock() == Blocks.CAMPFIRE && blockState.getValue(LIT) != false;
     }
 
     @Override

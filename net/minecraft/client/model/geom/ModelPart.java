@@ -3,20 +3,20 @@
  */
 package net.minecraft.client.model.geom;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
-import java.util.List;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -33,8 +33,8 @@ public class ModelPart {
     public float zRot;
     public boolean mirror;
     public boolean visible = true;
-    private final List<Cube> cubes = Lists.newArrayList();
-    private final List<ModelPart> children = Lists.newArrayList();
+    private final ObjectList<Cube> cubes = new ObjectArrayList<Cube>();
+    private final ObjectList<ModelPart> children = new ObjectArrayList<ModelPart>();
 
     public ModelPart(Model model) {
         model.accept(this);
@@ -143,25 +143,21 @@ public class ModelPart {
 
     private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float f, float g, float h) {
         Matrix4f matrix4f = pose.pose();
-        Matrix3f matrix3f = new Matrix3f(matrix4f);
+        Matrix3f matrix3f = pose.normal();
         for (Cube cube : this.cubes) {
             for (Polygon polygon : cube.polygons) {
-                Vector3f vector3f = new Vector3f(polygon.vertices[1].pos.vectorTo(polygon.vertices[0].pos));
-                Vector3f vector3f2 = new Vector3f(polygon.vertices[1].pos.vectorTo(polygon.vertices[2].pos));
+                Vector3f vector3f = polygon.normal.copy();
                 vector3f.transform(matrix3f);
-                vector3f2.transform(matrix3f);
-                vector3f2.cross(vector3f);
-                vector3f2.normalize();
-                float k = vector3f2.x();
-                float l = vector3f2.y();
-                float m = vector3f2.z();
+                float k = vector3f.x();
+                float l = vector3f.y();
+                float m = vector3f.z();
                 for (int n = 0; n < 4; ++n) {
                     float s;
                     float r;
                     Vertex vertex = polygon.vertices[n];
-                    float o = (float)vertex.pos.x / 16.0f;
-                    float p = (float)vertex.pos.y / 16.0f;
-                    float q = (float)vertex.pos.z / 16.0f;
+                    float o = vertex.pos.x() / 16.0f;
+                    float p = vertex.pos.y() / 16.0f;
+                    float q = vertex.pos.z() / 16.0f;
                     Vector4f vector4f = new Vector4f(o, p, q, 1.0f);
                     vector4f.transform(matrix4f);
                     if (textureAtlasSprite == null) {
@@ -171,7 +167,7 @@ public class ModelPart {
                         r = textureAtlasSprite.getU(vertex.u * 16.0f);
                         s = textureAtlasSprite.getV(vertex.v * 16.0f);
                     }
-                    vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z()).color(f, g, h, 1.0f).uv(r, s).overlayCoords(j).uv2(i).normal(k, l, m).endVertex();
+                    vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, 1.0f, r, s, j, i, k, l, m);
                 }
             }
         }
@@ -184,25 +180,25 @@ public class ModelPart {
     }
 
     public Cube getRandomCube(Random random) {
-        return this.cubes.get(random.nextInt(this.cubes.size()));
+        return (Cube)this.cubes.get(random.nextInt(this.cubes.size()));
     }
 
     @Environment(value=EnvType.CLIENT)
     static class Vertex {
-        public final Vec3 pos;
+        public final Vector3f pos;
         public final float u;
         public final float v;
 
         public Vertex(float f, float g, float h, float i, float j) {
-            this(new Vec3(f, g, h), i, j);
+            this(new Vector3f(f, g, h), i, j);
         }
 
         public Vertex remap(float f, float g) {
             return new Vertex(this.pos, f, g);
         }
 
-        public Vertex(Vec3 vec3, float f, float g) {
-            this.pos = vec3;
+        public Vertex(Vector3f vector3f, float f, float g) {
+            this.pos = vector3f;
             this.u = f;
             this.v = g;
         }
@@ -210,28 +206,29 @@ public class ModelPart {
 
     @Environment(value=EnvType.CLIENT)
     static class Polygon {
-        public Vertex[] vertices;
+        public final Vertex[] vertices;
+        public final Vector3f normal;
 
-        public Polygon(Vertex[] vertexs) {
+        public Polygon(Vertex[] vertexs, float f, float g, float h, float i, float j, float k, boolean bl, Direction direction) {
             this.vertices = vertexs;
-        }
-
-        public Polygon(Vertex[] vertexs, float f, float g, float h, float i, float j, float k) {
-            this(vertexs);
             float l = 0.0f / j;
             float m = 0.0f / k;
             vertexs[0] = vertexs[0].remap(h / j - l, g / k + m);
             vertexs[1] = vertexs[1].remap(f / j + l, g / k + m);
             vertexs[2] = vertexs[2].remap(f / j + l, i / k - m);
             vertexs[3] = vertexs[3].remap(h / j - l, i / k - m);
-        }
-
-        public void mirror() {
-            Vertex[] vertexs = new Vertex[this.vertices.length];
-            for (int i = 0; i < this.vertices.length; ++i) {
-                vertexs[i] = this.vertices[this.vertices.length - i - 1];
+            if (bl) {
+                int n = vertexs.length;
+                for (int o = 0; o < n / 2; ++o) {
+                    Vertex vertex = vertexs[o];
+                    vertexs[o] = vertexs[n - 1 - o];
+                    vertexs[n - 1 - o] = vertex;
+                }
             }
-            this.vertices = vertexs;
+            this.normal = direction.step();
+            if (bl) {
+                this.normal.mul(-1.0f, 1.0f, 1.0f);
+            }
         }
     }
 
@@ -284,17 +281,12 @@ public class ModelPart {
             float ac = j;
             float ad = (float)j + m;
             float ae = (float)j + m + l;
-            this.polygons[2] = new Polygon(new Vertex[]{vertex6, vertex5, vertex, vertex2}, x, ac, y, ad, q, r);
-            this.polygons[3] = new Polygon(new Vertex[]{vertex3, vertex4, vertex8, vertex7}, y, ad, z, ac, q, r);
-            this.polygons[1] = new Polygon(new Vertex[]{vertex, vertex5, vertex8, vertex4}, w, ad, x, ae, q, r);
-            this.polygons[4] = new Polygon(new Vertex[]{vertex2, vertex, vertex4, vertex3}, x, ad, y, ae, q, r);
-            this.polygons[0] = new Polygon(new Vertex[]{vertex6, vertex2, vertex3, vertex7}, y, ad, aa, ae, q, r);
-            this.polygons[5] = new Polygon(new Vertex[]{vertex5, vertex6, vertex7, vertex8}, aa, ad, ab, ae, q, r);
-            if (bl) {
-                for (Polygon polygon : this.polygons) {
-                    polygon.mirror();
-                }
-            }
+            this.polygons[2] = new Polygon(new Vertex[]{vertex6, vertex5, vertex, vertex2}, x, ac, y, ad, q, r, bl, Direction.DOWN);
+            this.polygons[3] = new Polygon(new Vertex[]{vertex3, vertex4, vertex8, vertex7}, y, ad, z, ac, q, r, bl, Direction.UP);
+            this.polygons[1] = new Polygon(new Vertex[]{vertex, vertex5, vertex8, vertex4}, w, ad, x, ae, q, r, bl, Direction.WEST);
+            this.polygons[4] = new Polygon(new Vertex[]{vertex2, vertex, vertex4, vertex3}, x, ad, y, ae, q, r, bl, Direction.NORTH);
+            this.polygons[0] = new Polygon(new Vertex[]{vertex6, vertex2, vertex3, vertex7}, y, ad, aa, ae, q, r, bl, Direction.EAST);
+            this.polygons[5] = new Polygon(new Vertex[]{vertex5, vertex6, vertex7, vertex8}, aa, ad, ab, ae, q, r, bl, Direction.SOUTH);
         }
     }
 }

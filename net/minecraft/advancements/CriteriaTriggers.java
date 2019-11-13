@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.BeeNestDestroyedTrigger;
 import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.BrewedPotionTrigger;
 import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
@@ -23,6 +24,7 @@ import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
+import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
@@ -32,6 +34,7 @@ import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
+import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.advancements.critereon.TickTrigger;
@@ -78,6 +81,9 @@ public class CriteriaTriggers {
     public static final KilledByCrossbowTrigger KILLED_BY_CROSSBOW = CriteriaTriggers.register(new KilledByCrossbowTrigger());
     public static final LocationTrigger RAID_WIN = CriteriaTriggers.register(new LocationTrigger(new ResourceLocation("hero_of_the_village")));
     public static final LocationTrigger BAD_OMEN = CriteriaTriggers.register(new LocationTrigger(new ResourceLocation("voluntary_exile")));
+    public static final ItemUsedOnBlockTrigger SAFELY_HARVEST_HONEY = CriteriaTriggers.register(new ItemUsedOnBlockTrigger(new ResourceLocation("safely_harvest_honey")));
+    public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = CriteriaTriggers.register(new SlideDownBlockTrigger());
+    public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = CriteriaTriggers.register(new BeeNestDestroyedTrigger());
 
     private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
         if (CRITERIA.containsKey(criterionTrigger.getId())) {

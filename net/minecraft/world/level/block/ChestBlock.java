@@ -3,7 +3,10 @@
  */
 package net.minecraft.world.level.block;
 
+import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -37,6 +40,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -120,6 +124,28 @@ implements SimpleWaterloggedBlock {
         @Override
         public MenuProvider acceptSingle(ChestBlockEntity chestBlockEntity) {
             return chestBlockEntity;
+        }
+
+        @Override
+        public /* synthetic */ Object acceptSingle(ChestBlockEntity chestBlockEntity) {
+            return this.acceptSingle(chestBlockEntity);
+        }
+
+        @Override
+        public /* synthetic */ Object acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+            return this.acceptDouble(chestBlockEntity, chestBlockEntity2);
+        }
+    };
+    private static final ChestSearchCallback<Float2FloatFunction> OPENNES_COMBINER = new ChestSearchCallback<Float2FloatFunction>(){
+
+        @Override
+        public Float2FloatFunction acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+            return f -> Math.max(chestBlockEntity.getOpenNess(f), chestBlockEntity2.getOpenNess(f));
+        }
+
+        @Override
+        public Float2FloatFunction acceptSingle(ChestBlockEntity chestBlockEntity) {
+            return chestBlockEntity::getOpenNess;
         }
 
         @Override
@@ -298,6 +324,15 @@ implements SimpleWaterloggedBlock {
     @Nullable
     public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
         return ChestBlock.combineWithNeigbour(blockState, level, blockPos, false, MENU_PROVIDER_COMBINER);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static float getCombinedOpenness(LidBlockEntity lidBlockEntity, BlockState blockState, Level level, BlockPos blockPos, float f) {
+        Float2FloatFunction float2FloatFunction = ChestBlock.combineWithNeigbour(blockState, level, blockPos, true, OPENNES_COMBINER);
+        if (float2FloatFunction == null) {
+            return lidBlockEntity.getOpenNess(f);
+        }
+        return float2FloatFunction.get(f);
     }
 
     @Override

@@ -2518,7 +2518,7 @@ CommandSource {
     }
 
     public double getRandomX(double d) {
-        return this.getX((2.0 * this.random.nextDouble() + 1.0) * d);
+        return this.getX((2.0 * this.random.nextDouble() - 1.0) * d);
     }
 
     public final double getY() {
@@ -2546,7 +2546,7 @@ CommandSource {
     }
 
     public double getRandomZ(double d) {
-        return this.getZ((2.0 * this.random.nextDouble() + 1.0) * d);
+        return this.getZ((2.0 * this.random.nextDouble() - 1.0) * d);
     }
 
     public void setPosRaw(double d, double e, double f) {

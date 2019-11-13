@@ -87,9 +87,10 @@ extends Item {
                 itemStack.shrink(1);
             }
             player.awardStat(Stats.ITEM_USED.get(this));
+            player.swing(interactionHand, true);
             return InteractionResultHolder.success(itemStack);
         }
-        return InteractionResultHolder.success(itemStack);
+        return InteractionResultHolder.consume(itemStack);
     }
 }
 

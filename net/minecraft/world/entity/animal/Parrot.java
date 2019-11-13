@@ -266,8 +266,10 @@ implements FlyingAnimal {
             }
             return true;
         }
-        if (!this.level.isClientSide && !this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
-            this.sitGoal.wantToSit(!this.isSitting());
+        if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
+            if (!this.level.isClientSide) {
+                this.sitGoal.wantToSit(!this.isSitting());
+            }
             return true;
         }
         return super.mobInteract(player, interactionHand);

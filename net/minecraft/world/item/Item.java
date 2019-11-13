@@ -146,7 +146,7 @@ implements ItemLike {
             ItemStack itemStack = player.getItemInHand(interactionHand);
             if (player.canEat(this.getFoodProperties().canAlwaysEat())) {
                 player.startUsingItem(interactionHand);
-                return InteractionResultHolder.success(itemStack);
+                return InteractionResultHolder.consume(itemStack);
             }
             return InteractionResultHolder.fail(itemStack);
         }

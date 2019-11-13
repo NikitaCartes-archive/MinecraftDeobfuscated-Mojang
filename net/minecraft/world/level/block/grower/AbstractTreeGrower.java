@@ -23,6 +23,7 @@ public abstract class AbstractTreeGrower {
             return false;
         }
         levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+        ((SmallTreeConfiguration)configuredFeature.config).setFromSapling();
         if (configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos)) {
             return true;
         }

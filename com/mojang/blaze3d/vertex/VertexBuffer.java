@@ -14,7 +14,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
-public class VertexBuffer {
+public class VertexBuffer
+implements AutoCloseable {
     private int id;
     private final VertexFormat format;
     private int vertexCount;
@@ -48,6 +49,9 @@ public class VertexBuffer {
 
     private void upload_(BufferBuilder bufferBuilder) {
         Pair<BufferBuilder.DrawState, ByteBuffer> pair = bufferBuilder.popNextBuffer();
+        if (this.id == -1) {
+            return;
+        }
         ByteBuffer byteBuffer = pair.getSecond();
         this.vertexCount = byteBuffer.remaining() / this.format.getVertexSize();
         this.bind();
@@ -67,7 +71,8 @@ public class VertexBuffer {
         RenderSystem.glBindBuffer(34962, () -> 0);
     }
 
-    public void delete() {
+    @Override
+    public void close() {
         if (this.id >= 0) {
             RenderSystem.glDeleteBuffers(this.id);
             this.id = -1;

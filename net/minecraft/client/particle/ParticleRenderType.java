@@ -19,7 +19,8 @@ public interface ParticleRenderType {
 
         @Override
         public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
-            RenderSystem.disableBlend();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             RenderSystem.depthMask(true);
             textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
             bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);

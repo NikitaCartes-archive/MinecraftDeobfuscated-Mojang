@@ -15,21 +15,23 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 public class MegaTreeConfiguration
 extends TreeConfiguration {
     public final int heightInterval;
+    public final int crownHeight;
 
-    protected MegaTreeConfiguration(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, List<TreeDecorator> list, int i, int j) {
+    protected MegaTreeConfiguration(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, List<TreeDecorator> list, int i, int j, int k) {
         super(blockStateProvider, blockStateProvider2, list, i);
         this.heightInterval = j;
+        this.crownHeight = k;
     }
 
     @Override
     public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        Dynamic<T> dynamic = new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("height_interval"), dynamicOps.createInt(this.heightInterval))));
+        Dynamic<T> dynamic = new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("height_interval"), dynamicOps.createInt(this.heightInterval), dynamicOps.createString("crown_height"), dynamicOps.createInt(this.crownHeight))));
         return dynamic.merge(super.serialize(dynamicOps));
     }
 
     public static <T> MegaTreeConfiguration deserialize(Dynamic<T> dynamic) {
         TreeConfiguration treeConfiguration = TreeConfiguration.deserialize(dynamic);
-        return new MegaTreeConfiguration(treeConfiguration.trunkProvider, treeConfiguration.leavesProvider, treeConfiguration.decorators, treeConfiguration.baseHeight, dynamic.get("height_interval").asInt(0));
+        return new MegaTreeConfiguration(treeConfiguration.trunkProvider, treeConfiguration.leavesProvider, treeConfiguration.decorators, treeConfiguration.baseHeight, dynamic.get("height_interval").asInt(0), dynamic.get("crown_height").asInt(0));
     }
 
     public static class MegaTreeConfigurationBuilder
@@ -37,6 +39,7 @@ extends TreeConfiguration {
         private List<TreeDecorator> decorators = ImmutableList.of();
         private int baseHeight;
         private int heightInterval;
+        private int crownHeight;
 
         public MegaTreeConfigurationBuilder(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2) {
             super(blockStateProvider, blockStateProvider2);
@@ -58,9 +61,14 @@ extends TreeConfiguration {
             return this;
         }
 
+        public MegaTreeConfigurationBuilder crownHeight(int i) {
+            this.crownHeight = i;
+            return this;
+        }
+
         @Override
         public MegaTreeConfiguration build() {
-            return new MegaTreeConfiguration(this.trunkProvider, this.leavesProvider, this.decorators, this.baseHeight, this.heightInterval);
+            return new MegaTreeConfiguration(this.trunkProvider, this.leavesProvider, this.decorators, this.baseHeight, this.heightInterval, this.crownHeight);
         }
 
         @Override

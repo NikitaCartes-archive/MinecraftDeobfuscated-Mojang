@@ -10,7 +10,6 @@ import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.ModelUtils;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Bee;
 
@@ -82,7 +81,7 @@ extends AgeableListModel<T> {
     @Override
     public void prepareMobModel(T bee, float f, float g, float h) {
         super.prepareMobModel(bee, f, g, h);
-        this.rollAmount = ((AgableMob)bee).isBaby() ? 0.0f : ((Bee)bee).getRollAmount(h);
+        this.rollAmount = ((Bee)bee).getRollAmount(h);
         this.stinger.visible = !((Bee)bee).hasStung();
     }
 

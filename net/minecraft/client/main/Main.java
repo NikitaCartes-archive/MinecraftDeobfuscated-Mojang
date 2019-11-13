@@ -30,6 +30,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.main.SilentInitException;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
@@ -143,6 +144,9 @@ public class Main {
             RenderSystem.beginInitialization();
             minecraft = new Minecraft(gameConfig);
             RenderSystem.finishInitialization();
+        } catch (SilentInitException silentInitException) {
+            LOGGER.warn("Failed to create window: ", (Throwable)silentInitException);
+            return;
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Initializing game");
             crashReport.addCategory("Initialization");

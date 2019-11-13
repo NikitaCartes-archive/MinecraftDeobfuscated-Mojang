@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.network.chat.Component;
@@ -59,7 +58,7 @@ extends BlockEntityRenderer<SignBlockEntity> {
         TextureAtlasSprite textureAtlasSprite = this.getSprite(SignRenderer.getTexture(blockState.getBlock()));
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
         this.signModel.sign.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         this.signModel.stick.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         poseStack.popPose();

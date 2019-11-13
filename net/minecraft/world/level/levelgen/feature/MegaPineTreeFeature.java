@@ -32,7 +32,7 @@ extends MegaTreeFeature<MegaTreeConfiguration> {
     }
 
     private void createCrown(LevelSimulatedRW levelSimulatedRW, Random random, int i, int j, int k, int l, Set<BlockPos> set, BoundingBox boundingBox, MegaTreeConfiguration megaTreeConfiguration) {
-        int m = random.nextInt(5) + megaTreeConfiguration.baseHeight;
+        int m = random.nextInt(5) + megaTreeConfiguration.crownHeight;
         int n = 0;
         for (int o = k - m; o <= k; ++o) {
             int p = k - o;

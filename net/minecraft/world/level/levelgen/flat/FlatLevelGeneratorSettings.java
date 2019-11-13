@@ -298,8 +298,16 @@ extends ChunkGeneratorSettings {
         }
         flatLevelGeneratorSettings.getLayersInfo().addAll(list);
         flatLevelGeneratorSettings.updateLayers();
-        Biome biome = iterator.hasNext() ? Registry.BIOME.get(new ResourceLocation(iterator.next())) : null;
-        flatLevelGeneratorSettings.setBiome(biome == null ? Biomes.PLAINS : biome);
+        Biome biome = Biomes.PLAINS;
+        if (iterator.hasNext()) {
+            try {
+                ResourceLocation resourceLocation = new ResourceLocation(iterator.next());
+                biome = Registry.BIOME.get(resourceLocation);
+            } catch (Exception exception) {
+                LOGGER.error("Error while parsing flat world string => {}", (Object)exception.getMessage());
+            }
+        }
+        flatLevelGeneratorSettings.setBiome(biome);
         if (iterator.hasNext()) {
             String[] strings;
             for (String string2 : strings = iterator.next().toLowerCase(Locale.ROOT).split(",")) {

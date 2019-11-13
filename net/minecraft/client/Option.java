@@ -33,11 +33,8 @@ public abstract class Option {
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
         String string = progressOption.getCaption();
-        if (d == 0.0) {
-            return string + I18n.get("options.off", new Object[0]);
-        }
         int i = (int)d * 2 + 1;
-        return string + i + "x" + i;
+        return string + I18n.get("options.biomeBlendRadius." + i, new Object[0]);
     });
     public static final ProgressOption CHAT_HEIGHT_FOCUSED = new ProgressOption("options.chat.height.focused", 0.0, 1.0, 0.0f, options -> options.chatHeightFocused, (options, double_) -> {
         options.chatHeightFocused = double_;

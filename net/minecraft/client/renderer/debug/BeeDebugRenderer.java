@@ -68,6 +68,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableTexture();
         this.clearRemovedHives();
+        this.clearRemovedBees();
         this.doRender();
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
@@ -75,6 +76,10 @@ implements DebugRenderer.SimpleDebugRenderer {
         if (!this.minecraft.player.isSpectator()) {
             this.updateLastLookedAtUuid();
         }
+    }
+
+    private void clearRemovedBees() {
+        this.beeInfosPerEntity.entrySet().removeIf(entry -> this.minecraft.level.getEntity(((BeeInfo)entry.getValue()).id) == null);
     }
 
     private void clearRemovedHives() {
@@ -162,7 +167,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         } else {
             BeeDebugRenderer.renderTextOverHive("In: " + hiveInfo.occupantCount + " bees", hiveInfo, i, -256);
         }
-        BeeDebugRenderer.renderTextOverHive(hiveInfo.hiveType, hiveInfo, ++i, -1);
+        BeeDebugRenderer.renderTextOverHive("Honey: " + hiveInfo.honeyLevel, hiveInfo, ++i, -23296);
+        BeeDebugRenderer.renderTextOverHive(hiveInfo.hiveType + (hiveInfo.sedated ? " (sedated)" : ""), hiveInfo, ++i, -1);
     }
 
     private void renderPath(BeeInfo beeInfo) {
@@ -176,13 +182,13 @@ implements DebugRenderer.SimpleDebugRenderer {
         int i = 0;
         BeeDebugRenderer.renderTextOverMob(beeInfo.pos, i, beeInfo.toString(), -1, 0.03f);
         ++i;
-        if (beeInfo.hivePos.equals(BlockPos.ZERO)) {
+        if (beeInfo.hivePos == null) {
             BeeDebugRenderer.renderTextOverMob(beeInfo.pos, i, "Homeless :(", -98404, 0.02f);
         } else {
             BeeDebugRenderer.renderTextOverMob(beeInfo.pos, i, "Hive: " + this.getPosDescription(beeInfo, beeInfo.hivePos), -256, 0.02f);
         }
         ++i;
-        if (beeInfo.flowerPos.equals(BlockPos.ZERO)) {
+        if (beeInfo.flowerPos == null) {
             BeeDebugRenderer.renderTextOverMob(beeInfo.pos, i, "No flower :(", -98404, 0.02f);
         } else {
             BeeDebugRenderer.renderTextOverMob(beeInfo.pos, i, "Flower: " + this.getPosDescription(beeInfo, beeInfo.flowerPos), -256, 0.02f);
@@ -278,7 +284,9 @@ implements DebugRenderer.SimpleDebugRenderer {
         public final Position pos;
         @Nullable
         public final Path path;
+        @Nullable
         public final BlockPos hivePos;
+        @Nullable
         public final BlockPos flowerPos;
         public final List<String> goals = Lists.newArrayList();
 
@@ -308,7 +316,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
 
         public boolean hasFlower() {
-            return this.flowerPos != BlockPos.ZERO;
+            return this.flowerPos != null;
         }
     }
 
@@ -317,12 +325,16 @@ implements DebugRenderer.SimpleDebugRenderer {
         public final BlockPos pos;
         public final String hiveType;
         public final int occupantCount;
+        public final int honeyLevel;
+        public final boolean sedated;
         public final long lastSeen;
 
-        public HiveInfo(BlockPos blockPos, String string, int i, long l) {
+        public HiveInfo(BlockPos blockPos, String string, int i, int j, boolean bl, long l) {
             this.pos = blockPos;
             this.hiveType = string;
             this.occupantCount = i;
+            this.honeyLevel = j;
+            this.sedated = bl;
             this.lastSeen = l;
         }
     }

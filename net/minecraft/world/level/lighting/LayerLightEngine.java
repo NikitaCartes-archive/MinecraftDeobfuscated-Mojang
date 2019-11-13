@@ -4,7 +4,6 @@
 package net.minecraft.world.level.lighting;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.level.lighting.LayerLightSectionStorage;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S extends LayerLightSectionStorage<M>>
@@ -75,28 +75,28 @@ implements LayerLightEventListener {
         Arrays.fill(this.lastChunk, null);
     }
 
-    protected BlockState getStateAndOpacity(long l, @Nullable AtomicInteger atomicInteger) {
+    protected BlockState getStateAndOpacity(long l, @Nullable MutableInt mutableInt) {
         boolean bl;
         int j;
         if (l == Long.MAX_VALUE) {
-            if (atomicInteger != null) {
-                atomicInteger.set(0);
+            if (mutableInt != null) {
+                mutableInt.setValue(0);
             }
             return Blocks.AIR.defaultBlockState();
         }
         int i = SectionPos.blockToSectionCoord(BlockPos.getX(l));
         BlockGetter blockGetter = this.getChunk(i, j = SectionPos.blockToSectionCoord(BlockPos.getZ(l)));
         if (blockGetter == null) {
-            if (atomicInteger != null) {
-                atomicInteger.set(16);
+            if (mutableInt != null) {
+                mutableInt.setValue(16);
             }
             return Blocks.BEDROCK.defaultBlockState();
         }
         this.pos.set(l);
         BlockState blockState = blockGetter.getBlockState(this.pos);
         boolean bl2 = bl = blockState.canOcclude() && blockState.useShapeForLightOcclusion();
-        if (atomicInteger != null) {
-            atomicInteger.set(blockState.getLightBlock(this.chunkSource.getLevel(), this.pos));
+        if (mutableInt != null) {
+            mutableInt.setValue(blockState.getLightBlock(this.chunkSource.getLevel(), this.pos));
         }
         return bl ? blockState : Blocks.AIR.defaultBlockState();
     }

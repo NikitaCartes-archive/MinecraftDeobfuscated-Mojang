@@ -154,11 +154,7 @@ extends Animal {
                 }
                 return true;
             }
-            if (itemStack.getItem() == Items.SADDLE) {
-                itemStack.interactEnemy(player, this, interactionHand);
-                return true;
-            }
-            return false;
+            return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
         }
         return true;
     }

@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
@@ -48,7 +47,7 @@ extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
         float n = Mth.frac(l + 0.75f) * 1.6f - 0.3f;
         float o = Mth.lerp(f, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
         this.bookModel.setupAnim(g, Mth.clamp(m, 0.0f, 1.0f), Mth.clamp(n, 0.0f, 1.0f), o);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
         this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, this.getSprite(BOOK_LOCATION));
         poseStack.popPose();
     }

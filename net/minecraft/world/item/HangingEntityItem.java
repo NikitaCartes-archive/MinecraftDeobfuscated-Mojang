@@ -55,8 +55,9 @@ extends Item {
                 level.addFreshEntity(hangingEntity);
             }
             itemStack.shrink(1);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     protected boolean mayPlace(Player player, Direction direction, ItemStack itemStack, BlockPos blockPos) {

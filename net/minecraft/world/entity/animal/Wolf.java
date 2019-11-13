@@ -66,7 +66,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class Wolf
 extends TamableAnimal {
-    private static final EntityDataAccessor<Float> DATA_HEALTH_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
     public static final Predicate<LivingEntity> PREY_SELECTOR = livingEntity -> {
@@ -130,14 +129,8 @@ extends TamableAnimal {
     }
 
     @Override
-    protected void customServerAiStep() {
-        this.entityData.set(DATA_HEALTH_ID, Float.valueOf(this.getHealth()));
-    }
-
-    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_HEALTH_ID, Float.valueOf(this.getHealth()));
         this.entityData.define(DATA_INTERESTED_ID, false);
         this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
     }
@@ -169,7 +162,7 @@ extends TamableAnimal {
             return SoundEvents.WOLF_GROWL;
         }
         if (this.random.nextInt(3) == 0) {
-            if (this.isTame() && this.entityData.get(DATA_HEALTH_ID).floatValue() < 10.0f) {
+            if (this.isTame() && this.getHealth() < 10.0f) {
                 return SoundEvents.WOLF_WHINE;
             }
             return SoundEvents.WOLF_PANT;
@@ -338,7 +331,7 @@ extends TamableAnimal {
             return this.isOwnedBy(player) || item == Items.BONE && !this.isAngry();
         }
         if (this.isTame()) {
-            if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < 20.0f) {
+            if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < this.getMaxHealth()) {
                 if (!player.abilities.instabuild) {
                     itemStack.shrink(1);
                 }
@@ -376,7 +369,6 @@ extends TamableAnimal {
                 this.navigation.stop();
                 this.setTarget(null);
                 this.sitGoal.wantToSit(true);
-                this.setHealth(20.0f);
                 this.level.broadcastEntityEvent(this, (byte)7);
             } else {
                 this.level.broadcastEntityEvent(this, (byte)6);
@@ -404,7 +396,7 @@ extends TamableAnimal {
             return 1.5393804f;
         }
         if (this.isTame()) {
-            return (0.55f - (this.getMaxHealth() - this.entityData.get(DATA_HEALTH_ID).floatValue()) * 0.02f) * (float)Math.PI;
+            return (0.55f - (this.getMaxHealth() - this.getHealth()) * 0.02f) * (float)Math.PI;
         }
         return 0.62831855f;
     }

@@ -133,7 +133,7 @@ implements VillagerDataHolder {
             }
             return true;
         }
-        return false;
+        return super.mobInteract(player, interactionHand);
     }
 
     @Override

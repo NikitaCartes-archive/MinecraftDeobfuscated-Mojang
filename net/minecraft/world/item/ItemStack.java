@@ -293,6 +293,9 @@ public final class ItemStack {
     }
 
     public ItemStack copy() {
+        if (this.isEmpty()) {
+            return EMPTY;
+        }
         ItemStack itemStack = new ItemStack(this.getItem(), this.count);
         itemStack.setPopTime(this.getPopTime());
         if (this.tag != null) {

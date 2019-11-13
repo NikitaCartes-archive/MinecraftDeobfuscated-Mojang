@@ -18,9 +18,13 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> {
+    public static final Logger LOGGER = LogManager.getLogger();
     public final F feature;
     public final FC config;
 
@@ -51,8 +55,14 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
     }
 
     public static <T> ConfiguredFeature<?, ?> deserialize(Dynamic<T> dynamic) {
-        Feature<?> feature = Registry.FEATURE.get(new ResourceLocation(dynamic.get("name").asString("")));
-        return new ConfiguredFeature(feature, dynamic.get("config").orElseEmptyMap());
+        String string = dynamic.get("name").asString("");
+        Feature<?> feature = Registry.FEATURE.get(new ResourceLocation(string));
+        try {
+            return new ConfiguredFeature(feature, dynamic.get("config").orElseEmptyMap());
+        } catch (RuntimeException runtimeException) {
+            LOGGER.warn("Error while deserializing {}", (Object)string);
+            return new ConfiguredFeature<NoneFeatureConfiguration, Feature<NoneFeatureConfiguration>>(Feature.NO_OP, NoneFeatureConfiguration.NONE);
+        }
     }
 }
 

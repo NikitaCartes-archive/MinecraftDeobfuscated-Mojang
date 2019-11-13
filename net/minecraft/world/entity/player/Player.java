@@ -263,7 +263,7 @@ extends LivingEntity {
             if (!ItemStack.isSameIgnoreDurability(this.lastItemInMainHand, itemStack)) {
                 this.resetAttackStrengthTicker();
             }
-            this.lastItemInMainHand = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();
+            this.lastItemInMainHand = itemStack.copy();
         }
         this.turtleHelmetTick();
         this.cooldowns.tick();
@@ -595,7 +595,7 @@ extends LivingEntity {
         if (bl) {
             float f = this.random.nextFloat() * 0.5f;
             float g = this.random.nextFloat() * ((float)Math.PI * 2);
-            this.setDeltaMovement(-Mth.sin(g) * f, 0.2f, Mth.cos(g) * f);
+            itemEntity.setDeltaMovement(-Mth.sin(g) * f, 0.2f, Mth.cos(g) * f);
         } else {
             float f = 0.3f;
             float g = Mth.sin(this.xRot * ((float)Math.PI / 180));
@@ -861,7 +861,6 @@ extends LivingEntity {
     }
 
     public InteractionResult interactOn(Entity entity, InteractionHand interactionHand) {
-        ItemStack itemStack2;
         if (this.isSpectator()) {
             if (entity instanceof MenuProvider) {
                 this.openMenu((MenuProvider)((Object)entity));
@@ -869,7 +868,7 @@ extends LivingEntity {
             return InteractionResult.PASS;
         }
         ItemStack itemStack = this.getItemInHand(interactionHand);
-        ItemStack itemStack3 = itemStack2 = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();
+        ItemStack itemStack2 = itemStack.copy();
         if (entity.interact(this, interactionHand)) {
             if (this.abilities.instabuild && itemStack == this.getItemInHand(interactionHand) && itemStack.getCount() < itemStack2.getCount()) {
                 itemStack.setCount(itemStack2.getCount());
@@ -1524,7 +1523,7 @@ extends LivingEntity {
     }
 
     public boolean canEat(boolean bl) {
-        return !this.abilities.invulnerable && (bl || this.foodData.needsFood());
+        return this.abilities.invulnerable || bl || this.foodData.needsFood();
     }
 
     public boolean isHurt() {

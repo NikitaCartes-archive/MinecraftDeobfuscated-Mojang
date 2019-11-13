@@ -37,6 +37,16 @@ public interface VertexConsumer {
 
     public void endVertex();
 
+    default public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
+        this.vertex(f, g, h);
+        this.color(i, j, k, l);
+        this.uv(m, n);
+        this.overlayCoords(o);
+        this.uv2(p);
+        this.normal(q, r, s);
+        this.endVertex();
+    }
+
     default public VertexConsumer color(float f, float g, float h, float i) {
         return this.color((int)(f * 255.0f), (int)(g * 255.0f), (int)(h * 255.0f), (int)(i * 255.0f));
     }
@@ -65,37 +75,34 @@ public interface VertexConsumer {
             ByteBuffer byteBuffer = memoryStack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
             IntBuffer intBuffer = byteBuffer.asIntBuffer();
             for (int l = 0; l < k; ++l) {
-                byte d;
-                byte c;
-                byte b;
-                int p;
+                float u;
+                float t;
+                float s;
+                float r;
+                float q;
                 intBuffer.clear();
                 intBuffer.put(js, l * 8, 8);
                 float m = byteBuffer.getFloat(0);
                 float n = byteBuffer.getFloat(4);
                 float o = byteBuffer.getFloat(8);
                 if (bl) {
-                    p = byteBuffer.get(12) & 0xFF;
-                    int q = byteBuffer.get(13) & 0xFF;
-                    int r = byteBuffer.get(14) & 0xFF;
-                    b = (byte)((float)p * fs[l] * f);
-                    c = (byte)((float)q * fs[l] * g);
-                    d = (byte)((float)r * fs[l] * h);
+                    float p = (float)(byteBuffer.get(12) & 0xFF) / 255.0f;
+                    q = (float)(byteBuffer.get(13) & 0xFF) / 255.0f;
+                    r = (float)(byteBuffer.get(14) & 0xFF) / 255.0f;
+                    s = p * fs[l] * f;
+                    t = q * fs[l] * g;
+                    u = r * fs[l] * h;
                 } else {
-                    b = (byte)(255.0f * fs[l] * f);
-                    c = (byte)(255.0f * fs[l] * g);
-                    d = (byte)(255.0f * fs[l] * h);
+                    s = fs[l] * f;
+                    t = fs[l] * g;
+                    u = fs[l] * h;
                 }
-                p = is[l];
-                float s = byteBuffer.getFloat(16);
-                float t = byteBuffer.getFloat(20);
-                this.vertex(matrix4f, m, n, o);
-                this.color(b, c, d, 255);
-                this.uv(s, t);
-                this.overlayCoords(i);
-                this.uv2(p);
-                this.normal(vector3f.x(), vector3f.y(), vector3f.z());
-                this.endVertex();
+                int v = is[l];
+                q = byteBuffer.getFloat(16);
+                r = byteBuffer.getFloat(20);
+                Vector4f vector4f = new Vector4f(m, n, o, 1.0f);
+                vector4f.transform(matrix4f);
+                this.vertex(vector4f.x(), vector4f.y(), vector4f.z(), s, t, u, 1.0f, q, r, i, v, vector3f.x(), vector3f.y(), vector3f.z());
             }
         }
     }

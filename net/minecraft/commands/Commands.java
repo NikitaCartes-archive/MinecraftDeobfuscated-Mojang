@@ -5,6 +5,7 @@ package net.minecraft.commands;
 
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -101,6 +102,7 @@ import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class Commands {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -291,6 +293,20 @@ public class Commands {
 
     public CommandDispatcher<CommandSourceStack> getDispatcher() {
         return this.dispatcher;
+    }
+
+    @Nullable
+    public static <S> CommandSyntaxException getParseException(ParseResults<S> parseResults) {
+        if (!parseResults.getReader().canRead()) {
+            return null;
+        }
+        if (parseResults.getExceptions().size() == 1) {
+            return parseResults.getExceptions().values().iterator().next();
+        }
+        if (parseResults.getContext().getRange().isEmpty()) {
+            return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
+        }
+        return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
     }
 
     @FunctionalInterface

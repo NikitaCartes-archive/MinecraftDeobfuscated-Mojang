@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.lighting;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -16,6 +15,7 @@ import net.minecraft.world.level.lighting.BlockLightSectionStorage;
 import net.minecraft.world.level.lighting.LayerLightEngine;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public final class BlockLightEngine
 extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, BlockLightSectionStorage> {
@@ -56,9 +56,9 @@ extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, Bloc
         if (direction == null) {
             return 15;
         }
-        AtomicInteger atomicInteger = new AtomicInteger();
-        BlockState blockState = this.getStateAndOpacity(m, atomicInteger);
-        if (atomicInteger.get() >= 15) {
+        MutableInt mutableInt = new MutableInt();
+        BlockState blockState = this.getStateAndOpacity(m, mutableInt);
+        if (mutableInt.getValue() >= 15) {
             return 15;
         }
         BlockState blockState2 = this.getStateAndOpacity(l, null);
@@ -66,7 +66,7 @@ extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, Bloc
         if (Shapes.faceShapeOccludes(voxelShape, voxelShape2 = this.getShape(blockState, m, direction.getOpposite()))) {
             return 15;
         }
-        return i + Math.max(1, atomicInteger.get());
+        return i + Math.max(1, mutableInt.getValue());
     }
 
     @Override

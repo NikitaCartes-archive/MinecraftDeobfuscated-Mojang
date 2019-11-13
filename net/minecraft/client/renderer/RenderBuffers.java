@@ -13,16 +13,15 @@ import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 
 @Environment(value=EnvType.CLIENT)
 public class RenderBuffers {
     private final ChunkBufferBuilderPack fixedBufferPack = new ChunkBufferBuilderPack();
     private final SortedMap<RenderType, BufferBuilder> fixedBuffers = Util.make(new Object2ObjectLinkedOpenHashMap(), object2ObjectLinkedOpenHashMap -> {
-        object2ObjectLinkedOpenHashMap.put(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.solid()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutout()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS), this.fixedBufferPack.builder(RenderType.translucent()));
+        object2ObjectLinkedOpenHashMap.put(RenderType.blockentitySolid(), this.fixedBufferPack.builder(RenderType.solid()));
+        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityCutout(), this.fixedBufferPack.builder(RenderType.cutout()));
+        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityNoOutline(), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
+        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityTranslucent(), this.fixedBufferPack.builder(RenderType.translucent()));
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.translucentNoCrumbling());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.glint());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());

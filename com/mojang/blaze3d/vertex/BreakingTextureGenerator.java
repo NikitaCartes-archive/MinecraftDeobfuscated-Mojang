@@ -23,10 +23,6 @@ extends DefaultedVertexConsumer {
     private float x;
     private float y;
     private float z;
-    private int r;
-    private int g;
-    private int b;
-    private int a;
     private int overlayU;
     private int overlayV;
     private int lightCoords;
@@ -47,10 +43,6 @@ extends DefaultedVertexConsumer {
         this.x = 0.0f;
         this.y = 0.0f;
         this.z = 0.0f;
-        this.r = this.defaultR;
-        this.g = this.defaultG;
-        this.b = this.defaultB;
-        this.a = this.defaultA;
         this.overlayU = 0;
         this.overlayV = 10;
         this.lightCoords = 0xF000F0;
@@ -71,7 +63,7 @@ extends DefaultedVertexConsumer {
         vector4f.transform(direction.getRotation());
         float f = -vector4f.x();
         float g = -vector4f.y();
-        this.delegate.vertex(this.x, this.y, this.z).color(this.r, this.g, this.b, this.a).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
+        this.delegate.vertex(this.x, this.y, this.z).color(1.0f, 1.0f, 1.0f, 1.0f).uv(f, g).overlayCoords(this.overlayU, this.overlayV).uv2(this.lightCoords).normal(this.nx, this.ny, this.nz).endVertex();
         this.resetState();
     }
 
@@ -85,13 +77,6 @@ extends DefaultedVertexConsumer {
 
     @Override
     public VertexConsumer color(int i, int j, int k, int l) {
-        if (this.defaultColorSet) {
-            throw new IllegalStateException();
-        }
-        this.r = i;
-        this.g = j;
-        this.b = k;
-        this.a = l;
         return this;
     }
 

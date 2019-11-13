@@ -92,8 +92,10 @@ implements FlyingAnimal {
     private int ticksSincePollination;
     private int cannotEnterHiveTicks;
     private int numCropsGrownSincePollination;
-    private BlockPos savedFlowerPos = BlockPos.ZERO;
-    private BlockPos hivePos = BlockPos.ZERO;
+    @Nullable
+    private BlockPos savedFlowerPos = null;
+    @Nullable
+    private BlockPos hivePos = null;
     private BeePollinateGoal beePollinateGoal;
     private int underWaterTicks;
 
@@ -135,8 +137,12 @@ implements FlyingAnimal {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("HivePos", NbtUtils.writeBlockPos(this.hivePos));
-        compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
+        if (this.hasHive()) {
+            compoundTag.put("HivePos", NbtUtils.writeBlockPos(this.getHivePos()));
+        }
+        if (this.hasSavedFlowerPos()) {
+            compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.getSavedFlowerPos()));
+        }
         compoundTag.putBoolean("HasNectar", this.hasNectar());
         compoundTag.putBoolean("HasStung", this.hasStung());
         compoundTag.putInt("TicksSincePollination", this.ticksSincePollination);
@@ -152,8 +158,14 @@ implements FlyingAnimal {
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
-        this.hivePos = NbtUtils.readBlockPos(compoundTag.getCompound("HivePos"));
-        this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+        this.hivePos = null;
+        if (compoundTag.contains("HivePos")) {
+            this.hivePos = NbtUtils.readBlockPos(compoundTag.getCompound("HivePos"));
+        }
+        this.savedFlowerPos = null;
+        if (compoundTag.contains("FlowerPos")) {
+            this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+        }
         super.readAdditionalSaveData(compoundTag);
         this.setHasNectar(compoundTag.getBoolean("HasNectar"));
         this.setHasStung(compoundTag.getBoolean("HasStung"));
@@ -212,12 +224,13 @@ implements FlyingAnimal {
         level.addParticle(particleOptions, Mth.lerp(level.random.nextDouble(), d, e), h, Mth.lerp(level.random.nextDouble(), f, g), 0.0, 0.0, 0.0);
     }
 
+    @Nullable
     public BlockPos getSavedFlowerPos() {
         return this.savedFlowerPos;
     }
 
     public boolean hasSavedFlowerPos() {
-        return this.savedFlowerPos != BlockPos.ZERO;
+        return this.savedFlowerPos != null;
     }
 
     public void setSavedFlowerPos(BlockPos blockPos) {
@@ -236,7 +249,7 @@ implements FlyingAnimal {
             return false;
         }
         boolean bl2 = bl = this.ticksSincePollination > 3600;
-        if (bl || this.hasNectar() || !this.level.isDay() || this.level.isRaining()) {
+        if (bl || this.hasNectar() || this.level.isNight() || this.level.isRaining()) {
             BlockEntity blockEntity = this.level.getBlockEntity(this.hivePos);
             return blockEntity instanceof BeehiveBlockEntity && !((BeehiveBlockEntity)blockEntity).isFireNearby();
         }
@@ -308,7 +321,12 @@ implements FlyingAnimal {
     }
 
     public boolean hasHive() {
-        return this.hivePos != BlockPos.ZERO;
+        return this.hivePos != null;
+    }
+
+    @Nullable
+    public BlockPos getHivePos() {
+        return this.hivePos;
     }
 
     @Override
@@ -339,7 +357,7 @@ implements FlyingAnimal {
             boolean bl = this.isAngry() && !this.hasStung() && this.getTarget() != null && this.getTarget().distanceToSqr(this) < 4.0;
             this.setRolling(bl);
             if (this.tickCount % 20 == 0 && !this.isHiveValid()) {
-                this.hivePos = BlockPos.ZERO;
+                this.hivePos = null;
             }
         }
     }
@@ -526,14 +544,10 @@ implements FlyingAnimal {
         @Override
         public boolean canBeeUse() {
             BlockEntity blockEntity;
-            if (!Bee.this.canEnterHive()) {
-                return false;
-            }
-            BlockPos blockPos = new BlockPos(Bee.this);
-            if (Bee.this.hivePos.distSqr(blockPos) < 4.0 && (blockEntity = Bee.this.level.getBlockEntity(Bee.this.hivePos)) instanceof BeehiveBlockEntity) {
+            if (Bee.this.canEnterHive() && Bee.this.hivePos.closerThan(Bee.this.position(), 2.0) && (blockEntity = Bee.this.level.getBlockEntity(Bee.this.hivePos)) instanceof BeehiveBlockEntity) {
                 BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
                 if (beehiveBlockEntity.isFull()) {
-                    Bee.this.hivePos = BlockPos.ZERO;
+                    Bee.this.hivePos = null;
                 } else {
                     return true;
                 }
@@ -718,6 +732,9 @@ implements FlyingAnimal {
             if (!this.pollinating) {
                 return false;
             }
+            if (!Bee.this.hasSavedFlowerPos()) {
+                return false;
+            }
             if (Bee.this.level.isRaining()) {
                 return false;
             }
@@ -858,33 +875,31 @@ implements FlyingAnimal {
         }
 
         @Override
-        public boolean canBeeUse() {
-            return this.isTargetPosValid() && Bee.this.ticksSincePollination > 3600;
-        }
-
-        @Override
-        public boolean canBeeContinueToUse() {
-            return this.isTargetPosValid();
-        }
-
-        @Override
-        public void stop() {
-            if (!this.isTargetPosValid()) {
-                Bee.this.savedFlowerPos = BlockPos.ZERO;
-            }
-        }
-
-        @Override
+        @Nullable
         protected BlockPos getTargetPos() {
             return Bee.this.savedFlowerPos;
         }
 
-        private boolean isTargetPosValid() {
-            if (this.isBeeWithinTargetPosRange()) {
-                return Bee.this.level.getBlockState(this.getTargetPos()).is(BlockTags.FLOWERS);
+        @Override
+        public boolean canBeeUse() {
+            if (this.getTargetPos() == null) {
+                return false;
             }
-            Bee.this.savedFlowerPos = BlockPos.ZERO;
+            if (this.isBeeWithinTargetPosRange()) {
+                return Bee.this.ticksSincePollination > 3600 && Bee.this.level.getBlockState(this.getTargetPos()).is(BlockTags.FLOWERS);
+            }
+            Bee.this.savedFlowerPos = null;
             return false;
+        }
+
+        @Override
+        public boolean canBeeContinueToUse() {
+            return this.canBeeUse();
+        }
+
+        @Override
+        protected void cantPathfindToTarget() {
+            Bee.this.savedFlowerPos = null;
         }
     }
 
@@ -895,6 +910,7 @@ implements FlyingAnimal {
         }
 
         @Override
+        @Nullable
         protected BlockPos getTargetPos() {
             return Bee.this.hivePos;
         }
@@ -904,7 +920,7 @@ implements FlyingAnimal {
             if (this.isBeeWithinTargetPosRange()) {
                 return Bee.this.canEnterHive();
             }
-            Bee.this.hivePos = BlockPos.ZERO;
+            Bee.this.hivePos = null;
             return false;
         }
 
@@ -912,21 +928,25 @@ implements FlyingAnimal {
         public boolean canBeeContinueToUse() {
             return this.canBeeUse();
         }
+
+        @Override
+        protected void cantPathfindToTarget() {
+            Bee.this.hivePos = null;
+        }
     }
 
     abstract class BeeGoToBlockGoal
     extends BaseBeeGoal {
-        protected boolean stuck;
         private int minThreshold;
         private int maxThreshold;
 
         public BeeGoToBlockGoal(int i, int j) {
-            this.stuck = false;
             this.minThreshold = i;
             this.maxThreshold = j;
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
 
+        @Nullable
         protected abstract BlockPos getTargetPos();
 
         @Override
@@ -936,7 +956,7 @@ implements FlyingAnimal {
 
         boolean isBeeWithinTargetPosRange() {
             BlockPos blockPos = this.getTargetPos();
-            if (blockPos == BlockPos.ZERO) {
+            if (blockPos == null) {
                 return false;
             }
             double d = blockPos.distSqr(new BlockPos(Bee.this));
@@ -945,21 +965,35 @@ implements FlyingAnimal {
             return bl && bl2;
         }
 
+        protected abstract void cantPathfindToTarget();
+
         @Override
         public void tick() {
             BlockPos blockPos = this.getTargetPos();
-            if (Bee.this.getNavigation().isDone()) {
+            PathNavigation pathNavigation = Bee.this.getNavigation();
+            if (pathNavigation.getPath() != null && !pathNavigation.getPath().canReach()) {
+                this.stop();
+                this.cantPathfindToTarget();
+                return;
+            }
+            if (pathNavigation.isDone()) {
                 Vec3 vec3 = new Vec3(blockPos);
                 Vec3 vec32 = RandomPos.getPosTowards(Bee.this, 8, 6, vec3, 0.3141592741012573, false);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards((PathfinderMob)Bee.this, 3, 3, vec3, false);
                 }
                 if (vec32 == null) {
-                    this.stuck = true;
+                    this.stop();
+                    this.cantPathfindToTarget();
                     return;
                 }
-                Bee.this.getNavigation().moveTo(vec32.x, vec32.y, vec32.z, 1.0);
+                pathNavigation.moveTo(vec32.x, vec32.y, vec32.z, 1.0);
             }
+        }
+
+        @Override
+        public void stop() {
+            Bee.this.getNavigation().stop();
         }
     }
 
@@ -991,7 +1025,7 @@ implements FlyingAnimal {
         @Nullable
         private Vec3 findPos() {
             Vec3 vec32;
-            if (!Bee.this.hivePos.closerThan(Bee.this.position(), 40.0) && Bee.this.isHiveValid()) {
+            if (Bee.this.isHiveValid() && !Bee.this.hivePos.closerThan(Bee.this.position(), 40.0)) {
                 Vec3 vec3 = new Vec3(Bee.this.hivePos);
                 vec32 = vec3.subtract(Bee.this.position()).normalize();
             } else {

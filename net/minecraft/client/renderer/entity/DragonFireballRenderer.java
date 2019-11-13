@@ -31,9 +31,8 @@ extends EntityRenderer<DragonFireball> {
     public void render(DragonFireball dragonFireball, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         poseStack.pushPose();
         poseStack.scale(2.0f, 2.0f, 2.0f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - this.entityRenderDispatcher.playerRotY));
-        float h = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * -this.entityRenderDispatcher.playerRotX;
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(h));
+        poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
         Matrix3f matrix3f = pose.normal();

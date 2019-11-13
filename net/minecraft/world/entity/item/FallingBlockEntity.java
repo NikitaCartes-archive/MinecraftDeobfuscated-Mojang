@@ -123,6 +123,7 @@ extends Entity {
         }
         this.move(MoverType.SELF, this.getDeltaMovement());
         if (!this.level.isClientSide) {
+            boolean bl3;
             BlockHitResult blockHitResult;
             blockPos = new BlockPos(this);
             boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
@@ -132,15 +133,16 @@ extends Entity {
                 blockPos = blockHitResult.getBlockPos();
                 bl2 = true;
             }
-            if (this.onGround || bl2) {
+            boolean bl4 = bl3 = this.onGround && !FallingBlock.isFree(this.level.getBlockState(blockPos.below()));
+            if (bl3 || bl2) {
                 BlockState blockState = this.level.getBlockState(blockPos);
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
                 if (blockState.getBlock() != Blocks.MOVING_PISTON) {
                     this.remove();
                     if (!this.cancelDrop) {
-                        boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
-                        boolean bl4 = this.blockState.canSurvive(this.level, blockPos);
-                        if (bl3 && bl4) {
+                        boolean bl42 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
+                        boolean bl5 = this.blockState.canSurvive(this.level, blockPos);
+                        if (bl42 && bl5) {
                             if (this.blockState.hasProperty(BlockStateProperties.WATERLOGGED) && this.level.getFluidState(blockPos).getType() == Fluids.WATER) {
                                 this.blockState = (BlockState)this.blockState.setValue(BlockStateProperties.WATERLOGGED, true);
                             }

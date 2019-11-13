@@ -384,16 +384,8 @@ extends Entity {
     protected void tickDeath() {
         ++this.deathTime;
         if (this.deathTime == 20) {
-            int i;
-            if (!this.level.isClientSide && (this.isAlwaysExperienceDropper() || this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))) {
-                int j;
-                for (i = this.getExperienceReward(this.lastHurtByPlayer); i > 0; i -= j) {
-                    j = ExperienceOrb.getExperienceValue(i);
-                    this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
-                }
-            }
             this.remove();
-            for (i = 0; i < 20; ++i) {
+            for (int i = 0; i < 20; ++i) {
                 double d = this.random.nextGaussian() * 0.02;
                 double e = this.random.nextGaussian() * 0.02;
                 double f = this.random.nextGaussian() * 0.02;
@@ -1010,9 +1002,20 @@ extends Entity {
             this.dropCustomDeathLoot(damageSource, i, bl);
         }
         this.dropEquipment();
+        this.dropExperience();
     }
 
     protected void dropEquipment() {
+    }
+
+    protected void dropExperience() {
+        if (!this.level.isClientSide && (this.isAlwaysExperienceDropper() || this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT))) {
+            int j;
+            for (int i = this.getExperienceReward(this.lastHurtByPlayer); i > 0; i -= j) {
+                j = ExperienceOrb.getExperienceValue(i);
+                this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
+            }
+        }
     }
 
     protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
@@ -1816,11 +1819,11 @@ extends Entity {
                 }
                 switch (equipmentSlot.getType()) {
                     case HAND: {
-                        this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2.copy());
+                        this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
                         continue block8;
                     }
                     case ARMOR: {
-                        this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2.copy());
+                        this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
                     }
                 }
             }

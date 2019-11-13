@@ -303,19 +303,23 @@ extends HangingEntity {
 
     @Override
     public boolean interact(Player player, InteractionHand interactionHand) {
+        boolean bl2;
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (!this.level.isClientSide) {
-            if (this.getItem().isEmpty()) {
-                if (!itemStack.isEmpty()) {
-                    this.setItem(itemStack);
-                    if (!player.abilities.instabuild) {
-                        itemStack.shrink(1);
-                    }
+        boolean bl = !this.getItem().isEmpty();
+        boolean bl3 = bl2 = !itemStack.isEmpty();
+        if (this.level.isClientSide) {
+            return bl || bl2;
+        }
+        if (!bl) {
+            if (bl2) {
+                this.setItem(itemStack);
+                if (!player.abilities.instabuild) {
+                    itemStack.shrink(1);
                 }
-            } else {
-                this.playSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1.0f, 1.0f);
-                this.setRotation(this.getRotation() + 1);
             }
+        } else {
+            this.playSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1.0f, 1.0f);
+            this.setRotation(this.getRotation() + 1);
         }
         return true;
     }

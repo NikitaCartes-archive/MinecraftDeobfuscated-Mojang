@@ -65,6 +65,7 @@ import net.minecraft.world.level.levelgen.feature.MegaPineTreeFeature;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.MonsterRoomFeature;
 import net.minecraft.world.level.levelgen.feature.NetherFortressFeature;
+import net.minecraft.world.level.levelgen.feature.NoOpFeature;
 import net.minecraft.world.level.levelgen.feature.OceanMonumentFeature;
 import net.minecraft.world.level.levelgen.feature.OreFeature;
 import net.minecraft.world.level.levelgen.feature.PillagerOutpostFeature;
@@ -139,6 +140,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final StructureFeature<NoneFeatureConfiguration> END_CITY = Feature.register("end_city", new EndCityFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final StructureFeature<BuriedTreasureConfiguration> BURIED_TREASURE = Feature.register("buried_treasure", new BuriedTreasureFeature((Function<Dynamic<?>, ? extends BuriedTreasureConfiguration>)((Function<Dynamic<?>, BuriedTreasureConfiguration>)BuriedTreasureConfiguration::deserialize)));
     public static final StructureFeature<VillageConfiguration> VILLAGE = Feature.register("village", new VillageFeature((Function<Dynamic<?>, ? extends VillageConfiguration>)((Function<Dynamic<?>, VillageConfiguration>)VillageConfiguration::deserialize)));
+    public static final Feature<NoneFeatureConfiguration> NO_OP = Feature.register("no_op", new NoOpFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<SmallTreeConfiguration> NORMAL_TREE = Feature.register("normal_tree", new TreeFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));
     public static final Feature<SmallTreeConfiguration> ACACIA_TREE = Feature.register("acacia_tree", new AcaciaFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));
     public static final Feature<SmallTreeConfiguration> FANCY_TREE = Feature.register("fancy_tree", new FancyTreeFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));

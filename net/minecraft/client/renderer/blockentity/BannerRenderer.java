@@ -76,7 +76,7 @@ extends BlockEntityRenderer<BannerBlockEntity> {
         TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
         this.pole.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         this.bar.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
         if (bannerBlockEntity.onlyRenderPattern()) {
@@ -97,7 +97,7 @@ extends BlockEntityRenderer<BannerBlockEntity> {
         List<BannerPattern> list = bannerBlockEntity.getPatterns();
         List<DyeColor> list2 = bannerBlockEntity.getColors();
         TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityNoOutline());
         for (int k = 0; k < 17 && k < list.size() && k < list2.size(); ++k) {
             BannerPattern bannerPattern = list.get(k);
             DyeColor dyeColor = list2.get(k);

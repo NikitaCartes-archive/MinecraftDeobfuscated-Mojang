@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerFunctionManager;
 import org.jetbrains.annotations.Nullable;
@@ -51,13 +52,7 @@ public class CommandFunction {
             try {
                 ParseResults<CommandSourceStack> parseResults = serverFunctionManager.getServer().getCommands().getDispatcher().parse(stringReader, serverFunctionManager.getCompilationContext());
                 if (parseResults.getReader().canRead()) {
-                    if (parseResults.getExceptions().size() == 1) {
-                        throw parseResults.getExceptions().values().iterator().next();
-                    }
-                    if (parseResults.getContext().getRange().isEmpty()) {
-                        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
-                    }
-                    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
+                    throw Commands.getParseException(parseResults);
                 }
                 list2.add(new CommandEntry(parseResults));
                 continue;

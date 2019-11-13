@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.platform.MemoryTracker;
 import com.mojang.blaze3d.vertex.BufferVertexConsumer;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -41,6 +42,8 @@ implements BufferVertexConsumer {
     private int elementIndex;
     private int mode;
     private VertexFormat format;
+    private boolean fastFormat;
+    private boolean fullFormat;
     private boolean building;
 
     public BufferBuilder(int i) {
@@ -164,9 +167,10 @@ implements BufferVertexConsumer {
         this.buffer.position(this.totalRenderedBytes);
         this.buffer.put(state.data);
         this.buffer.clear();
-        this.format = state.format;
-        this.vertices = i / this.format.getVertexSize();
-        this.nextElementByte = this.totalRenderedBytes + this.vertices * this.format.getVertexSize();
+        VertexFormat vertexFormat = state.format;
+        this.switchFormat(vertexFormat);
+        this.vertices = i / vertexFormat.getVertexSize();
+        this.nextElementByte = this.totalRenderedBytes + this.vertices * vertexFormat.getVertexSize();
     }
 
     public void begin(int i, VertexFormat vertexFormat) {
@@ -175,10 +179,21 @@ implements BufferVertexConsumer {
         }
         this.building = true;
         this.mode = i;
-        this.format = vertexFormat;
+        this.switchFormat(vertexFormat);
         this.currentElement = (VertexFormatElement)vertexFormat.getElements().get(0);
         this.elementIndex = 0;
         this.buffer.clear();
+    }
+
+    private void switchFormat(VertexFormat vertexFormat) {
+        if (this.format == vertexFormat) {
+            return;
+        }
+        this.format = vertexFormat;
+        boolean bl = vertexFormat == DefaultVertexFormat.NEW_ENTITY;
+        boolean bl2 = vertexFormat == DefaultVertexFormat.BLOCK;
+        this.fastFormat = bl || bl2;
+        this.fullFormat = bl;
     }
 
     public void end() {
@@ -238,6 +253,41 @@ implements BufferVertexConsumer {
             throw new IllegalStateException();
         }
         return BufferVertexConsumer.super.color(i, j, k, l);
+    }
+
+    @Override
+    public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
+        if (this.defaultColorSet) {
+            throw new IllegalStateException();
+        }
+        if (this.fastFormat) {
+            int t;
+            this.putFloat(0, f);
+            this.putFloat(4, g);
+            this.putFloat(8, h);
+            this.putByte(12, (byte)(i * 255.0f));
+            this.putByte(13, (byte)(j * 255.0f));
+            this.putByte(14, (byte)(k * 255.0f));
+            this.putByte(15, (byte)(l * 255.0f));
+            this.putFloat(16, m);
+            this.putFloat(20, n);
+            if (this.fullFormat) {
+                this.putShort(24, (short)(o & 0xFFFF));
+                this.putShort(26, (short)(o >> 16 & 0xFFFF));
+                t = 28;
+            } else {
+                t = 24;
+            }
+            this.putShort(t + 0, (short)(p & 0xFFFF));
+            this.putShort(t + 2, (short)(p >> 16 & 0xFFFF));
+            this.putByte(t + 4, (byte)((int)(q * 127.0f) & 0xFF));
+            this.putByte(t + 5, (byte)((int)(r * 127.0f) & 0xFF));
+            this.putByte(t + 6, (byte)((int)(s * 127.0f) & 0xFF));
+            this.nextElementByte += t + 8;
+            this.endVertex();
+            return;
+        }
+        super.vertex(f, g, h, i, j, k, l, m, n, o, p, q, r, s);
     }
 
     public Pair<DrawState, ByteBuffer> popNextBuffer() {

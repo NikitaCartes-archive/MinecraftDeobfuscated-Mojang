@@ -69,7 +69,6 @@ import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -149,10 +148,14 @@ ResourceManagerReloadListener {
     private final Set<BlockEntity> globalBlockEntities = Sets.newHashSet();
     private ViewArea viewArea;
     private final VertexFormat skyFormat = DefaultVertexFormat.POSITION;
+    @Nullable
     private VertexBuffer starBuffer;
+    @Nullable
     private VertexBuffer skyBuffer;
+    @Nullable
     private VertexBuffer darkBuffer;
     private boolean generateClouds = true;
+    @Nullable
     private VertexBuffer cloudBuffer;
     private int ticks;
     private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<BlockDestructionProgress>();
@@ -443,7 +446,7 @@ ResourceManagerReloadListener {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         if (this.darkBuffer != null) {
-            this.darkBuffer.delete();
+            this.darkBuffer.close();
         }
         this.darkBuffer = new VertexBuffer(this.skyFormat);
         this.drawSkyHemisphere(bufferBuilder, -16.0f, true);
@@ -455,7 +458,7 @@ ResourceManagerReloadListener {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         if (this.skyBuffer != null) {
-            this.skyBuffer.delete();
+            this.skyBuffer.close();
         }
         this.skyBuffer = new VertexBuffer(this.skyFormat);
         this.drawSkyHemisphere(bufferBuilder, 16.0f, false);
@@ -487,7 +490,7 @@ ResourceManagerReloadListener {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         if (this.starBuffer != null) {
-            this.starBuffer.delete();
+            this.starBuffer.close();
         }
         this.starBuffer = new VertexBuffer(this.skyFormat);
         this.drawStars(bufferBuilder);
@@ -911,8 +914,8 @@ ResourceManagerReloadListener {
         }
         this.checkPoseStack(poseStack);
         bufferSource.endBatch(RenderType.solid());
-        bufferSource.endBatch(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
-        bufferSource.endBatch(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.blockentitySolid());
+        bufferSource.endBatch(RenderType.blockentityCutout());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
         if (bl42) {
             this.entityEffect.process(f);
@@ -950,10 +953,11 @@ ResourceManagerReloadListener {
         this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g, l);
         this.renderWorldBounds(camera);
         RenderSystem.popMatrix();
+        bufferSource.endBatch(RenderType.waterMask());
         profilerFiller.popPush("translucent");
         this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
-        bufferSource.endBatch(RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS));
-        bufferSource.endBatch(RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.blockentityTranslucent());
+        bufferSource.endBatch(RenderType.blockentityNoOutline());
         bufferSource.endBatch();
         this.renderBuffers.crumblingBufferSource().endBatch();
         profilerFiller.popPush("particles");
@@ -1421,7 +1425,7 @@ ResourceManagerReloadListener {
             this.generateClouds = false;
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             if (this.cloudBuffer != null) {
-                this.cloudBuffer.delete();
+                this.cloudBuffer.close();
             }
             this.cloudBuffer = new VertexBuffer(DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
             this.buildClouds(bufferBuilder, l, m, n, vec3);

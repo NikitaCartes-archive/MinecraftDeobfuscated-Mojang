@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +59,7 @@ extends BlockEntityRenderer<BedBlockEntity> {
     @Override
     public void render(BedBlockEntity bedBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
         if (bedBlockEntity.hasLevel()) {
             BlockState blockState = bedBlockEntity.getBlockState();
             this.renderPiece(poseStack, vertexConsumer, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), resourceLocation, i, j, false);

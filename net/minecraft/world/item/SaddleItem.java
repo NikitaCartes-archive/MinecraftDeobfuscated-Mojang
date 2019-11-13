@@ -20,13 +20,11 @@ extends Item {
 
     @Override
     public boolean interactEnemy(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
-        if (livingEntity instanceof Pig) {
-            Pig pig = (Pig)livingEntity;
-            if (pig.isAlive() && !pig.hasSaddle() && !pig.isBaby()) {
-                pig.setSaddle(true);
-                pig.level.playSound(player, pig.getX(), pig.getY(), pig.getZ(), SoundEvents.PIG_SADDLE, SoundSource.NEUTRAL, 0.5f, 1.0f);
-                itemStack.shrink(1);
-            }
+        Pig pig;
+        if (livingEntity instanceof Pig && (pig = (Pig)livingEntity).isAlive() && !pig.hasSaddle() && !pig.isBaby()) {
+            pig.setSaddle(true);
+            pig.level.playSound(player, pig.getX(), pig.getY(), pig.getZ(), SoundEvents.PIG_SADDLE, SoundSource.NEUTRAL, 0.5f, 1.0f);
+            itemStack.shrink(1);
             return true;
         }
         return false;

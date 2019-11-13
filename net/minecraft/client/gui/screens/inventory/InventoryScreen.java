@@ -126,7 +126,6 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRot = livingEntity.yRot;
         livingEntity.yHeadRotO = livingEntity.yRot;
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        entityRenderDispatcher.setPlayerRotY(180.0f);
         entityRenderDispatcher.setRenderShadow(false);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack, bufferSource, 0xF000F0);

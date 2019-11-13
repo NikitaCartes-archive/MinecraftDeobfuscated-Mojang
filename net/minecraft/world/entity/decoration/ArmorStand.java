@@ -304,7 +304,7 @@ extends LivingEntity {
         if (this.isMarker() || itemStack.getItem() == Items.NAME_TAG) {
             return InteractionResult.PASS;
         }
-        if (this.level.isClientSide || player.isSpectator()) {
+        if (player.isSpectator()) {
             return InteractionResult.SUCCESS;
         }
         EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
@@ -312,8 +312,8 @@ extends LivingEntity {
             EquipmentSlot equipmentSlot3;
             EquipmentSlot equipmentSlot2 = this.getClickedSlot(vec3);
             EquipmentSlot equipmentSlot4 = equipmentSlot3 = this.isDisabled(equipmentSlot2) ? equipmentSlot : equipmentSlot2;
-            if (this.hasItemInSlot(equipmentSlot3)) {
-                this.swapItem(player, equipmentSlot3, itemStack, interactionHand);
+            if (this.hasItemInSlot(equipmentSlot3) && this.swapItem(player, equipmentSlot3, itemStack, interactionHand)) {
+                return InteractionResult.SUCCESS;
             }
         } else {
             if (this.isDisabled(equipmentSlot)) {
@@ -322,9 +322,11 @@ extends LivingEntity {
             if (equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.isShowArms()) {
                 return InteractionResult.FAIL;
             }
-            this.swapItem(player, equipmentSlot, itemStack, interactionHand);
+            if (this.swapItem(player, equipmentSlot, itemStack, interactionHand)) {
+                return InteractionResult.SUCCESS;
+            }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     /*
@@ -367,32 +369,33 @@ extends LivingEntity {
         return (this.disabledSlots & 1 << equipmentSlot.getFilterFlag()) != 0 || equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.isShowArms();
     }
 
-    private void swapItem(Player player, EquipmentSlot equipmentSlot, ItemStack itemStack, InteractionHand interactionHand) {
+    private boolean swapItem(Player player, EquipmentSlot equipmentSlot, ItemStack itemStack, InteractionHand interactionHand) {
         ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
         if (!itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 8) != 0) {
-            return;
+            return false;
         }
         if (itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 16) != 0) {
-            return;
+            return false;
         }
         if (player.abilities.instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
             ItemStack itemStack3 = itemStack.copy();
             itemStack3.setCount(1);
             this.setItemSlot(equipmentSlot, itemStack3);
-            return;
+            return true;
         }
         if (!itemStack.isEmpty() && itemStack.getCount() > 1) {
             if (!itemStack2.isEmpty()) {
-                return;
+                return false;
             }
             ItemStack itemStack3 = itemStack.copy();
             itemStack3.setCount(1);
             this.setItemSlot(equipmentSlot, itemStack3);
             itemStack.shrink(1);
-            return;
+            return true;
         }
         this.setItemSlot(equipmentSlot, itemStack);
         player.setItemInHand(interactionHand, itemStack2);
+        return true;
     }
 
     @Override

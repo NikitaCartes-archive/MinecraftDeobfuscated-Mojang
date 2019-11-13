@@ -8,13 +8,17 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.critereon.BeeNestDestroyedTrigger;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
 import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
@@ -22,10 +26,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 
 public class HusbandryAdvancements
@@ -47,6 +53,8 @@ implements Consumer<Consumer<Advancement>> {
         Advancement advancement8 = this.addFish(Advancement.Builder.advancement()).parent(advancement).requirements(RequirementsStrategy.OR).display(Items.FISHING_ROD, (Component)new TranslatableComponent("advancements.husbandry.fishy_business.title", new Object[0]), (Component)new TranslatableComponent("advancements.husbandry.fishy_business.description", new Object[0]), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/fishy_business");
         Advancement advancement9 = this.addFishBuckets(Advancement.Builder.advancement()).parent(advancement8).requirements(RequirementsStrategy.OR).display(Items.PUFFERFISH_BUCKET, (Component)new TranslatableComponent("advancements.husbandry.tactical_fishing.title", new Object[0]), (Component)new TranslatableComponent("advancements.husbandry.tactical_fishing.description", new Object[0]), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/tactical_fishing");
         Advancement advancement10 = this.addCatVariants(Advancement.Builder.advancement()).parent(advancement6).display(Items.COD, (Component)new TranslatableComponent("advancements.husbandry.complete_catalogue.title", new Object[0]), (Component)new TranslatableComponent("advancements.husbandry.complete_catalogue.description", new Object[0]), null, FrameType.CHALLENGE, true, true, false).rewards(AdvancementRewards.Builder.experience(50)).save(consumer, "husbandry/complete_catalogue");
+        Advancement advancement11 = Advancement.Builder.advancement().parent(advancement).addCriterion("safely_harvest_honey", ItemUsedOnBlockTrigger.TriggerInstance.safelyHarvestedHoney(BlockPredicate.Builder.block().of(BlockTags.BEEHIVES), ItemPredicate.Builder.item().of(Items.GLASS_BOTTLE))).display(Items.HONEY_BOTTLE, (Component)new TranslatableComponent("advancements.husbandry.safely_harvest_honey.title", new Object[0]), (Component)new TranslatableComponent("advancements.husbandry.safely_harvest_honey.description", new Object[0]), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/safely_harvest_honey");
+        Advancement advancement12 = Advancement.Builder.advancement().parent(advancement).addCriterion("silk_touch_nest", BeeNestDestroyedTrigger.TriggerInstance.destroyedBeeNest(Blocks.BEE_NEST, ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))), MinMaxBounds.Ints.exactly(3))).display(Blocks.BEE_NEST, (Component)new TranslatableComponent("advancements.husbandry.silk_touch_nest.title", new Object[0]), (Component)new TranslatableComponent("advancements.husbandry.silk_touch_nest.description", new Object[0]), null, FrameType.TASK, true, true, false).save(consumer, "husbandry/silk_touch_nest");
     }
 
     private Advancement.Builder addFood(Advancement.Builder builder) {

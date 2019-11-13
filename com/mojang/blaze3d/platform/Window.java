@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.main.SilentInitException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,7 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 @Environment(value=EnvType.CLIENT)
 public final class Window
@@ -195,7 +197,9 @@ implements AutoCloseable {
 
     private static void bootCrash(int i, long l) {
         RenderSystem.assertThread(RenderSystem::isInInitPhase);
-        throw new IllegalStateException("GLFW error " + i + ": " + MemoryUtil.memUTF8(l));
+        String string = "GLFW error " + i + ": " + MemoryUtil.memUTF8(l);
+        TinyFileDialogs.tinyfd_messageBox("Minecraft", string + ".\n\nPlease make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).", "ok", "error", false);
+        throw new WindowInitFailed(string);
     }
 
     public void defaultErrorCallback(int i, long l) {
@@ -422,6 +426,14 @@ implements AutoCloseable {
 
     public void updateRawMouseInput(boolean bl) {
         InputConstants.updateRawMouseInput(this.window, bl);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class WindowInitFailed
+    extends SilentInitException {
+        private WindowInitFailed(String string) {
+            super(string);
+        }
     }
 }
 

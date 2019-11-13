@@ -7,6 +7,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -31,7 +32,8 @@ extends Goal {
         List<Boat> list = this.mob.level.getEntitiesOfClass(Boat.class, this.mob.getBoundingBox().inflate(5.0));
         boolean bl = false;
         for (Boat boat : list) {
-            if (boat.getControllingPassenger() == null || !(Mth.abs(((LivingEntity)boat.getControllingPassenger()).xxa) > 0.0f) && !(Mth.abs(((LivingEntity)boat.getControllingPassenger()).zza) > 0.0f)) continue;
+            Entity entity = boat.getControllingPassenger();
+            if (!(entity instanceof LivingEntity) || !(Mth.abs(((LivingEntity)entity).xxa) > 0.0f) && !(Mth.abs(((LivingEntity)entity).zza) > 0.0f)) continue;
             bl = true;
             break;
         }

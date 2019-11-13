@@ -104,7 +104,7 @@ implements ResourceManagerReloadListener {
             EntityBlockRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
         } else {
             RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
-            RenderType renderType2 = bl2 && Objects.equals(renderType, RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)) ? RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS) : renderType;
+            RenderType renderType2 = bl2 && Objects.equals(renderType, RenderType.blockentityTranslucent()) ? RenderType.blockentityTranslucentCull() : renderType;
             VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, renderType2, true, itemStack.hasFoil());
             this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
         }

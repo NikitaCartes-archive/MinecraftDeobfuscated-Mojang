@@ -814,13 +814,14 @@ WindowEventHandler {
         this.lastNanoTime = n;
         while (Util.getMillis() >= this.lastTime + 1000L) {
             fps = this.frames;
-            Object[] objectArray = new Object[5];
+            Object[] objectArray = new Object[6];
             objectArray[0] = fps;
             objectArray[1] = (double)this.options.framerateLimit == Option.FRAMERATE_LIMIT.getMaxValue() ? "inf" : Integer.valueOf(this.options.framerateLimit);
             objectArray[2] = this.options.enableVsync ? " vsync" : "";
             Object object = objectArray[3] = this.options.fancyGraphics ? "" : " fast";
             objectArray[4] = this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds");
-            this.fpsString = String.format("%d fps T: %s%s%s%s", objectArray);
+            objectArray[5] = this.options.biomeBlendRadius;
+            this.fpsString = String.format("%d fps T: %s%s%s%s B: %d", objectArray);
             this.lastTime += 1000L;
             this.frames = 0;
             this.snooper.prepare();

@@ -21,6 +21,7 @@ import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
+import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
@@ -61,6 +62,7 @@ implements Consumer<Consumer<Advancement>> {
         Advancement advancement16 = Advancement.Builder.advancement().parent(advancement13).display(Items.CROSSBOW, (Component)new TranslatableComponent("advancements.adventure.arbalistic.title", new Object[0]), (Component)new TranslatableComponent("advancements.adventure.arbalistic.description", new Object[0]), null, FrameType.CHALLENGE, true, true, true).rewards(AdvancementRewards.Builder.experience(85)).addCriterion("arbalistic", KilledByCrossbowTrigger.TriggerInstance.crossbowKilled(MinMaxBounds.Ints.exactly(5))).save(consumer, "adventure/arbalistic");
         Advancement advancement17 = Advancement.Builder.advancement().parent(advancement).display(Raid.getLeaderBannerInstance(), (Component)new TranslatableComponent("advancements.adventure.voluntary_exile.title", new Object[0]), (Component)new TranslatableComponent("advancements.adventure.voluntary_exile.description", new Object[0]), null, FrameType.TASK, true, true, true).addCriterion("voluntary_exile", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityTypeTags.RAIDERS).equipment(EntityEquipmentPredicate.CAPTAIN))).save(consumer, "adventure/voluntary_exile");
         Advancement advancement18 = Advancement.Builder.advancement().parent(advancement17).display(Raid.getLeaderBannerInstance(), (Component)new TranslatableComponent("advancements.adventure.hero_of_the_village.title", new Object[0]), (Component)new TranslatableComponent("advancements.adventure.hero_of_the_village.description", new Object[0]), null, FrameType.CHALLENGE, true, true, true).rewards(AdvancementRewards.Builder.experience(100)).addCriterion("hero_of_the_village", LocationTrigger.TriggerInstance.raidWon()).save(consumer, "adventure/hero_of_the_village");
+        Advancement advancement19 = Advancement.Builder.advancement().parent(advancement).display(Blocks.HONEY_BLOCK.asItem(), (Component)new TranslatableComponent("advancements.adventure.honey_block_slide.title", new Object[0]), (Component)new TranslatableComponent("advancements.adventure.honey_block_slide.description", new Object[0]), null, FrameType.TASK, true, true, false).addCriterion("honey_block_slide", SlideDownBlockTrigger.TriggerInstance.slidesDownBlock(Blocks.HONEY_BLOCK)).save(consumer, "adventure/honey_block_slide");
     }
 
     private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

@@ -50,7 +50,7 @@ implements Serializable {
     protected void placeLeaf(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, SmallTreeConfiguration smallTreeConfiguration, Set<BlockPos> set) {
         if (AbstractTreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos) || AbstractTreeFeature.isReplaceablePlant(levelSimulatedRW, blockPos) || AbstractTreeFeature.isBlockWater(levelSimulatedRW, blockPos)) {
             levelSimulatedRW.setBlock(blockPos, smallTreeConfiguration.leavesProvider.getState(random, blockPos), 19);
-            set.add(blockPos);
+            set.add(blockPos.immutable());
         }
     }
 

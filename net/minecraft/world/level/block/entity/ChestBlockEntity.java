@@ -5,7 +5,6 @@ package net.minecraft.world.level.block.entity;
 
 import java.util.List;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
@@ -206,7 +205,6 @@ TickableBlockEntity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public float getOpenNess(float f) {
         return Mth.lerp(f, this.oOpenness, this.openness);
     }

@@ -11,13 +11,12 @@ implements Comparable<Ticket<?>> {
     private final TicketType<T> type;
     private final int ticketLevel;
     private final T key;
-    private final long createdTick;
+    private long createdTick;
 
-    protected Ticket(TicketType<T> ticketType, int i, T object, long l) {
+    protected Ticket(TicketType<T> ticketType, int i, T object) {
         this.type = ticketType;
         this.ticketLevel = i;
         this.key = object;
-        this.createdTick = l;
     }
 
     @Override
@@ -60,7 +59,11 @@ implements Comparable<Ticket<?>> {
         return this.ticketLevel;
     }
 
-    public boolean timedOut(long l) {
+    protected void setCreatedTick(long l) {
+        this.createdTick = l;
+    }
+
+    protected boolean timedOut(long l) {
         long m = this.type.timeout();
         return m != 0L && l - this.createdTick > m;
     }

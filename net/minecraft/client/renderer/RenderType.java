@@ -17,6 +17,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,12 @@ extends RenderStateShard {
     private static final RenderType GLINT = new CompositeRenderType("glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setCullState(NO_CULL).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(GLINT_TEXTURING).createCompositeState(false));
     private static final RenderType ENTITY_GLINT = new CompositeRenderType("entity_glint", DefaultVertexFormat.POSITION_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false)).setWriteMaskState(COLOR_WRITE).setCullState(NO_CULL).setDepthTestState(EQUAL_DEPTH_TEST).setTransparencyState(GLINT_TRANSPARENCY).setTexturingState(ENTITY_GLINT_TEXTURING).createCompositeState(false));
     private static final RenderType LIGHTNING = new CompositeRenderType("lightning", DefaultVertexFormat.POSITION_COLOR, 7, 256, false, true, CompositeState.builder().setWriteMaskState(COLOR_WRITE).setTransparencyState(LIGHTNING_TRANSPARENCY).setShadeModelState(SMOOTH_SHADE).createCompositeState(false));
+    public static final RenderType ENTITY_SOLID = RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
+    public static final RenderType ENTITY_CUTOUT = RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
+    public static final RenderType ENTITY_CUTOUT_NO_CULL = RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS);
+    public static final RenderType ENTITY_TRANSLUCENT = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+    public static final RenderType ENTITY_TRANSLUCENT_CULL = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+    public static final RenderType ENTITY_NO_OUTLINE = RenderType.entityNoOutline(TextureAtlas.LOCATION_BLOCKS);
     private final VertexFormat format;
     private final int mode;
     private final int bufferSize;
@@ -176,6 +183,30 @@ extends RenderStateShard {
 
     public static RenderType lines() {
         return new CompositeRenderType("lines", DefaultVertexFormat.POSITION_COLOR, 1, 256, CompositeState.builder().setLineState(new RenderStateShard.LineStateShard(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f))).setLayeringState(PROJECTION_LAYERING).setTransparencyState(TRANSLUCENT_TRANSPARENCY).createCompositeState(false));
+    }
+
+    public static RenderType blockentitySolid() {
+        return ENTITY_SOLID;
+    }
+
+    public static RenderType blockentityCutout() {
+        return ENTITY_CUTOUT;
+    }
+
+    public static RenderType blockentityCutoutNoCull() {
+        return ENTITY_CUTOUT_NO_CULL;
+    }
+
+    public static RenderType blockentityTranslucent() {
+        return ENTITY_TRANSLUCENT;
+    }
+
+    public static RenderType blockentityTranslucentCull() {
+        return ENTITY_TRANSLUCENT_CULL;
+    }
+
+    public static RenderType blockentityNoOutline() {
+        return ENTITY_NO_OUTLINE;
     }
 
     public RenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {

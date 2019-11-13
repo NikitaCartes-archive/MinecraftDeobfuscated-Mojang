@@ -20,7 +20,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class VideoSettingsScreen
 extends OptionsSubScreen {
     private OptionsList list;
-    private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS, Option.BIOME_BLEND_RADIUS};
+    private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS};
     private int oldMipmaps;
 
     public VideoSettingsScreen(Screen screen, Options options) {
@@ -32,6 +32,7 @@ extends OptionsSubScreen {
         this.oldMipmaps = this.options.mipmapLevels;
         this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
         this.list.addBig(new FullscreenResolutionProgressOption(this.minecraft.getWindow()));
+        this.list.addBig(Option.BIOME_BLEND_RADIUS);
         this.list.addSmall(OPTIONS);
         this.children.add(this.list);
         this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, I18n.get("gui.done", new Object[0]), button -> {

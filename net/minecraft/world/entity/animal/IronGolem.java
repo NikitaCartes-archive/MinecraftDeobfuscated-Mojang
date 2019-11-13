@@ -228,7 +228,7 @@ extends AbstractGolem {
         float f = this.getHealth();
         this.heal(25.0f);
         if (this.getHealth() == f) {
-            return true;
+            return false;
         }
         float g = 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f;
         this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0f, g);

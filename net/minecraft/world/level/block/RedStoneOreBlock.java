@@ -54,6 +54,7 @@ extends Block {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
+            RedStoneOreBlock.spawnParticles(level, blockPos);
             return InteractionResult.SUCCESS;
         }
         RedStoneOreBlock.interact(blockState, level, blockPos);

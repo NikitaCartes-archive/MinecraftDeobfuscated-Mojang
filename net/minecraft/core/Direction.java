@@ -198,6 +198,11 @@ public enum Direction implements StringRepresentable
         return this.axis == Axis.Z ? this.axisDirection.getStep() : 0;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public Vector3f step() {
+        return new Vector3f(this.getStepX(), this.getStepY(), this.getStepZ());
+    }
+
     public String getName() {
         return this.name;
     }
