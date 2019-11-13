@@ -135,7 +135,9 @@ public class Pig extends Animal {
 
 	@Override
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		if (!super.mobInteract(player, interactionHand)) {
+		if (super.mobInteract(player, interactionHand)) {
+			return true;
+		} else {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (itemStack.getItem() == Items.NAME_TAG) {
 				itemStack.interactEnemy(player, this, interactionHand);
@@ -146,14 +148,9 @@ public class Pig extends Animal {
 				}
 
 				return true;
-			} else if (itemStack.getItem() == Items.SADDLE) {
-				itemStack.interactEnemy(player, this, interactionHand);
-				return true;
 			} else {
-				return false;
+				return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
 			}
-		} else {
-			return true;
 		}
 	}
 

@@ -14,6 +14,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 
@@ -132,6 +133,12 @@ public class RenderType extends RenderStateShard {
 			.setShadeModelState(SMOOTH_SHADE)
 			.createCompositeState(false)
 	);
+	public static final RenderType ENTITY_SOLID = entitySolid(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType ENTITY_CUTOUT = entityCutout(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType ENTITY_CUTOUT_NO_CULL = entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType ENTITY_TRANSLUCENT = entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType ENTITY_TRANSLUCENT_CULL = entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType ENTITY_NO_OUTLINE = entityNoOutline(TextureAtlas.LOCATION_BLOCKS);
 	private final VertexFormat format;
 	private final int mode;
 	private final int bufferSize;
@@ -463,6 +470,30 @@ public class RenderType extends RenderStateShard {
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.createCompositeState(false)
 		);
+	}
+
+	public static RenderType blockentitySolid() {
+		return ENTITY_SOLID;
+	}
+
+	public static RenderType blockentityCutout() {
+		return ENTITY_CUTOUT;
+	}
+
+	public static RenderType blockentityCutoutNoCull() {
+		return ENTITY_CUTOUT_NO_CULL;
+	}
+
+	public static RenderType blockentityTranslucent() {
+		return ENTITY_TRANSLUCENT;
+	}
+
+	public static RenderType blockentityTranslucentCull() {
+		return ENTITY_TRANSLUCENT_CULL;
+	}
+
+	public static RenderType blockentityNoOutline() {
+		return ENTITY_NO_OUTLINE;
 	}
 
 	public RenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {

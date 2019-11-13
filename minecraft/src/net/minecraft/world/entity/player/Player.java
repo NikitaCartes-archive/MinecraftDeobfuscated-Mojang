@@ -274,7 +274,7 @@ public abstract class Player extends LivingEntity {
 				this.resetAttackStrengthTicker();
 			}
 
-			this.lastItemInMainHand = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();
+			this.lastItemInMainHand = itemStack.copy();
 		}
 
 		this.turtleHelmetTick();
@@ -670,7 +670,7 @@ public abstract class Player extends LivingEntity {
 			if (bl) {
 				float f = this.random.nextFloat() * 0.5F;
 				float g = this.random.nextFloat() * (float) (Math.PI * 2);
-				this.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
+				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
 			} else {
 				float f = 0.3F;
 				float g = Mth.sin(this.xRot * (float) (Math.PI / 180.0));
@@ -954,7 +954,7 @@ public abstract class Player extends LivingEntity {
 			return InteractionResult.PASS;
 		} else {
 			ItemStack itemStack = this.getItemInHand(interactionHand);
-			ItemStack itemStack2 = itemStack.isEmpty() ? ItemStack.EMPTY : itemStack.copy();
+			ItemStack itemStack2 = itemStack.copy();
 			if (entity.interact(this, interactionHand)) {
 				if (this.abilities.instabuild && itemStack == this.getItemInHand(interactionHand) && itemStack.getCount() < itemStack2.getCount()) {
 					itemStack.setCount(itemStack2.getCount());
@@ -1691,7 +1691,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public boolean canEat(boolean bl) {
-		return !this.abilities.invulnerable && (bl || this.foodData.needsFood());
+		return this.abilities.invulnerable || bl || this.foodData.needsFood();
 	}
 
 	public boolean isHurt() {

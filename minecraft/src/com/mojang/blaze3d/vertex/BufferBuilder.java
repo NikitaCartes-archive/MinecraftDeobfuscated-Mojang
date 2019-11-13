@@ -31,6 +31,8 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 	private int elementIndex;
 	private int mode;
 	private VertexFormat format;
+	private boolean fastFormat;
+	private boolean fullFormat;
 	private boolean building;
 
 	public BufferBuilder(int i) {
@@ -157,9 +159,10 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		this.buffer.position(this.totalRenderedBytes);
 		this.buffer.put(state.data);
 		this.buffer.clear();
-		this.format = state.format;
-		this.vertices = i / this.format.getVertexSize();
-		this.nextElementByte = this.totalRenderedBytes + this.vertices * this.format.getVertexSize();
+		VertexFormat vertexFormat = state.format;
+		this.switchFormat(vertexFormat);
+		this.vertices = i / vertexFormat.getVertexSize();
+		this.nextElementByte = this.totalRenderedBytes + this.vertices * vertexFormat.getVertexSize();
 	}
 
 	public void begin(int i, VertexFormat vertexFormat) {
@@ -168,10 +171,20 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		} else {
 			this.building = true;
 			this.mode = i;
-			this.format = vertexFormat;
+			this.switchFormat(vertexFormat);
 			this.currentElement = (VertexFormatElement)vertexFormat.getElements().get(0);
 			this.elementIndex = 0;
 			this.buffer.clear();
+		}
+	}
+
+	private void switchFormat(VertexFormat vertexFormat) {
+		if (this.format != vertexFormat) {
+			this.format = vertexFormat;
+			boolean bl = vertexFormat == DefaultVertexFormat.NEW_ENTITY;
+			boolean bl2 = vertexFormat == DefaultVertexFormat.BLOCK;
+			this.fastFormat = bl || bl2;
+			this.fullFormat = bl;
 		}
 	}
 
@@ -235,6 +248,41 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 			throw new IllegalStateException();
 		} else {
 			return BufferVertexConsumer.super.color(i, j, k, l);
+		}
+	}
+
+	@Override
+	public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
+		if (this.defaultColorSet) {
+			throw new IllegalStateException();
+		} else if (this.fastFormat) {
+			this.putFloat(0, f);
+			this.putFloat(4, g);
+			this.putFloat(8, h);
+			this.putByte(12, (byte)((int)(i * 255.0F)));
+			this.putByte(13, (byte)((int)(j * 255.0F)));
+			this.putByte(14, (byte)((int)(k * 255.0F)));
+			this.putByte(15, (byte)((int)(l * 255.0F)));
+			this.putFloat(16, m);
+			this.putFloat(20, n);
+			int t;
+			if (this.fullFormat) {
+				this.putShort(24, (short)(o & 65535));
+				this.putShort(26, (short)(o >> 16 & 65535));
+				t = 28;
+			} else {
+				t = 24;
+			}
+
+			this.putShort(t + 0, (short)(p & 65535));
+			this.putShort(t + 2, (short)(p >> 16 & 65535));
+			this.putByte(t + 4, (byte)((int)(q * 127.0F) & 0xFF));
+			this.putByte(t + 5, (byte)((int)(r * 127.0F) & 0xFF));
+			this.putByte(t + 6, (byte)((int)(s * 127.0F) & 0xFF));
+			this.nextElementByte += t + 8;
+			this.endVertex();
+		} else {
+			super.vertex(f, g, h, i, j, k, l, m, n, o, p, q, r, s);
 		}
 	}
 

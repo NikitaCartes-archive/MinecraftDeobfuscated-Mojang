@@ -58,6 +58,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableTexture();
 		this.clearRemovedHives();
+		this.clearRemovedBees();
 		this.doRender();
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
@@ -65,6 +66,10 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (!this.minecraft.player.isSpectator()) {
 			this.updateLastLookedAtUuid();
 		}
+	}
+
+	private void clearRemovedBees() {
+		this.beeInfosPerEntity.entrySet().removeIf(entry -> this.minecraft.level.getEntity(((BeeDebugRenderer.BeeInfo)entry.getValue()).id) == null);
 	}
 
 	private void clearRemovedHives() {
@@ -158,7 +163,8 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			renderTextOverHive("In: " + hiveInfo.occupantCount + " bees", hiveInfo, i, -256);
 		}
 
-		renderTextOverHive(hiveInfo.hiveType, hiveInfo, ++i, -1);
+		renderTextOverHive("Honey: " + hiveInfo.honeyLevel, hiveInfo, ++i, -23296);
+		renderTextOverHive(hiveInfo.hiveType + (hiveInfo.sedated ? " (sedated)" : ""), hiveInfo, ++i, -1);
 	}
 
 	private void renderPath(BeeDebugRenderer.BeeInfo beeInfo) {
@@ -174,14 +180,14 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		int i = 0;
 		renderTextOverMob(beeInfo.pos, i, beeInfo.toString(), -1, 0.03F);
 		i++;
-		if (beeInfo.hivePos.equals(BlockPos.ZERO)) {
+		if (beeInfo.hivePos == null) {
 			renderTextOverMob(beeInfo.pos, i, "Homeless :(", -98404, 0.02F);
 		} else {
 			renderTextOverMob(beeInfo.pos, i, "Hive: " + this.getPosDescription(beeInfo, beeInfo.hivePos), -256, 0.02F);
 		}
 
 		i++;
-		if (beeInfo.flowerPos.equals(BlockPos.ZERO)) {
+		if (beeInfo.flowerPos == null) {
 			renderTextOverMob(beeInfo.pos, i, "No flower :(", -98404, 0.02F);
 		} else {
 			renderTextOverMob(beeInfo.pos, i, "Flower: " + this.getPosDescription(beeInfo, beeInfo.flowerPos), -256, 0.02F);
@@ -287,7 +293,9 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		public final Position pos;
 		@Nullable
 		public final Path path;
+		@Nullable
 		public final BlockPos hivePos;
+		@Nullable
 		public final BlockPos flowerPos;
 		public final List<String> goals = Lists.<String>newArrayList();
 
@@ -317,7 +325,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		public boolean hasFlower() {
-			return this.flowerPos != BlockPos.ZERO;
+			return this.flowerPos != null;
 		}
 	}
 
@@ -326,12 +334,16 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		public final BlockPos pos;
 		public final String hiveType;
 		public final int occupantCount;
+		public final int honeyLevel;
+		public final boolean sedated;
 		public final long lastSeen;
 
-		public HiveInfo(BlockPos blockPos, String string, int i, long l) {
+		public HiveInfo(BlockPos blockPos, String string, int i, int j, boolean bl, long l) {
 			this.pos = blockPos;
 			this.hiveType = string;
 			this.occupantCount = i;
+			this.honeyLevel = j;
+			this.sedated = bl;
 			this.lastSeen = l;
 		}
 	}

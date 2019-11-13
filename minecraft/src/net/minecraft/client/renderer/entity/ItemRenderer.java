@@ -112,8 +112,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl3)) {
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
 				RenderType renderType2;
-				if (bl2 && Objects.equals(renderType, RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS))) {
-					renderType2 = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+				if (bl2 && Objects.equals(renderType, RenderType.blockentityTranslucent())) {
+					renderType2 = RenderType.blockentityTranslucentCull();
 				} else {
 					renderType2 = renderType;
 				}

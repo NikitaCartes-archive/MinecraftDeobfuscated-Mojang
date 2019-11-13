@@ -173,6 +173,16 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-stb/3.2.2/lwjgl-stb-3.2.2.jar"
 	},
 	{
+		"sha1sum": "259f1dbddb921e27e01b32458d6f584eb8bba13a",
+		"name": "lwjgl-tinyfd-3.2.1.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.2.1/lwjgl-tinyfd-3.2.1.jar"
+	},
+	{
+		"sha1sum": "fcbe606c8f8da6f8f9a05e2c540eb1ee8632b0e9",
+		"name": "lwjgl-tinyfd-3.2.2.jar",
+		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.2.2/lwjgl-tinyfd-3.2.2.jar"
+	},
+	{
 		"sha1sum": "d0626cd3108294d1d58c05859add27b4ef21f83b",
 		"name": "netty-all-4.1.25.Final.jar",
 		"url": "https://libraries.minecraft.net/io/netty/netty-all/4.1.25.Final/netty-all-4.1.25.Final.jar"

@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
@@ -45,7 +44,7 @@ public class EnchantTableRenderer extends BlockEntityRenderer<EnchantmentTableBl
 		float n = Mth.frac(l + 0.75F) * 1.6F - 0.3F;
 		float o = Mth.lerp(f, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
 		this.bookModel.setupAnim(g, Mth.clamp(m, 0.0F, 1.0F), Mth.clamp(n, 0.0F, 1.0F), o);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 		this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, this.getSprite(BOOK_LOCATION));
 		poseStack.popPose();
 	}

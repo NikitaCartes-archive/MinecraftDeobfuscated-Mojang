@@ -86,6 +86,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"buried_treasure", new BuriedTreasureFeature(BuriedTreasureConfiguration::deserialize)
 	);
 	public static final StructureFeature<VillageConfiguration> VILLAGE = register("village", new VillageFeature(VillageConfiguration::deserialize));
+	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> NORMAL_TREE = register("normal_tree", new TreeFeature(SmallTreeConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> ACACIA_TREE = register("acacia_tree", new AcaciaFeature(SmallTreeConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> FANCY_TREE = register("fancy_tree", new FancyTreeFeature(SmallTreeConfiguration::deserialize));

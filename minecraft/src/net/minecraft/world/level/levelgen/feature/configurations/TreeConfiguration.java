@@ -17,12 +17,17 @@ public class TreeConfiguration implements FeatureConfiguration {
 	public final BlockStateProvider leavesProvider;
 	public final List<TreeDecorator> decorators;
 	public final int baseHeight;
+	public transient boolean fromSapling;
 
 	protected TreeConfiguration(BlockStateProvider blockStateProvider, BlockStateProvider blockStateProvider2, List<TreeDecorator> list, int i) {
 		this.trunkProvider = blockStateProvider;
 		this.leavesProvider = blockStateProvider2;
 		this.decorators = list;
 		this.baseHeight = i;
+	}
+
+	public void setFromSapling() {
+		this.fromSapling = true;
 	}
 
 	@Override

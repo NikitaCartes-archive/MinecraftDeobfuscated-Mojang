@@ -5,23 +5,29 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.critereon.BeeNestDestroyedTrigger;
+import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
+import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
 import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 
 public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
@@ -236,6 +242,46 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.rewards(AdvancementRewards.Builder.experience(50))
 			.save(consumer, "husbandry/complete_catalogue");
+		Advancement advancement11 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.addCriterion(
+				"safely_harvest_honey",
+				ItemUsedOnBlockTrigger.TriggerInstance.safelyHarvestedHoney(
+					BlockPredicate.Builder.block().of(BlockTags.BEEHIVES), ItemPredicate.Builder.item().of(Items.GLASS_BOTTLE)
+				)
+			)
+			.display(
+				Items.HONEY_BOTTLE,
+				new TranslatableComponent("advancements.husbandry.safely_harvest_honey.title"),
+				new TranslatableComponent("advancements.husbandry.safely_harvest_honey.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.save(consumer, "husbandry/safely_harvest_honey");
+		Advancement advancement12 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.addCriterion(
+				"silk_touch_nest",
+				BeeNestDestroyedTrigger.TriggerInstance.destroyedBeeNest(
+					Blocks.BEE_NEST,
+					ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))),
+					MinMaxBounds.Ints.exactly(3)
+				)
+			)
+			.display(
+				Blocks.BEE_NEST,
+				new TranslatableComponent("advancements.husbandry.silk_touch_nest.title"),
+				new TranslatableComponent("advancements.husbandry.silk_touch_nest.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.save(consumer, "husbandry/silk_touch_nest");
 	}
 
 	private Advancement.Builder addFood(Advancement.Builder builder) {

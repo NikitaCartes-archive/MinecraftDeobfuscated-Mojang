@@ -22,13 +22,10 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity>
 
 	public void render(FireworkRocketEntity fireworkRocketEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.entityRenderDispatcher.playerRotY));
-		float h = (float)(this.entityRenderDispatcher.options.thirdPersonView == 2 ? -1 : 1) * this.entityRenderDispatcher.playerRotX;
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(h));
+		poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
 		if (fireworkRocketEntity.isShotAtAngle()) {
-			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-		} else {
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+			poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
 		}
 
 		this.itemRenderer

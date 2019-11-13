@@ -24,6 +24,12 @@ public class AcaciaFoliagePlacer extends FoliagePlacer {
 		smallTreeConfiguration.foliagePlacer.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, i, blockPos, 1, 1, set);
 		BlockPos blockPos2 = blockPos.above();
 
+		for (int l = -1; l <= 1; l++) {
+			for (int m = -1; m <= 1; m++) {
+				this.placeLeaf(levelSimulatedRW, random, blockPos2.offset(l, 0, m), smallTreeConfiguration, set);
+			}
+		}
+
 		for (int l = 2; l <= k - 1; l++) {
 			this.placeLeaf(levelSimulatedRW, random, blockPos2.east(l), smallTreeConfiguration, set);
 			this.placeLeaf(levelSimulatedRW, random, blockPos2.west(l), smallTreeConfiguration, set);

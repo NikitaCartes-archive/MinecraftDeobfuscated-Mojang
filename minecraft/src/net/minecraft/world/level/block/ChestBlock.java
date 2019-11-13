@@ -1,7 +1,10 @@
 package net.minecraft.world.level.block;
 
+import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -28,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -90,6 +94,15 @@ public class ChestBlock extends BaseEntityBlock implements SimpleWaterloggedBloc
 
 		public MenuProvider acceptSingle(ChestBlockEntity chestBlockEntity) {
 			return chestBlockEntity;
+		}
+	};
+	private static final ChestBlock.ChestSearchCallback<Float2FloatFunction> OPENNES_COMBINER = new ChestBlock.ChestSearchCallback<Float2FloatFunction>() {
+		public Float2FloatFunction acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+			return f -> Math.max(chestBlockEntity.getOpenNess(f), chestBlockEntity2.getOpenNess(f));
+		}
+
+		public Float2FloatFunction acceptSingle(ChestBlockEntity chestBlockEntity) {
+			return chestBlockEntity::getOpenNess;
 		}
 	};
 
@@ -283,6 +296,12 @@ public class ChestBlock extends BaseEntityBlock implements SimpleWaterloggedBloc
 	@Override
 	public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
 		return combineWithNeigbour(blockState, level, blockPos, false, MENU_PROVIDER_COMBINER);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static float getCombinedOpenness(LidBlockEntity lidBlockEntity, BlockState blockState, Level level, BlockPos blockPos, float f) {
+		Float2FloatFunction float2FloatFunction = combineWithNeigbour(blockState, level, blockPos, true, OPENNES_COMBINER);
+		return float2FloatFunction == null ? lidBlockEntity.getOpenNess(f) : float2FloatFunction.get(f);
 	}
 
 	@Override

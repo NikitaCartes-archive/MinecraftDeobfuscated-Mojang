@@ -50,6 +50,7 @@ public class RedStoneOreBlock extends Block {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.isClientSide) {
+			spawnParticles(level, blockPos);
 			return InteractionResult.SUCCESS;
 		} else {
 			interact(blockState, level, blockPos);

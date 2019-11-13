@@ -5,10 +5,12 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -69,21 +71,27 @@ public class BeehiveBlock extends BaseEntityBlock {
 	@Override
 	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
 		super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
-		if (!level.isClientSide) {
-			if (blockEntity instanceof BeehiveBlockEntity && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-				((BeehiveBlockEntity)blockEntity).emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
+		if (!level.isClientSide && blockEntity instanceof BeehiveBlockEntity) {
+			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+			if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+				beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 				level.updateNeighbourForOutputSignal(blockPos, this);
 			}
 
-			List<Bee> list = level.getEntitiesOfClass(Bee.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
-			if (!list.isEmpty()) {
-				List<Player> list2 = level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
-				int i = list2.size();
+			this.angerNearbyBees(level, blockPos);
+			CriteriaTriggers.BEE_NEST_DESTROYED.trigger((ServerPlayer)player, blockState.getBlock(), itemStack, beehiveBlockEntity.getOccupantCount());
+		}
+	}
 
-				for (Bee bee : list) {
-					if (bee.getTarget() == null) {
-						bee.makeAngry((Entity)list2.get(level.random.nextInt(i)));
-					}
+	private void angerNearbyBees(Level level, BlockPos blockPos) {
+		List<Bee> list = level.getEntitiesOfClass(Bee.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
+		if (!list.isEmpty()) {
+			List<Player> list2 = level.getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(8.0, 6.0, 8.0));
+			int i = list2.size();
+
+			for (Bee bee : list) {
+				if (bee.getTarget() == null) {
+					bee.makeAngry((Entity)list2.get(level.random.nextInt(i)));
 				}
 			}
 		}
@@ -122,10 +130,17 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		if (bl) {
-			if (!isCampfireBelow(level, blockPos)) {
+			if (!CampfireBlock.isSmokeyPos(level, blockPos, 5)) {
+				if (this.hiveContainsBees(level, blockPos)) {
+					this.angerNearbyBees(level, blockPos);
+				}
+
 				this.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			} else {
 				this.resetHoneyLevel(level, blockState, blockPos);
+				if (player instanceof ServerPlayer) {
+					CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player, blockPos, itemStack);
+				}
 			}
 
 			return InteractionResult.SUCCESS;
@@ -134,15 +149,14 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 	}
 
-	public static boolean isCampfireBelow(Level level, BlockPos blockPos) {
-		for (int i = 1; i <= 5; i++) {
-			BlockState blockState = level.getBlockState(blockPos.below(i));
-			if (!blockState.isAir()) {
-				return blockState.getBlock() == Blocks.CAMPFIRE;
-			}
+	private boolean hiveContainsBees(Level level, BlockPos blockPos) {
+		BlockEntity blockEntity = level.getBlockEntity(blockPos);
+		if (blockEntity instanceof BeehiveBlockEntity) {
+			BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+			return !beehiveBlockEntity.isEmpty();
+		} else {
+			return false;
 		}
-
-		return false;
 	}
 
 	public void releaseBeesAndResetHoneyLevel(
@@ -235,16 +249,22 @@ public class BeehiveBlock extends BaseEntityBlock {
 		if (!level.isClientSide && player.isCreative() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof BeehiveBlockEntity) {
-				ItemStack itemStack = new ItemStack(this);
 				BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-				if (!beehiveBlockEntity.isEmpty()) {
+				ItemStack itemStack = new ItemStack(this);
+				int i = (Integer)blockState.getValue(HONEY_LEVEL);
+				boolean bl = !beehiveBlockEntity.isEmpty();
+				if (!bl && i == 0) {
+					return;
+				}
+
+				if (bl) {
 					CompoundTag compoundTag = new CompoundTag();
 					compoundTag.put("Bees", beehiveBlockEntity.writeBees());
 					itemStack.addTagElement("BlockEntityTag", compoundTag);
 				}
 
 				CompoundTag compoundTag = new CompoundTag();
-				compoundTag.putInt("honey_level", (Integer)blockState.getValue(HONEY_LEVEL));
+				compoundTag.putInt("honey_level", i);
 				itemStack.addTagElement("BlockStateTag", compoundTag);
 				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
 				itemEntity.setDefaultPickUpDelay();

@@ -274,13 +274,15 @@ public class BiomeDefaultFeatures {
 		)
 		.baseHeight(13)
 		.heightInterval(15)
+		.crownHeight(13)
 		.decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL))))
 		.build();
 	public static final MegaTreeConfiguration MEGA_PINE_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(
 			new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES)
 		)
-		.baseHeight(3)
+		.baseHeight(13)
 		.heightInterval(15)
+		.crownHeight(3)
 		.decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL))))
 		.build();
 	public static final MegaTreeConfiguration MEGA_JUNGLE_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(
@@ -293,18 +295,18 @@ public class BiomeDefaultFeatures {
 	public static final RandomPatchConfiguration DEFAULT_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(
 			new SimpleStateProvider(GRASS), new SimpleBlockPlacer()
 		)
-		.tries(128)
+		.tries(32)
 		.build();
 	public static final RandomPatchConfiguration TAIGA_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(
 			new WeightedStateProvider().add(GRASS, 1).add(FERN, 4), new SimpleBlockPlacer()
 		)
-		.tries(128)
+		.tries(32)
 		.build();
 	public static final RandomPatchConfiguration JUNGLE_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(
 			new WeightedStateProvider().add(GRASS, 3).add(FERN, 1), new SimpleBlockPlacer()
 		)
 		.blacklist(ImmutableSet.of(PODZOL))
-		.tries(128)
+		.tries(32)
 		.build();
 	public static final RandomPatchConfiguration GENERAL_FOREST_FLOWER_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(
 			new SimpleStateProvider(LILY_OF_THE_VALLEY), new SimpleBlockPlacer()

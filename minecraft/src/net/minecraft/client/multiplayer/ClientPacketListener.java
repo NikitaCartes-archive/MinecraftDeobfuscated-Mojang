@@ -2028,20 +2028,28 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				Position position = new PositionImpl(d, e, g);
 				UUID uUID = friendlyByteBuf.readUUID();
 				int o = friendlyByteBuf.readInt();
-				BlockPos blockPos4 = friendlyByteBuf.readBlockPos();
-				BlockPos blockPos5 = friendlyByteBuf.readBlockPos();
 				boolean bl4 = friendlyByteBuf.readBoolean();
-				Path path3;
+				BlockPos blockPos4 = null;
 				if (bl4) {
-					path3 = Path.createFromStream(friendlyByteBuf);
-				} else {
-					path3 = null;
+					blockPos4 = friendlyByteBuf.readBlockPos();
 				}
 
-				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos4, blockPos5);
+				boolean bl5 = friendlyByteBuf.readBoolean();
+				BlockPos blockPos5 = null;
+				if (bl5) {
+					blockPos5 = friendlyByteBuf.readBlockPos();
+				}
+
+				boolean bl2 = friendlyByteBuf.readBoolean();
+				Path path2 = null;
+				if (bl2) {
+					path2 = Path.createFromStream(friendlyByteBuf);
+				}
+
+				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path2, blockPos4, blockPos5);
 				int w = friendlyByteBuf.readInt();
 
-				for (int x = 0; x < w; x++) {
+				for (int q = 0; q < w; q++) {
 					String string10 = friendlyByteBuf.readUtf();
 					beeInfo.goals.add(string10);
 				}
@@ -2051,7 +2059,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
 				int m = friendlyByteBuf.readInt();
-				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, this.level.getGameTime());
+				int x = friendlyByteBuf.readInt();
+				boolean bl6 = friendlyByteBuf.readBoolean();
+				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, x, bl6, this.level.getGameTime());
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.clear();
@@ -2059,8 +2069,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int j = friendlyByteBuf.readInt();
 				String string11 = friendlyByteBuf.readUtf();
-				int y = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, y);
+				int x = friendlyByteBuf.readInt();
+				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, x);
 			} else {
 				LOGGER.warn("Unknown custom packed identifier: {}", resourceLocation);
 			}

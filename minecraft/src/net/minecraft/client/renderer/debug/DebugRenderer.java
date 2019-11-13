@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.math.Matrix4f;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -15,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -169,9 +169,8 @@ public class DebugRenderer {
 			RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
 			RenderSystem.normal3f(0.0F, 1.0F, 0.0F);
 			RenderSystem.scalef(g, -g, g);
-			EntityRenderDispatcher entityRenderDispatcher = minecraft.getEntityRenderDispatcher();
-			RenderSystem.rotatef(-entityRenderDispatcher.playerRotY, 0.0F, 1.0F, 0.0F);
-			RenderSystem.rotatef(-entityRenderDispatcher.playerRotX, 1.0F, 0.0F, 0.0F);
+			RenderSystem.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+			RenderSystem.multMatrix(new Matrix4f(camera.rotation()));
 			RenderSystem.enableTexture();
 			if (bl2) {
 				RenderSystem.disableDepthTest();

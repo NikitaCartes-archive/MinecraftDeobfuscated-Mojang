@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
@@ -32,7 +31,7 @@ public class LecternRenderer extends BlockEntityRenderer<LecternBlockEntity> {
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees(67.5F));
 			poseStack.translate(0.0, -0.125, 0.0);
 			this.bookModel.setupAnim(0.0F, 0.1F, 0.9F, 1.2F);
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 			this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, this.getSprite(EnchantTableRenderer.BOOK_LOCATION));
 			poseStack.popPose();
 		}

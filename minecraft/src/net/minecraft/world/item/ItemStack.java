@@ -292,13 +292,17 @@ public final class ItemStack {
 	}
 
 	public ItemStack copy() {
-		ItemStack itemStack = new ItemStack(this.getItem(), this.count);
-		itemStack.setPopTime(this.getPopTime());
-		if (this.tag != null) {
-			itemStack.tag = this.tag.copy();
-		}
+		if (this.isEmpty()) {
+			return EMPTY;
+		} else {
+			ItemStack itemStack = new ItemStack(this.getItem(), this.count);
+			itemStack.setPopTime(this.getPopTime());
+			if (this.tag != null) {
+				itemStack.tag = this.tag.copy();
+			}
 
-		return itemStack;
+			return itemStack;
+		}
 	}
 
 	public static boolean tagMatches(ItemStack itemStack, ItemStack itemStack2) {

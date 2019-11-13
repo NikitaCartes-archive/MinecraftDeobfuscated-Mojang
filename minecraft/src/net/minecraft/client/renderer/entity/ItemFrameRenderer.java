@@ -53,7 +53,7 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		blockRenderDispatcher.getModelRenderer()
 			.renderModel(
 				poseStack.last(),
-				multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS)),
+				multiBufferSource.getBuffer(RenderType.blockentitySolid()),
 				null,
 				modelManager.getModel(modelResourceLocation),
 				1.0F,

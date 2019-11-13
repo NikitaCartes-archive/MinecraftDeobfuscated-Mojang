@@ -1,6 +1,5 @@
 package net.minecraft.world.level.lighting;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -12,6 +11,7 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorage.SkyDataLayerStorageMap, SkyLightSectionStorage> {
 	private static final Direction[] DIRECTIONS = Direction.values();
@@ -37,9 +37,9 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 			if (i >= 15) {
 				return i;
 			} else {
-				AtomicInteger atomicInteger = new AtomicInteger();
-				BlockState blockState = this.getStateAndOpacity(m, atomicInteger);
-				if (atomicInteger.get() >= 15) {
+				MutableInt mutableInt = new MutableInt();
+				BlockState blockState = this.getStateAndOpacity(m, mutableInt);
+				if (mutableInt.getValue() >= 15) {
 					return 15;
 				} else {
 					int j = BlockPos.getX(l);
@@ -85,7 +85,7 @@ public final class SkyLightEngine extends LayerLightEngine<SkyLightSectionStorag
 					}
 
 					boolean bl2 = l == Long.MAX_VALUE || bl && k > p;
-					return bl2 && i == 0 && atomicInteger.get() == 0 ? 0 : i + Math.max(1, atomicInteger.get());
+					return bl2 && i == 0 && mutableInt.getValue() == 0 ? 0 : i + Math.max(1, mutableInt.getValue());
 				}
 			}
 		}

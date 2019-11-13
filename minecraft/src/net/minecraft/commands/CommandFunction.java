@@ -54,15 +54,7 @@ public class CommandFunction {
 						.getDispatcher()
 						.parse(stringReader, serverFunctionManager.getCompilationContext());
 					if (parseResults.getReader().canRead()) {
-						if (parseResults.getExceptions().size() == 1) {
-							throw (CommandSyntaxException)parseResults.getExceptions().values().iterator().next();
-						}
-
-						if (parseResults.getContext().getRange().isEmpty()) {
-							throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
-						}
-
-						throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
+						throw Commands.getParseException(parseResults);
 					}
 
 					list2.add(new CommandFunction.CommandEntry(parseResults));

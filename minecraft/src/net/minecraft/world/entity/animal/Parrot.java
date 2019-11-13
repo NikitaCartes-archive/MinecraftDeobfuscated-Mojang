@@ -276,8 +276,11 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 			}
 
 			return true;
-		} else if (!this.level.isClientSide && !this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
-			this.sitGoal.wantToSit(!this.isSitting());
+		} else if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
+			if (!this.level.isClientSide) {
+				this.sitGoal.wantToSit(!this.isSitting());
+			}
+
 			return true;
 		} else {
 			return super.mobInteract(player, interactionHand);

@@ -1,24 +1,21 @@
 package com.mojang.math;
 
-import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 
 public final class Quaternion {
 	public static final Quaternion ONE = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-	private final float[] values;
-
-	private Quaternion(float[] fs) {
-		this.values = fs;
-	}
+	private float i;
+	private float j;
+	private float k;
+	private float r;
 
 	public Quaternion(float f, float g, float h, float i) {
-		this(new float[4]);
-		this.values[0] = f;
-		this.values[1] = g;
-		this.values[2] = h;
-		this.values[3] = i;
+		this.i = f;
+		this.j = g;
+		this.k = h;
+		this.r = i;
 	}
 
 	public Quaternion(Vector3f vector3f, float f, boolean bl) {
@@ -27,11 +24,10 @@ public final class Quaternion {
 		}
 
 		float g = sin(f / 2.0F);
-		this.values = new float[4];
-		this.values[0] = vector3f.x() * g;
-		this.values[1] = vector3f.y() * g;
-		this.values[2] = vector3f.z() * g;
-		this.values[3] = cos(f / 2.0F);
+		this.i = vector3f.x() * g;
+		this.j = vector3f.y() * g;
+		this.k = vector3f.z() * g;
+		this.r = cos(f / 2.0F);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -48,15 +44,17 @@ public final class Quaternion {
 		float l = cos(0.5F * g);
 		float m = sin(0.5F * h);
 		float n = cos(0.5F * h);
-		this.values = new float[4];
-		this.values[0] = i * l * n + j * k * m;
-		this.values[1] = j * k * n - i * l * m;
-		this.values[2] = i * k * n + j * l * m;
-		this.values[3] = j * l * n - i * k * m;
+		this.i = i * l * n + j * k * m;
+		this.j = j * k * n - i * l * m;
+		this.k = i * k * n + j * l * m;
+		this.r = j * l * n - i * k * m;
 	}
 
 	public Quaternion(Quaternion quaternion) {
-		this.values = Arrays.copyOf(quaternion.values, 4);
+		this.i = quaternion.i;
+		this.j = quaternion.j;
+		this.k = quaternion.k;
+		this.r = quaternion.r;
 	}
 
 	public boolean equals(Object object) {
@@ -64,14 +62,23 @@ public final class Quaternion {
 			return true;
 		} else if (object != null && this.getClass() == object.getClass()) {
 			Quaternion quaternion = (Quaternion)object;
-			return Arrays.equals(this.values, quaternion.values);
+			if (Float.compare(quaternion.i, this.i) != 0) {
+				return false;
+			} else if (Float.compare(quaternion.j, this.j) != 0) {
+				return false;
+			} else {
+				return Float.compare(quaternion.k, this.k) != 0 ? false : Float.compare(quaternion.r, this.r) == 0;
+			}
 		} else {
 			return false;
 		}
 	}
 
 	public int hashCode() {
-		return Arrays.hashCode(this.values);
+		int i = Float.floatToIntBits(this.i);
+		i = 31 * i + Float.floatToIntBits(this.j);
+		i = 31 * i + Float.floatToIntBits(this.k);
+		return 31 * i + Float.floatToIntBits(this.r);
 	}
 
 	public String toString() {
@@ -84,19 +91,19 @@ public final class Quaternion {
 	}
 
 	public float i() {
-		return this.values[0];
+		return this.i;
 	}
 
 	public float j() {
-		return this.values[1];
+		return this.j;
 	}
 
 	public float k() {
-		return this.values[2];
+		return this.k;
 	}
 
 	public float r() {
-		return this.values[3];
+		return this.r;
 	}
 
 	public void mul(Quaternion quaternion) {
@@ -108,32 +115,32 @@ public final class Quaternion {
 		float k = quaternion.j();
 		float l = quaternion.k();
 		float m = quaternion.r();
-		this.values[0] = i * j + f * m + g * l - h * k;
-		this.values[1] = i * k - f * l + g * m + h * j;
-		this.values[2] = i * l + f * k - g * j + h * m;
-		this.values[3] = i * m - f * j - g * k - h * l;
+		this.i = i * j + f * m + g * l - h * k;
+		this.j = i * k - f * l + g * m + h * j;
+		this.k = i * l + f * k - g * j + h * m;
+		this.r = i * m - f * j - g * k - h * l;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void mul(float f) {
-		this.values[0] = this.values[0] * f;
-		this.values[1] = this.values[1] * f;
-		this.values[2] = this.values[2] * f;
-		this.values[3] = this.values[3] * f;
+		this.i *= f;
+		this.j *= f;
+		this.k *= f;
+		this.r *= f;
 	}
 
 	public void conj() {
-		this.values[0] = -this.values[0];
-		this.values[1] = -this.values[1];
-		this.values[2] = -this.values[2];
+		this.i = -this.i;
+		this.j = -this.j;
+		this.k = -this.k;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public void set(float f, float g, float h, float i) {
-		this.values[0] = f;
-		this.values[1] = g;
-		this.values[2] = h;
-		this.values[3] = i;
+		this.i = f;
+		this.j = g;
+		this.k = h;
+		this.r = i;
 	}
 
 	private static float cos(float f) {
@@ -149,20 +156,20 @@ public final class Quaternion {
 		float f = this.i() * this.i() + this.j() * this.j() + this.k() * this.k() + this.r() * this.r();
 		if (f > 1.0E-6F) {
 			float g = Mth.fastInvSqrt(f);
-			this.values[0] = this.values[0] * g;
-			this.values[1] = this.values[1] * g;
-			this.values[2] = this.values[2] * g;
-			this.values[3] = this.values[3] * g;
+			this.i *= g;
+			this.j *= g;
+			this.k *= g;
+			this.r *= g;
 		} else {
-			this.values[0] = 0.0F;
-			this.values[1] = 0.0F;
-			this.values[2] = 0.0F;
-			this.values[3] = 0.0F;
+			this.i = 0.0F;
+			this.j = 0.0F;
+			this.k = 0.0F;
+			this.r = 0.0F;
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public Quaternion copy() {
-		return new Quaternion((float[])this.values.clone());
+		return new Quaternion(this);
 	}
 }

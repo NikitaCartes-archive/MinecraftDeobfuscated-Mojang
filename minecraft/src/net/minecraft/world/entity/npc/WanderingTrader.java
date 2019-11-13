@@ -82,7 +82,7 @@ public class WanderingTrader extends AbstractVillager {
 		this.goalSelector.addGoal(1, new PanicGoal(this, 0.5));
 		this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
 		this.goalSelector.addGoal(2, new WanderingTrader.WanderToPositionGoal(this, 2.0, 0.35));
-		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 1.0));
+		this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 0.35));
 		this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.35));
 		this.goalSelector.addGoal(9, new InteractGoal(this, Player.class, 3.0F, 1.0F));
 		this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));

@@ -16,10 +16,6 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 	private float x;
 	private float y;
 	private float z;
-	private int r;
-	private int g;
-	private int b;
-	private int a;
 	private int overlayU;
 	private int overlayV;
 	private int lightCoords;
@@ -40,10 +36,6 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 		this.x = 0.0F;
 		this.y = 0.0F;
 		this.z = 0.0F;
-		this.r = this.defaultR;
-		this.g = this.defaultG;
-		this.b = this.defaultB;
-		this.a = this.defaultA;
 		this.overlayU = 0;
 		this.overlayV = 10;
 		this.lightCoords = 15728880;
@@ -66,7 +58,7 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 		float g = -vector4f.y();
 		this.delegate
 			.vertex((double)this.x, (double)this.y, (double)this.z)
-			.color(this.r, this.g, this.b, this.a)
+			.color(1.0F, 1.0F, 1.0F, 1.0F)
 			.uv(f, g)
 			.overlayCoords(this.overlayU, this.overlayV)
 			.uv2(this.lightCoords)
@@ -85,15 +77,7 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 
 	@Override
 	public VertexConsumer color(int i, int j, int k, int l) {
-		if (this.defaultColorSet) {
-			throw new IllegalStateException();
-		} else {
-			this.r = i;
-			this.g = j;
-			this.b = k;
-			this.a = l;
-			return this;
-		}
+		return this;
 	}
 
 	@Override

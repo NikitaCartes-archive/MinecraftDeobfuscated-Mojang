@@ -31,7 +31,7 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 
 		@Override
 		public String getPrettyName() {
-			return "TAG_Int";
+			return "TAG_Int_Array";
 		}
 	};
 	private int[] data;

@@ -139,7 +139,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 
 			return true;
 		} else {
-			return false;
+			return super.mobInteract(player, interactionHand);
 		}
 	}
 

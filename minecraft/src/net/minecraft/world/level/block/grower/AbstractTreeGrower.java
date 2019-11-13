@@ -21,6 +21,7 @@ public abstract class AbstractTreeGrower {
 			return false;
 		} else {
 			levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+			configuredFeature.config.setFromSapling();
 			if (configuredFeature.place(levelAccessor, (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos)) {
 				return true;
 			} else {

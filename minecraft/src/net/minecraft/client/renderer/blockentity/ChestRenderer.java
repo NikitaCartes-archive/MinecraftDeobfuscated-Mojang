@@ -9,10 +9,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -84,9 +84,11 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends Block
 
 	@Override
 	public void render(T blockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-		BlockState blockState = blockEntity.hasLevel() ? blockEntity.getBlockState() : Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
+		Level level = blockEntity.getLevel();
+		boolean bl = level != null;
+		BlockState blockState = bl ? blockEntity.getBlockState() : Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
 		ChestType chestType = blockState.hasProperty((Property<T>)ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-		boolean bl = chestType != ChestType.SINGLE;
+		boolean bl2 = chestType != ChestType.SINGLE;
 		ResourceLocation resourceLocation;
 		if (this.xmasTextures) {
 			resourceLocation = this.chooseTexture(chestType, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT);
@@ -103,19 +105,25 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends Block
 		poseStack.translate(0.5, 0.5, 0.5);
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
 		poseStack.translate(-0.5, -0.5, -0.5);
-		float h = blockEntity.getOpenNess(f);
+		float h;
+		if (bl) {
+			h = ChestBlock.getCombinedOpenness(blockEntity, blockState, level, blockEntity.getBlockPos(), f);
+		} else {
+			h = blockEntity.getOpenNess(f);
+		}
+
 		h = 1.0F - h;
 		h = 1.0F - h * h * h;
 		TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
-		if (bl) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
+		if (bl2) {
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutout());
 			if (chestType == ChestType.LEFT) {
 				this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, i, j, textureAtlasSprite);
 			} else {
 				this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, i, j, textureAtlasSprite);
 			}
 		} else {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 			this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, i, j, textureAtlasSprite);
 		}
 

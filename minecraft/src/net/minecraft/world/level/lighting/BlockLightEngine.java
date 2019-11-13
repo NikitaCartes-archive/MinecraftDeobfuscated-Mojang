@@ -1,6 +1,5 @@
 package net.minecraft.world.level.lighting;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
@@ -11,6 +10,7 @@ import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionStorage.BlockDataLayerStorageMap, BlockLightSectionStorage> {
 	private static final Direction[] DIRECTIONS = Direction.values();
@@ -44,15 +44,15 @@ public final class BlockLightEngine extends LayerLightEngine<BlockLightSectionSt
 			if (direction == null) {
 				return 15;
 			} else {
-				AtomicInteger atomicInteger = new AtomicInteger();
-				BlockState blockState = this.getStateAndOpacity(m, atomicInteger);
-				if (atomicInteger.get() >= 15) {
+				MutableInt mutableInt = new MutableInt();
+				BlockState blockState = this.getStateAndOpacity(m, mutableInt);
+				if (mutableInt.getValue() >= 15) {
 					return 15;
 				} else {
 					BlockState blockState2 = this.getStateAndOpacity(l, null);
 					VoxelShape voxelShape = this.getShape(blockState2, l, direction);
 					VoxelShape voxelShape2 = this.getShape(blockState, m, direction.getOpposite());
-					return Shapes.faceShapeOccludes(voxelShape, voxelShape2) ? 15 : i + Math.max(1, atomicInteger.get());
+					return Shapes.faceShapeOccludes(voxelShape, voxelShape2) ? 15 : i + Math.max(1, mutableInt.getValue());
 				}
 			}
 		}

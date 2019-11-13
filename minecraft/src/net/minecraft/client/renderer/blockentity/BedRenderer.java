@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -56,7 +55,7 @@ public class BedRenderer extends BlockEntityRenderer<BedBlockEntity> {
 
 	public void render(BedBlockEntity bedBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 		if (bedBlockEntity.hasLevel()) {
 			BlockState blockState = bedBlockEntity.getBlockState();
 			this.renderPiece(

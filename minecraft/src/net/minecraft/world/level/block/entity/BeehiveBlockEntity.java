@@ -3,7 +3,6 @@ package net.minecraft.world.level.block.entity;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,12 +19,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.BeehiveBlock;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEntity {
 	private final List<BeehiveBlockEntity.BeeData> stored = Lists.<BeehiveBlockEntity.BeeData>newArrayList();
-	private BlockPos savedFlowerPos = BlockPos.ZERO;
+	@Nullable
+	private BlockPos savedFlowerPos = null;
 
 	public BeehiveBlockEntity() {
 		super(BlockEntityType.BEEHIVE);
@@ -69,7 +70,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 				if (entity instanceof Bee) {
 					Bee bee = (Bee)entity;
 					if (player.position().distanceToSqr(entity.position()) <= 16.0) {
-						if (!BeehiveBlock.isCampfireBelow(this.level, this.getBlockPos())) {
+						if (!this.isSedated()) {
 							bee.makeAngry(player);
 						} else {
 							bee.setCannotEnterHiveTicks(400);
@@ -90,6 +91,18 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		this.addOccupantWithPresetTicks(entity, bl, 0);
 	}
 
+	public int getOccupantCount() {
+		return this.stored.size();
+	}
+
+	public static int getHoneyLevel(BlockState blockState) {
+		return (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
+	}
+
+	public boolean isSedated() {
+		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos(), 5);
+	}
+
 	protected void sendDebugPackets() {
 		DebugPackets.sendHiveInfo(this);
 	}
@@ -103,7 +116,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 			if (this.level != null) {
 				if (entity instanceof Bee) {
 					Bee bee = (Bee)entity;
-					if (!this.hasSavedFlowerPos() || bee.hasSavedFlowerPos() && this.level.random.nextBoolean()) {
+					if (bee.hasSavedFlowerPos() && (!this.hasSavedFlowerPos() || this.level.random.nextBoolean())) {
 						this.savedFlowerPos = bee.getSavedFlowerPos();
 					}
 				}
@@ -121,47 +134,25 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		BlockState blockState, CompoundTag compoundTag, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
 	) {
 		BlockPos blockPos = this.getBlockPos();
-		if ((!this.level.isDay() || this.level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
+		if ((this.level.isNight() || this.level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 			return false;
 		} else {
 			compoundTag.remove("Passengers");
 			compoundTag.remove("Leash");
 			compoundTag.removeUUID("UUID");
-			Optional<BlockPos> optional = Optional.empty();
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);
-			BlockPos blockPos2 = blockPos.relative(direction, 2);
-			if (this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
-				optional = Optional.of(blockPos2);
-			}
-
-			if (!optional.isPresent()) {
-				for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-					BlockPos blockPos3 = blockPos.offset(direction2.getStepX() * 2, direction2.getStepY(), direction2.getStepZ() * 2);
-					if (this.level.getBlockState(blockPos3).getCollisionShape(this.level, blockPos3).isEmpty()) {
-						optional = Optional.of(blockPos3);
-						break;
-					}
-				}
-			}
-
-			if (!optional.isPresent()) {
-				for (Direction direction2x : Direction.Plane.VERTICAL) {
-					BlockPos blockPos3 = blockPos.offset(direction2x.getStepX() * 2, direction2x.getStepY(), direction2x.getStepZ() * 2);
-					if (this.level.getBlockState(blockPos3).getCollisionShape(this.level, blockPos3).isEmpty()) {
-						optional = Optional.of(blockPos3);
-					}
-				}
-			}
-
-			if (!optional.isPresent()) {
+			BlockPos blockPos2 = blockPos.relative(direction);
+			if (!this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
 				return false;
 			} else {
-				BlockPos blockPos4 = (BlockPos)optional.get();
-				Entity entity = EntityType.loadEntityRecursive(compoundTag, this.level, entityx -> {
-					entityx.moveTo((double)blockPos4.getX(), (double)blockPos4.getY(), (double)blockPos4.getZ(), entityx.yRot, entityx.xRot);
-					return entityx;
-				});
+				Entity entity = EntityType.loadEntityRecursive(compoundTag, this.level, entityx -> entityx);
 				if (entity != null) {
+					float f = entity.getBbWidth();
+					double d = 0.55 + (double)(f / 2.0F);
+					double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
+					double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
+					double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
+					entity.moveTo(e, g, h, entity.yRot, entity.xRot);
 					if (!entity.getType().is(EntityTypeTags.BEEHIVE_INHABITORS)) {
 						return false;
 					} else {
@@ -174,7 +165,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 							if (beeReleaseStatus == BeehiveBlockEntity.BeeReleaseStatus.HONEY_DELIVERED) {
 								bee.dropOffNectar();
 								if (blockState.getBlock().is(BlockTags.BEEHIVES)) {
-									int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
+									int i = getHoneyLevel(blockState);
 									if (i < 5) {
 										int j = this.level.random.nextInt(100) == 0 ? 2 : 1;
 										if (i + j > 5) {
@@ -205,7 +196,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	private boolean hasSavedFlowerPos() {
-		return this.savedFlowerPos != BlockPos.ZERO;
+		return this.savedFlowerPos != null;
 	}
 
 	private void tickOccupants() {
@@ -258,14 +249,20 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 			this.stored.add(beeData);
 		}
 
-		this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+		this.savedFlowerPos = null;
+		if (compoundTag.contains("FlowerPos")) {
+			this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
+		}
 	}
 
 	@Override
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
 		compoundTag.put("Bees", this.writeBees());
-		compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
+		if (this.hasSavedFlowerPos()) {
+			compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
+		}
+
 		return compoundTag;
 	}
 

@@ -77,7 +77,7 @@ public class Main {
 		if (string != null) {
 			try {
 				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec7)));
-			} catch (Exception var66) {
+			} catch (Exception var68) {
 			}
 		}
 
@@ -139,8 +139,11 @@ public class Main {
 			RenderSystem.beginInitialization();
 			minecraft = new Minecraft(gameConfig);
 			RenderSystem.finishInitialization();
-		} catch (Throwable var65) {
-			CrashReport crashReport = CrashReport.forThrowable(var65, "Initializing game");
+		} catch (SilentInitException var66) {
+			LOGGER.warn("Failed to create window: ", (Throwable)var66);
+			return;
+		} catch (Throwable var67) {
+			CrashReport crashReport = CrashReport.forThrowable(var67, "Initializing game");
 			crashReport.addCategory("Initialization");
 			Minecraft.fillReport(null, gameConfig.game.launchVersion, null, crashReport);
 			Minecraft.crash(crashReport);
@@ -169,8 +172,8 @@ public class Main {
 			try {
 				RenderSystem.initGameThread(false);
 				minecraft.run();
-			} catch (Throwable var64) {
-				LOGGER.error("Unhandled game exception", var64);
+			} catch (Throwable var65) {
+				LOGGER.error("Unhandled game exception", var65);
 			}
 		}
 
@@ -179,8 +182,8 @@ public class Main {
 			if (thread2 != null) {
 				thread2.join();
 			}
-		} catch (InterruptedException var62) {
-			LOGGER.error("Exception during client thread shutdown", (Throwable)var62);
+		} catch (InterruptedException var63) {
+			LOGGER.error("Exception during client thread shutdown", (Throwable)var63);
 		} finally {
 			minecraft.destroy();
 		}

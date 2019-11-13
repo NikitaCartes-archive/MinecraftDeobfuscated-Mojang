@@ -20,12 +20,8 @@ public abstract class Option {
 		}, (options, progressOption) -> {
 			double d = progressOption.get(options);
 			String string = progressOption.getCaption();
-			if (d == 0.0) {
-				return string + I18n.get("options.off");
-			} else {
-				int i = (int)d * 2 + 1;
-				return string + i + "x" + i;
-			}
+			int i = (int)d * 2 + 1;
+			return string + I18n.get("options.biomeBlendRadius." + i);
 		}
 	);
 	public static final ProgressOption CHAT_HEIGHT_FOCUSED = new ProgressOption(

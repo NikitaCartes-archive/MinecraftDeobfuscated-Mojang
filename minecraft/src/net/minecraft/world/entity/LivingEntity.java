@@ -400,20 +400,6 @@ public abstract class LivingEntity extends Entity {
 	protected void tickDeath() {
 		this.deathTime++;
 		if (this.deathTime == 20) {
-			if (!this.level.isClientSide
-				&& (
-					this.isAlwaysExperienceDropper()
-						|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
-				)) {
-				int i = this.getExperienceReward(this.lastHurtByPlayer);
-
-				while (i > 0) {
-					int j = ExperienceOrb.getExperienceValue(i);
-					i -= j;
-					this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
-				}
-			}
-
 			this.remove();
 
 			for (int i = 0; i < 20; i++) {
@@ -1136,9 +1122,26 @@ public abstract class LivingEntity extends Entity {
 		}
 
 		this.dropEquipment();
+		this.dropExperience();
 	}
 
 	protected void dropEquipment() {
+	}
+
+	protected void dropExperience() {
+		if (!this.level.isClientSide
+			&& (
+				this.isAlwaysExperienceDropper()
+					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
+			)) {
+			int i = this.getExperienceReward(this.lastHurtByPlayer);
+
+			while (i > 0) {
+				int j = ExperienceOrb.getExperienceValue(i);
+				i -= j;
+				this.level.addFreshEntity(new ExperienceOrb(this.level, this.getX(), this.getY(), this.getZ(), j));
+			}
+		}
 	}
 
 	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
@@ -2042,10 +2045,10 @@ public abstract class LivingEntity extends Entity {
 
 					switch (equipmentSlot.getType()) {
 						case HAND:
-							this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2.copy());
+							this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
 							break;
 						case ARMOR:
-							this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2.copy());
+							this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
 					}
 				}
 			}

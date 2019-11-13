@@ -12,7 +12,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
@@ -53,7 +52,7 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 		TextureAtlasSprite textureAtlasSprite = this.getSprite(getTexture(blockState.getBlock()));
 		poseStack.pushPose();
 		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 		this.signModel.sign.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 		this.signModel.stick.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 		poseStack.popPose();

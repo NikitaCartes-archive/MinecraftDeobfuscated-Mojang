@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.Direction;
@@ -52,7 +51,7 @@ public class ShulkerBoxRenderer extends BlockEntityRenderer<ShulkerBoxBlockEntit
 		poseStack.mulPose(direction.getRotation());
 		poseStack.scale(1.0F, -1.0F, -1.0F);
 		poseStack.translate(0.0, -1.0, 0.0);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutoutNoCull());
 		this.model.getBase().render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 		poseStack.translate(0.0, (double)(-shulkerBoxBlockEntity.getProgress(f) * 0.5F), 0.0);
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0F * shulkerBoxBlockEntity.getProgress(f)));

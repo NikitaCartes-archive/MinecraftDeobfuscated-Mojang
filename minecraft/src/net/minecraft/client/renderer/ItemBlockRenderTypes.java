@@ -5,7 +5,6 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -258,9 +257,7 @@ public class ItemBlockRenderTypes {
 
 	public static RenderType getRenderType(BlockState blockState) {
 		RenderType renderType = getChunkRenderType(blockState);
-		return renderType == RenderType.translucent()
-			? RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS)
-			: RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
+		return renderType == RenderType.translucent() ? RenderType.blockentityTranslucent() : RenderType.blockentityCutout();
 	}
 
 	public static RenderType getRenderType(ItemStack itemStack) {
@@ -269,7 +266,7 @@ public class ItemBlockRenderTypes {
 			Block block = ((BlockItem)item).getBlock();
 			return getRenderType(block.defaultBlockState());
 		} else {
-			return RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+			return RenderType.blockentityTranslucent();
 		}
 	}
 

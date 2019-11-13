@@ -45,7 +45,7 @@ public class MegaPineTreeFeature extends MegaTreeFeature<MegaTreeConfiguration> 
 		BoundingBox boundingBox,
 		MegaTreeConfiguration megaTreeConfiguration
 	) {
-		int m = random.nextInt(5) + megaTreeConfiguration.baseHeight;
+		int m = random.nextInt(5) + megaTreeConfiguration.crownHeight;
 		int n = 0;
 
 		for (int o = k - m; o <= k; o++) {

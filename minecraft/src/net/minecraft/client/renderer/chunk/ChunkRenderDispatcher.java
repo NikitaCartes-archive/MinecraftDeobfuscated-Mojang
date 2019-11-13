@@ -325,7 +325,7 @@ public class ChunkRenderDispatcher {
 
 		public void releaseBuffers() {
 			this.reset();
-			this.buffers.values().forEach(VertexBuffer::delete);
+			this.buffers.values().forEach(VertexBuffer::close);
 		}
 
 		public BlockPos getOrigin() {

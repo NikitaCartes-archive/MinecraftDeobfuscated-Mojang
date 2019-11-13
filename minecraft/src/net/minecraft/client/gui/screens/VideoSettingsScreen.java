@@ -28,8 +28,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.USE_FULLSCREEN,
 		Option.PARTICLES,
 		Option.MIPMAP_LEVELS,
-		Option.ENTITY_SHADOWS,
-		Option.BIOME_BLEND_RADIUS
+		Option.ENTITY_SHADOWS
 	};
 	private int oldMipmaps;
 
@@ -42,6 +41,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		this.oldMipmaps = this.options.mipmapLevels;
 		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
 		this.list.addBig(new FullscreenResolutionProgressOption(this.minecraft.getWindow()));
+		this.list.addBig(Option.BIOME_BLEND_RADIUS);
 		this.list.addSmall(OPTIONS);
 		this.children.add(this.list);
 		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, I18n.get("gui.done"), button -> {

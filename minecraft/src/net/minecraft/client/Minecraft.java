@@ -882,12 +882,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		while (Util.getMillis() >= this.lastTime + 1000L) {
 			fps = this.frames;
 			this.fpsString = String.format(
-				"%d fps T: %s%s%s%s",
+				"%d fps T: %s%s%s%s B: %d",
 				fps,
 				(double)this.options.framerateLimit == Option.FRAMERATE_LIMIT.getMaxValue() ? "inf" : this.options.framerateLimit,
 				this.options.enableVsync ? " vsync" : "",
 				this.options.fancyGraphics ? "" : " fast",
-				this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds")
+				this.options.renderClouds == CloudStatus.OFF ? "" : (this.options.renderClouds == CloudStatus.FAST ? " fast-clouds" : " fancy-clouds"),
+				this.options.biomeBlendRadius
 			);
 			this.lastTime += 1000L;
 			this.frames = 0;

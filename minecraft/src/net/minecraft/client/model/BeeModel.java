@@ -73,7 +73,7 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 
 	public void prepareMobModel(T bee, float f, float g, float h) {
 		super.prepareMobModel(bee, f, g, h);
-		this.rollAmount = bee.isBaby() ? 0.0F : bee.getRollAmount(h);
+		this.rollAmount = bee.getRollAmount(h);
 		this.stinger.visible = !bee.hasStung();
 	}
 

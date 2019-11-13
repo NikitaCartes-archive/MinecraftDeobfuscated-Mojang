@@ -10,7 +10,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -44,14 +43,14 @@ public class ConduitRenderer extends BlockEntityRenderer<ConduitBlockEntity> {
 		float g = (float)conduitBlockEntity.tickCount + f;
 		if (!conduitBlockEntity.isActive()) {
 			float h = conduitBlockEntity.getActiveRotation(0.0F);
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
 			poseStack.pushPose();
 			poseStack.translate(0.5, 0.5, 0.5);
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(h));
 			this.shell.render(poseStack, vertexConsumer, i, j, this.getSprite(SHELL_TEXTURE));
 			poseStack.popPose();
 		} else {
-			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.blockentityCutoutNoCull());
 			float k = conduitBlockEntity.getActiveRotation(f) * (180.0F / (float)Math.PI);
 			float l = Mth.sin(g * 0.1F) / 2.0F + 0.5F;
 			l = l * l + l;

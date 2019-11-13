@@ -5,6 +5,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class SuspiciousStewItem extends Item {
@@ -24,7 +25,7 @@ public class SuspiciousStewItem extends Item {
 
 	@Override
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		super.finishUsingItem(itemStack, level, livingEntity);
+		ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
 		CompoundTag compoundTag = itemStack.getTag();
 		if (compoundTag != null && compoundTag.contains("Effects", 9)) {
 			ListTag listTag = compoundTag.getList("Effects", 10);
@@ -43,6 +44,6 @@ public class SuspiciousStewItem extends Item {
 			}
 		}
 
-		return new ItemStack(Items.BOWL);
+		return livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild ? itemStack2 : new ItemStack(Items.BOWL);
 	}
 }

@@ -29,7 +29,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -58,10 +57,8 @@ public class EntityRenderDispatcher {
 	private final Font font;
 	public final TextureManager textureManager;
 	private Level level;
-	private Camera camera;
+	public Camera camera;
 	public Entity crosshairPickEntity;
-	public float playerRotY;
-	public float playerRotX;
 	public final Options options;
 	private boolean shouldRenderShadow = true;
 	private boolean renderHitBoxes;
@@ -211,20 +208,6 @@ public class EntityRenderDispatcher {
 		this.level = level;
 		this.camera = camera;
 		this.crosshairPickEntity = entity;
-		if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isSleeping()) {
-			Direction direction = ((LivingEntity)camera.getEntity()).getBedOrientation();
-			if (direction != null) {
-				this.playerRotY = direction.getOpposite().toYRot();
-				this.playerRotX = 0.0F;
-			}
-		} else {
-			this.playerRotY = camera.getYRot();
-			this.playerRotX = camera.getXRot();
-		}
-	}
-
-	public void setPlayerRotY(float f) {
-		this.playerRotY = f;
 	}
 
 	public void setRenderShadow(boolean bl) {
@@ -349,11 +332,11 @@ public class EntityRenderDispatcher {
 		float h = 0.0F;
 		float i = entity.getBbHeight() / f;
 		float j = 0.0F;
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.playerRotY));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(-this.camera.getYRot()));
 		poseStack.translate(0.0, 0.0, (double)(-0.3F + (float)((int)i) * 0.02F));
 		float k = 0.0F;
 		int l = 0;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutout());
 
 		for (PoseStack.Pose pose = poseStack.last(); i > 0.0F; l++) {
 			TextureAtlasSprite textureAtlasSprite3 = l % 2 == 0 ? textureAtlasSprite : textureAtlasSprite2;

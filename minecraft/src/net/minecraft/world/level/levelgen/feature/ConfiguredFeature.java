@@ -12,9 +12,13 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> {
+	public static final Logger LOGGER = LogManager.getLogger();
 	public final F feature;
 	public final FC config;
 
@@ -55,8 +59,14 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 	}
 
 	public static <T> ConfiguredFeature<?, ?> deserialize(Dynamic<T> dynamic) {
-		Feature<? extends FeatureConfiguration> feature = (Feature<? extends FeatureConfiguration>)Registry.FEATURE
-			.get(new ResourceLocation(dynamic.get("name").asString("")));
-		return new ConfiguredFeature<>(feature, dynamic.get("config").orElseEmptyMap());
+		String string = dynamic.get("name").asString("");
+		Feature<? extends FeatureConfiguration> feature = (Feature<? extends FeatureConfiguration>)Registry.FEATURE.get(new ResourceLocation(string));
+
+		try {
+			return new ConfiguredFeature<>(feature, dynamic.get("config").orElseEmptyMap());
+		} catch (RuntimeException var4) {
+			LOGGER.warn("Error while deserializing {}", string);
+			return new ConfiguredFeature<>(Feature.NO_OP, NoneFeatureConfiguration.NONE);
+		}
 	}
 }

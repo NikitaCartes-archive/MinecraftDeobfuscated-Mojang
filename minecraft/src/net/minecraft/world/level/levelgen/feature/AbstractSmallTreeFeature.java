@@ -34,24 +34,31 @@ public abstract class AbstractSmallTreeFeature<T extends SmallTreeConfiguration>
 	public Optional<BlockPos> getProjectedOrigin(
 		LevelSimulatedRW levelSimulatedRW, int i, int j, int k, BlockPos blockPos, SmallTreeConfiguration smallTreeConfiguration
 	) {
-		int l = levelSimulatedRW.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, blockPos).getY();
-		int m = levelSimulatedRW.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
-		BlockPos blockPos2 = new BlockPos(blockPos.getX(), l, blockPos.getZ());
-		if (m - l > smallTreeConfiguration.maxWaterDepth) {
-			return Optional.empty();
-		} else if (blockPos2.getY() >= 1 && blockPos2.getY() + i + 1 <= 256) {
-			for (int n = 0; n <= i + 1; n++) {
-				int o = smallTreeConfiguration.foliagePlacer.getTreeRadiusForHeight(j, i, k, n);
+		BlockPos blockPos2;
+		if (!smallTreeConfiguration.fromSapling) {
+			int l = levelSimulatedRW.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, blockPos).getY();
+			int m = levelSimulatedRW.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
+			blockPos2 = new BlockPos(blockPos.getX(), l, blockPos.getZ());
+			if (m - l > smallTreeConfiguration.maxWaterDepth) {
+				return Optional.empty();
+			}
+		} else {
+			blockPos2 = blockPos;
+		}
+
+		if (blockPos2.getY() >= 1 && blockPos2.getY() + i + 1 <= 256) {
+			for (int l = 0; l <= i + 1; l++) {
+				int m = smallTreeConfiguration.foliagePlacer.getTreeRadiusForHeight(j, i, k, l);
 				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-				for (int p = -o; p <= o; p++) {
-					int q = -o;
+				for (int n = -m; n <= m; n++) {
+					int o = -m;
 
-					while (q <= o) {
-						if (n + blockPos2.getY() >= 0 && n + blockPos2.getY() < 256) {
-							mutableBlockPos.set(p + blockPos2.getX(), n + blockPos2.getY(), q + blockPos2.getZ());
+					while (o <= m) {
+						if (l + blockPos2.getY() >= 0 && l + blockPos2.getY() < 256) {
+							mutableBlockPos.set(n + blockPos2.getX(), l + blockPos2.getY(), o + blockPos2.getZ());
 							if (isFree(levelSimulatedRW, mutableBlockPos) && (smallTreeConfiguration.ignoreVines || !isVine(levelSimulatedRW, mutableBlockPos))) {
-								q++;
+								o++;
 								continue;
 							}
 
