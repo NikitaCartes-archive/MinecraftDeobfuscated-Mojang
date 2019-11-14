@@ -337,8 +337,8 @@ extends RealmsScreen {
         private void renderWorldTemplateItem(WorldTemplate worldTemplate, int i, int j, int k, int l) {
             int m = i + 45 + 20;
             RealmsSelectWorldTemplateScreen.this.drawString(worldTemplate.name, m, j + 2, 0xFFFFFF);
-            RealmsSelectWorldTemplateScreen.this.drawString(worldTemplate.author, m, j + 15, 0x6C6C6C);
-            RealmsSelectWorldTemplateScreen.this.drawString(worldTemplate.version, m + 227 - RealmsSelectWorldTemplateScreen.this.fontWidth(worldTemplate.version), j + 1, 0x6C6C6C);
+            RealmsSelectWorldTemplateScreen.this.drawString(worldTemplate.author, m, j + 15, 0x808080);
+            RealmsSelectWorldTemplateScreen.this.drawString(worldTemplate.version, m + 227 - RealmsSelectWorldTemplateScreen.this.fontWidth(worldTemplate.version), j + 1, 0x808080);
             if (!("".equals(worldTemplate.link) && "".equals(worldTemplate.trailer) && "".equals(worldTemplate.recommendedPlayers))) {
                 this.drawIcons(m - 1, j + 25, k, l, worldTemplate.link, worldTemplate.trailer, worldTemplate.recommendedPlayers);
             }
@@ -356,7 +356,7 @@ extends RealmsScreen {
 
         private void drawIcons(int i, int j, int k, int l, String string, String string2, String string3) {
             if (!"".equals(string3)) {
-                RealmsSelectWorldTemplateScreen.this.drawString(string3, i, j + 4, 0x4C4C4C);
+                RealmsSelectWorldTemplateScreen.this.drawString(string3, i, j + 4, 0x808080);
             }
             int m = "".equals(string3) ? 0 : RealmsSelectWorldTemplateScreen.this.fontWidth(string3) + 2;
             boolean bl = false;

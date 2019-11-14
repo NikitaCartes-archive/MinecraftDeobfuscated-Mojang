@@ -281,7 +281,7 @@ extends RealmsScreen {
         private void renderBackupItem(Backup backup, int i, int j, int k, int l) {
             int m = backup.isUploadedVersion() ? -8388737 : 0xFFFFFF;
             RealmsBackupScreen.this.drawString("Backup (" + RealmsUtil.convertToAgePresentation(System.currentTimeMillis() - backup.lastModifiedDate.getTime()) + ")", i + 40, j + 1, m);
-            RealmsBackupScreen.this.drawString(this.getMediumDatePresentation(backup.lastModifiedDate), i + 40, j + 12, 0x4C4C4C);
+            RealmsBackupScreen.this.drawString(this.getMediumDatePresentation(backup.lastModifiedDate), i + 40, j + 12, 0x808080);
             int n = RealmsBackupScreen.this.width() - 175;
             int o = -3;
             int p = n - 10;

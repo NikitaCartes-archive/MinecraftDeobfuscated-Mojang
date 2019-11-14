@@ -949,11 +949,6 @@ implements FlyingAnimal {
         @Nullable
         protected abstract BlockPos getTargetPos();
 
-        @Override
-        public boolean canBeeContinueToUse() {
-            return this.isBeeWithinTargetPosRange();
-        }
-
         boolean isBeeWithinTargetPosRange() {
             BlockPos blockPos = this.getTargetPos();
             if (blockPos == null) {
@@ -971,7 +966,7 @@ implements FlyingAnimal {
         public void tick() {
             BlockPos blockPos = this.getTargetPos();
             PathNavigation pathNavigation = Bee.this.getNavigation();
-            if (pathNavigation.getPath() != null && !pathNavigation.getPath().canReach()) {
+            if (blockPos == null || pathNavigation.getPath() != null && !pathNavigation.getPath().canReach()) {
                 this.stop();
                 this.cantPathfindToTarget();
                 return;

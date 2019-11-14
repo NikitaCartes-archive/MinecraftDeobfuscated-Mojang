@@ -594,12 +594,12 @@ extends GuiComponent {
             int s = l - ++o * this.getFont().lineHeight;
             int t = this.screenWidth - 3 + 2;
             Gui.fill(r - 2, s, t, s + this.getFont().lineHeight, p);
-            this.getFont().draw(string3, r, s, 0x20FFFFFF);
-            this.getFont().draw(string4, t - this.getFont().width(string4), s, 0x20FFFFFF);
+            this.getFont().draw(string3, r, s, -1);
+            this.getFont().draw(string4, t - this.getFont().width(string4), s, -1);
             if (o != collection.size()) continue;
             Gui.fill(r - 2, s - this.getFont().lineHeight - 1, t, s - 1, q);
             Gui.fill(r - 2, s - 1, t, s, p);
-            this.getFont().draw(string, r + j / 2 - i / 2, s - this.getFont().lineHeight, 0x20FFFFFF);
+            this.getFont().draw(string, r + j / 2 - i / 2, s - this.getFont().lineHeight, -1);
         }
     }
 

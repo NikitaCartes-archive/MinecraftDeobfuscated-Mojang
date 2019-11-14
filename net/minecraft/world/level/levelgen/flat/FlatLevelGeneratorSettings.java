@@ -302,7 +302,7 @@ extends ChunkGeneratorSettings {
         if (iterator.hasNext()) {
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(iterator.next());
-                biome = Registry.BIOME.get(resourceLocation);
+                biome = Registry.BIOME.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Invalid Biome: " + resourceLocation));
             } catch (Exception exception) {
                 LOGGER.error("Error while parsing flat world string => {}", (Object)exception.getMessage());
             }

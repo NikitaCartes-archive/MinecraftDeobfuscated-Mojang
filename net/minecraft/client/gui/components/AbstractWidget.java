@@ -116,7 +116,7 @@ GuiEventListener {
         this.blit(this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
         this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
         this.renderBg(minecraft, i, j);
-        int l = 0xE0E0E0;
+        int l = 0xFFFFFF;
         if (!this.active) {
             l = 0xA0A0A0;
         } else if (this.isHovered()) {
