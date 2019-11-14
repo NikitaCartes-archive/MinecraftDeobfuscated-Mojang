@@ -654,12 +654,12 @@ public class Gui extends GuiComponent {
 			int s = l - o * 9;
 			int t = this.screenWidth - 3 + 2;
 			fill(n - 2, s, t, s + 9, p);
-			this.getFont().draw(string3, (float)n, (float)s, 553648127);
-			this.getFont().draw(string4, (float)(t - this.getFont().width(string4)), (float)s, 553648127);
+			this.getFont().draw(string3, (float)n, (float)s, -1);
+			this.getFont().draw(string4, (float)(t - this.getFont().width(string4)), (float)s, -1);
 			if (o == collection.size()) {
 				fill(n - 2, s - 9 - 1, t, s - 1, q);
 				fill(n - 2, s - 1, t, s, p);
-				this.getFont().draw(string, (float)(n + j / 2 - i / 2), (float)(s - 9), 553648127);
+				this.getFont().draw(string, (float)(n + j / 2 - i / 2), (float)(s - 9), -1);
 			}
 		}
 	}

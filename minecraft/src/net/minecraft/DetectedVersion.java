@@ -26,10 +26,10 @@ public class DetectedVersion implements GameVersion {
 
 	public DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "19w46a";
+		this.name = "19w46b";
 		this.stable = false;
-		this.worldVersion = 2216;
-		this.protocolVersion = 563;
+		this.worldVersion = 2217;
+		this.protocolVersion = 564;
 		this.packVersion = 4;
 		this.buildTime = new Date();
 		this.releaseTarget = "1.15";

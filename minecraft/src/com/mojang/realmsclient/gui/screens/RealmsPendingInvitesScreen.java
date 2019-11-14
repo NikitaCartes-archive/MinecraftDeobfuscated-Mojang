@@ -272,8 +272,8 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 		private void renderPendingInvitationItem(PendingInvite pendingInvite, int i, int j, int k, int l) {
 			RealmsPendingInvitesScreen.this.drawString(pendingInvite.worldName, i + 38, j + 1, 16777215);
-			RealmsPendingInvitesScreen.this.drawString(pendingInvite.worldOwnerName, i + 38, j + 12, 7105644);
-			RealmsPendingInvitesScreen.this.drawString(RealmsPendingInvitesScreen.getAge(pendingInvite), i + 38, j + 24, 7105644);
+			RealmsPendingInvitesScreen.this.drawString(pendingInvite.worldOwnerName, i + 38, j + 12, 8421504);
+			RealmsPendingInvitesScreen.this.drawString(RealmsPendingInvitesScreen.getAge(pendingInvite), i + 38, j + 24, 8421504);
 			RowButton.drawButtonsInRow(this.rowButtons, RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, i, j, k, l);
 			RealmsTextureManager.withBoundFace(pendingInvite.worldOwnerUuid, () -> {
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

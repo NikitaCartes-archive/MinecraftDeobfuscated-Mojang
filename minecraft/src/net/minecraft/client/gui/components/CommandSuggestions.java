@@ -29,8 +29,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ComponentUtils;
@@ -44,7 +46,7 @@ public class CommandSuggestions {
 	private final Screen screen;
 	private final EditBox input;
 	private final Font font;
-	private final boolean requireSlash;
+	private final boolean commandsOnly;
 	private final boolean onlyShowIfCursorPastError;
 	private final int lineStartOffset;
 	private final int suggestionLineLimit;
@@ -64,7 +66,7 @@ public class CommandSuggestions {
 		this.screen = screen;
 		this.input = editBox;
 		this.font = font;
-		this.requireSlash = bl;
+		this.commandsOnly = bl;
 		this.onlyShowIfCursorPastError = bl2;
 		this.lineStartOffset = i;
 		this.suggestionLineLimit = j;
@@ -84,7 +86,7 @@ public class CommandSuggestions {
 		if (this.suggestions != null && this.suggestions.keyPressed(i, j, k)) {
 			return true;
 		} else if (this.screen.getFocused() == this.input && i == 258) {
-			this.showSuggestions();
+			this.showSuggestions(true);
 			return true;
 		} else {
 			return false;
@@ -99,7 +101,7 @@ public class CommandSuggestions {
 		return this.suggestions != null && this.suggestions.mouseClicked((int)d, (int)e, i);
 	}
 
-	public void showSuggestions() {
+	public void showSuggestions(boolean bl) {
 		if (this.pendingSuggestions != null && this.pendingSuggestions.isDone()) {
 			Suggestions suggestions = (Suggestions)this.pendingSuggestions.join();
 			if (!suggestions.isEmpty()) {
@@ -111,7 +113,7 @@ public class CommandSuggestions {
 
 				int j = Mth.clamp(this.input.getScreenX(suggestions.getRange().getStart()), 0, this.input.getScreenX(0) + this.input.getInnerWidth() - i);
 				int k = this.anchorToBottom ? this.screen.height - 12 : 72;
-				this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, suggestions);
+				this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, suggestions, bl);
 			}
 		}
 	}
@@ -129,30 +131,37 @@ public class CommandSuggestions {
 
 		this.commandUsage.clear();
 		StringReader stringReader = new StringReader(string);
-		if (stringReader.canRead() && stringReader.peek() == '/') {
+		boolean bl;
+		if (this.commandsOnly) {
+			bl = true;
+		} else if (stringReader.canRead() && stringReader.peek() == '/') {
 			stringReader.skip();
-		} else if (this.requireSlash) {
-			return;
-		}
-
-		CommandDispatcher<SharedSuggestionProvider> commandDispatcher = this.minecraft.player.connection.getCommands();
-		if (this.currentParse == null) {
-			this.currentParse = commandDispatcher.parse(stringReader, this.minecraft.player.connection.getSuggestionsProvider());
-		}
-
-		int i = this.onlyShowIfCursorPastError ? stringReader.getCursor() : 1;
-		int j = this.input.getCursorPosition();
-		if (j < i || this.suggestions != null && this.keepSuggestions) {
-			int k = getLastWordIndex(string);
-			Collection<String> collection = this.minecraft.player.connection.getSuggestionsProvider().getOnlinePlayerNames();
-			this.pendingSuggestions = SharedSuggestionProvider.suggest(collection, new SuggestionsBuilder(string, k));
+			bl = true;
 		} else {
-			this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.currentParse, j);
-			this.pendingSuggestions.thenRun(() -> {
-				if (this.pendingSuggestions.isDone()) {
-					this.updateUsageInfo();
-				}
-			});
+			bl = false;
+		}
+
+		int i = this.input.getCursorPosition();
+		if (bl) {
+			CommandDispatcher<SharedSuggestionProvider> commandDispatcher = this.minecraft.player.connection.getCommands();
+			if (this.currentParse == null) {
+				this.currentParse = commandDispatcher.parse(stringReader, this.minecraft.player.connection.getSuggestionsProvider());
+			}
+
+			int j = this.onlyShowIfCursorPastError ? stringReader.getCursor() : 1;
+			if (i >= j && (this.suggestions == null || !this.keepSuggestions)) {
+				this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.currentParse, i);
+				this.pendingSuggestions.thenRun(() -> {
+					if (this.pendingSuggestions.isDone()) {
+						this.updateUsageInfo();
+					}
+				});
+			}
+		} else {
+			String string2 = string.substring(0, i);
+			int j = getLastWordIndex(string2);
+			Collection<String> collection = this.minecraft.player.connection.getSuggestionsProvider().getOnlinePlayerNames();
+			this.pendingSuggestions = SharedSuggestionProvider.suggest(collection, new SuggestionsBuilder(string2, j));
 		}
 	}
 
@@ -201,7 +210,7 @@ public class CommandSuggestions {
 
 		this.suggestions = null;
 		if (this.allowSuggestions && this.minecraft.options.autoSuggestions) {
-			this.showSuggestions();
+			this.showSuggestions(false);
 		}
 	}
 
@@ -299,6 +308,10 @@ public class CommandSuggestions {
 		}
 	}
 
+	public String getNarrationMessage() {
+		return this.suggestions != null ? "\n" + this.suggestions.getNarrationMessage() : "";
+	}
+
 	@Environment(EnvType.CLIENT)
 	public class SuggestionsList {
 		private final Rect2i rect;
@@ -308,13 +321,15 @@ public class CommandSuggestions {
 		private int current;
 		private Vec2 lastMouse = Vec2.ZERO;
 		private boolean tabCycles;
+		private int lastNarratedEntry;
 
-		private SuggestionsList(int i, int j, int k, Suggestions suggestions) {
+		private SuggestionsList(int i, int j, int k, Suggestions suggestions, boolean bl) {
 			int l = i - 1;
 			int m = CommandSuggestions.this.anchorToBottom ? j - 3 - Math.min(suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit) * 12 : j;
 			this.rect = new Rect2i(l, m, k + 1, Math.min(suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit) * 12);
 			this.suggestions = suggestions;
 			this.originalContents = CommandSuggestions.this.input.getValue();
+			this.lastNarratedEntry = bl ? -1 : 0;
 			this.select(0);
 		}
 
@@ -469,6 +484,9 @@ public class CommandSuggestions {
 			Suggestion suggestion = (Suggestion)this.suggestions.getList().get(this.current);
 			CommandSuggestions.this.input
 				.setSuggestion(CommandSuggestions.calculateSuggestionSuffix(CommandSuggestions.this.input.getValue(), suggestion.apply(this.originalContents)));
+			if (NarratorChatListener.INSTANCE.isActive() && this.lastNarratedEntry != this.current) {
+				NarratorChatListener.INSTANCE.sayNow(this.getNarrationMessage());
+			}
 		}
 
 		public void useSuggestion() {
@@ -481,6 +499,16 @@ public class CommandSuggestions {
 			this.select(this.current);
 			CommandSuggestions.this.keepSuggestions = false;
 			this.tabCycles = true;
+		}
+
+		private String getNarrationMessage() {
+			this.lastNarratedEntry = this.current;
+			List<Suggestion> list = this.suggestions.getList();
+			Suggestion suggestion = (Suggestion)list.get(this.current);
+			Message message = suggestion.getTooltip();
+			return message != null
+				? I18n.get("narration.suggestion.tooltip", this.current + 1, list.size(), suggestion.getText(), message.getString())
+				: I18n.get("narration.suggestion", this.current + 1, list.size(), suggestion.getText());
 		}
 
 		public void hide() {

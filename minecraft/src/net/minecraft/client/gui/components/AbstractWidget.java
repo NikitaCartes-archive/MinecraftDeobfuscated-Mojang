@@ -110,7 +110,7 @@ public abstract class AbstractWidget extends GuiComponent implements Widget, Gui
 		this.blit(this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
 		this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
 		this.renderBg(minecraft, i, j);
-		int l = 14737632;
+		int l = 16777215;
 		if (!this.active) {
 			l = 10526880;
 		} else if (this.isHovered()) {

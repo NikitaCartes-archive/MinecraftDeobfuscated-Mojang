@@ -655,11 +655,6 @@ public class Bee extends Animal implements FlyingAnimal {
 		@Nullable
 		protected abstract BlockPos getTargetPos();
 
-		@Override
-		public boolean canBeeContinueToUse() {
-			return this.isBeeWithinTargetPosRange();
-		}
-
 		boolean isBeeWithinTargetPosRange() {
 			BlockPos blockPos = this.getTargetPos();
 			if (blockPos == null) {
@@ -678,10 +673,7 @@ public class Bee extends Animal implements FlyingAnimal {
 		public void tick() {
 			BlockPos blockPos = this.getTargetPos();
 			PathNavigation pathNavigation = Bee.this.getNavigation();
-			if (pathNavigation.getPath() != null && !pathNavigation.getPath().canReach()) {
-				this.stop();
-				this.cantPathfindToTarget();
-			} else {
+			if (blockPos != null && (pathNavigation.getPath() == null || pathNavigation.getPath().canReach())) {
 				if (pathNavigation.isDone()) {
 					Vec3 vec3 = new Vec3(blockPos);
 					Vec3 vec32 = RandomPos.getPosTowards(Bee.this, 8, 6, vec3, (float) (Math.PI / 10), false);
@@ -697,6 +689,9 @@ public class Bee extends Animal implements FlyingAnimal {
 
 					pathNavigation.moveTo(vec32.x, vec32.y, vec32.z, 1.0);
 				}
+			} else {
+				this.stop();
+				this.cantPathfindToTarget();
 			}
 		}
 
