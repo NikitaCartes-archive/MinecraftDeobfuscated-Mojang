@@ -11,7 +11,9 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class PatrolSpawner {
@@ -75,6 +77,10 @@ public class PatrolSpawner {
     }
 
     private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
+        BlockState blockState = level.getBlockState(blockPos);
+        if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState())) {
+            return false;
+        }
         if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
             return false;
         }

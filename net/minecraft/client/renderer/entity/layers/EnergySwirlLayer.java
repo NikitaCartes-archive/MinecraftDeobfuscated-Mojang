@@ -35,7 +35,7 @@ extends RenderLayer<T, M> {
         ((EntityModel)this.getParentModel()).copyPropertiesTo(entityModel);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.energySwirl(this.getTextureLocation(), this.xOffset(m), m * 0.01f));
         entityModel.setupAnim(entity, f, g, j, k, l);
-        entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5f, 0.5f, 0.5f);
+        entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5f, 0.5f, 0.5f, 1.0f);
     }
 
     protected abstract float xOffset(float var1);

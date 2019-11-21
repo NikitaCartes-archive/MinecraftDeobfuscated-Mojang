@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,7 +15,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -165,7 +165,7 @@ implements MenuAccess<T> {
     protected abstract void renderBg(float var1, int var2, int var3);
 
     private void renderSlot(Slot slot) {
-        String string2;
+        Pair<ResourceLocation, ResourceLocation> pair;
         int i = slot.x;
         int j = slot.y;
         ItemStack itemStack = slot.getItem();
@@ -196,9 +196,9 @@ implements MenuAccess<T> {
         }
         this.setBlitOffset(100);
         this.itemRenderer.blitOffset = 100.0f;
-        if (itemStack.isEmpty() && slot.isActive() && (string2 = slot.getNoItemIcon()) != null) {
-            TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-            this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+        if (itemStack.isEmpty() && slot.isActive() && (pair = slot.getNoItemIcon()) != null) {
+            TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+            this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
             AbstractContainerScreen.blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
             bl2 = true;
         }

@@ -144,7 +144,7 @@ public class ChunkSerializer {
         Heightmap.primeHeightmaps(chunkAccess, enumSet);
         CompoundTag compoundTag3 = compoundTag2.getCompound("Structures");
         chunkAccess.setAllStarts(ChunkSerializer.unpackStructureStart(chunkGenerator, structureManager, compoundTag3));
-        chunkAccess.setAllReferences(ChunkSerializer.unpackStructureReferences(compoundTag3));
+        chunkAccess.setAllReferences(ChunkSerializer.unpackStructureReferences(chunkPos, compoundTag3));
         if (compoundTag2.getBoolean("shouldSave")) {
             chunkAccess.setUnsaved(true);
         }
@@ -345,11 +345,18 @@ public class ChunkSerializer {
         return map;
     }
 
-    private static Map<String, LongSet> unpackStructureReferences(CompoundTag compoundTag) {
+    private static Map<String, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag) {
         HashMap<String, LongSet> map = Maps.newHashMap();
         CompoundTag compoundTag2 = compoundTag.getCompound("References");
         for (String string : compoundTag2.getAllKeys()) {
-            map.put(string, new LongOpenHashSet(compoundTag2.getLongArray(string)));
+            map.put(string, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
+                ChunkPos chunkPos2 = new ChunkPos(l);
+                if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
+                    LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object)string, (Object)chunkPos2, (Object)chunkPos);
+                    return false;
+                }
+                return true;
+            }).toArray()));
         }
         return map;
     }

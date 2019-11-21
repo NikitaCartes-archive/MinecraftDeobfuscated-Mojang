@@ -10,7 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
@@ -22,6 +22,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -58,7 +59,7 @@ extends EntityRenderer<ItemFrame> {
         ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
         poseStack.pushPose();
         poseStack.translate(-0.5, -0.5, -0.5);
-        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(RenderType.blockentitySolid()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, i, OverlayTexture.NO_OVERLAY);
+        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, i, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
         ItemStack itemStack = itemFrame.getItem();
         if (!itemStack.isEmpty()) {
@@ -108,6 +109,11 @@ extends EntityRenderer<ItemFrame> {
     @Override
     protected void renderNameTag(ItemFrame itemFrame, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName().getColoredString(), poseStack, multiBufferSource, i);
+    }
+
+    @Override
+    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
+        return this.getRenderOffset((ItemFrame)entity, f);
     }
 }
 

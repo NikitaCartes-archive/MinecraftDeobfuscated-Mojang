@@ -7,13 +7,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -21,8 +22,8 @@ import net.minecraft.world.phys.Vec3;
 @Environment(value=EnvType.CLIENT)
 public class ShulkerRenderer
 extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
-    public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation("textures/" + ModelBakery.DEFAULT_SHULKER_TEXTURE_LOCATION.getPath() + ".png");
-    public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])ModelBakery.SHULKER_TEXTURE_LOCATION.stream().map(resourceLocation -> new ResourceLocation("textures/" + resourceLocation.getPath() + ".png")).toArray(ResourceLocation[]::new);
+    public static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation("textures/" + Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.texture().getPath() + ".png");
+    public static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION.stream().map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png")).toArray(ResourceLocation[]::new);
 
     public ShulkerRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new ShulkerModel(), 0.0f);
@@ -80,6 +81,11 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     protected void scale(Shulker shulker, PoseStack poseStack, float f) {
         float g = 0.999f;
         poseStack.scale(0.999f, 0.999f, 0.999f);
+    }
+
+    @Override
+    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
+        return this.getRenderOffset((Shulker)entity, f);
     }
 }
 

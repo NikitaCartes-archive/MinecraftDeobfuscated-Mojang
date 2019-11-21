@@ -127,7 +127,7 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         BOOK_MODEL.setupAnim(0.0f, o, p, h);
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer vertexConsumer = bufferSource.getBuffer(BOOK_MODEL.renderType(ENCHANTING_BOOK_LOCATION));
-        BOOK_MODEL.renderToBuffer(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        BOOK_MODEL.renderToBuffer(poseStack, vertexConsumer, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         bufferSource.endBatch();
         poseStack.popPose();
         RenderSystem.matrixMode(5889);

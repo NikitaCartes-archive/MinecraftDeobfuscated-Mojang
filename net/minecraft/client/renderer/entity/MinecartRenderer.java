@@ -92,7 +92,7 @@ extends EntityRenderer<T> {
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         this.model.setupAnim(abstractMinecart, 0.0f, 0.0f, -0.1f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(abstractMinecart)));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 

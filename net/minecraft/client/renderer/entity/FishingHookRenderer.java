@@ -29,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 public class FishingHookRenderer
 extends EntityRenderer<FishingHook> {
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
+    private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
 
     public FishingHookRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher);
@@ -53,7 +54,7 @@ extends EntityRenderer<FishingHook> {
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();
         Matrix3f matrix3f = pose.normal();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutout(TEXTURE_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
         FishingHookRenderer.vertex(vertexConsumer, matrix4f, matrix3f, i, 0.0f, 0, 0, 1);
         FishingHookRenderer.vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0f, 0, 1, 1);
         FishingHookRenderer.vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0f, 1, 1, 0);

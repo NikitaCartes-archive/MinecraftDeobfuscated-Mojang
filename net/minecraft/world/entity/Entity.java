@@ -83,7 +83,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
@@ -472,6 +471,7 @@ CommandSource {
         if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {
             vec3 = vec3.multiply(this.stuckSpeedMultiplier);
             this.stuckSpeedMultiplier = Vec3.ZERO;
+            this.setDeltaMovement(Vec3.ZERO);
         }
         if ((vec32 = this.collide(vec3 = this.maybeBackOffFromEdge(vec3, moverType))).lengthSqr() > 1.0E-7) {
             this.setBoundingBox(this.getBoundingBox().move(vec32));
@@ -1003,14 +1003,6 @@ CommandSource {
         return new Vec3(vec32.x * (double)i - vec32.z * (double)h, vec32.y, vec32.z * (double)i + vec32.x * (double)h);
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        if (this.isOnFire()) {
-            return 15;
-        }
-        return this.level.getBrightness(LightLayer.BLOCK, new BlockPos(this.getX(), this.getY(), this.getZ()));
-    }
-
     public float getBrightness() {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.getX(), 0.0, this.getZ());
         if (this.level.hasChunkAt(mutableBlockPos)) {
@@ -1172,7 +1164,7 @@ CommandSource {
         return this.calculateViewVector(f - 90.0f, g);
     }
 
-    public Vec3 getEyePosition(float f) {
+    public final Vec3 getEyePosition(float f) {
         if (f == 1.0f) {
             return new Vec3(this.getX(), this.getEyeY(), this.getZ());
         }

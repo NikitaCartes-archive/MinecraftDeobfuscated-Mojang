@@ -4,6 +4,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -38,7 +39,10 @@ extends MinecartRenderer<MinecartTNT> {
 
     public static void renderWhiteSolidBlock(BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl) {
         int j = bl ? OverlayTexture.pack(OverlayTexture.u(1.0f), 10) : OverlayTexture.NO_OVERLAY;
+        poseStack.pushPose();
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0f));
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
+        poseStack.popPose();
     }
 }
 

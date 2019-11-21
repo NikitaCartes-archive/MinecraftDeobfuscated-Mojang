@@ -42,7 +42,7 @@ extends RenderLayer<T, PlayerModel<T>> {
             float o = 0.75f * (float)m;
             poseStack.scale(o, o, o);
             poseStack.translate(0.0, -0.2f + 0.6f * (float)m, 0.0);
-            this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, null);
+            this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
     }

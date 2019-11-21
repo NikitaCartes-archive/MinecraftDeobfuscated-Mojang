@@ -28,7 +28,9 @@ import org.jetbrains.annotations.Nullable;
 public class MapRenderer
 implements AutoCloseable {
     public static final ResourceLocation MAP_BACKGROUND_LOCATION = new ResourceLocation("textures/map/map_background.png");
+    public static final RenderType MAP_BACKGROUND = RenderType.text(MAP_BACKGROUND_LOCATION);
     private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
+    private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
     private final TextureManager textureManager;
     private final Map<String, MapInstance> maps = Maps.newHashMap();
 
@@ -83,12 +85,13 @@ implements AutoCloseable {
     implements AutoCloseable {
         private final MapItemSavedData data;
         private final DynamicTexture texture;
-        private final ResourceLocation location;
+        private final RenderType renderType;
 
         private MapInstance(MapItemSavedData mapItemSavedData) {
             this.data = mapItemSavedData;
             this.texture = new DynamicTexture(128, 128, true);
-            this.location = MapRenderer.this.textureManager.register("map/" + mapItemSavedData.getId(), this.texture);
+            ResourceLocation resourceLocation = MapRenderer.this.textureManager.register("map/" + mapItemSavedData.getId(), this.texture);
+            this.renderType = RenderType.text(resourceLocation);
         }
 
         private void updateTexture() {
@@ -111,7 +114,7 @@ implements AutoCloseable {
             boolean k = false;
             float f = 0.0f;
             Matrix4f matrix4f = poseStack.last().pose();
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(this.location));
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.renderType);
             vertexConsumer.vertex(matrix4f, 0.0f, 128.0f, -0.01f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
             vertexConsumer.vertex(matrix4f, 128.0f, 128.0f, -0.01f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(i).endVertex();
             vertexConsumer.vertex(matrix4f, 128.0f, 0.0f, -0.01f).color(255, 255, 255, 255).uv(1.0f, 0.0f).uv2(i).endVertex();
@@ -131,7 +134,7 @@ implements AutoCloseable {
                 float n = (float)(b / 16 + 1) / 16.0f;
                 Matrix4f matrix4f2 = poseStack.last().pose();
                 float o = -0.001f;
-                VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(MAP_ICONS_LOCATION));
+                VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(MAP_ICONS);
                 vertexConsumer2.vertex(matrix4f2, -1.0f, 1.0f, (float)l * -0.001f).color(255, 255, 255, 255).uv(g, h).uv2(i).endVertex();
                 vertexConsumer2.vertex(matrix4f2, 1.0f, 1.0f, (float)l * -0.001f).color(255, 255, 255, 255).uv(m, h).uv2(i).endVertex();
                 vertexConsumer2.vertex(matrix4f2, 1.0f, -1.0f, (float)l * -0.001f).color(255, 255, 255, 255).uv(m, n).uv2(i).endVertex();

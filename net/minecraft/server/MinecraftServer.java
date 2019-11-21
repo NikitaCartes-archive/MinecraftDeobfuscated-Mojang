@@ -132,6 +132,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.saveddata.SaveDataDirtyRunnable;
 import net.minecraft.world.level.storage.CommandStorage;
@@ -438,6 +440,7 @@ Runnable {
         }
         this.packRepository.setSelected(list);
         this.updateSelectedPacks(levelData);
+        this.refreshRegistries();
     }
 
     protected void prepareLevels(ChunkProgressListener chunkProgressListener) {
@@ -1334,6 +1337,7 @@ Runnable {
         this.packRepository.reload();
         this.updateSelectedPacks(this.getLevel(DimensionType.OVERWORLD).getLevelData());
         this.getPlayerList().reloadResources();
+        this.refreshRegistries();
     }
 
     private void updateSelectedPacks(LevelData levelData) {
@@ -1554,6 +1558,10 @@ Runnable {
                 ((Writer)writer).write(10);
             }
         }
+    }
+
+    private void refreshRegistries() {
+        Block.BLOCK_STATE_REGISTRY.forEach(BlockState::initCache);
     }
 
     @Override

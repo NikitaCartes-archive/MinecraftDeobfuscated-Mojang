@@ -22,10 +22,16 @@ import net.minecraft.world.entity.projectile.ShulkerBullet;
 public class ShulkerBulletRenderer
 extends EntityRenderer<ShulkerBullet> {
     private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/shulker/spark.png");
+    private static final RenderType RENDER_TYPE = RenderType.entityTranslucent(TEXTURE_LOCATION);
     private final ShulkerBulletModel<ShulkerBullet> model = new ShulkerBulletModel();
 
     public ShulkerBulletRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher);
+    }
+
+    @Override
+    protected int getBlockLightLevel(ShulkerBullet shulkerBullet, float f) {
+        return 15;
     }
 
     @Override
@@ -41,10 +47,10 @@ extends EntityRenderer<ShulkerBullet> {
         poseStack.scale(-0.5f, -0.5f, 0.5f);
         this.model.setupAnim(shulkerBullet, 0.0f, 0.0f, 0.0f, h, j);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.scale(1.5f, 1.5f, 1.5f);
-        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityForceTranslucent(TEXTURE_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RENDER_TYPE);
+        this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 0.15f);
         poseStack.popPose();
         super.render(shulkerBullet, f, g, poseStack, multiBufferSource, i);
     }

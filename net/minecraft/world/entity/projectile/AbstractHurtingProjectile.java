@@ -189,12 +189,6 @@ extends Entity {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
-    }
-
-    @Override
     public Packet<?> getAddEntityPacket() {
         int i = this.owner == null ? 0 : this.owner.getId();
         return new ClientboundAddEntityPacket(this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.xRot, this.yRot, this.getType(), i, new Vec3(this.xPower, this.yPower, this.zPower));

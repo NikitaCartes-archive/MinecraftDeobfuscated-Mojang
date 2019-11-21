@@ -54,10 +54,10 @@ extends LivingEntityRenderer<T, M> {
         if (entity == null) {
             return;
         }
-        MobRenderer.renderLeash(mob, g, poseStack, multiBufferSource, entity);
+        this.renderLeash(mob, g, poseStack, multiBufferSource, entity);
     }
 
-    public static void renderLeash(Mob mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
+    private <E extends Entity> void renderLeash(T mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, E entity) {
         poseStack.pushPose();
         double d = Mth.lerp(f * 0.5f, entity.yRot, entity.yRotO) * ((float)Math.PI / 180);
         double e = Mth.lerp(f * 0.5f, entity.xRot, entity.xRotO) * ((float)Math.PI / 180);
@@ -73,13 +73,13 @@ extends LivingEntityRenderer<T, M> {
         double k = Mth.lerp((double)f, entity.xo, entity.getX()) - g * 0.7 - h * 0.5 * j;
         double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.getY() + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
         double m = Mth.lerp((double)f, entity.zo, entity.getZ()) - h * 0.7 + g * 0.5 * j;
-        double n = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
-        g = Math.cos(n) * (double)mob.getBbWidth() * 0.4;
-        h = Math.sin(n) * (double)mob.getBbWidth() * 0.4;
-        double o = Mth.lerp((double)f, mob.xo, mob.getX()) + g;
-        double p = Mth.lerp((double)f, mob.yo, mob.getY());
-        double q = Mth.lerp((double)f, mob.zo, mob.getZ()) + h;
-        poseStack.translate(g, -(1.6 - (double)mob.getBbHeight()) * 0.5, h);
+        double n = (double)(Mth.lerp(f, ((Mob)mob).yBodyRot, ((Mob)mob).yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
+        g = Math.cos(n) * (double)((Entity)mob).getBbWidth() * 0.4;
+        h = Math.sin(n) * (double)((Entity)mob).getBbWidth() * 0.4;
+        double o = Mth.lerp((double)f, ((Mob)mob).xo, ((Entity)mob).getX()) + g;
+        double p = Mth.lerp((double)f, ((Mob)mob).yo, ((Entity)mob).getY());
+        double q = Mth.lerp((double)f, ((Mob)mob).zo, ((Entity)mob).getZ()) + h;
+        poseStack.translate(g, -(1.6 - (double)((Entity)mob).getBbHeight()) * 0.5, h);
         float r = (float)(k - o);
         float s = (float)(l - p);
         float t = (float)(m - q);
@@ -89,10 +89,10 @@ extends LivingEntityRenderer<T, M> {
         float v = Mth.fastInvSqrt(r * r + t * t) * 0.025f / 2.0f;
         float w = t * v;
         float x = r * v;
-        int y = mob.getBlockLightLevel();
-        int z = entity.getBlockLightLevel();
-        int aa = mob.level.getBrightness(LightLayer.SKY, new BlockPos(mob));
-        int ab = mob.level.getBrightness(LightLayer.SKY, new BlockPos(entity));
+        int y = this.getBlockLightLevel(mob, f);
+        int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, f);
+        int aa = ((Mob)mob).level.getBrightness(LightLayer.SKY, new BlockPos(((Entity)mob).getEyePosition(f)));
+        int ab = ((Mob)mob).level.getBrightness(LightLayer.SKY, new BlockPos(entity.getEyePosition(f)));
         MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.025f, w, x);
         MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.0f, w, x);
         poseStack.popPose();

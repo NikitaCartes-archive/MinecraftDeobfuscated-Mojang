@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 @Environment(value=EnvType.CLIENT)
@@ -26,10 +25,10 @@ extends RenderLayer<T, M> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.eyes(this.getTextureLocation()));
-        ((Model)this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.renderType());
+        ((Model)this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, 0xF00000, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    public abstract ResourceLocation getTextureLocation();
+    public abstract RenderType renderType();
 }
 

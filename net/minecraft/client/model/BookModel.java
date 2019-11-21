@@ -12,9 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BookModel
@@ -41,12 +39,12 @@ extends Model {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-        this.render(poseStack, vertexConsumer, i, j, f, g, h, null);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+        this.b(poseStack, vertexConsumer, i, j, f, g, h, k);
     }
 
-    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, @Nullable TextureAtlasSprite textureAtlasSprite) {
-        this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, textureAtlasSprite, f, g, h));
+    public void b(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+        this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
     }
 
     public void setupAnim(float f, float g, float h, float i) {

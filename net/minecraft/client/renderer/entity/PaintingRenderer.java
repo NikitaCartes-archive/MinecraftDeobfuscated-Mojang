@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.core.BlockPos;
@@ -50,7 +49,7 @@ extends EntityRenderer<Painting> {
 
     @Override
     public ResourceLocation getTextureLocation(Painting painting) {
-        return TextureAtlas.LOCATION_PAINTINGS;
+        return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlas().location();
     }
 
     private void renderPainting(PoseStack poseStack, VertexConsumer vertexConsumer, Painting painting, int i, int j, TextureAtlasSprite textureAtlasSprite, TextureAtlasSprite textureAtlasSprite2) {

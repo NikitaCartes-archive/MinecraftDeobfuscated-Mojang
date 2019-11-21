@@ -79,7 +79,7 @@ implements TickableBlockEntity {
                     bee.makeAngry(player);
                     continue;
                 }
-                bee.setCannotEnterHiveTicks(400);
+                bee.setStayOutOfHiveCountdown(400);
             }
         }
     }
@@ -170,8 +170,8 @@ implements TickableBlockEntity {
                         this.level.setBlockAndUpdate(this.getBlockPos(), (BlockState)blockState.setValue(BeehiveBlock.HONEY_LEVEL, i + j));
                     }
                 }
+                bee.resetTicksWithoutNectarSinceExitingHive();
                 if (list != null) {
-                    bee.resetTicksSincePollination();
                     list.add(bee);
                 }
             }

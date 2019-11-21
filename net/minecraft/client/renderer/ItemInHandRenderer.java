@@ -16,7 +16,6 @@ import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -131,7 +130,7 @@ public class ItemInHandRenderer {
         poseStack.scale(0.38f, 0.38f, 0.38f);
         poseStack.translate(-0.5, -0.5, 0.0);
         poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_BACKGROUND_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MapRenderer.MAP_BACKGROUND);
         Matrix4f matrix4f = poseStack.last().pose();
         vertexConsumer.vertex(matrix4f, -7.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(0.0f, 1.0f).uv2(i).endVertex();
         vertexConsumer.vertex(matrix4f, 135.0f, 135.0f, 0.0f).color(255, 255, 255, 255).uv(1.0f, 1.0f).uv2(i).endVertex();

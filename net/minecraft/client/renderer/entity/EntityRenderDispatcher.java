@@ -20,9 +20,9 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.AreaEffectCloudRenderer;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
@@ -115,7 +115,6 @@ import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.client.renderer.entity.ZombieVillagerRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -132,7 +131,6 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -142,7 +140,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class EntityRenderDispatcher {
-    private static final ResourceLocation SHADOW_LOCATION = new ResourceLocation("textures/misc/shadow.png");
+    private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityNoOutline(new ResourceLocation("textures/misc/shadow.png"));
     private final Map<EntityType<?>, EntityRenderer<?>> renderers = Maps.newHashMap();
     private final Map<String, PlayerRenderer> playerRenderers = Maps.newHashMap();
     private final PlayerRenderer defaultPlayerRenderer;
@@ -155,8 +153,8 @@ public class EntityRenderDispatcher {
     private boolean shouldRenderShadow = true;
     private boolean renderHitBoxes;
 
-    public static int getPackedLightCoords(Entity entity) {
-        return LightTexture.pack(entity.getBlockLightLevel(), entity.level.getBrightness(LightLayer.SKY, new BlockPos(entity)));
+    public <E extends Entity> int getPackedLightCoords(E entity, float f) {
+        return this.getRenderer(entity).getPackedLightCoords(entity, f);
     }
 
     private <T extends Entity> void register(EntityType<T> entityType, EntityRenderer<? super T> entityRenderer) {
@@ -194,9 +192,9 @@ public class EntityRenderDispatcher {
         this.register(EntityType.EVOKER, new EvokerRenderer(this));
         this.register(EntityType.EXPERIENCE_BOTTLE, new ThrownItemRenderer(this, itemRenderer));
         this.register(EntityType.EXPERIENCE_ORB, new ExperienceOrbRenderer(this));
-        this.register(EntityType.EYE_OF_ENDER, new ThrownItemRenderer(this, itemRenderer));
+        this.register(EntityType.EYE_OF_ENDER, new ThrownItemRenderer(this, itemRenderer, 1.0f, true));
         this.register(EntityType.FALLING_BLOCK, new FallingBlockRenderer(this));
-        this.register(EntityType.FIREBALL, new ThrownItemRenderer(this, itemRenderer, 3.0f));
+        this.register(EntityType.FIREBALL, new ThrownItemRenderer(this, itemRenderer, 3.0f, true));
         this.register(EntityType.FIREWORK_ROCKET, new FireworkEntityRenderer(this, itemRenderer));
         this.register(EntityType.FISHING_BOBBER, new FishingHookRenderer(this));
         this.register(EntityType.FOX, new FoxRenderer(this));
@@ -239,7 +237,7 @@ public class EntityRenderDispatcher {
         this.register(EntityType.SKELETON_HORSE, new UndeadHorseRenderer(this));
         this.register(EntityType.SKELETON, new SkeletonRenderer(this));
         this.register(EntityType.SLIME, new SlimeRenderer(this));
-        this.register(EntityType.SMALL_FIREBALL, new ThrownItemRenderer(this, itemRenderer, 0.75f));
+        this.register(EntityType.SMALL_FIREBALL, new ThrownItemRenderer(this, itemRenderer, 0.75f, true));
         this.register(EntityType.SNOWBALL, new ThrownItemRenderer(this, itemRenderer));
         this.register(EntityType.SNOW_GOLEM, new SnowGolemRenderer(this));
         this.register(EntityType.SPAWNER_MINECART, new MinecartRenderer(this));
@@ -386,9 +384,8 @@ public class EntityRenderDispatcher {
     }
 
     private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
-        TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
-        TextureAtlasSprite textureAtlasSprite = textureAtlas.getSprite(ModelBakery.FIRE_0);
-        TextureAtlasSprite textureAtlasSprite2 = textureAtlas.getSprite(ModelBakery.FIRE_1);
+        TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_0.sprite();
+        TextureAtlasSprite textureAtlasSprite2 = ModelBakery.FIRE_1.sprite();
         poseStack.pushPose();
         float f = entity.getBbWidth() * 1.4f;
         poseStack.scale(f, f, f);
@@ -400,7 +397,7 @@ public class EntityRenderDispatcher {
         poseStack.translate(0.0, 0.0, -0.3f + (float)((int)i) * 0.02f);
         float k = 0.0f;
         int l = 0;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutout());
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.cutoutBlockSheet());
         PoseStack.Pose pose = poseStack.last();
         while (i > 0.0f) {
             TextureAtlasSprite textureAtlasSprite3 = l % 2 == 0 ? textureAtlasSprite : textureAtlasSprite2;
@@ -446,7 +443,7 @@ public class EntityRenderDispatcher {
         int o = Mth.floor(j - (double)i);
         int p = Mth.floor(j + (double)i);
         PoseStack.Pose pose = poseStack.last();
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityNoOutline(SHADOW_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SHADOW_RENDER_TYPE);
         for (BlockPos blockPos : BlockPos.betweenClosed(new BlockPos(k, m, o), new BlockPos(l, n, p))) {
             EntityRenderDispatcher.renderBlockShadow(pose, vertexConsumer, levelReader, blockPos, d, e, j, i, f);
         }

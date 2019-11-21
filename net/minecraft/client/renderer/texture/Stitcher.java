@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public class Stitcher {
-    private static final Comparator<Holder> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height).thenComparing(holder -> -holder.width).thenComparing(holder -> holder.sprite.getName());
+    private static final Comparator<Holder> HOLDER_COMPARATOR = Comparator.comparing(holder -> -holder.height).thenComparing(holder -> -holder.width).thenComparing(holder -> holder.spriteInfo.name());
     private final int mipLevel;
     private final Set<Holder> texturesToBeStitched = Sets.newHashSetWithExpectedSize(256);
     private final List<Region> storage = Lists.newArrayListWithCapacity(256);
@@ -42,8 +42,8 @@ public class Stitcher {
         return this.storageY;
     }
 
-    public void registerSprite(TextureAtlasSprite textureAtlasSprite) {
-        Holder holder = new Holder(textureAtlasSprite, this.mipLevel);
+    public void registerSprite(TextureAtlasSprite.Info info) {
+        Holder holder = new Holder(info, this.mipLevel);
         this.texturesToBeStitched.add(holder);
     }
 
@@ -52,23 +52,20 @@ public class Stitcher {
         list.sort(HOLDER_COMPARATOR);
         for (Holder holder2 : list) {
             if (this.addToStorage(holder2)) continue;
-            throw new StitcherException(holder2.sprite, list.stream().map(holder -> holder.sprite).collect(ImmutableList.toImmutableList()));
+            throw new StitcherException(holder2.spriteInfo, list.stream().map(holder -> holder.spriteInfo).collect(ImmutableList.toImmutableList()));
         }
         this.storageX = Mth.smallestEncompassingPowerOfTwo(this.storageX);
         this.storageY = Mth.smallestEncompassingPowerOfTwo(this.storageY);
     }
 
-    public List<TextureAtlasSprite> gatherSprites() {
-        ArrayList<TextureAtlasSprite> list = Lists.newArrayList();
+    public void gatherSprites(SpriteLoader spriteLoader) {
         for (Region region2 : this.storage) {
             region2.walk(region -> {
                 Holder holder = region.getHolder();
-                TextureAtlasSprite textureAtlasSprite = holder.sprite;
-                textureAtlasSprite.init(this.storageX, this.storageY, region.getX(), region.getY());
-                list.add(textureAtlasSprite);
+                TextureAtlasSprite.Info info = holder.spriteInfo;
+                spriteLoader.load(info, this.storageX, this.storageY, region.getX(), region.getY());
             });
         }
-        return list;
     }
 
     private static int smallestFittingMinTexel(int i, int j) {
@@ -205,19 +202,24 @@ public class Stitcher {
 
     @Environment(value=EnvType.CLIENT)
     static class Holder {
-        public final TextureAtlasSprite sprite;
+        public final TextureAtlasSprite.Info spriteInfo;
         public final int width;
         public final int height;
 
-        public Holder(TextureAtlasSprite textureAtlasSprite, int i) {
-            this.sprite = textureAtlasSprite;
-            this.width = Stitcher.smallestFittingMinTexel(textureAtlasSprite.getWidth(), i);
-            this.height = Stitcher.smallestFittingMinTexel(textureAtlasSprite.getHeight(), i);
+        public Holder(TextureAtlasSprite.Info info, int i) {
+            this.spriteInfo = info;
+            this.width = Stitcher.smallestFittingMinTexel(info.width(), i);
+            this.height = Stitcher.smallestFittingMinTexel(info.height(), i);
         }
 
         public String toString() {
             return "Holder{width=" + this.width + ", height=" + this.height + '}';
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static interface SpriteLoader {
+        public void load(TextureAtlasSprite.Info var1, int var2, int var3, int var4, int var5);
     }
 }
 

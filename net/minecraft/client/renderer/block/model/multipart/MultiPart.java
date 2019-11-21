@@ -10,6 +10,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.mojang.datafixers.util.Pair;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +27,7 @@ import net.minecraft.client.renderer.block.model.MultiVariant;
 import net.minecraft.client.renderer.block.model.multipart.Selector;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
@@ -80,13 +82,13 @@ implements UnbakedModel {
     }
 
     @Override
-    public Collection<ResourceLocation> getTextures(Function<ResourceLocation, UnbakedModel> function, Set<String> set) {
-        return this.getSelectors().stream().flatMap(selector -> selector.getVariant().getTextures(function, set).stream()).collect(Collectors.toSet());
+    public Collection<Material> getMaterials(Function<ResourceLocation, UnbakedModel> function, Set<Pair<String, String>> set) {
+        return this.getSelectors().stream().flatMap(selector -> selector.getVariant().getMaterials(function, set).stream()).collect(Collectors.toSet());
     }
 
     @Override
     @Nullable
-    public BakedModel bake(ModelBakery modelBakery, Function<ResourceLocation, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
+    public BakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
         MultiPartBakedModel.Builder builder = new MultiPartBakedModel.Builder();
         for (Selector selector : this.getSelectors()) {
             BakedModel bakedModel = selector.getVariant().bake(modelBakery, function, modelState, resourceLocation);

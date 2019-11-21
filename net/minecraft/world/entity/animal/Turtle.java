@@ -30,7 +30,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -58,6 +57,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.TurtleNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
@@ -76,6 +76,7 @@ extends Animal {
 
     public Turtle(EntityType<? extends Turtle> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
+        this.setPathfindingMalus(BlockPathTypes.WATER, 0.0f);
         this.moveControl = new TurtleMoveControl(this);
         this.maxUpStep = 1.0f;
     }
@@ -664,7 +665,7 @@ extends Animal {
             }
             if (this.turtle.getNavigation().isDone()) {
                 Vec3 vec3 = new Vec3(blockPos);
-                Vec3 vec32 = RandomPos.getPosTowards((PathfinderMob)this.turtle, 16, 3, vec3, 0.3141592741012573);
+                Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, 0.3141592741012573);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
                 }
@@ -717,7 +718,7 @@ extends Animal {
         public void tick() {
             if (this.turtle.getNavigation().isDone()) {
                 Vec3 vec3 = new Vec3(this.turtle.getTravelPos());
-                Vec3 vec32 = RandomPos.getPosTowards((PathfinderMob)this.turtle, 16, 3, vec3, 0.3141592741012573);
+                Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, 0.3141592741012573);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
                 }

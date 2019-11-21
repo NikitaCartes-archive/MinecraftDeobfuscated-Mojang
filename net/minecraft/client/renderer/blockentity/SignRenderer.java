@@ -15,18 +15,18 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(value=EnvType.CLIENT)
 public class SignRenderer
@@ -55,12 +55,12 @@ extends BlockEntityRenderer<SignBlockEntity> {
             poseStack.translate(0.0, -0.3125, -0.4375);
             this.signModel.stick.visible = false;
         }
-        TextureAtlasSprite textureAtlasSprite = this.getSprite(SignRenderer.getTexture(blockState.getBlock()));
         poseStack.pushPose();
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
-        this.signModel.sign.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.signModel.stick.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        Material material = SignRenderer.getMaterial(blockState.getBlock());
+        VertexConsumer vertexConsumer = material.buffer(multiBufferSource, this.signModel::renderType);
+        this.signModel.sign.render(poseStack, vertexConsumer, i, j);
+        this.signModel.stick.render(poseStack, vertexConsumer, i, j);
         poseStack.popPose();
         Font font = this.renderer.getFont();
         float k = 0.010416667f;
@@ -79,26 +79,9 @@ extends BlockEntityRenderer<SignBlockEntity> {
         poseStack.popPose();
     }
 
-    public static ResourceLocation getTexture(Block block) {
-        if (block == Blocks.OAK_SIGN || block == Blocks.OAK_WALL_SIGN) {
-            return ModelBakery.OAK_SIGN_TEXTURE;
-        }
-        if (block == Blocks.SPRUCE_SIGN || block == Blocks.SPRUCE_WALL_SIGN) {
-            return ModelBakery.SPRUCE_SIGN_TEXTURE;
-        }
-        if (block == Blocks.BIRCH_SIGN || block == Blocks.BIRCH_WALL_SIGN) {
-            return ModelBakery.BIRCH_SIGN_TEXTURE;
-        }
-        if (block == Blocks.ACACIA_SIGN || block == Blocks.ACACIA_WALL_SIGN) {
-            return ModelBakery.ACACIA_SIGN_TEXTURE;
-        }
-        if (block == Blocks.JUNGLE_SIGN || block == Blocks.JUNGLE_WALL_SIGN) {
-            return ModelBakery.JUNGLE_SIGN_TEXTURE;
-        }
-        if (block == Blocks.DARK_OAK_SIGN || block == Blocks.DARK_OAK_WALL_SIGN) {
-            return ModelBakery.DARK_OAK_SIGN_TEXTURE;
-        }
-        return ModelBakery.OAK_SIGN_TEXTURE;
+    public static Material getMaterial(Block block) {
+        WoodType woodType = block instanceof SignBlock ? ((SignBlock)block).type() : WoodType.OAK;
+        return Sheets.signTexture(woodType);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -115,9 +98,9 @@ extends BlockEntityRenderer<SignBlockEntity> {
         }
 
         @Override
-        public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-            this.sign.render(poseStack, vertexConsumer, i, j, null, f, g, h);
-            this.stick.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+        public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+            this.sign.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+            this.stick.render(poseStack, vertexConsumer, i, j, f, g, h, k);
         }
     }
 }

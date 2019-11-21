@@ -113,8 +113,8 @@ implements RenderLayerParent<T, M> {
         ((EntityModel)this.model).setupAnim(livingEntity, o, n, l, k, m);
         if (bl || bl2) {
             ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.entityForceTranslucent(resourceLocation) : ((Model)this.model).renderType(resourceLocation));
-            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0f, 1.0f, 1.0f);
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.entityTranslucent(resourceLocation) : ((Model)this.model).renderType(resourceLocation));
+            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
         }
         if (!((Entity)livingEntity).isSpectator()) {
             for (RenderLayer<T, M> renderLayer : this.layers) {

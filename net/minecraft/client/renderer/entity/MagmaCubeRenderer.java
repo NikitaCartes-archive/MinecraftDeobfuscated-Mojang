@@ -23,6 +23,11 @@ extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     }
 
     @Override
+    protected int getBlockLightLevel(MagmaCube magmaCube, float f) {
+        return 15;
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(MagmaCube magmaCube) {
         return MAGMACUBE_LOCATION;
     }

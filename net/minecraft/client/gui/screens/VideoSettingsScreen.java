@@ -12,7 +12,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -45,9 +44,7 @@ extends OptionsSubScreen {
     @Override
     public void removed() {
         if (this.options.mipmapLevels != this.oldMipmaps) {
-            this.minecraft.getTextureAtlas().setMaxMipLevel(this.options.mipmapLevels);
-            this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-            this.minecraft.getTextureAtlas().setFilter(false, this.options.mipmapLevels > 0);
+            this.minecraft.updateMaxMipLevel(this.options.mipmapLevels);
             this.minecraft.delayTextureReload();
         }
         super.removed();

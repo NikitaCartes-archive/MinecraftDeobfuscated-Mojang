@@ -35,7 +35,7 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
 
     protected static <T extends LivingEntity> void renderColoredCutoutModel(EntityModel<T> entityModel, ResourceLocation resourceLocation, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h) {
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-        entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), f, g, h);
+        entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), f, g, h, 1.0f);
     }
 
     public M getParentModel() {

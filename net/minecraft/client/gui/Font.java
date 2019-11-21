@@ -24,10 +24,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
@@ -104,8 +103,6 @@ implements AutoCloseable {
     }
 
     private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        BakedGlyph bakedGlyph2;
-        ResourceLocation resourceLocation2;
         float h = bl ? 0.25f : 1.0f;
         float l = (float)(i >> 16 & 0xFF) / 255.0f * h;
         float m = (float)(i >> 8 & 0xFF) / 255.0f * h;
@@ -124,6 +121,7 @@ implements AutoCloseable {
         for (int t = 0; t < string.length(); ++t) {
             float w;
             float v;
+            BakedGlyph bakedGlyph;
             char c = string.charAt(t);
             if (c == '\u00a7' && t + 1 < string.length()) {
                 ChatFormatting chatFormatting = ChatFormatting.getByCode(string.charAt(t + 1));
@@ -159,12 +157,11 @@ implements AutoCloseable {
                 continue;
             }
             GlyphInfo glyphInfo = this.fonts.getGlyphInfo(c);
-            BakedGlyph bakedGlyph = bl3 && c != ' ' ? this.fonts.getRandomGlyph(glyphInfo) : this.fonts.getGlyph(c);
-            ResourceLocation resourceLocation = bakedGlyph.getTexture();
-            if (resourceLocation != null) {
+            BakedGlyph bakedGlyph2 = bakedGlyph = bl3 && c != ' ' ? this.fonts.getRandomGlyph(glyphInfo) : this.fonts.getGlyph(c);
+            if (!(bakedGlyph instanceof EmptyGlyph)) {
                 v = bl4 ? glyphInfo.getBoldOffset() : 0.0f;
                 w = bl ? glyphInfo.getShadowOffset() : 0.0f;
-                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation) : RenderType.text(resourceLocation));
+                VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bakedGlyph.renderType(bl2));
                 this.renderChar(bakedGlyph, bl4, bl5, v, o + w, g + w, matrix4f, vertexConsumer, p, q, r, s, k);
             }
             v = glyphInfo.getAdvance(bl4);
@@ -184,8 +181,9 @@ implements AutoCloseable {
             float aa = (float)(j & 0xFF) / 255.0f;
             list.add(new BakedGlyph.Effect(f - 1.0f, g + 9.0f, o + 1.0f, g - 1.0f, 0.01f, y, z, aa, x));
         }
-        if (!list.isEmpty() && (resourceLocation2 = (bakedGlyph2 = this.fonts.whiteGlyph()).getTexture()) != null) {
-            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation2) : RenderType.text(resourceLocation2));
+        if (!list.isEmpty()) {
+            BakedGlyph bakedGlyph2 = this.fonts.whiteGlyph();
+            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bakedGlyph2.renderType(bl2));
             for (BakedGlyph.Effect effect : list) {
                 bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);
             }

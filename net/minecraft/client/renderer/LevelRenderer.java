@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
@@ -63,13 +62,16 @@ import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
@@ -829,7 +831,7 @@ ResourceManagerReloadListener {
             this.renderSky(poseStack, f);
         }
         profilerFiller.popPush("fog");
-        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, h, bl3);
+        FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, Math.max(h - 16.0f, 32.0f), bl3);
         profilerFiller.popPush("terrain_setup");
         this.setupRender(camera, frustum, bl2, this.frameId++, this.minecraft.player.isSpectator());
         profilerFiller.popPush("updatechunks");
@@ -878,6 +880,10 @@ ResourceManagerReloadListener {
             this.renderEntity(entity, d, e, g, f, poseStack, (MultiBufferSource)multiBufferSource);
         }
         this.checkPoseStack(poseStack);
+        bufferSource.endBatch(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS));
+        bufferSource.endBatch(RenderType.entitySmoothCutout(TextureAtlas.LOCATION_BLOCKS));
         profilerFiller.popPush("blockentities");
         for (RenderChunkInfo renderChunkInfo : this.renderChunks) {
             List<BlockEntity> list = renderChunkInfo.chunk.getCompiledChunk().getRenderableBlockEntities();
@@ -889,11 +895,11 @@ ResourceManagerReloadListener {
                 poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos.asLong());
                 if (sortedSet != null && !sortedSet.isEmpty() && (m = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
-                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(RenderType.crumbling(m)), poseStack.last());
+                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), poseStack.last());
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
-                            return new VertexMultiConsumer(ImmutableList.of(vertexConsumer, vertexConsumer2));
+                            return VertexMultiConsumer.create(vertexConsumer, vertexConsumer2);
                         }
                         return vertexConsumer2;
                     };
@@ -914,8 +920,12 @@ ResourceManagerReloadListener {
         }
         this.checkPoseStack(poseStack);
         bufferSource.endBatch(RenderType.solid());
-        bufferSource.endBatch(RenderType.blockentitySolid());
-        bufferSource.endBatch(RenderType.blockentityCutout());
+        bufferSource.endBatch(Sheets.solidBlockSheet());
+        bufferSource.endBatch(Sheets.cutoutBlockSheet());
+        bufferSource.endBatch(Sheets.bedSheet());
+        bufferSource.endBatch(Sheets.shulkerBoxSheet());
+        bufferSource.endBatch(Sheets.signSheet());
+        bufferSource.endBatch(Sheets.chestSheet());
         this.renderBuffers.outlineBufferSource().endOutlineBatch();
         if (bl42) {
             this.entityEffect.process(f);
@@ -932,7 +942,7 @@ ResourceManagerReloadListener {
             int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
             poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
-            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(RenderType.crumbling(r)), poseStack.last());
+            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), poseStack.last());
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -953,13 +963,15 @@ ResourceManagerReloadListener {
         this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g, l);
         this.renderWorldBounds(camera);
         RenderSystem.popMatrix();
-        bufferSource.endBatch(RenderType.waterMask());
-        profilerFiller.popPush("translucent");
-        this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
-        bufferSource.endBatch(RenderType.blockentityTranslucent());
-        bufferSource.endBatch(RenderType.blockentityNoOutline());
+        bufferSource.endBatch(RenderType.lines());
         bufferSource.endBatch();
         this.renderBuffers.crumblingBufferSource().endBatch();
+        bufferSource.endBatch(RenderType.waterMask());
+        bufferSource.endBatch(Sheets.translucentBlockSheet());
+        bufferSource.endBatch(Sheets.bannerSheet());
+        bufferSource.endBatch(Sheets.shieldSheet());
+        profilerFiller.popPush("translucent");
+        this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
         profilerFiller.popPush("particles");
         this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
         RenderSystem.pushMatrix();
@@ -992,7 +1004,7 @@ ResourceManagerReloadListener {
         double i = Mth.lerp((double)g, entity.yOld, entity.getY());
         double j = Mth.lerp((double)g, entity.zOld, entity.getZ());
         float k = Mth.lerp(g, entity.yRotO, entity.yRot);
-        this.entityRenderDispatcher.render(entity, h - d, i - e, j - f, k, g, poseStack, multiBufferSource, EntityRenderDispatcher.getPackedLightCoords(entity));
+        this.entityRenderDispatcher.render(entity, h - d, i - e, j - f, k, g, poseStack, multiBufferSource, this.entityRenderDispatcher.getPackedLightCoords(entity, g));
     }
 
     private void renderChunkLayer(RenderType renderType, PoseStack poseStack, double d, double e, double f) {

@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -180,12 +178,6 @@ extends Monster {
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
         return SoundEvents.VEX_HURT;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
     }
 
     @Override

@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -87,12 +85,6 @@ extends Monster {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.BLAZE_DEATH;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
     }
 
     @Override

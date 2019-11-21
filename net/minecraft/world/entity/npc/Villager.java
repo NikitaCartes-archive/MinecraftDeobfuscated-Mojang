@@ -487,6 +487,7 @@ VillagerDataHolder {
 
     @Override
     public void die(DamageSource damageSource) {
+        LOGGER.info("Villager {} died, message: '{}'", (Object)this, (Object)damageSource.getLocalizedDeathMessage(this).getString());
         Entity entity = damageSource.getEntity();
         if (entity != null) {
             this.tellWitnessesThatIWasMurdered(entity);

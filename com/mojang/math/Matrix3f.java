@@ -7,7 +7,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
@@ -19,18 +18,20 @@ public final class Matrix3f {
     private static final float CS = (float)Math.cos(0.39269908169872414);
     private static final float SS = (float)Math.sin(0.39269908169872414);
     private static final float SQ2 = 1.0f / (float)Math.sqrt(2.0);
-    private final float[] values;
+    protected float m00;
+    protected float m01;
+    protected float m02;
+    protected float m10;
+    protected float m11;
+    protected float m12;
+    protected float m20;
+    protected float m21;
+    protected float m22;
 
     public Matrix3f() {
-        this(new float[9]);
-    }
-
-    private Matrix3f(float[] fs) {
-        this.values = fs;
     }
 
     public Matrix3f(Quaternion quaternion) {
-        this();
         float f = quaternion.i();
         float g = quaternion.j();
         float h = quaternion.k();
@@ -38,34 +39,53 @@ public final class Matrix3f {
         float j = 2.0f * f * f;
         float k = 2.0f * g * g;
         float l = 2.0f * h * h;
-        this.set(0, 0, 1.0f - k - l);
-        this.set(1, 1, 1.0f - l - j);
-        this.set(2, 2, 1.0f - j - k);
+        this.m00 = 1.0f - k - l;
+        this.m11 = 1.0f - l - j;
+        this.m22 = 1.0f - j - k;
         float m = f * g;
         float n = g * h;
         float o = h * f;
         float p = f * i;
         float q = g * i;
         float r = h * i;
-        this.set(1, 0, 2.0f * (m + r));
-        this.set(0, 1, 2.0f * (m - r));
-        this.set(2, 0, 2.0f * (o - q));
-        this.set(0, 2, 2.0f * (o + q));
-        this.set(2, 1, 2.0f * (n + p));
-        this.set(1, 2, 2.0f * (n - p));
+        this.m10 = 2.0f * (m + r);
+        this.m01 = 2.0f * (m - r);
+        this.m20 = 2.0f * (o - q);
+        this.m02 = 2.0f * (o + q);
+        this.m21 = 2.0f * (n + p);
+        this.m12 = 2.0f * (n - p);
+    }
+
+    public static Matrix3f createScaleMatrix(float f, float g, float h) {
+        Matrix3f matrix3f = new Matrix3f();
+        matrix3f.m00 = f;
+        matrix3f.m11 = g;
+        matrix3f.m22 = h;
+        return matrix3f;
     }
 
     public Matrix3f(Matrix4f matrix4f) {
-        this();
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                this.values[j + i * 3] = matrix4f.get(j, i);
-            }
-        }
+        this.m00 = matrix4f.m00;
+        this.m01 = matrix4f.m01;
+        this.m02 = matrix4f.m02;
+        this.m10 = matrix4f.m10;
+        this.m11 = matrix4f.m11;
+        this.m12 = matrix4f.m12;
+        this.m20 = matrix4f.m20;
+        this.m21 = matrix4f.m21;
+        this.m22 = matrix4f.m22;
     }
 
     public Matrix3f(Matrix3f matrix3f) {
-        this(Arrays.copyOf(matrix3f.values, 9));
+        this.m00 = matrix3f.m00;
+        this.m01 = matrix3f.m01;
+        this.m02 = matrix3f.m02;
+        this.m10 = matrix3f.m10;
+        this.m11 = matrix3f.m11;
+        this.m12 = matrix3f.m12;
+        this.m20 = matrix3f.m20;
+        this.m21 = matrix3f.m21;
+        this.m22 = matrix3f.m22;
     }
 
     private static Pair<Float, Float> approxGivensQuat(float f, float g, float h) {
@@ -102,8 +122,8 @@ public final class Matrix3f {
         Pair<Float, Float> pair;
         Matrix3f matrix3f2 = new Matrix3f();
         Quaternion quaternion = Quaternion.ONE.copy();
-        if (matrix3f.get(0, 1) * matrix3f.get(0, 1) + matrix3f.get(1, 0) * matrix3f.get(1, 0) > 1.0E-6f) {
-            pair = Matrix3f.approxGivensQuat(matrix3f.get(0, 0), 0.5f * (matrix3f.get(0, 1) + matrix3f.get(1, 0)), matrix3f.get(1, 1));
+        if (matrix3f.m01 * matrix3f.m01 + matrix3f.m10 * matrix3f.m10 > 1.0E-6f) {
+            pair = Matrix3f.approxGivensQuat(matrix3f.m00, 0.5f * (matrix3f.m01 + matrix3f.m10), matrix3f.m11);
             float_ = pair.getFirst();
             float2 = pair.getSecond();
             quaternion2 = new Quaternion(0.0f, 0.0f, float_.floatValue(), float2.floatValue());
@@ -112,18 +132,18 @@ public final class Matrix3f {
             h = float2.floatValue() * float2.floatValue() + float_.floatValue() * float_.floatValue();
             quaternion.mul(quaternion2);
             matrix3f2.setIdentity();
-            matrix3f2.set(0, 0, f);
-            matrix3f2.set(1, 1, f);
-            matrix3f2.set(1, 0, -g);
-            matrix3f2.set(0, 1, g);
-            matrix3f2.set(2, 2, h);
+            matrix3f2.m00 = f;
+            matrix3f2.m11 = f;
+            matrix3f2.m10 = -g;
+            matrix3f2.m01 = g;
+            matrix3f2.m22 = h;
             matrix3f.mul(matrix3f2);
             matrix3f2.transpose();
             matrix3f2.mul(matrix3f);
             matrix3f.load(matrix3f2);
         }
-        if (matrix3f.get(0, 2) * matrix3f.get(0, 2) + matrix3f.get(2, 0) * matrix3f.get(2, 0) > 1.0E-6f) {
-            pair = Matrix3f.approxGivensQuat(matrix3f.get(0, 0), 0.5f * (matrix3f.get(0, 2) + matrix3f.get(2, 0)), matrix3f.get(2, 2));
+        if (matrix3f.m02 * matrix3f.m02 + matrix3f.m20 * matrix3f.m20 > 1.0E-6f) {
+            pair = Matrix3f.approxGivensQuat(matrix3f.m00, 0.5f * (matrix3f.m02 + matrix3f.m20), matrix3f.m22);
             float i = -pair.getFirst().floatValue();
             float2 = pair.getSecond();
             quaternion2 = new Quaternion(0.0f, i, 0.0f, float2.floatValue());
@@ -132,18 +152,18 @@ public final class Matrix3f {
             h = float2.floatValue() * float2.floatValue() + i * i;
             quaternion.mul(quaternion2);
             matrix3f2.setIdentity();
-            matrix3f2.set(0, 0, f);
-            matrix3f2.set(2, 2, f);
-            matrix3f2.set(2, 0, g);
-            matrix3f2.set(0, 2, -g);
-            matrix3f2.set(1, 1, h);
+            matrix3f2.m00 = f;
+            matrix3f2.m22 = f;
+            matrix3f2.m20 = g;
+            matrix3f2.m02 = -g;
+            matrix3f2.m11 = h;
             matrix3f.mul(matrix3f2);
             matrix3f2.transpose();
             matrix3f2.mul(matrix3f);
             matrix3f.load(matrix3f2);
         }
-        if (matrix3f.get(1, 2) * matrix3f.get(1, 2) + matrix3f.get(2, 1) * matrix3f.get(2, 1) > 1.0E-6f) {
-            pair = Matrix3f.approxGivensQuat(matrix3f.get(1, 1), 0.5f * (matrix3f.get(1, 2) + matrix3f.get(2, 1)), matrix3f.get(2, 2));
+        if (matrix3f.m12 * matrix3f.m12 + matrix3f.m21 * matrix3f.m21 > 1.0E-6f) {
+            pair = Matrix3f.approxGivensQuat(matrix3f.m11, 0.5f * (matrix3f.m12 + matrix3f.m21), matrix3f.m22);
             float_ = pair.getFirst();
             float2 = pair.getSecond();
             quaternion2 = new Quaternion(float_.floatValue(), 0.0f, 0.0f, float2.floatValue());
@@ -152,11 +172,11 @@ public final class Matrix3f {
             h = float2.floatValue() * float2.floatValue() + float_.floatValue() * float_.floatValue();
             quaternion.mul(quaternion2);
             matrix3f2.setIdentity();
-            matrix3f2.set(1, 1, f);
-            matrix3f2.set(2, 2, f);
-            matrix3f2.set(2, 1, -g);
-            matrix3f2.set(1, 2, g);
-            matrix3f2.set(0, 0, h);
+            matrix3f2.m11 = f;
+            matrix3f2.m22 = f;
+            matrix3f2.m21 = -g;
+            matrix3f2.m12 = g;
+            matrix3f2.m00 = h;
             matrix3f.mul(matrix3f2);
             matrix3f2.transpose();
             matrix3f2.mul(matrix3f);
@@ -166,15 +186,15 @@ public final class Matrix3f {
     }
 
     public void transpose() {
-        this.swap(0, 1);
-        this.swap(0, 2);
-        this.swap(1, 2);
-    }
-
-    private void swap(int i, int j) {
-        float f = this.values[i + 3 * j];
-        this.values[i + 3 * j] = this.values[j + 3 * i];
-        this.values[j + 3 * i] = f;
+        float f = this.m01;
+        this.m01 = this.m10;
+        this.m10 = f;
+        f = this.m02;
+        this.m02 = this.m20;
+        this.m20 = f;
+        f = this.m12;
+        this.m12 = this.m21;
+        this.m21 = f;
     }
 
     public Triple<Quaternion, Vector3f, Quaternion> svdDecompose() {
@@ -190,7 +210,7 @@ public final class Matrix3f {
         Matrix3f matrix3f2 = new Matrix3f(this);
         matrix3f2.mul(new Matrix3f(quaternion2));
         float f = 1.0f;
-        Pair<Float, Float> pair = Matrix3f.qrGivensQuat(matrix3f2.get(0, 0), matrix3f2.get(1, 0));
+        Pair<Float, Float> pair = Matrix3f.qrGivensQuat(matrix3f2.m00, matrix3f2.m10);
         Float float_ = pair.getFirst();
         Float float2 = pair.getSecond();
         float g = float2.floatValue() * float2.floatValue() - float_.floatValue() * float_.floatValue();
@@ -200,14 +220,14 @@ public final class Matrix3f {
         quaternion.mul(quaternion3);
         Matrix3f matrix3f3 = new Matrix3f();
         matrix3f3.setIdentity();
-        matrix3f3.set(0, 0, g);
-        matrix3f3.set(1, 1, g);
-        matrix3f3.set(1, 0, h);
-        matrix3f3.set(0, 1, -h);
-        matrix3f3.set(2, 2, j);
+        matrix3f3.m00 = g;
+        matrix3f3.m11 = g;
+        matrix3f3.m10 = h;
+        matrix3f3.m01 = -h;
+        matrix3f3.m22 = j;
         f *= j;
         matrix3f3.mul(matrix3f2);
-        pair = Matrix3f.qrGivensQuat(matrix3f3.get(0, 0), matrix3f3.get(2, 0));
+        pair = Matrix3f.qrGivensQuat(matrix3f3.m00, matrix3f3.m20);
         float k = -pair.getFirst().floatValue();
         Float float3 = pair.getSecond();
         float l = float3.floatValue() * float3.floatValue() - k * k;
@@ -217,14 +237,14 @@ public final class Matrix3f {
         quaternion.mul(quaternion4);
         Matrix3f matrix3f4 = new Matrix3f();
         matrix3f4.setIdentity();
-        matrix3f4.set(0, 0, l);
-        matrix3f4.set(2, 2, l);
-        matrix3f4.set(2, 0, -m);
-        matrix3f4.set(0, 2, m);
-        matrix3f4.set(1, 1, n);
+        matrix3f4.m00 = l;
+        matrix3f4.m22 = l;
+        matrix3f4.m20 = -m;
+        matrix3f4.m02 = m;
+        matrix3f4.m11 = n;
         f *= n;
         matrix3f4.mul(matrix3f3);
-        pair = Matrix3f.qrGivensQuat(matrix3f4.get(1, 1), matrix3f4.get(2, 1));
+        pair = Matrix3f.qrGivensQuat(matrix3f4.m11, matrix3f4.m21);
         Float float4 = pair.getFirst();
         Float float5 = pair.getSecond();
         float o = float5.floatValue() * float5.floatValue() - float4.floatValue() * float4.floatValue();
@@ -234,16 +254,16 @@ public final class Matrix3f {
         quaternion.mul(quaternion5);
         Matrix3f matrix3f5 = new Matrix3f();
         matrix3f5.setIdentity();
-        matrix3f5.set(1, 1, o);
-        matrix3f5.set(2, 2, o);
-        matrix3f5.set(2, 1, p);
-        matrix3f5.set(1, 2, -p);
-        matrix3f5.set(0, 0, q);
+        matrix3f5.m11 = o;
+        matrix3f5.m22 = o;
+        matrix3f5.m21 = p;
+        matrix3f5.m12 = -p;
+        matrix3f5.m00 = q;
         f *= q;
         matrix3f5.mul(matrix3f4);
         f = 1.0f / f;
         quaternion.mul((float)Math.sqrt(f));
-        Vector3f vector3f = new Vector3f(matrix3f5.get(0, 0) * f, matrix3f5.get(1, 1) * f, matrix3f5.get(2, 2) * f);
+        Vector3f vector3f = new Vector3f(matrix3f5.m00 * f, matrix3f5.m11 * f, matrix3f5.m22 * f);
         return Triple.of(quaternion, vector3f, quaternion2);
     }
 
@@ -255,63 +275,90 @@ public final class Matrix3f {
             return false;
         }
         Matrix3f matrix3f = (Matrix3f)object;
-        return Arrays.equals(this.values, matrix3f.values);
+        return Float.compare(matrix3f.m00, this.m00) == 0 && Float.compare(matrix3f.m01, this.m01) == 0 && Float.compare(matrix3f.m02, this.m02) == 0 && Float.compare(matrix3f.m10, this.m10) == 0 && Float.compare(matrix3f.m11, this.m11) == 0 && Float.compare(matrix3f.m12, this.m12) == 0 && Float.compare(matrix3f.m20, this.m20) == 0 && Float.compare(matrix3f.m21, this.m21) == 0 && Float.compare(matrix3f.m22, this.m22) == 0;
     }
 
     public int hashCode() {
-        return Arrays.hashCode(this.values);
+        int i = this.m00 != 0.0f ? Float.floatToIntBits(this.m00) : 0;
+        i = 31 * i + (this.m01 != 0.0f ? Float.floatToIntBits(this.m01) : 0);
+        i = 31 * i + (this.m02 != 0.0f ? Float.floatToIntBits(this.m02) : 0);
+        i = 31 * i + (this.m10 != 0.0f ? Float.floatToIntBits(this.m10) : 0);
+        i = 31 * i + (this.m11 != 0.0f ? Float.floatToIntBits(this.m11) : 0);
+        i = 31 * i + (this.m12 != 0.0f ? Float.floatToIntBits(this.m12) : 0);
+        i = 31 * i + (this.m20 != 0.0f ? Float.floatToIntBits(this.m20) : 0);
+        i = 31 * i + (this.m21 != 0.0f ? Float.floatToIntBits(this.m21) : 0);
+        i = 31 * i + (this.m22 != 0.0f ? Float.floatToIntBits(this.m22) : 0);
+        return i;
     }
 
     public void load(Matrix3f matrix3f) {
-        System.arraycopy(matrix3f.values, 0, this.values, 0, 9);
+        this.m00 = matrix3f.m00;
+        this.m01 = matrix3f.m01;
+        this.m02 = matrix3f.m02;
+        this.m10 = matrix3f.m10;
+        this.m11 = matrix3f.m11;
+        this.m12 = matrix3f.m12;
+        this.m20 = matrix3f.m20;
+        this.m21 = matrix3f.m21;
+        this.m22 = matrix3f.m22;
     }
 
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Matrix3f:\n");
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                stringBuilder.append(this.values[i + j * 3]);
-                if (j == 2) continue;
-                stringBuilder.append(" ");
-            }
-            stringBuilder.append("\n");
-        }
+        stringBuilder.append(this.m00);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m01);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m02);
+        stringBuilder.append("\n");
+        stringBuilder.append(this.m10);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m11);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m12);
+        stringBuilder.append("\n");
+        stringBuilder.append(this.m20);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m21);
+        stringBuilder.append(" ");
+        stringBuilder.append(this.m22);
+        stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 
     public void setIdentity() {
-        this.values[0] = 1.0f;
-        this.values[1] = 0.0f;
-        this.values[2] = 0.0f;
-        this.values[3] = 0.0f;
-        this.values[4] = 1.0f;
-        this.values[5] = 0.0f;
-        this.values[6] = 0.0f;
-        this.values[7] = 0.0f;
-        this.values[8] = 1.0f;
+        this.m00 = 1.0f;
+        this.m01 = 0.0f;
+        this.m02 = 0.0f;
+        this.m10 = 0.0f;
+        this.m11 = 1.0f;
+        this.m12 = 0.0f;
+        this.m20 = 0.0f;
+        this.m21 = 0.0f;
+        this.m22 = 1.0f;
     }
 
     public float adjugateAndDet() {
-        float f = this.det2(1, 2, 1, 2);
-        float g = -this.det2(1, 2, 0, 2);
-        float h = this.det2(1, 2, 0, 1);
-        float i = -this.det2(0, 2, 1, 2);
-        float j = this.det2(0, 2, 0, 2);
-        float k = -this.det2(0, 2, 0, 1);
-        float l = this.det2(0, 1, 1, 2);
-        float m = -this.det2(0, 1, 0, 2);
-        float n = this.det2(0, 1, 0, 1);
-        float o = this.get(0, 0) * f + this.get(0, 1) * g + this.get(0, 2) * h;
-        this.set(0, 0, f);
-        this.set(1, 0, g);
-        this.set(2, 0, h);
-        this.set(0, 1, i);
-        this.set(1, 1, j);
-        this.set(2, 1, k);
-        this.set(0, 2, l);
-        this.set(1, 2, m);
-        this.set(2, 2, n);
+        float f = this.m11 * this.m22 - this.m12 * this.m21;
+        float g = -(this.m10 * this.m22 - this.m12 * this.m20);
+        float h = this.m10 * this.m21 - this.m11 * this.m20;
+        float i = -(this.m01 * this.m22 - this.m02 * this.m21);
+        float j = this.m00 * this.m22 - this.m02 * this.m20;
+        float k = -(this.m00 * this.m21 - this.m01 * this.m20);
+        float l = this.m01 * this.m12 - this.m02 * this.m11;
+        float m = -(this.m00 * this.m12 - this.m02 * this.m10);
+        float n = this.m00 * this.m11 - this.m01 * this.m10;
+        float o = this.m00 * f + this.m01 * g + this.m02 * h;
+        this.m00 = f;
+        this.m10 = g;
+        this.m20 = h;
+        this.m01 = i;
+        this.m11 = j;
+        this.m21 = k;
+        this.m02 = l;
+        this.m12 = m;
+        this.m22 = n;
         return o;
     }
 
@@ -324,29 +371,25 @@ public final class Matrix3f {
         return false;
     }
 
-    private float det2(int i, int j, int k, int l) {
-        return this.get(i, k) * this.get(j, l) - this.get(i, l) * this.get(j, k);
-    }
-
-    public float get(int i, int j) {
-        return this.values[3 * j + i];
-    }
-
-    public void set(int i, int j, float f) {
-        this.values[3 * j + i] = f;
-    }
-
     public void mul(Matrix3f matrix3f) {
-        float[] fs = Arrays.copyOf(this.values, 9);
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                this.values[i + j * 3] = 0.0f;
-                for (int k = 0; k < 3; ++k) {
-                    int n = i + j * 3;
-                    this.values[n] = this.values[n] + fs[i + k * 3] * matrix3f.values[k + j * 3];
-                }
-            }
-        }
+        float f = this.m00 * matrix3f.m00 + this.m01 * matrix3f.m10 + this.m02 * matrix3f.m20;
+        float g = this.m00 * matrix3f.m01 + this.m01 * matrix3f.m11 + this.m02 * matrix3f.m21;
+        float h = this.m00 * matrix3f.m02 + this.m01 * matrix3f.m12 + this.m02 * matrix3f.m22;
+        float i = this.m10 * matrix3f.m00 + this.m11 * matrix3f.m10 + this.m12 * matrix3f.m20;
+        float j = this.m10 * matrix3f.m01 + this.m11 * matrix3f.m11 + this.m12 * matrix3f.m21;
+        float k = this.m10 * matrix3f.m02 + this.m11 * matrix3f.m12 + this.m12 * matrix3f.m22;
+        float l = this.m20 * matrix3f.m00 + this.m21 * matrix3f.m10 + this.m22 * matrix3f.m20;
+        float m = this.m20 * matrix3f.m01 + this.m21 * matrix3f.m11 + this.m22 * matrix3f.m21;
+        float n = this.m20 * matrix3f.m02 + this.m21 * matrix3f.m12 + this.m22 * matrix3f.m22;
+        this.m00 = f;
+        this.m01 = g;
+        this.m02 = h;
+        this.m10 = i;
+        this.m11 = j;
+        this.m12 = k;
+        this.m20 = l;
+        this.m21 = m;
+        this.m22 = n;
     }
 
     public void mul(Quaternion quaternion) {
@@ -354,15 +397,19 @@ public final class Matrix3f {
     }
 
     public void mul(float f) {
-        int i = 0;
-        while (i < 9) {
-            int n = i++;
-            this.values[n] = this.values[n] * f;
-        }
+        this.m00 *= f;
+        this.m01 *= f;
+        this.m02 *= f;
+        this.m10 *= f;
+        this.m11 *= f;
+        this.m12 *= f;
+        this.m20 *= f;
+        this.m21 *= f;
+        this.m22 *= f;
     }
 
     public Matrix3f copy() {
-        return new Matrix3f((float[])this.values.clone());
+        return new Matrix3f(this);
     }
 }
 

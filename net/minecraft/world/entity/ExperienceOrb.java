@@ -12,7 +12,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -54,12 +53,6 @@ extends Entity {
 
     @Override
     protected void defineSynchedData() {
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return Mth.clamp(super.getBlockLightLevel() + 7, 0, 15);
     }
 
     @Override

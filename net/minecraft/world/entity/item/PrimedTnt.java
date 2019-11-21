@@ -77,7 +77,9 @@ extends Entity {
             }
         } else {
             this.updateInWaterState();
-            this.level.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
+            if (this.level.isClientSide) {
+                this.level.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
+            }
         }
     }
 

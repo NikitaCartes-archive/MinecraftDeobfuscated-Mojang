@@ -113,6 +113,7 @@ extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player2, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
+        ItemStack itemStack2 = itemStack.copy();
         int i = blockState.getValue(HONEY_LEVEL);
         boolean bl = false;
         if (i >= 5) {
@@ -141,7 +142,7 @@ extends BaseEntityBlock {
             } else {
                 this.resetHoneyLevel(level, blockState, blockPos);
                 if (player2 instanceof ServerPlayer) {
-                    CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player2, blockPos, itemStack);
+                    CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player2, blockPos, itemStack2);
                 }
             }
             return InteractionResult.SUCCESS;

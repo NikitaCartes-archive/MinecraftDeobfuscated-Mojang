@@ -34,7 +34,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.control.DolphinLookControl;
@@ -436,7 +435,7 @@ extends WaterAnimal {
             if (this.dolphin.closeToNextPos() || this.dolphin.getNavigation().isDone()) {
                 BlockPos blockPos;
                 Vec3 vec3 = new Vec3(this.dolphin.getTreasurePos());
-                Vec3 vec32 = RandomPos.getPosTowards((PathfinderMob)this.dolphin, 16, 1, vec3, 0.3926991f);
+                Vec3 vec32 = RandomPos.getPosTowards(this.dolphin, 16, 1, vec3, 0.3926991f);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.dolphin, 8, 4, vec3);
                 }

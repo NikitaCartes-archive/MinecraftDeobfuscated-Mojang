@@ -416,11 +416,11 @@ extends GuiComponent {
             int o = l;
             float g = f;
             list.add(() -> {
+                this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, g);
                 Gui.blit(n + 3, o + 3, this.getBlitOffset(), 18, 18, textureAtlasSprite);
             });
         }
-        this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_MOB_EFFECTS);
         list.forEach(Runnable::run);
     }
 

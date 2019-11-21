@@ -85,13 +85,13 @@ extends QuadrupedModel<T> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         boolean bl = this.eggBelly.visible;
         if (bl) {
             poseStack.pushPose();
             poseStack.translate(0.0, -0.08f, 0.0);
         }
-        super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h);
+        super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h, k);
         if (bl) {
             poseStack.popPose();
         }

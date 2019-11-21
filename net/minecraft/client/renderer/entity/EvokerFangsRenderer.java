@@ -44,7 +44,7 @@ extends EntityRenderer<EvokerFangs> {
         poseStack.scale(0.5f, 0.5f, 0.5f);
         this.model.setupAnim(evokerFangs, h, 0.0f, 0.0f, evokerFangs.yRot, evokerFangs.xRot);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(evokerFangs, f, g, poseStack, multiBufferSource, i);
     }

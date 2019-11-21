@@ -31,6 +31,10 @@ extends EntityRenderer<EnderDragon> {
     private static final ResourceLocation DRAGON_EXPLODING_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon_exploding.png");
     private static final ResourceLocation DRAGON_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon.png");
     private static final ResourceLocation DRAGON_EYES_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon_eyes.png");
+    private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(DRAGON_LOCATION);
+    private static final RenderType DECAL = RenderType.entityDecal(DRAGON_LOCATION);
+    private static final RenderType EYES = RenderType.eyes(DRAGON_EYES_LOCATION);
+    private static final RenderType BEAM = RenderType.entitySmoothCutout(CRYSTAL_BEAM_LOCATION);
     private static final float HALF_SQRT_3 = (float)(Math.sqrt(3.0) / 2.0);
     private final DragonModel model = new DragonModel();
 
@@ -54,15 +58,15 @@ extends EntityRenderer<EnderDragon> {
         if (enderDragon.dragonDeathTime > 0) {
             float k = (float)enderDragon.dragonDeathTime / 200.0f;
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityAlpha(DRAGON_EXPLODING_LOCATION, k));
-            this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
-            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.entityDecal(DRAGON_LOCATION));
-            this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.pack(0.0f, bl), 1.0f, 1.0f, 1.0f);
+            this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
+            VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(DECAL);
+            this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.pack(0.0f, bl), 1.0f, 1.0f, 1.0f, 1.0f);
         } else {
-            VertexConsumer vertexConsumer3 = multiBufferSource.getBuffer(this.model.renderType(DRAGON_LOCATION));
-            this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.pack(0.0f, bl), 1.0f, 1.0f, 1.0f);
+            VertexConsumer vertexConsumer3 = multiBufferSource.getBuffer(RENDER_TYPE);
+            this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.pack(0.0f, bl), 1.0f, 1.0f, 1.0f, 1.0f);
         }
-        VertexConsumer vertexConsumer3 = multiBufferSource.getBuffer(RenderType.eyes(DRAGON_EYES_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        VertexConsumer vertexConsumer3 = multiBufferSource.getBuffer(EYES);
+        this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         if (enderDragon.dragonDeathTime > 0) {
             float l = ((float)enderDragon.dragonDeathTime + g) / 200.0f;
             float m = 0.0f;
@@ -134,7 +138,7 @@ extends EntityRenderer<EnderDragon> {
         poseStack.translate(0.0, 2.0, 0.0);
         poseStack.mulPose(Vector3f.YP.rotation((float)(-Math.atan2(h, f)) - 1.5707964f));
         poseStack.mulPose(Vector3f.XP.rotation((float)(-Math.atan2(l, g)) - 1.5707964f));
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySmoothCutout(CRYSTAL_BEAM_LOCATION));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(BEAM);
         float n = 0.0f - ((float)j + i) * 0.01f;
         float o = Mth.sqrt(f * f + g * g + h * h) / 32.0f - ((float)j + i) * 0.01f;
         int p = 8;
@@ -294,82 +298,82 @@ extends EntityRenderer<EnderDragon> {
         }
 
         @Override
-        public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-            float u;
+        public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+            float v;
             poseStack.pushPose();
-            float k = Mth.lerp(this.a, this.entity.oFlapTime, this.entity.flapTime);
-            this.jaw.xRot = (float)(Math.sin(k * ((float)Math.PI * 2)) + 1.0) * 0.2f;
-            float l = (float)(Math.sin(k * ((float)Math.PI * 2) - 1.0f) + 1.0);
-            l = (l * l + l * 2.0f) * 0.05f;
-            poseStack.translate(0.0, l - 2.0f, -3.0);
-            poseStack.mulPose(Vector3f.XP.rotationDegrees(l * 2.0f));
-            float m = 0.0f;
-            float n = 20.0f;
-            float o = -12.0f;
-            float p = 1.5f;
+            float l = Mth.lerp(this.a, this.entity.oFlapTime, this.entity.flapTime);
+            this.jaw.xRot = (float)(Math.sin(l * ((float)Math.PI * 2)) + 1.0) * 0.2f;
+            float m = (float)(Math.sin(l * ((float)Math.PI * 2) - 1.0f) + 1.0);
+            m = (m * m + m * 2.0f) * 0.05f;
+            poseStack.translate(0.0, m - 2.0f, -3.0);
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(m * 2.0f));
+            float n = 0.0f;
+            float o = 20.0f;
+            float p = -12.0f;
+            float q = 1.5f;
             double[] ds = this.entity.getLatencyPos(6, this.a);
-            float q = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] - this.entity.getLatencyPos(10, this.a)[0]);
-            float r = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] + (double)(q / 2.0f));
-            float s = k * ((float)Math.PI * 2);
-            for (int t = 0; t < 5; ++t) {
-                double[] es = this.entity.getLatencyPos(5 - t, this.a);
-                u = (float)Math.cos((float)t * 0.45f + s) * 0.15f;
+            float r = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] - this.entity.getLatencyPos(10, this.a)[0]);
+            float s = Mth.rotWrap(this.entity.getLatencyPos(5, this.a)[0] + (double)(r / 2.0f));
+            float t = l * ((float)Math.PI * 2);
+            for (int u = 0; u < 5; ++u) {
+                double[] es = this.entity.getLatencyPos(5 - u, this.a);
+                v = (float)Math.cos((float)u * 0.45f + t) * 0.15f;
                 this.neck.yRot = Mth.rotWrap(es[0] - ds[0]) * ((float)Math.PI / 180) * 1.5f;
-                this.neck.xRot = u + this.entity.getHeadPartYOffset(t, ds, es) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-                this.neck.zRot = -Mth.rotWrap(es[0] - (double)r) * ((float)Math.PI / 180) * 1.5f;
-                this.neck.y = n;
-                this.neck.z = o;
-                this.neck.x = m;
-                n = (float)((double)n + Math.sin(this.neck.xRot) * 10.0);
-                o = (float)((double)o - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                m = (float)((double)m - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                this.neck.render(poseStack, vertexConsumer, i, j, null);
+                this.neck.xRot = v + this.entity.getHeadPartYOffset(u, ds, es) * ((float)Math.PI / 180) * 1.5f * 5.0f;
+                this.neck.zRot = -Mth.rotWrap(es[0] - (double)s) * ((float)Math.PI / 180) * 1.5f;
+                this.neck.y = o;
+                this.neck.z = p;
+                this.neck.x = n;
+                o = (float)((double)o + Math.sin(this.neck.xRot) * 10.0);
+                p = (float)((double)p - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                n = (float)((double)n - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                this.neck.render(poseStack, vertexConsumer, i, j);
             }
-            this.head.y = n;
-            this.head.z = o;
-            this.head.x = m;
+            this.head.y = o;
+            this.head.z = p;
+            this.head.x = n;
             double[] fs = this.entity.getLatencyPos(0, this.a);
             this.head.yRot = Mth.rotWrap(fs[0] - ds[0]) * ((float)Math.PI / 180);
             this.head.xRot = Mth.rotWrap(this.entity.getHeadPartYOffset(6, ds, fs)) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-            this.head.zRot = -Mth.rotWrap(fs[0] - (double)r) * ((float)Math.PI / 180);
-            this.head.render(poseStack, vertexConsumer, i, j, null);
+            this.head.zRot = -Mth.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180);
+            this.head.render(poseStack, vertexConsumer, i, j);
             poseStack.pushPose();
             poseStack.translate(0.0, 1.0, 0.0);
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees(-q * 1.5f));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(-r * 1.5f));
             poseStack.translate(0.0, -1.0, 0.0);
             this.body.zRot = 0.0f;
-            this.body.render(poseStack, vertexConsumer, i, j, null);
-            float v = k * ((float)Math.PI * 2);
-            this.leftWing.xRot = 0.125f - (float)Math.cos(v) * 0.2f;
+            this.body.render(poseStack, vertexConsumer, i, j);
+            float w = l * ((float)Math.PI * 2);
+            this.leftWing.xRot = 0.125f - (float)Math.cos(w) * 0.2f;
             this.leftWing.yRot = -0.25f;
-            this.leftWing.zRot = -((float)(Math.sin(v) + 0.125)) * 0.8f;
-            this.leftWingTip.zRot = (float)(Math.sin(v + 2.0f) + 0.5) * 0.75f;
+            this.leftWing.zRot = -((float)(Math.sin(w) + 0.125)) * 0.8f;
+            this.leftWingTip.zRot = (float)(Math.sin(w + 2.0f) + 0.5) * 0.75f;
             this.rightWing.xRot = this.leftWing.xRot;
             this.rightWing.yRot = -this.leftWing.yRot;
             this.rightWing.zRot = -this.leftWing.zRot;
             this.rightWingTip.zRot = -this.leftWingTip.zRot;
-            this.renderSide(poseStack, vertexConsumer, i, j, l, this.leftWing, this.leftFrontLeg, this.leftFrontLegTip, this.leftFrontFoot, this.leftRearLeg, this.leftRearLegTip, this.leftRearFoot);
-            this.renderSide(poseStack, vertexConsumer, i, j, l, this.rightWing, this.rightFrontLeg, this.rightFrontLegTip, this.rightFrontFoot, this.rightRearLeg, this.rightRearLegTip, this.rightRearFoot);
+            this.renderSide(poseStack, vertexConsumer, i, j, m, this.leftWing, this.leftFrontLeg, this.leftFrontLegTip, this.leftFrontFoot, this.leftRearLeg, this.leftRearLegTip, this.leftRearFoot);
+            this.renderSide(poseStack, vertexConsumer, i, j, m, this.rightWing, this.rightFrontLeg, this.rightFrontLegTip, this.rightFrontFoot, this.rightRearLeg, this.rightRearLegTip, this.rightRearFoot);
             poseStack.popPose();
-            u = -((float)Math.sin(k * ((float)Math.PI * 2))) * 0.0f;
-            s = k * ((float)Math.PI * 2);
-            n = 10.0f;
-            o = 60.0f;
-            m = 0.0f;
+            v = -((float)Math.sin(l * ((float)Math.PI * 2))) * 0.0f;
+            t = l * ((float)Math.PI * 2);
+            o = 10.0f;
+            p = 60.0f;
+            n = 0.0f;
             ds = this.entity.getLatencyPos(11, this.a);
-            for (int w = 0; w < 12; ++w) {
-                fs = this.entity.getLatencyPos(12 + w, this.a);
-                u = (float)((double)u + Math.sin((float)w * 0.45f + s) * (double)0.05f);
+            for (int x = 0; x < 12; ++x) {
+                fs = this.entity.getLatencyPos(12 + x, this.a);
+                v = (float)((double)v + Math.sin((float)x * 0.45f + t) * (double)0.05f);
                 this.neck.yRot = (Mth.rotWrap(fs[0] - ds[0]) * 1.5f + 180.0f) * ((float)Math.PI / 180);
-                this.neck.xRot = u + (float)(fs[1] - ds[1]) * ((float)Math.PI / 180) * 1.5f * 5.0f;
-                this.neck.zRot = Mth.rotWrap(fs[0] - (double)r) * ((float)Math.PI / 180) * 1.5f;
-                this.neck.y = n;
-                this.neck.z = o;
-                this.neck.x = m;
-                n = (float)((double)n + Math.sin(this.neck.xRot) * 10.0);
-                o = (float)((double)o - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                m = (float)((double)m - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
-                this.neck.render(poseStack, vertexConsumer, i, j, null);
+                this.neck.xRot = v + (float)(fs[1] - ds[1]) * ((float)Math.PI / 180) * 1.5f * 5.0f;
+                this.neck.zRot = Mth.rotWrap(fs[0] - (double)s) * ((float)Math.PI / 180) * 1.5f;
+                this.neck.y = o;
+                this.neck.z = p;
+                this.neck.x = n;
+                o = (float)((double)o + Math.sin(this.neck.xRot) * 10.0);
+                p = (float)((double)p - Math.cos(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                n = (float)((double)n - Math.sin(this.neck.yRot) * Math.cos(this.neck.xRot) * 10.0);
+                this.neck.render(poseStack, vertexConsumer, i, j);
             }
             poseStack.popPose();
         }
@@ -381,9 +385,9 @@ extends EntityRenderer<EnderDragon> {
             modelPart2.xRot = 1.3f + f * 0.1f;
             modelPart3.xRot = -0.5f - f * 0.1f;
             modelPart4.xRot = 0.75f + f * 0.1f;
-            modelPart.render(poseStack, vertexConsumer, i, j, null);
-            modelPart2.render(poseStack, vertexConsumer, i, j, null);
-            modelPart5.render(poseStack, vertexConsumer, i, j, null);
+            modelPart.render(poseStack, vertexConsumer, i, j);
+            modelPart2.render(poseStack, vertexConsumer, i, j);
+            modelPart5.render(poseStack, vertexConsumer, i, j);
         }
     }
 }

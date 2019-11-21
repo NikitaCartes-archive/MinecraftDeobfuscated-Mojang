@@ -31,7 +31,7 @@ extends EntityRenderer<LeashFenceKnotEntity> {
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         this.model.setupAnim(leashFenceKnotEntity, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(KNOT_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(leashFenceKnotEntity, f, g, poseStack, multiBufferSource, i);
     }

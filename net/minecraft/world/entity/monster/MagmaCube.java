@@ -4,8 +4,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -52,12 +50,6 @@ extends Slime {
     protected void setSize(int i, boolean bl) {
         super.setSize(i, bl);
         this.getAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(i * 3);
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
     }
 
     @Override

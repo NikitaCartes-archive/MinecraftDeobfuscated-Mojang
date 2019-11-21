@@ -56,7 +56,7 @@ extends Particle {
         double k = Mth.lerp((double)g, this.itemEntity.getZ(), h);
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         Vec3 vec3 = camera.getPosition();
-        this.entityRenderDispatcher.render(this.itemEntity, i - vec3.x(), j - vec3.y(), k - vec3.z(), this.itemEntity.yRot, f, new PoseStack(), bufferSource, EntityRenderDispatcher.getPackedLightCoords(this.itemEntity));
+        this.entityRenderDispatcher.render(this.itemEntity, i - vec3.x(), j - vec3.y(), k - vec3.z(), this.itemEntity.yRot, f, new PoseStack(), bufferSource, this.entityRenderDispatcher.getPackedLightCoords(this.itemEntity, f));
         bufferSource.endBatch();
     }
 

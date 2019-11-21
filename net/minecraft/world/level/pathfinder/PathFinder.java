@@ -28,7 +28,7 @@ public class PathFinder {
     private final Set<Node> closedSet = Sets.newHashSet();
     private final Node[] neighbors = new Node[32];
     private final int maxVisitedNodes;
-    private NodeEvaluator nodeEvaluator;
+    private final NodeEvaluator nodeEvaluator;
 
     public PathFinder(NodeEvaluator nodeEvaluator, int i) {
         this.nodeEvaluator = nodeEvaluator;
@@ -36,18 +36,18 @@ public class PathFinder {
     }
 
     @Nullable
-    public Path findPath(PathNavigationRegion pathNavigationRegion, Mob mob, Set<BlockPos> set, float f, int i) {
+    public Path findPath(PathNavigationRegion pathNavigationRegion, Mob mob, Set<BlockPos> set, float f, int i, float g) {
         this.openSet.clear();
         this.nodeEvaluator.prepare(pathNavigationRegion, mob);
         Node node = this.nodeEvaluator.getStart();
         Map<Target, BlockPos> map = set.stream().collect(Collectors.toMap(blockPos -> this.nodeEvaluator.getGoal(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Function.identity()));
-        Path path = this.findPath(node, map, f, i);
+        Path path = this.findPath(node, map, f, i, g);
         this.nodeEvaluator.done();
         return path;
     }
 
     @Nullable
-    private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i) {
+    private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i, float g) {
         Stream<Path> stream;
         Optional<Path> optional;
         Set<Target> set = map.keySet();
@@ -57,21 +57,22 @@ public class PathFinder {
         this.closedSet.clear();
         this.openSet.insert(node);
         int j = 0;
-        while (!this.openSet.isEmpty() && ++j < this.maxVisitedNodes) {
+        int k = (int)((float)this.maxVisitedNodes * g);
+        while (!this.openSet.isEmpty() && ++j < k) {
             Node node2 = this.openSet.pop();
             node2.closed = true;
             set.stream().filter(target -> node2.distanceManhattan((Node)target) <= (float)i).forEach(Target::setReached);
             if (set.stream().anyMatch(Target::isReached)) break;
             if (node2.distanceTo(node) >= f) continue;
-            int k = this.nodeEvaluator.getNeighbors(this.neighbors, node2);
-            for (int l = 0; l < k; ++l) {
-                Node node3 = this.neighbors[l];
-                float g = node2.distanceTo(node3);
-                node3.walkedDistance = node2.walkedDistance + g;
-                float h = node2.g + g + node3.costMalus;
-                if (!(node3.walkedDistance < f) || node3.inOpenSet() && !(h < node3.g)) continue;
+            int l = this.nodeEvaluator.getNeighbors(this.neighbors, node2);
+            for (int m = 0; m < l; ++m) {
+                Node node3 = this.neighbors[m];
+                float h = node2.distanceTo(node3);
+                node3.walkedDistance = node2.walkedDistance + h;
+                float n = node2.g + h + node3.costMalus;
+                if (!(node3.walkedDistance < f) || node3.inOpenSet() && !(n < node3.g)) continue;
                 node3.cameFrom = node2;
-                node3.g = h;
+                node3.g = n;
                 node3.h = this.getBestH(node3, set) * 1.5f;
                 if (node3.inOpenSet()) {
                     this.openSet.changeCost(node3, node3.g + node3.h);

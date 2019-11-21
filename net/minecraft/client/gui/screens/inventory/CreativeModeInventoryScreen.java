@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -778,7 +779,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
 
         @Override
         @Nullable
-        public String getNoItemIcon() {
+        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
             return this.target.getNoItemIcon();
         }
 

@@ -23,6 +23,11 @@ extends HumanoidMobRenderer<Vex, VexModel> {
     }
 
     @Override
+    protected int getBlockLightLevel(Vex vex, float f) {
+        return 15;
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(Vex vex) {
         if (vex.isCharging()) {
             return VEX_CHARGING_LOCATION;

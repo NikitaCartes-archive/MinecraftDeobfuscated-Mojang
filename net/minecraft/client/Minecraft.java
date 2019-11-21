@@ -28,6 +28,7 @@ import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +36,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,7 +108,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ClientPackSource;
@@ -114,6 +115,7 @@ import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
 import net.minecraft.client.resources.LegacyResourcePackAdapter;
 import net.minecraft.client.resources.MobEffectTextureManager;
+import net.minecraft.client.resources.PackAdapterV4;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.SplashManager;
@@ -150,6 +152,7 @@ import net.minecraft.server.level.progress.ProcessorChunkProgressListener;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.server.packs.Pack;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.UnopenedPack;
@@ -260,7 +263,6 @@ WindowEventHandler {
     private final BlockColors blockColors;
     private final ItemColors itemColors;
     private final RenderTarget mainRenderTarget;
-    private final TextureAtlas textureAtlas;
     private final SoundManager soundManager;
     private final MusicManager musicManager;
     private final FontManager fontManager;
@@ -325,7 +327,7 @@ WindowEventHandler {
     public Minecraft(GameConfig gameConfig) {
         super("Client");
         int i;
-        String string2;
+        String string;
         instance = this;
         this.gameDirectory = gameConfig.location.gameDirectory;
         File file = gameConfig.location.assetDirectory;
@@ -334,10 +336,7 @@ WindowEventHandler {
         this.versionType = gameConfig.game.versionType;
         this.profileProperties = gameConfig.user.profileProperties;
         this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
-        this.resourcePackRepository = new PackRepository<UnopenedResourcePack>((string, bl, supplier, pack, packMetadataSection, position) -> {
-            Supplier<Pack> supplier2 = packMetadataSection.getPackFormat() < SharedConstants.getCurrentVersion().getPackVersion() ? () -> Minecraft.method_1528((Supplier)supplier) : supplier;
-            return new UnopenedResourcePack(string, bl, supplier2, pack, packMetadataSection, position);
-        });
+        this.resourcePackRepository = new PackRepository<UnopenedResourcePack>(Minecraft::createClientPackAdapter);
         this.resourcePackRepository.addSource(this.clientPackSource);
         this.resourcePackRepository.addSource(new FolderRepositorySource(this.resourcePackDirectory));
         this.proxy = gameConfig.user.proxy;
@@ -349,10 +348,10 @@ WindowEventHandler {
         this.is64bit = Minecraft.checkIs64Bit();
         this.singleplayerServer = null;
         if (gameConfig.server.hostname != null) {
-            string2 = gameConfig.server.hostname;
+            string = gameConfig.server.hostname;
             i = gameConfig.server.port;
         } else {
-            string2 = null;
+            string = null;
             i = 0;
         }
         Bootstrap.bootStrap();
@@ -390,8 +389,8 @@ WindowEventHandler {
         this.options.loadResourcePacks(this.resourcePackRepository);
         this.resourcePackRepository.reload();
         List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-        for (Pack pack2 : list) {
-            this.resourceManager.add(pack2);
+        for (Pack pack : list) {
+            this.resourceManager.add(pack);
         }
         this.languageManager = new LanguageManager(this.options.languageCode);
         this.resourceManager.registerReloadListener(this.languageManager);
@@ -418,14 +417,9 @@ WindowEventHandler {
         this.window.setErrorSection("Startup");
         RenderSystem.setupDefaultState(0, 0, this.window.getWidth(), this.window.getHeight());
         this.window.setErrorSection("Post startup");
-        this.textureAtlas = new TextureAtlas("textures");
-        this.textureAtlas.setMaxMipLevel(this.options.mipmapLevels);
-        this.textureManager.register(TextureAtlas.LOCATION_BLOCKS, this.textureAtlas);
-        this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
-        this.textureAtlas.setFilter(false, this.options.mipmapLevels > 0);
         this.blockColors = BlockColors.createDefault();
         this.itemColors = ItemColors.createDefault(this.blockColors);
-        this.modelManager = new ModelManager(this.textureAtlas, this.blockColors);
+        this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
         this.resourceManager.registerReloadListener(this.modelManager);
         this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
         this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
@@ -457,17 +451,28 @@ WindowEventHandler {
         this.window.updateRawMouseInput(this.options.rawMouseInput);
         this.window.setDefaultErrorCallback();
         this.resizeDisplay();
-        if (string2 != null) {
-            this.setScreen(new ConnectScreen(new TitleScreen(), this, string2, i));
+        if (string != null) {
+            this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
         } else {
             this.setScreen(new TitleScreen(true));
         }
         LoadingOverlay.registerTextures(this);
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createQueuedReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK), () -> {
+        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createQueuedReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK), optional -> Util.ifElse(optional, throwable -> {
+            if (this.resourcePackRepository.getSelected().size() > 1) {
+                LOGGER.info("Caught error loading resourcepacks, removing all assigned resourcepacks", (Throwable)throwable);
+                this.resourcePackRepository.setSelected(Collections.emptyList());
+                this.options.resourcePacks.clear();
+                this.options.incompatibleResourcePacks.clear();
+                this.options.save();
+                this.reloadResourcePacks();
+            } else {
+                Util.throwAsRuntime(throwable);
+            }
+        }, () -> {
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 this.selfTest();
             }
-        }, false));
+        }), false));
     }
 
     public void run() {
@@ -601,7 +606,8 @@ WindowEventHandler {
         }
         this.resourcePackRepository.reload();
         List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), () -> {
+        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> {
+            optional.ifPresent(Util::throwAsRuntime);
             this.languageManager.reload(list);
             this.levelRenderer.allChanged();
             completableFuture.complete(null);
@@ -711,7 +717,7 @@ WindowEventHandler {
     @Override
     public void close() {
         try {
-            this.textureAtlas.clearTextureData();
+            this.modelManager.close();
             this.font.close();
             this.fontManager.close();
             this.gameRenderer.close();
@@ -1732,8 +1738,8 @@ WindowEventHandler {
         return this.languageManager;
     }
 
-    public TextureAtlas getTextureAtlas() {
-        return this.textureAtlas;
+    public Function<ResourceLocation, TextureAtlasSprite> getTextureAtlas(ResourceLocation resourceLocation) {
+        return this.modelManager.getAtlas(resourceLocation)::getSprite;
     }
 
     public boolean is64Bit() {
@@ -1825,10 +1831,6 @@ WindowEventHandler {
 
     public <T> MutableSearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {
         return this.searchRegistry.getTree(key);
-    }
-
-    public static int getAverageFps() {
-        return fps;
     }
 
     public FrameTimer getFrameTimer() {
@@ -1929,8 +1931,28 @@ WindowEventHandler {
         return this.renderBuffers;
     }
 
-    private static /* synthetic */ Pack method_1528(Supplier supplier) {
-        return new LegacyResourcePackAdapter((Pack)supplier.get(), LegacyResourcePackAdapter.V3);
+    private static UnopenedResourcePack createClientPackAdapter(String string, boolean bl, Supplier<Pack> supplier, Pack pack, PackMetadataSection packMetadataSection, UnopenedPack.Position position) {
+        int i = packMetadataSection.getPackFormat();
+        Supplier<Pack> supplier2 = supplier;
+        if (i <= 3) {
+            supplier2 = Minecraft.adaptV3(supplier2);
+        }
+        if (i <= 4) {
+            supplier2 = Minecraft.adaptV4(supplier2);
+        }
+        return new UnopenedResourcePack(string, bl, supplier2, pack, packMetadataSection, position);
+    }
+
+    private static Supplier<Pack> adaptV3(Supplier<Pack> supplier) {
+        return () -> new LegacyResourcePackAdapter((Pack)supplier.get(), LegacyResourcePackAdapter.V3);
+    }
+
+    private static Supplier<Pack> adaptV4(Supplier<Pack> supplier) {
+        return () -> new PackAdapterV4((Pack)supplier.get());
+    }
+
+    public void updateMaxMipLevel(int i) {
+        this.modelManager.updateMaxMipLevel(i);
     }
 
     static {

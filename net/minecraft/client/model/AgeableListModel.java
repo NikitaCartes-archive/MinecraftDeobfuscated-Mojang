@@ -47,26 +47,26 @@ extends EntityModel<E> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         if (this.young) {
-            float k;
+            float l;
             poseStack.pushPose();
             if (this.scaleHead) {
-                k = 1.5f / this.babyHeadScale;
-                poseStack.scale(k, k, k);
+                l = 1.5f / this.babyHeadScale;
+                poseStack.scale(l, l, l);
             }
             poseStack.translate(0.0, this.yHeadOffset / 16.0f, this.zHeadOffset / 16.0f);
-            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
             poseStack.pushPose();
-            k = 1.0f / this.babyBodyScale;
-            poseStack.scale(k, k, k);
+            l = 1.0f / this.babyBodyScale;
+            poseStack.scale(l, l, l);
             poseStack.translate(0.0, this.bodyYOffset / 16.0f, 0.0);
-            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {
-            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
-            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+            this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
         }
     }
 

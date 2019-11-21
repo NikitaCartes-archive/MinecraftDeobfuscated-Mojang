@@ -9,11 +9,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,6 +28,17 @@ public abstract class EntityRenderer<T extends Entity> {
 
     protected EntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         this.entityRenderDispatcher = entityRenderDispatcher;
+    }
+
+    public final int getPackedLightCoords(T entity, float f) {
+        return LightTexture.pack(this.getBlockLightLevel(entity, f), ((Entity)entity).level.getBrightness(LightLayer.SKY, new BlockPos(((Entity)entity).getEyePosition(f))));
+    }
+
+    protected int getBlockLightLevel(T entity, float f) {
+        if (((Entity)entity).isOnFire()) {
+            return 15;
+        }
+        return ((Entity)entity).level.getBrightness(LightLayer.BLOCK, new BlockPos(((Entity)entity).getEyePosition(f)));
     }
 
     public boolean shouldRender(T entity, Frustum frustum, double d, double e, double f) {

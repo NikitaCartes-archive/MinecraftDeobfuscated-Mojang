@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -19,22 +20,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class RenderStateShard {
+public abstract class RenderStateShard {
     protected final String name;
     private final Runnable setupState;
     private final Runnable clearState;
     protected static final TransparencyStateShard NO_TRANSPARENCY = new TransparencyStateShard("no_transparency", () -> RenderSystem.disableBlend(), () -> {});
-    protected static final TransparencyStateShard FORCED_TRANSPARENCY = new TransparencyStateShard("forced_transparency", () -> {
-        RenderSystem.enableBlend();
-        RenderSystem.blendColor(1.0f, 1.0f, 1.0f, 0.15f);
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-        RenderSystem.depthMask(false);
-    }, () -> {
-        RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.blendColor(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.depthMask(true);
-    });
     protected static final TransparencyStateShard ADDITIVE_TRANSPARENCY = new TransparencyStateShard("additive_transparency", () -> {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
@@ -133,7 +123,7 @@ public class RenderStateShard {
     });
     protected static final OutputStateShard MAIN_TARGET = new OutputStateShard("main_target", () -> {}, () -> {});
     protected static final OutputStateShard OUTLINE_TARGET = new OutputStateShard("outline_target", () -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false), () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
-    protected static final LineStateShard DEFAULT_LINE = new LineStateShard(1.0f);
+    protected static final LineStateShard DEFAULT_LINE = new LineStateShard(OptionalDouble.of(1.0));
 
     public RenderStateShard(String string, Runnable runnable, Runnable runnable2) {
         this.name = string;
@@ -180,19 +170,23 @@ public class RenderStateShard {
     @Environment(value=EnvType.CLIENT)
     public static class LineStateShard
     extends RenderStateShard {
-        private final float width;
+        private final OptionalDouble width;
 
-        public LineStateShard(float f) {
+        public LineStateShard(OptionalDouble optionalDouble) {
             super("alpha", () -> {
-                if (f != 1.0f) {
-                    RenderSystem.lineWidth(f);
+                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
+                    if (optionalDouble.isPresent()) {
+                        RenderSystem.lineWidth((float)optionalDouble.getAsDouble());
+                    } else {
+                        RenderSystem.lineWidth(Math.max(2.5f, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0f * 2.5f));
+                    }
                 }
             }, () -> {
-                if (f != 1.0f) {
+                if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
                     RenderSystem.lineWidth(1.0f);
                 }
             });
-            this.width = f;
+            this.width = optionalDouble;
         }
 
         @Override
@@ -206,12 +200,12 @@ public class RenderStateShard {
             if (!super.equals(object)) {
                 return false;
             }
-            return this.width == ((LineStateShard)object).width;
+            return Objects.equals(this.width, ((LineStateShard)object).width);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(super.hashCode(), Float.valueOf(this.width));
+            return Objects.hash(super.hashCode(), this.width);
         }
     }
 

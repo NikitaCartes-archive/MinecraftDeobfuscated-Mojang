@@ -21,6 +21,11 @@ extends MobRenderer<Blaze, BlazeModel<Blaze>> {
     }
 
     @Override
+    protected int getBlockLightLevel(Blaze blaze, float f) {
+        return 15;
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(Blaze blaze) {
         return BLAZE_LOCATION;
     }

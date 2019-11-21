@@ -35,7 +35,7 @@ extends RenderLayer<T, SlimeModel<T>> {
         this.model.prepareMobModel(livingEntity, f, g, h);
         this.model.setupAnim(livingEntity, f, g, j, k, l);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(livingEntity)));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0f), 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
 

@@ -10,6 +10,7 @@ import java.io.Closeable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -20,6 +21,8 @@ public class FontTexture
 extends AbstractTexture
 implements Closeable {
     private final ResourceLocation name;
+    private final RenderType normalType;
+    private final RenderType seeThroughType;
     private final boolean colored;
     private final Node root;
 
@@ -28,6 +31,8 @@ implements Closeable {
         this.colored = bl;
         this.root = new Node(0, 0, 256, 256);
         TextureUtil.prepareImage(bl ? NativeImage.InternalGlFormat.RGBA : NativeImage.InternalGlFormat.INTENSITY, this.getId(), 256, 256);
+        this.normalType = RenderType.text(resourceLocation);
+        this.seeThroughType = RenderType.textSeeThrough(resourceLocation);
     }
 
     @Override
@@ -51,7 +56,7 @@ implements Closeable {
             float f = 256.0f;
             float g = 256.0f;
             float h = 0.01f;
-            return new BakedGlyph(this.name, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)rawGlyph.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)rawGlyph.getPixelHeight()) / 256.0f, rawGlyph.getLeft(), rawGlyph.getRight(), rawGlyph.getUp(), rawGlyph.getDown());
+            return new BakedGlyph(this.normalType, this.seeThroughType, ((float)node.x + 0.01f) / 256.0f, ((float)node.x - 0.01f + (float)rawGlyph.getPixelWidth()) / 256.0f, ((float)node.y + 0.01f) / 256.0f, ((float)node.y - 0.01f + (float)rawGlyph.getPixelHeight()) / 256.0f, rawGlyph.getLeft(), rawGlyph.getRight(), rawGlyph.getUp(), rawGlyph.getDown());
         }
         return null;
     }

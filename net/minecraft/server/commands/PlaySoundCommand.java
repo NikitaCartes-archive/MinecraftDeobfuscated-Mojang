@@ -65,7 +65,7 @@ public class PlaySoundCommand {
         if (collection.size() == 1) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.playsound.success.single", resourceLocation, collection.iterator().next().getDisplayName()), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.playsound.success.multiple", resourceLocation, collection.iterator().next().getDisplayName()), true);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
         }
         return i;
     }

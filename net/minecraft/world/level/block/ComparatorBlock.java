@@ -65,13 +65,14 @@ implements EntityBlock {
     @Override
     protected boolean shouldTurnOn(Level level, BlockPos blockPos, BlockState blockState) {
         int i = this.getInputSignal(level, blockPos, blockState);
-        if (i >= 15) {
-            return true;
-        }
         if (i == 0) {
             return false;
         }
-        return i >= this.getAlternateSignal(level, blockPos, blockState);
+        int j = this.getAlternateSignal(level, blockPos, blockState);
+        if (i > j) {
+            return true;
+        }
+        return i == j && blockState.getValue(MODE) == ComparatorMode.COMPARE;
     }
 
     @Override

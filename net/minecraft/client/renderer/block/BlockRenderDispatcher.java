@@ -12,7 +12,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.color.block.BlockColors;
-import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockModelShaper;
@@ -108,7 +108,7 @@ implements ResourceManagerReloadListener {
                 break;
             }
             case ENTITYBLOCK_ANIMATED: {
-                EntityBlockRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);
+                BlockEntityWithoutLevelRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);
             }
         }
     }

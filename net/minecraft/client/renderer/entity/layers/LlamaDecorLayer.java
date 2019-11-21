@@ -42,7 +42,7 @@ extends RenderLayer<Llama, LlamaModel<Llama>> {
         ((LlamaModel)this.getParentModel()).copyPropertiesTo(this.model);
         this.model.setupAnim(llama, f, g, j, k, l);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
 

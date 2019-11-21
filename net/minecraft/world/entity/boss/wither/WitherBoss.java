@@ -444,12 +444,6 @@ RangedAttackMob {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
-    }
-
-    @Override
     public boolean causeFallDamage(float f, float g) {
         return false;
     }

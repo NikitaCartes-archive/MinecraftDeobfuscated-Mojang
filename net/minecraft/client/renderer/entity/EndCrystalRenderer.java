@@ -26,7 +26,8 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 public class EndCrystalRenderer
 extends EntityRenderer<EndCrystal> {
     private static final ResourceLocation END_CRYSTAL_LOCATION = new ResourceLocation("textures/entity/end_crystal/end_crystal.png");
-    public static final float SIN_45 = (float)Math.sin(0.7853981633974483);
+    private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(END_CRYSTAL_LOCATION);
+    private static final float SIN_45 = (float)Math.sin(0.7853981633974483);
     private final ModelPart cube;
     private final ModelPart glass;
     private final ModelPart base;
@@ -47,27 +48,27 @@ extends EntityRenderer<EndCrystal> {
         poseStack.pushPose();
         float h = EndCrystalRenderer.getY(endCrystal, g);
         float j = ((float)endCrystal.time + g) * 3.0f;
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(this.getTextureLocation(endCrystal)));
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
         poseStack.pushPose();
         poseStack.scale(2.0f, 2.0f, 2.0f);
         poseStack.translate(0.0, -0.5, 0.0);
         int k = OverlayTexture.NO_OVERLAY;
         if (endCrystal.showsBottom()) {
-            this.base.render(poseStack, vertexConsumer, i, k, null);
+            this.base.render(poseStack, vertexConsumer, i, k);
         }
         poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
         poseStack.translate(0.0, 1.5f + h / 2.0f, 0.0);
         poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
-        this.glass.render(poseStack, vertexConsumer, i, k, null);
+        this.glass.render(poseStack, vertexConsumer, i, k);
         float l = 0.875f;
         poseStack.scale(0.875f, 0.875f, 0.875f);
         poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
-        this.glass.render(poseStack, vertexConsumer, i, k, null);
+        this.glass.render(poseStack, vertexConsumer, i, k);
         poseStack.scale(0.875f, 0.875f, 0.875f);
         poseStack.mulPose(new Quaternion(new Vector3f(SIN_45, 0.0f, SIN_45), 60.0f, true));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(j));
-        this.cube.render(poseStack, vertexConsumer, i, k, null);
+        this.cube.render(poseStack, vertexConsumer, i, k);
         poseStack.popPose();
         poseStack.popPose();
         BlockPos blockPos = endCrystal.getBeamTarget();

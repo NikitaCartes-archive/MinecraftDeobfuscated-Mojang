@@ -35,7 +35,7 @@ extends RenderLayer<Pig, PigModel<Pig>> {
         this.model.prepareMobModel(pig, f, g, h);
         this.model.setupAnim(pig, f, g, j, k, l);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(SADDLE_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 }
 

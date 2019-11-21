@@ -96,7 +96,7 @@ extends BlockEntityRenderer<SkullBlockEntity> {
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SkullBlockRenderer.getRenderType(type, gameProfile));
         skullModel.setupAnim(g, f, 0.0f);
-        skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 

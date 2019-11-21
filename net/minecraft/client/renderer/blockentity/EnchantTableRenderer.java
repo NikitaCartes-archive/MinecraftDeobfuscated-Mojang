@@ -13,6 +13,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
@@ -20,7 +22,7 @@ import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 @Environment(value=EnvType.CLIENT)
 public class EnchantTableRenderer
 extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
-    public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("entity/enchanting_table_book");
+    public static final Material BOOK_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/enchanting_table_book"));
     private final BookModel bookModel = new BookModel();
 
     public EnchantTableRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
@@ -47,8 +49,8 @@ extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
         float n = Mth.frac(l + 0.75f) * 1.6f - 0.3f;
         float o = Mth.lerp(f, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
         this.bookModel.setupAnim(g, Mth.clamp(m, 0.0f, 1.0f), Mth.clamp(n, 0.0f, 1.0f), o);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
-        this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, this.getSprite(BOOK_LOCATION));
+        VertexConsumer vertexConsumer = BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
+        this.bookModel.b(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 }

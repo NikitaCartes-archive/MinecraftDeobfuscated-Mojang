@@ -181,9 +181,9 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
         playerModel.swimAmount = 0.0f;
         playerModel.setupAnim(abstractClientPlayer, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
         modelPart.xRot = 0.0f;
-        modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY, null);
+        modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entitySolid(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY);
         modelPart2.xRot = 0.0f;
-        modelPart2.render(poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY, null);
+        modelPart2.render(poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(abstractClientPlayer.getSkinTextureLocation())), i, OverlayTexture.NO_OVERLAY);
     }
 
     @Override
@@ -216,6 +216,11 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
         } else {
             super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
         }
+    }
+
+    @Override
+    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
+        return this.getRenderOffset((AbstractClientPlayer)entity, f);
     }
 }
 

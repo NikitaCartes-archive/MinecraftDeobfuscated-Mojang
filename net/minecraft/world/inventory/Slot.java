@@ -3,8 +3,10 @@
  */
 package net.minecraft.world.inventory;
 
+import com.mojang.datafixers.util.Pair;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -76,7 +78,7 @@ public class Slot {
 
     @Nullable
     @Environment(value=EnvType.CLIENT)
-    public String getNoItemIcon() {
+    public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
         return null;
     }
 

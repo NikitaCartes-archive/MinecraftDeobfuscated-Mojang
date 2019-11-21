@@ -11,7 +11,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -188,11 +187,6 @@ extends Zombie {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.ZOMBIE_PIGMAN_DEATH;
-    }
-
-    @Override
-    public boolean mobInteract(Player player, InteractionHand interactionHand) {
-        return false;
     }
 
     @Override

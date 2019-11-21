@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
 import java.util.Optional;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
@@ -192,9 +193,8 @@ public class DebugRenderer {
         RenderSystem.pushMatrix();
         RenderSystem.translatef((float)(d - j), (float)(e - k) + 0.07f, (float)(f - l));
         RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
-        RenderSystem.scalef(g, -g, g);
-        RenderSystem.rotatef(180.0f, 0.0f, 1.0f, 0.0f);
         RenderSystem.multMatrix(new Matrix4f(camera.rotation()));
+        RenderSystem.scalef(g, -g, g);
         RenderSystem.enableTexture();
         if (bl2) {
             RenderSystem.disableDepthTest();
@@ -204,7 +204,10 @@ public class DebugRenderer {
         RenderSystem.depthMask(true);
         RenderSystem.scalef(-1.0f, 1.0f, 1.0f);
         float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
-        font.draw(string, m -= h / g, 0.0f, i);
+        RenderSystem.enableAlphaTest();
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        font.drawInBatch(string, m -= h / g, 0.0f, i, false, Transformation.identity().getMatrix(), bufferSource, bl2, 0, 0xF000F0);
+        bufferSource.endBatch();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableDepthTest();
         RenderSystem.popMatrix();

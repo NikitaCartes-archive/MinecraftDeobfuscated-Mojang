@@ -11,12 +11,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
@@ -40,8 +39,7 @@ extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
         if (shulkerBoxBlockEntity.hasLevel() && (blockState = shulkerBoxBlockEntity.getLevel().getBlockState(shulkerBoxBlockEntity.getBlockPos())).getBlock() instanceof ShulkerBoxBlock) {
             direction = blockState.getValue(ShulkerBoxBlock.FACING);
         }
-        ResourceLocation resourceLocation = (dyeColor = shulkerBoxBlockEntity.getColor()) == null ? ModelBakery.DEFAULT_SHULKER_TEXTURE_LOCATION : ModelBakery.SHULKER_TEXTURE_LOCATION.get(dyeColor.getId());
-        TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
+        Material material = (dyeColor = shulkerBoxBlockEntity.getColor()) == null ? Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION : Sheets.SHULKER_TEXTURE_LOCATION.get(dyeColor.getId());
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
         float g = 0.9995f;
@@ -49,11 +47,11 @@ extends BlockEntityRenderer<ShulkerBoxBlockEntity> {
         poseStack.mulPose(direction.getRotation());
         poseStack.scale(1.0f, -1.0f, -1.0f);
         poseStack.translate(0.0, -1.0, 0.0);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutoutNoCull());
-        this.model.getBase().render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityCutoutNoCull);
+        this.model.getBase().render(poseStack, vertexConsumer, i, j);
         poseStack.translate(0.0, -shulkerBoxBlockEntity.getProgress(f) * 0.5f, 0.0);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(270.0f * shulkerBoxBlockEntity.getProgress(f)));
-        this.model.getLid().render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        this.model.getLid().render(poseStack, vertexConsumer, i, j);
         poseStack.popPose();
     }
 }

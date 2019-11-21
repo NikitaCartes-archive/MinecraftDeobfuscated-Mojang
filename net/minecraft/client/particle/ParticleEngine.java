@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
@@ -118,10 +117,10 @@ implements PreparableReloadListener {
     private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap();
     private final Queue<Particle> particlesToAdd = Queues.newArrayDeque();
     private final Map<ResourceLocation, MutableSpriteSet> spriteSets = Maps.newHashMap();
-    private final TextureAtlas textureAtlas = new TextureAtlas("textures/particle");
+    private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
 
     public ParticleEngine(Level level, TextureManager textureManager) {
-        textureManager.register(TextureAtlas.LOCATION_PARTICLES, this.textureAtlas);
+        textureManager.register(this.textureAtlas.location(), this.textureAtlas);
         this.level = level;
         this.textureManager = textureManager;
         this.registerProviders();
@@ -209,8 +208,7 @@ implements PreparableReloadListener {
         return ((CompletableFuture)((CompletableFuture)CompletableFuture.allOf(completableFutures).thenApplyAsync(void_ -> {
             profilerFiller.startTick();
             profilerFiller.push("stitching");
-            Set<ResourceLocation> set = map.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            TextureAtlas.Preparations preparations = this.textureAtlas.prepareToStitch(resourceManager, set, profilerFiller);
+            TextureAtlas.Preparations preparations = this.textureAtlas.prepareToStitch(resourceManager, map.values().stream().flatMap(Collection::stream), profilerFiller, 0);
             profilerFiller.pop();
             profilerFiller.endTick();
             return preparations;
@@ -234,25 +232,25 @@ implements PreparableReloadListener {
         this.textureAtlas.clearTextureData();
     }
 
-    private void loadParticleDescription(ResourceManager resourceManager, ResourceLocation resourceLocation, Map<ResourceLocation, List<ResourceLocation>> map) {
-        ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "particles/" + resourceLocation.getPath() + ".json");
-        try (Resource resource = resourceManager.getResource(resourceLocation2);
+    private void loadParticleDescription(ResourceManager resourceManager, ResourceLocation resourceLocation2, Map<ResourceLocation, List<ResourceLocation>> map) {
+        ResourceLocation resourceLocation22 = new ResourceLocation(resourceLocation2.getNamespace(), "particles/" + resourceLocation2.getPath() + ".json");
+        try (Resource resource = resourceManager.getResource(resourceLocation22);
              InputStreamReader reader = new InputStreamReader(resource.getInputStream(), Charsets.UTF_8);){
             ParticleDescription particleDescription = ParticleDescription.fromJson(GsonHelper.parse(reader));
             List<ResourceLocation> list = particleDescription.getTextures();
-            boolean bl = this.spriteSets.containsKey(resourceLocation);
+            boolean bl = this.spriteSets.containsKey(resourceLocation2);
             if (list == null) {
                 if (bl) {
-                    throw new IllegalStateException("Missing texture list for particle " + resourceLocation);
+                    throw new IllegalStateException("Missing texture list for particle " + resourceLocation2);
                 }
             } else {
                 if (!bl) {
-                    throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
+                    throw new IllegalStateException("Redundant texture list for particle " + resourceLocation2);
                 }
-                map.put(resourceLocation, list);
+                map.put(resourceLocation2, list.stream().map(resourceLocation -> new ResourceLocation(resourceLocation.getNamespace(), "particle/" + resourceLocation.getPath())).collect(Collectors.toList()));
             }
         } catch (IOException iOException) {
-            throw new IllegalStateException("Failed to load description for particle " + resourceLocation, iOException);
+            throw new IllegalStateException("Failed to load description for particle " + resourceLocation2, iOException);
         }
     }
 

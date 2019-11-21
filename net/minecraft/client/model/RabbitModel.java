@@ -99,24 +99,24 @@ extends EntityModel<T> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         if (this.young) {
-            float k = 1.5f;
+            float l = 1.5f;
             poseStack.pushPose();
             poseStack.scale(0.56666666f, 0.56666666f, 0.56666666f);
             poseStack.translate(0.0, 1.375, 0.125);
-            ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            ImmutableList.of(this.head, this.earLeft, this.earRight, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
             poseStack.pushPose();
             poseStack.scale(0.4f, 0.4f, 0.4f);
             poseStack.translate(0.0, 2.25, 0.0);
-            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.tail).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         } else {
             poseStack.pushPose();
             poseStack.scale(0.6f, 0.6f, 0.6f);
             poseStack.translate(0.0, 1.0, 0.0);
-            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.head, this.earRight, this.earLeft, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+            ImmutableList.of(this.rearFootLeft, this.rearFootRight, this.haunchLeft, this.haunchRight, this.body, this.frontLegLeft, this.frontLegRight, this.head, this.earRight, this.earLeft, this.tail, this.nose, new ModelPart[0]).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
             poseStack.popPose();
         }
     }

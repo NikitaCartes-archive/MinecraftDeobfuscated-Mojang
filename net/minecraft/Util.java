@@ -143,6 +143,11 @@ public class Util {
         return completableFuture;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static void throwAsRuntime(Throwable throwable) {
+        throw throwable instanceof RuntimeException ? (RuntimeException)throwable : new RuntimeException(throwable);
+    }
+
     public static OS getPlatform() {
         String string = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         if (string.contains("win")) {

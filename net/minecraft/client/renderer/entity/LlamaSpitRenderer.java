@@ -35,7 +35,7 @@ extends EntityRenderer<LlamaSpit> {
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(Mth.lerp(g, llamaSpit.xRotO, llamaSpit.xRot)));
         this.model.setupAnim(llamaSpit, g, 0.0f, -0.1f, 0.0f, 0.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(LLAMA_SPIT_LOCATION));
-        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
         super.render(llamaSpit, f, g, poseStack, multiBufferSource, i);
     }

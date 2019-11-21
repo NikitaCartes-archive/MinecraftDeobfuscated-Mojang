@@ -9,7 +9,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.renderer.texture.AtlasSet;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -22,17 +24,21 @@ import net.minecraft.world.level.material.FluidState;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelManager
-extends SimplePreparableReloadListener<ModelBakery> {
+extends SimplePreparableReloadListener<ModelBakery>
+implements AutoCloseable {
     private Map<ResourceLocation, BakedModel> bakedRegistry;
-    private final TextureAtlas terrainAtlas;
+    private AtlasSet atlases;
     private final BlockModelShaper blockModelShaper;
+    private final TextureManager textureManager;
     private final BlockColors blockColors;
+    private final int mipmapLevels;
     private BakedModel missingModel;
     private Object2IntMap<BlockState> modelGroups;
 
-    public ModelManager(TextureAtlas textureAtlas, BlockColors blockColors) {
-        this.terrainAtlas = textureAtlas;
+    public ModelManager(TextureManager textureManager, BlockColors blockColors, int i) {
+        this.textureManager = textureManager;
         this.blockColors = blockColors;
+        this.mipmapLevels = i;
         this.blockModelShaper = new BlockModelShaper(this);
     }
 
@@ -51,7 +57,7 @@ extends SimplePreparableReloadListener<ModelBakery> {
     @Override
     protected ModelBakery prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         profilerFiller.startTick();
-        ModelBakery modelBakery = new ModelBakery(resourceManager, this.terrainAtlas, this.blockColors, profilerFiller);
+        ModelBakery modelBakery = new ModelBakery(resourceManager, this.blockColors, profilerFiller, this.mipmapLevels);
         profilerFiller.endTick();
         return modelBakery;
     }
@@ -60,7 +66,7 @@ extends SimplePreparableReloadListener<ModelBakery> {
     protected void apply(ModelBakery modelBakery, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         profilerFiller.startTick();
         profilerFiller.push("upload");
-        modelBakery.uploadTextures(profilerFiller);
+        this.atlases = modelBakery.uploadTextures(this.textureManager, this.mipmapLevels, profilerFiller);
         this.bakedRegistry = modelBakery.getBakedTopLevelModels();
         this.modelGroups = modelBakery.getModelGroups();
         this.missingModel = this.bakedRegistry.get(ModelBakery.MISSING_MODEL_LOCATION);
@@ -82,6 +88,19 @@ extends SimplePreparableReloadListener<ModelBakery> {
             return fluidState != (fluidState2 = blockState2.getFluidState());
         }
         return true;
+    }
+
+    public TextureAtlas getAtlas(ResourceLocation resourceLocation) {
+        return this.atlases.getAtlas(resourceLocation);
+    }
+
+    @Override
+    public void close() {
+        this.atlases.close();
+    }
+
+    public void updateMaxMipLevel(int i) {
+        this.atlases.updateMaxMipLevel(this.textureManager, i);
     }
 
     @Override

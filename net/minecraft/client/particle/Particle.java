@@ -157,12 +157,12 @@ public abstract class Particle {
 
     public void move(double d, double e, double f) {
         if (this.stoppedByCollision) {
-            e = 0.0;
+            return;
         }
         double g = d;
         double h = e;
         double i = f;
-        if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0) && !this.stoppedByCollision) {
+        if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0)) {
             Vec3 vec3 = Entity.collideBoundingBoxHeuristically(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), new RewindableStream<VoxelShape>(Stream.empty()));
             d = vec3.x;
             e = vec3.y;
@@ -172,7 +172,7 @@ public abstract class Particle {
             this.setBoundingBox(this.getBoundingBox().move(d, e, f));
             this.setLocationFromBoundingbox();
         }
-        if (Math.abs(e) < (double)1.0E-5f) {
+        if (Math.abs(h) >= (double)1.0E-5f && Math.abs(e) < (double)1.0E-5f) {
             this.stoppedByCollision = true;
         }
         boolean bl = this.onGround = h != e && h < 0.0;

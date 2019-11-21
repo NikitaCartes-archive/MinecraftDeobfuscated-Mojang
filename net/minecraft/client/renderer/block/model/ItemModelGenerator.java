@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.block.model;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Vector3f;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,24 +18,24 @@ import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
 public class ItemModelGenerator {
     public static final List<String> LAYERS = Lists.newArrayList("layer0", "layer1", "layer2", "layer3", "layer4");
 
-    public BlockModel generateBlockModel(Function<ResourceLocation, TextureAtlasSprite> function, BlockModel blockModel) {
+    public BlockModel generateBlockModel(Function<Material, TextureAtlasSprite> function, BlockModel blockModel) {
         String string;
-        HashMap<String, String> map = Maps.newHashMap();
+        HashMap<String, Either<Material, String>> map = Maps.newHashMap();
         ArrayList<BlockElement> list = Lists.newArrayList();
         for (int i = 0; i < LAYERS.size() && blockModel.hasTexture(string = LAYERS.get(i)); ++i) {
-            String string2 = blockModel.getTexture(string);
-            map.put(string, string2);
-            TextureAtlasSprite textureAtlasSprite = function.apply(new ResourceLocation(string2));
+            Material material = blockModel.getMaterial(string);
+            map.put(string, Either.left(material));
+            TextureAtlasSprite textureAtlasSprite = function.apply(material);
             list.addAll(this.processFrames(i, string, textureAtlasSprite));
         }
-        map.put("particle", blockModel.hasTexture("particle") ? blockModel.getTexture("particle") : (String)map.get("layer0"));
+        map.put("particle", blockModel.hasTexture("particle") ? Either.left(blockModel.getMaterial("particle")) : (Either)map.get("layer0"));
         BlockModel blockModel2 = new BlockModel(null, list, map, false, false, blockModel.getTransforms(), blockModel.getOverrides());
         blockModel2.name = blockModel.name;
         return blockModel2;

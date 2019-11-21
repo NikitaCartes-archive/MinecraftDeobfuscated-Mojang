@@ -45,7 +45,7 @@ extends RenderLayer<T, M> {
         ((EntityModel)this.getParentModel()).copyPropertiesTo(this.elytraModel);
         this.elytraModel.setupAnim(livingEntity, f, g, j, k, l);
         VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.elytraModel.renderType(resourceLocation), false, itemStack.hasFoil());
-        this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f);
+        this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 }

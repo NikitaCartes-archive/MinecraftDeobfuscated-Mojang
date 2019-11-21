@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultedVertexConsumer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -13,7 +12,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
 public class OutlineBufferSource
@@ -32,11 +30,11 @@ implements MultiBufferSource {
     @Override
     public VertexConsumer getBuffer(RenderType renderType) {
         VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
-        Optional<ResourceLocation> optional = renderType.outlineTexture();
+        Optional<RenderType> optional = renderType.outline();
         if (optional.isPresent()) {
-            VertexConsumer vertexConsumer2 = this.outlineBufferSource.getBuffer(RenderType.outline(optional.get()));
+            VertexConsumer vertexConsumer2 = this.outlineBufferSource.getBuffer(optional.get());
             EntityOutlineGenerator entityOutlineGenerator = new EntityOutlineGenerator(vertexConsumer2, this.teamR, this.teamG, this.teamB, this.teamA);
-            return new VertexMultiConsumer(ImmutableList.of(entityOutlineGenerator, vertexConsumer));
+            return VertexMultiConsumer.create(entityOutlineGenerator, vertexConsumer);
         }
         return vertexConsumer;
     }
@@ -104,6 +102,11 @@ implements MultiBufferSource {
         @Override
         public VertexConsumer normal(float f, float g, float h) {
             return this;
+        }
+
+        @Override
+        public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
+            this.delegate.vertex(f, g, h).color(this.defaultR, this.defaultG, this.defaultB, this.defaultA).uv(m, n).endVertex();
         }
 
         @Override

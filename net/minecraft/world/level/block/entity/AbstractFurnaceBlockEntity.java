@@ -163,7 +163,7 @@ TickableBlockEntity {
         AbstractFurnaceBlockEntity.add(map, Items.CROSSBOW, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.BAMBOO, 50);
         AbstractFurnaceBlockEntity.add(map, Blocks.DEAD_BUSH, 100);
-        AbstractFurnaceBlockEntity.add(map, Blocks.SCAFFOLDING, 50);
+        AbstractFurnaceBlockEntity.add(map, Blocks.SCAFFOLDING, 400);
         AbstractFurnaceBlockEntity.add(map, Blocks.LOOM, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.BARREL, 300);
         AbstractFurnaceBlockEntity.add(map, Blocks.CARTOGRAPHY_TABLE, 300);

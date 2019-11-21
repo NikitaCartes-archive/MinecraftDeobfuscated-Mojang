@@ -29,7 +29,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PathfindToRaidGoal;
@@ -350,7 +349,7 @@ extends PatrollingMonster {
         public void tick() {
             if (this.raider.getNavigation().isDone()) {
                 Vec3 vec3 = new Vec3(this.poiPos);
-                Vec3 vec32 = RandomPos.getPosTowards((PathfinderMob)this.raider, 16, 7, vec3, 0.3141592741012573);
+                Vec3 vec32 = RandomPos.getPosTowards(this.raider, 16, 7, vec3, 0.3141592741012573);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.raider, 8, 7, vec3);
                 }

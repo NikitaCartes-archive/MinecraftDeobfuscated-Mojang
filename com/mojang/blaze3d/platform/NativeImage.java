@@ -24,6 +24,8 @@ import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
@@ -37,13 +39,14 @@ import org.lwjgl.system.MemoryUtil;
 @Environment(value=EnvType.CLIENT)
 public final class NativeImage
 implements AutoCloseable {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Set<StandardOpenOption> OPEN_OPTIONS = EnumSet.of(StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     private final Format format;
     private final int width;
     private final int height;
     private final boolean useStbFree;
     private long pixels;
-    private final int size;
+    private final long size;
 
     public NativeImage(int i, int j, boolean bl) {
         this(Format.RGBA, i, j, bl);
@@ -53,7 +56,7 @@ implements AutoCloseable {
         this.format = format;
         this.width = i;
         this.height = j;
-        this.size = i * j * format.components();
+        this.size = (long)i * (long)j * (long)format.components();
         this.useStbFree = false;
         this.pixels = bl ? MemoryUtil.nmemCalloc(1L, this.size) : MemoryUtil.nmemAlloc(this.size);
     }
@@ -175,7 +178,8 @@ implements AutoCloseable {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
-        return MemoryUtil.memIntBuffer(this.pixels, this.size).get(i + j * this.width);
+        long l = (i + j * this.width) * 4;
+        return MemoryUtil.memGetInt(this.pixels + l);
     }
 
     public void setPixelRGBA(int i, int j, int k) {
@@ -186,7 +190,8 @@ implements AutoCloseable {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
         this.checkAllocated();
-        MemoryUtil.memIntBuffer(this.pixels, this.size).put(i + j * this.width, k);
+        long l = (i + j * this.width) * 4;
+        MemoryUtil.memPutInt(this.pixels + l, k);
     }
 
     public byte getLuminanceOrAlpha(int i, int j) {
@@ -196,7 +201,8 @@ implements AutoCloseable {
         if (i > this.width || j > this.height) {
             throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
         }
-        return MemoryUtil.memByteBuffer(this.pixels, this.size).get((i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8);
+        int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8;
+        return MemoryUtil.memGetByte(this.pixels + (long)k);
     }
 
     public void blendPixel(int i, int j, int k) {
@@ -204,14 +210,14 @@ implements AutoCloseable {
             throw new UnsupportedOperationException("Can only call blendPixel with RGBA format");
         }
         int l = this.getPixelRGBA(i, j);
-        float f = (float)(k >> 24 & 0xFF) / 255.0f;
-        float g = (float)(k >> 16 & 0xFF) / 255.0f;
-        float h = (float)(k >> 8 & 0xFF) / 255.0f;
-        float m = (float)(k >> 0 & 0xFF) / 255.0f;
-        float n = (float)(l >> 24 & 0xFF) / 255.0f;
-        float o = (float)(l >> 16 & 0xFF) / 255.0f;
-        float p = (float)(l >> 8 & 0xFF) / 255.0f;
-        float q = (float)(l >> 0 & 0xFF) / 255.0f;
+        float f = (float)NativeImage.getA(k) / 255.0f;
+        float g = (float)NativeImage.getB(k) / 255.0f;
+        float h = (float)NativeImage.getG(k) / 255.0f;
+        float m = (float)NativeImage.getR(k) / 255.0f;
+        float n = (float)NativeImage.getA(l) / 255.0f;
+        float o = (float)NativeImage.getB(l) / 255.0f;
+        float p = (float)NativeImage.getG(l) / 255.0f;
+        float q = (float)NativeImage.getR(l) / 255.0f;
         float r = f;
         float s = 1.0f - f;
         float t = f * r + n * s;
@@ -234,7 +240,7 @@ implements AutoCloseable {
         int y = (int)(u * 255.0f);
         int z = (int)(v * 255.0f);
         int aa = (int)(w * 255.0f);
-        this.setPixelRGBA(i, j, x << 24 | y << 16 | z << 8 | aa << 0);
+        this.setPixelRGBA(i, j, NativeImage.combine(x, y, z, aa));
     }
 
     @Deprecated
@@ -248,10 +254,10 @@ implements AutoCloseable {
             for (int j = 0; j < this.getWidth(); ++j) {
                 int p;
                 int k = this.getPixelRGBA(j, i);
-                int l = k >> 24 & 0xFF;
-                int m = k >> 16 & 0xFF;
-                int n = k >> 8 & 0xFF;
-                int o = k >> 0 & 0xFF;
+                int l = NativeImage.getA(k);
+                int m = NativeImage.getB(k);
+                int n = NativeImage.getG(k);
+                int o = NativeImage.getR(k);
                 is[j + i * this.getWidth()] = p = l << 24 | o << 16 | n << 8 | m;
             }
         }
@@ -321,24 +327,90 @@ implements AutoCloseable {
         STBTruetype.nstbtt_MakeGlyphBitmapSubpixel(sTBTTFontinfo.address(), this.pixels + (long)m + (long)(n * this.getWidth()), j, k, this.getWidth(), f, g, h, l, i);
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
     public void writeToFile(Path path) throws IOException {
         if (!this.format.supportedByStb()) {
             throw new UnsupportedOperationException("Don't know how to write format " + (Object)((Object)this.format));
         }
         this.checkAllocated();
         try (SeekableByteChannel writableByteChannel = Files.newByteChannel(path, OPEN_OPTIONS, new FileAttribute[0]);){
-            WriteCallback writeCallback = new WriteCallback(writableByteChannel);
-            try {
-                if (!STBImageWrite.stbi_write_png_to_func(writeCallback, 0L, this.getWidth(), this.getHeight(), this.format.components(), MemoryUtil.memByteBuffer(this.pixels, this.size), 0)) {
-                    throw new IOException("Could not write image to the PNG file \"" + path.toAbsolutePath() + "\": " + STBImage.stbi_failure_reason());
-                }
-            } finally {
-                writeCallback.free();
+            if (!this.writeToChannel(writableByteChannel)) {
+                throw new IOException("Could not write image to the PNG file \"" + path.toAbsolutePath() + "\": " + STBImage.stbi_failure_reason());
+            }
+        }
+    }
+
+    /*
+     * Exception decompiling
+     */
+    public byte[] asByteArray() throws IOException {
+        /*
+         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
+         * 
+         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
+         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
+         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
+         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
+         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
+         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
+         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
+         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
+         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
+         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
+         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
+         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
+         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
+         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
+         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
+         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
+         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
+         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
+         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
+         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
+         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
+         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
+         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
+         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
+         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
+         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
+         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
+         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
+         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
+         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+         *     at java.base/java.lang.Thread.run(Thread.java:833)
+         */
+        throw new IllegalStateException("Decompilation failed");
+    }
+
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
+    private boolean writeToChannel(WritableByteChannel writableByteChannel) throws IOException {
+        WriteCallback writeCallback = new WriteCallback(writableByteChannel);
+        try {
+            int i = Math.min(this.getHeight(), Integer.MAX_VALUE / this.getWidth() / this.format.components());
+            if (i < this.getHeight()) {
+                LOGGER.warn("Dropping image height from {} to {} to fit the size into 32-bit signed int", (Object)this.getHeight(), (Object)i);
+            }
+            if (STBImageWrite.nstbi_write_png_to_func(writeCallback.address(), 0L, this.getWidth(), i, this.format.components(), this.pixels, 0) == 0) {
+                boolean bl = false;
+                return bl;
             }
             writeCallback.throwIfException();
+            boolean bl = true;
+            return bl;
+        } finally {
+            writeCallback.free();
         }
     }
 
@@ -420,6 +492,26 @@ implements AutoCloseable {
             NativeImage nativeImage = NativeImage.read(byteBuffer3);
             return nativeImage;
         }
+    }
+
+    public static int getA(int i) {
+        return i >> 24 & 0xFF;
+    }
+
+    public static int getR(int i) {
+        return i >> 0 & 0xFF;
+    }
+
+    public static int getG(int i) {
+        return i >> 8 & 0xFF;
+    }
+
+    public static int getB(int i) {
+        return i >> 16 & 0xFF;
+    }
+
+    public static int combine(int i, int j, int k, int l) {
+        return (i & 0xFF) << 24 | (j & 0xFF) << 16 | (k & 0xFF) << 8 | (l & 0xFF) << 0;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -536,6 +628,7 @@ implements AutoCloseable {
     static class WriteCallback
     extends STBIWriteCallback {
         private final WritableByteChannel output;
+        @Nullable
         private IOException exception;
 
         private WriteCallback(WritableByteChannel writableByteChannel) {

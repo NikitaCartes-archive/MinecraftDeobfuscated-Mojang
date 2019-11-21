@@ -43,7 +43,7 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
         DyeColor dyeColor = shulker.getColor();
         ResourceLocation resourceLocation = dyeColor == null ? ShulkerRenderer.DEFAULT_TEXTURE_LOCATION : ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()];
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation));
-        modelPart.render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f), null);
+        modelPart.render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f));
         poseStack.popPose();
     }
 }

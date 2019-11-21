@@ -196,12 +196,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public int getBlockLightLevel() {
-        return 15;
-    }
-
-    @Override
     public boolean isAttackable() {
         return false;
     }

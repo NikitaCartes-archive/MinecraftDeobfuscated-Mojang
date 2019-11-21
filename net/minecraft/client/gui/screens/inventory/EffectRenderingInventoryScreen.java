@@ -10,7 +10,7 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -81,12 +81,13 @@ extends AbstractContainerScreen<T> {
     }
 
     private void renderIcons(int i, int j, Iterable<MobEffectInstance> iterable) {
-        this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_MOB_EFFECTS);
         MobEffectTextureManager mobEffectTextureManager = this.minecraft.getMobEffectTextures();
         int k = this.topPos;
         for (MobEffectInstance mobEffectInstance : iterable) {
             MobEffect mobEffect = mobEffectInstance.getEffect();
-            EffectRenderingInventoryScreen.blit(i + 6, k + 7, this.getBlitOffset(), 18, 18, mobEffectTextureManager.get(mobEffect));
+            TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(mobEffect);
+            this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+            EffectRenderingInventoryScreen.blit(i + 6, k + 7, this.getBlitOffset(), 18, 18, textureAtlasSprite);
             k += j;
         }
     }

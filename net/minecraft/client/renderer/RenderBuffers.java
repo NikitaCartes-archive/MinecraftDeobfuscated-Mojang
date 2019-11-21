@@ -13,23 +13,27 @@ import net.minecraft.client.renderer.ChunkBufferBuilderPack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.ModelBakery;
 
 @Environment(value=EnvType.CLIENT)
 public class RenderBuffers {
     private final ChunkBufferBuilderPack fixedBufferPack = new ChunkBufferBuilderPack();
     private final SortedMap<RenderType, BufferBuilder> fixedBuffers = Util.make(new Object2ObjectLinkedOpenHashMap(), object2ObjectLinkedOpenHashMap -> {
-        object2ObjectLinkedOpenHashMap.put(RenderType.blockentitySolid(), this.fixedBufferPack.builder(RenderType.solid()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityCutout(), this.fixedBufferPack.builder(RenderType.cutout()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityNoOutline(), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
-        object2ObjectLinkedOpenHashMap.put(RenderType.blockentityTranslucent(), this.fixedBufferPack.builder(RenderType.translucent()));
+        object2ObjectLinkedOpenHashMap.put(Sheets.solidBlockSheet(), this.fixedBufferPack.builder(RenderType.solid()));
+        object2ObjectLinkedOpenHashMap.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.builder(RenderType.cutout()));
+        object2ObjectLinkedOpenHashMap.put(Sheets.bannerSheet(), this.fixedBufferPack.builder(RenderType.cutoutMipped()));
+        object2ObjectLinkedOpenHashMap.put(Sheets.translucentBlockSheet(), this.fixedBufferPack.builder(RenderType.translucent()));
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.shieldSheet());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.bedSheet());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.shulkerBoxSheet());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.signSheet());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, Sheets.chestSheet());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.translucentNoCrumbling());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.glint());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
-        for (int i = 0; i < 10; ++i) {
-            RenderType renderType = RenderType.crumbling(i);
-            RenderBuffers.put(object2ObjectLinkedOpenHashMap, renderType);
-        }
+        ModelBakery.DESTROY_TYPES.forEach(renderType -> RenderBuffers.put(object2ObjectLinkedOpenHashMap, renderType));
     });
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediateWithBuffers(this.fixedBuffers, new BufferBuilder(256));
     private final MultiBufferSource.BufferSource crumblingBufferSource = MultiBufferSource.immediate(new BufferBuilder(256));

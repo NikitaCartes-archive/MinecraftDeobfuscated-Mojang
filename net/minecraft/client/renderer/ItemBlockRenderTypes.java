@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -264,9 +265,9 @@ public class ItemBlockRenderTypes {
     public static RenderType getRenderType(BlockState blockState) {
         RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
         if (renderType == RenderType.translucent()) {
-            return RenderType.blockentityTranslucent();
+            return Sheets.translucentBlockSheet();
         }
-        return RenderType.blockentityCutout();
+        return Sheets.cutoutBlockSheet();
     }
 
     public static RenderType getRenderType(ItemStack itemStack) {
@@ -275,7 +276,7 @@ public class ItemBlockRenderTypes {
             Block block = ((BlockItem)item).getBlock();
             return ItemBlockRenderTypes.getRenderType(block.defaultBlockState());
         }
-        return RenderType.blockentityTranslucent();
+        return Sheets.translucentBlockSheet();
     }
 
     public static RenderType getRenderLayer(FluidState fluidState) {

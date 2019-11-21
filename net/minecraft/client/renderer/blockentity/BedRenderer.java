@@ -6,19 +6,16 @@ package net.minecraft.client.renderer.blockentity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import java.util.Arrays;
-import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,7 +24,6 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 @Environment(value=EnvType.CLIENT)
 public class BedRenderer
 extends BlockEntityRenderer<BedBlockEntity> {
-    public static final ResourceLocation[] TEXTURES = (ResourceLocation[])Arrays.stream(DyeColor.values()).sorted(Comparator.comparingInt(DyeColor::getId)).map(dyeColor -> new ResourceLocation("entity/bed/" + dyeColor.getName())).toArray(ResourceLocation[]::new);
     private final ModelPart headPiece;
     private final ModelPart footPiece;
     private final ModelPart[] legs = new ModelPart[4];
@@ -58,18 +54,17 @@ extends BlockEntityRenderer<BedBlockEntity> {
 
     @Override
     public void render(BedBlockEntity bedBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-        ResourceLocation resourceLocation = TEXTURES[bedBlockEntity.getColor().getId()];
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
+        Material material = Sheets.BED_TEXTURES[bedBlockEntity.getColor().getId()];
         if (bedBlockEntity.hasLevel()) {
             BlockState blockState = bedBlockEntity.getBlockState();
-            this.renderPiece(poseStack, vertexConsumer, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), resourceLocation, i, j, false);
+            this.renderPiece(poseStack, multiBufferSource, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), material, i, j, false);
         } else {
-            this.renderPiece(poseStack, vertexConsumer, true, Direction.SOUTH, resourceLocation, i, j, false);
-            this.renderPiece(poseStack, vertexConsumer, false, Direction.SOUTH, resourceLocation, i, j, true);
+            this.renderPiece(poseStack, multiBufferSource, true, Direction.SOUTH, material, i, j, false);
+            this.renderPiece(poseStack, multiBufferSource, false, Direction.SOUTH, material, i, j, true);
         }
     }
 
-    private void renderPiece(PoseStack poseStack, VertexConsumer vertexConsumer, boolean bl, Direction direction, ResourceLocation resourceLocation, int i, int j, boolean bl2) {
+    private void renderPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, boolean bl, Direction direction, Material material, int i, int j, boolean bl2) {
         this.headPiece.visible = bl;
         this.footPiece.visible = !bl;
         this.legs[0].visible = !bl;
@@ -82,13 +77,13 @@ extends BlockEntityRenderer<BedBlockEntity> {
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f + direction.toYRot()));
         poseStack.translate(-0.5, -0.5, -0.5);
-        TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
-        this.headPiece.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.footPiece.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.legs[0].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.legs[1].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.legs[2].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-        this.legs[3].render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+        VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entitySolid);
+        this.headPiece.render(poseStack, vertexConsumer, i, j);
+        this.footPiece.render(poseStack, vertexConsumer, i, j);
+        this.legs[0].render(poseStack, vertexConsumer, i, j);
+        this.legs[1].render(poseStack, vertexConsumer, i, j);
+        this.legs[2].render(poseStack, vertexConsumer, i, j);
+        this.legs[3].render(poseStack, vertexConsumer, i, j);
         poseStack.popPose();
     }
 }

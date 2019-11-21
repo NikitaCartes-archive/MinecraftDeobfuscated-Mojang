@@ -25,6 +25,11 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     }
 
     @Override
+    protected int getBlockLightLevel(WitherBoss witherBoss, float f) {
+        return 15;
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(WitherBoss witherBoss) {
         int i = witherBoss.getInvulnerableTicks();
         if (i <= 0 || i <= 80 && i / 5 % 2 == 1) {

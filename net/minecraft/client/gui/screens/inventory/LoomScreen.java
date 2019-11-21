@@ -9,7 +9,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,6 +37,7 @@ public class LoomScreen
 extends AbstractContainerScreen<LoomMenu> {
     private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/loom.png");
     private static final int TOTAL_PATTERN_ROWS = (BannerPattern.COUNT - 5 - 1 + 4 - 1) / 4;
+    private final ModelPart flag;
     @Nullable
     private BannerBlockEntity resultBanner;
     private ItemStack bannerStack = ItemStack.EMPTY;
@@ -47,6 +52,7 @@ extends AbstractContainerScreen<LoomMenu> {
 
     public LoomScreen(LoomMenu loomMenu, Inventory inventory, Component component) {
         super(loomMenu, inventory, component);
+        this.flag = BannerRenderer.makeFlag();
         loomMenu.registerUpdateListener(this::containerChanged);
     }
 
@@ -124,8 +130,6 @@ extends AbstractContainerScreen<LoomMenu> {
     }
 
     private void renderPattern(int i, int j, int k) {
-        this.minecraft.getTextureAtlas().bind();
-        RenderSystem.texParameter(3553, 10241, 9728);
         BannerBlockEntity bannerBlockEntity = new BannerBlockEntity();
         bannerBlockEntity.setOnlyRenderPattern(true);
         ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
@@ -133,13 +137,20 @@ extends AbstractContainerScreen<LoomMenu> {
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.BASE, DyeColor.GRAY).addPattern(BannerPattern.values()[i], DyeColor.WHITE).toListTag();
         compoundTag.put("Patterns", listTag);
         bannerBlockEntity.fromItem(itemStack, DyeColor.GRAY);
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef((float)j + 0.5f, k + 16, 0.0f);
-        RenderSystem.scalef(6.0f, -6.0f, 1.0f);
-        RenderSystem.translatef(0.5f, 0.5f, 0.0f);
-        BlockEntityRenderDispatcher.instance.renderItem(bannerBlockEntity, new PoseStack());
-        RenderSystem.popMatrix();
-        this.minecraft.getTextureAtlas().bind();
+        PoseStack poseStack = new PoseStack();
+        poseStack.pushPose();
+        poseStack.translate((float)j + 0.5f, k + 16, 0.0);
+        poseStack.scale(6.0f, -6.0f, 1.0f);
+        poseStack.translate(0.5, 0.5, 0.0);
+        float f = 0.6666667f;
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
+        MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
+        this.flag.xRot = 0.0f;
+        this.flag.y = -32.0f;
+        BannerRenderer.renderPatterns(bannerBlockEntity, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, this.flag, true);
+        poseStack.popPose();
+        bufferSource.endBatch();
     }
 
     @Override
