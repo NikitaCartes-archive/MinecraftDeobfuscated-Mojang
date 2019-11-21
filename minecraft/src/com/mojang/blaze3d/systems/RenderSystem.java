@@ -16,7 +16,6 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Mth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -28,6 +27,7 @@ public class RenderSystem {
 	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
 	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator();
 	public static final float DEFAULTALPHACUTOFF = 0.1F;
+	private static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
 	private static boolean isReplayingQueue;
 	private static Thread gameThread;
 	private static Thread renderThread;
@@ -587,16 +587,18 @@ public class RenderSystem {
 	public static int maxSupportedTextureSize() {
 		assertThread(RenderSystem::isInInitPhase);
 		if (MAX_SUPPORTED_TEXTURE_SIZE == -1) {
-			for (int i = 16384; i > 0; i >>= 1) {
-				GlStateManager._texImage2D(32868, 0, 6408, i, i, 0, 6408, 5121, null);
-				int j = GlStateManager._getTexLevelParameter(32868, 0, 4096);
-				if (j != 0) {
-					MAX_SUPPORTED_TEXTURE_SIZE = i;
-					return i;
+			int i = GlStateManager._getInteger(3379);
+
+			for (int j = Math.max(32768, i); j >= 1024; j >>= 1) {
+				GlStateManager._texImage2D(32868, 0, 6408, j, j, 0, 6408, 5121, null);
+				int k = GlStateManager._getTexLevelParameter(32868, 0, 4096);
+				if (k != 0) {
+					MAX_SUPPORTED_TEXTURE_SIZE = j;
+					return j;
 				}
 			}
 
-			MAX_SUPPORTED_TEXTURE_SIZE = Mth.clamp(GlStateManager._getInteger(3379), 1024, 16384);
+			MAX_SUPPORTED_TEXTURE_SIZE = Math.max(i, 1024);
 			LOGGER.info("Failed to determine maximum texture size by probing, trying GL_MAX_TEXTURE_SIZE = {}", MAX_SUPPORTED_TEXTURE_SIZE);
 		}
 

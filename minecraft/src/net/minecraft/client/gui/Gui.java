@@ -446,13 +446,13 @@ public class Gui extends GuiComponent {
 					int o = l;
 					float g = f;
 					list.add((Runnable)() -> {
+						this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
 						RenderSystem.color4f(1.0F, 1.0F, 1.0F, g);
 						blit(n + 3, o + 3, this.getBlitOffset(), 18, 18, textureAtlasSprite);
 					});
 				}
 			}
 
-			this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_MOB_EFFECTS);
 			list.forEach(Runnable::run);
 		}
 	}

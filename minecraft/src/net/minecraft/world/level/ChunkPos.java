@@ -104,6 +104,10 @@ public class ChunkPos {
 		return new BlockPos(this.x << 4, 0, this.z << 4);
 	}
 
+	public int getChessboardDistance(ChunkPos chunkPos) {
+		return Math.max(Math.abs(this.x - chunkPos.x), Math.abs(this.z - chunkPos.z));
+	}
+
 	public static Stream<ChunkPos> rangeClosed(ChunkPos chunkPos, int i) {
 		return rangeClosed(new ChunkPos(chunkPos.x - i, chunkPos.z - i), new ChunkPos(chunkPos.x + i, chunkPos.z + i));
 	}

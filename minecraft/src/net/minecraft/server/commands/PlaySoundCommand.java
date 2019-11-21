@@ -156,9 +156,7 @@ public class PlaySoundCommand {
 					new TranslatableComponent("commands.playsound.success.single", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
 				);
 			} else {
-				commandSourceStack.sendSuccess(
-					new TranslatableComponent("commands.playsound.success.multiple", resourceLocation, ((ServerPlayer)collection.iterator().next()).getDisplayName()), true
-				);
+				commandSourceStack.sendSuccess(new TranslatableComponent("commands.playsound.success.multiple", resourceLocation, collection.size()), true);
 			}
 
 			return i;

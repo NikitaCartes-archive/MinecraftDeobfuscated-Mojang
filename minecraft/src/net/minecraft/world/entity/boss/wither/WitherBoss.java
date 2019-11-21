@@ -489,12 +489,6 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public int getBlockLightLevel() {
-		return 15;
-	}
-
 	@Override
 	public boolean causeFallDamage(float f, float g) {
 		return false;

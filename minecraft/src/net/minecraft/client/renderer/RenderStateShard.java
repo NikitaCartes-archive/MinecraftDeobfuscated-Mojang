@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,25 +16,12 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
-public class RenderStateShard {
+public abstract class RenderStateShard {
 	protected final String name;
 	private final Runnable setupState;
 	private final Runnable clearState;
 	protected static final RenderStateShard.TransparencyStateShard NO_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
 		"no_transparency", () -> RenderSystem.disableBlend(), () -> {
-		}
-	);
-	protected static final RenderStateShard.TransparencyStateShard FORCED_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-		"forced_transparency", () -> {
-			RenderSystem.enableBlend();
-			RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 0.15F);
-			RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
-			RenderSystem.depthMask(false);
-		}, () -> {
-			RenderSystem.disableBlend();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.blendColor(1.0F, 1.0F, 1.0F, 1.0F);
-			RenderSystem.depthMask(true);
 		}
 	);
 	protected static final RenderStateShard.TransparencyStateShard ADDITIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
@@ -168,7 +156,7 @@ public class RenderStateShard {
 		() -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false),
 		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
 	);
-	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(1.0F);
+	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(OptionalDouble.of(1.0));
 
 	public RenderStateShard(String string, Runnable runnable, Runnable runnable2) {
 		this.name = string;
@@ -373,19 +361,23 @@ public class RenderStateShard {
 
 	@Environment(EnvType.CLIENT)
 	public static class LineStateShard extends RenderStateShard {
-		private final float width;
+		private final OptionalDouble width;
 
-		public LineStateShard(float f) {
+		public LineStateShard(OptionalDouble optionalDouble) {
 			super("alpha", () -> {
-				if (f != 1.0F) {
-					RenderSystem.lineWidth(f);
+				if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
+					if (optionalDouble.isPresent()) {
+						RenderSystem.lineWidth((float)optionalDouble.getAsDouble());
+					} else {
+						RenderSystem.lineWidth(Math.max(2.5F, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.5F));
+					}
 				}
 			}, () -> {
-				if (f != 1.0F) {
+				if (!Objects.equals(optionalDouble, OptionalDouble.of(1.0))) {
 					RenderSystem.lineWidth(1.0F);
 				}
 			});
-			this.width = f;
+			this.width = optionalDouble;
 		}
 
 		@Override
@@ -395,7 +387,7 @@ public class RenderStateShard {
 			} else if (object == null || this.getClass() != object.getClass()) {
 				return false;
 			} else {
-				return !super.equals(object) ? false : this.width == ((RenderStateShard.LineStateShard)object).width;
+				return !super.equals(object) ? false : Objects.equals(this.width, ((RenderStateShard.LineStateShard)object).width);
 			}
 		}
 

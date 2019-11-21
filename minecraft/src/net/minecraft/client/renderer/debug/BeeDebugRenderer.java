@@ -92,9 +92,11 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 		}
 
+		Map<BlockPos, Set<UUID>> map = this.createHiveBlacklistMap();
 		this.hives.values().forEach(hiveInfo -> {
 			if (blockPos.closerThan(hiveInfo.pos, 30.0)) {
-				this.renderHiveInfo(hiveInfo);
+				Set<UUID> set = (Set<UUID>)map.get(hiveInfo.pos);
+				this.renderHiveInfo(hiveInfo, (Collection<UUID>)(set == null ? Sets.<UUID>newHashSet() : set));
 			}
 		});
 		this.getGhostHives().forEach((blockPos2x, list) -> {
@@ -102,6 +104,12 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				this.renderGhostHive(blockPos2x, list);
 			}
 		});
+	}
+
+	private Map<BlockPos, Set<UUID>> createHiveBlacklistMap() {
+		Map<BlockPos, Set<UUID>> map = Maps.<BlockPos, Set<UUID>>newHashMap();
+		this.beeInfosPerEntity.values().forEach(beeInfo -> beeInfo.blacklistedHives.forEach(blockPos -> addBeeToSetInMap(map, beeInfo, blockPos)));
+		return map;
 	}
 
 	private void renderFlowerInfos() {
@@ -119,11 +127,32 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			BlockPos blockPos = (BlockPos)entry.getKey();
 			Set<UUID> set = (Set<UUID>)entry.getValue();
 			Set<String> set2 = (Set<String>)set.stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet());
-			renderTextOverPos(set2.toString(), blockPos, 1, -256);
-			renderTextOverPos("Flower", blockPos, 2, -1);
+			int i = 1;
+			renderTextOverPos(set2.toString(), blockPos, i++, -256);
+			renderTextOverPos("Flower", blockPos, i++, -1);
 			float f = 0.05F;
 			renderTransparentFilledBox(blockPos, 0.05F, 0.8F, 0.8F, 0.0F, 0.3F);
 		});
+	}
+
+	private static String getBeeUuidsAsString(Collection<UUID> collection) {
+		if (collection.isEmpty()) {
+			return "-";
+		} else {
+			return collection.size() > 3
+				? "" + collection.size() + " bees"
+				: ((Set)collection.stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet())).toString();
+		}
+	}
+
+	private static void addBeeToSetInMap(Map<BlockPos, Set<UUID>> map, BeeDebugRenderer.BeeInfo beeInfo, BlockPos blockPos) {
+		Set<UUID> set = (Set<UUID>)map.get(blockPos);
+		if (set == null) {
+			set = Sets.<UUID>newHashSet();
+			map.put(blockPos, set);
+		}
+
+		set.add(beeInfo.getUuid());
 	}
 
 	private static void highlightHive(BlockPos blockPos) {
@@ -144,27 +173,23 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		DebugRenderer.renderFilledBox(blockPos, f, g, h, i, j);
 	}
 
-	private void renderHiveInfo(BeeDebugRenderer.HiveInfo hiveInfo) {
+	private void renderHiveInfo(BeeDebugRenderer.HiveInfo hiveInfo, Collection<UUID> collection) {
 		int i = 0;
-		if (this.getHiveMemberNames(hiveInfo).isEmpty()) {
-			renderTextOverHive("Out: -", hiveInfo, i, -3355444);
-		} else if (this.getHiveMemberNames(hiveInfo).size() < 4) {
-			renderTextOverHive("Out: " + this.getHiveMemberNames(hiveInfo), hiveInfo, i, -3355444);
-		} else {
-			renderTextOverHive("Out: " + this.getHiveMemberNames(hiveInfo).size() + " bees", hiveInfo, i, -3355444);
+		if (!collection.isEmpty()) {
+			renderTextOverHive("Blacklisted by " + getBeeUuidsAsString(collection), hiveInfo, i++, -65536);
 		}
 
-		i++;
+		renderTextOverHive("Out: " + getBeeUuidsAsString(this.getHiveMembers(hiveInfo.pos)), hiveInfo, i++, -3355444);
 		if (hiveInfo.occupantCount == 0) {
-			renderTextOverHive("In: -", hiveInfo, i, -256);
+			renderTextOverHive("In: -", hiveInfo, i++, -256);
 		} else if (hiveInfo.occupantCount == 1) {
-			renderTextOverHive("In: 1 bee", hiveInfo, i, -256);
+			renderTextOverHive("In: 1 bee", hiveInfo, i++, -256);
 		} else {
-			renderTextOverHive("In: " + hiveInfo.occupantCount + " bees", hiveInfo, i, -256);
+			renderTextOverHive("In: " + hiveInfo.occupantCount + " bees", hiveInfo, i++, -256);
 		}
 
-		renderTextOverHive("Honey: " + hiveInfo.honeyLevel, hiveInfo, ++i, -23296);
-		renderTextOverHive(hiveInfo.hiveType + (hiveInfo.sedated ? " (sedated)" : ""), hiveInfo, ++i, -1);
+		renderTextOverHive("Honey: " + hiveInfo.honeyLevel, hiveInfo, i++, -23296);
+		renderTextOverHive(hiveInfo.hiveType + (hiveInfo.sedated ? " (sedated)" : ""), hiveInfo, i++, -1);
 	}
 
 	private void renderPath(BeeDebugRenderer.BeeInfo beeInfo) {
@@ -178,30 +203,30 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private void renderBeeInfo(BeeDebugRenderer.BeeInfo beeInfo) {
 		boolean bl = this.isBeeSelected(beeInfo);
 		int i = 0;
-		renderTextOverMob(beeInfo.pos, i, beeInfo.toString(), -1, 0.03F);
-		i++;
+		renderTextOverMob(beeInfo.pos, i++, beeInfo.toString(), -1, 0.03F);
 		if (beeInfo.hivePos == null) {
-			renderTextOverMob(beeInfo.pos, i, "Homeless :(", -98404, 0.02F);
+			renderTextOverMob(beeInfo.pos, i++, "No hive", -98404, 0.02F);
 		} else {
-			renderTextOverMob(beeInfo.pos, i, "Hive: " + this.getPosDescription(beeInfo, beeInfo.hivePos), -256, 0.02F);
+			renderTextOverMob(beeInfo.pos, i++, "Hive: " + this.getPosDescription(beeInfo, beeInfo.hivePos), -256, 0.02F);
 		}
 
-		i++;
 		if (beeInfo.flowerPos == null) {
-			renderTextOverMob(beeInfo.pos, i, "No flower :(", -98404, 0.02F);
+			renderTextOverMob(beeInfo.pos, i++, "No flower", -98404, 0.02F);
 		} else {
-			renderTextOverMob(beeInfo.pos, i, "Flower: " + this.getPosDescription(beeInfo, beeInfo.flowerPos), -256, 0.02F);
+			renderTextOverMob(beeInfo.pos, i++, "Flower: " + this.getPosDescription(beeInfo, beeInfo.flowerPos), -256, 0.02F);
 		}
-
-		i++;
 
 		for (String string : beeInfo.goals) {
-			renderTextOverMob(beeInfo.pos, i, string, -16711936, 0.02F);
-			i++;
+			renderTextOverMob(beeInfo.pos, i++, string, -16711936, 0.02F);
 		}
 
 		if (bl) {
 			this.renderPath(beeInfo);
+		}
+
+		if (beeInfo.travelTicks > 0) {
+			int j = beeInfo.travelTicks < 600 ? -3355444 : -23296;
+			renderTextOverMob(beeInfo.pos, i++, "Travelling: " + beeInfo.travelTicks + " ticks", j, 0.02F);
 		}
 	}
 
@@ -232,10 +257,6 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	private Camera getCamera() {
 		return this.minecraft.gameRenderer.getMainCamera();
-	}
-
-	private Set<String> getHiveMemberNames(BeeDebugRenderer.HiveInfo hiveInfo) {
-		return (Set<String>)this.getHiveMembers(hiveInfo.pos).stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet());
 	}
 
 	private String getPosDescription(BeeDebugRenderer.BeeInfo beeInfo, BlockPos blockPos) {
@@ -297,15 +318,18 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		public final BlockPos hivePos;
 		@Nullable
 		public final BlockPos flowerPos;
+		public final int travelTicks;
 		public final List<String> goals = Lists.<String>newArrayList();
+		public final Set<BlockPos> blacklistedHives = Sets.<BlockPos>newHashSet();
 
-		public BeeInfo(UUID uUID, int i, Position position, Path path, BlockPos blockPos, BlockPos blockPos2) {
+		public BeeInfo(UUID uUID, int i, Position position, Path path, BlockPos blockPos, BlockPos blockPos2, int j) {
 			this.uuid = uUID;
 			this.id = i;
 			this.pos = position;
 			this.path = path;
 			this.hivePos = blockPos;
 			this.flowerPos = blockPos2;
+			this.travelTicks = j;
 		}
 
 		public boolean hasHive(BlockPos blockPos) {

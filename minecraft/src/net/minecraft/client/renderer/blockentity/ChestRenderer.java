@@ -9,32 +9,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
-import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.Property;
 
 @Environment(EnvType.CLIENT)
 public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends BlockEntityRenderer<T> {
-	public static final ResourceLocation CHEST_TRAP_LOCATION = new ResourceLocation("entity/chest/trapped");
-	public static final ResourceLocation CHEST_TRAP_LOCATION_LEFT = new ResourceLocation("entity/chest/trapped_left");
-	public static final ResourceLocation CHEST_TRAP_LOCATION_RIGHT = new ResourceLocation("entity/chest/trapped_right");
-	public static final ResourceLocation CHEST_XMAS_LOCATION = new ResourceLocation("entity/chest/christmas");
-	public static final ResourceLocation CHEST_XMAS_LOCATION_LEFT = new ResourceLocation("entity/chest/christmas_left");
-	public static final ResourceLocation CHEST_XMAS_LOCATION_RIGHT = new ResourceLocation("entity/chest/christmas_right");
-	public static final ResourceLocation CHEST_LOCATION = new ResourceLocation("entity/chest/normal");
-	public static final ResourceLocation CHEST_LOCATION_LEFT = new ResourceLocation("entity/chest/normal_left");
-	public static final ResourceLocation CHEST_LOCATION_RIGHT = new ResourceLocation("entity/chest/normal_right");
-	public static final ResourceLocation ENDER_CHEST_LOCATION = new ResourceLocation("entity/chest/ender");
 	private final ModelPart lid;
 	private final ModelPart bottom;
 	private final ModelPart lock;
@@ -89,17 +77,6 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends Block
 		BlockState blockState = bl ? blockEntity.getBlockState() : Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
 		ChestType chestType = blockState.hasProperty((Property<T>)ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 		boolean bl2 = chestType != ChestType.SINGLE;
-		ResourceLocation resourceLocation;
-		if (this.xmasTextures) {
-			resourceLocation = this.chooseTexture(chestType, CHEST_XMAS_LOCATION, CHEST_XMAS_LOCATION_LEFT, CHEST_XMAS_LOCATION_RIGHT);
-		} else if (blockEntity instanceof TrappedChestBlockEntity) {
-			resourceLocation = this.chooseTexture(chestType, CHEST_TRAP_LOCATION, CHEST_TRAP_LOCATION_LEFT, CHEST_TRAP_LOCATION_RIGHT);
-		} else if (blockEntity instanceof EnderChestBlockEntity) {
-			resourceLocation = ENDER_CHEST_LOCATION;
-		} else {
-			resourceLocation = this.chooseTexture(chestType, CHEST_LOCATION, CHEST_LOCATION_LEFT, CHEST_LOCATION_RIGHT);
-		}
-
 		poseStack.pushPose();
 		float g = ((Direction)blockState.getValue(ChestBlock.FACING)).toYRot();
 		poseStack.translate(0.5, 0.5, 0.5);
@@ -114,51 +91,26 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> extends Block
 
 		h = 1.0F - h;
 		h = 1.0F - h * h * h;
-		TextureAtlasSprite textureAtlasSprite = this.getSprite(resourceLocation);
+		Material material = Sheets.chooseMaterial(blockEntity, chestType, this.xmasTextures);
+		VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityCutout);
 		if (bl2) {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityCutout());
 			if (chestType == ChestType.LEFT) {
-				this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, i, j, textureAtlasSprite);
+				this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, i, j);
 			} else {
-				this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, i, j, textureAtlasSprite);
+				this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, i, j);
 			}
 		} else {
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
-			this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, i, j, textureAtlasSprite);
+			this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, i, j);
 		}
 
 		poseStack.popPose();
 	}
 
-	private ResourceLocation chooseTexture(
-		ChestType chestType, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3
-	) {
-		switch (chestType) {
-			case LEFT:
-				return resourceLocation3;
-			case RIGHT:
-				return resourceLocation2;
-			case SINGLE:
-			default:
-				return resourceLocation;
-		}
-	}
-
-	private void render(
-		PoseStack poseStack,
-		VertexConsumer vertexConsumer,
-		ModelPart modelPart,
-		ModelPart modelPart2,
-		ModelPart modelPart3,
-		float f,
-		int i,
-		int j,
-		TextureAtlasSprite textureAtlasSprite
-	) {
+	private void render(PoseStack poseStack, VertexConsumer vertexConsumer, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, int j) {
 		modelPart.xRot = -(f * (float) (Math.PI / 2));
 		modelPart2.xRot = modelPart.xRot;
-		modelPart.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-		modelPart2.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-		modelPart3.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+		modelPart.render(poseStack, vertexConsumer, i, j);
+		modelPart2.render(poseStack, vertexConsumer, i, j);
+		modelPart3.render(poseStack, vertexConsumer, i, j);
 	}
 }

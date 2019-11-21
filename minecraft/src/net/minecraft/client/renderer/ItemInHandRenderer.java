@@ -137,7 +137,7 @@ public class ItemInHandRenderer {
 		poseStack.scale(0.38F, 0.38F, 0.38F);
 		poseStack.translate(-0.5, -0.5, 0.0);
 		poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.text(MapRenderer.MAP_BACKGROUND_LOCATION));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(MapRenderer.MAP_BACKGROUND);
 		Matrix4f matrix4f = poseStack.last().pose();
 		vertexConsumer.vertex(matrix4f, -7.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
 		vertexConsumer.vertex(matrix4f, 135.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(i).endVertex();

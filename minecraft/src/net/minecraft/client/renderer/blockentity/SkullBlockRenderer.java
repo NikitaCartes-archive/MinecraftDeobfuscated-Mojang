@@ -97,7 +97,7 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(getRenderType(type, gameProfile));
 		skullModel.setupAnim(g, f, 0.0F);
-		skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		skullModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();
 	}
 

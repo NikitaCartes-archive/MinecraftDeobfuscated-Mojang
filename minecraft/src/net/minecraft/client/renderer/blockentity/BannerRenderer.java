@@ -6,12 +6,11 @@ import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,17 +24,21 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
-	private final ModelPart flag = new ModelPart(64, 64, 0, 0);
-	private final ModelPart pole;
+	private final ModelPart flag = makeFlag();
+	private final ModelPart pole = new ModelPart(64, 64, 44, 0);
 	private final ModelPart bar;
 
 	public BannerRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
 		super(blockEntityRenderDispatcher);
-		this.flag.addBox(-10.0F, 0.0F, -2.0F, 20.0F, 40.0F, 1.0F, 0.0F);
-		this.pole = new ModelPart(64, 64, 44, 0);
 		this.pole.addBox(-1.0F, -30.0F, -1.0F, 2.0F, 42.0F, 2.0F, 0.0F);
 		this.bar = new ModelPart(64, 64, 0, 42);
 		this.bar.addBox(-10.0F, -32.0F, -1.0F, 20.0F, 2.0F, 2.0F, 0.0F);
+	}
+
+	public static ModelPart makeFlag() {
+		ModelPart modelPart = new ModelPart(64, 64, 0, 0);
+		modelPart.addBox(-10.0F, 0.0F, -2.0F, 20.0F, 40.0F, 1.0F, 0.0F);
+		return modelPart;
 	}
 
 	public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -65,12 +68,11 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 				}
 			}
 
-			TextureAtlasSprite textureAtlasSprite = this.getSprite(ModelBakery.BANNER_BASE);
 			poseStack.pushPose();
 			poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
-			this.pole.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
-			this.bar.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
+			VertexConsumer vertexConsumer = ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid);
+			this.pole.render(poseStack, vertexConsumer, i, j);
+			this.bar.render(poseStack, vertexConsumer, i, j);
 			if (bannerBlockEntity.onlyRenderPattern()) {
 				this.flag.xRot = 0.0F;
 			} else {
@@ -80,7 +82,6 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 			}
 
 			this.flag.y = -32.0F;
-			this.flag.render(poseStack, vertexConsumer, i, j, textureAtlasSprite);
 			renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, true);
 			poseStack.popPose();
 			poseStack.popPose();
@@ -90,16 +91,16 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 	public static void renderPatterns(
 		BannerBlockEntity bannerBlockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, boolean bl
 	) {
+		modelPart.render(poseStack, ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid), i, j);
 		List<BannerPattern> list = bannerBlockEntity.getPatterns();
 		List<DyeColor> list2 = bannerBlockEntity.getColors();
-		TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentityNoOutline());
 
 		for (int k = 0; k < 17 && k < list.size() && k < list2.size(); k++) {
 			BannerPattern bannerPattern = (BannerPattern)list.get(k);
 			DyeColor dyeColor = (DyeColor)list2.get(k);
 			float[] fs = dyeColor.getTextureDiffuseColors();
-			modelPart.render(poseStack, vertexConsumer, i, j, textureAtlas.getSprite(bannerPattern.location(bl)), fs[0], fs[1], fs[2]);
+			Material material = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, bannerPattern.location(bl));
+			modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
 		}
 	}
 }

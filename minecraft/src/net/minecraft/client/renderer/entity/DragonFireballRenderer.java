@@ -16,9 +16,14 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 @Environment(EnvType.CLIENT)
 public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon_fireball.png");
+	private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(TEXTURE_LOCATION);
 
 	public DragonFireballRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		super(entityRenderDispatcher);
+	}
+
+	protected int getBlockLightLevel(DragonFireball dragonFireball, float f) {
+		return 15;
 	}
 
 	public void render(DragonFireball dragonFireball, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -29,7 +34,7 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 		PoseStack.Pose pose = poseStack.last();
 		Matrix4f matrix4f = pose.pose();
 		Matrix3f matrix3f = pose.normal();
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(TEXTURE_LOCATION));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
 		vertex(vertexConsumer, matrix4f, matrix3f, i, 0.0F, 0, 0, 1);
 		vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0F, 0, 1, 1);
 		vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0F, 1, 1, 0);

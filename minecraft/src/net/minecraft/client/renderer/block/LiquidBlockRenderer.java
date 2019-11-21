@@ -6,7 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -32,12 +31,11 @@ public class LiquidBlockRenderer {
 	private TextureAtlasSprite waterOverlay;
 
 	protected void setupSprites() {
-		TextureAtlas textureAtlas = Minecraft.getInstance().getTextureAtlas();
 		this.lavaIcons[0] = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.LAVA.defaultBlockState()).getParticleIcon();
-		this.lavaIcons[1] = textureAtlas.getSprite(ModelBakery.LAVA_FLOW);
+		this.lavaIcons[1] = ModelBakery.LAVA_FLOW.sprite();
 		this.waterIcons[0] = Minecraft.getInstance().getModelManager().getBlockModelShaper().getBlockModel(Blocks.WATER.defaultBlockState()).getParticleIcon();
-		this.waterIcons[1] = textureAtlas.getSprite(ModelBakery.WATER_FLOW);
-		this.waterOverlay = textureAtlas.getSprite(ModelBakery.WATER_OVERLAY);
+		this.waterIcons[1] = ModelBakery.WATER_FLOW.sprite();
+		this.waterOverlay = ModelBakery.WATER_OVERLAY.sprite();
 	}
 
 	private static boolean isNeighborSameFluid(BlockGetter blockGetter, BlockPos blockPos, Direction direction, FluidState fluidState) {
@@ -167,10 +165,10 @@ public class LiquidBlockRenderer {
 				float wx = 0.5F * f;
 				float yx = 0.5F * g;
 				float aax = 0.5F * h;
-				this.vertex(vertexConsumer, d, e, r + 1.0, wx, yx, aax, tx, zx, ak);
-				this.vertex(vertexConsumer, d, e, r, wx, yx, aax, tx, xx, ak);
-				this.vertex(vertexConsumer, d + 1.0, e, r, wx, yx, aax, vx, xx, ak);
-				this.vertex(vertexConsumer, d + 1.0, e, r + 1.0, wx, yx, aax, vx, zx, ak);
+				this.vertex(vertexConsumer, d, e + 0.001F, r + 1.0, wx, yx, aax, tx, zx, ak);
+				this.vertex(vertexConsumer, d, e + 0.001F, r, wx, yx, aax, tx, xx, ak);
+				this.vertex(vertexConsumer, d + 1.0, e + 0.001F, r, wx, yx, aax, vx, xx, ak);
+				this.vertex(vertexConsumer, d + 1.0, e + 0.001F, r + 1.0, wx, yx, aax, vx, zx, ak);
 				bl8 = true;
 			}
 
@@ -244,11 +242,11 @@ public class LiquidBlockRenderer {
 					float aw = 1.0F * at * h;
 					this.vertex(vertexConsumer, am, e + (double)vx, ao, au, av, aw, ah, aj, as);
 					this.vertex(vertexConsumer, an, e + (double)xx, ap, au, av, aw, ai, aq, as);
-					this.vertex(vertexConsumer, an, e + 0.0, ap, au, av, aw, ai, ar, as);
-					this.vertex(vertexConsumer, am, e + 0.0, ao, au, av, aw, ah, ar, as);
+					this.vertex(vertexConsumer, an, e + 0.001F, ap, au, av, aw, ai, ar, as);
+					this.vertex(vertexConsumer, am, e + 0.001F, ao, au, av, aw, ah, ar, as);
 					if (textureAtlasSprite2 != this.waterOverlay) {
-						this.vertex(vertexConsumer, am, e + 0.0, ao, au, av, aw, ah, ar, as);
-						this.vertex(vertexConsumer, an, e + 0.0, ap, au, av, aw, ai, ar, as);
+						this.vertex(vertexConsumer, am, e + 0.001F, ao, au, av, aw, ah, ar, as);
+						this.vertex(vertexConsumer, an, e + 0.001F, ap, au, av, aw, ai, ar, as);
 						this.vertex(vertexConsumer, an, e + (double)xx, ap, au, av, aw, ai, aq, as);
 						this.vertex(vertexConsumer, am, e + (double)vx, ao, au, av, aw, ah, aj, as);
 					}

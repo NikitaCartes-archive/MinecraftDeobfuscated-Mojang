@@ -28,7 +28,7 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(
 			multiBufferSource, this.model.renderType(this.getTextureLocation(thrownTrident)), false, thrownTrident.isFoil()
 		);
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		poseStack.popPose();
 		super.render(thrownTrident, f, g, poseStack, multiBufferSource, i);
 	}

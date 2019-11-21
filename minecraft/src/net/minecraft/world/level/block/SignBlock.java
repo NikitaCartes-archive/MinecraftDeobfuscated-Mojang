@@ -1,5 +1,7 @@
 package net.minecraft.world.level.block;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -15,6 +17,7 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -24,9 +27,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
+	private final WoodType type;
 
-	protected SignBlock(Block.Properties properties) {
+	protected SignBlock(Block.Properties properties, WoodType woodType) {
 		super(properties);
+		this.type = woodType;
 	}
 
 	@Override
@@ -84,5 +89,10 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	@Override
 	public FluidState getFluidState(BlockState blockState) {
 		return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public WoodType type() {
+		return this.type;
 	}
 }

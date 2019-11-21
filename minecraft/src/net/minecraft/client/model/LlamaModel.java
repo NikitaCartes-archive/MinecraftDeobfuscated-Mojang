@@ -78,30 +78,30 @@ public class LlamaModel<T extends AbstractChestedHorse> extends EntityModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
 		if (this.young) {
-			float k = 2.0F;
+			float l = 2.0F;
 			poseStack.pushPose();
-			float l = 0.7F;
+			float m = 0.7F;
 			poseStack.scale(0.71428573F, 0.64935064F, 0.7936508F);
 			poseStack.translate(0.0, 1.3125, 0.22F);
-			this.head.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+			this.head.render(poseStack, vertexConsumer, i, j, f, g, h, k);
 			poseStack.popPose();
 			poseStack.pushPose();
-			float m = 1.1F;
+			float n = 1.1F;
 			poseStack.scale(0.625F, 0.45454544F, 0.45454544F);
 			poseStack.translate(0.0, 2.0625, 0.0);
-			this.body.render(poseStack, vertexConsumer, i, j, null, f, g, h);
+			this.body.render(poseStack, vertexConsumer, i, j, f, g, h, k);
 			poseStack.popPose();
 			poseStack.pushPose();
 			poseStack.scale(0.45454544F, 0.41322312F, 0.45454544F);
 			poseStack.translate(0.0, 2.0625, 0.0);
 			ImmutableList.of(this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 			poseStack.popPose();
 		} else {
 			ImmutableList.of(this.head, this.body, this.leg0, this.leg1, this.leg2, this.leg3, this.chest1, this.chest2)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 		}
 	}
 }

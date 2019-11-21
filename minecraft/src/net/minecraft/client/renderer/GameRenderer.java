@@ -25,7 +25,6 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -385,7 +384,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 				this.lightTexture.turnOnLightLayer();
 				this.itemInHandRenderer
 					.renderHandsWithItems(
-						f, poseStack, this.renderBuffers.bufferSource(), this.minecraft.player, EntityRenderDispatcher.getPackedLightCoords(this.minecraft.player)
+						f,
+						poseStack,
+						this.renderBuffers.bufferSource(),
+						this.minecraft.player,
+						this.minecraft.getEntityRenderDispatcher().getPackedLightCoords(this.minecraft.player, f)
 					);
 				this.lightTexture.turnOffLightLayer();
 			}
@@ -458,11 +461,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				int m = Math.min(Minecraft.getAverageFps(), k);
-				m = Math.max(m, 60);
+				int m = 30;
 				long n = Util.getNanos() - l;
-				long o = Math.max((long)(1000000000 / m / 4) - n, 0L);
-				this.renderLevel(f, Util.getNanos() + o, poseStack);
+				long o = (long)(1000000000 / m);
+				long p = Math.max(o * 3L / 4L - n, o / 10L);
+				this.renderLevel(f, Util.getNanos() + p, poseStack);
 				if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
 					this.lastScreenshotAttempt = Util.getMillis();
 					if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -510,8 +513,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			if (this.minecraft.overlay != null) {
 				try {
 					this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering overlay");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.overlay.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -519,8 +522,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			} else if (this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var14) {
-					CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(

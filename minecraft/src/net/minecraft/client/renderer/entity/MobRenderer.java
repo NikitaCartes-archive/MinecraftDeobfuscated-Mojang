@@ -40,11 +40,11 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		super.render(mob, f, g, poseStack, multiBufferSource, i);
 		Entity entity = mob.getLeashHolder();
 		if (entity != null) {
-			renderLeash(mob, g, poseStack, multiBufferSource, entity);
+			this.renderLeash(mob, g, poseStack, multiBufferSource, entity);
 		}
 	}
 
-	public static void renderLeash(Mob mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity) {
+	private <E extends Entity> void renderLeash(T mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, E entity) {
 		poseStack.pushPose();
 		double d = (double)(Mth.lerp(f * 0.5F, entity.yRot, entity.yRotO) * (float) (Math.PI / 180.0));
 		double e = (double)(Mth.lerp(f * 0.5F, entity.xRot, entity.xRotO) * (float) (Math.PI / 180.0));
@@ -77,10 +77,10 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		float v = Mth.fastInvSqrt(r * r + t * t) * 0.025F / 2.0F;
 		float w = t * v;
 		float x = r * v;
-		int y = mob.getBlockLightLevel();
-		int z = entity.getBlockLightLevel();
-		int aa = mob.level.getBrightness(LightLayer.SKY, new BlockPos(mob));
-		int ab = mob.level.getBrightness(LightLayer.SKY, new BlockPos(entity));
+		int y = this.getBlockLightLevel(mob, f);
+		int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, f);
+		int aa = mob.level.getBrightness(LightLayer.SKY, new BlockPos(mob.getEyePosition(f)));
+		int ab = mob.level.getBrightness(LightLayer.SKY, new BlockPos(entity.getEyePosition(f)));
 		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.025F, w, x);
 		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.0F, w, x);
 		poseStack.popPose();

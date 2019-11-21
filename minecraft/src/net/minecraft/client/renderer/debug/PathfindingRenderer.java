@@ -42,7 +42,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 
 			for (Integer integer2 : (Integer[])this.creationMap.keySet().toArray(new Integer[0])) {
-				if (m - (Long)this.creationMap.get(integer2) > 20000L) {
+				if (m - (Long)this.creationMap.get(integer2) > 5000L) {
 					this.pathMap.remove(integer2);
 					this.creationMap.remove(integer2);
 				}
@@ -66,7 +66,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static void doRenderPath(Path path, float f, boolean bl, boolean bl2, double d, double e, double g) {
 		renderPathLine(path, d, e, g);
 		BlockPos blockPos = path.getTarget();
-		if (distanceToCamera(blockPos, d, e, g) <= 40.0F) {
+		if (distanceToCamera(blockPos, d, e, g) <= 80.0F) {
 			DebugRenderer.renderFilledBox(
 				new AABB(
 						(double)((float)blockPos.getX() + 0.25F),
@@ -85,7 +85,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 			for (int i = 0; i < path.getSize(); i++) {
 				Node node = path.get(i);
-				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 40.0F) {
+				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
 					float h = i == path.getIndex() ? 1.0F : 0.0F;
 					float j = i == path.getIndex() ? 0.0F : 1.0F;
 					DebugRenderer.renderFilledBox(
@@ -109,19 +109,41 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		if (bl) {
 			for (Node node2 : path.getClosedSet()) {
-				if (distanceToCamera(node2.asBlockPos(), d, e, g) <= 40.0F) {
-					DebugRenderer.renderFloatingText(String.format("%s", node2.type), (double)node2.x + 0.5, (double)node2.y + 0.75, (double)node2.z + 0.5, -65536);
-					DebugRenderer.renderFloatingText(
-						String.format(Locale.ROOT, "%.2f", node2.costMalus), (double)node2.x + 0.5, (double)node2.y + 0.25, (double)node2.z + 0.5, -65536
+				if (distanceToCamera(node2.asBlockPos(), d, e, g) <= 80.0F) {
+					DebugRenderer.renderFilledBox(
+						new AABB(
+								(double)((float)node2.x + 0.5F - f / 2.0F),
+								(double)((float)node2.y + 0.01F),
+								(double)((float)node2.z + 0.5F - f / 2.0F),
+								(double)((float)node2.x + 0.5F + f / 2.0F),
+								(double)node2.y + 0.1,
+								(double)((float)node2.z + 0.5F + f / 2.0F)
+							)
+							.move(-d, -e, -g),
+						1.0F,
+						0.8F,
+						0.8F,
+						0.5F
 					);
 				}
 			}
 
 			for (Node node2x : path.getOpenSet()) {
-				if (distanceToCamera(node2x.asBlockPos(), d, e, g) <= 40.0F) {
-					DebugRenderer.renderFloatingText(String.format("%s", node2x.type), (double)node2x.x + 0.5, (double)node2x.y + 0.75, (double)node2x.z + 0.5, -16776961);
-					DebugRenderer.renderFloatingText(
-						String.format(Locale.ROOT, "%.2f", node2x.costMalus), (double)node2x.x + 0.5, (double)node2x.y + 0.25, (double)node2x.z + 0.5, -16776961
+				if (distanceToCamera(node2x.asBlockPos(), d, e, g) <= 80.0F) {
+					DebugRenderer.renderFilledBox(
+						new AABB(
+								(double)((float)node2x.x + 0.5F - f / 2.0F),
+								(double)((float)node2x.y + 0.01F),
+								(double)((float)node2x.z + 0.5F - f / 2.0F),
+								(double)((float)node2x.x + 0.5F + f / 2.0F),
+								(double)node2x.y + 0.1,
+								(double)((float)node2x.z + 0.5F + f / 2.0F)
+							)
+							.move(-d, -e, -g),
+						0.8F,
+						1.0F,
+						1.0F,
+						0.5F
 					);
 				}
 			}
@@ -130,7 +152,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (bl2) {
 			for (int ix = 0; ix < path.getSize(); ix++) {
 				Node node = path.get(ix);
-				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 40.0F) {
+				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
 					DebugRenderer.renderFloatingText(String.format("%s", node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1);
 					DebugRenderer.renderFloatingText(String.format(Locale.ROOT, "%.2f", node.costMalus), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1);
 				}
@@ -145,7 +167,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		for (int i = 0; i < path.getSize(); i++) {
 			Node node = path.get(i);
-			if (!(distanceToCamera(node.asBlockPos(), d, e, f) > 40.0F)) {
+			if (!(distanceToCamera(node.asBlockPos(), d, e, f) > 80.0F)) {
 				float g = (float)i / (float)path.getSize() * 0.33F;
 				int j = i == 0 ? 0 : Mth.hsvToRgb(g, 0.9F, 0.9F);
 				int k = j >> 16 & 0xFF;

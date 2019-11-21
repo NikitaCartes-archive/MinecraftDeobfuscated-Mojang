@@ -108,6 +108,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
+		ItemStack itemStack2 = itemStack.copy();
 		int i = (Integer)blockState.getValue(HONEY_LEVEL);
 		boolean bl = false;
 		if (i >= 5) {
@@ -139,7 +140,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 			} else {
 				this.resetHoneyLevel(level, blockState, blockPos);
 				if (player instanceof ServerPlayer) {
-					CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player, blockPos, itemStack);
+					CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player, blockPos, itemStack2);
 				}
 			}
 

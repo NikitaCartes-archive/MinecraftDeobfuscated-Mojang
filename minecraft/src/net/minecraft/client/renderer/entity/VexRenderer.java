@@ -16,6 +16,10 @@ public class VexRenderer extends HumanoidMobRenderer<Vex, VexModel> {
 		super(entityRenderDispatcher, new VexModel(), 0.3F);
 	}
 
+	protected int getBlockLightLevel(Vex vex, float f) {
+		return 15;
+	}
+
 	public ResourceLocation getTextureLocation(Vex vex) {
 		return vex.isCharging() ? VEX_CHARGING_LOCATION : VEX_LOCATION;
 	}

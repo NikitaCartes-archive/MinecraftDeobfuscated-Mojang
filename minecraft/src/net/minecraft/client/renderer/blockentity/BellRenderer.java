@@ -7,6 +7,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.block.entity.BellBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class BellRenderer extends BlockEntityRenderer<BellBlockEntity> {
-	public static final ResourceLocation BELL_RESOURCE_LOCATION = new ResourceLocation("entity/bell/bell_body");
+	public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
 	private final ModelPart bellBody = new ModelPart(32, 32, 0, 0);
 
 	public BellRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
@@ -46,7 +48,7 @@ public class BellRenderer extends BlockEntityRenderer<BellBlockEntity> {
 
 		this.bellBody.xRot = h;
 		this.bellBody.zRot = k;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.blockentitySolid());
-		this.bellBody.render(poseStack, vertexConsumer, i, j, this.getSprite(BELL_RESOURCE_LOCATION));
+		VertexConsumer vertexConsumer = BELL_RESOURCE_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
+		this.bellBody.render(poseStack, vertexConsumer, i, j);
 	}
 }

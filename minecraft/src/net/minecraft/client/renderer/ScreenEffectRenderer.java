@@ -11,7 +11,6 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
@@ -62,7 +61,7 @@ public class ScreenEffectRenderer {
 	}
 
 	private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
-		minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+		minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		float f = 0.1F;
 		float g = -1.0F;
@@ -115,8 +114,8 @@ public class ScreenEffectRenderer {
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		TextureAtlasSprite textureAtlasSprite = minecraft.getTextureAtlas().getSprite(ModelBakery.FIRE_1);
-		minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+		TextureAtlasSprite textureAtlasSprite = ModelBakery.FIRE_1.sprite();
+		minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
 		float f = textureAtlasSprite.getU0();
 		float g = textureAtlasSprite.getU1();
 		float h = (f + g) / 2.0F;

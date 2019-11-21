@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
+import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -21,16 +23,16 @@ public class LoadingOverlay extends Overlay {
 	private static final ResourceLocation MOJANG_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojang.png");
 	private final Minecraft minecraft;
 	private final ReloadInstance reload;
-	private final Runnable onFinish;
+	private final Consumer<Optional<Throwable>> onFinish;
 	private final boolean fadeIn;
 	private float currentProgress;
 	private long fadeOutStart = -1L;
 	private long fadeInStart = -1L;
 
-	public LoadingOverlay(Minecraft minecraft, ReloadInstance reloadInstance, Runnable runnable, boolean bl) {
+	public LoadingOverlay(Minecraft minecraft, ReloadInstance reloadInstance, Consumer<Optional<Throwable>> consumer, boolean bl) {
 		this.minecraft = minecraft;
 		this.reload = reloadInstance;
-		this.onFinish = runnable;
+		this.onFinish = consumer;
 		this.fadeIn = bl;
 	}
 
@@ -88,9 +90,14 @@ public class LoadingOverlay extends Overlay {
 		}
 
 		if (this.fadeOutStart == -1L && this.reload.isDone() && (!this.fadeIn || h >= 2.0F)) {
-			this.reload.checkExceptions();
+			try {
+				this.reload.checkExceptions();
+				this.onFinish.accept(Optional.empty());
+			} catch (Throwable var15) {
+				this.onFinish.accept(Optional.of(var15));
+			}
+
 			this.fadeOutStart = Util.getMillis();
-			this.onFinish.run();
 			if (this.minecraft.screen != null) {
 				this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
 			}

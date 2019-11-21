@@ -101,14 +101,10 @@ public class Vector4f {
 		float g = this.y;
 		float h = this.z;
 		float i = this.w;
-		this.x = multiplyRow(0, matrix4f, f, g, h, i);
-		this.y = multiplyRow(1, matrix4f, f, g, h, i);
-		this.z = multiplyRow(2, matrix4f, f, g, h, i);
-		this.w = multiplyRow(3, matrix4f, f, g, h, i);
-	}
-
-	private static float multiplyRow(int i, Matrix4f matrix4f, float f, float g, float h, float j) {
-		return matrix4f.get(i, 0) * f + matrix4f.get(i, 1) * g + matrix4f.get(i, 2) * h + matrix4f.get(i, 3) * j;
+		this.x = matrix4f.m00 * f + matrix4f.m01 * g + matrix4f.m02 * h + matrix4f.m03 * i;
+		this.y = matrix4f.m10 * f + matrix4f.m11 * g + matrix4f.m12 * h + matrix4f.m13 * i;
+		this.z = matrix4f.m20 * f + matrix4f.m21 * g + matrix4f.m22 * h + matrix4f.m23 * i;
+		this.w = matrix4f.m30 * f + matrix4f.m31 * g + matrix4f.m32 * h + matrix4f.m33 * i;
 	}
 
 	public void transform(Quaternion quaternion) {

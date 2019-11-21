@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -199,10 +199,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		this.setBlitOffset(100);
 		this.itemRenderer.blitOffset = 100.0F;
 		if (itemStack.isEmpty() && slot.isActive()) {
-			String string2 = slot.getNoItemIcon();
-			if (string2 != null) {
-				TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas().getTexture(string2);
-				this.minecraft.getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+			Pair<ResourceLocation, ResourceLocation> pair = slot.getNoItemIcon();
+			if (pair != null) {
+				TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
+				this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
 				blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
 				bl2 = true;
 			}

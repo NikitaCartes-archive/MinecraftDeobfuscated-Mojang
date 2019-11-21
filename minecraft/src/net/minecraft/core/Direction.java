@@ -175,15 +175,15 @@ public enum Direction implements StringRepresentable {
 	}
 
 	public int getStepX() {
-		return this.axis == Direction.Axis.X ? this.axisDirection.getStep() : 0;
+		return this.normal.getX();
 	}
 
 	public int getStepY() {
-		return this.axis == Direction.Axis.Y ? this.axisDirection.getStep() : 0;
+		return this.normal.getY();
 	}
 
 	public int getStepZ() {
-		return this.axis == Direction.Axis.Z ? this.axisDirection.getStep() : 0;
+		return this.normal.getZ();
 	}
 
 	@Environment(EnvType.CLIENT)

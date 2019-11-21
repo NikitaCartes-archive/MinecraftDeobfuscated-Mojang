@@ -1,5 +1,6 @@
 package net.minecraft.client.resources;
 
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -13,22 +14,29 @@ import net.minecraft.util.profiling.ProfilerFiller;
 @Environment(EnvType.CLIENT)
 public abstract class TextureAtlasHolder extends SimplePreparableReloadListener<TextureAtlas.Preparations> implements AutoCloseable {
 	private final TextureAtlas textureAtlas;
+	private final String prefix;
 
 	public TextureAtlasHolder(TextureManager textureManager, ResourceLocation resourceLocation, String string) {
-		this.textureAtlas = new TextureAtlas(string);
-		textureManager.register(resourceLocation, this.textureAtlas);
+		this.prefix = string;
+		this.textureAtlas = new TextureAtlas(resourceLocation);
+		textureManager.register(this.textureAtlas.location(), this.textureAtlas);
 	}
 
-	protected abstract Iterable<ResourceLocation> getResourcesToLoad();
+	protected abstract Stream<ResourceLocation> getResourcesToLoad();
 
 	protected TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
-		return this.textureAtlas.getSprite(resourceLocation);
+		return this.textureAtlas.getSprite(this.resolveLocation(resourceLocation));
+	}
+
+	private ResourceLocation resolveLocation(ResourceLocation resourceLocation) {
+		return new ResourceLocation(resourceLocation.getNamespace(), this.prefix + "/" + resourceLocation.getPath());
 	}
 
 	protected TextureAtlas.Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		profilerFiller.startTick();
 		profilerFiller.push("stitching");
-		TextureAtlas.Preparations preparations = this.textureAtlas.prepareToStitch(resourceManager, this.getResourcesToLoad(), profilerFiller);
+		TextureAtlas.Preparations preparations = this.textureAtlas
+			.prepareToStitch(resourceManager, this.getResourcesToLoad().map(this::resolveLocation), profilerFiller, 0);
 		profilerFiller.pop();
 		profilerFiller.endTick();
 		return preparations;

@@ -54,9 +54,9 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
 		this.model.setupAnim(boat, g, 0.0F, -0.1F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(boat)));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
-		this.model.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY, null);
+		this.model.waterPatch().render(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 		super.render(boat, f, g, poseStack, multiBufferSource, i);
 	}

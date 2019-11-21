@@ -2,14 +2,14 @@ package net.minecraft.client.gui.font.glyphs;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderType;
 
 @Environment(EnvType.CLIENT)
 public class BakedGlyph {
-	private final ResourceLocation texture;
+	private final RenderType normalType;
+	private final RenderType seeThroughType;
 	private final float u0;
 	private final float u1;
 	private final float v0;
@@ -19,8 +19,9 @@ public class BakedGlyph {
 	private final float up;
 	private final float down;
 
-	public BakedGlyph(ResourceLocation resourceLocation, float f, float g, float h, float i, float j, float k, float l, float m) {
-		this.texture = resourceLocation;
+	public BakedGlyph(RenderType renderType, RenderType renderType2, float f, float g, float h, float i, float j, float k, float l, float m) {
+		this.normalType = renderType;
+		this.seeThroughType = renderType2;
 		this.u0 = f;
 		this.u1 = g;
 		this.v0 = h;
@@ -54,9 +55,8 @@ public class BakedGlyph {
 		vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v0).uv2(i).endVertex();
 	}
 
-	@Nullable
-	public ResourceLocation getTexture() {
-		return this.texture;
+	public RenderType renderType(boolean bl) {
+		return bl ? this.seeThroughType : this.normalType;
 	}
 
 	@Environment(EnvType.CLIENT)

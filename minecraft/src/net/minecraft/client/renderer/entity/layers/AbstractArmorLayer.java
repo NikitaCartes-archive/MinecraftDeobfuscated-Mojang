@@ -93,7 +93,7 @@ public abstract class AbstractArmorLayer<T extends LivingEntity, M extends Human
 		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(
 			multiBufferSource, RenderType.entityCutoutNoCull(this.getArmorLocation(armorItem, bl2, string)), false, bl
 		);
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h);
+		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0F);
 	}
 
 	public A getArmorModel(EquipmentSlot equipmentSlot) {

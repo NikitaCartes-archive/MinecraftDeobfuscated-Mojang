@@ -2,8 +2,6 @@ package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -181,12 +179,6 @@ public class Vex extends Monster {
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
 		return SoundEvents.VEX_HURT;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public int getBlockLightLevel() {
-		return 15;
 	}
 
 	@Override

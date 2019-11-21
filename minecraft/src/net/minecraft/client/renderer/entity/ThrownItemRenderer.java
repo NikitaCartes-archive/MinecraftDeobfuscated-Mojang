@@ -15,15 +15,22 @@ import net.minecraft.world.entity.projectile.ItemSupplier;
 public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityRenderer<T> {
 	private final ItemRenderer itemRenderer;
 	private final float scale;
+	private final boolean fullBright;
 
-	public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer, float f) {
+	public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer, float f, boolean bl) {
 		super(entityRenderDispatcher);
 		this.itemRenderer = itemRenderer;
 		this.scale = f;
+		this.fullBright = bl;
 	}
 
 	public ThrownItemRenderer(EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
-		this(entityRenderDispatcher, itemRenderer, 1.0F);
+		this(entityRenderDispatcher, itemRenderer, 1.0F, false);
+	}
+
+	@Override
+	protected int getBlockLightLevel(T entity, float f) {
+		return this.fullBright ? 15 : super.getBlockLightLevel(entity, f);
 	}
 
 	@Override

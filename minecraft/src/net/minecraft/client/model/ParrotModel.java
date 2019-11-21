@@ -81,7 +81,7 @@ public class ParrotModel extends ListModel<Parrot> {
 	public void renderOnShoulder(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k, int l) {
 		this.prepare(ParrotModel.State.ON_SHOULDER);
 		this.setupAnim(ParrotModel.State.ON_SHOULDER, l, f, g, 0.0F, h, k);
-		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null));
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j));
 	}
 
 	private void setupAnim(ParrotModel.State state, int i, float f, float g, float h, float j, float k) {

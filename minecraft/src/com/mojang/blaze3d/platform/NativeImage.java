@@ -1,11 +1,13 @@
 package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +19,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBImageResize;
@@ -28,6 +32,7 @@ import org.lwjgl.system.MemoryUtil;
 
 @Environment(EnvType.CLIENT)
 public final class NativeImage implements AutoCloseable {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Set<StandardOpenOption> OPEN_OPTIONS = EnumSet.of(
 		StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
 	);
@@ -36,7 +41,7 @@ public final class NativeImage implements AutoCloseable {
 	private final int height;
 	private final boolean useStbFree;
 	private long pixels;
-	private final int size;
+	private final long size;
 
 	public NativeImage(int i, int j, boolean bl) {
 		this(NativeImage.Format.RGBA, i, j, bl);
@@ -46,12 +51,12 @@ public final class NativeImage implements AutoCloseable {
 		this.format = format;
 		this.width = i;
 		this.height = j;
-		this.size = i * j * format.components();
+		this.size = (long)i * (long)j * (long)format.components();
 		this.useStbFree = false;
 		if (bl) {
-			this.pixels = MemoryUtil.nmemCalloc(1L, (long)this.size);
+			this.pixels = MemoryUtil.nmemCalloc(1L, this.size);
 		} else {
-			this.pixels = MemoryUtil.nmemAlloc((long)this.size);
+			this.pixels = MemoryUtil.nmemAlloc(this.size);
 		}
 	}
 
@@ -61,7 +66,7 @@ public final class NativeImage implements AutoCloseable {
 		this.height = j;
 		this.useStbFree = bl;
 		this.pixels = l;
-		this.size = i * j * format.components();
+		this.size = (long)(i * j * format.components());
 	}
 
 	public String toString() {
@@ -178,7 +183,8 @@ public final class NativeImage implements AutoCloseable {
 			throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", this.format));
 		} else if (i <= this.width && j <= this.height) {
 			this.checkAllocated();
-			return MemoryUtil.memIntBuffer(this.pixels, this.size).get(i + j * this.width);
+			long l = (long)((i + j * this.width) * 4);
+			return MemoryUtil.memGetInt(this.pixels + l);
 		} else {
 			throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
 		}
@@ -189,7 +195,8 @@ public final class NativeImage implements AutoCloseable {
 			throw new IllegalArgumentException(String.format("getPixelRGBA only works on RGBA images; have %s", this.format));
 		} else if (i <= this.width && j <= this.height) {
 			this.checkAllocated();
-			MemoryUtil.memIntBuffer(this.pixels, this.size).put(i + j * this.width, k);
+			long l = (long)((i + j * this.width) * 4);
+			MemoryUtil.memPutInt(this.pixels + l, k);
 		} else {
 			throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
 		}
@@ -199,7 +206,8 @@ public final class NativeImage implements AutoCloseable {
 		if (!this.format.hasLuminanceOrAlpha()) {
 			throw new IllegalArgumentException(String.format("no luminance or alpha in %s", this.format));
 		} else if (i <= this.width && j <= this.height) {
-			return MemoryUtil.memByteBuffer(this.pixels, this.size).get((i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8);
+			int k = (i + j * this.width) * this.format.components() + this.format.luminanceOrAlphaOffset() / 8;
+			return MemoryUtil.memGetByte(this.pixels + (long)k);
 		} else {
 			throw new IllegalArgumentException(String.format("(%s, %s) outside of image bounds (%s, %s)", i, j, this.width, this.height));
 		}
@@ -210,14 +218,14 @@ public final class NativeImage implements AutoCloseable {
 			throw new UnsupportedOperationException("Can only call blendPixel with RGBA format");
 		} else {
 			int l = this.getPixelRGBA(i, j);
-			float f = (float)(k >> 24 & 0xFF) / 255.0F;
-			float g = (float)(k >> 16 & 0xFF) / 255.0F;
-			float h = (float)(k >> 8 & 0xFF) / 255.0F;
-			float m = (float)(k >> 0 & 0xFF) / 255.0F;
-			float n = (float)(l >> 24 & 0xFF) / 255.0F;
-			float o = (float)(l >> 16 & 0xFF) / 255.0F;
-			float p = (float)(l >> 8 & 0xFF) / 255.0F;
-			float q = (float)(l >> 0 & 0xFF) / 255.0F;
+			float f = (float)getA(k) / 255.0F;
+			float g = (float)getB(k) / 255.0F;
+			float h = (float)getG(k) / 255.0F;
+			float m = (float)getR(k) / 255.0F;
+			float n = (float)getA(l) / 255.0F;
+			float o = (float)getB(l) / 255.0F;
+			float p = (float)getG(l) / 255.0F;
+			float q = (float)getR(l) / 255.0F;
 			float s = 1.0F - f;
 			float t = f * f + n * s;
 			float u = g * f + o * s;
@@ -243,7 +251,7 @@ public final class NativeImage implements AutoCloseable {
 			int y = (int)(u * 255.0F);
 			int z = (int)(v * 255.0F);
 			int aa = (int)(w * 255.0F);
-			this.setPixelRGBA(i, j, x << 24 | y << 16 | z << 8 | aa << 0);
+			this.setPixelRGBA(i, j, combine(x, y, z, aa));
 		}
 	}
 
@@ -258,10 +266,10 @@ public final class NativeImage implements AutoCloseable {
 			for (int i = 0; i < this.getHeight(); i++) {
 				for (int j = 0; j < this.getWidth(); j++) {
 					int k = this.getPixelRGBA(j, i);
-					int l = k >> 24 & 0xFF;
-					int m = k >> 16 & 0xFF;
-					int n = k >> 8 & 0xFF;
-					int o = k >> 0 & 0xFF;
+					int l = getA(k);
+					int m = getB(k);
+					int n = getG(k);
+					int o = getR(k);
 					int p = l << 24 | o << 16 | n << 8 | m;
 					is[j + i * this.getWidth()] = p;
 				}
@@ -346,29 +354,19 @@ public final class NativeImage implements AutoCloseable {
 			Throwable var3 = null;
 
 			try {
-				NativeImage.WriteCallback writeCallback = new NativeImage.WriteCallback(writableByteChannel);
-
-				try {
-					if (!STBImageWrite.stbi_write_png_to_func(
-						writeCallback, 0L, this.getWidth(), this.getHeight(), this.format.components(), MemoryUtil.memByteBuffer(this.pixels, this.size), 0
-					)) {
-						throw new IOException("Could not write image to the PNG file \"" + path.toAbsolutePath() + "\": " + STBImage.stbi_failure_reason());
-					}
-				} finally {
-					writeCallback.free();
+				if (!this.writeToChannel(writableByteChannel)) {
+					throw new IOException("Could not write image to the PNG file \"" + path.toAbsolutePath() + "\": " + STBImage.stbi_failure_reason());
 				}
-
-				writeCallback.throwIfException();
-			} catch (Throwable var19) {
-				var3 = var19;
-				throw var19;
+			} catch (Throwable var12) {
+				var3 = var12;
+				throw var12;
 			} finally {
 				if (writableByteChannel != null) {
 					if (var3 != null) {
 						try {
 							writableByteChannel.close();
-						} catch (Throwable var17) {
-							var3.addSuppressed(var17);
+						} catch (Throwable var11) {
+							var3.addSuppressed(var11);
 						}
 					} else {
 						writableByteChannel.close();
@@ -376,6 +374,80 @@ public final class NativeImage implements AutoCloseable {
 				}
 			}
 		}
+	}
+
+	public byte[] asByteArray() throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		Throwable var2 = null;
+
+		byte[] var5;
+		try {
+			WritableByteChannel writableByteChannel = Channels.newChannel(byteArrayOutputStream);
+			Throwable var4 = null;
+
+			try {
+				if (!this.writeToChannel(writableByteChannel)) {
+					throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
+				}
+
+				var5 = byteArrayOutputStream.toByteArray();
+			} catch (Throwable var28) {
+				var4 = var28;
+				throw var28;
+			} finally {
+				if (writableByteChannel != null) {
+					if (var4 != null) {
+						try {
+							writableByteChannel.close();
+						} catch (Throwable var27) {
+							var4.addSuppressed(var27);
+						}
+					} else {
+						writableByteChannel.close();
+					}
+				}
+			}
+		} catch (Throwable var30) {
+			var2 = var30;
+			throw var30;
+		} finally {
+			if (byteArrayOutputStream != null) {
+				if (var2 != null) {
+					try {
+						byteArrayOutputStream.close();
+					} catch (Throwable var26) {
+						var2.addSuppressed(var26);
+					}
+				} else {
+					byteArrayOutputStream.close();
+				}
+			}
+		}
+
+		return var5;
+	}
+
+	private boolean writeToChannel(WritableByteChannel writableByteChannel) throws IOException {
+		NativeImage.WriteCallback writeCallback = new NativeImage.WriteCallback(writableByteChannel);
+
+		boolean var4;
+		try {
+			int i = Math.min(this.getHeight(), Integer.MAX_VALUE / this.getWidth() / this.format.components());
+			if (i < this.getHeight()) {
+				LOGGER.warn("Dropping image height from {} to {} to fit the size into 32-bit signed int", this.getHeight(), i);
+			}
+
+			if (STBImageWrite.nstbi_write_png_to_func(writeCallback.address(), 0L, this.getWidth(), i, this.format.components(), this.pixels, 0) != 0) {
+				writeCallback.throwIfException();
+				return true;
+			}
+
+			var4 = false;
+		} finally {
+			writeCallback.free();
+		}
+
+		return var4;
 	}
 
 	public void copyFrom(NativeImage nativeImage) {
@@ -386,7 +458,7 @@ public final class NativeImage implements AutoCloseable {
 			this.checkAllocated();
 			nativeImage.checkAllocated();
 			if (this.width == nativeImage.width) {
-				MemoryUtil.memCopy(nativeImage.pixels, this.pixels, (long)Math.min(this.size, nativeImage.size));
+				MemoryUtil.memCopy(nativeImage.pixels, this.pixels, Math.min(this.size, nativeImage.size));
 			} else {
 				int j = Math.min(this.getWidth(), nativeImage.getWidth());
 				int k = Math.min(this.getHeight(), nativeImage.getHeight());
@@ -465,6 +537,26 @@ public final class NativeImage implements AutoCloseable {
 		}
 
 		return var6;
+	}
+
+	public static int getA(int i) {
+		return i >> 24 & 0xFF;
+	}
+
+	public static int getR(int i) {
+		return i >> 0 & 0xFF;
+	}
+
+	public static int getG(int i) {
+		return i >> 8 & 0xFF;
+	}
+
+	public static int getB(int i) {
+		return i >> 16 & 0xFF;
+	}
+
+	public static int combine(int i, int j, int k, int l) {
+		return (i & 0xFF) << 24 | (j & 0xFF) << 16 | (k & 0xFF) << 8 | (l & 0xFF) << 0;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -579,6 +671,7 @@ public final class NativeImage implements AutoCloseable {
 	@Environment(EnvType.CLIENT)
 	static class WriteCallback extends STBIWriteCallback {
 		private final WritableByteChannel output;
+		@Nullable
 		private IOException exception;
 
 		private WriteCallback(WritableByteChannel writableByteChannel) {

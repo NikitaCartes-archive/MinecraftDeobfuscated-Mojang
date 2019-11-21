@@ -110,10 +110,11 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		this.model.setupAnim(livingEntity, o, n, lx, k, m);
 		if (bl || bl2) {
 			ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(
-				bl2 ? RenderType.entityForceTranslucent(resourceLocation) : this.model.renderType(resourceLocation)
-			);
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0F, 1.0F, 1.0F);
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.entityTranslucent(resourceLocation) : this.model.renderType(resourceLocation));
+			this.model
+				.renderToBuffer(
+					poseStack, vertexConsumer, i, getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0F, 1.0F, 1.0F, bl2 ? 0.15F : 1.0F
+				);
 		}
 
 		if (!livingEntity.isSpectator()) {

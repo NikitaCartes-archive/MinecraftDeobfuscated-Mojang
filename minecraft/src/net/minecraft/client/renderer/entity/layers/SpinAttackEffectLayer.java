@@ -35,7 +35,7 @@ public class SpinAttackEffectLayer<T extends LivingEntity> extends RenderLayer<T
 				float o = 0.75F * (float)m;
 				poseStack.scale(o, o, o);
 				poseStack.translate(0.0, (double)(-0.2F + 0.6F * (float)m), 0.0);
-				this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, null);
+				this.box.render(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}
 		}

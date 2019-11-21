@@ -131,18 +131,14 @@ public class CommandSuggestions {
 
 		this.commandUsage.clear();
 		StringReader stringReader = new StringReader(string);
-		boolean bl;
-		if (this.commandsOnly) {
-			bl = true;
-		} else if (stringReader.canRead() && stringReader.peek() == '/') {
+		boolean bl = stringReader.canRead() && stringReader.peek() == '/';
+		if (bl) {
 			stringReader.skip();
-			bl = true;
-		} else {
-			bl = false;
 		}
 
+		boolean bl2 = this.commandsOnly || bl;
 		int i = this.input.getCursorPosition();
-		if (bl) {
+		if (bl2) {
 			CommandDispatcher<SharedSuggestionProvider> commandDispatcher = this.minecraft.player.connection.getCommands();
 			if (this.currentParse == null) {
 				this.currentParse = commandDispatcher.parse(stringReader, this.minecraft.player.connection.getSuggestionsProvider());

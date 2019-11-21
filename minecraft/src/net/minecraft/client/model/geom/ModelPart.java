@@ -9,11 +9,9 @@ import com.mojang.math.Vector4f;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
 @Environment(EnvType.CLIENT)
@@ -105,21 +103,19 @@ public class ModelPart {
 		this.z = h;
 	}
 
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite) {
-		this.render(poseStack, vertexConsumer, i, j, textureAtlasSprite, 1.0F, 1.0F, 1.0F);
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
+		this.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
-	public void render(
-		PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float f, float g, float h
-	) {
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
 		if (this.visible) {
 			if (!this.cubes.isEmpty() || !this.children.isEmpty()) {
 				poseStack.pushPose();
 				this.translateAndRotate(poseStack);
-				this.compile(poseStack.last(), vertexConsumer, i, j, textureAtlasSprite, f, g, h);
+				this.compile(poseStack.last(), vertexConsumer, i, j, f, g, h, k);
 
 				for (ModelPart modelPart : this.children) {
-					modelPart.render(poseStack, vertexConsumer, i, j, textureAtlasSprite, f, g, h);
+					modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k);
 				}
 
 				poseStack.popPose();
@@ -142,9 +138,7 @@ public class ModelPart {
 		}
 	}
 
-	private void compile(
-		PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, @Nullable TextureAtlasSprite textureAtlasSprite, float f, float g, float h
-	) {
+	private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
 		Matrix4f matrix4f = pose.pose();
 		Matrix3f matrix3f = pose.normal();
 
@@ -152,28 +146,18 @@ public class ModelPart {
 			for (ModelPart.Polygon polygon : cube.polygons) {
 				Vector3f vector3f = polygon.normal.copy();
 				vector3f.transform(matrix3f);
-				float k = vector3f.x();
-				float l = vector3f.y();
-				float m = vector3f.z();
+				float l = vector3f.x();
+				float m = vector3f.y();
+				float n = vector3f.z();
 
-				for (int n = 0; n < 4; n++) {
-					ModelPart.Vertex vertex = polygon.vertices[n];
-					float o = vertex.pos.x() / 16.0F;
-					float p = vertex.pos.y() / 16.0F;
-					float q = vertex.pos.z() / 16.0F;
-					Vector4f vector4f = new Vector4f(o, p, q, 1.0F);
+				for (int o = 0; o < 4; o++) {
+					ModelPart.Vertex vertex = polygon.vertices[o];
+					float p = vertex.pos.x() / 16.0F;
+					float q = vertex.pos.y() / 16.0F;
+					float r = vertex.pos.z() / 16.0F;
+					Vector4f vector4f = new Vector4f(p, q, r, 1.0F);
 					vector4f.transform(matrix4f);
-					float r;
-					float s;
-					if (textureAtlasSprite == null) {
-						r = vertex.u;
-						s = vertex.v;
-					} else {
-						r = textureAtlasSprite.getU((double)(vertex.u * 16.0F));
-						s = textureAtlasSprite.getV((double)(vertex.v * 16.0F));
-					}
-
-					vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, 1.0F, r, s, j, i, k, l, m);
+					vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
 				}
 			}
 		}

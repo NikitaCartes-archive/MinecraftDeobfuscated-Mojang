@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.TurtleNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
@@ -70,6 +71,7 @@ public class Turtle extends Animal {
 
 	public Turtle(EntityType<? extends Turtle> entityType, Level level) {
 		super(entityType, level);
+		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
 		this.moveControl = new Turtle.TurtleMoveControl(this);
 		this.maxUpStep = 1.0F;
 	}

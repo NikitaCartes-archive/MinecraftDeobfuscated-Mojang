@@ -257,7 +257,7 @@ public class ItemBlockRenderTypes {
 
 	public static RenderType getRenderType(BlockState blockState) {
 		RenderType renderType = getChunkRenderType(blockState);
-		return renderType == RenderType.translucent() ? RenderType.blockentityTranslucent() : RenderType.blockentityCutout();
+		return renderType == RenderType.translucent() ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet();
 	}
 
 	public static RenderType getRenderType(ItemStack itemStack) {
@@ -266,7 +266,7 @@ public class ItemBlockRenderTypes {
 			Block block = ((BlockItem)item).getBlock();
 			return getRenderType(block.defaultBlockState());
 		} else {
-			return RenderType.blockentityTranslucent();
+			return Sheets.translucentBlockSheet();
 		}
 	}
 

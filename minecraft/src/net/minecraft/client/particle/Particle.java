@@ -167,38 +167,36 @@ public abstract class Particle {
 	}
 
 	public void move(double d, double e, double f) {
-		if (this.stoppedByCollision) {
-			e = 0.0;
-		}
+		if (!this.stoppedByCollision) {
+			double g = d;
+			double h = e;
+			double i = f;
+			if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0)) {
+				Vec3 vec3 = Entity.collideBoundingBoxHeuristically(
+					null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), new RewindableStream<>(Stream.empty())
+				);
+				d = vec3.x;
+				e = vec3.y;
+				f = vec3.z;
+			}
 
-		double g = d;
-		double h = e;
-		double i = f;
-		if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0) && !this.stoppedByCollision) {
-			Vec3 vec3 = Entity.collideBoundingBoxHeuristically(
-				null, new Vec3(d, e, f), this.getBoundingBox(), this.level, CollisionContext.empty(), new RewindableStream<>(Stream.empty())
-			);
-			d = vec3.x;
-			e = vec3.y;
-			f = vec3.z;
-		}
+			if (d != 0.0 || e != 0.0 || f != 0.0) {
+				this.setBoundingBox(this.getBoundingBox().move(d, e, f));
+				this.setLocationFromBoundingbox();
+			}
 
-		if (d != 0.0 || e != 0.0 || f != 0.0) {
-			this.setBoundingBox(this.getBoundingBox().move(d, e, f));
-			this.setLocationFromBoundingbox();
-		}
+			if (Math.abs(h) >= 1.0E-5F && Math.abs(e) < 1.0E-5F) {
+				this.stoppedByCollision = true;
+			}
 
-		if (Math.abs(e) < 1.0E-5F) {
-			this.stoppedByCollision = true;
-		}
+			this.onGround = h != e && h < 0.0;
+			if (g != d) {
+				this.xd = 0.0;
+			}
 
-		this.onGround = h != e && h < 0.0;
-		if (g != d) {
-			this.xd = 0.0;
-		}
-
-		if (i != f) {
-			this.zd = 0.0;
+			if (i != f) {
+				this.zd = 0.0;
+			}
 		}
 	}
 

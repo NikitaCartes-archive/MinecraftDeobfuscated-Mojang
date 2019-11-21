@@ -3,7 +3,10 @@ package net.minecraft.client.renderer.blockentity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,6 +20,7 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 	public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
 	public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
 	private static final Random RANDOM = new Random(31100L);
+	private static final List<RenderType> RENDER_TYPES = (List<RenderType>)IntStream.range(0, 16).mapToObj(RenderType::endPortal).collect(Collectors.toList());
 
 	public TheEndPortalRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
 		super(blockEntityRenderDispatcher);
@@ -28,10 +32,10 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 		int k = this.getPasses(d);
 		float g = this.getOffset();
 		Matrix4f matrix4f = poseStack.last().pose();
-		this.renderCube(theEndPortalBlockEntity, g, 0.15F, matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(1)));
+		this.renderCube(theEndPortalBlockEntity, g, 0.15F, matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(1)));
 
 		for (int l = 1; l < k; l++) {
-			this.renderCube(theEndPortalBlockEntity, g, 2.0F / (float)(18 - l), matrix4f, multiBufferSource.getBuffer(RenderType.endPortal(l + 1)));
+			this.renderCube(theEndPortalBlockEntity, g, 2.0F / (float)(18 - l), matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(l + 1)));
 		}
 	}
 

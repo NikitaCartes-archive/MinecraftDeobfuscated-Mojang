@@ -202,12 +202,6 @@ public abstract class AbstractHurtingProjectile extends Entity {
 		return 1.0F;
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public int getBlockLightLevel() {
-		return 15;
-	}
-
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		int i = this.owner == null ? 0 : this.owner.getId();

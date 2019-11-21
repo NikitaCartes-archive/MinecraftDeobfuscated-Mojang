@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -75,10 +74,10 @@ public class ParticleEngine implements PreparableReloadListener {
 	private final Int2ObjectMap<ParticleProvider<?>> providers = new Int2ObjectOpenHashMap<>();
 	private final Queue<Particle> particlesToAdd = Queues.<Particle>newArrayDeque();
 	private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.<ResourceLocation, ParticleEngine.MutableSpriteSet>newHashMap();
-	private final TextureAtlas textureAtlas = new TextureAtlas("textures/particle");
+	private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
 
 	public ParticleEngine(Level level, TextureManager textureManager) {
-		textureManager.register(TextureAtlas.LOCATION_PARTICLES, this.textureAtlas);
+		textureManager.register(this.textureAtlas.location(), this.textureAtlas);
 		this.level = level;
 		this.textureManager = textureManager;
 		this.registerProviders();
@@ -175,15 +174,18 @@ public class ParticleEngine implements PreparableReloadListener {
 			.map(resourceLocation -> CompletableFuture.runAsync(() -> this.loadParticleDescription(resourceManager, resourceLocation, map), executor))
 			.toArray(CompletableFuture[]::new);
 		return CompletableFuture.allOf(completableFutures)
-			.thenApplyAsync(void_ -> {
-				profilerFiller.startTick();
-				profilerFiller.push("stitching");
-				Set<ResourceLocation> set = (Set<ResourceLocation>)map.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-				TextureAtlas.Preparations preparations = this.textureAtlas.prepareToStitch(resourceManager, set, profilerFiller);
-				profilerFiller.pop();
-				profilerFiller.endTick();
-				return preparations;
-			}, executor)
+			.thenApplyAsync(
+				void_ -> {
+					profilerFiller.startTick();
+					profilerFiller.push("stitching");
+					TextureAtlas.Preparations preparations = this.textureAtlas
+						.prepareToStitch(resourceManager, map.values().stream().flatMap(Collection::stream), profilerFiller, 0);
+					profilerFiller.pop();
+					profilerFiller.endTick();
+					return preparations;
+				},
+				executor
+			)
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(
 				preparations -> {
@@ -236,7 +238,12 @@ public class ParticleEngine implements PreparableReloadListener {
 							throw new IllegalStateException("Redundant texture list for particle " + resourceLocation);
 						}
 
-						map.put(resourceLocation, list);
+						map.put(
+							resourceLocation,
+							list.stream()
+								.map(resourceLocationx -> new ResourceLocation(resourceLocationx.getNamespace(), "particle/" + resourceLocationx.getPath()))
+								.collect(Collectors.toList())
+						);
 					}
 				} catch (Throwable var35) {
 					var8 = var35;

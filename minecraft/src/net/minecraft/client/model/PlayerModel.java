@@ -82,11 +82,11 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.ear.copyFrom(this.head);
 		this.ear.x = 0.0F;
 		this.ear.y = 0.0F;
-		this.ear.render(poseStack, vertexConsumer, i, j, null);
+		this.ear.render(poseStack, vertexConsumer, i, j);
 	}
 
 	public void renderCloak(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
-		this.cloak.render(poseStack, vertexConsumer, i, j, null);
+		this.cloak.render(poseStack, vertexConsumer, i, j);
 	}
 
 	@Override

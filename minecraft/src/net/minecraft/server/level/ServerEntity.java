@@ -10,6 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
@@ -22,6 +23,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.ModifiableAttributeMap;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -244,6 +246,13 @@ public class ServerEntity {
 
 		if (this.entity.isPassenger()) {
 			consumer.accept(new ClientboundSetPassengersPacket(this.entity.getVehicle()));
+		}
+
+		if (this.entity instanceof Mob) {
+			Mob mob = (Mob)this.entity;
+			if (mob.isLeashed()) {
+				consumer.accept(new ClientboundSetEntityLinkPacket(mob, mob.getLeashHolder()));
+			}
 		}
 	}
 

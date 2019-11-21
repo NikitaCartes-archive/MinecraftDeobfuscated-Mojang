@@ -56,6 +56,6 @@ public class LlamaDecorLayer extends RenderLayer<Llama, LlamaModel<Llama>> {
 		this.getParentModel().copyPropertiesTo(this.model);
 		this.model.setupAnim(llama, f, g, j, k, l);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 	}
 }

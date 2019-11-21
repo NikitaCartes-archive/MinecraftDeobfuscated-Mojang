@@ -8,7 +8,9 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class PatrolSpawner {
 	private int nextTick;
@@ -86,7 +88,10 @@ public class PatrolSpawner {
 	}
 
 	private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
-		if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
+		BlockState blockState = level.getBlockState(blockPos);
+		if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState())) {
+			return false;
+		} else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
 			return false;
 		} else {
 			PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(level);

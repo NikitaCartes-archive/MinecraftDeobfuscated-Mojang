@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -25,11 +24,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.EntityBlockRenderer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -112,8 +112,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl3)) {
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
 				RenderType renderType2;
-				if (bl2 && Objects.equals(renderType, RenderType.blockentityTranslucent())) {
-					renderType2 = RenderType.blockentityTranslucentCull();
+				if (bl2 && Objects.equals(renderType, Sheets.translucentBlockSheet())) {
+					renderType2 = Sheets.translucentCullBlockSheet();
 				} else {
 					renderType2 = renderType;
 				}
@@ -121,7 +121,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				VertexConsumer vertexConsumer = getFoilBuffer(multiBufferSource, renderType2, true, itemStack.hasFoil());
 				this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
 			} else {
-				EntityBlockRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
+				BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
 			}
 
 			poseStack.popPose();
@@ -129,11 +129,9 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
-		return (VertexConsumer)(bl2
-			? new VertexMultiConsumer(
-				ImmutableList.of(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType))
-			)
-			: multiBufferSource.getBuffer(renderType));
+		return bl2
+			? VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType))
+			: multiBufferSource.getBuffer(renderType);
 	}
 
 	private void renderQuadList(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j) {

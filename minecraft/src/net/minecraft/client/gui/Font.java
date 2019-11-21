@@ -20,10 +20,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -156,11 +155,10 @@ public class Font implements AutoCloseable {
 			} else {
 				GlyphInfo glyphInfo = this.fonts.getGlyphInfo(c);
 				BakedGlyph bakedGlyph = bl3 && c != ' ' ? this.fonts.getRandomGlyph(glyphInfo) : this.fonts.getGlyph(c);
-				ResourceLocation resourceLocation = bakedGlyph.getTexture();
-				if (resourceLocation != null) {
+				if (!(bakedGlyph instanceof EmptyGlyph)) {
 					float v = bl4 ? glyphInfo.getBoldOffset() : 0.0F;
 					float w = bl ? glyphInfo.getShadowOffset() : 0.0F;
-					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation) : RenderType.text(resourceLocation));
+					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bakedGlyph.renderType(bl2));
 					this.renderChar(bakedGlyph, bl4, bl5, v, o + w, g + w, matrix4f, vertexConsumer, p, q, r, s, k);
 				}
 
@@ -188,13 +186,10 @@ public class Font implements AutoCloseable {
 
 		if (!list.isEmpty()) {
 			BakedGlyph bakedGlyph2 = this.fonts.whiteGlyph();
-			ResourceLocation resourceLocation2 = bakedGlyph2.getTexture();
-			if (resourceLocation2 != null) {
-				VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bl2 ? RenderType.textSeeThrough(resourceLocation2) : RenderType.text(resourceLocation2));
+			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(bakedGlyph2.renderType(bl2));
 
-				for (BakedGlyph.Effect effect : list) {
-					bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);
-				}
+			for (BakedGlyph.Effect effect : list) {
+				bakedGlyph2.renderEffect(effect, matrix4f, vertexConsumer2, k);
 			}
 		}
 

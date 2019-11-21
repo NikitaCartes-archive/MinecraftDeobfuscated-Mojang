@@ -85,12 +85,7 @@ public final class Transformation {
 		}
 
 		if (vector3f2 != null) {
-			Matrix4f matrix4f2 = new Matrix4f();
-			matrix4f2.setIdentity();
-			matrix4f2.set(0, 0, vector3f2.x());
-			matrix4f2.set(1, 1, vector3f2.y());
-			matrix4f2.set(2, 2, vector3f2.z());
-			matrix4f.multiply(matrix4f2);
+			matrix4f.multiply(Matrix4f.createScaleMatrix(vector3f2.x(), vector3f2.y(), vector3f2.z()));
 		}
 
 		if (quaternion2 != null) {
@@ -98,17 +93,17 @@ public final class Transformation {
 		}
 
 		if (vector3f != null) {
-			matrix4f.set(0, 3, vector3f.x());
-			matrix4f.set(1, 3, vector3f.y());
-			matrix4f.set(2, 3, vector3f.z());
+			matrix4f.m03 = vector3f.x();
+			matrix4f.m13 = vector3f.y();
+			matrix4f.m32 = vector3f.z();
 		}
 
 		return matrix4f;
 	}
 
 	public static Pair<Matrix3f, Vector3f> toAffine(Matrix4f matrix4f) {
-		matrix4f.multiply(1.0F / matrix4f.get(3, 3));
-		Vector3f vector3f = new Vector3f(matrix4f.get(0, 3), matrix4f.get(1, 3), matrix4f.get(2, 3));
+		matrix4f.multiply(1.0F / matrix4f.m33);
+		Vector3f vector3f = new Vector3f(matrix4f.m03, matrix4f.m13, matrix4f.m23);
 		Matrix3f matrix3f = new Matrix3f(matrix4f);
 		return Pair.of(matrix3f, vector3f);
 	}

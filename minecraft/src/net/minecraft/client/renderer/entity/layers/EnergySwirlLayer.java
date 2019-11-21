@@ -28,7 +28,7 @@ public abstract class EnergySwirlLayer<T extends Entity & PowerableMob, M extend
 			this.getParentModel().copyPropertiesTo(entityModel);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.energySwirl(this.getTextureLocation(), this.xOffset(m), m * 0.01F));
 			entityModel.setupAnim(entity, f, g, j, k, l);
-			entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F);
+			entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 0.5F, 0.5F, 0.5F, 1.0F);
 		}
 	}
 

@@ -55,10 +55,11 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 	@Override
 	protected boolean shouldTurnOn(Level level, BlockPos blockPos, BlockState blockState) {
 		int i = this.getInputSignal(level, blockPos, blockState);
-		if (i >= 15) {
-			return true;
+		if (i == 0) {
+			return false;
 		} else {
-			return i == 0 ? false : i >= this.getAlternateSignal(level, blockPos, blockState);
+			int j = this.getAlternateSignal(level, blockPos, blockState);
+			return i > j ? true : i == j && blockState.getValue(MODE) == ComparatorMode.COMPARE;
 		}
 	}
 

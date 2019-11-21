@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
@@ -420,22 +421,27 @@ public class Blocks {
 	);
 	public static final Block FURNACE = register("furnace", new FurnaceBlock(Block.Properties.of(Material.STONE).strength(3.5F).lightLevel(13)));
 	public static final Block OAK_SIGN = register(
-		"oak_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"oak_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.OAK)
 	);
 	public static final Block SPRUCE_SIGN = register(
-		"spruce_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD, SPRUCE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"spruce_sign",
+		new StandingSignBlock(Block.Properties.of(Material.WOOD, SPRUCE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.SPRUCE)
 	);
 	public static final Block BIRCH_SIGN = register(
-		"birch_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"birch_sign",
+		new StandingSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.BIRCH)
 	);
 	public static final Block ACACIA_SIGN = register(
-		"acacia_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"acacia_sign",
+		new StandingSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.ACACIA)
 	);
 	public static final Block JUNGLE_SIGN = register(
-		"jungle_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD, JUNGLE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"jungle_sign",
+		new StandingSignBlock(Block.Properties.of(Material.WOOD, JUNGLE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.JUNGLE)
 	);
 	public static final Block DARK_OAK_SIGN = register(
-		"dark_oak_sign", new StandingSignBlock(Block.Properties.of(Material.WOOD, DARK_OAK_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD))
+		"dark_oak_sign",
+		new StandingSignBlock(Block.Properties.of(Material.WOOD, DARK_OAK_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.DARK_OAK)
 	);
 	public static final Block OAK_DOOR = register(
 		"oak_door", new DoorBlock(Block.Properties.of(Material.WOOD, OAK_PLANKS.materialColor).strength(3.0F).sound(SoundType.WOOD).noOcclusion())
@@ -448,27 +454,38 @@ public class Blocks {
 		"cobblestone_stairs", new StairBlock(COBBLESTONE.defaultBlockState(), Block.Properties.copy(COBBLESTONE))
 	);
 	public static final Block OAK_WALL_SIGN = register(
-		"oak_wall_sign", new WallSignBlock(Block.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(OAK_SIGN))
+		"oak_wall_sign", new WallSignBlock(Block.Properties.of(Material.WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(OAK_SIGN), WoodType.OAK)
 	);
 	public static final Block SPRUCE_WALL_SIGN = register(
 		"spruce_wall_sign",
-		new WallSignBlock(Block.Properties.of(Material.WOOD, SPRUCE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(SPRUCE_SIGN))
+		new WallSignBlock(
+			Block.Properties.of(Material.WOOD, SPRUCE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(SPRUCE_SIGN), WoodType.SPRUCE
+		)
 	);
 	public static final Block BIRCH_WALL_SIGN = register(
 		"birch_wall_sign",
-		new WallSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(BIRCH_SIGN))
+		new WallSignBlock(
+			Block.Properties.of(Material.WOOD, MaterialColor.SAND).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(BIRCH_SIGN), WoodType.BIRCH
+		)
 	);
 	public static final Block ACACIA_WALL_SIGN = register(
 		"acacia_wall_sign",
-		new WallSignBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(ACACIA_SIGN))
+		new WallSignBlock(
+			Block.Properties.of(Material.WOOD, MaterialColor.COLOR_ORANGE).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(ACACIA_SIGN), WoodType.ACACIA
+		)
 	);
 	public static final Block JUNGLE_WALL_SIGN = register(
 		"jungle_wall_sign",
-		new WallSignBlock(Block.Properties.of(Material.WOOD, JUNGLE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(JUNGLE_SIGN))
+		new WallSignBlock(
+			Block.Properties.of(Material.WOOD, JUNGLE_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(JUNGLE_SIGN), WoodType.JUNGLE
+		)
 	);
 	public static final Block DARK_OAK_WALL_SIGN = register(
 		"dark_oak_wall_sign",
-		new WallSignBlock(Block.Properties.of(Material.WOOD, DARK_OAK_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(DARK_OAK_SIGN))
+		new WallSignBlock(
+			Block.Properties.of(Material.WOOD, DARK_OAK_LOG.materialColor).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(DARK_OAK_SIGN),
+			WoodType.DARK_OAK
+		)
 	);
 	public static final Block LEVER = register(
 		"lever", new LeverBlock(Block.Properties.of(Material.DECORATION).noCollission().strength(0.5F).sound(SoundType.WOOD))

@@ -23,6 +23,7 @@ import net.minecraft.world.phys.Vec3;
 public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 	private static final ResourceLocation GUARDIAN_LOCATION = new ResourceLocation("textures/entity/guardian.png");
 	private static final ResourceLocation GUARDIAN_BEAM_LOCATION = new ResourceLocation("textures/entity/guardian_beam.png");
+	private static final RenderType BEAM_RENDER_TYPE = RenderType.entityCutoutNoCull(GUARDIAN_BEAM_LOCATION);
 
 	public GuardianRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		this(entityRenderDispatcher, 0.5F);
@@ -103,7 +104,7 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 			float ap = 0.4999F;
 			float aq = -1.0F + k;
 			float ar = m * 2.5F + aq;
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(GUARDIAN_BEAM_LOCATION));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(BEAM_RENDER_TYPE);
 			PoseStack.Pose pose = poseStack.last();
 			Matrix4f matrix4f = pose.pose();
 			Matrix3f matrix3f = pose.normal();

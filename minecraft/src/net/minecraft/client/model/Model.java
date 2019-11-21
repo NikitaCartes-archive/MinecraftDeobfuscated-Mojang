@@ -27,5 +27,5 @@ public abstract class Model implements Consumer<ModelPart> {
 		return (RenderType)this.renderType.apply(resourceLocation);
 	}
 
-	public abstract void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h);
+	public abstract void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k);
 }

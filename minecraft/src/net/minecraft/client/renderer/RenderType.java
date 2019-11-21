@@ -5,22 +5,22 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import it.unimi.dsi.fastutil.Hash.Strategy;
+import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
-public class RenderType extends RenderStateShard {
-	private static final RenderType SOLID = new RenderType.CompositeRenderType(
+public abstract class RenderType extends RenderStateShard {
+	private static final RenderType SOLID = create(
 		"solid",
 		DefaultVertexFormat.BLOCK,
 		7,
@@ -33,7 +33,7 @@ public class RenderType extends RenderStateShard {
 			.setTextureState(BLOCK_SHEET_MIPPED)
 			.createCompositeState(true)
 	);
-	private static final RenderType CUTOUT_MIPPED = new RenderType.CompositeRenderType(
+	private static final RenderType CUTOUT_MIPPED = create(
 		"cutout_mipped",
 		DefaultVertexFormat.BLOCK,
 		7,
@@ -47,7 +47,7 @@ public class RenderType extends RenderStateShard {
 			.setAlphaState(MIDWAY_ALPHA)
 			.createCompositeState(true)
 	);
-	private static final RenderType CUTOUT = new RenderType.CompositeRenderType(
+	private static final RenderType CUTOUT = create(
 		"cutout",
 		DefaultVertexFormat.BLOCK,
 		7,
@@ -61,38 +61,25 @@ public class RenderType extends RenderStateShard {
 			.setAlphaState(MIDWAY_ALPHA)
 			.createCompositeState(true)
 	);
-	private static final RenderType TRANSLUCENT = new RenderType.CompositeRenderType(
-		"translucent",
-		DefaultVertexFormat.BLOCK,
-		7,
-		262144,
-		true,
-		true,
-		RenderType.CompositeState.builder()
-			.setShadeModelState(SMOOTH_SHADE)
-			.setLightmapState(LIGHTMAP)
-			.setTextureState(BLOCK_SHEET_MIPPED)
-			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-			.createCompositeState(true)
+	private static final RenderType TRANSLUCENT = create("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, translucentState());
+	private static final RenderType TRANSLUCENT_NO_CRUMBLING = create(
+		"translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentState()
 	);
-	private static final RenderType TRANSLUCENT_NO_CRUMBLING = new RenderType(
-		"translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 256, false, true, TRANSLUCENT::setupRenderState, TRANSLUCENT::clearRenderState
-	);
-	private static final RenderType LEASH = new RenderType.CompositeRenderType(
+	private static final RenderType LEASH = create(
 		"leash",
 		DefaultVertexFormat.POSITION_COLOR_LIGHTMAP,
 		7,
 		256,
 		RenderType.CompositeState.builder().setTextureState(NO_TEXTURE).setCullState(NO_CULL).setLightmapState(LIGHTMAP).createCompositeState(false)
 	);
-	private static final RenderType WATER_MASK = new RenderType.CompositeRenderType(
+	private static final RenderType WATER_MASK = create(
 		"water_mask",
 		DefaultVertexFormat.POSITION,
 		7,
 		256,
 		RenderType.CompositeState.builder().setTextureState(NO_TEXTURE).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
 	);
-	private static final RenderType GLINT = new RenderType.CompositeRenderType(
+	private static final RenderType GLINT = create(
 		"glint",
 		DefaultVertexFormat.POSITION_TEX,
 		7,
@@ -106,7 +93,7 @@ public class RenderType extends RenderStateShard {
 			.setTexturingState(GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
-	private static final RenderType ENTITY_GLINT = new RenderType.CompositeRenderType(
+	private static final RenderType ENTITY_GLINT = create(
 		"entity_glint",
 		DefaultVertexFormat.POSITION_TEX,
 		7,
@@ -120,7 +107,7 @@ public class RenderType extends RenderStateShard {
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
-	private static final RenderType LIGHTNING = new RenderType.CompositeRenderType(
+	private static final RenderType LIGHTNING = create(
 		"lightning",
 		DefaultVertexFormat.POSITION_COLOR,
 		7,
@@ -133,12 +120,17 @@ public class RenderType extends RenderStateShard {
 			.setShadeModelState(SMOOTH_SHADE)
 			.createCompositeState(false)
 	);
-	public static final RenderType ENTITY_SOLID = entitySolid(TextureAtlas.LOCATION_BLOCKS);
-	public static final RenderType ENTITY_CUTOUT = entityCutout(TextureAtlas.LOCATION_BLOCKS);
-	public static final RenderType ENTITY_CUTOUT_NO_CULL = entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS);
-	public static final RenderType ENTITY_TRANSLUCENT = entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-	public static final RenderType ENTITY_TRANSLUCENT_CULL = entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
-	public static final RenderType ENTITY_NO_OUTLINE = entityNoOutline(TextureAtlas.LOCATION_BLOCKS);
+	public static final RenderType.CompositeRenderType LINES = create(
+		"lines",
+		DefaultVertexFormat.POSITION_COLOR,
+		1,
+		256,
+		RenderType.CompositeState.builder()
+			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+			.setLayeringState(PROJECTION_LAYERING)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.createCompositeState(false)
+	);
 	private final VertexFormat format;
 	private final int mode;
 	private final int bufferSize;
@@ -157,6 +149,15 @@ public class RenderType extends RenderStateShard {
 		return CUTOUT;
 	}
 
+	private static RenderType.CompositeState translucentState() {
+		return RenderType.CompositeState.builder()
+			.setShadeModelState(SMOOTH_SHADE)
+			.setLightmapState(LIGHTMAP)
+			.setTextureState(BLOCK_SHEET_MIPPED)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.createCompositeState(true);
+	}
+
 	public static RenderType translucent() {
 		return TRANSLUCENT;
 	}
@@ -173,7 +174,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+		return create("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
 	}
 
 	public static RenderType entityCutout(ResourceLocation resourceLocation) {
@@ -185,7 +186,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+		return create("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
 	}
 
 	public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
@@ -198,7 +199,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+		return create("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
 	}
 
 	public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
@@ -210,7 +211,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
+		return create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
 	}
 
 	public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
@@ -223,19 +224,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
-	}
-
-	public static RenderType entityForceTranslucent(ResourceLocation resourceLocation) {
-		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-			.setTransparencyState(FORCED_TRANSPARENCY)
-			.setDiffuseLightingState(DIFFUSE_LIGHTING)
-			.setCullState(NO_CULL)
-			.setLightmapState(LIGHTMAP)
-			.setOverlayState(OVERLAY)
-			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_force_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
+		return create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
 	}
 
 	public static RenderType entitySmoothCutout(ResourceLocation resourceLocation) {
@@ -247,7 +236,7 @@ public class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setLightmapState(LIGHTMAP)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+		return create("entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
 	}
 
 	public static RenderType beaconBeam(ResourceLocation resourceLocation, boolean bl) {
@@ -257,7 +246,7 @@ public class RenderType extends RenderStateShard {
 			.setWriteMaskState(bl ? COLOR_WRITE : COLOR_DEPTH_WRITE)
 			.setFogState(NO_FOG)
 			.createCompositeState(false);
-		return new RenderType.CompositeRenderType("beacon_beam", DefaultVertexFormat.BLOCK, 7, 256, false, true, compositeState);
+		return create("beacon_beam", DefaultVertexFormat.BLOCK, 7, 256, false, true, compositeState);
 	}
 
 	public static RenderType entityDecal(ResourceLocation resourceLocation) {
@@ -270,7 +259,7 @@ public class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setOverlayState(OVERLAY)
 			.createCompositeState(false);
-		return new RenderType.CompositeRenderType("entity_decal", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+		return create("entity_decal", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
 	}
 
 	public static RenderType entityNoOutline(ResourceLocation resourceLocation) {
@@ -284,7 +273,7 @@ public class RenderType extends RenderStateShard {
 			.setOverlayState(OVERLAY)
 			.setWriteMaskState(COLOR_WRITE)
 			.createCompositeState(false);
-		return new RenderType.CompositeRenderType("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
+		return create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
 	}
 
 	public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
@@ -293,12 +282,12 @@ public class RenderType extends RenderStateShard {
 			.setAlphaState(new RenderStateShard.AlphaStateShard(f))
 			.setCullState(NO_CULL)
 			.createCompositeState(true);
-		return new RenderType.CompositeRenderType("entity_alpha", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
+		return create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
 	}
 
 	public static RenderType eyes(ResourceLocation resourceLocation) {
 		RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
-		return new RenderType.CompositeRenderType(
+		return create(
 			"eyes",
 			DefaultVertexFormat.NEW_ENTITY,
 			7,
@@ -315,7 +304,7 @@ public class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType energySwirl(ResourceLocation resourceLocation, float f, float g) {
-		return new RenderType.CompositeRenderType(
+		return create(
 			"energy_swirl",
 			DefaultVertexFormat.NEW_ENTITY,
 			7,
@@ -344,8 +333,8 @@ public class RenderType extends RenderStateShard {
 		return WATER_MASK;
 	}
 
-	public static RenderType outline(ResourceLocation resourceLocation) {
-		return new RenderType.CompositeRenderType(
+	private static RenderType outline(ResourceLocation resourceLocation) {
+		return create(
 			"outline",
 			DefaultVertexFormat.POSITION_COLOR_TEX,
 			7,
@@ -370,11 +359,9 @@ public class RenderType extends RenderStateShard {
 		return ENTITY_GLINT;
 	}
 
-	public static RenderType crumbling(int i) {
-		RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(
-			(ResourceLocation)ModelBakery.BREAKING_LOCATIONS.get(i), false, false
-		);
-		return new RenderType.CompositeRenderType(
+	public static RenderType crumbling(ResourceLocation resourceLocation) {
+		RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
+		return create(
 			"crumbling",
 			DefaultVertexFormat.BLOCK,
 			7,
@@ -392,7 +379,7 @@ public class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType text(ResourceLocation resourceLocation) {
-		return new RenderType.CompositeRenderType(
+		return create(
 			"text",
 			DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 			7,
@@ -409,7 +396,7 @@ public class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType textSeeThrough(ResourceLocation resourceLocation) {
-		return new RenderType.CompositeRenderType(
+		return create(
 			"text_see_through",
 			DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
 			7,
@@ -442,7 +429,7 @@ public class RenderType extends RenderStateShard {
 			textureStateShard = new RenderStateShard.TextureStateShard(TheEndPortalRenderer.END_PORTAL_LOCATION, false, false);
 		}
 
-		return new RenderType.CompositeRenderType(
+		return create(
 			"end_portal",
 			DefaultVertexFormat.POSITION_COLOR,
 			7,
@@ -459,41 +446,7 @@ public class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType lines() {
-		return new RenderType.CompositeRenderType(
-			"lines",
-			DefaultVertexFormat.POSITION_COLOR,
-			1,
-			256,
-			RenderType.CompositeState.builder()
-				.setLineState(new RenderStateShard.LineStateShard(Math.max(2.5F, (float)Minecraft.getInstance().getWindow().getWidth() / 1920.0F * 2.5F)))
-				.setLayeringState(PROJECTION_LAYERING)
-				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-				.createCompositeState(false)
-		);
-	}
-
-	public static RenderType blockentitySolid() {
-		return ENTITY_SOLID;
-	}
-
-	public static RenderType blockentityCutout() {
-		return ENTITY_CUTOUT;
-	}
-
-	public static RenderType blockentityCutoutNoCull() {
-		return ENTITY_CUTOUT_NO_CULL;
-	}
-
-	public static RenderType blockentityTranslucent() {
-		return ENTITY_TRANSLUCENT;
-	}
-
-	public static RenderType blockentityTranslucentCull() {
-		return ENTITY_TRANSLUCENT_CULL;
-	}
-
-	public static RenderType blockentityNoOutline() {
-		return ENTITY_NO_OUTLINE;
+		return LINES;
 	}
 
 	public RenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {
@@ -503,6 +456,16 @@ public class RenderType extends RenderStateShard {
 		this.bufferSize = j;
 		this.affectsCrumbling = bl;
 		this.sortOnUpload = bl2;
+	}
+
+	public static RenderType.CompositeRenderType create(String string, VertexFormat vertexFormat, int i, int j, RenderType.CompositeState compositeState) {
+		return create(string, vertexFormat, i, j, false, false, compositeState);
+	}
+
+	public static RenderType.CompositeRenderType create(
+		String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, RenderType.CompositeState compositeState
+	) {
+		return RenderType.CompositeRenderType.memoize(string, vertexFormat, i, j, bl, bl2, compositeState);
 	}
 
 	public void end(BufferBuilder bufferBuilder, int i, int j, int k) {
@@ -538,7 +501,7 @@ public class RenderType extends RenderStateShard {
 		return this.mode;
 	}
 
-	public Optional<ResourceLocation> outlineTexture() {
+	public Optional<RenderType> outline() {
 		return Optional.empty();
 	}
 
@@ -547,16 +510,15 @@ public class RenderType extends RenderStateShard {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class CompositeRenderType extends RenderType {
+	static final class CompositeRenderType extends RenderType {
+		private static final ObjectOpenCustomHashSet<RenderType.CompositeRenderType> INSTANCES = new ObjectOpenCustomHashSet<>(
+			RenderType.CompositeRenderType.EqualsStrategy.INSTANCE
+		);
 		private final RenderType.CompositeState state;
-		private int hashCode;
-		private boolean hashed = false;
+		private final int hashCode;
+		private final Optional<RenderType> outline;
 
-		public CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, RenderType.CompositeState compositeState) {
-			this(string, vertexFormat, i, j, false, false, compositeState);
-		}
-
-		public CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, RenderType.CompositeState compositeState) {
+		private CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, RenderType.CompositeState compositeState) {
 			super(
 				string,
 				vertexFormat,
@@ -568,37 +530,48 @@ public class RenderType extends RenderStateShard {
 				() -> compositeState.states.forEach(RenderStateShard::clearRenderState)
 			);
 			this.state = compositeState;
+			this.outline = compositeState.affectsOutline
+				? compositeState.textureState.texture().map(resourceLocation -> RenderType.outline(resourceLocation))
+				: Optional.empty();
+			this.hashCode = Objects.hash(new Object[]{super.hashCode(), compositeState});
+		}
+
+		private static RenderType.CompositeRenderType memoize(
+			String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, RenderType.CompositeState compositeState
+		) {
+			return INSTANCES.addOrGet(new RenderType.CompositeRenderType(string, vertexFormat, i, j, bl, bl2, compositeState));
 		}
 
 		@Override
-		public Optional<ResourceLocation> outlineTexture() {
-			return this.state().affectsOutline ? this.state().textureState.texture() : Optional.empty();
-		}
-
-		protected final RenderType.CompositeState state() {
-			return this.state;
+		public Optional<RenderType> outline() {
+			return this.outline;
 		}
 
 		@Override
 		public boolean equals(@Nullable Object object) {
-			if (!super.equals(object)) {
-				return false;
-			} else if (this.getClass() != object.getClass()) {
-				return false;
-			} else {
-				RenderType.CompositeRenderType compositeRenderType = (RenderType.CompositeRenderType)object;
-				return this.state.equals(compositeRenderType.state);
-			}
+			return this == object;
 		}
 
 		@Override
 		public int hashCode() {
-			if (!this.hashed) {
-				this.hashed = true;
-				this.hashCode = Objects.hash(new Object[]{super.hashCode(), this.state});
+			return this.hashCode;
+		}
+
+		@Environment(EnvType.CLIENT)
+		static enum EqualsStrategy implements Strategy<RenderType.CompositeRenderType> {
+			INSTANCE;
+
+			public int hashCode(@Nullable RenderType.CompositeRenderType compositeRenderType) {
+				return compositeRenderType == null ? 0 : compositeRenderType.hashCode;
 			}
 
-			return this.hashCode;
+			public boolean equals(@Nullable RenderType.CompositeRenderType compositeRenderType, @Nullable RenderType.CompositeRenderType compositeRenderType2) {
+				if (compositeRenderType == compositeRenderType2) {
+					return true;
+				} else {
+					return compositeRenderType != null && compositeRenderType2 != null ? Objects.equals(compositeRenderType.state, compositeRenderType2.state) : false;
+				}
+			}
 		}
 	}
 

@@ -40,6 +40,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
 
 public class Guardian extends Monster {
@@ -58,6 +59,7 @@ public class Guardian extends Monster {
 	public Guardian(EntityType<? extends Guardian> entityType, Level level) {
 		super(entityType, level);
 		this.xpReward = 10;
+		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
 		this.moveControl = new Guardian.GuardianMoveControl(this);
 		this.clientSideTailAnimation = this.random.nextFloat();
 		this.clientSideTailAnimationO = this.clientSideTailAnimation;

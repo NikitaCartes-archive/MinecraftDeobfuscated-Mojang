@@ -148,14 +148,9 @@ public final class Vector3f {
 		float f = this.x;
 		float g = this.y;
 		float h = this.z;
-		this.x = multiplyRow(0, matrix3f, f, g, h);
-		this.y = multiplyRow(1, matrix3f, f, g, h);
-		this.z = multiplyRow(2, matrix3f, f, g, h);
-	}
-
-	@Environment(EnvType.CLIENT)
-	private static float multiplyRow(int i, Matrix3f matrix3f, float f, float g, float h) {
-		return matrix3f.get(i, 0) * f + matrix3f.get(i, 1) * g + matrix3f.get(i, 2) * h;
+		this.x = matrix3f.m00 * f + matrix3f.m01 * g + matrix3f.m02 * h;
+		this.y = matrix3f.m10 * f + matrix3f.m11 * g + matrix3f.m12 * h;
+		this.z = matrix3f.m20 * f + matrix3f.m21 * g + matrix3f.m22 * h;
 	}
 
 	public void transform(Quaternion quaternion) {

@@ -59,7 +59,7 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
 		float h
 	) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), f, g, h);
+		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), f, g, h, 1.0F);
 	}
 
 	public M getParentModel() {

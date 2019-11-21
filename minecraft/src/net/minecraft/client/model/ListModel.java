@@ -10,8 +10,8 @@ import net.minecraft.world.entity.Entity;
 @Environment(EnvType.CLIENT)
 public abstract class ListModel<E extends Entity> extends EntityModel<E> {
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h) {
-		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, null, f, g, h));
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
 	}
 
 	public abstract Iterable<ModelPart> parts();

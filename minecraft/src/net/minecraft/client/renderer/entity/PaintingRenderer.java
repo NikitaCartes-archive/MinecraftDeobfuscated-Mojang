@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.core.BlockPos;
@@ -44,7 +43,7 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 	}
 
 	public ResourceLocation getTextureLocation(Painting painting) {
-		return TextureAtlas.LOCATION_PAINTINGS;
+		return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlas().location();
 	}
 
 	private void renderPainting(

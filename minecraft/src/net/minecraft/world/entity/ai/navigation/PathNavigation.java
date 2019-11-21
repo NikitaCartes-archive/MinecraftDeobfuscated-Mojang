@@ -31,7 +31,7 @@ public abstract class PathNavigation {
 	@Nullable
 	protected Path path;
 	protected double speedModifier;
-	private final AttributeInstance dist;
+	private final AttributeInstance followRange;
 	protected int tick;
 	protected int lastStuckCheck;
 	protected Vec3 lastStuckCheckPos = Vec3.ZERO;
@@ -45,13 +45,23 @@ public abstract class PathNavigation {
 	protected NodeEvaluator nodeEvaluator;
 	private BlockPos targetPos;
 	private int reachRange;
-	private PathFinder pathFinder;
+	private float maxVisitedNodesMultiplier = 1.0F;
+	private final PathFinder pathFinder;
 
 	public PathNavigation(Mob mob, Level level) {
 		this.mob = mob;
 		this.level = level;
-		this.dist = mob.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-		this.pathFinder = this.createPathFinder(Mth.floor(this.dist.getValue() * 16.0));
+		this.followRange = mob.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
+		int i = Mth.floor(this.followRange.getValue() * 16.0);
+		this.pathFinder = this.createPathFinder(i);
+	}
+
+	public void resetMaxVisitedNodesMultiplier() {
+		this.maxVisitedNodesMultiplier = 1.0F;
+	}
+
+	public void setMaxVisitedNodesMultiplier(float f) {
+		this.maxVisitedNodesMultiplier = f;
 	}
 
 	public BlockPos getTargetPos() {
@@ -62,10 +72,6 @@ public abstract class PathNavigation {
 
 	public void setSpeedModifier(double d) {
 		this.speedModifier = d;
-	}
-
-	public float getMaxDist() {
-		return (float)this.dist.getValue();
 	}
 
 	public boolean hasDelayedRecomputation() {
@@ -117,11 +123,11 @@ public abstract class PathNavigation {
 			return this.path;
 		} else {
 			this.level.getProfiler().push("pathfind");
-			float f = this.getMaxDist();
+			float f = (float)this.followRange.getValue();
 			BlockPos blockPos = bl ? new BlockPos(this.mob).above() : new BlockPos(this.mob);
 			int k = (int)(f + (float)i);
 			PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
-			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j);
+			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j, this.maxVisitedNodesMultiplier);
 			this.level.getProfiler().pop();
 			if (path != null && path.getTarget() != null) {
 				this.targetPos = path.getTarget();
@@ -248,6 +254,10 @@ public abstract class PathNavigation {
 
 	public boolean isDone() {
 		return this.path == null || this.path.isDone();
+	}
+
+	public boolean isInProgress() {
+		return !this.isDone();
 	}
 
 	public void stop() {
