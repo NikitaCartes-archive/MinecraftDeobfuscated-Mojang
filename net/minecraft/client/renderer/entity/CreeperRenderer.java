@@ -43,7 +43,7 @@ extends MobRenderer<Creeper, CreeperModel<Creeper>> {
         if ((int)(g * 10.0f) % 2 == 0) {
             return 0.0f;
         }
-        return Mth.clamp(g, 0.0f, 1.0f);
+        return Mth.clamp(g, 0.5f, 1.0f);
     }
 
     @Override

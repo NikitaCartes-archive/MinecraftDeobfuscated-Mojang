@@ -15,7 +15,7 @@ import net.minecraft.world.entity.monster.Guardian;
 @Environment(value=EnvType.CLIENT)
 public class ElderGuardianRenderer
 extends GuardianRenderer {
-    private static final ResourceLocation GUARDIAN_ELDER_LOCATION = new ResourceLocation("textures/entity/guardian_elder.png");
+    public static final ResourceLocation GUARDIAN_ELDER_LOCATION = new ResourceLocation("textures/entity/guardian_elder.png");
 
     public ElderGuardianRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, 1.2f);

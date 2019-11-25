@@ -23,7 +23,7 @@ implements AutoCloseable {
                     nativeImage.setPixelRGBA(j, i, -1308622593);
                     continue;
                 }
-                int k = (int)((1.0f - (float)j / 15.0f * 0.2f) * 255.0f);
+                int k = (int)((1.0f - (float)j / 15.0f * 0.75f) * 255.0f);
                 nativeImage.setPixelRGBA(j, i, k << 24 | 0xFFFFFF);
             }
         }

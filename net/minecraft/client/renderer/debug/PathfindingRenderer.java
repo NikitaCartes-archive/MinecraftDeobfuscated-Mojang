@@ -36,18 +36,18 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         if (this.pathMap.isEmpty()) {
             return;
         }
-        long m = Util.getMillis();
+        long l = Util.getMillis();
         for (Integer integer : this.pathMap.keySet()) {
             Path path = this.pathMap.get(integer);
             float g = this.pathMaxDist.get(integer).floatValue();
             PathfindingRenderer.renderPath(path, g, true, true, d, e, f);
         }
         for (Integer integer2 : this.creationMap.keySet().toArray(new Integer[0])) {
-            if (m - this.creationMap.get(integer2) <= 5000L) continue;
+            if (l - this.creationMap.get(integer2) <= 5000L) continue;
             this.pathMap.remove(integer2);
             this.creationMap.remove(integer2);
         }

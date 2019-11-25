@@ -38,7 +38,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         double g = Util.getNanos();
         if (g - this.lastUpdateTime > 3.0E9) {
             this.lastUpdateTime = g;

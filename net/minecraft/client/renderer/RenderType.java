@@ -133,7 +133,7 @@ extends RenderStateShard {
         return WATER_MASK;
     }
 
-    private static RenderType outline(ResourceLocation resourceLocation) {
+    public static RenderType outline(ResourceLocation resourceLocation) {
         return RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(NO_CULL).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(false));
     }
 
@@ -248,7 +248,7 @@ extends RenderStateShard {
         private CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, CompositeState compositeState) {
             super(string, vertexFormat, i, j, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
             this.state = compositeState;
-            this.outline = compositeState.affectsOutline ? compositeState.textureState.texture().map(resourceLocation -> RenderType.outline(resourceLocation)) : Optional.empty();
+            this.outline = compositeState.affectsOutline ? compositeState.textureState.texture().map(RenderType::outline) : Optional.empty();
             this.hashCode = Objects.hash(super.hashCode(), compositeState);
         }
 

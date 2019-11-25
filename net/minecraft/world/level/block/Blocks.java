@@ -176,6 +176,7 @@ import net.minecraft.world.level.block.WitherSkullBlock;
 import net.minecraft.world.level.block.WitherWallSkullBlock;
 import net.minecraft.world.level.block.WoodButtonBlock;
 import net.minecraft.world.level.block.WoolCarpetBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.AcaciaTreeGrower;
 import net.minecraft.world.level.block.grower.BirchTreeGrower;
 import net.minecraft.world.level.block.grower.DarkOakTreeGrower;
@@ -337,7 +338,7 @@ public class Blocks {
     public static final Block FIRE = Blocks.register("fire", new FireBlock(Block.Properties.of(Material.FIRE, MaterialColor.FIRE).noCollission().randomTicks().instabreak().lightLevel(15).sound(SoundType.WOOL).noDrops()));
     public static final Block SPAWNER = Blocks.register("spawner", new SpawnerBlock(Block.Properties.of(Material.STONE).strength(5.0f).sound(SoundType.METAL).noOcclusion()));
     public static final Block OAK_STAIRS = Blocks.register("oak_stairs", new StairBlock(OAK_PLANKS.defaultBlockState(), Block.Properties.copy(OAK_PLANKS)));
-    public static final Block CHEST = Blocks.register("chest", new ChestBlock(Block.Properties.of(Material.WOOD).strength(2.5f).sound(SoundType.WOOD)));
+    public static final Block CHEST = Blocks.register("chest", new ChestBlock(Block.Properties.of(Material.WOOD).strength(2.5f).sound(SoundType.WOOD), () -> BlockEntityType.CHEST));
     public static final Block REDSTONE_WIRE = Blocks.register("redstone_wire", new RedStoneWireBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak()));
     public static final Block DIAMOND_ORE = Blocks.register("diamond_ore", new OreBlock(Block.Properties.of(Material.STONE).strength(3.0f, 3.0f)));
     public static final Block DIAMOND_BLOCK = Blocks.register("diamond_block", new Block(Block.Properties.of(Material.METAL, MaterialColor.DIAMOND).strength(5.0f, 6.0f).sound(SoundType.METAL)));

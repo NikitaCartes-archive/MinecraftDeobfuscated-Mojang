@@ -35,7 +35,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -341,11 +340,15 @@ implements Projectile {
                 ((LivingEntity)entity2).setLastHurtMob(entity);
             }
         }
+        boolean bl = entity.getType() == EntityType.ENDERMAN;
         int j = entity.getRemainingFireTicks();
-        if (this.isOnFire() && !(entity instanceof EnderMan)) {
+        if (this.isOnFire() && !bl) {
             entity.setSecondsOnFire(5);
         }
         if (entity.hurt(damageSource, i)) {
+            if (bl) {
+                return;
+            }
             if (entity instanceof LivingEntity) {
                 Vec3 vec3;
                 LivingEntity livingEntity = (LivingEntity)entity;
@@ -376,7 +379,7 @@ implements Projectile {
                 }
             }
             this.playSound(this.soundEvent, 1.0f, 1.2f / (this.random.nextFloat() * 0.2f + 0.9f));
-            if (this.getPierceLevel() <= 0 && !(entity instanceof EnderMan)) {
+            if (this.getPierceLevel() <= 0) {
                 this.remove();
             }
         } else {

@@ -53,7 +53,7 @@ extends EntityRenderer<ExperienceOrb> {
         int t = 255;
         int u = (int)((Mth.sin(r + 4.1887903f) + 1.0f) * 0.1f * 255.0f);
         poseStack.translate(0.0, 0.1f, 0.0);
-        poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         float v = 0.3f;
         poseStack.scale(0.3f, 0.3f, 0.3f);

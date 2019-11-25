@@ -93,10 +93,12 @@ extends Block {
         if (item == Items.FLINT_AND_STEEL || item == Items.FIRE_CHARGE) {
             TntBlock.explode(level, blockPos, player2);
             level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
-            if (item == Items.FLINT_AND_STEEL) {
-                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
-            } else {
-                itemStack.shrink(1);
+            if (!player2.isCreative()) {
+                if (item == Items.FLINT_AND_STEEL) {
+                    itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
+                } else {
+                    itemStack.shrink(1);
+                }
             }
             return InteractionResult.SUCCESS;
         }

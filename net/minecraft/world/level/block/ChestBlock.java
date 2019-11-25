@@ -5,6 +5,9 @@ package net.minecraft.world.level.block;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -33,12 +36,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -68,34 +73,35 @@ implements SimpleWaterloggedBlock {
     protected static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 1.0, 15.0, 14.0, 15.0);
     protected static final VoxelShape EAST_AABB = Block.box(1.0, 0.0, 1.0, 16.0, 14.0, 15.0);
     protected static final VoxelShape AABB = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
-    private static final ChestSearchCallback<Container> CHEST_COMBINER = new ChestSearchCallback<Container>(){
+    protected final Supplier<BlockEntityType<? extends ChestBlockEntity>> blockEntityType;
+    private static final DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<Container>> CHEST_COMBINER = new DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<Container>>(){
 
         @Override
-        public Container acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-            return new CompoundContainer(chestBlockEntity, chestBlockEntity2);
+        public Optional<Container> acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+            return Optional.of(new CompoundContainer(chestBlockEntity, chestBlockEntity2));
         }
 
         @Override
-        public Container acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return chestBlockEntity;
+        public Optional<Container> acceptSingle(ChestBlockEntity chestBlockEntity) {
+            return Optional.of(chestBlockEntity);
         }
 
         @Override
-        public /* synthetic */ Object acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return this.acceptSingle(chestBlockEntity);
+        public Optional<Container> acceptNone() {
+            return Optional.empty();
         }
 
         @Override
-        public /* synthetic */ Object acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-            return this.acceptDouble(chestBlockEntity, chestBlockEntity2);
+        public /* synthetic */ Object acceptNone() {
+            return this.acceptNone();
         }
     };
-    private static final ChestSearchCallback<MenuProvider> MENU_PROVIDER_COMBINER = new ChestSearchCallback<MenuProvider>(){
+    private static final DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<MenuProvider>> MENU_PROVIDER_COMBINER = new DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<MenuProvider>>(){
 
         @Override
-        public MenuProvider acceptDouble(final ChestBlockEntity chestBlockEntity, final ChestBlockEntity chestBlockEntity2) {
+        public Optional<MenuProvider> acceptDouble(final ChestBlockEntity chestBlockEntity, final ChestBlockEntity chestBlockEntity2) {
             final CompoundContainer container = new CompoundContainer(chestBlockEntity, chestBlockEntity2);
-            return new MenuProvider(){
+            return Optional.of(new MenuProvider(){
 
                 @Override
                 @Nullable
@@ -118,50 +124,40 @@ implements SimpleWaterloggedBlock {
                     }
                     return new TranslatableComponent("container.chestDouble", new Object[0]);
                 }
-            };
+            });
         }
 
         @Override
-        public MenuProvider acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return chestBlockEntity;
+        public Optional<MenuProvider> acceptSingle(ChestBlockEntity chestBlockEntity) {
+            return Optional.of(chestBlockEntity);
         }
 
         @Override
-        public /* synthetic */ Object acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return this.acceptSingle(chestBlockEntity);
+        public Optional<MenuProvider> acceptNone() {
+            return Optional.empty();
         }
 
         @Override
-        public /* synthetic */ Object acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-            return this.acceptDouble(chestBlockEntity, chestBlockEntity2);
-        }
-    };
-    private static final ChestSearchCallback<Float2FloatFunction> OPENNES_COMBINER = new ChestSearchCallback<Float2FloatFunction>(){
-
-        @Override
-        public Float2FloatFunction acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-            return f -> Math.max(chestBlockEntity.getOpenNess(f), chestBlockEntity2.getOpenNess(f));
-        }
-
-        @Override
-        public Float2FloatFunction acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return chestBlockEntity::getOpenNess;
-        }
-
-        @Override
-        public /* synthetic */ Object acceptSingle(ChestBlockEntity chestBlockEntity) {
-            return this.acceptSingle(chestBlockEntity);
-        }
-
-        @Override
-        public /* synthetic */ Object acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-            return this.acceptDouble(chestBlockEntity, chestBlockEntity2);
+        public /* synthetic */ Object acceptNone() {
+            return this.acceptNone();
         }
     };
 
-    protected ChestBlock(Block.Properties properties) {
+    protected ChestBlock(Block.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
         super(properties);
+        this.blockEntityType = supplier;
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(TYPE, ChestType.SINGLE)).setValue(WATERLOGGED, false));
+    }
+
+    public static DoubleBlockCombiner.BlockType getBlockType(BlockState blockState) {
+        ChestType chestType = blockState.getValue(TYPE);
+        if (chestType == ChestType.SINGLE) {
+            return DoubleBlockCombiner.BlockType.SINGLE;
+        }
+        if (chestType == ChestType.RIGHT) {
+            return DoubleBlockCombiner.BlockType.FIRST;
+        }
+        return DoubleBlockCombiner.BlockType.SECOND;
     }
 
     @Override
@@ -285,54 +281,45 @@ implements SimpleWaterloggedBlock {
     }
 
     @Nullable
-    public static <T> T combineWithNeigbour(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ChestSearchCallback<T> chestSearchCallback) {
-        ChestType chestType2;
-        BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
-        if (!(blockEntity instanceof ChestBlockEntity)) {
-            return null;
-        }
-        if (!bl && ChestBlock.isChestBlockedAt(levelAccessor, blockPos)) {
-            return null;
-        }
-        ChestBlockEntity chestBlockEntity = (ChestBlockEntity)blockEntity;
-        ChestType chestType = blockState.getValue(TYPE);
-        if (chestType == ChestType.SINGLE) {
-            return chestSearchCallback.acceptSingle(chestBlockEntity);
-        }
-        BlockPos blockPos2 = blockPos.relative(ChestBlock.getConnectedDirection(blockState));
-        BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
-        if (blockState2.getBlock() == blockState.getBlock() && (chestType2 = blockState2.getValue(TYPE)) != ChestType.SINGLE && chestType != chestType2 && blockState2.getValue(FACING) == blockState.getValue(FACING)) {
-            if (!bl && ChestBlock.isChestBlockedAt(levelAccessor, blockPos2)) {
-                return null;
-            }
-            BlockEntity blockEntity2 = levelAccessor.getBlockEntity(blockPos2);
-            if (blockEntity2 instanceof ChestBlockEntity) {
-                ChestBlockEntity chestBlockEntity2 = chestType == ChestType.RIGHT ? chestBlockEntity : (ChestBlockEntity)blockEntity2;
-                ChestBlockEntity chestBlockEntity3 = chestType == ChestType.RIGHT ? (ChestBlockEntity)blockEntity2 : chestBlockEntity;
-                return chestSearchCallback.acceptDouble(chestBlockEntity2, chestBlockEntity3);
-            }
-        }
-        return chestSearchCallback.acceptSingle(chestBlockEntity);
+    public static Container getContainer(ChestBlock chestBlock, BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
+        return ChestBlock.combine(chestBlock, blockState, level, blockPos, bl).apply(CHEST_COMBINER).orElse(null);
     }
 
-    @Nullable
-    public static Container getContainer(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
-        return ChestBlock.combineWithNeigbour(blockState, level, blockPos, bl, CHEST_COMBINER);
+    public static DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(ChestBlock chestBlock, BlockState blockState, Level level, BlockPos blockPos2, boolean bl) {
+        BiPredicate<LevelAccessor, BlockPos> biPredicate = bl ? (levelAccessor, blockPos) -> false : ChestBlock::isChestBlockedAt;
+        return DoubleBlockCombiner.combineWithNeigbour(chestBlock.blockEntityType.get(), ChestBlock::getBlockType, ChestBlock::getConnectedDirection, FACING, blockState, level, blockPos2, biPredicate);
     }
 
     @Override
     @Nullable
     public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
-        return ChestBlock.combineWithNeigbour(blockState, level, blockPos, false, MENU_PROVIDER_COMBINER);
+        return ChestBlock.combine(this, blockState, level, blockPos, false).apply(MENU_PROVIDER_COMBINER).orElse(null);
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static float getCombinedOpenness(LidBlockEntity lidBlockEntity, BlockState blockState, Level level, BlockPos blockPos, float f) {
-        Float2FloatFunction float2FloatFunction = ChestBlock.combineWithNeigbour(blockState, level, blockPos, true, OPENNES_COMBINER);
-        if (float2FloatFunction == null) {
-            return lidBlockEntity.getOpenNess(f);
-        }
-        return float2FloatFunction.get(f);
+    public static DoubleBlockCombiner.Combiner<ChestBlockEntity, Float2FloatFunction> opennessCombiner(final LidBlockEntity lidBlockEntity) {
+        return new DoubleBlockCombiner.Combiner<ChestBlockEntity, Float2FloatFunction>(){
+
+            @Override
+            public Float2FloatFunction acceptDouble(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+                return f -> Math.max(chestBlockEntity.getOpenNess(f), chestBlockEntity2.getOpenNess(f));
+            }
+
+            @Override
+            public Float2FloatFunction acceptSingle(ChestBlockEntity chestBlockEntity) {
+                return chestBlockEntity::getOpenNess;
+            }
+
+            @Override
+            public Float2FloatFunction acceptNone() {
+                return lidBlockEntity::getOpenNess;
+            }
+
+            @Override
+            public /* synthetic */ Object acceptNone() {
+                return this.acceptNone();
+            }
+        };
     }
 
     @Override
@@ -340,7 +327,7 @@ implements SimpleWaterloggedBlock {
         return new ChestBlockEntity();
     }
 
-    private static boolean isChestBlockedAt(LevelAccessor levelAccessor, BlockPos blockPos) {
+    public static boolean isChestBlockedAt(LevelAccessor levelAccessor, BlockPos blockPos) {
         return ChestBlock.isBlockedChestByBlock(levelAccessor, blockPos) || ChestBlock.isCatSittingOnChest(levelAccessor, blockPos);
     }
 
@@ -367,7 +354,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-        return AbstractContainerMenu.getRedstoneSignalFromContainer(ChestBlock.getContainer(blockState, level, blockPos, false));
+        return AbstractContainerMenu.getRedstoneSignalFromContainer(ChestBlock.getContainer(this, blockState, level, blockPos, false));
     }
 
     @Override
@@ -388,12 +375,6 @@ implements SimpleWaterloggedBlock {
     @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
-    }
-
-    static interface ChestSearchCallback<T> {
-        public T acceptDouble(ChestBlockEntity var1, ChestBlockEntity var2);
-
-        public T acceptSingle(ChestBlockEntity var1);
     }
 }
 

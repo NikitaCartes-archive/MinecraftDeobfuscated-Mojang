@@ -30,9 +30,9 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
-        long m = Util.getMillis();
-        this.markers.entrySet().removeIf(entry -> m > ((Marker)entry.getValue()).removeAtTime);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
+        long l = Util.getMillis();
+        this.markers.entrySet().removeIf(entry -> l > ((Marker)entry.getValue()).removeAtTime);
         this.markers.forEach(this::renderMarker);
     }
 

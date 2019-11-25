@@ -49,7 +49,7 @@ extends EntityRenderer<FishingHook> {
         poseStack.pushPose();
         poseStack.pushPose();
         poseStack.scale(0.5f, 0.5f, 0.5f);
-        poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
         PoseStack.Pose pose = poseStack.last();
         Matrix4f matrix4f = pose.pose();

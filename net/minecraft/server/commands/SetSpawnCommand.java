@@ -23,7 +23,7 @@ public class SetSpawnCommand {
 
     private static int setSpawn(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, BlockPos blockPos) {
         for (ServerPlayer serverPlayer : collection) {
-            serverPlayer.setRespawnPosition(blockPos, true);
+            serverPlayer.setRespawnPosition(blockPos, true, false);
         }
         if (collection.size() == 1) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.spawnpoint.success.single", blockPos.getX(), blockPos.getY(), blockPos.getZ(), collection.iterator().next().getDisplayName()), true);

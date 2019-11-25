@@ -3,12 +3,12 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -27,7 +27,7 @@ extends BlockEntityRenderer<T> {
     public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
     public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
     private static final Random RANDOM = new Random(31100L);
-    private static final List<RenderType> RENDER_TYPES = IntStream.range(0, 16).mapToObj(RenderType::endPortal).collect(Collectors.toList());
+    private static final List<RenderType> RENDER_TYPES = IntStream.range(0, 16).mapToObj(i -> RenderType.endPortal(i + 1)).collect(ImmutableList.toImmutableList());
 
     public TheEndPortalRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
         super(blockEntityRenderDispatcher);
@@ -40,9 +40,9 @@ extends BlockEntityRenderer<T> {
         int k = this.getPasses(d);
         float g = this.getOffset();
         Matrix4f matrix4f = poseStack.last().pose();
-        this.renderCube(theEndPortalBlockEntity, g, 0.15f, matrix4f, multiBufferSource.getBuffer(RENDER_TYPES.get(1)));
+        this.renderCube(theEndPortalBlockEntity, g, 0.15f, matrix4f, multiBufferSource.getBuffer(RENDER_TYPES.get(0)));
         for (int l = 1; l < k; ++l) {
-            this.renderCube(theEndPortalBlockEntity, g, 2.0f / (float)(18 - l), matrix4f, multiBufferSource.getBuffer(RENDER_TYPES.get(l + 1)));
+            this.renderCube(theEndPortalBlockEntity, g, 2.0f / (float)(18 - l), matrix4f, multiBufferSource.getBuffer(RENDER_TYPES.get(l)));
         }
     }
 
@@ -68,8 +68,31 @@ extends BlockEntityRenderer<T> {
     }
 
     protected int getPasses(double d) {
-        int i = d > 36864.0 ? 1 : (d > 25600.0 ? 3 : (d > 16384.0 ? 5 : (d > 9216.0 ? 7 : (d > 4096.0 ? 9 : (d > 1024.0 ? 11 : (d > 576.0 ? 13 : (d > 256.0 ? 14 : 15)))))));
-        return i;
+        if (d > 36864.0) {
+            return 1;
+        }
+        if (d > 25600.0) {
+            return 3;
+        }
+        if (d > 16384.0) {
+            return 5;
+        }
+        if (d > 9216.0) {
+            return 7;
+        }
+        if (d > 4096.0) {
+            return 9;
+        }
+        if (d > 1024.0) {
+            return 11;
+        }
+        if (d > 576.0) {
+            return 13;
+        }
+        if (d > 256.0) {
+            return 14;
+        }
+        return 15;
     }
 
     protected float getOffset() {

@@ -40,10 +40,10 @@ extends Model {
 
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-        this.b(poseStack, vertexConsumer, i, j, f, g, h, k);
+        this.render(poseStack, vertexConsumer, i, j, f, g, h, k);
     }
 
-    public void b(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+    public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
         this.parts.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
     }
 

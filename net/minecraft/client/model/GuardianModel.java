@@ -57,6 +57,7 @@ extends ListModel<Guardian> {
         this.head.addChild(this.tailParts[0]);
         this.tailParts[0].addChild(this.tailParts[1]);
         this.tailParts[1].addChild(this.tailParts[2]);
+        this.setupSpikes(0.0f, 0.0f);
     }
 
     @Override
@@ -70,14 +71,7 @@ extends ListModel<Guardian> {
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
         float l = (1.0f - guardian.getSpikesAnimation(k)) * 0.55f;
-        for (int m = 0; m < 12; ++m) {
-            this.spikeParts[m].xRot = (float)Math.PI * SPIKE_X_ROT[m];
-            this.spikeParts[m].yRot = (float)Math.PI * SPIKE_Y_ROT[m];
-            this.spikeParts[m].zRot = (float)Math.PI * SPIKE_Z_ROT[m];
-            this.spikeParts[m].x = SPIKE_X[m] * (1.0f + Mth.cos(h * 1.5f + (float)m) * 0.01f - l);
-            this.spikeParts[m].y = 16.0f + SPIKE_Y[m] * (1.0f + Mth.cos(h * 1.5f + (float)m) * 0.01f - l);
-            this.spikeParts[m].z = SPIKE_Z[m] * (1.0f + Mth.cos(h * 1.5f + (float)m) * 0.01f - l);
-        }
+        this.setupSpikes(h, l);
         this.eye.z = -8.25f;
         Entity entity = Minecraft.getInstance().getCameraEntity();
         if (guardian.hasActiveAttackTarget()) {
@@ -95,16 +89,27 @@ extends ListModel<Guardian> {
             this.eye.x = Mth.sqrt((float)Math.abs(e)) * 2.0f * (float)Math.signum(e);
         }
         this.eye.visible = true;
-        float n = guardian.getTailAnimation(k);
-        this.tailParts[0].yRot = Mth.sin(n) * (float)Math.PI * 0.05f;
-        this.tailParts[1].yRot = Mth.sin(n) * (float)Math.PI * 0.1f;
+        float m = guardian.getTailAnimation(k);
+        this.tailParts[0].yRot = Mth.sin(m) * (float)Math.PI * 0.05f;
+        this.tailParts[1].yRot = Mth.sin(m) * (float)Math.PI * 0.1f;
         this.tailParts[1].x = -1.5f;
         this.tailParts[1].y = 0.5f;
         this.tailParts[1].z = 14.0f;
-        this.tailParts[2].yRot = Mth.sin(n) * (float)Math.PI * 0.15f;
+        this.tailParts[2].yRot = Mth.sin(m) * (float)Math.PI * 0.15f;
         this.tailParts[2].x = 0.5f;
         this.tailParts[2].y = 0.5f;
         this.tailParts[2].z = 6.0f;
+    }
+
+    private void setupSpikes(float f, float g) {
+        for (int i = 0; i < 12; ++i) {
+            this.spikeParts[i].xRot = (float)Math.PI * SPIKE_X_ROT[i];
+            this.spikeParts[i].yRot = (float)Math.PI * SPIKE_Y_ROT[i];
+            this.spikeParts[i].zRot = (float)Math.PI * SPIKE_Z_ROT[i];
+            this.spikeParts[i].x = SPIKE_X[i] * (1.0f + Mth.cos(f * 1.5f + (float)i) * 0.01f - g);
+            this.spikeParts[i].y = 16.0f + SPIKE_Y[i] * (1.0f + Mth.cos(f * 1.5f + (float)i) * 0.01f - g);
+            this.spikeParts[i].z = SPIKE_Z[i] * (1.0f + Mth.cos(f * 1.5f + (float)i) * 0.01f - g);
+        }
     }
 }
 

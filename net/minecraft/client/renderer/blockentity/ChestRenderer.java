@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.blockentity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
+import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.Calendar;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,11 +16,14 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -80,25 +84,32 @@ extends BlockEntityRenderer<T> {
         boolean bl = level != null;
         BlockState blockState = bl ? ((BlockEntity)blockEntity).getBlockState() : (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
         ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
+        Block block = blockState.getBlock();
+        if (!(block instanceof ChestBlock)) {
+            return;
+        }
+        ChestBlock chestBlock = (ChestBlock)block;
         boolean bl2 = chestType != ChestType.SINGLE;
         poseStack.pushPose();
         float g = blockState.getValue(ChestBlock.FACING).toYRot();
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
         poseStack.translate(-0.5, -0.5, -0.5);
-        float h = bl ? ChestBlock.getCombinedOpenness((LidBlockEntity)blockEntity, blockState, level, ((BlockEntity)blockEntity).getBlockPos(), f) : ((LidBlockEntity)blockEntity).getOpenNess(f);
+        DoubleBlockCombiner.NeighborCombineResult<Object> neighborCombineResult = bl ? ChestBlock.combine(chestBlock, blockState, level, ((BlockEntity)blockEntity).getBlockPos(), true) : DoubleBlockCombiner.Combiner::acceptNone;
+        float h = neighborCombineResult.apply(ChestBlock.opennessCombiner((LidBlockEntity)blockEntity)).get(f);
         h = 1.0f - h;
         h = 1.0f - h * h * h;
+        int k = ((Int2IntFunction)neighborCombineResult.apply(new BrightnessCombiner())).applyAsInt(i);
         Material material = Sheets.chooseMaterial(blockEntity, chestType, this.xmasTextures);
         VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entityCutout);
         if (bl2) {
             if (chestType == ChestType.LEFT) {
-                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, i, j);
+                this.render(poseStack, vertexConsumer, this.doubleRightLid, this.doubleRightLock, this.doubleRightBottom, h, k, j);
             } else {
-                this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, i, j);
+                this.render(poseStack, vertexConsumer, this.doubleLeftLid, this.doubleLeftLock, this.doubleLeftBottom, h, k, j);
             }
         } else {
-            this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, i, j);
+            this.render(poseStack, vertexConsumer, this.lid, this.lock, this.bottom, h, k, j);
         }
         poseStack.popPose();
     }

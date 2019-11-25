@@ -24,22 +24,25 @@ extends Item {
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         Level level = useOnContext.getLevel();
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
-        }
         BlockPos blockPos = useOnContext.getClickedPos();
         BlockState blockState = level.getBlockState(blockPos);
+        boolean bl = false;
         if (blockState.getBlock() == Blocks.CAMPFIRE) {
             if (!blockState.getValue(CampfireBlock.LIT).booleanValue() && !blockState.getValue(CampfireBlock.WATERLOGGED).booleanValue()) {
                 this.playSound(level, blockPos);
                 level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));
+                bl = true;
             }
         } else if (level.getBlockState(blockPos = blockPos.relative(useOnContext.getClickedFace())).isAir()) {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
+            bl = true;
         }
-        useOnContext.getItemInHand().shrink(1);
-        return InteractionResult.SUCCESS;
+        if (bl) {
+            useOnContext.getItemInHand().shrink(1);
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.FAIL;
     }
 
     private void playSound(Level level, BlockPos blockPos) {

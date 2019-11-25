@@ -28,7 +28,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel levelAccessor = this.minecraft.level;
         RenderSystem.pushMatrix();
         RenderSystem.enableBlend();

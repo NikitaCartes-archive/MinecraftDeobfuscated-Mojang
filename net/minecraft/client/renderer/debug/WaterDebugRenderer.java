@@ -26,7 +26,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         FluidState fluidState;
         BlockPos blockPos = this.minecraft.player.getCommandSenderBlockPosition();
         Level levelReader = this.minecraft.player.level;

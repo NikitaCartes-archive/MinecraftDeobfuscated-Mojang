@@ -9,10 +9,12 @@ import com.mojang.datafixers.types.Type;
 import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
@@ -128,6 +130,15 @@ public class BlockEntityType<T extends BlockEntity> {
 
     public boolean isValid(Block block) {
         return this.validBlocks.contains(block);
+    }
+
+    @Nullable
+    public T getBlockEntity(BlockGetter blockGetter, BlockPos blockPos) {
+        BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
+        if (blockEntity == null || blockEntity.getType() != this) {
+            return null;
+        }
+        return (T)blockEntity;
     }
 
     public static final class Builder<T extends BlockEntity> {

@@ -108,13 +108,16 @@ implements RenderLayerParent<T, M> {
             }
         }
         ((EntityModel)this.model).prepareMobModel(livingEntity, o, n, g);
-        boolean bl = this.isVisible(livingEntity, false);
-        boolean bl2 = !bl && !((Entity)livingEntity).isInvisibleTo(Minecraft.getInstance().player);
+        boolean bl = ((Entity)livingEntity).isGlowing();
+        boolean bl2 = this.isVisible(livingEntity, false);
+        boolean bl3 = !bl2 && !((Entity)livingEntity).isInvisibleTo(Minecraft.getInstance().player);
         ((EntityModel)this.model).setupAnim(livingEntity, o, n, l, k, m);
-        if (bl || bl2) {
-            ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl2 ? RenderType.entityTranslucent(resourceLocation) : ((Model)this.model).renderType(resourceLocation));
-            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g)), 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
+        RenderType renderType = bl3 ? RenderType.entityTranslucent(resourceLocation) : (bl2 ? ((Model)this.model).renderType(resourceLocation) : RenderType.outline(resourceLocation));
+        if (bl2 || bl3 || bl) {
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
+            int p = LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
+            ((Model)this.model).renderToBuffer(poseStack, vertexConsumer, i, p, 1.0f, 1.0f, 1.0f, bl3 ? 0.15f : 1.0f);
         }
         if (!((Entity)livingEntity).isSpectator()) {
             for (RenderLayer<T, M> renderLayer : this.layers) {

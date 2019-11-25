@@ -238,7 +238,7 @@ extends RealmsScreen {
 
             @Override
             public void onPress() {
-                RealmsUtil.browseTo("https://minecraft.net/realms");
+                RealmsUtil.browseTo("https://aka.ms/BuyJavaRealms");
             }
         };
         this.buttonsAdd(this.buyARealmButton);
@@ -430,7 +430,7 @@ extends RealmsScreen {
         if (realmsServer == null) {
             return;
         }
-        String string = "https://account.mojang.com/buy/realms?sid=" + realmsServer.remoteSubscriptionId + "&pid=" + Realms.getUUID() + "&ref=" + (realmsServer.expiredTrial ? "expiredTrial" : "expiredRealm");
+        String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + realmsServer.remoteSubscriptionId + "&profileId=" + Realms.getUUID() + "&ref=" + (realmsServer.expiredTrial ? "expiredTrial" : "expiredRealm");
         this.browseURL(string);
     }
 

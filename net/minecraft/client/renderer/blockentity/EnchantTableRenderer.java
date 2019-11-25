@@ -50,7 +50,7 @@ extends BlockEntityRenderer<EnchantmentTableBlockEntity> {
         float o = Mth.lerp(f, enchantmentTableBlockEntity.oOpen, enchantmentTableBlockEntity.open);
         this.bookModel.setupAnim(g, Mth.clamp(m, 0.0f, 1.0f), Mth.clamp(n, 0.0f, 1.0f), o);
         VertexConsumer vertexConsumer = BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
-        this.bookModel.b(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
+        this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 }

@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -113,8 +114,10 @@ implements RecipeUpdateListener {
         PoseStack poseStack = new PoseStack();
         poseStack.translate(-i, j, 50.0);
         poseStack.scale(k, k, k);
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(-((float)Math.atan(g / 40.0f)) * 20.0f));
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0f);
+        Quaternion quaternion2 = Vector3f.XP.rotationDegrees(-((float)Math.atan(g / 40.0f)) * 20.0f);
+        quaternion.mul(quaternion2);
+        poseStack.mulPose(quaternion);
         float h = livingEntity.yBodyRot;
         float l = livingEntity.yRot;
         float m = livingEntity.xRot;
@@ -126,6 +129,9 @@ implements RecipeUpdateListener {
         livingEntity.yHeadRot = livingEntity.yRot;
         livingEntity.yHeadRotO = livingEntity.yRot;
         EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion2.conj();
+        quaternion2.mul(Vector3f.YP.rotationDegrees(180.0f));
+        entityRenderDispatcher.overrideCameraOrientation(quaternion2);
         entityRenderDispatcher.setRenderShadow(false);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack, bufferSource, 0xF000F0);

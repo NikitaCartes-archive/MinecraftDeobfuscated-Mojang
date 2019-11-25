@@ -123,7 +123,7 @@ public class StructureTemplate {
     public List<StructureBlockInfo> filterBlocks(BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block, boolean bl) {
         ArrayList<StructureBlockInfo> list = Lists.newArrayList();
         BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
-        for (StructureBlockInfo structureBlockInfo : structurePlaceSettings.getPalette(this.palettes, blockPos)) {
+        for (StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos)) {
             BlockState blockState;
             BlockPos blockPos2;
             BlockPos blockPos3 = blockPos2 = bl ? StructureTemplate.calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
@@ -156,7 +156,7 @@ public class StructureTemplate {
         if (this.palettes.isEmpty()) {
             return false;
         }
-        List<StructureBlockInfo> list = structurePlaceSettings.getPalette(this.palettes, blockPos);
+        List<StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos);
         if (list.isEmpty() && (structurePlaceSettings.isIgnoreEntities() || this.entityInfoList.isEmpty()) || this.size.getX() < 1 || this.size.getY() < 1 || this.size.getZ() < 1) {
             return false;
         }

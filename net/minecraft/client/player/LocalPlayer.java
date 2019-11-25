@@ -134,6 +134,11 @@ extends AbstractClientPlayer {
     }
 
     @Override
+    public boolean isGlowing() {
+        return super.isGlowing() || this.minecraft.player.isSpectator() && this.minecraft.options.keySpectatorOutlines.isDown();
+    }
+
+    @Override
     public boolean hurt(DamageSource damageSource, float f) {
         return false;
     }
@@ -585,7 +590,7 @@ extends AbstractClientPlayer {
         if (this.abilities.flying || this.isSwimming() || !this.canEnterPose(Pose.CROUCHING)) {
             return false;
         }
-        return this.isShiftKeyDown() || !this.canEnterPose(Pose.STANDING);
+        return this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING);
     }
 
     public boolean isMovingSlowly() {

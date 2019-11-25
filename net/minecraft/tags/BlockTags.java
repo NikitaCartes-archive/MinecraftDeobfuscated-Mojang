@@ -68,6 +68,7 @@ public class BlockTags {
     public static final Tag<Block> BEEHIVES;
     public static final Tag<Block> CROPS;
     public static final Tag<Block> BEE_GROWABLES;
+    public static final Tag<Block> PORTALS;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -138,6 +139,7 @@ public class BlockTags {
         BEEHIVES = BlockTags.bind("beehives");
         CROPS = BlockTags.bind("crops");
         BEE_GROWABLES = BlockTags.bind("bee_growables");
+        PORTALS = BlockTags.bind("portals");
     }
 
     static class Wrapper

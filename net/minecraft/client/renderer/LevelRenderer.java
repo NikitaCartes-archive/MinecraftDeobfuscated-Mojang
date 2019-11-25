@@ -49,6 +49,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Option;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -792,7 +793,7 @@ ResourceManagerReloadListener {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
-        int m;
+        int t;
         boolean bl3;
         Frustum frustum;
         boolean bl2;
@@ -835,7 +836,13 @@ ResourceManagerReloadListener {
         profilerFiller.popPush("terrain_setup");
         this.setupRender(camera, frustum, bl2, this.frameId++, this.minecraft.player.isSpectator());
         profilerFiller.popPush("updatechunks");
-        this.compileChunksUntil(l);
+        int i = 30;
+        int j = this.minecraft.options.framerateLimit;
+        long m = 33333333L;
+        long n = (double)j == Option.FRAMERATE_LIMIT.getMaxValue() ? 0L : (long)(1000000000 / j);
+        long o = Util.getNanos() - l;
+        long p = Mth.clamp(o * 2L, n, 33333333L);
+        this.compileChunksUntil(l + p);
         profilerFiller.popPush("terrain");
         this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
@@ -854,8 +861,7 @@ ResourceManagerReloadListener {
         boolean bl42 = false;
         MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
         for (Entity entity : this.level.entitiesForRendering()) {
-            Object multiBufferSource;
-            boolean bl52;
+            MultiBufferSource multiBufferSource;
             if (!this.entityRenderDispatcher.shouldRender(entity, frustum, d, e, g) && !entity.hasIndirectPassenger(this.minecraft.player) || entity == camera.getEntity() && !camera.isDetached() && (!(camera.getEntity() instanceof LivingEntity) || !((LivingEntity)camera.getEntity()).isSleeping()) || entity instanceof LocalPlayer && camera.getEntity() != entity) continue;
             ++this.renderedEntities;
             if (entity.tickCount == 0) {
@@ -863,21 +869,20 @@ ResourceManagerReloadListener {
                 entity.yOld = entity.getY();
                 entity.zOld = entity.getZ();
             }
-            boolean bl6 = bl52 = this.shouldShowEntityOutlines() && (entity.isGlowing() || entity instanceof Player && this.minecraft.player.isSpectator() && this.minecraft.options.keySpectatorOutlines.isDown());
-            if (bl52) {
+            if (this.shouldShowEntityOutlines() && entity.isGlowing()) {
                 bl42 = true;
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
-                int i = entity.getTeamColor();
-                int j = 255;
-                int k = i >> 16 & 0xFF;
-                m = i >> 8 & 0xFF;
-                int n = i & 0xFF;
-                outlineBufferSource.setColor(k, m, n, 255);
+                int k = entity.getTeamColor();
+                int q = 255;
+                int r = k >> 16 & 0xFF;
+                int s = k >> 8 & 0xFF;
+                t = k & 0xFF;
+                outlineBufferSource.setColor(r, s, t, 255);
             } else {
                 multiBufferSource = bufferSource;
             }
-            this.renderEntity(entity, d, e, g, f, poseStack, (MultiBufferSource)multiBufferSource);
+            this.renderEntity(entity, d, e, g, f, poseStack, multiBufferSource);
         }
         this.checkPoseStack(poseStack);
         bufferSource.endBatch(RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS));
@@ -894,8 +899,8 @@ ResourceManagerReloadListener {
                 poseStack.pushPose();
                 poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos.asLong());
-                if (sortedSet != null && !sortedSet.isEmpty() && (m = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
-                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(m)), poseStack.last());
+                if (sortedSet != null && !sortedSet.isEmpty() && (t = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
+                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(t)), poseStack.last());
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -934,15 +939,15 @@ ResourceManagerReloadListener {
         profilerFiller.popPush("destroyProgress");
         for (Long2ObjectMap.Entry entry : this.destructionProgress.long2ObjectEntrySet()) {
             SortedSet sortedSet2;
-            double q;
-            double p;
+            double w;
+            double v;
             BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-            double o = (double)blockPos3.getX() - d;
-            if (o * o + (p = (double)blockPos3.getY() - e) * p + (q = (double)blockPos3.getZ() - g) * q > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
-            int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+            double u = (double)blockPos3.getX() - d;
+            if (u * u + (v = (double)blockPos3.getY() - e) * v + (w = (double)blockPos3.getZ() - g) * w > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
+            int x = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
             poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
-            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(r)), poseStack.last());
+            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(x)), poseStack.last());
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -960,16 +965,18 @@ ResourceManagerReloadListener {
         }
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());
-        this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g, l);
+        this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
         this.renderWorldBounds(camera);
         RenderSystem.popMatrix();
         bufferSource.endBatch(RenderType.lines());
-        bufferSource.endBatch();
         this.renderBuffers.crumblingBufferSource().endBatch();
+        bufferSource.endBatch(RenderType.glint());
+        bufferSource.endBatch(RenderType.entityGlint());
         bufferSource.endBatch(RenderType.waterMask());
         bufferSource.endBatch(Sheets.translucentBlockSheet());
         bufferSource.endBatch(Sheets.bannerSheet());
         bufferSource.endBatch(Sheets.shieldSheet());
+        bufferSource.endBatch();
         profilerFiller.popPush("translucent");
         this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
         profilerFiller.popPush("particles");

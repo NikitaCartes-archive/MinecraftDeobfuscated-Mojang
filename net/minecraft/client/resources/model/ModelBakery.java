@@ -190,15 +190,15 @@ public class ModelBakery {
         profilerFiller.pop();
     }
 
-    public AtlasSet uploadTextures(TextureManager textureManager, int i, ProfilerFiller profilerFiller) {
+    public AtlasSet uploadTextures(TextureManager textureManager, ProfilerFiller profilerFiller) {
         profilerFiller.push("atlas");
         for (Pair<TextureAtlas, TextureAtlas.Preparations> pair : this.atlasPreparations.values()) {
             TextureAtlas textureAtlas = pair.getFirst();
-            textureAtlas.setMaxMipLevel(i);
-            textureAtlas.reload(pair.getSecond());
+            TextureAtlas.Preparations preparations = pair.getSecond();
+            textureAtlas.reload(preparations);
             textureManager.register(textureAtlas.location(), textureAtlas);
             textureManager.bind(textureAtlas.location());
-            textureAtlas.setFilter(false, i > 0);
+            textureAtlas.updateFilter(preparations);
         }
         this.atlasSet = new AtlasSet(this.atlasPreparations.values().stream().map(Pair::getFirst).collect(Collectors.toList()));
         profilerFiller.popPush("baking");

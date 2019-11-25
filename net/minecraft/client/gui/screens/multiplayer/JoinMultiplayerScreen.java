@@ -71,11 +71,11 @@ extends Screen {
         this.selectButton = this.addButton(new Button(this.width / 2 - 154, this.height - 52, 100, 20, I18n.get("selectServer.select", new Object[0]), button -> this.joinSelectedServer()));
         this.addButton(new Button(this.width / 2 - 50, this.height - 52, 100, 20, I18n.get("selectServer.direct", new Object[0]), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
-            this.minecraft.setScreen(new DirectJoinServerScreen(this::directJoinCallback, this.editingServer));
+            this.minecraft.setScreen(new DirectJoinServerScreen(this, this::directJoinCallback, this.editingServer));
         }));
         this.addButton(new Button(this.width / 2 + 4 + 50, this.height - 52, 100, 20, I18n.get("selectServer.add", new Object[0]), button -> {
             this.editingServer = new ServerData(I18n.get("selectServer.defaultName", new Object[0]), "", false);
-            this.minecraft.setScreen(new EditServerScreen(this::addServerCallback, this.editingServer));
+            this.minecraft.setScreen(new EditServerScreen(this, this::addServerCallback, this.editingServer));
         }));
         this.editButton = this.addButton(new Button(this.width / 2 - 154, this.height - 28, 70, 20, I18n.get("selectServer.edit", new Object[0]), button -> {
             ServerSelectionList.Entry entry = (ServerSelectionList.Entry)this.serverSelectionList.getSelected();
@@ -83,7 +83,7 @@ extends Screen {
                 ServerData serverData = ((ServerSelectionList.OnlineServerEntry)entry).getServerData();
                 this.editingServer = new ServerData(serverData.name, serverData.ip, false);
                 this.editingServer.copyFrom(serverData);
-                this.minecraft.setScreen(new EditServerScreen(this::editServerCallback, this.editingServer));
+                this.minecraft.setScreen(new EditServerScreen(this, this::editServerCallback, this.editingServer));
             }
         }));
         this.deleteButton = this.addButton(new Button(this.width / 2 - 74, this.height - 28, 70, 20, I18n.get("selectServer.delete", new Object[0]), button -> {

@@ -404,16 +404,11 @@ ResourceManagerReloadListener {
         }
         int i = (int)(this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth());
         int j = (int)(this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight());
-        int k = this.minecraft.options.framerateLimit;
         PoseStack poseStack = new PoseStack();
         RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
         if (bl && this.minecraft.level != null) {
             this.minecraft.getProfiler().push("level");
-            int m = 30;
-            long n = Util.getNanos() - l;
-            long o = 1000000000 / m;
-            long p = Math.max(o * 3L / 4L - n, o / 10L);
-            this.renderLevel(f, Util.getNanos() + p, poseStack);
+            this.renderLevel(f, l, poseStack);
             if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
                 this.lastScreenshotAttempt = Util.getMillis();
                 if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -540,11 +535,11 @@ ResourceManagerReloadListener {
         this.minecraft.getProfiler().popPush("camera");
         Camera camera = this.mainCamera;
         this.renderDistance = this.minecraft.options.renderDistance * 16;
-        Matrix4f matrix4f = this.getProjectionMatrix(camera, f, true);
-        this.resetProjectionMatrix(matrix4f);
-        this.bobHurt(poseStack, f);
+        PoseStack poseStack2 = new PoseStack();
+        poseStack2.last().pose().multiply(this.getProjectionMatrix(camera, f, true));
+        this.bobHurt(poseStack2, f);
         if (this.minecraft.options.bobView) {
-            this.bobView(poseStack, f);
+            this.bobView(poseStack2, f);
         }
         if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
             int i = 20;
@@ -554,11 +549,13 @@ ResourceManagerReloadListener {
             float h = 5.0f / (g * g + 5.0f) - g * 0.04f;
             h *= h;
             Vector3f vector3f = new Vector3f(0.0f, Mth.SQRT_OF_TWO / 2.0f, Mth.SQRT_OF_TWO / 2.0f);
-            poseStack.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
-            poseStack.scale(1.0f / h, 1.0f, 1.0f);
+            poseStack2.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
+            poseStack2.scale(1.0f / h, 1.0f, 1.0f);
             float j = -((float)this.tick + f) * (float)i;
-            poseStack.mulPose(vector3f.rotationDegrees(j));
+            poseStack2.mulPose(vector3f.rotationDegrees(j));
         }
+        Matrix4f matrix4f = poseStack2.last().pose();
+        this.resetProjectionMatrix(matrix4f);
         camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), this.minecraft.options.thirdPersonView > 0, this.minecraft.options.thirdPersonView == 2, f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0f));

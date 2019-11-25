@@ -3,30 +3,31 @@
  */
 package net.minecraft.client.particle;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.GuardianModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ElderGuardianRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class MobAppearanceParticle
 extends Particle {
-    private LivingEntity displayEntity;
+    private final Model model = new GuardianModel();
+    private final RenderType renderType = RenderType.entityTranslucent(ElderGuardianRenderer.GUARDIAN_ELDER_LOCATION);
 
     private MobAppearanceParticle(Level level, double d, double e, double f) {
         super(level, d, e, f);
@@ -40,46 +41,18 @@ extends Particle {
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        if (this.displayEntity == null) {
-            ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(this.level);
-            elderGuardian.setGhost();
-            this.displayEntity = elderGuardian;
-        }
-    }
-
-    @Override
     public void render(VertexConsumer vertexConsumer, Camera camera, float f) {
-        if (this.displayEntity == null) {
-            return;
-        }
-        EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-        float g = 1.0f / ElderGuardian.ELDER_SIZE_SCALE;
-        float h = ((float)this.age + f) / (float)this.lifetime;
-        RenderSystem.depthMask(true);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        float i = 240.0f;
-        RenderSystem.glMultiTexCoord2f(33986, 240.0f, 240.0f);
-        RenderSystem.pushMatrix();
-        float j = 0.05f + 0.5f * Mth.sin(h * (float)Math.PI);
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, j);
-        RenderSystem.translatef(0.0f, 1.8f, 0.0f);
-        RenderSystem.rotatef(180.0f - camera.getYRot(), 0.0f, 1.0f, 0.0f);
-        RenderSystem.rotatef(60.0f - 150.0f * h - camera.getXRot(), 1.0f, 0.0f, 0.0f);
-        RenderSystem.translatef(0.0f, -0.4f, -1.5f);
-        RenderSystem.scalef(g, g, g);
-        this.displayEntity.yRot = 0.0f;
-        this.displayEntity.yHeadRot = 0.0f;
-        this.displayEntity.yRotO = 0.0f;
-        this.displayEntity.yHeadRotO = 0.0f;
+        float g = ((float)this.age + f) / (float)this.lifetime;
+        float h = 0.05f + 0.5f * Mth.sin(g * (float)Math.PI);
+        PoseStack poseStack = new PoseStack();
+        poseStack.mulPose(camera.rotation());
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(150.0f * g - 60.0f));
+        poseStack.scale(-1.0f, -1.0f, 1.0f);
+        poseStack.translate(0.0, -1.101f, 1.5);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        entityRenderDispatcher.render(this.displayEntity, 0.0, 0.0, 0.0, 0.0f, f, new PoseStack(), bufferSource, 0xF000F0);
+        VertexConsumer vertexConsumer2 = bufferSource.getBuffer(this.renderType);
+        this.model.renderToBuffer(poseStack, vertexConsumer2, 0xF000F0, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, h);
         bufferSource.endBatch();
-        RenderSystem.popMatrix();
-        RenderSystem.enableDepthTest();
     }
 
     @Environment(value=EnvType.CLIENT)

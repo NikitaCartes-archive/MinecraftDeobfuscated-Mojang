@@ -58,7 +58,6 @@ implements Tickable {
     private final Map<ResourceLocation, TextureAtlasSprite> texturesByName = Maps.newHashMap();
     private final ResourceLocation location;
     private final int maxSupportedTextureSize;
-    private int maxMipLevel;
 
     public TextureAtlas(ResourceLocation resourceLocation) {
         this.location = resourceLocation;
@@ -72,8 +71,8 @@ implements Tickable {
     public void reload(Preparations preparations) {
         this.sprites.clear();
         this.sprites.addAll(preparations.sprites);
-        LOGGER.info("Created: {}x{} {}-atlas", (Object)preparations.width, (Object)preparations.height, (Object)this.location);
-        TextureUtil.prepareImage(this.getId(), this.maxMipLevel, preparations.width, preparations.height);
+        LOGGER.info("Created: {}x{}x{} {}-atlas", (Object)preparations.width, (Object)preparations.height, (Object)preparations.mipLevel, (Object)this.location);
+        TextureUtil.prepareImage(this.getId(), preparations.mipLevel, preparations.width, preparations.height);
         this.clearTextureData();
         for (TextureAtlasSprite textureAtlasSprite : preparations.regions) {
             this.texturesByName.put(textureAtlasSprite.getName(), textureAtlasSprite);
@@ -92,6 +91,7 @@ implements Tickable {
     }
 
     public Preparations prepareToStitch(ResourceManager resourceManager, Stream<ResourceLocation> stream, ProfilerFiller profilerFiller, int i) {
+        int m;
         profilerFiller.push("preparing");
         Set<ResourceLocation> set = stream.peek(resourceLocation -> {
             if (resourceLocation == null) {
@@ -105,7 +105,7 @@ implements Tickable {
         profilerFiller.popPush("extracting_frames");
         for (TextureAtlasSprite.Info info2 : this.getBasicSpriteInfos(resourceManager, set)) {
             k = Math.min(k, Math.min(info2.width(), info2.height()));
-            int m = Math.min(Integer.lowestOneBit(info2.width()), Integer.lowestOneBit(info2.height()));
+            m = Math.min(Integer.lowestOneBit(info2.width()), Integer.lowestOneBit(info2.height()));
             if (m < l) {
                 LOGGER.warn("Texture {} with size {}x{} limits mip level from {} to {}", (Object)info2.name(), (Object)info2.width(), (Object)info2.height(), (Object)Mth.log2(l), (Object)Mth.log2(m));
                 l = m;
@@ -114,10 +114,11 @@ implements Tickable {
         }
         int n = Math.min(k, l);
         int o = Mth.log2(n);
-        this.maxMipLevel = i;
-        if (o < this.maxMipLevel) {
-            LOGGER.warn("{}: dropping miplevel from {} to {}, because of minimum power of two: {}", (Object)this.location, (Object)this.maxMipLevel, (Object)o, (Object)n);
-            this.maxMipLevel = o;
+        if (o < i) {
+            LOGGER.warn("{}: dropping miplevel from {} to {}, because of minimum power of two: {}", (Object)this.location, (Object)i, (Object)o, (Object)n);
+            m = o;
+        } else {
+            m = i;
         }
         profilerFiller.popPush("register");
         stitcher.registerSprite(MissingTextureAtlasSprite.info());
@@ -132,9 +133,9 @@ implements Tickable {
             throw new ReportedException(crashReport);
         }
         profilerFiller.popPush("loading");
-        List<TextureAtlasSprite> list = this.getLoadedSprites(resourceManager, stitcher);
+        List<TextureAtlasSprite> list = this.getLoadedSprites(resourceManager, stitcher, m);
         profilerFiller.pop();
-        return new Preparations(set, stitcher.getWidth(), stitcher.getHeight(), list);
+        return new Preparations(set, stitcher.getWidth(), stitcher.getHeight(), m, list);
     }
 
     private Collection<TextureAtlasSprite.Info> getBasicSpriteInfos(ResourceManager resourceManager, Set<ResourceLocation> set) {
@@ -167,16 +168,16 @@ implements Tickable {
         return concurrentLinkedQueue;
     }
 
-    private List<TextureAtlasSprite> getLoadedSprites(ResourceManager resourceManager, Stitcher stitcher) {
+    private List<TextureAtlasSprite> getLoadedSprites(ResourceManager resourceManager, Stitcher stitcher, int i) {
         ConcurrentLinkedQueue concurrentLinkedQueue = new ConcurrentLinkedQueue();
         ArrayList list = Lists.newArrayList();
-        stitcher.gatherSprites((info, i, j, k, l) -> {
+        stitcher.gatherSprites((info, j, k, l, m) -> {
             if (info == MissingTextureAtlasSprite.info()) {
-                MissingTextureAtlasSprite missingTextureAtlasSprite = MissingTextureAtlasSprite.newInstance(this, this.maxMipLevel, i, j, k, l);
+                MissingTextureAtlasSprite missingTextureAtlasSprite = MissingTextureAtlasSprite.newInstance(this, i, j, k, l, m);
                 concurrentLinkedQueue.add(missingTextureAtlasSprite);
             } else {
                 list.add(CompletableFuture.runAsync(() -> {
-                    TextureAtlasSprite textureAtlasSprite = this.load(resourceManager, info, i, j, k, l);
+                    TextureAtlasSprite textureAtlasSprite = this.load(resourceManager, info, j, k, i, l, m);
                     if (textureAtlasSprite != null) {
                         concurrentLinkedQueue.add(textureAtlasSprite);
                     }
@@ -193,11 +194,11 @@ implements Tickable {
      * Enabled aggressive exception aggregation
      */
     @Nullable
-    private TextureAtlasSprite load(ResourceManager resourceManager, TextureAtlasSprite.Info info, int i, int j, int k, int l) {
+    private TextureAtlasSprite load(ResourceManager resourceManager, TextureAtlasSprite.Info info, int i, int j, int k, int l, int m) {
         ResourceLocation resourceLocation = this.getResourceLocation(info.name());
         try (Resource resource = resourceManager.getResource(resourceLocation);){
             NativeImage nativeImage = NativeImage.read(resource.getInputStream());
-            TextureAtlasSprite textureAtlasSprite = new TextureAtlasSprite(this, info, this.maxMipLevel, i, j, k, l, nativeImage);
+            TextureAtlasSprite textureAtlasSprite = new TextureAtlasSprite(this, info, k, i, j, l, m, nativeImage);
             return textureAtlasSprite;
         } catch (RuntimeException runtimeException) {
             LOGGER.error("Unable to parse metadata from {}", (Object)resourceLocation, (Object)runtimeException);
@@ -228,10 +229,6 @@ implements Tickable {
         }
     }
 
-    public void setMaxMipLevel(int i) {
-        this.maxMipLevel = i;
-    }
-
     public TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {
         TextureAtlasSprite textureAtlasSprite = this.texturesByName.get(resourceLocation);
         if (textureAtlasSprite == null) {
@@ -252,17 +249,23 @@ implements Tickable {
         return this.location;
     }
 
+    public void updateFilter(Preparations preparations) {
+        this.setFilter(false, preparations.mipLevel > 0);
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static class Preparations {
         final Set<ResourceLocation> sprites;
         final int width;
         final int height;
+        final int mipLevel;
         final List<TextureAtlasSprite> regions;
 
-        public Preparations(Set<ResourceLocation> set, int i, int j, List<TextureAtlasSprite> list) {
+        public Preparations(Set<ResourceLocation> set, int i, int j, int k, List<TextureAtlasSprite> list) {
             this.sprites = set;
             this.width = i;
             this.height = j;
+            this.mipLevel = k;
             this.regions = list;
         }
     }

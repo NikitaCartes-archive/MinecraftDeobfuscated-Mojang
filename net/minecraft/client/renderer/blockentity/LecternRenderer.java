@@ -41,7 +41,7 @@ extends BlockEntityRenderer<LecternBlockEntity> {
         poseStack.translate(0.0, -0.125, 0.0);
         this.bookModel.setupAnim(0.0f, 0.1f, 0.9f, 1.2f);
         VertexConsumer vertexConsumer = EnchantTableRenderer.BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
-        this.bookModel.b(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
+        this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
         poseStack.popPose();
     }
 }

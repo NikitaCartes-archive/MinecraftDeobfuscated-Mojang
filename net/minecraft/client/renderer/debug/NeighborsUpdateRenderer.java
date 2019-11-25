@@ -46,8 +46,8 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
-        long m = this.minecraft.level.getGameTime();
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
+        long l = this.minecraft.level.getGameTime();
         int i = 200;
         double g = 0.0025;
         HashSet<BlockPos> set = Sets.newHashSet();
@@ -58,8 +58,8 @@ implements DebugRenderer.SimpleDebugRenderer {
             Map.Entry<Long, Map<BlockPos, Integer>> entry = iterator.next();
             Long long_ = entry.getKey();
             Map<BlockPos, Integer> map2 = entry.getValue();
-            long n = m - long_;
-            if (n > 200L) {
+            long m = l - long_;
+            if (m > 200L) {
                 iterator.remove();
                 continue;
             }
@@ -67,7 +67,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 BlockPos blockPos = entry2.getKey();
                 Integer integer = entry2.getValue();
                 if (!set.add(blockPos)) continue;
-                AABB aABB = new AABB(BlockPos.ZERO).inflate(0.002).deflate(0.0025 * (double)n).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()).move(-d, -e, -f);
+                AABB aABB = new AABB(BlockPos.ZERO).inflate(0.002).deflate(0.0025 * (double)m).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()).move(-d, -e, -f);
                 LevelRenderer.renderLineBox(vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, 1.0f, 1.0f, 1.0f, 1.0f);
                 map.put(blockPos, integer);
             }

@@ -375,7 +375,7 @@ public abstract class PlayerList {
             if (optional.isPresent()) {
                 Vec3 vec3 = optional.get();
                 serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, 0.0f, 0.0f);
-                serverPlayer2.setRespawnPosition(blockPos, bl2);
+                serverPlayer2.setRespawnPosition(blockPos, bl2, false);
             } else {
                 serverPlayer2.connection.send(new ClientboundGameEventPacket(0, 0.0f));
             }

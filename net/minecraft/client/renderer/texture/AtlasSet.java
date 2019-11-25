@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,14 +35,6 @@ implements AutoCloseable {
     public void close() {
         this.atlases.values().forEach(TextureAtlas::clearTextureData);
         this.atlases.clear();
-    }
-
-    public void updateMaxMipLevel(TextureManager textureManager, int i) {
-        this.atlases.values().forEach(textureAtlas -> {
-            textureAtlas.setMaxMipLevel(i);
-            textureManager.bind(textureAtlas.location());
-            textureAtlas.setFilter(false, i > 0);
-        });
     }
 }
 

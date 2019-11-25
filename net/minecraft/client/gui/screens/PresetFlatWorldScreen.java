@@ -82,6 +82,11 @@ extends Screen {
     }
 
     @Override
+    public void onClose() {
+        this.minecraft.setScreen(this.parent);
+    }
+
+    @Override
     public void removed() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }

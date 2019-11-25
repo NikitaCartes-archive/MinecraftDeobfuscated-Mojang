@@ -45,6 +45,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
@@ -101,6 +102,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
@@ -1360,6 +1362,10 @@ extends Entity {
                 this.breakItem(this.getItemBySlot(EquipmentSlot.FEET));
                 break;
             }
+            case 54: {
+                HoneyBlock.showJumpParticles(this);
+                break;
+            }
             default: {
                 super.handleEntityEvent(b);
             }
@@ -1487,7 +1493,11 @@ extends Entity {
         }
     }
 
-    public void findStandUpPosition(Entity entity) {
+    private void findStandUpPosition(Entity entity) {
+        if (this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS)) {
+            this.setPos(entity.getX(), entity.getY(1.0) + 0.001, entity.getZ());
+            return;
+        }
         if (entity instanceof Boat || entity instanceof AbstractHorse) {
             float f;
             int i;

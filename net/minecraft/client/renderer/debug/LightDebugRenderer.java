@@ -28,7 +28,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         ClientLevel level = this.minecraft.level;
         RenderSystem.pushMatrix();
         RenderSystem.enableBlend();
@@ -40,9 +40,9 @@ implements DebugRenderer.SimpleDebugRenderer {
             int i = level.getBrightness(LightLayer.SKY, blockPos2);
             float g = (float)(15 - i) / 15.0f * 0.5f + 0.16f;
             int j = Mth.hsvToRgb(g, 0.9f, 0.9f);
-            long m = SectionPos.blockToSection(blockPos2.asLong());
-            if (longSet.add(m)) {
-                DebugRenderer.renderFloatingText(((Level)level).getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(m)), SectionPos.x(m) * 16 + 8, SectionPos.y(m) * 16 + 8, SectionPos.z(m) * 16 + 8, 0xFF0000, 0.3f);
+            long l = SectionPos.blockToSection(blockPos2.asLong());
+            if (longSet.add(l)) {
+                DebugRenderer.renderFloatingText(((Level)level).getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)), SectionPos.x(l) * 16 + 8, SectionPos.y(l) * 16 + 8, SectionPos.z(l) * 16 + 8, 0xFF0000, 0.3f);
             }
             if (i == 15) continue;
             DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);

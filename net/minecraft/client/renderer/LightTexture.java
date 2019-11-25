@@ -157,5 +157,13 @@ implements AutoCloseable {
     public static int pack(int i, int j) {
         return i << 4 | j << 20;
     }
+
+    public static int block(int i) {
+        return i >> 4 & 0xFFFF;
+    }
+
+    public static int sky(int i) {
+        return i >> 20 & 0xFFFF;
+    }
 }
 

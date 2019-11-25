@@ -321,8 +321,14 @@ extends Level {
     public void animateTick(int i, int j, int k) {
         int l = 32;
         Random random = new Random();
-        ItemStack itemStack = this.minecraft.player.getMainHandItem();
-        boolean bl = this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE && !itemStack.isEmpty() && itemStack.getItem() == Blocks.BARRIER.asItem();
+        boolean bl = false;
+        if (this.minecraft.gameMode.getPlayerMode() == GameType.CREATIVE) {
+            for (ItemStack itemStack : this.minecraft.player.getHandSlots()) {
+                if (itemStack.getItem() != Blocks.BARRIER.asItem()) continue;
+                bl = true;
+                break;
+            }
+        }
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int m = 0; m < 667; ++m) {
             this.doAnimateTick(i, j, k, 16, random, bl, mutableBlockPos);

@@ -328,7 +328,7 @@ TickableBlockEntity {
         if (block instanceof WorldlyContainerHolder) {
             container = ((WorldlyContainerHolder)((Object)block)).getContainer(blockState, level, blockPos);
         } else if (block.isEntityBlock() && (blockEntity = level.getBlockEntity(blockPos)) instanceof Container && (container = (Container)((Object)blockEntity)) instanceof ChestBlockEntity && block instanceof ChestBlock) {
-            container = ChestBlock.getContainer(blockState, level, blockPos, true);
+            container = ChestBlock.getContainer((ChestBlock)block, blockState, level, blockPos, true);
         }
         if (container == null && !(list = level.getEntities((Entity)null, new AABB(d - 0.5, e - 0.5, f - 0.5, d + 0.5, e + 0.5, f + 0.5), EntitySelector.CONTAINER_ENTITY_SELECTOR)).isEmpty()) {
             container = (Container)((Object)list.get(level.random.nextInt(list.size())));

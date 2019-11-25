@@ -31,6 +31,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -204,9 +205,8 @@ implements EntityBlock {
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        Direction direction = blockState.getValue(FACING);
-        Direction direction2 = blockState.getValue(PART) == BedPart.HEAD ? direction : direction.getOpposite();
-        switch (direction2) {
+        Direction direction = BedBlock.getConnectedDirection(blockState).getOpposite();
+        switch (direction) {
             case NORTH: {
                 return NORTH_SHAPE;
             }
@@ -218,6 +218,20 @@ implements EntityBlock {
             }
         }
         return EAST_SHAPE;
+    }
+
+    public static Direction getConnectedDirection(BlockState blockState) {
+        Direction direction = blockState.getValue(FACING);
+        return blockState.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static DoubleBlockCombiner.BlockType getBlockType(BlockState blockState) {
+        BedPart bedPart = blockState.getValue(PART);
+        if (bedPart == BedPart.HEAD) {
+            return DoubleBlockCombiner.BlockType.FIRST;
+        }
+        return DoubleBlockCombiner.BlockType.SECOND;
     }
 
     public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos, int i) {
