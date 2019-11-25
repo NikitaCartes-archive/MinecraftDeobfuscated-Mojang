@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -56,6 +57,7 @@ public class EntityRenderDispatcher {
 	public final TextureManager textureManager;
 	private Level level;
 	public Camera camera;
+	private Quaternion cameraOrientation;
 	public Entity crosshairPickEntity;
 	public final Options options;
 	private boolean shouldRenderShadow = true;
@@ -205,7 +207,12 @@ public class EntityRenderDispatcher {
 	public void prepare(Level level, Camera camera, Entity entity) {
 		this.level = level;
 		this.camera = camera;
+		this.cameraOrientation = camera.rotation();
 		this.crosshairPickEntity = entity;
+	}
+
+	public void overrideCameraOrientation(Quaternion quaternion) {
+		this.cameraOrientation = quaternion;
 	}
 
 	public void setRenderShadow(boolean bl) {
@@ -459,6 +466,10 @@ public class EntityRenderDispatcher {
 
 	public double distanceToSqr(double d, double e, double f) {
 		return this.camera.getPosition().distanceToSqr(d, e, f);
+	}
+
+	public Quaternion cameraOrientation() {
+		return this.cameraOrientation;
 	}
 
 	public Font getFont() {

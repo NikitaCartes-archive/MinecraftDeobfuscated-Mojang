@@ -351,7 +351,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 			if (blockEntity instanceof Container) {
 				container = (Container)blockEntity;
 				if (container instanceof ChestBlockEntity && block instanceof ChestBlock) {
-					container = ChestBlock.getContainer(blockState, level, blockPos, true);
+					container = ChestBlock.getContainer((ChestBlock)block, blockState, level, blockPos, true);
 				}
 			}
 		}

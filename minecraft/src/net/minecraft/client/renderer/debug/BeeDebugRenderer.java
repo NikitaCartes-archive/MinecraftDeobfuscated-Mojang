@@ -52,7 +52,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		RenderSystem.pushMatrix();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();

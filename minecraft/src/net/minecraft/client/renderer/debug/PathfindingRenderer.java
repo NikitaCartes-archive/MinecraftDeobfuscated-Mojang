@@ -31,9 +31,9 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		if (!this.pathMap.isEmpty()) {
-			long m = Util.getMillis();
+			long l = Util.getMillis();
 
 			for (Integer integer : this.pathMap.keySet()) {
 				Path path = (Path)this.pathMap.get(integer);
@@ -42,7 +42,7 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 
 			for (Integer integer2 : (Integer[])this.creationMap.keySet().toArray(new Integer[0])) {
-				if (m - (Long)this.creationMap.get(integer2) > 5000L) {
+				if (l - (Long)this.creationMap.get(integer2) > 5000L) {
 					this.pathMap.remove(integer2);
 					this.creationMap.remove(integer2);
 				}

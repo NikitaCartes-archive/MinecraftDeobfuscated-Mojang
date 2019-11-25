@@ -1,11 +1,11 @@
 package net.minecraft.client.renderer.blockentity;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,7 +20,9 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 	public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
 	public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
 	private static final Random RANDOM = new Random(31100L);
-	private static final List<RenderType> RENDER_TYPES = (List<RenderType>)IntStream.range(0, 16).mapToObj(RenderType::endPortal).collect(Collectors.toList());
+	private static final List<RenderType> RENDER_TYPES = (List<RenderType>)IntStream.range(0, 16)
+		.mapToObj(i -> RenderType.endPortal(i + 1))
+		.collect(ImmutableList.toImmutableList());
 
 	public TheEndPortalRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher) {
 		super(blockEntityRenderDispatcher);
@@ -32,10 +34,10 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 		int k = this.getPasses(d);
 		float g = this.getOffset();
 		Matrix4f matrix4f = poseStack.last().pose();
-		this.renderCube(theEndPortalBlockEntity, g, 0.15F, matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(1)));
+		this.renderCube(theEndPortalBlockEntity, g, 0.15F, matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(0)));
 
 		for (int l = 1; l < k; l++) {
-			this.renderCube(theEndPortalBlockEntity, g, 2.0F / (float)(18 - l), matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(l + 1)));
+			this.renderCube(theEndPortalBlockEntity, g, 2.0F / (float)(18 - l), matrix4f, multiBufferSource.getBuffer((RenderType)RENDER_TYPES.get(l)));
 		}
 	}
 
@@ -77,28 +79,23 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> extends Blo
 	}
 
 	protected int getPasses(double d) {
-		int i;
 		if (d > 36864.0) {
-			i = 1;
+			return 1;
 		} else if (d > 25600.0) {
-			i = 3;
+			return 3;
 		} else if (d > 16384.0) {
-			i = 5;
+			return 5;
 		} else if (d > 9216.0) {
-			i = 7;
+			return 7;
 		} else if (d > 4096.0) {
-			i = 9;
+			return 9;
 		} else if (d > 1024.0) {
-			i = 11;
+			return 11;
 		} else if (d > 576.0) {
-			i = 13;
-		} else if (d > 256.0) {
-			i = 14;
+			return 13;
 		} else {
-			i = 15;
+			return d > 256.0 ? 14 : 15;
 		}
-
-		return i;
 	}
 
 	protected float getOffset() {

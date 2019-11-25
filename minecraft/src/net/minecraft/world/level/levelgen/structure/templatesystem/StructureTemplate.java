@@ -129,7 +129,7 @@ public class StructureTemplate {
 		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
 		BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
 
-		for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePlaceSettings.getPalette(this.palettes, blockPos)) {
+		for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos)) {
 			BlockPos blockPos2 = bl ? calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
 			if (boundingBox == null || boundingBox.isInside(blockPos2)) {
 				BlockState blockState = structureBlockInfo.state;
@@ -167,7 +167,7 @@ public class StructureTemplate {
 		if (this.palettes.isEmpty()) {
 			return false;
 		} else {
-			List<StructureTemplate.StructureBlockInfo> list = structurePlaceSettings.getPalette(this.palettes, blockPos);
+			List<StructureTemplate.StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos);
 			if ((!list.isEmpty() || !structurePlaceSettings.isIgnoreEntities() && !this.entityInfoList.isEmpty())
 				&& this.size.getX() >= 1
 				&& this.size.getY() >= 1

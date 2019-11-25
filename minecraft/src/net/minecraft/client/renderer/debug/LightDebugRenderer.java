@@ -23,7 +23,7 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Level level = this.minecraft.level;
 		RenderSystem.pushMatrix();
 		RenderSystem.enableBlend();
@@ -36,13 +36,13 @@ public class LightDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			int i = level.getBrightness(LightLayer.SKY, blockPos2);
 			float g = (float)(15 - i) / 15.0F * 0.5F + 0.16F;
 			int j = Mth.hsvToRgb(g, 0.9F, 0.9F);
-			long m = SectionPos.blockToSection(blockPos2.asLong());
-			if (longSet.add(m)) {
+			long l = SectionPos.blockToSection(blockPos2.asLong());
+			if (longSet.add(l)) {
 				DebugRenderer.renderFloatingText(
-					level.getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(m)),
-					(double)(SectionPos.x(m) * 16 + 8),
-					(double)(SectionPos.y(m) * 16 + 8),
-					(double)(SectionPos.z(m) * 16 + 8),
+					level.getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)),
+					(double)(SectionPos.x(l) * 16 + 8),
+					(double)(SectionPos.y(l) * 16 + 8),
+					(double)(SectionPos.z(l) * 16 + 8),
 					16711680,
 					0.3F
 				);

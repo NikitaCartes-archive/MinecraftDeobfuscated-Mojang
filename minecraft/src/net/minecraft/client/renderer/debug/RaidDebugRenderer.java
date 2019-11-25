@@ -24,7 +24,7 @@ public class RaidDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		BlockPos blockPos = this.getCamera().getBlockPosition();
 
 		for (BlockPos blockPos2 : this.raidCenters) {

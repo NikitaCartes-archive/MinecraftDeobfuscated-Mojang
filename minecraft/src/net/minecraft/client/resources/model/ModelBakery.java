@@ -209,16 +209,16 @@ public class ModelBakery {
 		profilerFiller.pop();
 	}
 
-	public AtlasSet uploadTextures(TextureManager textureManager, int i, ProfilerFiller profilerFiller) {
+	public AtlasSet uploadTextures(TextureManager textureManager, ProfilerFiller profilerFiller) {
 		profilerFiller.push("atlas");
 
 		for (Pair<TextureAtlas, TextureAtlas.Preparations> pair : this.atlasPreparations.values()) {
 			TextureAtlas textureAtlas = pair.getFirst();
-			textureAtlas.setMaxMipLevel(i);
-			textureAtlas.reload(pair.getSecond());
+			TextureAtlas.Preparations preparations = pair.getSecond();
+			textureAtlas.reload(preparations);
 			textureManager.register(textureAtlas.location(), textureAtlas);
 			textureManager.bind(textureAtlas.location());
-			textureAtlas.setFilter(false, i > 0);
+			textureAtlas.updateFilter(preparations);
 		}
 
 		this.atlasSet = new AtlasSet((Collection<TextureAtlas>)this.atlasPreparations.values().stream().map(Pair::getFirst).collect(Collectors.toList()));
@@ -228,8 +228,8 @@ public class ModelBakery {
 
 			try {
 				bakedModel = this.bake(resourceLocation, BlockModelRotation.X0_Y0);
-			} catch (Exception var4) {
-				LOGGER.warn("Unable to bake model: '{}': {}", resourceLocation, var4);
+			} catch (Exception var4x) {
+				LOGGER.warn("Unable to bake model: '{}': {}", resourceLocation, var4x);
 			}
 
 			if (bakedModel != null) {

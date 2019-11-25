@@ -7,10 +7,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
@@ -239,6 +241,12 @@ public class BlockEntityType<T extends BlockEntity> {
 
 	public boolean isValid(Block block) {
 		return this.validBlocks.contains(block);
+	}
+
+	@Nullable
+	public T getBlockEntity(BlockGetter blockGetter, BlockPos blockPos) {
+		BlockEntity blockEntity = blockGetter.getBlockEntity(blockPos);
+		return (T)(blockEntity != null && blockEntity.getType() == this ? blockEntity : null);
 	}
 
 	public static final class Builder<T extends BlockEntity> {

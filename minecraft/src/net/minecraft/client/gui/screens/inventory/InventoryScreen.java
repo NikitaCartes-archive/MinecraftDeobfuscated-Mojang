@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -106,8 +107,10 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		PoseStack poseStack = new PoseStack();
 		poseStack.translate((double)(-i), (double)j, 50.0);
 		poseStack.scale((float)k, (float)k, (float)k);
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(-((float)Math.atan((double)(g / 40.0F))) * 20.0F));
+		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
+		Quaternion quaternion2 = Vector3f.XP.rotationDegrees(-((float)Math.atan((double)(g / 40.0F))) * 20.0F);
+		quaternion.mul(quaternion2);
+		poseStack.mulPose(quaternion);
 		float h = livingEntity.yBodyRot;
 		float l = livingEntity.yRot;
 		float m = livingEntity.xRot;
@@ -119,6 +122,9 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		livingEntity.yHeadRot = livingEntity.yRot;
 		livingEntity.yHeadRotO = livingEntity.yRot;
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+		quaternion2.conj();
+		quaternion2.mul(Vector3f.YP.rotationDegrees(180.0F));
+		entityRenderDispatcher.overrideCameraOrientation(quaternion2);
 		entityRenderDispatcher.setRenderShadow(false);
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880);

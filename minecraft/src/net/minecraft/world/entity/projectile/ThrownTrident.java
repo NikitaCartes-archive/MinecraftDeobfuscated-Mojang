@@ -125,30 +125,32 @@ public class ThrownTrident extends AbstractArrow {
 		DamageSource damageSource = DamageSource.trident(this, (Entity)(entity2 == null ? this : entity2));
 		this.dealtDamage = true;
 		SoundEvent soundEvent = SoundEvents.TRIDENT_HIT;
-		if (entity.hurt(damageSource, f) && entity instanceof LivingEntity) {
-			LivingEntity livingEntity2 = (LivingEntity)entity;
-			if (entity2 instanceof LivingEntity) {
-				EnchantmentHelper.doPostHurtEffects(livingEntity2, entity2);
-				EnchantmentHelper.doPostDamageEffects((LivingEntity)entity2, livingEntity2);
+		if (entity.hurt(damageSource, f) && entity.getType() != EntityType.ENDERMAN) {
+			if (entity instanceof LivingEntity) {
+				LivingEntity livingEntity2 = (LivingEntity)entity;
+				if (entity2 instanceof LivingEntity) {
+					EnchantmentHelper.doPostHurtEffects(livingEntity2, entity2);
+					EnchantmentHelper.doPostDamageEffects((LivingEntity)entity2, livingEntity2);
+				}
+
+				this.doPostHurtEffects(livingEntity2);
 			}
 
-			this.doPostHurtEffects(livingEntity2);
-		}
-
-		this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
-		float g = 1.0F;
-		if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem)) {
-			BlockPos blockPos = entity.getCommandSenderBlockPosition();
-			if (this.level.canSeeSky(blockPos)) {
-				LightningBolt lightningBolt = new LightningBolt(this.level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, false);
-				lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
-				((ServerLevel)this.level).addGlobalEntity(lightningBolt);
-				soundEvent = SoundEvents.TRIDENT_THUNDER;
-				g = 5.0F;
+			this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
+			float g = 1.0F;
+			if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem)) {
+				BlockPos blockPos = entity.getCommandSenderBlockPosition();
+				if (this.level.canSeeSky(blockPos)) {
+					LightningBolt lightningBolt = new LightningBolt(this.level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, false);
+					lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
+					((ServerLevel)this.level).addGlobalEntity(lightningBolt);
+					soundEvent = SoundEvents.TRIDENT_THUNDER;
+					g = 5.0F;
+				}
 			}
-		}
 
-		this.playSound(soundEvent, g, 1.0F);
+			this.playSound(soundEvent, g, 1.0F);
+		}
 	}
 
 	@Override

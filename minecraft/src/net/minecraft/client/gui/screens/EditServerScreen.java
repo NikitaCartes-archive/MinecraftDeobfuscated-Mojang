@@ -21,6 +21,7 @@ public class EditServerScreen extends Screen {
 	private EditBox ipEdit;
 	private EditBox nameEdit;
 	private Button serverPackButton;
+	private final Screen lastScreen;
 	private final Predicate<String> addressFilter = string -> {
 		if (StringUtil.isNullOrEmpty(string)) {
 			return true;
@@ -39,8 +40,9 @@ public class EditServerScreen extends Screen {
 		}
 	};
 
-	public EditServerScreen(BooleanConsumer booleanConsumer, ServerData serverData) {
+	public EditServerScreen(Screen screen, BooleanConsumer booleanConsumer, ServerData serverData) {
 		super(new TranslatableComponent("addServer.title"));
+		this.lastScreen = screen;
 		this.callback = booleanConsumer;
 		this.serverData = serverData;
 	}
@@ -83,7 +85,7 @@ public class EditServerScreen extends Screen {
 		);
 		this.addButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20, I18n.get("addServer.add"), button -> this.onAdd()));
 		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20, I18n.get("gui.cancel"), button -> this.callback.accept(false)));
-		this.onClose();
+		this.cleanUp();
 	}
 
 	@Override
@@ -112,6 +114,11 @@ public class EditServerScreen extends Screen {
 
 	@Override
 	public void onClose() {
+		this.cleanUp();
+		this.minecraft.setScreen(this.lastScreen);
+	}
+
+	private void cleanUp() {
 		String string = this.ipEdit.getValue();
 		boolean bl = !string.isEmpty() && string.split(":").length > 0 && string.indexOf(32) == -1;
 		this.addButton.active = bl && !this.nameEdit.getValue().isEmpty();

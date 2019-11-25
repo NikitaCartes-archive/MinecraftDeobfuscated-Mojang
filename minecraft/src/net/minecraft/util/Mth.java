@@ -91,6 +91,15 @@ public class Mth {
 		}
 	}
 
+	@Environment(EnvType.CLIENT)
+	public static long clamp(long l, long m, long n) {
+		if (l < m) {
+			return m;
+		} else {
+			return l > n ? n : l;
+		}
+	}
+
 	public static float clamp(float f, float g, float h) {
 		if (f < g) {
 			return g;

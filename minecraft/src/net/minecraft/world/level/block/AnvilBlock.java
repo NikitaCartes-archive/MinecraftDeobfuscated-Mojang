@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -55,6 +56,7 @@ public class AnvilBlock extends FallingBlock {
 			return InteractionResult.SUCCESS;
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
+			player.awardStat(Stats.INTERACT_WITH_ANVIL);
 			return InteractionResult.SUCCESS;
 		}
 	}

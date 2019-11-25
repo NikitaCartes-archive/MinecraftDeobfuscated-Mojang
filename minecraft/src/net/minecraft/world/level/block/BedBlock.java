@@ -212,9 +212,8 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		Direction direction = blockState.getValue(FACING);
-		Direction direction2 = blockState.getValue(PART) == BedPart.HEAD ? direction : direction.getOpposite();
-		switch (direction2) {
+		Direction direction = getConnectedDirection(blockState).getOpposite();
+		switch (direction) {
 			case NORTH:
 				return NORTH_SHAPE;
 			case SOUTH:
@@ -224,6 +223,17 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 			default:
 				return EAST_SHAPE;
 		}
+	}
+
+	public static Direction getConnectedDirection(BlockState blockState) {
+		Direction direction = blockState.getValue(FACING);
+		return blockState.getValue(PART) == BedPart.HEAD ? direction.getOpposite() : direction;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static DoubleBlockCombiner.BlockType getBlockType(BlockState blockState) {
+		BedPart bedPart = blockState.getValue(PART);
+		return bedPart == BedPart.HEAD ? DoubleBlockCombiner.BlockType.FIRST : DoubleBlockCombiner.BlockType.SECOND;
 	}
 
 	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos, int i) {

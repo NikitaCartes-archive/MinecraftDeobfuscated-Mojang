@@ -16,9 +16,11 @@ public class DirectJoinServerScreen extends Screen {
 	private final ServerData serverData;
 	private EditBox ipEdit;
 	private final BooleanConsumer callback;
+	private final Screen lastScreen;
 
-	public DirectJoinServerScreen(BooleanConsumer booleanConsumer, ServerData serverData) {
+	public DirectJoinServerScreen(Screen screen, BooleanConsumer booleanConsumer, ServerData serverData) {
 		super(new TranslatableComponent("selectServer.direct"));
+		this.lastScreen = screen;
 		this.serverData = serverData;
 		this.callback = booleanConsumer;
 	}
@@ -65,6 +67,11 @@ public class DirectJoinServerScreen extends Screen {
 	private void onSelect() {
 		this.serverData.ip = this.ipEdit.getValue();
 		this.callback.accept(true);
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	@Override

@@ -89,12 +89,12 @@ public class DebugRenderer {
 		return this.renderChunkborder;
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, double d, double e, double f) {
 		if (this.renderChunkborder && !Minecraft.getInstance().showOnlyReducedInfo()) {
-			this.chunkBorderRenderer.render(poseStack, bufferSource, d, e, f, l);
+			this.chunkBorderRenderer.render(poseStack, bufferSource, d, e, f);
 		}
 
-		this.gameTestDebugRenderer.render(poseStack, bufferSource, d, e, f, l);
+		this.gameTestDebugRenderer.render(poseStack, bufferSource, d, e, f);
 	}
 
 	public static Optional<Entity> getTargetedEntity(@Nullable Entity entity, int i) {
@@ -194,7 +194,7 @@ public class DebugRenderer {
 
 	@Environment(EnvType.CLIENT)
 	public interface SimpleDebugRenderer {
-		void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l);
+		void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f);
 
 		default void clear() {
 		}

@@ -18,26 +18,29 @@ public class FireChargeItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockPos blockPos = useOnContext.getClickedPos();
-			BlockState blockState = level.getBlockState(blockPos);
-			if (blockState.getBlock() == Blocks.CAMPFIRE) {
-				if (!(Boolean)blockState.getValue(CampfireBlock.LIT) && !(Boolean)blockState.getValue(CampfireBlock.WATERLOGGED)) {
-					this.playSound(level, blockPos);
-					level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(true)));
-				}
-			} else {
-				blockPos = blockPos.relative(useOnContext.getClickedFace());
-				if (level.getBlockState(blockPos).isAir()) {
-					this.playSound(level, blockPos);
-					level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
-				}
+		BlockPos blockPos = useOnContext.getClickedPos();
+		BlockState blockState = level.getBlockState(blockPos);
+		boolean bl = false;
+		if (blockState.getBlock() == Blocks.CAMPFIRE) {
+			if (!(Boolean)blockState.getValue(CampfireBlock.LIT) && !(Boolean)blockState.getValue(CampfireBlock.WATERLOGGED)) {
+				this.playSound(level, blockPos);
+				level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(true)));
+				bl = true;
 			}
+		} else {
+			blockPos = blockPos.relative(useOnContext.getClickedFace());
+			if (level.getBlockState(blockPos).isAir()) {
+				this.playSound(level, blockPos);
+				level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
+				bl = true;
+			}
+		}
 
+		if (bl) {
 			useOnContext.getItemInHand().shrink(1);
 			return InteractionResult.SUCCESS;
+		} else {
+			return InteractionResult.FAIL;
 		}
 	}
 

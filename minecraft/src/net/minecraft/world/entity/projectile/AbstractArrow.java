@@ -33,7 +33,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -385,12 +384,17 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 			}
 		}
 
+		boolean bl = entity.getType() == EntityType.ENDERMAN;
 		int j = entity.getRemainingFireTicks();
-		if (this.isOnFire() && !(entity instanceof EnderMan)) {
+		if (this.isOnFire() && !bl) {
 			entity.setSecondsOnFire(5);
 		}
 
 		if (entity.hurt(damageSource, (float)i)) {
+			if (bl) {
+				return;
+			}
+
 			if (entity instanceof LivingEntity) {
 				LivingEntity livingEntity = (LivingEntity)entity;
 				if (!this.level.isClientSide && this.getPierceLevel() <= 0) {
@@ -429,7 +433,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 			}
 
 			this.playSound(this.soundEvent, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-			if (this.getPierceLevel() <= 0 && !(entity instanceof EnderMan)) {
+			if (this.getPierceLevel() <= 0) {
 				this.remove();
 			}
 		} else {

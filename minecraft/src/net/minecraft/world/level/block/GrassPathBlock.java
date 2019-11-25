@@ -63,4 +63,9 @@ public class GrassPathBlock extends Block {
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
+
+	@Override
+	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return true;
+	}
 }

@@ -49,6 +49,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Option;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -944,7 +945,19 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		profilerFiller.popPush("terrain_setup");
 		this.setupRender(camera, frustum, bl2, this.frameId++, this.minecraft.player.isSpectator());
 		profilerFiller.popPush("updatechunks");
-		this.compileChunksUntil(l);
+		int i = 30;
+		int j = this.minecraft.options.framerateLimit;
+		long m = 33333333L;
+		long n;
+		if ((double)j == Option.FRAMERATE_LIMIT.getMaxValue()) {
+			n = 0L;
+		} else {
+			n = (long)(1000000000 / j);
+		}
+
+		long o = Util.getNanos() - l;
+		long p = Mth.clamp(o * 2L, n, 33333333L);
+		this.compileChunksUntil(l + p);
 		profilerFiller.popPush("terrain");
 		this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
 		this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
@@ -975,19 +988,17 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					entity.zOld = entity.getZ();
 				}
 
-				boolean bl5 = this.shouldShowEntityOutlines()
-					&& (entity.isGlowing() || entity instanceof Player && this.minecraft.player.isSpectator() && this.minecraft.options.keySpectatorOutlines.isDown());
 				MultiBufferSource multiBufferSource;
-				if (bl5) {
+				if (this.shouldShowEntityOutlines() && entity.isGlowing()) {
 					bl4 = true;
 					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 					multiBufferSource = outlineBufferSource;
-					int i = entity.getTeamColor();
-					int j = 255;
-					int k = i >> 16 & 0xFF;
-					int m = i >> 8 & 0xFF;
-					int n = i & 0xFF;
-					outlineBufferSource.setColor(k, m, n, 255);
+					int k = entity.getTeamColor();
+					int q = 255;
+					int r = k >> 16 & 0xFF;
+					int s = k >> 8 & 0xFF;
+					int t = k & 0xFF;
+					outlineBufferSource.setColor(r, s, t, 255);
 				} else {
 					multiBufferSource = bufferSource;
 				}
@@ -1013,10 +1024,10 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos.asLong());
 					if (sortedSet != null && !sortedSet.isEmpty()) {
-						int m = ((BlockDestructionProgress)sortedSet.last()).getProgress();
-						if (m >= 0) {
+						int t = ((BlockDestructionProgress)sortedSet.last()).getProgress();
+						if (t >= 0) {
 							VertexConsumer vertexConsumer = new BreakingTextureGenerator(
-								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(m)), poseStack.last()
+								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(t)), poseStack.last()
 							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
@@ -1059,17 +1070,17 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 		for (Entry<SortedSet<BlockDestructionProgress>> entry : this.destructionProgress.long2ObjectEntrySet()) {
 			BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-			double o = (double)blockPos3.getX() - d;
-			double p = (double)blockPos3.getY() - e;
-			double q = (double)blockPos3.getZ() - g;
-			if (!(o * o + p * p + q * q > 1024.0)) {
+			double u = (double)blockPos3.getX() - d;
+			double v = (double)blockPos3.getY() - e;
+			double w = (double)blockPos3.getZ() - g;
+			if (!(u * u + v * v + w * w > 1024.0)) {
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
-					int r = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+					int x = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
 					poseStack.pushPose();
 					poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
 					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(
-						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(r)), poseStack.last()
+						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(x)), poseStack.last()
 					);
 					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
@@ -1092,16 +1103,18 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 		RenderSystem.pushMatrix();
 		RenderSystem.multMatrix(poseStack.last().pose());
-		this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g, l);
+		this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
 		this.renderWorldBounds(camera);
 		RenderSystem.popMatrix();
 		bufferSource.endBatch(RenderType.lines());
-		bufferSource.endBatch();
 		this.renderBuffers.crumblingBufferSource().endBatch();
+		bufferSource.endBatch(RenderType.glint());
+		bufferSource.endBatch(RenderType.entityGlint());
 		bufferSource.endBatch(RenderType.waterMask());
 		bufferSource.endBatch(Sheets.translucentBlockSheet());
 		bufferSource.endBatch(Sheets.bannerSheet());
 		bufferSource.endBatch(Sheets.shieldSheet());
+		bufferSource.endBatch();
 		profilerFiller.popPush("translucent");
 		this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
 		profilerFiller.popPush("particles");

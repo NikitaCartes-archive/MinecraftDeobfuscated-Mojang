@@ -44,7 +44,7 @@ public class SetSpawnCommand {
 
 	private static int setSpawn(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, BlockPos blockPos) {
 		for (ServerPlayer serverPlayer : collection) {
-			serverPlayer.setRespawnPosition(blockPos, true);
+			serverPlayer.setRespawnPosition(blockPos, true, false);
 		}
 
 		if (collection.size() == 1) {

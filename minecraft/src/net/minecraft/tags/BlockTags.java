@@ -63,6 +63,7 @@ public class BlockTags {
 	public static final Tag<Block> BEEHIVES = bind("beehives");
 	public static final Tag<Block> CROPS = bind("crops");
 	public static final Tag<Block> BEE_GROWABLES = bind("bee_growables");
+	public static final Tag<Block> PORTALS = bind("portals");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

@@ -940,7 +940,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleSetSpawn(ClientboundSetSpawnPositionPacket clientboundSetSpawnPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetSpawnPositionPacket, this, this.minecraft);
-		this.minecraft.player.setRespawnPosition(clientboundSetSpawnPositionPacket.getPos(), true);
+		this.minecraft.player.setRespawnPosition(clientboundSetSpawnPositionPacket.getPos(), true, false);
 		this.minecraft.level.getLevelData().setSpawn(clientboundSetSpawnPositionPacket.getPos());
 	}
 

@@ -23,14 +23,14 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 	private final BlockModelShaper blockModelShaper;
 	private final TextureManager textureManager;
 	private final BlockColors blockColors;
-	private final int mipmapLevels;
+	private int maxMipmapLevels;
 	private BakedModel missingModel;
 	private Object2IntMap<BlockState> modelGroups;
 
 	public ModelManager(TextureManager textureManager, BlockColors blockColors, int i) {
 		this.textureManager = textureManager;
 		this.blockColors = blockColors;
-		this.mipmapLevels = i;
+		this.maxMipmapLevels = i;
 		this.blockModelShaper = new BlockModelShaper(this);
 	}
 
@@ -48,7 +48,7 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 
 	protected ModelBakery prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		profilerFiller.startTick();
-		ModelBakery modelBakery = new ModelBakery(resourceManager, this.blockColors, profilerFiller, this.mipmapLevels);
+		ModelBakery modelBakery = new ModelBakery(resourceManager, this.blockColors, profilerFiller, this.maxMipmapLevels);
 		profilerFiller.endTick();
 		return modelBakery;
 	}
@@ -56,7 +56,7 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 	protected void apply(ModelBakery modelBakery, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		profilerFiller.startTick();
 		profilerFiller.push("upload");
-		this.atlases = modelBakery.uploadTextures(this.textureManager, this.mipmapLevels, profilerFiller);
+		this.atlases = modelBakery.uploadTextures(this.textureManager, profilerFiller);
 		this.bakedRegistry = modelBakery.getBakedTopLevelModels();
 		this.modelGroups = modelBakery.getModelGroups();
 		this.missingModel = (BakedModel)this.bakedRegistry.get(ModelBakery.MISSING_MODEL_LOCATION);
@@ -93,6 +93,6 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 	}
 
 	public void updateMaxMipLevel(int i) {
-		this.atlases.updateMaxMipLevel(this.textureManager, i);
+		this.maxMipmapLevels = i;
 	}
 }

@@ -20,7 +20,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		RenderSystem.enableDepthTest();
 		RenderSystem.shadeModel(7425);
 		RenderSystem.enableAlphaTest();
@@ -38,11 +38,11 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = -16; k <= 32; k += 16) {
-			for (int m = -16; m <= 32; m += 16) {
-				bufferBuilder.vertex(i + (double)k, g, j + (double)m).color(1.0F, 0.0F, 0.0F, 0.0F).endVertex();
-				bufferBuilder.vertex(i + (double)k, g, j + (double)m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-				bufferBuilder.vertex(i + (double)k, h, j + (double)m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-				bufferBuilder.vertex(i + (double)k, h, j + (double)m).color(1.0F, 0.0F, 0.0F, 0.0F).endVertex();
+			for (int l = -16; l <= 32; l += 16) {
+				bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(1.0F, 0.0F, 0.0F, 0.0F).endVertex();
+				bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+				bufferBuilder.vertex(i + (double)k, h, j + (double)l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+				bufferBuilder.vertex(i + (double)k, h, j + (double)l).color(1.0F, 0.0F, 0.0F, 0.0F).endVertex();
 			}
 		}
 
@@ -69,14 +69,14 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		for (int k = 0; k <= 256; k += 2) {
-			double n = (double)k - e;
-			bufferBuilder.vertex(i, n, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, n, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, n, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
+			double m = (double)k - e;
+			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j + 16.0).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(1.0F, 1.0F, 0.0F, 0.0F).endVertex();
 		}
 
 		tesselator.end();
@@ -84,23 +84,23 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
 		for (int k = 0; k <= 16; k += 16) {
-			for (int m = 0; m <= 16; m += 16) {
-				bufferBuilder.vertex(i + (double)k, g, j + (double)m).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
-				bufferBuilder.vertex(i + (double)k, g, j + (double)m).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-				bufferBuilder.vertex(i + (double)k, h, j + (double)m).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-				bufferBuilder.vertex(i + (double)k, h, j + (double)m).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
+			for (int l = 0; l <= 16; l += 16) {
+				bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
+				bufferBuilder.vertex(i + (double)k, g, j + (double)l).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+				bufferBuilder.vertex(i + (double)k, h, j + (double)l).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+				bufferBuilder.vertex(i + (double)k, h, j + (double)l).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
 			}
 		}
 
 		for (int k = 0; k <= 256; k += 16) {
-			double n = (double)k - e;
-			bufferBuilder.vertex(i, n, j).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j + 16.0).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, n, j + 16.0).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i + 16.0, n, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(i, n, j).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
+			double m = (double)k - e;
+			bufferBuilder.vertex(i, m, j).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j + 16.0).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j + 16.0).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i + 16.0, m, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(0.25F, 0.25F, 1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(i, m, j).color(0.25F, 0.25F, 1.0F, 0.0F).endVertex();
 		}
 
 		tesselator.end();

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.Registry;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.AcaciaTreeGrower;
 import net.minecraft.world.level.block.grower.BirchTreeGrower;
 import net.minecraft.world.level.block.grower.DarkOakTreeGrower;
@@ -402,7 +403,9 @@ public class Blocks {
 		"spawner", new SpawnerBlock(Block.Properties.of(Material.STONE).strength(5.0F).sound(SoundType.METAL).noOcclusion())
 	);
 	public static final Block OAK_STAIRS = register("oak_stairs", new StairBlock(OAK_PLANKS.defaultBlockState(), Block.Properties.copy(OAK_PLANKS)));
-	public static final Block CHEST = register("chest", new ChestBlock(Block.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD)));
+	public static final Block CHEST = register(
+		"chest", new ChestBlock(Block.Properties.of(Material.WOOD).strength(2.5F).sound(SoundType.WOOD), () -> BlockEntityType.CHEST)
+	);
 	public static final Block REDSTONE_WIRE = register(
 		"redstone_wire", new RedStoneWireBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak())
 	);

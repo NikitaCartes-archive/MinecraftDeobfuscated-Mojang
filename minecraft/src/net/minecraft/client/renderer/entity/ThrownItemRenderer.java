@@ -37,7 +37,7 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 	public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.scale(this.scale, this.scale, this.scale);
-		poseStack.mulPose(this.entityRenderDispatcher.camera.rotation());
+		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
 		this.itemRenderer.renderStatic(entity.getItem(), ItemTransforms.TransformType.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource);
 		poseStack.popPose();
 		super.render(entity, f, g, poseStack, multiBufferSource, i);

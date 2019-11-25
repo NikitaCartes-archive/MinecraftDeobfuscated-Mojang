@@ -1,5 +1,7 @@
 package net.minecraft.world.level.block;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -7,7 +9,10 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,6 +27,10 @@ public class HoneyBlock extends HalfTransparentBlock {
 		super(properties);
 	}
 
+	private static boolean doesEntityDoHoneyBlockSlideEffects(Entity entity) {
+		return entity instanceof LivingEntity || entity instanceof AbstractMinecart || entity instanceof PrimedTnt || entity instanceof Boat;
+	}
+
 	@Override
 	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
@@ -29,7 +38,11 @@ public class HoneyBlock extends HalfTransparentBlock {
 
 	@Override
 	public void fallOn(Level level, BlockPos blockPos, Entity entity, float f) {
-		this.doLandingParticleEffect(level, blockPos, entity);
+		entity.playSound(SoundEvents.HONEY_BLOCK_SLIDE, 1.0F, 1.0F);
+		if (!level.isClientSide) {
+			level.broadcastEntityEvent(entity, (byte)54);
+		}
+
 		if (entity.causeFallDamage(f, 0.2F)) {
 			entity.playSound(this.soundType.getFallSound(), this.soundType.getVolume() * 0.5F, this.soundType.getPitch() * 0.75F);
 		}
@@ -38,20 +51,9 @@ public class HoneyBlock extends HalfTransparentBlock {
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (this.isSlidingDown(blockPos, entity)) {
-			Vec3 vec3 = entity.getDeltaMovement();
-			if (vec3.y < -0.05) {
-				if (entity instanceof ServerPlayer && vec3.y < -0.127) {
-					CriteriaTriggers.HONEY_BLOCK_SLIDE.trigger((ServerPlayer)entity, level.getBlockState(blockPos));
-				}
-
-				entity.setDeltaMovement(new Vec3(vec3.x, -0.05, vec3.z));
-			}
-
-			entity.fallDistance = 0.0F;
-			this.doSlideDownParticleEffects(level, blockPos, entity);
-			if (level.getGameTime() % 10L == 0L) {
-				entity.playSound(SoundEvents.HONEY_BLOCK_SLIDE, 1.0F, 1.0F);
-			}
+			this.maybeDoSlideAchievement(entity, blockPos);
+			this.doSlideMovement(entity);
+			this.maybeDoSlideEffects(level, entity);
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);
@@ -62,7 +64,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 			return false;
 		} else if (entity.getY() > (double)blockPos.getY() + 0.9375 - 1.0E-7) {
 			return false;
-		} else if (entity.getDeltaMovement().y >= -0.04) {
+		} else if (entity.getDeltaMovement().y >= -0.08) {
 			return false;
 		} else {
 			double d = Math.abs((double)blockPos.getX() + 0.5 - entity.getX());
@@ -72,43 +74,54 @@ public class HoneyBlock extends HalfTransparentBlock {
 		}
 	}
 
-	private void doSlideDownParticleEffects(Level level, BlockPos blockPos, Entity entity) {
-		float f = entity.getDimensions(Pose.STANDING).width;
-		this.doParticleEffects(
-			entity,
-			level,
-			blockPos,
-			1,
-			((double)level.random.nextFloat() - 0.5) * (double)f,
-			(double)(level.random.nextFloat() / 2.0F),
-			((double)level.random.nextFloat() - 0.5) * (double)f,
-			(double)level.random.nextFloat() - 0.5,
-			(double)(level.random.nextFloat() - 1.0F),
-			(double)level.random.nextFloat() - 0.5
-		);
+	private void maybeDoSlideAchievement(Entity entity, BlockPos blockPos) {
+		if (entity instanceof ServerPlayer && entity.level.getGameTime() % 20L == 0L) {
+			CriteriaTriggers.HONEY_BLOCK_SLIDE.trigger((ServerPlayer)entity, entity.level.getBlockState(blockPos));
+		}
 	}
 
-	private void doLandingParticleEffect(Level level, BlockPos blockPos, Entity entity) {
-		float f = entity.getDimensions(Pose.STANDING).width;
-		this.doParticleEffects(
-			entity,
-			level,
-			blockPos,
-			10,
-			((double)level.random.nextFloat() - 0.5) * (double)f,
-			0.0,
-			((double)level.random.nextFloat() - 0.5) * (double)f,
-			(double)level.random.nextFloat() - 0.5,
-			0.5,
-			(double)level.random.nextFloat() - 0.5
-		);
+	private void doSlideMovement(Entity entity) {
+		Vec3 vec3 = entity.getDeltaMovement();
+		if (vec3.y < -0.13) {
+			double d = -0.05 / vec3.y;
+			entity.setDeltaMovement(new Vec3(vec3.x * d, -0.05, vec3.z * d));
+		} else {
+			entity.setDeltaMovement(new Vec3(vec3.x, -0.05, vec3.z));
+		}
+
+		entity.fallDistance = 0.0F;
 	}
 
-	private void doParticleEffects(Entity entity, Level level, BlockPos blockPos, int i, double d, double e, double f, double g, double h, double j) {
-		BlockState blockState = level.getBlockState(new BlockPos(blockPos));
+	private void maybeDoSlideEffects(Level level, Entity entity) {
+		if (doesEntityDoHoneyBlockSlideEffects(entity)) {
+			if (level.random.nextInt(5) == 0) {
+				entity.playSound(SoundEvents.HONEY_BLOCK_SLIDE, 1.0F, 1.0F);
+			}
 
-		for (int k = 0; k < i; k++) {
-			entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), entity.getX() + d, entity.getY() + e, entity.getZ() + f, g, h, j);
+			if (!level.isClientSide && level.random.nextInt(5) == 0) {
+				level.broadcastEntityEvent(entity, (byte)53);
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static void showSlideParticles(Entity entity) {
+		showParticles(entity, 5);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static void showJumpParticles(Entity entity) {
+		showParticles(entity, 10);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static void showParticles(Entity entity, int i) {
+		if (entity.level.isClientSide) {
+			BlockState blockState = Blocks.HONEY_BLOCK.defaultBlockState();
+
+			for (int j = 0; j < i; j++) {
+				entity.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), entity.getX(), entity.getY(), entity.getZ(), 0.0, 0.0, 0.0);
+			}
 		}
 	}
 }

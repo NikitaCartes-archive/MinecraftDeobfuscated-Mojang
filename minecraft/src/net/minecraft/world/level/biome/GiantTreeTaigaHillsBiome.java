@@ -40,6 +40,7 @@ public final class GiantTreeTaigaHillsBiome extends Biome {
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(this);
 		BiomeDefaultFeatures.addDefaultSprings(this);
+		BiomeDefaultFeatures.addSparseBerryBushes(this);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.PIG, 10, 4, 4));

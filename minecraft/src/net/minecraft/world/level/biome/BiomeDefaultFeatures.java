@@ -150,7 +150,7 @@ public class BiomeDefaultFeatures {
 			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0)
 		)
 		.baseHeight(4)
-		.heightRandA(6)
+		.heightRandA(8)
 		.foliageHeight(3)
 		.decorators(ImmutableList.of(new CocoaDecorator(0.2F), new TrunkVineDecorator(), new LeaveVineDecorator()))
 		.ignoreVines()
@@ -159,7 +159,7 @@ public class BiomeDefaultFeatures {
 			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0)
 		)
 		.baseHeight(4)
-		.heightRandA(6)
+		.heightRandA(8)
 		.foliageHeight(3)
 		.ignoreVines()
 		.build();

@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.List;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -38,12 +36,6 @@ public class ElderGuardian extends Guardian {
 	@Override
 	public int getAttackDuration() {
 		return 60;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setGhost() {
-		this.clientSideSpikesAnimation = 1.0F;
-		this.clientSideSpikesAnimationO = this.clientSideSpikesAnimation;
 	}
 
 	@Override

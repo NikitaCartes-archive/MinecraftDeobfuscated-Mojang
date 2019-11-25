@@ -61,12 +61,18 @@ public class RandomStrollGoal extends Goal {
 
 	@Override
 	public boolean canContinueToUse() {
-		return !this.mob.getNavigation().isDone();
+		return !this.mob.getNavigation().isDone() && !this.mob.isVehicle();
 	}
 
 	@Override
 	public void start() {
 		this.mob.getNavigation().moveTo(this.wantedX, this.wantedY, this.wantedZ, this.speedModifier);
+	}
+
+	@Override
+	public void stop() {
+		this.mob.getNavigation().stop();
+		super.stop();
 	}
 
 	public void trigger() {

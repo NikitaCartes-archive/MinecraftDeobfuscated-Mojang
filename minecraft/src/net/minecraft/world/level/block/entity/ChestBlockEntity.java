@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
@@ -222,6 +223,7 @@ public class ChestBlockEntity extends RandomizableContainerBlockEntity implement
 		this.items = nonNullList;
 	}
 
+	@Environment(EnvType.CLIENT)
 	@Override
 	public float getOpenNess(float f) {
 		return Mth.lerp(f, this.oOpenness, this.openness);

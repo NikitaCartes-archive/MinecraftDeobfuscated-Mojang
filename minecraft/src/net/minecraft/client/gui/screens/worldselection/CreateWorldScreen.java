@@ -351,6 +351,15 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	@Override
+	public void onClose() {
+		if (this.displayOptions) {
+			this.setDisplayOptions(false);
+		} else {
+			this.minecraft.setScreen(this.lastScreen);
+		}
+	}
+
+	@Override
 	public void render(int i, int j, float f) {
 		this.renderBackground();
 		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, -1);

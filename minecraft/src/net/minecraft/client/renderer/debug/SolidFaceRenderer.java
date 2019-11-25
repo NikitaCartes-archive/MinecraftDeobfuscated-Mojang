@@ -26,7 +26,7 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, long l) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		BlockGetter blockGetter = this.minecraft.player.level;
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
@@ -47,19 +47,19 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 					double i = aABB2.minZ;
 					double j = aABB2.maxX;
 					double k = aABB2.maxY;
-					double m = aABB2.maxZ;
-					float n = 1.0F;
+					double l = aABB2.maxZ;
+					float m = 1.0F;
+					float n = 0.0F;
 					float o = 0.0F;
-					float p = 0.0F;
-					float q = 0.5F;
+					float p = 0.5F;
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.WEST)) {
 						Tesselator tesselator = Tesselator.getInstance();
 						BufferBuilder bufferBuilder = tesselator.getBuilder();
 						bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
 						bufferBuilder.vertex(g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						bufferBuilder.vertex(g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						tesselator.end();
 					}
 
@@ -67,10 +67,10 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 						Tesselator tesselator = Tesselator.getInstance();
 						BufferBuilder bufferBuilder = tesselator.getBuilder();
 						bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(g, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						tesselator.end();
 					}
 
@@ -78,9 +78,9 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 						Tesselator tesselator = Tesselator.getInstance();
 						BufferBuilder bufferBuilder = tesselator.getBuilder();
 						bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
-						bufferBuilder.vertex(j, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						bufferBuilder.vertex(j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						bufferBuilder.vertex(j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						tesselator.end();
 					}
@@ -102,8 +102,8 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 						bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
 						bufferBuilder.vertex(g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						bufferBuilder.vertex(j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, h, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						tesselator.end();
 					}
 
@@ -112,9 +112,9 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 						BufferBuilder bufferBuilder = tesselator.getBuilder();
 						bufferBuilder.begin(5, DefaultVertexFormat.POSITION_COLOR);
 						bufferBuilder.vertex(g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(g, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						bufferBuilder.vertex(j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						bufferBuilder.vertex(j, k, m).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						bufferBuilder.vertex(j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
 						tesselator.end();
 					}
 				}

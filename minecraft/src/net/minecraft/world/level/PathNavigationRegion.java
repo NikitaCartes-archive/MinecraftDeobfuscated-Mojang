@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -26,11 +26,12 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 		int i = blockPos2.getX() >> 4;
 		int j = blockPos2.getZ() >> 4;
 		this.chunks = new ChunkAccess[i - this.centerX + 1][j - this.centerZ + 1];
+		ChunkSource chunkSource = level.getChunkSource();
 		this.allEmpty = true;
 
 		for (int k = this.centerX; k <= i; k++) {
 			for (int l = this.centerZ; l <= j; l++) {
-				this.chunks[k - this.centerX][l - this.centerZ] = level.getChunk(k, l, ChunkStatus.FULL, false);
+				this.chunks[k - this.centerX][l - this.centerZ] = chunkSource.getChunkNow(k, l);
 			}
 		}
 

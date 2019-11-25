@@ -11,8 +11,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 
@@ -48,10 +52,22 @@ public class BedRenderer extends BlockEntityRenderer<BedBlockEntity> {
 
 	public void render(BedBlockEntity bedBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
 		Material material = Sheets.BED_TEXTURES[bedBlockEntity.getColor().getId()];
-		if (bedBlockEntity.hasLevel()) {
+		Level level = bedBlockEntity.getLevel();
+		if (level != null) {
 			BlockState blockState = bedBlockEntity.getBlockState();
+			DoubleBlockCombiner.NeighborCombineResult<? extends BedBlockEntity> neighborCombineResult = DoubleBlockCombiner.combineWithNeigbour(
+				BlockEntityType.BED,
+				BedBlock::getBlockType,
+				BedBlock::getConnectedDirection,
+				ChestBlock.FACING,
+				blockState,
+				level,
+				bedBlockEntity.getBlockPos(),
+				(levelAccessor, blockPos) -> false
+			);
+			int k = neighborCombineResult.apply(new BrightnessCombiner<>()).get(i);
 			this.renderPiece(
-				poseStack, multiBufferSource, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), material, i, j, false
+				poseStack, multiBufferSource, blockState.getValue(BedBlock.PART) == BedPart.HEAD, blockState.getValue(BedBlock.FACING), material, k, j, false
 			);
 		} else {
 			this.renderPiece(poseStack, multiBufferSource, true, Direction.SOUTH, material, i, j, false);

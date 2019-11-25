@@ -40,6 +40,7 @@ public final class GiantTreeTaigaBiome extends Biome {
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
 		BiomeDefaultFeatures.addDefaultExtraVegetation(this);
 		BiomeDefaultFeatures.addDefaultSprings(this);
+		BiomeDefaultFeatures.addSparseBerryBushes(this);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.PIG, 10, 4, 4));
@@ -47,6 +48,7 @@ public final class GiantTreeTaigaBiome extends Biome {
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.COW, 8, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.WOLF, 8, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.RABBIT, 4, 2, 3));
+		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.FOX, 8, 2, 4));
 		this.addSpawn(MobCategory.AMBIENT, new Biome.SpawnerData(EntityType.BAT, 10, 8, 8));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SPIDER, 100, 4, 4));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ZOMBIE, 100, 4, 4));

@@ -93,10 +93,12 @@ public class TntBlock extends Block {
 		} else {
 			explode(level, blockPos, player);
 			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
-			if (item == Items.FLINT_AND_STEEL) {
-				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-			} else {
-				itemStack.shrink(1);
+			if (!player.isCreative()) {
+				if (item == Items.FLINT_AND_STEEL) {
+					itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				} else {
+					itemStack.shrink(1);
+				}
 			}
 
 			return InteractionResult.SUCCESS;

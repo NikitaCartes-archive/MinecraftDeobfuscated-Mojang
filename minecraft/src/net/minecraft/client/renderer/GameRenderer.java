@@ -456,16 +456,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			int j = (int)(
 				this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
 			);
-			int k = this.minecraft.options.framerateLimit;
 			PoseStack poseStack = new PoseStack();
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				int m = 30;
-				long n = Util.getNanos() - l;
-				long o = (long)(1000000000 / m);
-				long p = Math.max(o * 3L / 4L - n, o / 10L);
-				this.renderLevel(f, Util.getNanos() + p, poseStack);
+				this.renderLevel(f, l, poseStack);
 				if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
 					this.lastScreenshotAttempt = Util.getMillis();
 					if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -513,8 +508,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			if (this.minecraft.overlay != null) {
 				try {
 					this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var17) {
-					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
+				} catch (Throwable var13) {
+					CrashReport crashReport = CrashReport.forThrowable(var13, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.overlay.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -522,8 +517,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			} else if (this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
+				} catch (Throwable var12) {
+					CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -623,11 +618,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		this.minecraft.getProfiler().popPush("camera");
 		Camera camera = this.mainCamera;
 		this.renderDistance = (float)(this.minecraft.options.renderDistance * 16);
-		Matrix4f matrix4f = this.getProjectionMatrix(camera, f, true);
-		this.resetProjectionMatrix(matrix4f);
-		this.bobHurt(poseStack, f);
+		PoseStack poseStack2 = new PoseStack();
+		poseStack2.last().pose().multiply(this.getProjectionMatrix(camera, f, true));
+		this.bobHurt(poseStack2, f);
 		if (this.minecraft.options.bobView) {
-			this.bobView(poseStack, f);
+			this.bobView(poseStack2, f);
 		}
 
 		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
@@ -640,12 +635,14 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
 			h *= h;
 			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
-			poseStack.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
-			poseStack.scale(1.0F / h, 1.0F, 1.0F);
+			poseStack2.mulPose(vector3f.rotationDegrees(((float)this.tick + f) * (float)i));
+			poseStack2.scale(1.0F / h, 1.0F, 1.0F);
 			float j = -((float)this.tick + f) * (float)i;
-			poseStack.mulPose(vector3f.rotationDegrees(j));
+			poseStack2.mulPose(vector3f.rotationDegrees(j));
 		}
 
+		Matrix4f matrix4f = poseStack2.last().pose();
+		this.resetProjectionMatrix(matrix4f);
 		camera.setup(
 			this.minecraft.level,
 			(Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity()),
