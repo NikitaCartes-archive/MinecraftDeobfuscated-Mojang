@@ -5,6 +5,7 @@ package net.minecraft.client.renderer.entity;
 
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -179,9 +180,15 @@ implements ResourceManagerReloadListener {
         RenderSystem.scalef(16.0f, 16.0f, 16.0f);
         PoseStack poseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        if (bakedModel.isGui3d()) {
+            Lighting.setupFor3DItems();
+        }
         this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
+        if (bakedModel.isGui3d()) {
+            Lighting.setupForFlatItems();
+        }
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();
         RenderSystem.popMatrix();

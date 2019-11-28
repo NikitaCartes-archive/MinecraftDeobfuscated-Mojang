@@ -81,17 +81,11 @@ extends ObjectSelectionList<Entry> {
         int j = this.children().indexOf(this.getSelected());
         int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
         Entry entry = (Entry)this.children().get(k);
-        super.setSelected(entry);
         if (entry instanceof LANHeader) {
-            if (i > 0 && k == this.getItemCount() - 1) {
-                return;
-            }
-            if (i < 0 && k == 0) {
-                return;
-            }
-            this.moveSelection(i);
-            return;
+            k = Mth.clamp(k + (i > 0 ? 1 : -1), 0, this.getItemCount() - 1);
+            entry = (Entry)this.children().get(k);
         }
+        super.setSelected(entry);
         this.ensureVisible(entry);
         this.screen.onSelectedChange();
     }

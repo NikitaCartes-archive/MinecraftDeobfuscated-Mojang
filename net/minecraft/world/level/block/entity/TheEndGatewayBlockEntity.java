@@ -42,6 +42,7 @@ implements TickableBlockEntity {
     private static final Logger LOGGER = LogManager.getLogger();
     private long age;
     private int teleportCooldown;
+    @Nullable
     private BlockPos exitPortal;
     private boolean exactTeleport;
 
@@ -88,7 +89,7 @@ implements TickableBlockEntity {
         } else if (!this.level.isClientSide) {
             List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
             if (!list.isEmpty()) {
-                this.teleportEntity(list.get(0));
+                this.teleportEntity(list.get(0).getRootVehicle());
             }
             if (this.age % 2400L == 0L) {
                 this.triggerCooldown();

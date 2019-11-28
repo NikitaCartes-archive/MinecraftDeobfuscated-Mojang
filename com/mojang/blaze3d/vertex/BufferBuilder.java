@@ -280,9 +280,9 @@ implements BufferVertexConsumer {
             }
             this.putShort(t + 0, (short)(p & 0xFFFF));
             this.putShort(t + 2, (short)(p >> 16 & 0xFFFF));
-            this.putByte(t + 4, (byte)((int)(q * 127.0f) & 0xFF));
-            this.putByte(t + 5, (byte)((int)(r * 127.0f) & 0xFF));
-            this.putByte(t + 6, (byte)((int)(s * 127.0f) & 0xFF));
+            this.putByte(t + 4, BufferVertexConsumer.normalIntValue(q));
+            this.putByte(t + 5, BufferVertexConsumer.normalIntValue(r));
+            this.putByte(t + 6, BufferVertexConsumer.normalIntValue(s));
             this.nextElementByte += t + 8;
             this.endVertex();
             return;

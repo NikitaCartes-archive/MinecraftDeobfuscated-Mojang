@@ -103,7 +103,7 @@ extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
+        if (itemStack.getDamageValue() >= itemStack.getMaxDamage() - 1) {
             return InteractionResultHolder.fail(itemStack);
         }
         if (EnchantmentHelper.getRiptide(itemStack) > 0 && !player.isInWaterOrRain()) {

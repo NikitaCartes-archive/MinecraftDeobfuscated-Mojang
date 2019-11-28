@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -120,8 +119,7 @@ extends Screen {
         poseStack.pushPose();
         poseStack.translate(this.width / 2, 0.0, 50.0);
         float g = 93.75f;
-        poseStack.scale(-93.75f, -93.75f, -93.75f);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f));
+        poseStack.scale(93.75f, -93.75f, 93.75f);
         poseStack.translate(0.0, -1.3125, 0.0);
         BlockState blockState = this.sign.getBlockState();
         boolean bl = blockState.getBlock() instanceof StandingSignBlock;

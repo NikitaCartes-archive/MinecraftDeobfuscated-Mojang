@@ -109,10 +109,11 @@ public class BlockEntityWithoutLevelRenderer {
             Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
             VertexConsumer vertexConsumer = material.sprite().wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
             this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
-            this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             if (bl) {
                 this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
-                BannerRenderer.renderPatterns(this.banner, poseStack, multiBufferSource, i, j, this.shieldModel.plate(), false);
+                BannerRenderer.renderPatterns(this.banner, poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false);
+            } else {
+                this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             }
             poseStack.popPose();
         } else if (item == Items.TRIDENT) {

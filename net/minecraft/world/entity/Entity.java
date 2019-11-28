@@ -126,6 +126,7 @@ CommandSource {
     public boolean blocksBuilding;
     private final List<Entity> passengers = Lists.newArrayList();
     protected int boardingCooldown;
+    @Nullable
     private Entity vehicle;
     public boolean forcedLoading;
     public Level level;
@@ -1456,10 +1457,14 @@ CommandSource {
     }
 
     public void positionRider(Entity entity) {
+        this.positionRider(entity, Entity::setPos);
+    }
+
+    public void positionRider(Entity entity, MoveCallback moveCallback) {
         if (!this.hasPassenger(entity)) {
             return;
         }
-        entity.setPos(this.getX(), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ());
+        moveCallback.accept(entity, this.getX(), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ());
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -2106,9 +2111,13 @@ CommandSource {
         if (!(this.level instanceof ServerLevel)) {
             return;
         }
-        this.teleported = true;
+        ServerLevel serverLevel = (ServerLevel)this.level;
         this.moveTo(d, e, f, this.yRot, this.xRot);
-        ((ServerLevel)this.level).updateChunkPos(this);
+        this.getSelfAndPassengers().forEach(entity -> {
+            serverLevel.updateChunkPos((Entity)entity);
+            entity.teleported = true;
+            entity.repositionDirectPassengers(Entity::forceMove);
+        });
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -2320,6 +2329,10 @@ CommandSource {
         return set;
     }
 
+    public Stream<Entity> getSelfAndPassengers() {
+        return Stream.concat(Stream.of(this), this.passengers.stream().flatMap(Entity::getSelfAndPassengers));
+    }
+
     public boolean hasOnePlayerPassenger() {
         HashSet<Entity> set = Sets.newHashSet();
         this.fillIndirectPassengers(true, set);
@@ -2356,6 +2369,12 @@ CommandSource {
             return true;
         }
         return false;
+    }
+
+    public void repositionDirectPassengers(MoveCallback moveCallback) {
+        for (Entity entity : this.passengers) {
+            this.positionRider(entity, moveCallback);
+        }
     }
 
     public boolean isControlledByLocalInstance() {
@@ -2554,6 +2573,15 @@ CommandSource {
     }
 
     public void checkDespawn() {
+    }
+
+    public void forceMove(double d, double e, double f) {
+        this.moveTo(d, e, f, this.yRot, this.xRot);
+    }
+
+    @FunctionalInterface
+    public static interface MoveCallback {
+        public void accept(Entity var1, double var2, double var4, double var6);
     }
 }
 

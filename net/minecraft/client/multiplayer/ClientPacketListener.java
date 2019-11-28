@@ -566,8 +566,8 @@ implements ClientGamePacketListener {
                 float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f : entity.xRot;
                 entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
             } else if (clientboundMoveEntityPacket.hasRotation()) {
-                float h = clientboundMoveEntityPacket.getyRot();
-                float f = clientboundMoveEntityPacket.getxRot();
+                float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0f;
+                float f = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f;
                 entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, f, 3, false);
             }
             entity.onGround = clientboundMoveEntityPacket.isOnGround();

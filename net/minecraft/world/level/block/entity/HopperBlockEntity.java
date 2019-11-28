@@ -116,7 +116,7 @@ TickableBlockEntity {
         }
         if (!this.isOnCooldown() && this.getBlockState().getValue(HopperBlock.ENABLED).booleanValue()) {
             boolean bl = false;
-            if (!this.inventoryEmpty()) {
+            if (!this.isEmpty()) {
                 bl = this.ejectItems();
             }
             if (!this.inventoryFull()) {
@@ -129,19 +129,6 @@ TickableBlockEntity {
             }
         }
         return false;
-    }
-
-    private boolean inventoryEmpty() {
-        for (ItemStack itemStack : this.items) {
-            if (itemStack.isEmpty()) continue;
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.inventoryEmpty();
     }
 
     private boolean inventoryFull() {

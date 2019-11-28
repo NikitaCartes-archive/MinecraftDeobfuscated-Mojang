@@ -4,6 +4,7 @@
 package net.minecraft.world.level.lighting;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -33,7 +34,7 @@ extends SectionTracker {
     protected final M updatingSectionData;
     protected final LongSet changedSections = new LongOpenHashSet();
     protected final LongSet sectionsAffectedByLightUpdates = new LongOpenHashSet();
-    protected final Long2ObjectMap<DataLayer> queuedSections = new Long2ObjectOpenHashMap<DataLayer>();
+    protected final Long2ObjectMap<DataLayer> queuedSections = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap());
     private final LongSet columnsToRetainQueuedDataFor = new LongOpenHashSet();
     private final LongSet toRemove = new LongOpenHashSet();
     protected volatile boolean hasToRemove;
@@ -161,13 +162,17 @@ extends SectionTracker {
     }
 
     protected void clearQueuedSectionBlocks(LayerLightEngine<?, ?> layerLightEngine, long l) {
+        if (layerLightEngine.getQueueSize() < 8192) {
+            layerLightEngine.removeIf(m -> SectionPos.blockToSection(m) == l);
+            return;
+        }
         int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
         int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
         int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
-        for (int m = 0; m < 16; ++m) {
+        for (int m2 = 0; m2 < 16; ++m2) {
             for (int n = 0; n < 16; ++n) {
                 for (int o = 0; o < 16; ++o) {
-                    long p = BlockPos.asLong(i + m, j + n, k + o);
+                    long p = BlockPos.asLong(i + m2, j + n, k + o);
                     layerLightEngine.removeFromQueue(p);
                 }
             }

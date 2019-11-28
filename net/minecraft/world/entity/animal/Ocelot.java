@@ -273,7 +273,7 @@ extends Animal {
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (spawnGroupData == null) {
             spawnGroupData = new AgableMob.AgableMobGroupData();
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.14285715f);
+            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0f);
         }
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

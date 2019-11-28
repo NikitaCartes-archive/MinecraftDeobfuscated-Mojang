@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.blockentity.BrightnessCombiner;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -85,17 +86,17 @@ extends BlockEntityRenderer<T> {
         BlockState blockState = bl ? ((BlockEntity)blockEntity).getBlockState() : (BlockState)Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH);
         ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
         Block block = blockState.getBlock();
-        if (!(block instanceof ChestBlock)) {
+        if (!(block instanceof AbstractChestBlock)) {
             return;
         }
-        ChestBlock chestBlock = (ChestBlock)block;
+        AbstractChestBlock abstractChestBlock = (AbstractChestBlock)block;
         boolean bl2 = chestType != ChestType.SINGLE;
         poseStack.pushPose();
         float g = blockState.getValue(ChestBlock.FACING).toYRot();
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(-g));
         poseStack.translate(-0.5, -0.5, -0.5);
-        DoubleBlockCombiner.NeighborCombineResult<Object> neighborCombineResult = bl ? ChestBlock.combine(chestBlock, blockState, level, ((BlockEntity)blockEntity).getBlockPos(), true) : DoubleBlockCombiner.Combiner::acceptNone;
+        DoubleBlockCombiner.NeighborCombineResult<Object> neighborCombineResult = bl ? abstractChestBlock.combine(blockState, level, ((BlockEntity)blockEntity).getBlockPos(), true) : DoubleBlockCombiner.Combiner::acceptNone;
         float h = neighborCombineResult.apply(ChestBlock.opennessCombiner((LidBlockEntity)blockEntity)).get(f);
         h = 1.0f - h;
         h = 1.0f - h * h * h;

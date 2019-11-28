@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public interface BufferVertexConsumer
@@ -98,11 +99,15 @@ extends VertexConsumer {
         if (vertexFormatElement.getType() != VertexFormatElement.Type.BYTE) {
             throw new IllegalStateException();
         }
-        this.putByte(0, (byte)((int)(f * 127.0f) & 0xFF));
-        this.putByte(1, (byte)((int)(g * 127.0f) & 0xFF));
-        this.putByte(2, (byte)((int)(h * 127.0f) & 0xFF));
+        this.putByte(0, BufferVertexConsumer.normalIntValue(f));
+        this.putByte(1, BufferVertexConsumer.normalIntValue(g));
+        this.putByte(2, BufferVertexConsumer.normalIntValue(h));
         this.nextElement();
         return this;
+    }
+
+    public static byte normalIntValue(float f) {
+        return (byte)((int)(Mth.clamp(f, -1.0f, 1.0f) * 127.0f) & 0xFF);
     }
 }
 

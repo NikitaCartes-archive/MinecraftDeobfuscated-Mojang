@@ -65,15 +65,6 @@ TickableBlockEntity {
     }
 
     @Override
-    public boolean isEmpty() {
-        for (ItemStack itemStack : this.items) {
-            if (itemStack.isEmpty()) continue;
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     protected Component getDefaultName() {
         return new TranslatableComponent("container.chest", new Object[0]);
     }

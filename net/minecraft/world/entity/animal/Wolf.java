@@ -314,6 +314,7 @@ extends TamableAnimal {
         super.setTame(bl);
         if (bl) {
             this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0);
+            this.setHealth(20.0f);
         } else {
             this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
         }

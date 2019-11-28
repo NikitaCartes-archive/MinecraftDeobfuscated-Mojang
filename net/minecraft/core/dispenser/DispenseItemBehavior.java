@@ -368,7 +368,7 @@ public interface DispenseItemBehavior {
 
             @Override
             protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-                this.success = !ArmorItem.dispenseArmor(blockSource, itemStack).isEmpty();
+                this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
                 return itemStack;
             }
         };
@@ -384,7 +384,6 @@ public interface DispenseItemBehavior {
                 Level level = blockSource.getLevel();
                 Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos blockPos = blockSource.getPos().relative(direction);
-                this.success = true;
                 if (level.isEmptyBlock(blockPos) && WitherSkullBlock.canSpawnMob(level, blockPos, itemStack)) {
                     level.setBlock(blockPos, (BlockState)Blocks.WITHER_SKELETON_SKULL.defaultBlockState().setValue(SkullBlock.ROTATION, direction.getAxis() == Direction.Axis.Y ? 0 : direction.getOpposite().get2DDataValue() * 4), 3);
                     BlockEntity blockEntity = level.getBlockEntity(blockPos);
@@ -392,13 +391,11 @@ public interface DispenseItemBehavior {
                         WitherSkullBlock.checkSpawn(level, blockPos, (SkullBlockEntity)blockEntity);
                     }
                     itemStack.shrink(1);
+                    this.success = true;
                 } else {
-                    ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-                    if (itemStack.getCount() < itemStack2.getCount()) {
-                        this.success = false;
-                    }
+                    this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
                 }
-                return super.execute(blockSource, itemStack);
+                return itemStack;
             }
         });
         DispenserBlock.registerBehavior(Blocks.CARVED_PUMPKIN, new OptionalDispenseItemBehavior(){
@@ -408,19 +405,16 @@ public interface DispenseItemBehavior {
                 Level level = blockSource.getLevel();
                 BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                 CarvedPumpkinBlock carvedPumpkinBlock = (CarvedPumpkinBlock)Blocks.CARVED_PUMPKIN;
-                this.success = true;
                 if (level.isEmptyBlock(blockPos) && carvedPumpkinBlock.canSpawnGolem(level, blockPos)) {
                     if (!level.isClientSide) {
                         level.setBlock(blockPos, carvedPumpkinBlock.defaultBlockState(), 3);
                     }
                     itemStack.shrink(1);
+                    this.success = true;
                 } else {
-                    ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-                    if (itemStack.getCount() < itemStack2.getCount()) {
-                        this.success = false;
-                    }
+                    this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
                 }
-                return super.execute(blockSource, itemStack);
+                return itemStack;
             }
         });
         DispenserBlock.registerBehavior(Blocks.SHULKER_BOX.asItem(), new ShulkerBoxDispenseBehavior());

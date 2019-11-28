@@ -248,15 +248,6 @@ TickableBlockEntity {
     }
 
     @Override
-    public boolean isEmpty() {
-        for (ItemStack itemStack : this.itemStacks) {
-            if (itemStack.isEmpty()) continue;
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public int[] getSlotsForFace(Direction direction) {
         return SLOTS;
     }

@@ -34,7 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.AbstractChestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoubleBlockCombiner;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -63,7 +63,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class ChestBlock
-extends BaseEntityBlock
+extends AbstractChestBlock<ChestBlockEntity>
 implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final EnumProperty<ChestType> TYPE = BlockStateProperties.CHEST_TYPE;
@@ -73,7 +73,6 @@ implements SimpleWaterloggedBlock {
     protected static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 1.0, 15.0, 14.0, 15.0);
     protected static final VoxelShape EAST_AABB = Block.box(1.0, 0.0, 1.0, 16.0, 14.0, 15.0);
     protected static final VoxelShape AABB = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
-    protected final Supplier<BlockEntityType<? extends ChestBlockEntity>> blockEntityType;
     private static final DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<Container>> CHEST_COMBINER = new DoubleBlockCombiner.Combiner<ChestBlockEntity, Optional<Container>>(){
 
         @Override
@@ -144,8 +143,7 @@ implements SimpleWaterloggedBlock {
     };
 
     protected ChestBlock(Block.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
-        super(properties);
-        this.blockEntityType = supplier;
+        super(properties, supplier);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(TYPE, ChestType.SINGLE)).setValue(WATERLOGGED, false));
     }
 
@@ -282,18 +280,19 @@ implements SimpleWaterloggedBlock {
 
     @Nullable
     public static Container getContainer(ChestBlock chestBlock, BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
-        return ChestBlock.combine(chestBlock, blockState, level, blockPos, bl).apply(CHEST_COMBINER).orElse(null);
+        return chestBlock.combine(blockState, level, blockPos, bl).apply(CHEST_COMBINER).orElse(null);
     }
 
-    public static DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(ChestBlock chestBlock, BlockState blockState, Level level, BlockPos blockPos2, boolean bl) {
+    @Override
+    public DoubleBlockCombiner.NeighborCombineResult<? extends ChestBlockEntity> combine(BlockState blockState, Level level, BlockPos blockPos2, boolean bl) {
         BiPredicate<LevelAccessor, BlockPos> biPredicate = bl ? (levelAccessor, blockPos) -> false : ChestBlock::isChestBlockedAt;
-        return DoubleBlockCombiner.combineWithNeigbour(chestBlock.blockEntityType.get(), ChestBlock::getBlockType, ChestBlock::getConnectedDirection, FACING, blockState, level, blockPos2, biPredicate);
+        return DoubleBlockCombiner.combineWithNeigbour((BlockEntityType)this.blockEntityType.get(), ChestBlock::getBlockType, ChestBlock::getConnectedDirection, FACING, blockState, level, blockPos2, biPredicate);
     }
 
     @Override
     @Nullable
     public MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
-        return ChestBlock.combine(this, blockState, level, blockPos, false).apply(MENU_PROVIDER_COMBINER).orElse(null);
+        return this.combine(blockState, level, blockPos, false).apply(MENU_PROVIDER_COMBINER).orElse(null);
     }
 
     @Environment(value=EnvType.CLIENT)

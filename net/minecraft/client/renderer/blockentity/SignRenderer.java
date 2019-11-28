@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.renderer.blockentity;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -67,14 +68,19 @@ extends BlockEntityRenderer<SignBlockEntity> {
         poseStack.translate(0.0, 0.3333333432674408, 0.046666666865348816);
         poseStack.scale(0.010416667f, -0.010416667f, 0.010416667f);
         int l = signBlockEntity.getColor().getTextColor();
-        for (int m = 0; m < 4; ++m) {
-            String string = signBlockEntity.getRenderMessage(m, component -> {
+        double d = 0.4;
+        int m = (int)((double)NativeImage.getR(l) * 0.4);
+        int n = (int)((double)NativeImage.getG(l) * 0.4);
+        int o = (int)((double)NativeImage.getB(l) * 0.4);
+        int p = NativeImage.combine(0, o, n, m);
+        for (int q = 0; q < 4; ++q) {
+            String string = signBlockEntity.getRenderMessage(q, component -> {
                 List<Component> list = ComponentRenderUtils.wrapComponents(component, 90, font, false, true);
                 return list.isEmpty() ? "" : list.get(0).getColoredString();
             });
             if (string == null) continue;
-            float n = -font.width(string) / 2;
-            font.drawInBatch(string, n, m * 10 - signBlockEntity.messages.length * 5, l, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+            float r = -font.width(string) / 2;
+            font.drawInBatch(string, r, q * 10 - signBlockEntity.messages.length * 5, p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
     }

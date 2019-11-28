@@ -63,6 +63,7 @@ import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RunningTrimmedMean;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.ViewArea;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -160,6 +161,7 @@ ResourceManagerReloadListener {
     private boolean generateClouds = true;
     @Nullable
     private VertexBuffer cloudBuffer;
+    private RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
     private int ticks;
     private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<BlockDestructionProgress>();
     private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<SortedSet<BlockDestructionProgress>>();
@@ -793,7 +795,7 @@ ResourceManagerReloadListener {
      * WARNING - Removed try catching itself - possible behaviour change.
      */
     public void renderLevel(PoseStack poseStack, float f, long l, boolean bl, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f matrix4f) {
-        int t;
+        int v;
         boolean bl3;
         Frustum frustum;
         boolean bl2;
@@ -841,8 +843,10 @@ ResourceManagerReloadListener {
         long m = 33333333L;
         long n = (double)j == Option.FRAMERATE_LIMIT.getMaxValue() ? 0L : (long)(1000000000 / j);
         long o = Util.getNanos() - l;
-        long p = Mth.clamp(o * 2L, n, 33333333L);
-        this.compileChunksUntil(l + p);
+        long p = this.frameTimes.registerValueAndGetMean(o);
+        long q = p * 3L / 2L;
+        long r = Mth.clamp(q, n, 33333333L);
+        this.compileChunksUntil(l + r);
         profilerFiller.popPush("terrain");
         this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
@@ -854,7 +858,6 @@ ResourceManagerReloadListener {
         this.culledEntities = 0;
         profilerFiller.popPush("entities");
         if (this.shouldShowEntityOutlines()) {
-            profilerFiller.popPush("entityOutlines");
             this.entityTarget.clear(Minecraft.ON_OSX);
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
@@ -874,11 +877,11 @@ ResourceManagerReloadListener {
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
                 int k = entity.getTeamColor();
-                int q = 255;
-                int r = k >> 16 & 0xFF;
-                int s = k >> 8 & 0xFF;
-                t = k & 0xFF;
-                outlineBufferSource.setColor(r, s, t, 255);
+                int s = 255;
+                int t = k >> 16 & 0xFF;
+                int u = k >> 8 & 0xFF;
+                v = k & 0xFF;
+                outlineBufferSource.setColor(t, u, v, 255);
             } else {
                 multiBufferSource = bufferSource;
             }
@@ -899,8 +902,8 @@ ResourceManagerReloadListener {
                 poseStack.pushPose();
                 poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos.asLong());
-                if (sortedSet != null && !sortedSet.isEmpty() && (t = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
-                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(t)), poseStack.last());
+                if (sortedSet != null && !sortedSet.isEmpty() && (v = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
+                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(v)), poseStack.last());
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -939,15 +942,15 @@ ResourceManagerReloadListener {
         profilerFiller.popPush("destroyProgress");
         for (Long2ObjectMap.Entry entry : this.destructionProgress.long2ObjectEntrySet()) {
             SortedSet sortedSet2;
-            double w;
-            double v;
+            double y;
+            double x;
             BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-            double u = (double)blockPos3.getX() - d;
-            if (u * u + (v = (double)blockPos3.getY() - e) * v + (w = (double)blockPos3.getZ() - g) * w > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
-            int x = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+            double w = (double)blockPos3.getX() - d;
+            if (w * w + (x = (double)blockPos3.getY() - e) * x + (y = (double)blockPos3.getZ() - g) * y > 1024.0 || (sortedSet2 = (SortedSet)entry.getValue()) == null || sortedSet2.isEmpty()) continue;
+            int z = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
             poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
-            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(x)), poseStack.last());
+            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(z)), poseStack.last());
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -968,14 +971,14 @@ ResourceManagerReloadListener {
         this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
         this.renderWorldBounds(camera);
         RenderSystem.popMatrix();
-        bufferSource.endBatch(RenderType.lines());
-        this.renderBuffers.crumblingBufferSource().endBatch();
-        bufferSource.endBatch(RenderType.glint());
-        bufferSource.endBatch(RenderType.entityGlint());
-        bufferSource.endBatch(RenderType.waterMask());
         bufferSource.endBatch(Sheets.translucentBlockSheet());
         bufferSource.endBatch(Sheets.bannerSheet());
         bufferSource.endBatch(Sheets.shieldSheet());
+        bufferSource.endBatch(RenderType.glint());
+        bufferSource.endBatch(RenderType.entityGlint());
+        bufferSource.endBatch(RenderType.waterMask());
+        this.renderBuffers.crumblingBufferSource().endBatch();
+        bufferSource.endBatch(RenderType.lines());
         bufferSource.endBatch();
         profilerFiller.popPush("translucent");
         this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
@@ -1567,9 +1570,13 @@ ResourceManagerReloadListener {
 
     private void compileChunksUntil(long l) {
         this.needsUpdate |= this.chunkRenderDispatcher.uploadAllPendingUploads();
+        long m = Util.getNanos();
+        int i = 0;
         if (!this.chunksToCompile.isEmpty()) {
             Iterator<ChunkRenderDispatcher.RenderChunk> iterator = this.chunksToCompile.iterator();
             while (iterator.hasNext()) {
+                long o;
+                long p;
                 ChunkRenderDispatcher.RenderChunk renderChunk = iterator.next();
                 if (renderChunk.isDirtyFromPlayer()) {
                     this.chunkRenderDispatcher.rebuildChunkSync(renderChunk);
@@ -1578,8 +1585,9 @@ ResourceManagerReloadListener {
                 }
                 renderChunk.setNotDirty();
                 iterator.remove();
-                long m = l - Util.getNanos();
-                if (m >= 0L) continue;
+                long n = Util.getNanos();
+                long q = l - n;
+                if (q >= (p = (o = n - m) / (long)(++i))) continue;
                 break;
             }
         }

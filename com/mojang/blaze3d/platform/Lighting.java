@@ -5,11 +5,15 @@ package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
 public class Lighting {
+    private static Matrix4f lightPoseForFlatItems = new Matrix4f();
+    private static Matrix4f lightPoseFor3DItems = new Matrix4f();
+
     public static void turnBackOn() {
         RenderSystem.enableLighting();
         RenderSystem.enableColorMaterial();
@@ -26,7 +30,19 @@ public class Lighting {
     }
 
     public static void setupGui(Matrix4f matrix4f) {
+        lightPoseForFlatItems = matrix4f.copy();
+        lightPoseFor3DItems = matrix4f.copy();
+        lightPoseFor3DItems.multiply(Vector3f.YP.rotationDegrees(62.0f));
+        lightPoseFor3DItems.multiply(Vector3f.XP.rotationDegrees(185.5f));
         RenderSystem.setupGuiDiffuseLighting(matrix4f);
+    }
+
+    public static void setupForFlatItems() {
+        RenderSystem.setupGuiDiffuseLighting(lightPoseForFlatItems);
+    }
+
+    public static void setupFor3DItems() {
+        RenderSystem.setupGuiDiffuseLighting(lightPoseFor3DItems);
     }
 }
 

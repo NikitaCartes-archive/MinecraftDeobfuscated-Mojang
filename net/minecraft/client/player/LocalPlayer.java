@@ -690,7 +690,7 @@ extends AbstractClientPlayer {
                 }
             }
         }
-        if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
+        if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();
