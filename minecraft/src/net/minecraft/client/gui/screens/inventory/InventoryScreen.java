@@ -102,39 +102,41 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	public static void renderEntityInInventory(int i, int j, int k, float f, float g, LivingEntity livingEntity) {
+		float h = (float)Math.atan((double)(f / 40.0F));
+		float l = (float)Math.atan((double)(g / 40.0F));
 		RenderSystem.pushMatrix();
-		RenderSystem.scalef(-1.0F, 1.0F, 1.0F);
+		RenderSystem.translatef((float)i, (float)j, 1050.0F);
+		RenderSystem.scalef(1.0F, 1.0F, -1.0F);
 		PoseStack poseStack = new PoseStack();
-		poseStack.translate((double)(-i), (double)j, 50.0);
+		poseStack.translate(0.0, 0.0, 1000.0);
 		poseStack.scale((float)k, (float)k, (float)k);
 		Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-		Quaternion quaternion2 = Vector3f.XP.rotationDegrees(-((float)Math.atan((double)(g / 40.0F))) * 20.0F);
+		Quaternion quaternion2 = Vector3f.XP.rotationDegrees(l * 20.0F);
 		quaternion.mul(quaternion2);
 		poseStack.mulPose(quaternion);
-		float h = livingEntity.yBodyRot;
-		float l = livingEntity.yRot;
-		float m = livingEntity.xRot;
-		float n = livingEntity.yHeadRotO;
-		float o = livingEntity.yHeadRot;
-		livingEntity.yBodyRot = (float)Math.atan((double)(f / 40.0F)) * 20.0F;
-		livingEntity.yRot = (float)Math.atan((double)(f / 40.0F)) * 40.0F;
-		livingEntity.xRot = -((float)Math.atan((double)(g / 40.0F))) * 20.0F;
+		float m = livingEntity.yBodyRot;
+		float n = livingEntity.yRot;
+		float o = livingEntity.xRot;
+		float p = livingEntity.yHeadRotO;
+		float q = livingEntity.yHeadRot;
+		livingEntity.yBodyRot = 180.0F + h * 20.0F;
+		livingEntity.yRot = 180.0F + h * 40.0F;
+		livingEntity.xRot = -l * 20.0F;
 		livingEntity.yHeadRot = livingEntity.yRot;
 		livingEntity.yHeadRotO = livingEntity.yRot;
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		quaternion2.conj();
-		quaternion2.mul(Vector3f.YP.rotationDegrees(180.0F));
 		entityRenderDispatcher.overrideCameraOrientation(quaternion2);
 		entityRenderDispatcher.setRenderShadow(false);
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880);
-		bufferSource.endBatch(-i, j, 1000);
+		bufferSource.endBatch();
 		entityRenderDispatcher.setRenderShadow(true);
-		livingEntity.yBodyRot = h;
-		livingEntity.yRot = l;
-		livingEntity.xRot = m;
-		livingEntity.yHeadRotO = n;
-		livingEntity.yHeadRot = o;
+		livingEntity.yBodyRot = m;
+		livingEntity.yRot = n;
+		livingEntity.xRot = o;
+		livingEntity.yHeadRotO = p;
+		livingEntity.yHeadRot = q;
 		RenderSystem.popMatrix();
 	}
 

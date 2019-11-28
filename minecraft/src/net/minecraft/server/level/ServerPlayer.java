@@ -1059,6 +1059,12 @@ public class ServerPlayer extends Player implements ContainerListener {
 	}
 
 	@Override
+	public void forceMove(double d, double e, double f) {
+		this.connection.teleport(d, e, f, this.yRot, this.xRot);
+		this.connection.resetPosition();
+	}
+
+	@Override
 	public void crit(Entity entity) {
 		this.getLevel().getChunkSource().broadcastAndSend(this, new ClientboundAnimatePacket(entity, 4));
 	}

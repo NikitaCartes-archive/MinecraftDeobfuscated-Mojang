@@ -62,32 +62,24 @@ public interface MultiBufferSource {
 		}
 
 		public void endBatch() {
-			this.endBatch(0, 0, 0);
-		}
-
-		public void endBatch(int i, int j, int k) {
 			this.lastState.ifPresent(renderTypex -> {
 				VertexConsumer vertexConsumer = this.getBuffer(renderTypex);
 				if (vertexConsumer == this.builder) {
-					this.endBatch(renderTypex, i, j, k);
+					this.endBatch(renderTypex);
 				}
 			});
 
 			for (RenderType renderType : this.fixedBuffers.keySet()) {
-				this.endBatch(renderType, i, j, k);
+				this.endBatch(renderType);
 			}
 		}
 
 		public void endBatch(RenderType renderType) {
-			this.endBatch(renderType, 0, 0, 0);
-		}
-
-		public void endBatch(RenderType renderType, int i, int j, int k) {
 			BufferBuilder bufferBuilder = this.getBuilderRaw(renderType);
 			boolean bl = Objects.equals(this.lastState, Optional.of(renderType));
 			if (bl || bufferBuilder != this.builder) {
 				if (this.startedBuffers.remove(bufferBuilder)) {
-					renderType.end(bufferBuilder, i, j, k);
+					renderType.end(bufferBuilder, 0, 0, 0);
 					if (bl) {
 						this.lastState = Optional.empty();
 					}

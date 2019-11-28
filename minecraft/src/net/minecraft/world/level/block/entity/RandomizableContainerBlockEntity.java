@@ -78,6 +78,12 @@ public abstract class RandomizableContainerBlockEntity extends BaseContainerBloc
 	}
 
 	@Override
+	public boolean isEmpty() {
+		this.unpackLootTable(null);
+		return this.getItems().stream().allMatch(ItemStack::isEmpty);
+	}
+
+	@Override
 	public ItemStack getItem(int i) {
 		this.unpackLootTable(null);
 		return this.getItems().get(i);

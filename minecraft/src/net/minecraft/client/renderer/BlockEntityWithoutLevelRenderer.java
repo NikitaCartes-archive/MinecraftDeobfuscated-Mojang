@@ -116,10 +116,11 @@ public class BlockEntityWithoutLevelRenderer {
 				VertexConsumer vertexConsumer = material.sprite()
 					.wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
-				this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				if (bl) {
 					this.banner.fromItem(itemStack, ShieldItem.getColor(itemStack));
-					BannerRenderer.renderPatterns(this.banner, poseStack, multiBufferSource, i, j, this.shieldModel.plate(), false);
+					BannerRenderer.renderPatterns(this.banner, poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false);
+				} else {
+					this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				}
 
 				poseStack.popPose();

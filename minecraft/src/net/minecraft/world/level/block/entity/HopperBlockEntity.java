@@ -103,7 +103,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 		if (this.level != null && !this.level.isClientSide) {
 			if (!this.isOnCooldown() && (Boolean)this.getBlockState().getValue(HopperBlock.ENABLED)) {
 				boolean bl = false;
-				if (!this.inventoryEmpty()) {
+				if (!this.isEmpty()) {
 					bl = this.ejectItems();
 				}
 
@@ -122,21 +122,6 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 		} else {
 			return false;
 		}
-	}
-
-	private boolean inventoryEmpty() {
-		for (ItemStack itemStack : this.items) {
-			if (!itemStack.isEmpty()) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.inventoryEmpty();
 	}
 
 	private boolean inventoryFull() {

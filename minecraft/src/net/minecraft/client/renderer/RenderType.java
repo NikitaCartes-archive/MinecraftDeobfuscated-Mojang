@@ -85,7 +85,7 @@ public abstract class RenderType extends RenderStateShard {
 		7,
 		256,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -99,7 +99,7 @@ public abstract class RenderType extends RenderStateShard {
 		7,
 		256,
 		RenderType.CompositeState.builder()
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, false, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -129,6 +129,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setLayeringState(PROJECTION_LAYERING)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setWriteMaskState(COLOR_WRITE)
 			.createCompositeState(false)
 	);
 	private final VertexFormat format;

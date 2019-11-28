@@ -32,6 +32,7 @@ public class TntRenderer extends EntityRenderer<PrimedTnt> {
 
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
 		poseStack.translate(-0.5, -0.5, 0.5);
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
 		TntMinecartRenderer.renderWhiteSolidBlock(Blocks.TNT.defaultBlockState(), poseStack, multiBufferSource, i, primedTnt.getLife() / 5 % 2 == 0);
 		poseStack.popPose();
 		super.render(primedTnt, f, g, poseStack, multiBufferSource, i);

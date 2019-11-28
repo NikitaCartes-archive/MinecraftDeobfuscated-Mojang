@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Matrix4f;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -50,6 +51,7 @@ public class ChatComponent extends GuiComponent {
 				double e = this.minecraft.options.chatOpacity * 0.9F + 0.1F;
 				double f = this.minecraft.options.textBackgroundOpacity;
 				int m = 0;
+				Matrix4f matrix4f = Matrix4f.createTranslateMatrix(0.0F, 0.0F, -100.0F);
 
 				for (int n = 0; n + this.chatScrollbarPos < this.trimmedMessages.size() && n < j; n++) {
 					GuiMessage guiMessage = (GuiMessage)this.trimmedMessages.get(n + this.chatScrollbarPos);
@@ -63,7 +65,7 @@ public class ChatComponent extends GuiComponent {
 							if (p > 3) {
 								int r = 0;
 								int s = -n * 9;
-								fill(-2, s - 9, 0 + l + 4, s, q << 24);
+								fill(matrix4f, -2, s - 9, 0 + l + 4, s, q << 24);
 								String string = guiMessage.getMessage().getColoredString();
 								RenderSystem.enableBlend();
 								this.minecraft.font.drawShadow(string, 0.0F, (float)(s - 8), 16777215 + (p << 24));

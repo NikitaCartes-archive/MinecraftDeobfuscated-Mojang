@@ -1,6 +1,7 @@
 package net.minecraft.world.level.lighting;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -28,7 +29,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 	protected final M updatingSectionData;
 	protected final LongSet changedSections = new LongOpenHashSet();
 	protected final LongSet sectionsAffectedByLightUpdates = new LongOpenHashSet();
-	protected final Long2ObjectMap<DataLayer> queuedSections = new Long2ObjectOpenHashMap<>();
+	protected final Long2ObjectMap<DataLayer> queuedSections = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 	private final LongSet columnsToRetainQueuedDataFor = new LongOpenHashSet();
 	private final LongSet toRemove = new LongOpenHashSet();
 	protected volatile boolean hasToRemove;
@@ -152,15 +153,19 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 	}
 
 	protected void clearQueuedSectionBlocks(LayerLightEngine<?, ?> layerLightEngine, long l) {
-		int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
-		int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
-		int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
+		if (layerLightEngine.getQueueSize() < 8192) {
+			layerLightEngine.removeIf(mx -> SectionPos.blockToSection(mx) == l);
+		} else {
+			int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
+			int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
+			int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
 
-		for (int m = 0; m < 16; m++) {
-			for (int n = 0; n < 16; n++) {
-				for (int o = 0; o < 16; o++) {
-					long p = BlockPos.asLong(i + m, j + n, k + o);
-					layerLightEngine.removeFromQueue(p);
+			for (int m = 0; m < 16; m++) {
+				for (int n = 0; n < 16; n++) {
+					for (int o = 0; o < 16; o++) {
+						long p = BlockPos.asLong(i + m, j + n, k + o);
+						layerLightEngine.removeFromQueue(p);
+					}
 				}
 			}
 		}

@@ -30,8 +30,7 @@ public class ArmorItem extends Item {
 	public static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
 		@Override
 		protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-			ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-			return itemStack2.isEmpty() ? super.execute(blockSource, itemStack) : itemStack2;
+			return ArmorItem.dispenseArmor(blockSource, itemStack) ? itemStack : super.execute(blockSource, itemStack);
 		}
 	};
 	protected final EquipmentSlot slot;
@@ -39,12 +38,12 @@ public class ArmorItem extends Item {
 	protected final float toughness;
 	protected final ArmorMaterial material;
 
-	public static ItemStack dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
+	public static boolean dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
 		BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 		List<LivingEntity> list = blockSource.getLevel()
 			.getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS.and(new EntitySelector.MobCanWearArmourEntitySelector(itemStack)));
 		if (list.isEmpty()) {
-			return ItemStack.EMPTY;
+			return false;
 		} else {
 			LivingEntity livingEntity = (LivingEntity)list.get(0);
 			EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
@@ -55,7 +54,7 @@ public class ArmorItem extends Item {
 				((Mob)livingEntity).setPersistenceRequired();
 			}
 
-			return itemStack;
+			return true;
 		}
 	}
 

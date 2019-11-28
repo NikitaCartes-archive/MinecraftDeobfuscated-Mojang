@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -149,7 +150,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
 		this.flag.xRot = 0.0F;
 		this.flag.y = -32.0F;
-		BannerRenderer.renderPatterns(bannerBlockEntity, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, true);
+		BannerRenderer.renderPatterns(bannerBlockEntity, poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true);
 		poseStack.popPose();
 		bufferSource.endBatch();
 	}

@@ -35,6 +35,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	private static final Logger LOGGER = LogManager.getLogger();
 	private long age;
 	private int teleportCooldown;
+	@Nullable
 	private BlockPos exitPortal;
 	private boolean exactTeleport;
 
@@ -84,7 +85,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		} else if (!this.level.isClientSide) {
 			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
 			if (!list.isEmpty()) {
-				this.teleportEntity((Entity)list.get(0));
+				this.teleportEntity(((Entity)list.get(0)).getRootVehicle());
 			}
 
 			if (this.age % 2400L == 0L) {

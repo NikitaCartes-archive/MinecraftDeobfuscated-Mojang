@@ -713,7 +713,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 		}
 
-		if (this.input.jumping && !bl6 && !bl && !this.abilities.flying) {
+		if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger()) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
 				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));

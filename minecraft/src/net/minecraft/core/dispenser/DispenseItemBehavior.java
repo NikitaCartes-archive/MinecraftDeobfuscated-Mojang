@@ -355,7 +355,7 @@ public interface DispenseItemBehavior {
 		DispenseItemBehavior dispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.success = !ArmorItem.dispenseArmor(blockSource, itemStack).isEmpty();
+				this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
 				return itemStack;
 			}
 		};
@@ -372,7 +372,6 @@ public interface DispenseItemBehavior {
 					Level level = blockSource.getLevel();
 					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
 					BlockPos blockPos = blockSource.getPos().relative(direction);
-					this.success = true;
 					if (level.isEmptyBlock(blockPos) && WitherSkullBlock.canSpawnMob(level, blockPos, itemStack)) {
 						level.setBlock(
 							blockPos,
@@ -387,14 +386,12 @@ public interface DispenseItemBehavior {
 						}
 
 						itemStack.shrink(1);
+						this.success = true;
 					} else {
-						ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-						if (itemStack.getCount() < itemStack2.getCount()) {
-							this.success = false;
-						}
+						this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
 					}
 
-					return super.execute(blockSource, itemStack);
+					return itemStack;
 				}
 			}
 		);
@@ -404,21 +401,18 @@ public interface DispenseItemBehavior {
 				Level level = blockSource.getLevel();
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				CarvedPumpkinBlock carvedPumpkinBlock = (CarvedPumpkinBlock)Blocks.CARVED_PUMPKIN;
-				this.success = true;
 				if (level.isEmptyBlock(blockPos) && carvedPumpkinBlock.canSpawnGolem(level, blockPos)) {
 					if (!level.isClientSide) {
 						level.setBlock(blockPos, carvedPumpkinBlock.defaultBlockState(), 3);
 					}
 
 					itemStack.shrink(1);
+					this.success = true;
 				} else {
-					ItemStack itemStack2 = ArmorItem.dispenseArmor(blockSource, itemStack);
-					if (itemStack.getCount() < itemStack2.getCount()) {
-						this.success = false;
-					}
+					this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
 				}
 
-				return super.execute(blockSource, itemStack);
+				return itemStack;
 			}
 		});
 		DispenserBlock.registerBehavior(Blocks.SHULKER_BOX.asItem(), new ShulkerBoxDispenseBehavior());

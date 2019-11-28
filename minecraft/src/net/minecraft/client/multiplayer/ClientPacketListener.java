@@ -622,8 +622,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.xRot;
 					entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3, false);
 				} else if (clientboundMoveEntityPacket.hasRotation()) {
-					float h = (float)clientboundMoveEntityPacket.getyRot();
-					float f = (float)clientboundMoveEntityPacket.getxRot();
+					float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F;
+					float f = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F;
 					entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, f, 3, false);
 				}
 

@@ -77,21 +77,28 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 				this.flag.xRot = 0.0F;
 			} else {
 				BlockPos blockPos = bannerBlockEntity.getBlockPos();
-				float k = (float)((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l) + f;
-				this.flag.xRot = (-0.0125F + 0.01F * Mth.cos(k * (float) Math.PI * 0.02F)) * (float) Math.PI;
+				float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
+				this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
 			}
 
 			this.flag.y = -32.0F;
-			renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, true);
+			renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true);
 			poseStack.popPose();
 			poseStack.popPose();
 		}
 	}
 
 	public static void renderPatterns(
-		BannerBlockEntity bannerBlockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, boolean bl
+		BannerBlockEntity bannerBlockEntity,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		int i,
+		int j,
+		ModelPart modelPart,
+		Material material,
+		boolean bl
 	) {
-		modelPart.render(poseStack, ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid), i, j);
+		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid), i, j);
 		List<BannerPattern> list = bannerBlockEntity.getPatterns();
 		List<DyeColor> list2 = bannerBlockEntity.getColors();
 
@@ -99,8 +106,8 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 			BannerPattern bannerPattern = (BannerPattern)list.get(k);
 			DyeColor dyeColor = (DyeColor)list2.get(k);
 			float[] fs = dyeColor.getTextureDiffuseColors();
-			Material material = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, bannerPattern.location(bl));
-			modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
+			Material material2 = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, bannerPattern.location(bl));
+			modelPart.render(poseStack, material2.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
 		}
 	}
 }

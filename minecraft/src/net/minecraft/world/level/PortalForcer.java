@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -43,13 +42,7 @@ public class PortalForcer {
 			Vec3 vec33 = portalInfo.speed;
 			entity.setDeltaMovement(vec33);
 			entity.yRot = f + (float)portalInfo.angle;
-			if (entity instanceof ServerPlayer) {
-				((ServerPlayer)entity).connection.teleport(vec32.x, vec32.y, vec32.z, entity.yRot, entity.xRot);
-				((ServerPlayer)entity).connection.resetPosition();
-			} else {
-				entity.moveTo(vec32.x, vec32.y, vec32.z, entity.yRot, entity.xRot);
-			}
-
+			entity.forceMove(vec32.x, vec32.y, vec32.z);
 			return true;
 		}
 	}

@@ -274,7 +274,7 @@ public class Ocelot extends Animal {
 	) {
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.14285715F);
+			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0F);
 		}
 
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

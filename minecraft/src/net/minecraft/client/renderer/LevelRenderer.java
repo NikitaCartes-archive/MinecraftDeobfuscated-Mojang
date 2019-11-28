@@ -147,6 +147,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 	private boolean generateClouds = true;
 	@Nullable
 	private VertexBuffer cloudBuffer;
+	private RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
 	private int ticks;
 	private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<>();
@@ -956,8 +957,10 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		}
 
 		long o = Util.getNanos() - l;
-		long p = Mth.clamp(o * 2L, n, 33333333L);
-		this.compileChunksUntil(l + p);
+		long p = this.frameTimes.registerValueAndGetMean(o);
+		long q = p * 3L / 2L;
+		long r = Mth.clamp(q, n, 33333333L);
+		this.compileChunksUntil(l + r);
 		profilerFiller.popPush("terrain");
 		this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
 		this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
@@ -969,7 +972,6 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		this.culledEntities = 0;
 		profilerFiller.popPush("entities");
 		if (this.shouldShowEntityOutlines()) {
-			profilerFiller.popPush("entityOutlines");
 			this.entityTarget.clear(Minecraft.ON_OSX);
 			this.minecraft.getMainRenderTarget().bindWrite(false);
 		}
@@ -994,11 +996,11 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 					multiBufferSource = outlineBufferSource;
 					int k = entity.getTeamColor();
-					int q = 255;
-					int r = k >> 16 & 0xFF;
-					int s = k >> 8 & 0xFF;
-					int t = k & 0xFF;
-					outlineBufferSource.setColor(r, s, t, 255);
+					int s = 255;
+					int t = k >> 16 & 0xFF;
+					int u = k >> 8 & 0xFF;
+					int v = k & 0xFF;
+					outlineBufferSource.setColor(t, u, v, 255);
 				} else {
 					multiBufferSource = bufferSource;
 				}
@@ -1024,10 +1026,10 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
 					SortedSet<BlockDestructionProgress> sortedSet = this.destructionProgress.get(blockPos.asLong());
 					if (sortedSet != null && !sortedSet.isEmpty()) {
-						int t = ((BlockDestructionProgress)sortedSet.last()).getProgress();
-						if (t >= 0) {
+						int v = ((BlockDestructionProgress)sortedSet.last()).getProgress();
+						if (v >= 0) {
 							VertexConsumer vertexConsumer = new BreakingTextureGenerator(
-								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(t)), poseStack.last()
+								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(v)), poseStack.last()
 							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
@@ -1070,17 +1072,17 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 		for (Entry<SortedSet<BlockDestructionProgress>> entry : this.destructionProgress.long2ObjectEntrySet()) {
 			BlockPos blockPos3 = BlockPos.of(entry.getLongKey());
-			double u = (double)blockPos3.getX() - d;
-			double v = (double)blockPos3.getY() - e;
-			double w = (double)blockPos3.getZ() - g;
-			if (!(u * u + v * v + w * w > 1024.0)) {
+			double w = (double)blockPos3.getX() - d;
+			double x = (double)blockPos3.getY() - e;
+			double y = (double)blockPos3.getZ() - g;
+			if (!(w * w + x * x + y * y > 1024.0)) {
 				SortedSet<BlockDestructionProgress> sortedSet2 = (SortedSet<BlockDestructionProgress>)entry.getValue();
 				if (sortedSet2 != null && !sortedSet2.isEmpty()) {
-					int x = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
+					int z = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
 					poseStack.pushPose();
 					poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
 					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(
-						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(x)), poseStack.last()
+						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(z)), poseStack.last()
 					);
 					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
@@ -1106,14 +1108,14 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
 		this.renderWorldBounds(camera);
 		RenderSystem.popMatrix();
-		bufferSource.endBatch(RenderType.lines());
-		this.renderBuffers.crumblingBufferSource().endBatch();
-		bufferSource.endBatch(RenderType.glint());
-		bufferSource.endBatch(RenderType.entityGlint());
-		bufferSource.endBatch(RenderType.waterMask());
 		bufferSource.endBatch(Sheets.translucentBlockSheet());
 		bufferSource.endBatch(Sheets.bannerSheet());
 		bufferSource.endBatch(Sheets.shieldSheet());
+		bufferSource.endBatch(RenderType.glint());
+		bufferSource.endBatch(RenderType.entityGlint());
+		bufferSource.endBatch(RenderType.waterMask());
+		this.renderBuffers.crumblingBufferSource().endBatch();
+		bufferSource.endBatch(RenderType.lines());
 		bufferSource.endBatch();
 		profilerFiller.popPush("translucent");
 		this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
@@ -1877,6 +1879,8 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 	private void compileChunksUntil(long l) {
 		this.needsUpdate = this.needsUpdate | this.chunkRenderDispatcher.uploadAllPendingUploads();
+		long m = Util.getNanos();
+		int i = 0;
 		if (!this.chunksToCompile.isEmpty()) {
 			Iterator<ChunkRenderDispatcher.RenderChunk> iterator = this.chunksToCompile.iterator();
 
@@ -1890,8 +1894,12 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 
 				renderChunk.setNotDirty();
 				iterator.remove();
-				long m = l - Util.getNanos();
-				if (m < 0L) {
+				i++;
+				long n = Util.getNanos();
+				long o = n - m;
+				long p = o / (long)i;
+				long q = l - n;
+				if (q < p) {
 					break;
 				}
 			}

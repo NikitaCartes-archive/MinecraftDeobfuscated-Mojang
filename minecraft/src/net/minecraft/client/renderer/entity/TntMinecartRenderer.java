@@ -1,7 +1,6 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -39,9 +38,6 @@ public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
 			j = OverlayTexture.NO_OVERLAY;
 		}
 
-		poseStack.pushPose();
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(90.0F));
 		Minecraft.getInstance().getBlockRenderer().renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
-		poseStack.popPose();
 	}
 }

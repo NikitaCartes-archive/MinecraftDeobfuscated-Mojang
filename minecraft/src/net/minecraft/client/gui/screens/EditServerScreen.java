@@ -98,7 +98,7 @@ public class EditServerScreen extends Screen {
 	}
 
 	private void onEdited(String string) {
-		this.onClose();
+		this.cleanUp();
 	}
 
 	@Override
