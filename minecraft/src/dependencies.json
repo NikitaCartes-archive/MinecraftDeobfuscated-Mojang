@@ -193,9 +193,9 @@
 		"url": "https://libraries.minecraft.net/oshi-project/oshi-core/1.1/oshi-core-1.1.jar"
 	},
 	{
-		"sha1sum": "eb8bb7b66fa0e2152b1b40b3856e82f7619439ee",
-		"name": "patchy-1.3.9.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/patchy/1.3.9/patchy-1.3.9.jar"
+		"sha1sum": "aef610b34a1be37fa851825f12372b78424d8903",
+		"name": "patchy-1.1.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/patchy/1.1/patchy-1.1.jar"
 	},
 	{
 		"sha1sum": "e3f70017be8100d3d6923f50b3d2ee17714e9c13",

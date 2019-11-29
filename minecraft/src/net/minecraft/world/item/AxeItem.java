@@ -8,6 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -72,8 +74,8 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG)
 		.build();
 
-	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {
-		super(f, g, tier, DIGGABLES, properties);
+	protected AxeItem(Tier tier, Item.Properties properties) {
+		super(tier, DIGGABLES, properties);
 	}
 
 	@Override
@@ -82,6 +84,11 @@ public class AxeItem extends DiggerItem {
 		return material != Material.WOOD && material != Material.PLANT && material != Material.REPLACEABLE_PLANT && material != Material.BAMBOO
 			? super.getDestroySpeed(itemStack, blockState)
 			: this.speed;
+	}
+
+	@Override
+	protected WeaponType getWeaponType() {
+		return WeaponType.AXE;
 	}
 
 	@Override
@@ -104,5 +111,11 @@ public class AxeItem extends DiggerItem {
 		} else {
 			return InteractionResult.PASS;
 		}
+	}
+
+	@Override
+	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
+		itemStack.hurtAndBreak(1, livingEntity2, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		return true;
 	}
 }

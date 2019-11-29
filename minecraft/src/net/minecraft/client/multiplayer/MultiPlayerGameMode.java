@@ -165,7 +165,6 @@ public class MultiPlayerGameMode {
 			this.isDestroying = false;
 			this.destroyProgress = 0.0F;
 			this.minecraft.level.destroyBlockProgress(this.minecraft.player.getId(), this.destroyBlockPos, -1);
-			this.minecraft.player.resetAttackStrengthTicker();
 		}
 	}
 
@@ -215,7 +214,15 @@ public class MultiPlayerGameMode {
 	}
 
 	public float getPickRange() {
-		return this.localPlayerMode.isCreative() ? 5.0F : 4.5F;
+		return this.localPlayerMode.getBlockPickRange();
+	}
+
+	public float getInteractionRange() {
+		return this.localPlayerMode.getInteractionRange();
+	}
+
+	public float getMaxInteractionRange() {
+		return this.localPlayerMode.getMaxInteractionRange();
 	}
 
 	public void tick() {
@@ -336,6 +343,14 @@ public class MultiPlayerGameMode {
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
 	}
 
+	public void swingInAir(Player player) {
+		this.ensureHasSentCarriedItem();
+		this.connection.send(new ServerboundInteractPacket());
+		if (this.localPlayerMode != GameType.SPECTATOR) {
+			player.resetAttackStrengthTicker();
+		}
+	}
+
 	public ItemStack handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {
 		short s = player.containerMenu.backup(player.inventory);
 		ItemStack itemStack = player.containerMenu.clicked(j, k, clickType, player);
@@ -378,10 +393,6 @@ public class MultiPlayerGameMode {
 	}
 
 	public boolean hasInfiniteItems() {
-		return this.localPlayerMode.isCreative();
-	}
-
-	public boolean hasFarPickRange() {
 		return this.localPlayerMode.isCreative();
 	}
 

@@ -12,7 +12,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HoeItem extends TieredItem {
-	private final float attackSpeed;
 	protected static final Map<Block, BlockState> TILLABLES = Maps.<Block, BlockState>newHashMap(
 		ImmutableMap.of(
 			Blocks.GRASS_BLOCK,
@@ -34,9 +32,8 @@ public class HoeItem extends TieredItem {
 		)
 	);
 
-	public HoeItem(Tier tier, float f, Item.Properties properties) {
+	public HoeItem(Tier tier, Item.Properties properties) {
 		super(tier, properties);
-		this.attackSpeed = f;
 	}
 
 	@Override
@@ -72,14 +69,7 @@ public class HoeItem extends TieredItem {
 	public Multimap<String, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		Multimap<String, AttributeModifier> multimap = super.getDefaultAttributeModifiers(equipmentSlot);
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			multimap.put(
-				SharedMonsterAttributes.ATTACK_DAMAGE.getName(),
-				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 0.0, AttributeModifier.Operation.ADDITION)
-			);
-			multimap.put(
-				SharedMonsterAttributes.ATTACK_SPEED.getName(),
-				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)this.attackSpeed, AttributeModifier.Operation.ADDITION)
-			);
+			WeaponType.HOE.addCombatAttributes(this.getTier(), multimap);
 		}
 
 		return multimap;

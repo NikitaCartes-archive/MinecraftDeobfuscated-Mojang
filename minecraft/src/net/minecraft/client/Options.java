@@ -89,6 +89,8 @@ public class Options {
 	private final Map<SoundSource, Float> sourceVolumes = Maps.newEnumMap(SoundSource.class);
 	public boolean useNativeTransport = true;
 	public AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.CROSSHAIR;
+	public ShieldIndicatorStatus shieldIndicator = ShieldIndicatorStatus.OFF;
+	public boolean useShieldOnCrouch = true;
 	public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
 	public int biomeBlendRadius = 2;
 	public double mouseWheelSensitivity = 1.0;
@@ -393,6 +395,14 @@ public class Options {
 						this.attackIndicator = AttackIndicatorStatus.byId(Integer.parseInt(string2));
 					}
 
+					if ("shieldIndicator".equals(string)) {
+						this.shieldIndicator = ShieldIndicatorStatus.byId(Integer.parseInt(string2));
+					}
+
+					if ("useShieldOnCrouch".equals(string)) {
+						Option.USE_SHIELD_ON_CROUCH.set(this, string2);
+					}
+
 					if ("resourcePacks".equals(string)) {
 						this.resourcePacks = GsonHelper.fromJson(GSON, string2, RESOURCE_PACK_TYPE);
 						if (this.resourcePacks == null) {
@@ -628,6 +638,8 @@ public class Options {
 				printWriter.println("useNativeTransport:" + this.useNativeTransport);
 				printWriter.println("mainHand:" + (this.mainHand == HumanoidArm.LEFT ? "left" : "right"));
 				printWriter.println("attackIndicator:" + this.attackIndicator.getId());
+				printWriter.println("shieldIndicator:" + this.shieldIndicator.getId());
+				printWriter.println("useShieldOnCrouch:" + Option.USE_SHIELD_ON_CROUCH.get(this));
 				printWriter.println("narrator:" + this.narratorStatus.getId());
 				printWriter.println("tutorialStep:" + this.tutorialStep.getName());
 				printWriter.println("mouseWheelSensitivity:" + this.mouseWheelSensitivity);
@@ -688,7 +700,11 @@ public class Options {
 			this.minecraft
 				.player
 				.connection
-				.send(new ServerboundClientInformationPacket(this.languageCode, this.renderDistance, this.chatVisibility, this.chatColors, i, this.mainHand));
+				.send(
+					new ServerboundClientInformationPacket(
+						this.languageCode, this.renderDistance, this.chatVisibility, this.chatColors, i, this.mainHand, this.useShieldOnCrouch
+					)
+				);
 		}
 	}
 

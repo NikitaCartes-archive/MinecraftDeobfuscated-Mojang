@@ -1,5 +1,7 @@
 package net.minecraft.world.level;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Abilities;
@@ -61,6 +63,21 @@ public enum GameType {
 
 	public boolean isSurvival() {
 		return this == SURVIVAL || this == ADVENTURE;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public float getInteractionRange() {
+		return 2.5F;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public float getMaxInteractionRange() {
+		return 6.0F;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public float getBlockPickRange() {
+		return this.isCreative() ? 5.0F : 4.5F;
 	}
 
 	public static GameType byId(int i) {

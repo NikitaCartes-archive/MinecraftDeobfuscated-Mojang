@@ -47,8 +47,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
+import net.minecraft.world.CombatRules;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -75,6 +75,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -139,6 +140,7 @@ public abstract class LivingEntity extends Entity {
 	public float oAttackAnim;
 	public float attackAnim;
 	protected int attackStrengthTicker;
+	protected int attackStrengthStartValue;
 	public float animationSpeedOld;
 	public float animationSpeed;
 	public float animationPosition;
@@ -849,8 +851,18 @@ public abstract class LivingEntity extends Entity {
 			}
 
 			this.animationSpeed = 1.5F;
+			Entity entity = damageSource.getEntity();
+			int i = 10;
+			if (entity != null && entity instanceof Player) {
+				i = Math.min(((Player)entity).getAttackDelay(), i);
+			}
+
+			if (damageSource.isProjectile()) {
+				i = 0;
+			}
+
 			boolean bl2 = true;
-			if ((float)this.invulnerableTime > 10.0F) {
+			if (this.invulnerableTime > 0) {
 				if (f <= this.lastHurt) {
 					return false;
 				}
@@ -860,24 +872,23 @@ public abstract class LivingEntity extends Entity {
 				bl2 = false;
 			} else {
 				this.lastHurt = f;
-				this.invulnerableTime = 20;
+				this.invulnerableTime = i;
 				this.actuallyHurt(damageSource, f);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
 			}
 
 			this.hurtDir = 0.0F;
-			Entity entity2 = damageSource.getEntity();
-			if (entity2 != null) {
-				if (entity2 instanceof LivingEntity) {
-					this.setLastHurtByMob((LivingEntity)entity2);
+			if (entity != null) {
+				if (entity instanceof LivingEntity) {
+					this.setLastHurtByMob((LivingEntity)entity);
 				}
 
-				if (entity2 instanceof Player) {
+				if (entity instanceof Player) {
 					this.lastHurtByPlayerTime = 100;
-					this.lastHurtByPlayer = (Player)entity2;
-				} else if (entity2 instanceof Wolf) {
-					Wolf wolf = (Wolf)entity2;
+					this.lastHurtByPlayer = (Player)entity;
+				} else if (entity instanceof Wolf) {
+					Wolf wolf = (Wolf)entity;
 					if (wolf.isTame()) {
 						this.lastHurtByPlayerTime = 100;
 						LivingEntity livingEntity = wolf.getOwner();
@@ -914,16 +925,16 @@ public abstract class LivingEntity extends Entity {
 					this.markHurt();
 				}
 
-				if (entity2 != null) {
-					double d = entity2.getX() - this.getX();
+				if (entity != null) {
+					double d = entity.getX() - this.getX();
 
 					double e;
-					for (e = entity2.getZ() - this.getZ(); d * d + e * e < 1.0E-4; e = (Math.random() - Math.random()) * 0.01) {
+					for (e = entity.getZ() - this.getZ(); d * d + e * e < 1.0E-4; e = (Math.random() - Math.random()) * 0.01) {
 						d = (Math.random() - Math.random()) * 0.01;
 					}
 
 					this.hurtDir = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI - (double)this.yRot);
-					this.knockback(entity2, 0.4F, d, e);
+					this.knockback(entity, 0.4F, d, e);
 				} else {
 					this.hurtDir = (float)((int)(Math.random() * 2.0) * 180);
 				}
@@ -955,8 +966,8 @@ public abstract class LivingEntity extends Entity {
 				}
 			}
 
-			if (entity2 instanceof ServerPlayer) {
-				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
+			if (entity instanceof ServerPlayer) {
+				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity, this, damageSource, g, f, bl);
 			}
 
 			return bl3;
@@ -969,6 +980,14 @@ public abstract class LivingEntity extends Entity {
 
 	protected void blockedByShield(LivingEntity livingEntity) {
 		livingEntity.knockback(this, 0.5F, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
+		if (this.getMainHandItem().getItem() instanceof AxeItem) {
+			float f = 1.6F + (float)EnchantmentHelper.getChopping(this) * 0.5F;
+			livingEntity.disableShield(f);
+		}
+	}
+
+	public boolean disableShield(float f) {
+		return false;
 	}
 
 	private boolean checkTotemDeathProtection(DamageSource damageSource) {
@@ -1036,7 +1055,7 @@ public abstract class LivingEntity extends Entity {
 				Vec3 vec32 = this.getViewVector(1.0F);
 				Vec3 vec33 = vec3.vectorTo(this.position()).normalize();
 				vec33 = new Vec3(vec33.x, 0.0, vec33.z);
-				if (vec33.dot(vec32) < 0.0) {
+				if (vec33.dot(vec32) * (float) Math.PI < 0.87266463F) {
 					return true;
 				}
 			}
@@ -1176,7 +1195,8 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public void knockback(Entity entity, float f, double d, double e) {
-		if (!(this.random.nextDouble() < this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue())) {
+		f = (float)((double)f * (1.0 - this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()));
+		if (!(f <= 0.0F)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
 			Vec3 vec32 = new Vec3(d, 0.0, e).normalize().scale((double)f);
@@ -1430,7 +1450,7 @@ public abstract class LivingEntity extends Entity {
 				boolean bl3 = b == 37;
 				boolean bl4 = b == 44;
 				this.animationSpeed = 1.5F;
-				this.invulnerableTime = 20;
+				this.invulnerableTime = 10;
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
 				this.hurtDir = 0.0F;
@@ -2652,13 +2672,36 @@ public abstract class LivingEntity extends Entity {
 		this.useItemRemaining = 0;
 	}
 
+	public float getAttackStrengthScale(float f) {
+		return 2.0F;
+	}
+
 	public boolean isBlocking() {
-		if (this.isUsingItem() && !this.useItem.isEmpty()) {
-			Item item = this.useItem.getItem();
-			return item.getUseAnimation(this.useItem) != UseAnim.BLOCK ? false : item.getUseDuration(this.useItem) - this.useItemRemaining >= 5;
+		if (this.getAttackStrengthScale(1.0F) < 1.95F) {
+			return false;
 		} else {
+			if (this.isUsingItem() && !this.useItem.isEmpty()) {
+				Item item = this.useItem.getItem();
+				if (item.getUseAnimation(this.useItem) == UseAnim.BLOCK) {
+					return true;
+				}
+			} else if ((this.isCrouching() || this.isPassenger()) && this.hasEnabledShieldOnCrouch()) {
+				ItemStack itemStack = this.getItemInHand(InteractionHand.OFF_HAND);
+				if (!itemStack.isEmpty() && itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BLOCK && !this.isItemOnCooldown(itemStack)) {
+					return true;
+				}
+			}
+
 			return false;
 		}
+	}
+
+	public boolean hasEnabledShieldOnCrouch() {
+		return true;
+	}
+
+	public boolean isItemOnCooldown(ItemStack itemStack) {
+		return false;
 	}
 
 	public boolean isSuppressingSlidingDownLadder() {

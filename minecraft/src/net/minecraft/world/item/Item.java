@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -56,8 +55,6 @@ public class Item implements ItemLike {
 	private static final ItemPropertyFunction PROPERTY_CUSTOM_MODEL_DATA = (itemStack, level, livingEntity) -> itemStack.hasTag()
 			? (float)itemStack.getTag().getInt("CustomModelData")
 			: 0.0F;
-	protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
-	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
 	protected static final Random random = new Random();
 	private final Map<ResourceLocation, ItemPropertyFunction> properties = Maps.<ResourceLocation, ItemPropertyFunction>newHashMap();
 	protected final CreativeModeTab category;

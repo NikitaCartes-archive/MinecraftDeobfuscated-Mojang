@@ -58,7 +58,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
@@ -79,13 +78,11 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -160,6 +157,7 @@ public abstract class Player extends LivingEntity {
 	private final ItemCooldowns cooldowns = this.createItemCooldowns();
 	@Nullable
 	public FishingHook fishing;
+	protected boolean enableShieldOnCrouch = true;
 
 	public Player(Level level, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
@@ -188,10 +186,11 @@ public abstract class Player extends LivingEntity {
 	@Override
 	protected void registerAttributes() {
 		super.registerAttributes();
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0);
+		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0);
 		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.1F);
 		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
 		this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
+		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_REACH);
 	}
 
 	@Override
@@ -267,13 +266,9 @@ public abstract class Player extends LivingEntity {
 			this.setPos(d, this.getY(), e);
 		}
 
-		this.attackStrengthTicker++;
+		this.attackStrengthTicker--;
 		ItemStack itemStack = this.getMainHandItem();
 		if (!ItemStack.matches(this.lastItemInMainHand, itemStack)) {
-			if (!ItemStack.isSameIgnoreDurability(this.lastItemInMainHand, itemStack)) {
-				this.resetAttackStrengthTicker();
-			}
-
 			this.lastItemInMainHand = itemStack.copy();
 		}
 
@@ -693,7 +688,7 @@ public abstract class Player extends LivingEntity {
 	public float getDestroySpeed(BlockState blockState) {
 		float f = this.inventory.getDestroySpeed(blockState);
 		if (f > 1.0F) {
-			int i = EnchantmentHelper.getBlockEfficiency(this);
+			int i = EnchantmentHelper.getDiggingEfficiency(this);
 			ItemStack itemStack = this.getMainHandItem();
 			if (i > 0 && !itemStack.isEmpty()) {
 				f += (float)(i * i + 1);
@@ -854,9 +849,11 @@ public abstract class Player extends LivingEntity {
 	@Override
 	protected void blockUsingShield(LivingEntity livingEntity) {
 		super.blockUsingShield(livingEntity);
-		if (livingEntity.getMainHandItem().getItem() instanceof AxeItem) {
-			this.disableShield(true);
-		}
+	}
+
+	@Override
+	protected void blockedByShield(LivingEntity livingEntity) {
+		super.blockedByShield(livingEntity);
 	}
 
 	public boolean canHarmPlayer(Player player) {
@@ -876,11 +873,18 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected void hurtCurrentlyUsedShield(float f) {
-		if (f >= 3.0F && this.useItem.getItem() == Items.SHIELD) {
+		ItemStack itemStack = this.useItem;
+		InteractionHand interactionHand = this.getUsedItemHand();
+		if (itemStack.getItem() != Items.SHIELD) {
+			itemStack = this.getOffhandItem();
+			interactionHand = InteractionHand.OFF_HAND;
+		}
+
+		if (f >= 3.0F && itemStack.getItem() == Items.SHIELD) {
 			int i = 1 + Mth.floor(f);
-			InteractionHand interactionHand = this.getUsedItemHand();
-			this.useItem.hurtAndBreak(i, this, player -> player.broadcastBreakEvent(interactionHand));
-			if (this.useItem.isEmpty()) {
+			InteractionHand interactionHand2 = interactionHand;
+			itemStack.hurtAndBreak(i, this, player -> player.broadcastBreakEvent(interactionHand2));
+			if (itemStack.isEmpty()) {
 				if (interactionHand == InteractionHand.MAIN_HAND) {
 					this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 				} else {
@@ -1051,163 +1055,158 @@ public abstract class Player extends LivingEntity {
 	public void attack(Entity entity) {
 		if (entity.isAttackable()) {
 			if (!entity.skipAttackInteraction(this)) {
-				float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
-				float g;
-				if (entity instanceof LivingEntity) {
-					g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
-				} else {
-					g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
-				}
-
-				float h = this.getAttackStrengthScale(0.5F);
-				f *= 0.2F + h * h * 0.8F;
-				g *= h;
-				this.resetAttackStrengthTicker();
-				if (f > 0.0F || g > 0.0F) {
-					boolean bl = h > 0.9F;
-					boolean bl2 = false;
-					int i = 0;
-					i += EnchantmentHelper.getKnockbackBonus(this);
-					if (this.isSprinting() && bl) {
-						this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
-						i++;
-						bl2 = true;
-					}
-
-					boolean bl3 = bl
-						&& this.fallDistance > 0.0F
-						&& !this.onGround
-						&& !this.onLadder()
-						&& !this.isInWater()
-						&& !this.hasEffect(MobEffects.BLINDNESS)
-						&& !this.isPassenger()
-						&& entity instanceof LivingEntity;
-					bl3 = bl3 && !this.isSprinting();
-					if (bl3) {
-						f *= 1.5F;
-					}
-
-					f += g;
-					boolean bl4 = false;
-					double d = (double)(this.walkDist - this.walkDistO);
-					if (bl && !bl3 && !bl2 && this.onGround && d < (double)this.getSpeed()) {
-						ItemStack itemStack = this.getItemInHand(InteractionHand.MAIN_HAND);
-						if (itemStack.getItem() instanceof SwordItem) {
-							bl4 = true;
-						}
-					}
-
-					float j = 0.0F;
-					boolean bl5 = false;
-					int k = EnchantmentHelper.getFireAspect(this);
+				float f = this.getAttackStrengthScale(1.0F);
+				if (!(f < 1.0F)) {
+					float g = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+					float h;
 					if (entity instanceof LivingEntity) {
-						j = ((LivingEntity)entity).getHealth();
-						if (k > 0 && !entity.isOnFire()) {
-							bl5 = true;
-							entity.setSecondsOnFire(1);
-						}
+						h = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), (LivingEntity)entity);
+					} else {
+						h = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), null);
 					}
 
-					Vec3 vec3 = entity.getDeltaMovement();
-					boolean bl6 = entity.hurt(DamageSource.playerAttack(this), f);
-					if (bl6) {
-						if (i > 0) {
-							if (entity instanceof LivingEntity) {
-								((LivingEntity)entity)
-									.knockback(this, (float)i * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
-							} else {
-								entity.push(
-									(double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * (float)i * 0.5F),
-									0.1,
-									(double)(Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * (float)i * 0.5F)
-								);
+					float i = this.getCurrentAttackReach(1.0F);
+					this.resetAttackStrengthTicker();
+					if (g > 0.0F || h > 0.0F) {
+						boolean bl = !this.onLadder() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && entity instanceof LivingEntity;
+						boolean bl2 = bl && f > 1.95F;
+						boolean bl3 = false;
+						int j = 0;
+						j += EnchantmentHelper.getKnockbackBonus(this);
+						if (this.isSprinting() && bl) {
+							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
+							j++;
+							bl3 = true;
+						}
+
+						boolean bl4 = bl && this.fallDistance > 0.0F && !this.onGround;
+						if (bl4) {
+							g *= 1.5F;
+						}
+
+						g += h;
+						boolean bl5 = false;
+						if (bl2 && !bl4 && !bl3 && this.checkSweepAttack()) {
+							bl5 = true;
+						}
+
+						float k = 0.0F;
+						boolean bl6 = false;
+						int l = EnchantmentHelper.getFireAspect(this);
+						if (entity instanceof LivingEntity) {
+							k = ((LivingEntity)entity).getHealth();
+							if (l > 0 && !entity.isOnFire()) {
+								bl6 = true;
+								entity.setSecondsOnFire(1);
+							}
+						}
+
+						Vec3 vec3 = entity.getDeltaMovement();
+						boolean bl7 = entity.hurt(DamageSource.playerAttack(this).setCritSpecial(bl4), g);
+						if (bl7) {
+							if (j > 0) {
+								if (entity instanceof LivingEntity) {
+									((LivingEntity)entity)
+										.knockback(this, (float)j * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+								} else {
+									entity.push(
+										(double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * (float)j * 0.5F),
+										0.1,
+										(double)(Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * (float)j * 0.5F)
+									);
+								}
+
+								this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
+								this.setSprinting(false);
 							}
 
-							this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
-							this.setSprinting(false);
-						}
+							if (bl5) {
+								AABB aABB = entity.getBoundingBox().inflate(1.0, 0.25, 1.0);
+								this.sweepAttack(aABB, i, g, entity);
+							}
 
-						if (bl4) {
-							float l = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * f;
+							if (entity instanceof ServerPlayer && entity.hurtMarked) {
+								((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
+								entity.hurtMarked = false;
+								entity.setDeltaMovement(vec3);
+							}
 
-							for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
-								if (livingEntity != this
-									&& livingEntity != entity
-									&& !this.isAlliedTo(livingEntity)
-									&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
-									&& this.distanceToSqr(livingEntity) < 9.0) {
-									livingEntity.knockback(this, 0.4F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
-									livingEntity.hurt(DamageSource.playerAttack(this), l);
+							if (bl4) {
+								this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
+								this.crit(entity);
+							}
+
+							if (!bl4 && !bl5) {
+								if (bl) {
+									this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
+								} else {
+									this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
 								}
 							}
 
-							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
-							this.sweepAttack();
-						}
-
-						if (entity instanceof ServerPlayer && entity.hurtMarked) {
-							((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
-							entity.hurtMarked = false;
-							entity.setDeltaMovement(vec3);
-						}
-
-						if (bl3) {
-							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
-							this.crit(entity);
-						}
-
-						if (!bl3 && !bl4) {
-							if (bl) {
-								this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
-							} else {
-								this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
-							}
-						}
-
-						if (g > 0.0F) {
-							this.magicCrit(entity);
-						}
-
-						this.setLastHurtMob(entity);
-						if (entity instanceof LivingEntity) {
-							EnchantmentHelper.doPostHurtEffects((LivingEntity)entity, this);
-						}
-
-						EnchantmentHelper.doPostDamageEffects(this, entity);
-						ItemStack itemStack2 = this.getMainHandItem();
-						Entity entity2 = entity;
-						if (entity instanceof EnderDragonPart) {
-							entity2 = ((EnderDragonPart)entity).parentMob;
-						}
-
-						if (!this.level.isClientSide && !itemStack2.isEmpty() && entity2 instanceof LivingEntity) {
-							itemStack2.hurtEnemy((LivingEntity)entity2, this);
-							if (itemStack2.isEmpty()) {
-								this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-							}
-						}
-
-						if (entity instanceof LivingEntity) {
-							float m = j - ((LivingEntity)entity).getHealth();
-							this.awardStat(Stats.DAMAGE_DEALT, Math.round(m * 10.0F));
-							if (k > 0) {
-								entity.setSecondsOnFire(k * 4);
+							if (h > 0.0F) {
+								this.magicCrit(entity);
 							}
 
-							if (this.level instanceof ServerLevel && m > 2.0F) {
-								int n = (int)((double)m * 0.5);
-								((ServerLevel)this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), n, 0.1, 0.0, 0.1, 0.2);
+							this.setLastHurtMob(entity);
+							if (entity instanceof LivingEntity) {
+								EnchantmentHelper.doPostHurtEffects((LivingEntity)entity, this);
 							}
-						}
 
-						this.causeFoodExhaustion(0.1F);
-					} else {
-						this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
-						if (bl5) {
-							entity.clearFire();
+							EnchantmentHelper.doPostDamageEffects(this, entity);
+							ItemStack itemStack = this.getMainHandItem();
+							Entity entity2 = entity;
+							if (entity instanceof EnderDragonPart) {
+								entity2 = ((EnderDragonPart)entity).parentMob;
+							}
+
+							if (!this.level.isClientSide && !itemStack.isEmpty() && entity2 instanceof LivingEntity) {
+								itemStack.hurtEnemy((LivingEntity)entity2, this);
+								if (itemStack.isEmpty()) {
+									this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+								}
+							}
+
+							if (entity instanceof LivingEntity) {
+								float m = k - ((LivingEntity)entity).getHealth();
+								this.awardStat(Stats.DAMAGE_DEALT, Math.round(m * 10.0F));
+								if (l > 0) {
+									entity.setSecondsOnFire(l * 4);
+								}
+
+								if (this.level instanceof ServerLevel && m > 2.0F) {
+									int n = (int)((double)m * 0.5);
+									((ServerLevel)this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), n, 0.1, 0.0, 0.1, 0.2);
+								}
+							}
+
+							this.causeFoodExhaustion(0.1F);
+						} else {
+							this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
+							if (bl6) {
+								entity.clearFire();
+							}
 						}
 					}
 				}
+			}
+		}
+	}
+
+	public void attackAir() {
+		float f = this.getAttackStrengthScale(1.0F);
+		if (!(f < 1.0F)) {
+			this.swing(InteractionHand.MAIN_HAND);
+			this.resetAttackStrengthTicker();
+			float g = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+			boolean bl = f > 1.95F;
+			if (bl && g > 0.0F && this.checkSweepAttack()) {
+				float h = this.getCurrentAttackReach(1.0F);
+				double d = 2.0;
+				double e = (double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0))) * 2.0;
+				double i = (double)Mth.cos(this.yRot * (float) (Math.PI / 180.0)) * 2.0;
+				AABB aABB = this.getBoundingBox().inflate(1.0, 0.25, 1.0).move(e, 0.0, i);
+				this.sweepAttack(aABB, h, g, null);
 			}
 		}
 	}
@@ -1217,17 +1216,12 @@ public abstract class Player extends LivingEntity {
 		this.attack(livingEntity);
 	}
 
-	public void disableShield(boolean bl) {
-		float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-		if (bl) {
-			f += 0.75F;
-		}
-
-		if (this.random.nextFloat() < f) {
-			this.getCooldowns().addCooldown(Items.SHIELD, 100);
-			this.stopUsingItem();
-			this.level.broadcastEntityEvent(this, (byte)30);
-		}
+	@Override
+	public boolean disableShield(float f) {
+		this.getCooldowns().addCooldown(Items.SHIELD, (int)(f * 20.0F));
+		this.stopUsingItem();
+		this.level.broadcastEntityEvent(this, (byte)30);
+		return true;
 	}
 
 	public void crit(Entity entity) {
@@ -1236,11 +1230,33 @@ public abstract class Player extends LivingEntity {
 	public void magicCrit(Entity entity) {
 	}
 
-	public void sweepAttack() {
-		double d = (double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)));
-		double e = (double)Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+	protected boolean checkSweepAttack() {
+		double d = (double)(this.walkDist - this.walkDistO);
+		return this.onGround && d < (double)this.getSpeed() && EnchantmentHelper.getSweepingDamageRatio(this) > 0.0F;
+	}
+
+	public void sweepAttack(AABB aABB, float f, float g, Entity entity) {
+		float h = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * g;
+
+		for (LivingEntity livingEntity : this.level.getEntitiesOfClass(LivingEntity.class, aABB)) {
+			if (livingEntity != this
+				&& livingEntity != entity
+				&& !this.isAlliedTo(livingEntity)
+				&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())) {
+				float i = f + livingEntity.getBbWidth() * 0.5F;
+				if (this.distanceToSqr(livingEntity) < (double)(i * i)) {
+					livingEntity.knockback(this, 0.4F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+					livingEntity.hurt(DamageSource.playerAttack(this), h);
+				}
+			}
+		}
+
+		this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
 		if (this.level instanceof ServerLevel) {
-			((ServerLevel)this.level).sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + d, this.getY(0.5), this.getZ() + e, 0, d, 0.0, e, 0.0);
+			double d = (double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)));
+			double e = (double)Mth.cos(this.yRot * (float) (Math.PI / 180.0));
+			((ServerLevel)this.level)
+				.sendParticles(ParticleTypes.SWEEP_ATTACK, this.getX() + d, this.getY() + (double)this.getBbHeight() * 0.5, this.getZ() + e, 0, d, 0.0, e, 0.0);
 		}
 	}
 
@@ -2009,16 +2025,32 @@ public abstract class Player extends LivingEntity {
 		this.entityData.set(DATA_SHOULDER_RIGHT, compoundTag);
 	}
 
-	public float getCurrentItemAttackStrengthDelay() {
-		return (float)(1.0 / this.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getValue() * 20.0);
+	public int getAttackDelay() {
+		float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getValue() - 1.5F;
+		f = Mth.clamp(f, 0.1F, 1024.0F);
+		return (int)(1.0F / f * 20.0F + 0.5F);
 	}
 
+	@Override
 	public float getAttackStrengthScale(float f) {
-		return Mth.clamp(((float)this.attackStrengthTicker + f) / this.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
+		return this.attackStrengthStartValue == 0
+			? 2.0F
+			: Mth.clamp(2.0F * (1.0F - ((float)this.attackStrengthTicker - f) / (float)this.attackStrengthStartValue), 0.0F, 2.0F);
 	}
 
 	public void resetAttackStrengthTicker() {
-		this.attackStrengthTicker = 0;
+		this.attackStrengthStartValue = this.getAttackDelay() * 2;
+		this.attackStrengthTicker = this.attackStrengthStartValue;
+	}
+
+	public float getCurrentAttackReach(float f) {
+		float g = 0.0F;
+		float h = this.getAttackStrengthScale(f);
+		if (h > 1.95F) {
+			g = 1.0F;
+		}
+
+		return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_REACH).getValue() + g;
 	}
 
 	public ItemCooldowns getCooldowns() {
@@ -2028,6 +2060,11 @@ public abstract class Player extends LivingEntity {
 	@Override
 	protected float getBlockSpeedFactor() {
 		return !this.abilities.flying && !this.isFallFlying() ? super.getBlockSpeedFactor() : 1.0F;
+	}
+
+	@Override
+	public boolean isItemOnCooldown(ItemStack itemStack) {
+		return this.cooldowns.isOnCooldown(itemStack.getItem());
 	}
 
 	public float getLuck() {
@@ -2083,6 +2120,11 @@ public abstract class Player extends LivingEntity {
 		}
 
 		return super.eat(level, itemStack);
+	}
+
+	@Override
+	public boolean hasEnabledShieldOnCrouch() {
+		return this.enableShieldOnCrouch;
 	}
 
 	public static enum BedSleepingProblem {

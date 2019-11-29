@@ -1133,9 +1133,10 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 		this.player.resetLastActionTime();
 		if (entity != null) {
 			boolean bl = this.player.canSee(entity);
-			double d = 36.0;
+			float f = this.player.getCurrentAttackReach(1.0F) + 0.25F + entity.getBbWidth() * 0.5F;
+			double d = (double)(f * f);
 			if (!bl) {
-				d = 9.0;
+				d = 6.25;
 			}
 
 			if (this.player.distanceToSqr(entity) < d) {
@@ -1155,6 +1156,8 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 					this.player.attack(entity);
 				}
 			}
+		} else {
+			this.player.attackAir();
 		}
 	}
 
