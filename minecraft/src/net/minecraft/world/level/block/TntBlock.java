@@ -74,9 +74,7 @@ public class TntBlock extends Block {
 
 	private static void explode(Level level, BlockPos blockPos, @Nullable LivingEntity livingEntity) {
 		if (!level.isClientSide) {
-			PrimedTnt primedTnt = new PrimedTnt(
-				level, (double)((float)blockPos.getX() + 0.5F), (double)blockPos.getY(), (double)((float)blockPos.getZ() + 0.5F), livingEntity
-			);
+			PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, livingEntity);
 			level.addFreshEntity(primedTnt);
 			level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}

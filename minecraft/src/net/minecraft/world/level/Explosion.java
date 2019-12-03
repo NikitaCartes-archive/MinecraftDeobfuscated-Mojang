@@ -3,7 +3,9 @@ package net.minecraft.world.level;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -226,14 +228,14 @@ public class Explosion {
 		}
 
 		if (bl2) {
-			ObjectArrayList<ItemStack> objectArrayList = new ObjectArrayList<>();
-			List<BlockPos> list = Lists.<BlockPos>newArrayList();
+			ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList = new ObjectArrayList<>();
+			Collections.shuffle(this.toBlow, this.level.random);
 
 			for (BlockPos blockPos : this.toBlow) {
 				BlockState blockState = this.level.getBlockState(blockPos);
 				Block block = blockState.getBlock();
 				if (!blockState.isAir()) {
-					list.add(blockPos.immutable());
+					BlockPos blockPos2 = blockPos.immutable();
 					this.level.getProfiler().push("explosion_blocks");
 					if (block.dropFromExplosion(this) && this.level instanceof ServerLevel) {
 						BlockEntity blockEntity = block.isEntityBlock() ? this.level.getBlockEntity(blockPos) : null;
@@ -247,7 +249,7 @@ public class Explosion {
 							builder.withParameter(LootContextParams.EXPLOSION_RADIUS, this.radius);
 						}
 
-						blockState.getDrops(builder).forEach(itemStackx -> addBlockDrops(objectArrayList, itemStackx));
+						blockState.getDrops(builder).forEach(itemStack -> addBlockDrops(objectArrayList, itemStack, blockPos2));
 					}
 
 					this.level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
@@ -256,39 +258,38 @@ public class Explosion {
 				}
 			}
 
-			int i = list.size();
-
-			for (ItemStack itemStack : objectArrayList) {
-				Block.popResource(this.level, (BlockPos)list.get(this.random.nextInt(i)), itemStack);
+			for (Pair<ItemStack, BlockPos> pair : objectArrayList) {
+				Block.popResource(this.level, pair.getSecond(), pair.getFirst());
 			}
 		}
 
 		if (this.fire) {
-			for (BlockPos blockPos2 : this.toBlow) {
+			for (BlockPos blockPos3 : this.toBlow) {
 				if (this.random.nextInt(3) == 0
-					&& this.level.getBlockState(blockPos2).isAir()
-					&& this.level.getBlockState(blockPos2.below()).isSolidRender(this.level, blockPos2.below())) {
-					this.level.setBlockAndUpdate(blockPos2, Blocks.FIRE.defaultBlockState());
+					&& this.level.getBlockState(blockPos3).isAir()
+					&& this.level.getBlockState(blockPos3.below()).isSolidRender(this.level, blockPos3.below())) {
+					this.level.setBlockAndUpdate(blockPos3, Blocks.FIRE.defaultBlockState());
 				}
 			}
 		}
 	}
 
-	private static void addBlockDrops(ObjectArrayList<ItemStack> objectArrayList, ItemStack itemStack) {
+	private static void addBlockDrops(ObjectArrayList<Pair<ItemStack, BlockPos>> objectArrayList, ItemStack itemStack, BlockPos blockPos) {
 		int i = objectArrayList.size();
 
 		for (int j = 0; j < i; j++) {
-			ItemStack itemStack2 = objectArrayList.get(j);
+			Pair<ItemStack, BlockPos> pair = objectArrayList.get(j);
+			ItemStack itemStack2 = pair.getFirst();
 			if (ItemEntity.areMergable(itemStack2, itemStack)) {
 				ItemStack itemStack3 = ItemEntity.merge(itemStack2, itemStack, 16);
-				objectArrayList.set(j, itemStack3);
+				objectArrayList.set(j, Pair.of(itemStack3, pair.getSecond()));
 				if (itemStack.isEmpty()) {
 					return;
 				}
 			}
 		}
 
-		objectArrayList.add(itemStack);
+		objectArrayList.add(Pair.of(itemStack, blockPos));
 	}
 
 	public DamageSource getDamageSource() {

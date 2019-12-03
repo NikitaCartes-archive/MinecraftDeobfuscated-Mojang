@@ -226,29 +226,27 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	private void animationTick() {
 		Random random = this.level.random;
-		float f = Mth.sin((float)(this.tickCount + 35) * 0.1F) / 2.0F + 0.5F;
-		f = (f * f + f) * 0.3F;
-		Vec3 vec3 = new Vec3(
-			(double)((float)this.worldPosition.getX() + 0.5F), (double)((float)this.worldPosition.getY() + 1.5F + f), (double)((float)this.worldPosition.getZ() + 0.5F)
-		);
+		double d = (double)(Mth.sin((float)(this.tickCount + 35) * 0.1F) / 2.0F + 0.5F);
+		d = (d * d + d) * 0.3F;
+		Vec3 vec3 = new Vec3((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 1.5 + d, (double)this.worldPosition.getZ() + 0.5);
 
 		for (BlockPos blockPos : this.effectBlocks) {
 			if (random.nextInt(50) == 0) {
-				float g = -0.5F + random.nextFloat();
-				float h = -2.0F + random.nextFloat();
-				float i = -0.5F + random.nextFloat();
+				float f = -0.5F + random.nextFloat();
+				float g = -2.0F + random.nextFloat();
+				float h = -0.5F + random.nextFloat();
 				BlockPos blockPos2 = blockPos.subtract(this.worldPosition);
-				Vec3 vec32 = new Vec3((double)g, (double)h, (double)i).add((double)blockPos2.getX(), (double)blockPos2.getY(), (double)blockPos2.getZ());
+				Vec3 vec32 = new Vec3((double)f, (double)g, (double)h).add((double)blockPos2.getX(), (double)blockPos2.getY(), (double)blockPos2.getZ());
 				this.level.addParticle(ParticleTypes.NAUTILUS, vec3.x, vec3.y, vec3.z, vec32.x, vec32.y, vec32.z);
 			}
 		}
 
 		if (this.destroyTarget != null) {
 			Vec3 vec33 = new Vec3(this.destroyTarget.getX(), this.destroyTarget.getEyeY(), this.destroyTarget.getZ());
-			float j = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());
-			float g = -1.0F + random.nextFloat() * this.destroyTarget.getBbHeight();
-			float h = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());
-			Vec3 vec34 = new Vec3((double)j, (double)g, (double)h);
+			float i = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());
+			float f = -1.0F + random.nextFloat() * this.destroyTarget.getBbHeight();
+			float g = (-0.5F + random.nextFloat()) * (3.0F + this.destroyTarget.getBbWidth());
+			Vec3 vec34 = new Vec3((double)i, (double)f, (double)g);
 			this.level.addParticle(ParticleTypes.NAUTILUS, vec33.x, vec33.y, vec33.z, vec34.x, vec34.y, vec34.z);
 		}
 	}

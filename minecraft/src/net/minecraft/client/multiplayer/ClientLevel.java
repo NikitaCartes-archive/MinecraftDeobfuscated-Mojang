@@ -380,7 +380,7 @@ public class ClientLevel extends Level {
 		}
 
 		if (bl && blockState.getBlock() == Blocks.BARRIER) {
-			this.addParticle(ParticleTypes.BARRIER, (double)((float)m + 0.5F), (double)((float)n + 0.5F), (double)((float)o + 0.5F), 0.0, 0.0, 0.0);
+			this.addParticle(ParticleTypes.BARRIER, (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
 		}
 	}
 

@@ -589,7 +589,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				float g = (float)(clientboundTeleportEntityPacket.getyRot() * 360) / 256.0F;
 				float h = (float)(clientboundTeleportEntityPacket.getxRot() * 360) / 256.0F;
 				if (!(Math.abs(entity.getX() - d) >= 0.03125) && !(Math.abs(entity.getY() - e) >= 0.015625) && !(Math.abs(entity.getZ() - f) >= 0.03125)) {
-					entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), g, h, 0, true);
+					entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), g, h, 3, true);
 				} else {
 					entity.lerpTo(d, e, f, g, h, 3, true);
 				}

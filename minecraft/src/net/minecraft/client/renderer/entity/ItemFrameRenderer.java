@@ -5,7 +5,6 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.MapRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -70,7 +69,6 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 			int j = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
 			poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
 			if (bl) {
-				this.entityRenderDispatcher.textureManager.bind(MapRenderer.MAP_BACKGROUND_LOCATION);
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);

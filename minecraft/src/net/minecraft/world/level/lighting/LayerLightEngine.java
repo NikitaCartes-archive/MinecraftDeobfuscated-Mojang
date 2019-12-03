@@ -220,7 +220,6 @@ public abstract class LayerLightEngine<M extends DataLayerStorageMap<M>, S exten
 
 	public void enableLightSources(ChunkPos chunkPos, boolean bl) {
 		long l = SectionPos.getZeroNode(SectionPos.asLong(chunkPos.x, 0, chunkPos.z));
-		this.storage.runAllUpdates();
 		this.storage.enableLightSources(l, bl);
 	}
 

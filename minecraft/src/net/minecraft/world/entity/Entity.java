@@ -1523,7 +1523,7 @@ public abstract class Entity implements Nameable, CommandSource {
 					int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * this.dimensions.width * 0.8F));
 					if (pooledMutableBlockPos.getX() != k || pooledMutableBlockPos.getY() != j || pooledMutableBlockPos.getZ() != l) {
 						pooledMutableBlockPos.set(k, j, l);
-						if (this.level.getBlockState(pooledMutableBlockPos).isViewBlocking(this.level, pooledMutableBlockPos)) {
+						if (this.level.getBlockState(pooledMutableBlockPos).isSuffocating(this.level, pooledMutableBlockPos)) {
 							return true;
 						}
 					}

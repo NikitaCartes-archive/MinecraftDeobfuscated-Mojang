@@ -280,8 +280,14 @@ public class Block implements ItemLike {
 	}
 
 	@Deprecated
-	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return this.material.blocksMotion() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+	}
+
+	@Deprecated
+	@Environment(EnvType.CLIENT)
+	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return blockState.isSuffocating(blockGetter, blockPos);
 	}
 
 	@Deprecated

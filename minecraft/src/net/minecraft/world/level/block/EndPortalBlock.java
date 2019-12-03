@@ -54,9 +54,9 @@ public class EndPortalBlock extends BaseEntityBlock {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		double d = (double)((float)blockPos.getX() + random.nextFloat());
-		double e = (double)((float)blockPos.getY() + 0.8F);
-		double f = (double)((float)blockPos.getZ() + random.nextFloat());
+		double d = (double)blockPos.getX() + (double)random.nextFloat();
+		double e = (double)blockPos.getY() + 0.8;
+		double f = (double)blockPos.getZ() + (double)random.nextFloat();
 		double g = 0.0;
 		double h = 0.0;
 		double i = 0.0;

@@ -1,6 +1,8 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
@@ -56,6 +58,12 @@ public class SoulsandBlock extends Block {
 
 	@Override
 	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
+		return true;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return true;
 	}
 }

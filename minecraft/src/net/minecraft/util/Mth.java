@@ -430,7 +430,6 @@ public class Mth {
 		return 0.6666667F * g + 1.0F / (3.0F * g * g * f);
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static int hsvToRgb(float f, float g, float h) {
 		int i = (int)(f * 6.0F) % 6;
 		float j = f * 6.0F - (float)i;

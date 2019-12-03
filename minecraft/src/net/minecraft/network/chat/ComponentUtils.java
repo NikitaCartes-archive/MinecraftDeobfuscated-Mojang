@@ -58,7 +58,7 @@ public class ComponentUtils {
 		} else {
 			List<T> list = Lists.<T>newArrayList(collection);
 			list.sort(Comparable::compareTo);
-			return formatList(collection, function);
+			return formatList(list, function);
 		}
 	}
 

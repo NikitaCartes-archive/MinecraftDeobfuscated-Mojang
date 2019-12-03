@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -27,22 +28,10 @@ public class ScreenEffectRenderer {
 
 	public static void renderScreenEffect(Minecraft minecraft, PoseStack poseStack) {
 		RenderSystem.disableAlphaTest();
-		if (minecraft.player.isInWall()) {
-			BlockState blockState = minecraft.level.getBlockState(new BlockPos(minecraft.player));
-			Player player = minecraft.player;
-
-			for (int i = 0; i < 8; i++) {
-				double d = player.getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * player.getBbWidth() * 0.8F);
-				double e = player.getY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-				double f = player.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * player.getBbWidth() * 0.8F);
-				BlockPos blockPos = new BlockPos(d, e + (double)player.getEyeHeight(), f);
-				BlockState blockState2 = minecraft.level.getBlockState(blockPos);
-				if (blockState2.isViewBlocking(minecraft.level, blockPos)) {
-					blockState = blockState2;
-				}
-			}
-
-			if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
+		Player player = minecraft.player;
+		if (!player.noPhysics) {
+			BlockState blockState = getViewBlockingState(player);
+			if (blockState != null) {
 				renderTex(minecraft, minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
 			}
 		}
@@ -58,6 +47,24 @@ public class ScreenEffectRenderer {
 		}
 
 		RenderSystem.enableAlphaTest();
+	}
+
+	@Nullable
+	private static BlockState getViewBlockingState(Player player) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int i = 0; i < 8; i++) {
+			double d = player.getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * player.getBbWidth() * 0.8F);
+			double e = player.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
+			double f = player.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * player.getBbWidth() * 0.8F);
+			mutableBlockPos.set(d, e, f);
+			BlockState blockState = player.level.getBlockState(mutableBlockPos);
+			if (blockState.getRenderShape() != RenderShape.INVISIBLE && blockState.isViewBlocking(player.level, mutableBlockPos)) {
+				return blockState;
+			}
+		}
+
+		return null;
 	}
 
 	private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {

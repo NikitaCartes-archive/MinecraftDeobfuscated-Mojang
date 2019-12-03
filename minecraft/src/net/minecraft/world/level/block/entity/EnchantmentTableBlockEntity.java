@@ -58,8 +58,8 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 				false
 			);
 		if (player != null) {
-			double d = player.getX() - (double)((float)this.worldPosition.getX() + 0.5F);
-			double e = player.getZ() - (double)((float)this.worldPosition.getZ() + 0.5F);
+			double d = player.getX() - ((double)this.worldPosition.getX() + 0.5);
+			double e = player.getZ() - ((double)this.worldPosition.getZ() + 0.5);
 			this.tRot = (float)Mth.atan2(e, d);
 			this.open += 0.1F;
 			if (this.open < 0.5F || RANDOM.nextInt(40) == 0) {

@@ -31,9 +31,9 @@ public class EndGatewayBlock extends BaseEntityBlock {
 			int i = ((TheEndGatewayBlockEntity)blockEntity).getParticleAmount();
 
 			for (int j = 0; j < i; j++) {
-				double d = (double)((float)blockPos.getX() + random.nextFloat());
-				double e = (double)((float)blockPos.getY() + random.nextFloat());
-				double f = (double)((float)blockPos.getZ() + random.nextFloat());
+				double d = (double)blockPos.getX() + (double)random.nextFloat();
+				double e = (double)blockPos.getY() + (double)random.nextFloat();
+				double f = (double)blockPos.getZ() + (double)random.nextFloat();
 				double g = ((double)random.nextFloat() - 0.5) * 0.5;
 				double h = ((double)random.nextFloat() - 0.5) * 0.5;
 				double k = ((double)random.nextFloat() - 0.5) * 0.5;

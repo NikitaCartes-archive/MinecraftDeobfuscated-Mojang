@@ -13,8 +13,8 @@ public class Slot {
 	private final int slot;
 	public final Container container;
 	public int index;
-	public int x;
-	public int y;
+	public final int x;
+	public final int y;
 
 	public Slot(Container container, int i, int j, int k) {
 		this.container = container;

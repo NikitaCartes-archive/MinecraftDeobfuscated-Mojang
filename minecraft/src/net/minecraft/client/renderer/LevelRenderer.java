@@ -28,8 +28,12 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +138,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 	private final RenderBuffers renderBuffers;
 	private ClientLevel level;
 	private Set<ChunkRenderDispatcher.RenderChunk> chunksToCompile = Sets.<ChunkRenderDispatcher.RenderChunk>newLinkedHashSet();
-	private List<LevelRenderer.RenderChunkInfo> renderChunks = Lists.<LevelRenderer.RenderChunkInfo>newArrayListWithCapacity(69696);
+	private final ObjectList<LevelRenderer.RenderChunkInfo> renderChunks = new ObjectArrayList<>(69696);
 	private final Set<BlockEntity> globalBlockEntities = Sets.<BlockEntity>newHashSet();
 	private ViewArea viewArea;
 	private final VertexFormat skyFormat = DefaultVertexFormat.POSITION;
@@ -740,6 +744,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		this.minecraft.getProfiler().popPush("culling");
 		BlockPos blockPos = camera.getBlockPosition();
 		ChunkRenderDispatcher.RenderChunk renderChunk = this.viewArea.getRenderChunkAt(blockPos);
+		int j = 16;
 		BlockPos blockPos2 = new BlockPos(Mth.floor(vec3.x / 16.0) * 16, Mth.floor(vec3.y / 16.0) * 16, Mth.floor(vec3.z / 16.0) * 16);
 		float g = camera.getXRot();
 		float h = camera.getYRot();
@@ -758,7 +763,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		this.minecraft.getProfiler().popPush("update");
 		if (!bl && this.needsUpdate) {
 			this.needsUpdate = false;
-			this.renderChunks = Lists.<LevelRenderer.RenderChunkInfo>newArrayList();
+			this.renderChunks.clear();
 			Queue<LevelRenderer.RenderChunkInfo> queue = Queues.<LevelRenderer.RenderChunkInfo>newArrayDeque();
 			Entity.setViewScale(Mth.clamp((double)this.minecraft.options.renderDistance / 8.0, 1.0, 2.5));
 			boolean bl3 = this.minecraft.smartCull;
@@ -787,17 +792,23 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 					queue.add(renderChunkInfo);
 				}
 			} else {
-				int j = blockPos.getY() > 0 ? 248 : 8;
+				int k = blockPos.getY() > 0 ? 248 : 8;
+				int l = Mth.floor(vec3.x / 16.0) * 16;
+				int m = Mth.floor(vec3.z / 16.0) * 16;
+				List<LevelRenderer.RenderChunkInfo> list = Lists.<LevelRenderer.RenderChunkInfo>newArrayList();
 
-				for (int k = -this.lastViewDistance; k <= this.lastViewDistance; k++) {
-					for (int l = -this.lastViewDistance; l <= this.lastViewDistance; l++) {
-						ChunkRenderDispatcher.RenderChunk renderChunk2 = this.viewArea.getRenderChunkAt(new BlockPos((k << 4) + 8, j, (l << 4) + 8));
+				for (int n = -this.lastViewDistance; n <= this.lastViewDistance; n++) {
+					for (int o = -this.lastViewDistance; o <= this.lastViewDistance; o++) {
+						ChunkRenderDispatcher.RenderChunk renderChunk2 = this.viewArea.getRenderChunkAt(new BlockPos(l + (n << 4) + 8, k, m + (o << 4) + 8));
 						if (renderChunk2 != null && frustum.isVisible(renderChunk2.bb)) {
 							renderChunk2.setFrame(i);
-							queue.add(new LevelRenderer.RenderChunkInfo(renderChunk2, null, 0));
+							list.add(new LevelRenderer.RenderChunkInfo(renderChunk2, null, 0));
 						}
 					}
 				}
+
+				list.sort(Comparator.comparingDouble(renderChunkInfox -> blockPos.distSqr(renderChunkInfox.chunk.getOrigin().offset(8, 8, 8))));
+				queue.addAll(list);
 			}
 
 			this.minecraft.getProfiler().push("iteration");
@@ -1180,26 +1191,23 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		}
 
 		this.minecraft.getProfiler().push("filterempty");
-		List<ChunkRenderDispatcher.RenderChunk> list = Lists.<ChunkRenderDispatcher.RenderChunk>newArrayList();
+		this.minecraft.getProfiler().popPush((Supplier<String>)(() -> "render_" + renderType));
+		boolean bl = renderType != RenderType.translucent();
+		ObjectListIterator<LevelRenderer.RenderChunkInfo> objectListIterator = this.renderChunks.listIterator(bl ? 0 : this.renderChunks.size());
 
-		for (LevelRenderer.RenderChunkInfo renderChunkInfo2 : renderType == RenderType.translucent() ? Lists.reverse(this.renderChunks) : this.renderChunks) {
+		while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
+			LevelRenderer.RenderChunkInfo renderChunkInfo2 = bl ? (LevelRenderer.RenderChunkInfo)objectListIterator.next() : objectListIterator.previous();
 			ChunkRenderDispatcher.RenderChunk renderChunk = renderChunkInfo2.chunk;
 			if (!renderChunk.getCompiledChunk().isEmpty(renderType)) {
-				list.add(renderChunk);
+				VertexBuffer vertexBuffer = renderChunk.getBuffer(renderType);
+				poseStack.pushPose();
+				BlockPos blockPos = renderChunk.getOrigin();
+				poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
+				vertexBuffer.bind();
+				this.format.setupBufferState(0L);
+				vertexBuffer.draw(poseStack.last().pose(), 7);
+				poseStack.popPose();
 			}
-		}
-
-		this.minecraft.getProfiler().popPush((Supplier<String>)(() -> "render_" + renderType));
-
-		for (ChunkRenderDispatcher.RenderChunk renderChunk2 : list) {
-			VertexBuffer vertexBuffer = renderChunk2.getBuffer(renderType);
-			poseStack.pushPose();
-			BlockPos blockPos = renderChunk2.getOrigin();
-			poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - f);
-			vertexBuffer.bind();
-			this.format.setupBufferState(0L);
-			vertexBuffer.draw(poseStack.last().pose(), 7);
-			poseStack.popPose();
 		}
 
 		VertexBuffer.unbind();

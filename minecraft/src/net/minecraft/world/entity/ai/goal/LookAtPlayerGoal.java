@@ -13,7 +13,7 @@ public class LookAtPlayerGoal extends Goal {
 	protected Entity lookAt;
 	protected final float lookDistance;
 	private int lookTime;
-	private final float probability;
+	protected final float probability;
 	protected final Class<? extends LivingEntity> lookAtType;
 	protected final TargetingConditions lookAtContext;
 

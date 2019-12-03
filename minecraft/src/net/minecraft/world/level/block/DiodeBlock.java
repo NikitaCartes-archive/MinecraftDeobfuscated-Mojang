@@ -46,7 +46,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 			} else if (!bl) {
 				serverLevel.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 2);
 				if (!bl2) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.HIGH);
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.VERY_HIGH);
 				}
 			}
 		}

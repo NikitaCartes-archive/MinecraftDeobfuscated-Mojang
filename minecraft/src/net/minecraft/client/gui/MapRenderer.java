@@ -22,8 +22,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Environment(EnvType.CLIENT)
 public class MapRenderer implements AutoCloseable {
-	public static final ResourceLocation MAP_BACKGROUND_LOCATION = new ResourceLocation("textures/map/map_background.png");
-	public static final RenderType MAP_BACKGROUND = RenderType.text(MAP_BACKGROUND_LOCATION);
 	private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
 	private static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
 	private final TextureManager textureManager;
@@ -92,7 +90,7 @@ public class MapRenderer implements AutoCloseable {
 					int k = j + i * 128;
 					int l = this.data.colors[k] & 255;
 					if (l / 4 == 0) {
-						this.texture.getPixels().setPixelRGBA(j, i, (k + k / 128 & 1) * 8 + 16 << 24);
+						this.texture.getPixels().setPixelRGBA(j, i, 0);
 					} else {
 						this.texture.getPixels().setPixelRGBA(j, i, MaterialColor.MATERIAL_COLORS[l / 4].calculateRGBColor(l & 3));
 					}

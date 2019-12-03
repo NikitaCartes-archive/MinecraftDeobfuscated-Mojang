@@ -59,9 +59,9 @@ public abstract class WaterFluid extends FlowingFluid {
 		} else if (random.nextInt(10) == 0) {
 			level.addParticle(
 				ParticleTypes.UNDERWATER,
-				(double)((float)blockPos.getX() + random.nextFloat()),
-				(double)((float)blockPos.getY() + random.nextFloat()),
-				(double)((float)blockPos.getZ() + random.nextFloat()),
+				(double)blockPos.getX() + (double)random.nextFloat(),
+				(double)blockPos.getY() + (double)random.nextFloat(),
+				(double)blockPos.getZ() + (double)random.nextFloat(),
 				0.0,
 				0.0,
 				0.0
