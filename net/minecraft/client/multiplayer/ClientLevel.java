@@ -354,7 +354,7 @@ extends Level {
             }
         }
         if (bl && blockState.getBlock() == Blocks.BARRIER) {
-            this.addParticle(ParticleTypes.BARRIER, (float)m + 0.5f, (float)n + 0.5f, (float)o + 0.5f, 0.0, 0.0, 0.0);
+            this.addParticle(ParticleTypes.BARRIER, (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
         }
     }
 

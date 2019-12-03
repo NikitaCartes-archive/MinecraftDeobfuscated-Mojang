@@ -10,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.decoration.ArmorStand;
 
@@ -64,6 +65,13 @@ extends ArmorStandArmorModel {
     }
 
     @Override
+    public void prepareMobModel(ArmorStand armorStand, float f, float g, float h) {
+        this.basePlate.xRot = 0.0f;
+        this.basePlate.yRot = (float)Math.PI / 180 * -Mth.rotLerp(h, armorStand.yRotO, armorStand.yRot);
+        this.basePlate.zRot = 0.0f;
+    }
+
+    @Override
     public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {
         super.setupAnim(armorStand, f, g, h, i, j);
         this.leftArm.visible = armorStand.isShowArms();
@@ -80,9 +88,6 @@ extends ArmorStandArmorModel {
         this.shoulderStick.xRot = (float)Math.PI / 180 * armorStand.getBodyPose().getX();
         this.shoulderStick.yRot = (float)Math.PI / 180 * armorStand.getBodyPose().getY();
         this.shoulderStick.zRot = (float)Math.PI / 180 * armorStand.getBodyPose().getZ();
-        this.basePlate.xRot = 0.0f;
-        this.basePlate.yRot = (float)Math.PI / 180 * -armorStand.yRot;
-        this.basePlate.zRot = 0.0f;
     }
 
     @Override

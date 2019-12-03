@@ -165,6 +165,7 @@ implements ResourceManagerReloadListener {
     }
 
     protected void renderGuiItem(ItemStack itemStack, int i, int j, BakedModel bakedModel) {
+        boolean bl;
         RenderSystem.pushMatrix();
         this.textureManager.bind(TextureAtlas.LOCATION_BLOCKS);
         this.textureManager.getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
@@ -180,14 +181,16 @@ implements ResourceManagerReloadListener {
         RenderSystem.scalef(16.0f, 16.0f, 16.0f);
         PoseStack poseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        if (bakedModel.isGui3d()) {
-            Lighting.setupFor3DItems();
+        Item item = itemStack.getItem();
+        boolean bl2 = bl = !bakedModel.isGui3d() || item == Items.SHIELD || item == Items.TRIDENT;
+        if (bl) {
+            Lighting.setupForFlatItems();
         }
         this.render(itemStack, ItemTransforms.TransformType.GUI, false, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, bakedModel);
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
-        if (bakedModel.isGui3d()) {
-            Lighting.setupForFlatItems();
+        if (bl) {
+            Lighting.setupFor3DItems();
         }
         RenderSystem.disableAlphaTest();
         RenderSystem.disableRescaleNormal();

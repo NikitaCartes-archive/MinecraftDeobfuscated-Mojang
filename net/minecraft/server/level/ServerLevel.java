@@ -973,7 +973,7 @@ extends Level {
     }
 
     public <T extends ParticleOptions> int sendParticles(T particleOptions, double d, double e, double f, int i, double g, double h, double j, double k) {
-        ClientboundLevelParticlesPacket clientboundLevelParticlesPacket = new ClientboundLevelParticlesPacket(particleOptions, false, (float)d, (float)e, (float)f, (float)g, (float)h, (float)j, (float)k, i);
+        ClientboundLevelParticlesPacket clientboundLevelParticlesPacket = new ClientboundLevelParticlesPacket(particleOptions, false, d, e, f, (float)g, (float)h, (float)j, (float)k, i);
         int l = 0;
         for (int m = 0; m < this.players.size(); ++m) {
             ServerPlayer serverPlayer = this.players.get(m);
@@ -984,7 +984,7 @@ extends Level {
     }
 
     public <T extends ParticleOptions> boolean sendParticles(ServerPlayer serverPlayer, T particleOptions, boolean bl, double d, double e, double f, int i, double g, double h, double j, double k) {
-        ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(particleOptions, bl, (float)d, (float)e, (float)f, (float)g, (float)h, (float)j, (float)k, i);
+        ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(particleOptions, bl, d, e, f, (float)g, (float)h, (float)j, (float)k, i);
         return this.sendParticles(serverPlayer, bl, d, e, f, packet);
     }
 

@@ -215,7 +215,6 @@ implements LayerLightEventListener {
 
     public void enableLightSources(ChunkPos chunkPos, boolean bl) {
         long l = SectionPos.getZeroNode(SectionPos.asLong(chunkPos.x, 0, chunkPos.z));
-        ((LayerLightSectionStorage)this.storage).runAllUpdates();
         ((LayerLightSectionStorage)this.storage).enableLightSources(l, bl);
     }
 

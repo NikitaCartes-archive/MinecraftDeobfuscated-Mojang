@@ -64,7 +64,7 @@ public class ComponentUtils {
         }
         ArrayList<T> list = Lists.newArrayList(collection);
         list.sort(Comparable::compareTo);
-        return ComponentUtils.formatList(collection, function);
+        return ComponentUtils.formatList(list, function);
     }
 
     public static <T> Component formatList(Collection<T> collection, Function<T, Component> function) {

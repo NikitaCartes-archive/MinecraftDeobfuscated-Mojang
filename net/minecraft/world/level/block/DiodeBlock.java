@@ -57,7 +57,7 @@ extends HorizontalDirectionalBlock {
         } else if (!bl) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 2);
             if (!bl2) {
-                ((ServerTickList)serverLevel.getBlockTicks()).scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.HIGH);
+                ((ServerTickList)serverLevel.getBlockTicks()).scheduleTick(blockPos, this, this.getDelay(blockState), TickPriority.VERY_HIGH);
             }
         }
     }

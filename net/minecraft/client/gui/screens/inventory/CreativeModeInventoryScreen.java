@@ -64,7 +64,9 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     private float scrollOffs;
     private boolean scrolling;
     private EditBox searchBox;
+    @Nullable
     private List<Slot> originalSlots;
+    @Nullable
     private Slot destroyItemSlot;
     private CreativeInventoryListener listener;
     private boolean ignoreTextInput;
@@ -441,34 +443,30 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             }
             ((ItemPickerMenu)this.menu).slots.clear();
             for (j = 0; j < abstractContainerMenu.slots.size(); ++j) {
+                int o;
+                int n;
                 int m;
-                int l;
-                SlotWrapper slot = new SlotWrapper(abstractContainerMenu.slots.get(j), j);
-                ((ItemPickerMenu)this.menu).slots.add(slot);
                 if (j >= 5 && j < 9) {
-                    k = j - 5;
-                    l = k / 2;
-                    m = k % 2;
-                    slot.x = 54 + l * 54;
-                    slot.y = 6 + m * 27;
-                    continue;
+                    int l = j - 5;
+                    m = l / 2;
+                    n = l % 2;
+                    o = 54 + m * 54;
+                    k = 6 + n * 27;
+                } else if (j >= 0 && j < 5) {
+                    o = -2000;
+                    k = -2000;
+                } else if (j == 45) {
+                    o = 35;
+                    k = 20;
+                } else {
+                    int l = j - 9;
+                    m = l % 9;
+                    n = l / 9;
+                    o = 9 + m * 18;
+                    k = j >= 36 ? 112 : 54 + n * 18;
                 }
-                if (j >= 0 && j < 5) {
-                    slot.x = -2000;
-                    slot.y = -2000;
-                    continue;
-                }
-                if (j == 45) {
-                    slot.x = 35;
-                    slot.y = 20;
-                    continue;
-                }
-                if (j >= abstractContainerMenu.slots.size()) continue;
-                k = j - 9;
-                l = k % 9;
-                m = k / 9;
-                slot.x = 9 + l * 18;
-                slot.y = j >= 36 ? 112 : 54 + m * 18;
+                SlotWrapper slot = new SlotWrapper(abstractContainerMenu.slots.get(j), j, o, k);
+                ((ItemPickerMenu)this.menu).slots.add(slot);
             }
             this.destroyItemSlot = new Slot(CONTAINER, 0, 173, 112);
             ((ItemPickerMenu)this.menu).slots.add(this.destroyItemSlot);
@@ -727,19 +725,18 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    class SlotWrapper
+    static class SlotWrapper
     extends Slot {
         private final Slot target;
 
-        public SlotWrapper(Slot slot, int i) {
-            super(slot.container, i, 0, 0);
+        public SlotWrapper(Slot slot, int i, int j, int k) {
+            super(slot.container, i, j, k);
             this.target = slot;
         }
 
         @Override
         public ItemStack onTake(Player player, ItemStack itemStack) {
-            this.target.onTake(player, itemStack);
-            return itemStack;
+            return this.target.onTake(player, itemStack);
         }
 
         @Override

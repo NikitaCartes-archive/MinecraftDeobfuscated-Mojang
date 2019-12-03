@@ -123,6 +123,7 @@ extends LayerLightSectionStorage<SkyDataLayerStorageMap> {
 
     @Override
     protected void enableLightSources(long l, boolean bl) {
+        this.runAllUpdates();
         if (bl && this.columnsWithSkySources.add(l)) {
             int i = ((SkyDataLayerStorageMap)this.updatingSectionData).topSections.get(l);
             if (i != ((SkyDataLayerStorageMap)this.updatingSectionData).currentLowestY) {

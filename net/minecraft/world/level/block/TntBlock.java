@@ -81,7 +81,7 @@ extends Block {
         if (level.isClientSide) {
             return;
         }
-        PrimedTnt primedTnt = new PrimedTnt(level, (float)blockPos.getX() + 0.5f, blockPos.getY(), (float)blockPos.getZ() + 0.5f, livingEntity);
+        PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, livingEntity);
         level.addFreshEntity(primedTnt);
         level.playSound(null, primedTnt.getX(), primedTnt.getY(), primedTnt.getZ(), SoundEvents.TNT_PRIMED, SoundSource.BLOCKS, 1.0f, 1.0f);
     }

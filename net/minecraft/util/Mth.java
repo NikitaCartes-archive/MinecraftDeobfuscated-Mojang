@@ -446,7 +446,6 @@ public class Mth {
         return g;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static int hsvToRgb(float f, float g, float h) {
         float p;
         float o;

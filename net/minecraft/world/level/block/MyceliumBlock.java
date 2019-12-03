@@ -24,7 +24,7 @@ extends SpreadingSnowyDirtBlock {
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         super.animateTick(blockState, level, blockPos, random);
         if (random.nextInt(10) == 0) {
-            level.addParticle(ParticleTypes.MYCELIUM, (float)blockPos.getX() + random.nextFloat(), (float)blockPos.getY() + 1.1f, (float)blockPos.getZ() + random.nextFloat(), 0.0, 0.0, 0.0);
+            level.addParticle(ParticleTypes.MYCELIUM, (double)blockPos.getX() + (double)random.nextFloat(), (double)blockPos.getY() + 1.1, (double)blockPos.getZ() + (double)random.nextFloat(), 0.0, 0.0, 0.0);
         }
     }
 }

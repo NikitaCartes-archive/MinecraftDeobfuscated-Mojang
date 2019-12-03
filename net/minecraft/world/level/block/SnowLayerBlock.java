@@ -69,10 +69,13 @@ extends Block {
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockState blockState2 = levelReader.getBlockState(blockPos.below());
         Block block = blockState2.getBlock();
-        if (block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BARRIER || block == Blocks.WHEAT) {
+        if (block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BARRIER) {
             return false;
         }
-        return Block.isFaceFull(blockState2.getShape(levelReader, blockPos.below()), Direction.UP) || block == this && blockState2.getValue(LAYERS) == 8;
+        if (block == Blocks.HONEY_BLOCK || block == Blocks.SOUL_SAND) {
+            return true;
+        }
+        return Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP) || block == this && blockState2.getValue(LAYERS) == 8;
     }
 
     @Override

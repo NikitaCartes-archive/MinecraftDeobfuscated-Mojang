@@ -74,6 +74,7 @@ extends Animal {
     private static final EntityDataAccessor<Byte> MAIN_GENE_ID = SynchedEntityData.defineId(Panda.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> HIDDEN_GENE_ID = SynchedEntityData.defineId(Panda.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(Panda.class, EntityDataSerializers.BYTE);
+    private static final TargetingConditions BREED_TARGETING = new TargetingConditions().range(8.0).allowSameTeam().allowInvulnerable();
     private boolean gotBamboo;
     private boolean didBite;
     public int rollCounter;
@@ -84,6 +85,7 @@ extends Animal {
     private float onBackAmountO;
     private float rollAmount;
     private float rollAmountO;
+    private PandaLookAtPlayerGoal lookAtPlayerGoal;
     private static final Predicate<ItemEntity> PANDA_ITEMS = itemEntity -> {
         Item item = itemEntity.getItem().getItem();
         return (item == Blocks.BAMBOO.asItem() || item == Blocks.CAKE.asItem()) && itemEntity.isAlive() && !itemEntity.hasPickUpDelay();
@@ -256,7 +258,8 @@ extends Animal {
         this.goalSelector.addGoal(7, new PandaSitGoal());
         this.goalSelector.addGoal(8, new PandaLieOnBackGoal(this));
         this.goalSelector.addGoal(8, new PandaSneezeGoal(this));
-        this.goalSelector.addGoal(9, new PandaLookAtPlayerGoal(this, Player.class, 6.0f));
+        this.lookAtPlayerGoal = new PandaLookAtPlayerGoal(this, Player.class, 6.0f);
+        this.goalSelector.addGoal(9, this.lookAtPlayerGoal);
         this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(12, new PandaRollGoal(this));
         this.goalSelector.addGoal(13, new FollowParentGoal(this, 1.25));
@@ -791,15 +794,14 @@ extends Animal {
         }
     }
 
-    static class PandaBreedGoal
+    class PandaBreedGoal
     extends BreedGoal {
-        private static final TargetingConditions BREED_TARGETING = new TargetingConditions().range(8.0).allowSameTeam().allowInvulnerable();
         private final Panda panda;
         private int unhappyCooldown;
 
-        public PandaBreedGoal(Panda panda, double d) {
-            super(panda, d);
-            this.panda = panda;
+        public PandaBreedGoal(Panda panda2, double d) {
+            super(panda2, d);
+            this.panda = panda2;
         }
 
         @Override
@@ -811,7 +813,7 @@ extends Animal {
                         this.unhappyCooldown = this.panda.tickCount + 600;
                         if (this.panda.isEffectiveAi()) {
                             Player player = this.level.getNearestPlayer(BREED_TARGETING, this.panda);
-                            this.panda.setTarget(player);
+                            this.panda.lookAtPlayerGoal.setTarget(player);
                         }
                     }
                     return false;
@@ -937,9 +939,19 @@ extends Animal {
             this.panda = panda;
         }
 
+        public void setTarget(LivingEntity livingEntity) {
+            this.lookAt = livingEntity;
+        }
+
         @Override
         public boolean canUse() {
-            return this.panda.canPerformAction() && super.canUse();
+            if (this.mob.getRandom().nextFloat() >= this.probability) {
+                return false;
+            }
+            if (this.lookAt == null) {
+                this.lookAt = this.lookAtType == Player.class ? this.mob.level.getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ()) : this.mob.level.getNearestLoadedEntity(this.lookAtType, this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ(), this.mob.getBoundingBox().inflate(this.lookDistance, 3.0, this.lookDistance));
+            }
+            return this.panda.canPerformAction() && this.lookAt != null;
         }
     }
 

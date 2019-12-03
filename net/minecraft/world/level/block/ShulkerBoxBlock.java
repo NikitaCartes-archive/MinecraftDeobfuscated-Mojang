@@ -72,7 +72,7 @@ extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return true;
     }
 

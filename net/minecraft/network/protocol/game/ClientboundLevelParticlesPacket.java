@@ -16,9 +16,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
 public class ClientboundLevelParticlesPacket
 implements Packet<ClientGamePacketListener> {
-    private float x;
-    private float y;
-    private float z;
+    private double x;
+    private double y;
+    private double z;
     private float xDist;
     private float yDist;
     private float zDist;
@@ -30,17 +30,17 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundLevelParticlesPacket() {
     }
 
-    public <T extends ParticleOptions> ClientboundLevelParticlesPacket(T particleOptions, boolean bl, float f, float g, float h, float i, float j, float k, float l, int m) {
+    public <T extends ParticleOptions> ClientboundLevelParticlesPacket(T particleOptions, boolean bl, double d, double e, double f, float g, float h, float i, float j, int k) {
         this.particle = particleOptions;
         this.overrideLimiter = bl;
-        this.x = f;
-        this.y = g;
-        this.z = h;
-        this.xDist = i;
-        this.yDist = j;
-        this.zDist = k;
-        this.maxSpeed = l;
-        this.count = m;
+        this.x = d;
+        this.y = e;
+        this.z = f;
+        this.xDist = g;
+        this.yDist = h;
+        this.zDist = i;
+        this.maxSpeed = j;
+        this.count = k;
     }
 
     @Override
@@ -50,9 +50,9 @@ implements Packet<ClientGamePacketListener> {
             particleType = ParticleTypes.BARRIER;
         }
         this.overrideLimiter = friendlyByteBuf.readBoolean();
-        this.x = friendlyByteBuf.readFloat();
-        this.y = friendlyByteBuf.readFloat();
-        this.z = friendlyByteBuf.readFloat();
+        this.x = friendlyByteBuf.readDouble();
+        this.y = friendlyByteBuf.readDouble();
+        this.z = friendlyByteBuf.readDouble();
         this.xDist = friendlyByteBuf.readFloat();
         this.yDist = friendlyByteBuf.readFloat();
         this.zDist = friendlyByteBuf.readFloat();
@@ -69,9 +69,9 @@ implements Packet<ClientGamePacketListener> {
     public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
         friendlyByteBuf.writeInt(Registry.PARTICLE_TYPE.getId(this.particle.getType()));
         friendlyByteBuf.writeBoolean(this.overrideLimiter);
-        friendlyByteBuf.writeFloat(this.x);
-        friendlyByteBuf.writeFloat(this.y);
-        friendlyByteBuf.writeFloat(this.z);
+        friendlyByteBuf.writeDouble(this.x);
+        friendlyByteBuf.writeDouble(this.y);
+        friendlyByteBuf.writeDouble(this.z);
         friendlyByteBuf.writeFloat(this.xDist);
         friendlyByteBuf.writeFloat(this.yDist);
         friendlyByteBuf.writeFloat(this.zDist);

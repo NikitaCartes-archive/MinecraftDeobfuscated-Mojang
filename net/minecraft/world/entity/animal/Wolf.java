@@ -43,7 +43,6 @@ import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -476,12 +475,12 @@ extends TamableAnimal {
 
     @Override
     public boolean wantsToAttack(LivingEntity livingEntity, LivingEntity livingEntity2) {
-        Wolf wolf;
         if (livingEntity instanceof Creeper || livingEntity instanceof Ghast) {
             return false;
         }
-        if (livingEntity instanceof Wolf && (wolf = (Wolf)livingEntity).isTame() && wolf.getOwner() == livingEntity2) {
-            return false;
+        if (livingEntity instanceof Wolf) {
+            Wolf wolf = (Wolf)livingEntity;
+            return !wolf.isTame() || wolf.getOwner() != livingEntity2;
         }
         if (livingEntity instanceof Player && livingEntity2 instanceof Player && !((Player)livingEntity2).canHarmPlayer((Player)livingEntity)) {
             return false;
@@ -489,7 +488,7 @@ extends TamableAnimal {
         if (livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isTamed()) {
             return false;
         }
-        return !(livingEntity instanceof Cat) || !((Cat)livingEntity).isTame();
+        return !(livingEntity instanceof TamableAnimal) || !((TamableAnimal)livingEntity).isTame();
     }
 
     @Override

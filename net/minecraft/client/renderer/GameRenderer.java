@@ -437,7 +437,7 @@ ResourceManagerReloadListener {
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
         RenderSystem.translatef(0.0f, 0.0f, -2000.0f);
-        Lighting.setupGui(poseStack.last().pose());
+        Lighting.setupFor3DItems();
         if (bl && this.minecraft.level != null) {
             this.minecraft.getProfiler().popPush("gui");
             if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {

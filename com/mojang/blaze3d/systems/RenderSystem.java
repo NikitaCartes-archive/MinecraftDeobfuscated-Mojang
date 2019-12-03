@@ -694,9 +694,14 @@ public class RenderSystem {
         GlStateManager.setupLevelDiffuseLighting(matrix4f);
     }
 
-    public static void setupGuiDiffuseLighting(Matrix4f matrix4f) {
+    public static void setupGuiFlatDiffuseLighting() {
         RenderSystem.assertThread(RenderSystem::isOnGameThread);
-        GlStateManager.setupGuiDiffuseLighting(matrix4f);
+        GlStateManager.setupGuiFlatDiffuseLighting();
+    }
+
+    public static void setupGui3DDiffuseLighting() {
+        RenderSystem.assertThread(RenderSystem::isOnGameThread);
+        GlStateManager.setupGui3DDiffuseLighting();
     }
 
     public static void mulTextureByProjModelView() {
@@ -747,10 +752,6 @@ public class RenderSystem {
 
     public static void defaultAlphaFunc() {
         RenderSystem.alphaFunc(516, 0.1f);
-    }
-
-    private static /* synthetic */ void lambda$setupGuiDiffuseLighting$69(Matrix4f matrix4f) {
-        GlStateManager.setupGuiDiffuseLighting(matrix4f);
     }
 
     private static /* synthetic */ void lambda$setupLevelDiffuseLighting$68(Matrix4f matrix4f) {

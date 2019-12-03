@@ -72,9 +72,9 @@ extends Block {
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         BlockPos blockPos2;
         if (random.nextInt(16) == 0 && FallingBlock.isFree(level.getBlockState(blockPos2 = blockPos.below()))) {
-            double d = (float)blockPos.getX() + random.nextFloat();
+            double d = (double)blockPos.getX() + (double)random.nextFloat();
             double e = (double)blockPos.getY() - 0.05;
-            double f = (float)blockPos.getZ() + random.nextFloat();
+            double f = (double)blockPos.getZ() + (double)random.nextFloat();
             level.addParticle(new BlockParticleOption(ParticleTypes.FALLING_DUST, blockState), d, e, f, 0.0, 0.0, 0.0);
         }
     }

@@ -671,6 +671,8 @@ public class GlStateManager {
 
     public static void setupLevelDiffuseLighting(Matrix4f matrix4f) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        GlStateManager._pushMatrix();
+        GlStateManager._loadIdentity();
         GlStateManager._enableLight(0);
         GlStateManager._enableLight(1);
         Vector4f vector4f = new Vector4f(DIFFUSE_LIGHT_0);
@@ -689,14 +691,29 @@ public class GlStateManager {
         GlStateManager._shadeModel(7424);
         float g = 0.4f;
         GlStateManager._lightModel(2899, GlStateManager.getBuffer(0.4f, 0.4f, 0.4f, 1.0f));
+        GlStateManager._popMatrix();
     }
 
-    public static void setupGuiDiffuseLighting(Matrix4f matrix4f) {
+    public static void setupGuiFlatDiffuseLighting() {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        Matrix4f matrix4f2 = matrix4f.copy();
-        matrix4f2.multiply(Vector3f.YP.rotationDegrees(-22.5f));
-        matrix4f2.multiply(Vector3f.XP.rotationDegrees(135.0f));
-        GlStateManager.setupLevelDiffuseLighting(matrix4f2);
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.setIdentity();
+        matrix4f.multiply(Matrix4f.createScaleMatrix(1.0f, -1.0f, 1.0f));
+        matrix4f.multiply(Vector3f.YP.rotationDegrees(-22.5f));
+        matrix4f.multiply(Vector3f.XP.rotationDegrees(135.0f));
+        GlStateManager.setupLevelDiffuseLighting(matrix4f);
+    }
+
+    public static void setupGui3DDiffuseLighting() {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThread);
+        Matrix4f matrix4f = new Matrix4f();
+        matrix4f.setIdentity();
+        matrix4f.multiply(Vector3f.YP.rotationDegrees(62.0f));
+        matrix4f.multiply(Vector3f.XP.rotationDegrees(185.5f));
+        matrix4f.multiply(Matrix4f.createScaleMatrix(1.0f, -1.0f, 1.0f));
+        matrix4f.multiply(Vector3f.YP.rotationDegrees(-22.5f));
+        matrix4f.multiply(Vector3f.XP.rotationDegrees(135.0f));
+        GlStateManager.setupLevelDiffuseLighting(matrix4f);
     }
 
     private static FloatBuffer getBuffer(float f, float g, float h, float i) {

@@ -293,6 +293,11 @@ implements StateHolder<BlockState> {
         this.getBlock().attack(this, level, blockPos, player);
     }
 
+    public boolean isSuffocating(BlockGetter blockGetter, BlockPos blockPos) {
+        return this.getBlock().isSuffocating(this, blockGetter, blockPos);
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public boolean isViewBlocking(BlockGetter blockGetter, BlockPos blockPos) {
         return this.getBlock().isViewBlocking(this, blockGetter, blockPos);
     }

@@ -60,8 +60,8 @@ TickableBlockEntity {
         this.oRot = this.rot;
         Player player = this.level.getNearestPlayer((double)((float)this.worldPosition.getX() + 0.5f), (double)((float)this.worldPosition.getY() + 0.5f), (double)((float)this.worldPosition.getZ() + 0.5f), 3.0, false);
         if (player != null) {
-            double d = player.getX() - (double)((float)this.worldPosition.getX() + 0.5f);
-            double e = player.getZ() - (double)((float)this.worldPosition.getZ() + 0.5f);
+            double d = player.getX() - ((double)this.worldPosition.getX() + 0.5);
+            double e = player.getZ() - ((double)this.worldPosition.getZ() + 0.5);
             this.tRot = (float)Mth.atan2(e, d);
             this.open += 0.1f;
             if (this.open < 0.5f || RANDOM.nextInt(40) == 0) {

@@ -21,30 +21,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ScreenEffectRenderer {
     private static final ResourceLocation UNDERWATER_LOCATION = new ResourceLocation("textures/misc/underwater.png");
 
     public static void renderScreenEffect(Minecraft minecraft, PoseStack poseStack) {
+        BlockState blockState;
         RenderSystem.disableAlphaTest();
-        if (minecraft.player.isInWall()) {
-            BlockState blockState = minecraft.level.getBlockState(new BlockPos(minecraft.player));
-            LocalPlayer player = minecraft.player;
-            for (int i = 0; i < 8; ++i) {
-                double d = player.getX() + (double)(((float)((i >> 0) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
-                double e = player.getY() + (double)(((float)((i >> 1) % 2) - 0.5f) * 0.1f);
-                double f = player.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
-                BlockPos blockPos = new BlockPos(d, e + (double)player.getEyeHeight(), f);
-                BlockState blockState2 = minecraft.level.getBlockState(blockPos);
-                if (!blockState2.isViewBlocking(minecraft.level, blockPos)) continue;
-                blockState = blockState2;
-            }
-            if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
-                ScreenEffectRenderer.renderTex(minecraft, minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
-            }
+        LocalPlayer player = minecraft.player;
+        if (!player.noPhysics && (blockState = ScreenEffectRenderer.getViewBlockingState(player)) != null) {
+            ScreenEffectRenderer.renderTex(minecraft, minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState), poseStack);
         }
         if (!minecraft.player.isSpectator()) {
             if (minecraft.player.isUnderLiquid(FluidTags.WATER)) {
@@ -55,6 +46,21 @@ public class ScreenEffectRenderer {
             }
         }
         RenderSystem.enableAlphaTest();
+    }
+
+    @Nullable
+    private static BlockState getViewBlockingState(Player player) {
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 8; ++i) {
+            double d = player.getX() + (double)(((float)((i >> 0) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
+            double e = player.getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5f) * 0.1f);
+            double f = player.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * player.getBbWidth() * 0.8f);
+            mutableBlockPos.set(d, e, f);
+            BlockState blockState = player.level.getBlockState(mutableBlockPos);
+            if (blockState.getRenderShape() == RenderShape.INVISIBLE || !blockState.isViewBlocking(player.level, mutableBlockPos)) continue;
+            return blockState;
+        }
+        return null;
     }
 
     private static void renderTex(Minecraft minecraft, TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
