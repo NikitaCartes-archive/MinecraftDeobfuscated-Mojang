@@ -66,6 +66,7 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -141,6 +142,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.KeybindComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
@@ -388,13 +390,8 @@ WindowEventHandler {
         this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES, this.gameThread);
         this.options.loadResourcePacks(this.resourcePackRepository);
         this.resourcePackRepository.reload();
-        List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-        for (Pack pack : list) {
-            this.resourceManager.add(pack);
-        }
         this.languageManager = new LanguageManager(this.options.languageCode);
         this.resourceManager.registerReloadListener(this.languageManager);
-        this.languageManager.reload(list);
         this.textureManager = new TextureManager(this.resourceManager);
         this.resourceManager.registerReloadListener(this.textureManager);
         this.skinManager = new SkinManager(this.textureManager, new File(file, "skins"), this.minecraftSessionService);
@@ -457,22 +454,30 @@ WindowEventHandler {
             this.setScreen(new TitleScreen(true));
         }
         LoadingOverlay.registerTextures(this);
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createQueuedReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK), optional -> Util.ifElse(optional, throwable -> {
-            if (this.resourcePackRepository.getSelected().size() > 1) {
-                LOGGER.info("Caught error loading resourcepacks, removing all assigned resourcepacks", (Throwable)throwable);
-                this.resourcePackRepository.setSelected(Collections.emptyList());
-                this.options.resourcePacks.clear();
-                this.options.incompatibleResourcePacks.clear();
-                this.options.save();
-                this.reloadResourcePacks();
-            } else {
-                Util.throwAsRuntime(throwable);
-            }
-        }, () -> {
+        List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
+        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+            this.languageManager.reload(list);
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 this.selfTest();
             }
         }), false));
+    }
+
+    private void rollbackResourcePacks(Throwable throwable) {
+        if (this.resourcePackRepository.getSelected().size() > 1) {
+            TextComponent component = throwable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure ? new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)throwable).getPack().getName()) : null;
+            LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
+            this.resourcePackRepository.setSelected(Collections.emptyList());
+            this.options.resourcePacks.clear();
+            this.options.incompatibleResourcePacks.clear();
+            this.options.save();
+            this.reloadResourcePacks().thenRun(() -> {
+                ToastComponent toastComponent = this.getToasts();
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail", new Object[0]), component);
+            });
+        } else {
+            Util.throwAsRuntime(throwable);
+        }
     }
 
     public void run() {
@@ -606,12 +611,11 @@ WindowEventHandler {
         }
         this.resourcePackRepository.reload();
         List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> {
-            optional.ifPresent(Util::throwAsRuntime);
+        this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
             this.languageManager.reload(list);
             this.levelRenderer.allChanged();
             completableFuture.complete(null);
-        }, true));
+        }), true));
         return completableFuture;
     }
 
@@ -758,7 +762,6 @@ WindowEventHandler {
             this.runAllTasks();
             this.profiler.pop();
         }
-        long m = Util.getNanos();
         this.profiler.push("tick");
         if (bl) {
             for (i = 0; i < Math.min(10, this.timer.ticks); ++i) {
@@ -798,12 +801,15 @@ WindowEventHandler {
         this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
         RenderSystem.popMatrix();
         this.profiler.startTick();
+        this.profiler.push("updateDisplay");
         this.window.updateDisplay();
         i = this.getFramerateLimit();
         if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
             RenderSystem.limitDisplayFPS(i);
         }
+        this.profiler.popPush("yield");
         Thread.yield();
+        this.profiler.pop();
         this.window.setErrorSection("Post render");
         ++this.frames;
         boolean bl3 = bl2 = this.hasSingleplayerServer() && (this.screen != null && this.screen.isPauseScreen() || this.overlay != null && this.overlay.isPauseScreen()) && !this.singleplayerServer.isPublished();
@@ -815,9 +821,9 @@ WindowEventHandler {
             }
             this.pause = bl2;
         }
-        long n = Util.getNanos();
-        this.frameTimer.logFrameDuration(n - this.lastNanoTime);
-        this.lastNanoTime = n;
+        long m = Util.getNanos();
+        this.frameTimer.logFrameDuration(m - this.lastNanoTime);
+        this.lastNanoTime = m;
         while (Util.getMillis() >= this.lastTime + 1000L) {
             fps = this.frames;
             Object[] objectArray = new Object[6];
@@ -885,19 +891,19 @@ WindowEventHandler {
         ResultField resultField = list.remove(0);
         if (i == 0) {
             int j;
-            if (!resultField.name.isEmpty() && (j = this.debugPath.lastIndexOf(46)) >= 0) {
+            if (!resultField.name.isEmpty() && (j = this.debugPath.lastIndexOf(30)) >= 0) {
                 this.debugPath = this.debugPath.substring(0, j);
             }
         } else if (--i < list.size() && !"unspecified".equals(list.get((int)i).name)) {
             if (!this.debugPath.isEmpty()) {
-                this.debugPath = this.debugPath + ".";
+                this.debugPath = this.debugPath + '\u001e';
             }
             this.debugPath = this.debugPath + list.get((int)i).name;
         }
     }
 
     private void renderFpsMeter() {
-        int l;
+        int m;
         if (!this.profiler.continuous().isEnabled()) {
             return;
         }
@@ -932,9 +938,9 @@ WindowEventHandler {
             float g;
             float f;
             int q;
-            l = Mth.floor(resultField2.percentage / 4.0) + 1;
+            int l = Mth.floor(resultField2.percentage / 4.0) + 1;
             bufferBuilder.begin(6, DefaultVertexFormat.POSITION_COLOR);
-            int m = resultField2.getColor();
+            m = resultField2.getColor();
             int n = m >> 16 & 0xFF;
             int o = m >> 8 & 0xFF;
             int p = m & 0xFF;
@@ -951,6 +957,7 @@ WindowEventHandler {
                 f = (float)((d + resultField2.percentage * (double)q / (double)l) * 6.2831854820251465 / 100.0);
                 g = Mth.sin(f) * 160.0f;
                 h = Mth.cos(f) * 160.0f * 0.5f;
+                if (h > 0.0f) continue;
                 bufferBuilder.vertex((float)j + g, (float)k - h, 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
                 bufferBuilder.vertex((float)j + g, (float)k - h + 10.0f, 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
             }
@@ -960,15 +967,16 @@ WindowEventHandler {
         DecimalFormat decimalFormat = new DecimalFormat("##0.00");
         decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
         RenderSystem.enableTexture();
-        String string = "";
-        if (!"unspecified".equals(resultField.name)) {
-            string = string + "[0] ";
+        String string = ProfileResults.demanglePath(resultField.name);
+        String string2 = "";
+        if (!"unspecified".equals(string)) {
+            string2 = string2 + "[0] ";
         }
-        string = resultField.name.isEmpty() ? string + "ROOT " : string + resultField.name + ' ';
-        l = 0xFFFFFF;
-        this.font.drawShadow(string, j - 160, k - 80 - 16, 0xFFFFFF);
-        string = decimalFormat.format(resultField.globalPercentage) + "%";
-        this.font.drawShadow(string, j + 160 - this.font.width(string), k - 80 - 16, 0xFFFFFF);
+        string2 = string.isEmpty() ? string2 + "ROOT " : string2 + string + ' ';
+        m = 0xFFFFFF;
+        this.font.drawShadow(string2, j - 160, k - 80 - 16, 0xFFFFFF);
+        string2 = decimalFormat.format(resultField.globalPercentage) + "%";
+        this.font.drawShadow(string2, j + 160 - this.font.width(string2), k - 80 - 16, 0xFFFFFF);
         for (int r = 0; r < list.size(); ++r) {
             ResultField resultField3 = list.get(r);
             StringBuilder stringBuilder = new StringBuilder();
@@ -977,12 +985,12 @@ WindowEventHandler {
             } else {
                 stringBuilder.append("[").append(r + 1).append("] ");
             }
-            String string2 = stringBuilder.append(resultField3.name).toString();
-            this.font.drawShadow(string2, j - 160, k + 80 + r * 8 + 20, resultField3.getColor());
-            string2 = decimalFormat.format(resultField3.percentage) + "%";
-            this.font.drawShadow(string2, j + 160 - 50 - this.font.width(string2), k + 80 + r * 8 + 20, resultField3.getColor());
-            string2 = decimalFormat.format(resultField3.globalPercentage) + "%";
-            this.font.drawShadow(string2, j + 160 - this.font.width(string2), k + 80 + r * 8 + 20, resultField3.getColor());
+            String string3 = stringBuilder.append(resultField3.name).toString();
+            this.font.drawShadow(string3, j - 160, k + 80 + r * 8 + 20, resultField3.getColor());
+            string3 = decimalFormat.format(resultField3.percentage) + "%";
+            this.font.drawShadow(string3, j + 160 - 50 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
+            string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
+            this.font.drawShadow(string3, j + 160 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
         }
     }
 

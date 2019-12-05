@@ -36,9 +36,9 @@ public enum FuzzyOffsetBiomeZoomer implements BiomeZoomer
             t = bl ? p : p + 1;
             u = bl2 ? q : q + 1;
             int v = bl3 ? r : r + 1;
-            double g = bl ? d : 1.0 - d;
-            double h = bl2 ? e : 1.0 - e;
-            double w = bl3 ? f : 1.0 - f;
+            double g = bl ? d : d - 1.0;
+            double h = bl2 ? e : e - 1.0;
+            double w = bl3 ? f : f - 1.0;
             ds[s] = FuzzyOffsetBiomeZoomer.getFiddledDistance(l, t, u, v, g, h, w);
         }
         s = 0;

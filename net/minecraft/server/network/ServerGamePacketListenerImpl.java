@@ -726,6 +726,9 @@ implements ServerGamePacketListener {
         m = h - this.lastGoodX;
         n = i - this.lastGoodY;
         o = j - this.lastGoodZ;
+        if (n > 0.0) {
+            this.player.fallDistance = 0.0f;
+        }
         if (this.player.onGround && !serverboundMovePlayerPacket.isOnGround() && n > 0.0) {
             this.player.jumpFromGround();
         }

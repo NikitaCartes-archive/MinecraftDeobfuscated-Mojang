@@ -72,7 +72,8 @@ implements Toast {
     public static enum SystemToastIds {
         TUTORIAL_HINT,
         NARRATOR_TOGGLE,
-        WORLD_BACKUP;
+        WORLD_BACKUP,
+        PACK_LOAD_FAILURE;
 
     }
 }

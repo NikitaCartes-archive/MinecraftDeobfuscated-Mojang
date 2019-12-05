@@ -211,6 +211,8 @@ extends GuiComponent {
                     if (levelChunk2 != null) {
                         LevelLightEngine levelLightEngine = level.getChunkSource().getLightEngine();
                         list.add("Server Light: (" + levelLightEngine.getLayerListener(LightLayer.SKY).getLightValue(blockPos) + " sky, " + levelLightEngine.getLayerListener(LightLayer.BLOCK).getLightValue(blockPos) + " block)");
+                    } else {
+                        list.add("Server Light: (?? sky, ?? block)");
                     }
                     StringBuilder stringBuilder = new StringBuilder("CH");
                     for (Heightmap.Types types : Heightmap.Types.values()) {
@@ -218,15 +220,18 @@ extends GuiComponent {
                         stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get((Object)types)).append(": ").append(levelChunk.getHeight(types, blockPos.getX(), blockPos.getZ()));
                     }
                     list.add(stringBuilder.toString());
-                    if (levelChunk2 != null) {
-                        stringBuilder.setLength(0);
-                        stringBuilder.append("SH");
-                        for (Heightmap.Types types : Heightmap.Types.values()) {
-                            if (!types.keepAfterWorldgen()) continue;
-                            stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get((Object)types)).append(": ").append(levelChunk2.getHeight(types, blockPos.getX(), blockPos.getZ()));
+                    stringBuilder.setLength(0);
+                    stringBuilder.append("SH");
+                    for (Heightmap.Types types : Heightmap.Types.values()) {
+                        if (!types.keepAfterWorldgen()) continue;
+                        stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get((Object)types)).append(": ");
+                        if (levelChunk2 != null) {
+                            stringBuilder.append(levelChunk2.getHeight(types, blockPos.getX(), blockPos.getZ()));
+                            continue;
                         }
-                        list.add(stringBuilder.toString());
+                        stringBuilder.append("??");
                     }
+                    list.add(stringBuilder.toString());
                     if (blockPos.getY() >= 0 && blockPos.getY() < 256) {
                         list.add("Biome: " + Registry.BIOME.getKey(this.minecraft.level.getBiome(blockPos)));
                         long l = 0L;
@@ -375,7 +380,9 @@ extends GuiComponent {
             q += (long)u;
         }
         t = this.minecraft.getWindow().getGuiScaledHeight();
-        DebugScreenOverlay.fill(i, t - 60, i + p, t, -1873784752);
+        Matrix4f matrix4f2 = matrix4f.copy();
+        matrix4f2.multiply(Matrix4f.createTranslateMatrix(0.0f, 0.0f, 100.0f));
+        DebugScreenOverlay.fill(matrix4f2, i, t - 60, i + p, t, -1873784752);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
@@ -401,15 +408,12 @@ extends GuiComponent {
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         if (bl) {
-            DebugScreenOverlay.fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
-            this.font.drawInBatch("60 FPS", i + 2, t - 30 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, 0, 0xF000F0);
+            this.font.drawInBatch("60 FPS", i + 2, t - 30 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, -1873784752, 0xF000F0);
             this.hLine(i, i + p - 1, t - 30, -1);
-            DebugScreenOverlay.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-            this.font.drawInBatch("30 FPS", i + 2, t - 60 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, 0, 0xF000F0);
+            this.font.drawInBatch("30 FPS", i + 2, t - 60 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, -1873784752, 0xF000F0);
             this.hLine(i, i + p - 1, t - 60, -1);
         } else {
-            DebugScreenOverlay.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-            this.font.drawInBatch("20 TPS", i + 2, t - 60 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, 0, 0xF000F0);
+            this.font.drawInBatch("20 TPS", i + 2, t - 60 + 2, 0xE0E0E0, false, matrix4f, bufferSource, false, -1873784752, 0xF000F0);
             this.hLine(i, i + p - 1, t - 60, -1);
         }
         this.hLine(i, i + p - 1, t - 1, -1);

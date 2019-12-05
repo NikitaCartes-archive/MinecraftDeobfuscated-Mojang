@@ -19,9 +19,6 @@ extends ResourceManager {
     public CompletableFuture<Unit> reload(Executor var1, Executor var2, List<Pack> var3, CompletableFuture<Unit> var4);
 
     @Environment(value=EnvType.CLIENT)
-    public ReloadInstance createQueuedReload(Executor var1, Executor var2, CompletableFuture<Unit> var3);
-
-    @Environment(value=EnvType.CLIENT)
     public ReloadInstance createFullReload(Executor var1, Executor var2, CompletableFuture<Unit> var3, List<Pack> var4);
 
     public void registerReloadListener(PreparableReloadListener var1);

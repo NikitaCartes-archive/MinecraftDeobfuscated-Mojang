@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -79,6 +80,7 @@ extends AbstractContainerScreen<EnchantmentMenu> {
 
     @Override
     protected void renderBg(float f, int i, int j) {
+        Lighting.setupForFlatItems();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
         int k = (this.width - this.imageWidth) / 2;
@@ -134,6 +136,7 @@ extends AbstractContainerScreen<EnchantmentMenu> {
         RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
         RenderSystem.popMatrix();
         RenderSystem.matrixMode(5888);
+        Lighting.setupFor3DItems();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         EnchantmentNames.getInstance().initSeed(((EnchantmentMenu)this.menu).getEnchantmentSeed());
         int q = ((EnchantmentMenu)this.menu).getGoldCount();

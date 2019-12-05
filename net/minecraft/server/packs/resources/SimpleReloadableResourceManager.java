@@ -51,7 +51,6 @@ implements ReloadableResourceManager {
         this.mainThread = thread;
     }
 
-    @Override
     public void add(Pack pack) {
         for (String string : pack.getNamespaces(this.type)) {
             this.namespaces.add(string);
@@ -133,19 +132,74 @@ implements ReloadableResourceManager {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public ReloadInstance createQueuedReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture) {
-        return this.createReload(executor, executor2, this.recentlyRegistered, completableFuture);
-    }
-
-    @Override
     public ReloadInstance createFullReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<Pack> list) {
         this.clear();
         LOGGER.info("Reloading ResourceManager: {}", (Object)list.stream().map(Pack::getName).collect(Collectors.joining(", ")));
         for (Pack pack : list) {
-            this.add(pack);
+            try {
+                this.add(pack);
+            } catch (Exception exception) {
+                LOGGER.error("Failed to add resource pack {}", (Object)pack.getName(), (Object)exception);
+                return new FailingReloadInstance(new ResourcePackLoadingFailure(pack, (Throwable)exception));
+            }
         }
         return this.createReload(executor, executor2, this.listeners, completableFuture);
+    }
+
+    static class FailingReloadInstance
+    implements ReloadInstance {
+        private final ResourcePackLoadingFailure exception;
+        private final CompletableFuture<Unit> failedFuture;
+
+        public FailingReloadInstance(ResourcePackLoadingFailure resourcePackLoadingFailure) {
+            this.exception = resourcePackLoadingFailure;
+            this.failedFuture = new CompletableFuture();
+            this.failedFuture.completeExceptionally(resourcePackLoadingFailure);
+        }
+
+        @Override
+        public CompletableFuture<Unit> done() {
+            return this.failedFuture;
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public float getActualProgress() {
+            return 0.0f;
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public boolean isApplying() {
+            return false;
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public void checkExceptions() {
+            throw this.exception;
+        }
+    }
+
+    public static class ResourcePackLoadingFailure
+    extends RuntimeException {
+        private final Pack pack;
+
+        public ResourcePackLoadingFailure(Pack pack, Throwable throwable) {
+            super(pack.getName(), throwable);
+            this.pack = pack;
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public Pack getPack() {
+            return this.pack;
+        }
     }
 }
 

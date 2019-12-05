@@ -120,7 +120,7 @@ implements RepositorySource {
                 Map<String, String> map = ClientPackSource.getDownloadHeaders();
                 Minecraft minecraft = Minecraft.getInstance();
                 minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
-                completableFuture = HttpUtil.downloadTo(file, string, map, 0x3200000, progressScreen, minecraft.getProxy());
+                completableFuture = HttpUtil.downloadTo(file, string, map, 0x6400000, progressScreen, minecraft.getProxy());
             }
             CompletableFuture<?> completableFuture2 = this.currentDownload = ((CompletableFuture)completableFuture.thenCompose(object -> {
                 if (!this.checkHash(string4, file)) {
