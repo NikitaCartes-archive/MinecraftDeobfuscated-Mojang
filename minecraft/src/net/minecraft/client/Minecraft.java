@@ -54,6 +54,7 @@ import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -128,7 +129,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.KeybindComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
@@ -372,8 +375,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			InputStream inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
 			InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
 			this.window.setIcon(inputStream, inputStream2);
-		} catch (IOException var9) {
-			LOGGER.error("Couldn't set icon", (Throwable)var9);
+		} catch (IOException var8) {
+			LOGGER.error("Couldn't set icon", (Throwable)var8);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit);
@@ -387,15 +390,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES, this.gameThread);
 		this.options.loadResourcePacks(this.resourcePackRepository);
 		this.resourcePackRepository.reload();
-		List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-
-		for (Pack pack : list) {
-			this.resourceManager.add(pack);
-		}
-
 		this.languageManager = new LanguageManager(this.options.languageCode);
 		this.resourceManager.registerReloadListener(this.languageManager);
-		this.languageManager.reload(list);
 		this.textureManager = new TextureManager(this.resourceManager);
 		this.resourceManager.registerReloadListener(this.textureManager);
 		this.skinManager = new SkinManager(this.textureManager, new File(file, "skins"), this.minecraftSessionService);
@@ -460,22 +456,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			LoadingOverlay.registerTextures(this);
+			List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
 			this.setOverlay(
 				new LoadingOverlay(
 					this,
-					this.resourceManager.createQueuedReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK),
-					optional -> Util.ifElse(optional, throwable -> {
-							if (this.resourcePackRepository.getSelected().size() > 1) {
-								LOGGER.info("Caught error loading resourcepacks, removing all assigned resourcepacks", throwable);
-								this.resourcePackRepository.setSelected(Collections.emptyList());
-								this.options.resourcePacks.clear();
-								this.options.incompatibleResourcePacks.clear();
-								this.options.save();
-								this.reloadResourcePacks();
-							} else {
-								Util.throwAsRuntime(throwable);
-							}
-						}, () -> {
+					this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
+					optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+							this.languageManager.reload(list);
 							if (SharedConstants.IS_RUNNING_IN_IDE) {
 								this.selfTest();
 							}
@@ -483,6 +470,29 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					false
 				)
 			);
+		}
+	}
+
+	private void rollbackResourcePacks(Throwable throwable) {
+		if (this.resourcePackRepository.getSelected().size() > 1) {
+			Component component;
+			if (throwable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure) {
+				component = new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)throwable).getPack().getName());
+			} else {
+				component = null;
+			}
+
+			LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
+			this.resourcePackRepository.setSelected(Collections.emptyList());
+			this.options.resourcePacks.clear();
+			this.options.incompatibleResourcePacks.clear();
+			this.options.save();
+			this.reloadResourcePacks().thenRun(() -> {
+				ToastComponent toastComponent = this.getToasts();
+				SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
+			});
+		} else {
+			Util.throwAsRuntime(throwable);
 		}
 	}
 
@@ -641,12 +651,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				this.resourcePackRepository.reload();
 				List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
 				this.setOverlay(
-					new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> {
-						optional.ifPresent(Util::throwAsRuntime);
-						this.languageManager.reload(list);
-						this.levelRenderer.allChanged();
-						completableFuture.complete(null);
-					}, true)
+					new LoadingOverlay(
+						this,
+						this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
+						optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+								this.languageManager.reload(list);
+								this.levelRenderer.allChanged();
+								completableFuture.complete(null);
+							}),
+						true
+					)
 				);
 				return completableFuture;
 			}
@@ -817,7 +831,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.profiler.pop();
 		}
 
-		long m = Util.getNanos();
 		this.profiler.push("tick");
 		if (bl) {
 			for (int i = 0; i < Math.min(10, this.timer.ticks); i++) {
@@ -860,13 +873,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
 		RenderSystem.popMatrix();
 		this.profiler.startTick();
+		this.profiler.push("updateDisplay");
 		this.window.updateDisplay();
 		int i = this.getFramerateLimit();
 		if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
 			RenderSystem.limitDisplayFPS(i);
 		}
 
+		this.profiler.popPush("yield");
 		Thread.yield();
+		this.profiler.pop();
 		this.window.setErrorSection("Post render");
 		this.frames++;
 		boolean bl2 = this.hasSingleplayerServer()
@@ -882,9 +898,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.pause = bl2;
 		}
 
-		long n = Util.getNanos();
-		this.frameTimer.logFrameDuration(n - this.lastNanoTime);
-		this.lastNanoTime = n;
+		long m = Util.getNanos();
+		this.frameTimer.logFrameDuration(m - this.lastNanoTime);
+		this.lastNanoTime = m;
 
 		while (Util.getMillis() >= this.lastTime + 1000L) {
 			fps = this.frames;
@@ -953,7 +969,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			ResultField resultField = (ResultField)list.remove(0);
 			if (i == 0) {
 				if (!resultField.name.isEmpty()) {
-					int j = this.debugPath.lastIndexOf(46);
+					int j = this.debugPath.lastIndexOf(30);
 					if (j >= 0) {
 						this.debugPath = this.debugPath.substring(0, j);
 					}
@@ -962,7 +978,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				i--;
 				if (i < list.size() && !"unspecified".equals(((ResultField)list.get(i)).name)) {
 					if (!this.debugPath.isEmpty()) {
-						this.debugPath = this.debugPath + ".";
+						this.debugPath = this.debugPath + '\u001e';
 					}
 
 					this.debugPath = this.debugPath + ((ResultField)list.get(i)).name;
@@ -1023,8 +1039,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					float f = (float)((d + resultField2.percentage * (double)q / (double)l) * (float) (Math.PI * 2) / 100.0);
 					float g = Mth.sin(f) * 160.0F;
 					float h = Mth.cos(f) * 160.0F * 0.5F;
-					bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
-					bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h + 10.0F), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
+					if (!(h > 0.0F)) {
+						bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
+						bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h + 10.0F), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
+					}
 				}
 
 				tesselator.end();
@@ -1034,21 +1052,22 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			DecimalFormat decimalFormat = new DecimalFormat("##0.00");
 			decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
 			RenderSystem.enableTexture();
-			String string = "";
-			if (!"unspecified".equals(resultField.name)) {
-				string = string + "[0] ";
+			String string = ProfileResults.demanglePath(resultField.name);
+			String string2 = "";
+			if (!"unspecified".equals(string)) {
+				string2 = string2 + "[0] ";
 			}
 
-			if (resultField.name.isEmpty()) {
-				string = string + "ROOT ";
+			if (string.isEmpty()) {
+				string2 = string2 + "ROOT ";
 			} else {
-				string = string + resultField.name + ' ';
+				string2 = string2 + string + ' ';
 			}
 
-			int l = 16777215;
-			this.font.drawShadow(string, (float)(j - 160), (float)(k - 80 - 16), 16777215);
-			string = decimalFormat.format(resultField.globalPercentage) + "%";
-			this.font.drawShadow(string, (float)(j + 160 - this.font.width(string)), (float)(k - 80 - 16), 16777215);
+			int m = 16777215;
+			this.font.drawShadow(string2, (float)(j - 160), (float)(k - 80 - 16), 16777215);
+			string2 = decimalFormat.format(resultField.globalPercentage) + "%";
+			this.font.drawShadow(string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 16777215);
 
 			for (int r = 0; r < list.size(); r++) {
 				ResultField resultField3 = (ResultField)list.get(r);
@@ -1059,12 +1078,12 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 					stringBuilder.append("[").append(r + 1).append("] ");
 				}
 
-				String string2 = stringBuilder.append(resultField3.name).toString();
-				this.font.drawShadow(string2, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
-				string2 = decimalFormat.format(resultField3.percentage) + "%";
-				this.font.drawShadow(string2, (float)(j + 160 - 50 - this.font.width(string2)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
-				string2 = decimalFormat.format(resultField3.globalPercentage) + "%";
-				this.font.drawShadow(string2, (float)(j + 160 - this.font.width(string2)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+				String string3 = stringBuilder.append(resultField3.name).toString();
+				this.font.drawShadow(string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+				string3 = decimalFormat.format(resultField3.percentage) + "%";
+				this.font.drawShadow(string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+				string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
+				this.font.drawShadow(string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
 			}
 		}
 	}

@@ -114,7 +114,7 @@ public class ClientPackSource implements RepositorySource {
 				Map<String, String> map = getDownloadHeaders();
 				Minecraft minecraft = Minecraft.getInstance();
 				minecraft.executeBlocking(() -> minecraft.setScreen(progressScreen));
-				completableFuture = HttpUtil.downloadTo(file, string, map, 52428800, progressScreen, minecraft.getProxy());
+				completableFuture = HttpUtil.downloadTo(file, string, map, 104857600, progressScreen, minecraft.getProxy());
 			}
 
 			this.currentDownload = completableFuture.thenCompose(

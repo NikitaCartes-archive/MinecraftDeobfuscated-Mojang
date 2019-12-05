@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
 
 public interface ResourceManager {
 	@Environment(EnvType.CLIENT)
@@ -22,7 +21,4 @@ public interface ResourceManager {
 	List<Resource> getResources(ResourceLocation resourceLocation) throws IOException;
 
 	Collection<ResourceLocation> listResources(String string, Predicate<String> predicate);
-
-	@Environment(EnvType.CLIENT)
-	void add(Pack pack);
 }

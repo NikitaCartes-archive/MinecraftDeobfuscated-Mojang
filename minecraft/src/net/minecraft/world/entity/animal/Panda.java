@@ -919,6 +919,13 @@ public class Panda extends Animal {
 				return this.panda.canPerformAction() && this.lookAt != null;
 			}
 		}
+
+		@Override
+		public void tick() {
+			if (this.lookAt != null) {
+				super.tick();
+			}
+		}
 	}
 
 	static class PandaMoveControl extends MoveControl {

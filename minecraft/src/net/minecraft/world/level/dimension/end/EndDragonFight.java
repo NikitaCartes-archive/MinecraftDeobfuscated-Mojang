@@ -188,14 +188,16 @@ public class EndDragonFight {
 
 	private void scanState() {
 		LOGGER.info("Scanning for legacy world dragon fight...");
-		boolean bl = this.hasExitPortal();
+		boolean bl = this.hasActiveExitPortal();
 		if (bl) {
 			LOGGER.info("Found that the dragon has been killed in this world already.");
 			this.previouslyKilled = true;
 		} else {
 			LOGGER.info("Found that the dragon has not yet been killed in this world.");
 			this.previouslyKilled = false;
-			this.spawnExitPortal(false);
+			if (this.findExitPortal() == null) {
+				this.spawnExitPortal(false);
+			}
 		}
 
 		List<EnderDragon> list = this.level.getDragons();
@@ -248,7 +250,7 @@ public class EndDragonFight {
 		}
 	}
 
-	private boolean hasExitPortal() {
+	private boolean hasActiveExitPortal() {
 		for (int i = -8; i <= 8; i++) {
 			for (int j = -8; j <= 8; j++) {
 				LevelChunk levelChunk = this.level.getChunk(i, j);

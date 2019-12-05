@@ -32,7 +32,6 @@ public class FallbackResourceManager implements ResourceManager {
 		this.namespace = string;
 	}
 
-	@Override
 	public void add(Pack pack) {
 		this.fallbacks.add(pack);
 	}
