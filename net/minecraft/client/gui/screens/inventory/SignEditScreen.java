@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -113,6 +114,7 @@ extends Screen {
         int t;
         String string;
         int r;
+        Lighting.setupForFlatItems();
         this.renderBackground();
         this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 40, 0xFFFFFF);
         PoseStack poseStack = new PoseStack();
@@ -197,6 +199,7 @@ extends Screen {
             RenderSystem.enableTexture();
         }
         poseStack.popPose();
+        Lighting.setupFor3DItems();
         super.render(i, j, f);
     }
 }
