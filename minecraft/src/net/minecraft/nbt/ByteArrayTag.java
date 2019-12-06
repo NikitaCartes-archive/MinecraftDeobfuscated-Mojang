@@ -14,7 +14,7 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 		public ByteArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);
 			int j = dataInput.readInt();
-			nbtAccounter.accountBits((long)(8 * j));
+			nbtAccounter.accountBits(8L * (long)j);
 			byte[] bs = new byte[j];
 			dataInput.readFully(bs);
 			return new ByteArrayTag(bs);

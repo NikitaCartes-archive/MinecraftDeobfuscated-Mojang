@@ -14,7 +14,7 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 		public IntArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);
 			int j = dataInput.readInt();
-			nbtAccounter.accountBits((long)(32 * j));
+			nbtAccounter.accountBits(32L * (long)j);
 			int[] is = new int[j];
 
 			for (int k = 0; k < j; k++) {

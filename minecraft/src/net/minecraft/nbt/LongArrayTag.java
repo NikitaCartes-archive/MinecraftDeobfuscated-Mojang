@@ -15,7 +15,7 @@ public class LongArrayTag extends CollectionTag<LongTag> {
 		public LongArrayTag load(DataInput dataInput, int i, NbtAccounter nbtAccounter) throws IOException {
 			nbtAccounter.accountBits(192L);
 			int j = dataInput.readInt();
-			nbtAccounter.accountBits((long)(64 * j));
+			nbtAccounter.accountBits(64L * (long)j);
 			long[] ls = new long[j];
 
 			for (int k = 0; k < j; k++) {

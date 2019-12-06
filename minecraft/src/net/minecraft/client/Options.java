@@ -242,10 +242,7 @@ public class Options {
 					try {
 						Iterator<String> iterator = OPTION_SPLITTER.split(stringx).iterator();
 						compoundTag.putString((String)iterator.next(), (String)iterator.next());
-					} catch (OutOfMemoryError var3x) {
-						System.gc();
-						throw new Options.OptionParseError("Failed to parse option: " + stringx.substring(0, Math.min(200, stringx.length())), var3x);
-					} catch (Exception var4x) {
+					} catch (Exception var3x) {
 						LOGGER.warn("Skipping bad option: {}", stringx);
 					}
 				});
@@ -773,12 +770,5 @@ public class Options {
 		}
 
 		packRepository.setSelected(set);
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class OptionParseError extends Error {
-		public OptionParseError(String string, Throwable throwable) {
-			super(string, throwable);
-		}
 	}
 }

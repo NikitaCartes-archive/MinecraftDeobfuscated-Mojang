@@ -594,9 +594,13 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	protected float getBlockSpeedFactor() {
-		float f = this.level.getBlockState(new BlockPos(this)).getBlock().getSpeedFactor();
-		float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor();
-		return (double)f == 1.0 ? g : f;
+		Block block = this.level.getBlockState(new BlockPos(this)).getBlock();
+		float f = block.getSpeedFactor();
+		if (block != Blocks.WATER && block != Blocks.BUBBLE_COLUMN) {
+			return (double)f == 1.0 ? this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor() : f;
+		} else {
+			return f;
+		}
 	}
 
 	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
