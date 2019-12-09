@@ -31,7 +31,6 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
@@ -92,30 +91,25 @@ public class DebugScreenOverlay extends GuiComponent {
 	public void render() {
 		this.minecraft.getProfiler().push("debug");
 		RenderSystem.pushMatrix();
-		RenderSystem.translatef(0.0F, 0.0F, -100.0F);
-		RenderSystem.scalef(1.0F, 1.0F, -1.0F);
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
-		MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
-		Matrix4f matrix4f = Transformation.identity().getMatrix();
-		this.drawGameInformation(matrix4f, bufferSource);
-		this.drawSystemInformation(matrix4f, bufferSource);
+		this.drawGameInformation();
+		this.drawSystemInformation();
+		RenderSystem.popMatrix();
 		if (this.minecraft.options.renderFpsChart) {
 			int i = this.minecraft.getWindow().getGuiScaledWidth();
-			this.drawChart(matrix4f, bufferSource, this.minecraft.getFrameTimer(), 0, i / 2, true);
+			this.drawChart(this.minecraft.getFrameTimer(), 0, i / 2, true);
 			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 			if (integratedServer != null) {
-				this.drawChart(matrix4f, bufferSource, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+				this.drawChart(integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
 			}
 		}
 
-		bufferSource.endBatch();
-		RenderSystem.popMatrix();
 		this.minecraft.getProfiler().pop();
 	}
 
-	protected void drawGameInformation(Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
+	protected void drawGameInformation() {
 		List<String> list = this.getGameInformation();
 		list.add("");
 		boolean bl = this.minecraft.getSingleplayerServer() != null;
@@ -131,24 +125,28 @@ public class DebugScreenOverlay extends GuiComponent {
 		for (int i = 0; i < list.size(); i++) {
 			String string = (String)list.get(i);
 			if (!Strings.isNullOrEmpty(string)) {
-				int j = 9 + 1;
-				int k = 2 + j * i;
-				this.font.drawInBatch(string, 2.0F, (float)k, 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+				int j = 9;
+				int k = this.font.width(string);
+				int l = 2;
+				int m = 2 + j * i;
+				fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
+				this.font.draw(string, 2.0F, (float)m, 14737632);
 			}
 		}
 	}
 
-	protected void drawSystemInformation(Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
+	protected void drawSystemInformation() {
 		List<String> list = this.getSystemInformation();
 
 		for (int i = 0; i < list.size(); i++) {
 			String string = (String)list.get(i);
 			if (!Strings.isNullOrEmpty(string)) {
-				int j = 9 + 1;
+				int j = 9;
 				int k = this.font.width(string);
 				int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
 				int m = 2 + j * i;
-				this.font.drawInBatch(string, (float)l, (float)m, 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+				fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
+				this.font.draw(string, (float)l, (float)m, 14737632);
 			}
 		}
 	}
@@ -478,7 +476,8 @@ public class DebugScreenOverlay extends GuiComponent {
 		return property.getName() + ": " + string;
 	}
 
-	private void drawChart(Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource, FrameTimer frameTimer, int i, int j, boolean bl) {
+	private void drawChart(FrameTimer frameTimer, int i, int j, boolean bl) {
+		RenderSystem.disableDepthTest();
 		int k = frameTimer.getLogStart();
 		int l = frameTimer.getLogEnd();
 		long[] ls = frameTimer.getLog();
@@ -498,16 +497,14 @@ public class DebugScreenOverlay extends GuiComponent {
 		}
 
 		int t = this.minecraft.getWindow().getGuiScaledHeight();
-		Matrix4f matrix4f2 = matrix4f.copy();
-		matrix4f2.multiply(Matrix4f.createTranslateMatrix(0.0F, 0.0F, 100.0F));
-		fill(matrix4f2, i, t - 60, i + p, t, -1873784752);
+		fill(i, t - 60, i + p, t, -1873784752);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
 		RenderSystem.defaultBlendFunc();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
 
-		while (m != l) {
+		for (Matrix4f matrix4f = Transformation.identity().getMatrix(); m != l; m = frameTimer.wrapIndex(m + 1)) {
 			int v = frameTimer.scaleSampleTo(ls[m], bl ? 30 : 60, bl ? 60 : 20);
 			int w = bl ? 100 : 60;
 			int x = this.getSampleColor(Mth.clamp(v, 0, w), 0, w / 2, w);
@@ -520,7 +517,6 @@ public class DebugScreenOverlay extends GuiComponent {
 			bufferBuilder.vertex(matrix4f, (float)n, (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
 			bufferBuilder.vertex(matrix4f, (float)(n + 1), (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
 			n++;
-			m = frameTimer.wrapIndex(m + 1);
 		}
 
 		bufferBuilder.end();
@@ -528,12 +524,15 @@ public class DebugScreenOverlay extends GuiComponent {
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 		if (bl) {
-			this.font.drawInBatch("60 FPS", (float)(i + 2), (float)(t - 30 + 2), 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+			fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
+			this.font.draw("60 FPS", (float)(i + 2), (float)(t - 30 + 2), 14737632);
 			this.hLine(i, i + p - 1, t - 30, -1);
-			this.font.drawInBatch("30 FPS", (float)(i + 2), (float)(t - 60 + 2), 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+			fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			this.font.draw("30 FPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
 			this.hLine(i, i + p - 1, t - 60, -1);
 		} else {
-			this.font.drawInBatch("20 TPS", (float)(i + 2), (float)(t - 60 + 2), 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+			fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			this.font.draw("20 TPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
 			this.hLine(i, i + p - 1, t - 60, -1);
 		}
 
@@ -547,11 +546,10 @@ public class DebugScreenOverlay extends GuiComponent {
 		String string = r + " ms min";
 		String string2 = q / (long)p + " ms avg";
 		String string3 = s + " ms max";
-		int y = t - 60 - 9;
-		this.font.drawInBatch(string, (float)(i + 2), (float)y, 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
-		this.font
-			.drawInBatch(string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)y, 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
-		this.font.drawInBatch(string3, (float)(i + p - this.font.width(string3)), (float)y, 14737632, false, matrix4f, bufferSource, false, -1873784752, 15728880);
+		this.font.drawShadow(string, (float)(i + 2), (float)(t - 60 - 9), 14737632);
+		this.font.drawShadow(string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)(t - 60 - 9), 14737632);
+		this.font.drawShadow(string3, (float)(i + p - this.font.width(string3)), (float)(t - 60 - 9), 14737632);
+		RenderSystem.enableDepthTest();
 	}
 
 	private int getSampleColor(int i, int j, int k, int l) {
