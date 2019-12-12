@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -589,8 +590,8 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 	}
 
-	private void leaveClicked(RealmsServer realmsServer) {
-		if (!Realms.getUUID().equals(realmsServer.ownerUUID)) {
+	private void leaveClicked(@Nullable RealmsServer realmsServer) {
+		if (realmsServer != null && !Realms.getUUID().equals(realmsServer.ownerUUID)) {
 			this.saveListScrollPosition();
 			String string = getLocalizedString("mco.configure.world.leave.question.line1");
 			String string2 = getLocalizedString("mco.configure.world.leave.question.line2");
@@ -617,23 +618,32 @@ public class RealmsMainScreen extends RealmsScreen {
 		if (i == 4) {
 			if (bl) {
 				(new Thread("Realms-leave-server") {
-					public void run() {
-						try {
-							RealmsServer realmsServer = RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId);
-							if (realmsServer != null) {
-								RealmsClient realmsClient = RealmsClient.createRealmsClient();
-								realmsClient.uninviteMyselfFrom(realmsServer.id);
-								RealmsMainScreen.realmsDataFetcher.removeItem(realmsServer);
-								RealmsMainScreen.this.realmsServers.remove(realmsServer);
-								RealmsMainScreen.this.selectedServerId = -1L;
-								RealmsMainScreen.this.playButton.active(false);
+						public void run() {
+							try {
+								RealmsServer realmsServer = RealmsMainScreen.this.findServer(RealmsMainScreen.this.selectedServerId);
+								if (realmsServer != null) {
+									RealmsClient realmsClient = RealmsClient.createRealmsClient();
+									realmsClient.uninviteMyselfFrom(realmsServer.id);
+									RealmsMainScreen.realmsDataFetcher.removeItem(realmsServer);
+									RealmsMainScreen.this.realmsServers.remove(realmsServer);
+									RealmsMainScreen.this.realmSelectionList
+										.children()
+										.removeIf(
+											realmListEntry -> realmListEntry instanceof RealmsMainScreen.RealmSelectionListEntry
+													&& ((RealmsMainScreen.RealmSelectionListEntry)realmListEntry).mServerData.id == RealmsMainScreen.this.selectedServerId
+										);
+									RealmsMainScreen.this.realmSelectionList.setSelected(-1);
+									RealmsMainScreen.this.updateButtonStates(null);
+									RealmsMainScreen.this.selectedServerId = -1L;
+									RealmsMainScreen.this.playButton.active(false);
+								}
+							} catch (RealmsServiceException var3) {
+								RealmsMainScreen.LOGGER.error("Couldn't configure world");
+								Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
 							}
-						} catch (RealmsServiceException var3) {
-							RealmsMainScreen.LOGGER.error("Couldn't configure world");
-							Realms.setScreen(new RealmsGenericErrorScreen(var3, RealmsMainScreen.this));
 						}
-					}
-				}).start();
+					})
+					.start();
 			}
 
 			Realms.setScreen(this);
@@ -1214,7 +1224,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class RealmSelectionList extends RealmsObjectSelectionList {
+	class RealmSelectionList extends RealmsObjectSelectionList<RealmListEntry> {
 		public RealmSelectionList() {
 			super(RealmsMainScreen.this.width(), RealmsMainScreen.this.height(), 32, RealmsMainScreen.this.height() - 40, 36);
 		}
@@ -1263,9 +1273,19 @@ public class RealmsMainScreen extends RealmsScreen {
 						Realms.narrateNow(RealmsScreen.getLocalizedString("mco.trial.message.line1"), RealmsScreen.getLocalizedString("mco.trial.message.line2"));
 						realmsServer = null;
 					} else {
+						if (i - 1 >= RealmsMainScreen.this.realmsServers.size()) {
+							RealmsMainScreen.this.selectedServerId = -1L;
+							return;
+						}
+
 						realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i - 1);
 					}
 				} else {
+					if (i >= RealmsMainScreen.this.realmsServers.size()) {
+						RealmsMainScreen.this.selectedServerId = -1L;
+						return;
+					}
+
 					realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i);
 				}
 

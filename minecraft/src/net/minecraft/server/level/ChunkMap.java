@@ -315,9 +315,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	@Override
 	public void close() throws IOException {
-		this.queueSorter.close();
-		this.poiManager.close();
-		super.close();
+		try {
+			this.queueSorter.close();
+			this.poiManager.close();
+		} finally {
+			super.close();
+		}
 	}
 
 	protected void saveAllChunks(boolean bl) {

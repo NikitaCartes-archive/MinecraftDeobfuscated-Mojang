@@ -22,6 +22,7 @@ public class RealmsWorldSlotButton extends RealmsButton {
 	private final RealmsWorldSlotButton.Listener listener;
 	private final int slotIndex;
 	private int animTick;
+	@Nullable
 	private RealmsWorldSlotButton.State state;
 
 	public RealmsWorldSlotButton(
@@ -185,7 +186,9 @@ public class RealmsWorldSlotButton extends RealmsButton {
 
 	@Override
 	public void onPress() {
-		this.listener.onSlotClick(this.slotIndex, this.state.action, this.state.minigame, this.state.empty);
+		if (this.state != null) {
+			this.listener.onSlotClick(this.slotIndex, this.state.action, this.state.minigame, this.state.empty);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

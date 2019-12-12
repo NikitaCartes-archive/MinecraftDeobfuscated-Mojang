@@ -12,6 +12,7 @@ import com.mojang.realmsclient.gui.RealmsWorldSlotButton;
 import com.mojang.realmsclient.util.RealmsTasks;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.realms.Realms;
@@ -25,6 +26,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreenWithCallback<WorldTe
 	private static final Logger LOGGER = LogManager.getLogger();
 	private String toolTip;
 	private final RealmsMainScreen lastScreen;
+	@Nullable
 	private RealmsServer serverData;
 	private final long serverId;
 	private int left_x;

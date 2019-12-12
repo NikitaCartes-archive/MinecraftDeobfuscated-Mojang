@@ -112,7 +112,7 @@ public class Block implements ItemLike {
 	@Nullable
 	private Item item;
 	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(200) {
+		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
 			@Override
 			protected void rehash(int i) {
 			}
@@ -359,7 +359,7 @@ public class Block implements ItemLike {
 				VoxelShape voxelShape = blockState.getFaceOcclusionShape(blockGetter, blockPos, direction);
 				VoxelShape voxelShape2 = blockState2.getFaceOcclusionShape(blockGetter, blockPos2, direction.getOpposite());
 				boolean bl = Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
-				if (object2ByteLinkedOpenHashMap.size() == 200) {
+				if (object2ByteLinkedOpenHashMap.size() == 2048) {
 					object2ByteLinkedOpenHashMap.removeLastByte();
 				}
 
