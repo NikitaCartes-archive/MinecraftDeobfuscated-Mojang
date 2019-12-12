@@ -51,6 +51,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsMainScreen
@@ -579,8 +580,8 @@ extends RealmsScreen {
         }
     }
 
-    private void leaveClicked(RealmsServer realmsServer) {
-        if (!Realms.getUUID().equals(realmsServer.ownerUUID)) {
+    private void leaveClicked(@Nullable RealmsServer realmsServer) {
+        if (realmsServer != null && !Realms.getUUID().equals(realmsServer.ownerUUID)) {
             this.saveListScrollPosition();
             String string = RealmsMainScreen.getLocalizedString("mco.configure.world.leave.question.line1");
             String string2 = RealmsMainScreen.getLocalizedString("mco.configure.world.leave.question.line2");
@@ -615,6 +616,9 @@ extends RealmsScreen {
                                 realmsClient.uninviteMyselfFrom(realmsServer.id);
                                 realmsDataFetcher.removeItem(realmsServer);
                                 RealmsMainScreen.this.realmsServers.remove(realmsServer);
+                                RealmsMainScreen.this.realmSelectionList.children().removeIf(realmListEntry -> realmListEntry instanceof RealmSelectionListEntry && ((RealmSelectionListEntry)realmListEntry).mServerData.id == RealmsMainScreen.this.selectedServerId);
+                                RealmsMainScreen.this.realmSelectionList.setSelected(-1);
+                                RealmsMainScreen.this.updateButtonStates(null);
                                 RealmsMainScreen.this.selectedServerId = -1L;
                                 RealmsMainScreen.this.playButton.active(false);
                             }
@@ -1352,7 +1356,7 @@ extends RealmsScreen {
 
     @Environment(value=EnvType.CLIENT)
     class RealmSelectionList
-    extends RealmsObjectSelectionList {
+    extends RealmsObjectSelectionList<RealmListEntry> {
         public RealmSelectionList() {
             super(RealmsMainScreen.this.width(), RealmsMainScreen.this.height(), 32, RealmsMainScreen.this.height() - 40, 36);
         }
@@ -1403,9 +1407,17 @@ extends RealmsScreen {
                     Realms.narrateNow(RealmsScreen.getLocalizedString("mco.trial.message.line1"), RealmsScreen.getLocalizedString("mco.trial.message.line2"));
                     realmsServer = null;
                 } else {
+                    if (i - 1 >= RealmsMainScreen.this.realmsServers.size()) {
+                        RealmsMainScreen.this.selectedServerId = -1L;
+                        return;
+                    }
                     realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i - 1);
                 }
             } else {
+                if (i >= RealmsMainScreen.this.realmsServers.size()) {
+                    RealmsMainScreen.this.selectedServerId = -1L;
+                    return;
+                }
                 realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i);
             }
             RealmsMainScreen.this.updateButtonStates(realmsServer);

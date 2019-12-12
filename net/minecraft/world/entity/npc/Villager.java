@@ -408,7 +408,9 @@ VillagerDataHolder {
         this.lastRestockGameTime = compoundTag.getLong("LastRestock");
         this.lastGossipDecayTime = compoundTag.getLong("LastGossipDecay");
         this.setCanPickUpLoot(true);
-        this.refreshBrain((ServerLevel)this.level);
+        if (this.level instanceof ServerLevel) {
+            this.refreshBrain((ServerLevel)this.level);
+        }
         this.numberOfRestocksToday = compoundTag.getInt("RestocksToday");
     }
 

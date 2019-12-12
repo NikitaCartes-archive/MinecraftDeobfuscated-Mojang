@@ -278,6 +278,9 @@ implements AutoCloseable {
         return chunkPos.getRegionLocalX() + chunkPos.getRegionLocalZ() * 32;
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     @Override
     public void close() throws IOException {
         try {
@@ -286,7 +289,11 @@ implements AutoCloseable {
             try {
                 this.writeHeader();
             } finally {
-                this.file.close();
+                try {
+                    this.file.force(true);
+                } finally {
+                    this.file.close();
+                }
             }
         }
     }

@@ -10,10 +10,14 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class ChunkBiomeContainer
 implements BiomeManager.NoiseBiomeSource {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final int WIDTH_BITS = (int)Math.round(Math.log(16.0) / Math.log(2.0)) - 2;
     private static final int HEIGHT_BITS = (int)Math.round(Math.log(256.0) / Math.log(2.0)) - 2;
     public static final int BIOMES_SIZE = 1 << WIDTH_BITS + WIDTH_BITS + HEIGHT_BITS;
@@ -32,7 +36,14 @@ implements BiomeManager.NoiseBiomeSource {
     public ChunkBiomeContainer(FriendlyByteBuf friendlyByteBuf) {
         this();
         for (int i = 0; i < this.biomes.length; ++i) {
-            this.biomes[i] = (Biome)Registry.BIOME.byId(friendlyByteBuf.readInt());
+            int j = friendlyByteBuf.readInt();
+            Biome biome = (Biome)Registry.BIOME.byId(j);
+            if (biome == null) {
+                LOGGER.warn("Received invalid biome id: " + j);
+                this.biomes[i] = Biomes.PLAINS;
+                continue;
+            }
+            this.biomes[i] = biome;
         }
     }
 
