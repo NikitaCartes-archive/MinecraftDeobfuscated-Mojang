@@ -22,5 +22,9 @@ public interface ProfilerFiller {
 
     @Environment(value=EnvType.CLIENT)
     public void popPush(Supplier<String> var1);
+
+    public void incrementCounter(String var1);
+
+    public void incrementCounter(Supplier<String> var1);
 }
 

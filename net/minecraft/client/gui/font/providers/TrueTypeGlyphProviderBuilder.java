@@ -22,6 +22,10 @@ import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.stb.STBTTFontinfo;
+import org.lwjgl.stb.STBTruetype;
+import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.Struct;
 
 @Environment(value=EnvType.CLIENT)
 public class TrueTypeGlyphProviderBuilder
@@ -77,15 +81,25 @@ implements GlyphProviderBuilder {
     @Override
     @Nullable
     public GlyphProvider create(ResourceManager resourceManager) {
+        Struct sTBTTFontinfo = null;
+        ByteBuffer byteBuffer = null;
         try (Resource resource = resourceManager.getResource(new ResourceLocation(this.location.getNamespace(), "font/" + this.location.getPath()));){
-            LOGGER.info("Loading font");
-            ByteBuffer byteBuffer = TextureUtil.readResource(resource.getInputStream());
+            LOGGER.debug("Loading font {}", (Object)this.location);
+            sTBTTFontinfo = STBTTFontinfo.malloc();
+            byteBuffer = TextureUtil.readResource(resource.getInputStream());
             byteBuffer.flip();
-            LOGGER.info("Reading font");
-            TrueTypeGlyphProvider trueTypeGlyphProvider = new TrueTypeGlyphProvider(TrueTypeGlyphProvider.getStbttFontinfo(byteBuffer), this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
+            LOGGER.debug("Reading font {}", (Object)this.location);
+            if (!STBTruetype.stbtt_InitFont((STBTTFontinfo)sTBTTFontinfo, byteBuffer)) {
+                throw new IOException("Invalid ttf");
+            }
+            TrueTypeGlyphProvider trueTypeGlyphProvider = new TrueTypeGlyphProvider(byteBuffer, (STBTTFontinfo)sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.skip);
             return trueTypeGlyphProvider;
-        } catch (IOException iOException) {
-            LOGGER.error("Couldn't load truetype font {}", (Object)this.location, (Object)iOException);
+        } catch (Exception exception) {
+            LOGGER.error("Couldn't load truetype font {}", (Object)this.location, (Object)exception);
+            if (sTBTTFontinfo != null) {
+                sTBTTFontinfo.free();
+            }
+            MemoryUtil.memFree(byteBuffer);
             return null;
         }
     }

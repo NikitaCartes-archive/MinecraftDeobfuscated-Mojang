@@ -33,6 +33,7 @@ extends Screen {
             int i = HttpUtil.getAvailablePort();
             TranslatableComponent component = this.minecraft.getSingleplayerServer().publishServer(GameType.byName(this.gameModeName), this.commands, i) ? new TranslatableComponent("commands.publish.started", i) : new TranslatableComponent("commands.publish.failed", new Object[0]);
             this.minecraft.gui.getChat().addMessage(component);
+            this.minecraft.updateTitle();
         }));
         this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, I18n.get("gui.cancel", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
         this.modeButton = this.addButton(new Button(this.width / 2 - 155, 100, 150, 20, I18n.get("selectWorld.gameMode", new Object[0]), button -> {

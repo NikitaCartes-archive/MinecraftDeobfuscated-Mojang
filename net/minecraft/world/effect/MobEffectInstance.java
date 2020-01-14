@@ -11,6 +11,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class MobEffectInstance
 implements Comparable<MobEffectInstance> {
@@ -24,6 +25,8 @@ implements Comparable<MobEffectInstance> {
     private boolean noCounter;
     private boolean visible;
     private boolean showIcon;
+    @Nullable
+    private MobEffectInstance hiddenEffect;
 
     public MobEffectInstance(MobEffect mobEffect) {
         this(mobEffect, 0, 0);
@@ -42,16 +45,25 @@ implements Comparable<MobEffectInstance> {
     }
 
     public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3) {
+        this(mobEffect, i, j, bl, bl2, bl3, null);
+    }
+
+    public MobEffectInstance(MobEffect mobEffect, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance) {
         this.effect = mobEffect;
         this.duration = i;
         this.amplifier = j;
         this.ambient = bl;
         this.visible = bl2;
         this.showIcon = bl3;
+        this.hiddenEffect = mobEffectInstance;
     }
 
     public MobEffectInstance(MobEffectInstance mobEffectInstance) {
         this.effect = mobEffectInstance.effect;
+        this.setDetailsFrom(mobEffectInstance);
+    }
+
+    void setDetailsFrom(MobEffectInstance mobEffectInstance) {
         this.duration = mobEffectInstance.duration;
         this.amplifier = mobEffectInstance.amplifier;
         this.ambient = mobEffectInstance.ambient;
@@ -65,6 +77,9 @@ implements Comparable<MobEffectInstance> {
         }
         boolean bl = false;
         if (mobEffectInstance.amplifier > this.amplifier) {
+            if (mobEffectInstance.duration < this.duration) {
+                this.hiddenEffect = new MobEffectInstance(this);
+            }
             this.amplifier = mobEffectInstance.amplifier;
             this.duration = mobEffectInstance.duration;
             bl = true;
@@ -117,11 +132,18 @@ implements Comparable<MobEffectInstance> {
                 this.applyEffect(livingEntity);
             }
             this.tickDownDuration();
+            if (this.duration == 0 && this.hiddenEffect != null) {
+                this.setDetailsFrom(this.hiddenEffect);
+                this.hiddenEffect = this.hiddenEffect.hiddenEffect;
+            }
         }
         return this.duration > 0;
     }
 
     private int tickDownDuration() {
+        if (this.hiddenEffect != null) {
+            this.hiddenEffect.tickDownDuration();
+        }
         return --this.duration;
     }
 
@@ -171,12 +193,21 @@ implements Comparable<MobEffectInstance> {
 
     public CompoundTag save(CompoundTag compoundTag) {
         compoundTag.putByte("Id", (byte)MobEffect.getId(this.getEffect()));
+        this.writeDetailsTo(compoundTag);
+        return compoundTag;
+    }
+
+    private void writeDetailsTo(CompoundTag compoundTag) {
         compoundTag.putByte("Amplifier", (byte)this.getAmplifier());
         compoundTag.putInt("Duration", this.getDuration());
         compoundTag.putBoolean("Ambient", this.isAmbient());
         compoundTag.putBoolean("ShowParticles", this.isVisible());
         compoundTag.putBoolean("ShowIcon", this.showIcon());
-        return compoundTag;
+        if (this.hiddenEffect != null) {
+            CompoundTag compoundTag2 = new CompoundTag();
+            this.hiddenEffect.save(compoundTag2);
+            compoundTag.put("HiddenEffect", compoundTag2);
+        }
     }
 
     public static MobEffectInstance load(CompoundTag compoundTag) {
@@ -185,8 +216,12 @@ implements Comparable<MobEffectInstance> {
         if (mobEffect == null) {
             return null;
         }
-        byte j = compoundTag.getByte("Amplifier");
-        int k = compoundTag.getInt("Duration");
+        return MobEffectInstance.loadSpecifiedEffect(mobEffect, compoundTag);
+    }
+
+    private static MobEffectInstance loadSpecifiedEffect(MobEffect mobEffect, CompoundTag compoundTag) {
+        byte i = compoundTag.getByte("Amplifier");
+        int j = compoundTag.getInt("Duration");
         boolean bl = compoundTag.getBoolean("Ambient");
         boolean bl2 = true;
         if (compoundTag.contains("ShowParticles", 1)) {
@@ -196,7 +231,11 @@ implements Comparable<MobEffectInstance> {
         if (compoundTag.contains("ShowIcon", 1)) {
             bl3 = compoundTag.getBoolean("ShowIcon");
         }
-        return new MobEffectInstance(mobEffect, k, j < 0 ? (byte)0 : j, bl, bl2, bl3);
+        MobEffectInstance mobEffectInstance = null;
+        if (compoundTag.contains("HiddenEffect", 10)) {
+            mobEffectInstance = MobEffectInstance.loadSpecifiedEffect(mobEffect, compoundTag.getCompound("HiddenEffect"));
+        }
+        return new MobEffectInstance(mobEffect, j, i < 0 ? (byte)0 : i, bl, bl2, bl3, mobEffectInstance);
     }
 
     @Environment(value=EnvType.CLIENT)

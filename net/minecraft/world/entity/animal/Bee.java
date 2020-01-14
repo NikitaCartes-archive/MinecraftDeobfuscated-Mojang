@@ -191,7 +191,7 @@ implements FlyingAnimal {
         this.setAngerTime(compoundTag.getInt("Anger"));
         this.ticksWithoutNectarSinceExitingHive = compoundTag.getInt("TicksSincePollination");
         this.stayOutOfHiveCountdown = compoundTag.getInt("CannotEnterHiveTicks");
-        this.numCropsGrownSincePollination = compoundTag.getInt("NumCropsGrownSincePollination");
+        this.numCropsGrownSincePollination = compoundTag.getInt("CropsGrownSincePollination");
         String string = compoundTag.getString("HurtBy");
         if (!string.isEmpty()) {
             this.lastHurtByUUID = UUID.fromString(string);

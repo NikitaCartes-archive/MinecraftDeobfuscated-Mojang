@@ -22,7 +22,6 @@ import com.mojang.realmsclient.gui.RealmsDataFetcher;
 import com.mojang.realmsclient.gui.screens.RealmsClientOutdatedScreen;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsCreateRealmScreen;
-import com.mojang.realmsclient.gui.screens.RealmsCreateTrialScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
@@ -414,10 +413,6 @@ extends RealmsScreen {
         this.stopRealmsFetcher();
     }
 
-    public void setCreatedTrial(boolean bl) {
-        this.createdTrial = bl;
-    }
-
     private void onPlay() {
         RealmsServer realmsServer = this.findServer(this.selectedServerId);
         if (realmsServer == null) {
@@ -439,7 +434,8 @@ extends RealmsScreen {
         if (!this.trialsAvailable || this.createdTrial) {
             return;
         }
-        Realms.setScreen(new RealmsCreateTrialScreen(this));
+        RealmsUtil.browseTo("https://aka.ms/startjavarealmstrial");
+        Realms.setScreen(this.lastScreen);
     }
 
     private void checkClientCompatability() {
@@ -1053,12 +1049,6 @@ extends RealmsScreen {
 
     public RealmsMainScreen newScreen() {
         return new RealmsMainScreen(this.lastScreen);
-    }
-
-    public void closePopup() {
-        if (this.shouldShowPopup() && this.popupOpenedByUser) {
-            this.popupOpenedByUser = false;
-        }
     }
 
     public static void updateTeaserImages(ResourceManager resourceManager) {

@@ -76,6 +76,18 @@ implements ProfilerFiller {
         this.perTick.collector.popPush(supplier);
     }
 
+    @Override
+    public void incrementCounter(String string) {
+        this.continuous.collector.incrementCounter(string);
+        this.perTick.collector.incrementCounter(string);
+    }
+
+    @Override
+    public void incrementCounter(Supplier<String> supplier) {
+        this.continuous.collector.incrementCounter(supplier);
+        this.perTick.collector.incrementCounter(supplier);
+    }
+
     class ProfilerImpl
     implements Profiler {
         protected ProfileCollector collector = InactiveProfiler.INACTIVE;

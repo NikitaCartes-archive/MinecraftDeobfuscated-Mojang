@@ -4,12 +4,15 @@
 package net.minecraft.util.profiling;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
@@ -18,8 +21,10 @@ import net.minecraft.Util;
 import net.minecraft.util.profiling.FilledProfileResults;
 import net.minecraft.util.profiling.ProfileCollector;
 import net.minecraft.util.profiling.ProfileResults;
+import net.minecraft.util.profiling.ProfilerPathEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class ActiveProfiler
 implements ProfileCollector {
@@ -27,13 +32,14 @@ implements ProfileCollector {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<String> paths = Lists.newArrayList();
     private final LongList startTimes = new LongArrayList();
-    private final Object2LongMap<String> times = new Object2LongOpenHashMap<String>();
-    private final Object2LongMap<String> counts = new Object2LongOpenHashMap<String>();
+    private final Map<String, PathEntry> entries = Maps.newHashMap();
     private final IntSupplier getTickTime;
     private final long startTimeNano;
     private final int startTimeTicks;
     private String path = "";
     private boolean started;
+    @Nullable
+    private PathEntry currentEntry;
     private final boolean warn;
 
     public ActiveProfiler(long l, IntSupplier intSupplier, boolean bl) {
@@ -80,6 +86,7 @@ implements ProfileCollector {
         this.path = this.path + string;
         this.paths.add(this.path);
         this.startTimes.add(Util.getNanos());
+        this.currentEntry = null;
     }
 
     @Override
@@ -101,12 +108,14 @@ implements ProfileCollector {
         long m = this.startTimes.removeLong(this.startTimes.size() - 1);
         this.paths.remove(this.paths.size() - 1);
         long n = l - m;
-        this.times.put(this.path, this.times.getLong(this.path) + n);
-        this.counts.put(this.path, this.counts.getLong(this.path) + 1L);
+        PathEntry pathEntry = this.getCurrentEntry();
+        pathEntry.duration = pathEntry.duration + n;
+        pathEntry.count = pathEntry.count + 1L;
         if (this.warn && n > WARNING_TIME_NANOS) {
             LOGGER.warn("Something's taking too long! '{}' took aprox {} ms", () -> ProfileResults.demanglePath(this.path), () -> (double)n / 1000000.0);
         }
         this.path = this.paths.isEmpty() ? "" : this.paths.get(this.paths.size() - 1);
+        this.currentEntry = null;
     }
 
     @Override
@@ -122,9 +131,51 @@ implements ProfileCollector {
         this.push(supplier);
     }
 
+    private PathEntry getCurrentEntry() {
+        if (this.currentEntry == null) {
+            this.currentEntry = this.entries.computeIfAbsent(this.path, string -> new PathEntry());
+        }
+        return this.currentEntry;
+    }
+
+    @Override
+    public void incrementCounter(String string) {
+        this.getCurrentEntry().counters.addTo(string, 1L);
+    }
+
+    @Override
+    public void incrementCounter(Supplier<String> supplier) {
+        this.getCurrentEntry().counters.addTo(supplier.get(), 1L);
+    }
+
     @Override
     public ProfileResults getResults() {
-        return new FilledProfileResults(this.times, this.counts, this.startTimeNano, this.startTimeTicks, Util.getNanos(), this.getTickTime.getAsInt());
+        return new FilledProfileResults(this.entries, this.startTimeNano, this.startTimeTicks, Util.getNanos(), this.getTickTime.getAsInt());
+    }
+
+    static class PathEntry
+    implements ProfilerPathEntry {
+        private long duration;
+        private long count;
+        private Object2LongOpenHashMap<String> counters = new Object2LongOpenHashMap();
+
+        private PathEntry() {
+        }
+
+        @Override
+        public long getDuration() {
+            return this.duration;
+        }
+
+        @Override
+        public long getCount() {
+            return this.count;
+        }
+
+        @Override
+        public Object2LongMap<String> getCounters() {
+            return Object2LongMaps.unmodifiable(this.counters);
+        }
     }
 }
 

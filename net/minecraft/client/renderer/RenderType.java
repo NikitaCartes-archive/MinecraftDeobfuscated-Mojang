@@ -41,6 +41,7 @@ extends RenderStateShard {
     private final int bufferSize;
     private final boolean affectsCrumbling;
     private final boolean sortOnUpload;
+    private final Optional<RenderType> asOptional;
 
     public static RenderType solid() {
         return SOLID;
@@ -76,9 +77,13 @@ extends RenderStateShard {
         return RenderType.create("entity_cutout", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
     }
 
-    public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
-        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+    public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation, boolean bl) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(bl);
         return RenderType.create("entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+    }
+
+    public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
+        return RenderType.entityCutoutNoCull(resourceLocation, true);
     }
 
     public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
@@ -86,9 +91,13 @@ extends RenderStateShard {
         return RenderType.create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
     }
 
-    public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
-        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
+    public static RenderType entityTranslucent(ResourceLocation resourceLocation, boolean bl) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(bl);
         return RenderType.create("entity_translucent", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
+    }
+
+    public static RenderType entityTranslucent(ResourceLocation resourceLocation) {
+        return RenderType.entityTranslucent(resourceLocation, true);
     }
 
     public static RenderType entitySmoothCutout(ResourceLocation resourceLocation) {
@@ -134,7 +143,7 @@ extends RenderStateShard {
     }
 
     public static RenderType outline(ResourceLocation resourceLocation) {
-        return RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(NO_CULL).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(false));
+        return RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(NO_CULL).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(OutlineProperty.IS_OUTLINE));
     }
 
     public static RenderType glint() {
@@ -186,6 +195,7 @@ extends RenderStateShard {
         this.bufferSize = j;
         this.affectsCrumbling = bl;
         this.sortOnUpload = bl2;
+        this.asOptional = Optional.of(this);
     }
 
     public static CompositeRenderType create(String string, VertexFormat vertexFormat, int i, int j, CompositeState compositeState) {
@@ -233,8 +243,16 @@ extends RenderStateShard {
         return Optional.empty();
     }
 
+    public boolean isOutline() {
+        return false;
+    }
+
     public boolean affectsCrumbling() {
         return this.affectsCrumbling;
+    }
+
+    public Optional<RenderType> asOptional() {
+        return this.asOptional;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -244,11 +262,13 @@ extends RenderStateShard {
         private final CompositeState state;
         private final int hashCode;
         private final Optional<RenderType> outline;
+        private final boolean isOutline;
 
         private CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, CompositeState compositeState) {
             super(string, vertexFormat, i, j, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
             this.state = compositeState;
-            this.outline = compositeState.affectsOutline ? compositeState.textureState.texture().map(RenderType::outline) : Optional.empty();
+            this.outline = compositeState.outlineProperty == OutlineProperty.AFFECTS_OUTLINE ? compositeState.textureState.texture().map(RenderType::outline) : Optional.empty();
+            this.isOutline = compositeState.outlineProperty == OutlineProperty.IS_OUTLINE;
             this.hashCode = Objects.hash(super.hashCode(), compositeState);
         }
 
@@ -259,6 +279,11 @@ extends RenderStateShard {
         @Override
         public Optional<RenderType> outline() {
             return this.outline;
+        }
+
+        @Override
+        public boolean isOutline() {
+            return this.isOutline;
         }
 
         @Override
@@ -325,10 +350,10 @@ extends RenderStateShard {
         private final RenderStateShard.TexturingStateShard texturingState;
         private final RenderStateShard.WriteMaskStateShard writeMaskState;
         private final RenderStateShard.LineStateShard lineState;
-        private final boolean affectsOutline;
+        private final OutlineProperty outlineProperty;
         private final ImmutableList<RenderStateShard> states;
 
-        private CompositeState(RenderStateShard.TextureStateShard textureStateShard, RenderStateShard.TransparencyStateShard transparencyStateShard, RenderStateShard.DiffuseLightingStateShard diffuseLightingStateShard, RenderStateShard.ShadeModelStateShard shadeModelStateShard, RenderStateShard.AlphaStateShard alphaStateShard, RenderStateShard.DepthTestStateShard depthTestStateShard, RenderStateShard.CullStateShard cullStateShard, RenderStateShard.LightmapStateShard lightmapStateShard, RenderStateShard.OverlayStateShard overlayStateShard, RenderStateShard.FogStateShard fogStateShard, RenderStateShard.LayeringStateShard layeringStateShard, RenderStateShard.OutputStateShard outputStateShard, RenderStateShard.TexturingStateShard texturingStateShard, RenderStateShard.WriteMaskStateShard writeMaskStateShard, RenderStateShard.LineStateShard lineStateShard, boolean bl) {
+        private CompositeState(RenderStateShard.TextureStateShard textureStateShard, RenderStateShard.TransparencyStateShard transparencyStateShard, RenderStateShard.DiffuseLightingStateShard diffuseLightingStateShard, RenderStateShard.ShadeModelStateShard shadeModelStateShard, RenderStateShard.AlphaStateShard alphaStateShard, RenderStateShard.DepthTestStateShard depthTestStateShard, RenderStateShard.CullStateShard cullStateShard, RenderStateShard.LightmapStateShard lightmapStateShard, RenderStateShard.OverlayStateShard overlayStateShard, RenderStateShard.FogStateShard fogStateShard, RenderStateShard.LayeringStateShard layeringStateShard, RenderStateShard.OutputStateShard outputStateShard, RenderStateShard.TexturingStateShard texturingStateShard, RenderStateShard.WriteMaskStateShard writeMaskStateShard, RenderStateShard.LineStateShard lineStateShard, OutlineProperty outlineProperty) {
             this.textureState = textureStateShard;
             this.transparencyState = transparencyStateShard;
             this.diffuseLightingState = diffuseLightingStateShard;
@@ -344,7 +369,7 @@ extends RenderStateShard {
             this.texturingState = texturingStateShard;
             this.writeMaskState = writeMaskStateShard;
             this.lineState = lineStateShard;
-            this.affectsOutline = bl;
+            this.outlineProperty = outlineProperty;
             this.states = ImmutableList.of(this.textureState, this.transparencyState, this.diffuseLightingState, this.shadeModelState, this.alphaState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.fogState, this.layeringState, this.outputState, new RenderStateShard[]{this.texturingState, this.writeMaskState, this.lineState});
         }
 
@@ -356,11 +381,11 @@ extends RenderStateShard {
                 return false;
             }
             CompositeState compositeState = (CompositeState)object;
-            return this.affectsOutline == compositeState.affectsOutline && this.states.equals(compositeState.states);
+            return this.outlineProperty == compositeState.outlineProperty && this.states.equals(compositeState.states);
         }
 
         public int hashCode() {
-            return Objects.hash(this.states, this.affectsOutline);
+            return Objects.hash(new Object[]{this.states, this.outlineProperty});
         }
 
         public static CompositeStateBuilder builder() {
@@ -464,9 +489,21 @@ extends RenderStateShard {
             }
 
             public CompositeState createCompositeState(boolean bl) {
-                return new CompositeState(this.textureState, this.transparencyState, this.diffuseLightingState, this.shadeModelState, this.alphaState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.fogState, this.layeringState, this.outputState, this.texturingState, this.writeMaskState, this.lineState, bl);
+                return this.createCompositeState(bl ? OutlineProperty.AFFECTS_OUTLINE : OutlineProperty.NONE);
+            }
+
+            public CompositeState createCompositeState(OutlineProperty outlineProperty) {
+                return new CompositeState(this.textureState, this.transparencyState, this.diffuseLightingState, this.shadeModelState, this.alphaState, this.depthTestState, this.cullState, this.lightmapState, this.overlayState, this.fogState, this.layeringState, this.outputState, this.texturingState, this.writeMaskState, this.lineState, outlineProperty);
             }
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    static enum OutlineProperty {
+        NONE,
+        IS_OUTLINE,
+        AFFECTS_OUTLINE;
+
     }
 }
 

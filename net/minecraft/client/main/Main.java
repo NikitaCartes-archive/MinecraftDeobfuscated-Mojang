@@ -119,6 +119,7 @@ public class Main {
         String string7 = optionSet.has(optionSpec20) ? (String)optionSpec20.value(optionSet) : null;
         String string8 = Main.parseArgument(optionSet, optionSpec);
         Integer integer = Main.parseArgument(optionSet, optionSpec2);
+        CrashReport.preload();
         User user = new User((String)optionSpec10.value(optionSet), string6, (String)optionSpec12.value(optionSet), (String)optionSpec21.value(optionSet));
         GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl2, string4, string5), new GameConfig.ServerData(string8, integer));
         Thread thread = new Thread("Client Shutdown Thread"){

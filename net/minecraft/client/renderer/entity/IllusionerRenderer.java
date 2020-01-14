@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.phys.Vec3;
 
@@ -58,8 +59,13 @@ extends IllagerRenderer<Illusioner> {
     }
 
     @Override
-    protected boolean isVisible(Illusioner illusioner, boolean bl) {
+    protected boolean isBodyVisible(Illusioner illusioner) {
         return true;
+    }
+
+    @Override
+    protected /* synthetic */ boolean isBodyVisible(LivingEntity livingEntity) {
+        return this.isBodyVisible((Illusioner)livingEntity);
     }
 }
 

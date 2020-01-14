@@ -80,7 +80,7 @@ public abstract class DynamicGraphMinFixedPoint {
     }
 
     public void removeIf(LongPredicate longPredicate) {
-        LongArrayList longList = new LongArrayList(0);
+        LongArrayList longList = new LongArrayList();
         this.computedLevels.keySet().forEach(l -> {
             if (longPredicate.test(l)) {
                 longList.add(l);

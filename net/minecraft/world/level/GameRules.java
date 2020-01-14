@@ -67,6 +67,8 @@ public class GameRules {
     public static final Key<BooleanValue> RULE_DROWNING_DAMAGE = GameRules.register("drowningDamage", BooleanValue.method_20755(true));
     public static final Key<BooleanValue> RULE_FALL_DAMAGE = GameRules.register("fallDamage", BooleanValue.method_20755(true));
     public static final Key<BooleanValue> RULE_FIRE_DAMAGE = GameRules.register("fireDamage", BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_PATROL_SPAWNING = GameRules.register("doPatrolSpawning", BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_TRADER_SPAWNING = GameRules.register("doTraderSpawning", BooleanValue.method_20755(true));
     private final Map<Key<?>, Value<?>> rules = GAME_RULE_TYPES.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Type)entry.getValue()).createRule()));
 
     private static <T extends Value<T>> Key<T> register(String string, Type<T> type) {

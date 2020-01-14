@@ -3,10 +3,12 @@
  */
 package com.mojang.blaze3d.platform;
 
+import com.google.common.base.Charsets;
 import java.nio.ByteBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
@@ -14,7 +16,7 @@ import org.lwjgl.system.MemoryUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class ClipboardManager {
-    private final ByteBuffer clipboardScratchBuffer = ByteBuffer.allocateDirect(1024);
+    private final ByteBuffer clipboardScratchBuffer = BufferUtils.createByteBuffer(8192);
 
     public String getClipboard(long l, GLFWErrorCallbackI gLFWErrorCallbackI) {
         GLFWErrorCallback gLFWErrorCallback = GLFW.glfwSetErrorCallback(gLFWErrorCallbackI);
@@ -27,19 +29,29 @@ public class ClipboardManager {
         return string;
     }
 
-    private void setClipboard(long l, ByteBuffer byteBuffer, String string) {
-        MemoryUtil.memUTF8(string, true, byteBuffer);
+    private static void pushClipboard(long l, ByteBuffer byteBuffer, byte[] bs) {
+        byteBuffer.clear();
+        byteBuffer.put(bs);
+        byteBuffer.put((byte)0);
+        byteBuffer.flip();
         GLFW.glfwSetClipboardString(l, byteBuffer);
     }
 
+    /*
+     * WARNING - Removed try catching itself - possible behaviour change.
+     */
     public void setClipboard(long l, String string) {
-        int i = MemoryUtil.memLengthUTF8(string, true);
+        byte[] bs = string.getBytes(Charsets.UTF_8);
+        int i = bs.length + 1;
         if (i < this.clipboardScratchBuffer.capacity()) {
-            this.setClipboard(l, this.clipboardScratchBuffer, string);
-            this.clipboardScratchBuffer.clear();
+            ClipboardManager.pushClipboard(l, this.clipboardScratchBuffer, bs);
         } else {
-            ByteBuffer byteBuffer = ByteBuffer.allocateDirect(i);
-            this.setClipboard(l, byteBuffer, string);
+            ByteBuffer byteBuffer = MemoryUtil.memAlloc(i);
+            try {
+                ClipboardManager.pushClipboard(l, byteBuffer, bs);
+            } finally {
+                MemoryUtil.memFree(byteBuffer);
+            }
         }
     }
 }

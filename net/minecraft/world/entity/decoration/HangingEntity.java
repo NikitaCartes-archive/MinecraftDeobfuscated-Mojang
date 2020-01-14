@@ -124,7 +124,11 @@ extends Entity {
     @Override
     public boolean skipAttackInteraction(Entity entity) {
         if (entity instanceof Player) {
-            return this.hurt(DamageSource.playerAttack((Player)entity), 0.0f);
+            Player player = (Player)entity;
+            if (!this.level.mayInteract(player, this.pos)) {
+                return true;
+            }
+            return this.hurt(DamageSource.playerAttack(player), 0.0f);
         }
         return false;
     }

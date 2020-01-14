@@ -15,7 +15,7 @@ public class AcaciaTreeGrower
 extends AbstractTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
         return Feature.ACACIA_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG);
     }
 }

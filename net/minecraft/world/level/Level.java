@@ -698,6 +698,7 @@ AutoCloseable {
 
     @Override
     public List<Entity> getEntities(@Nullable Entity entity, AABB aABB, @Nullable Predicate<? super Entity> predicate) {
+        this.getProfiler().incrementCounter("getEntities");
         ArrayList<Entity> list = Lists.newArrayList();
         int i = Mth.floor((aABB.minX - 2.0) / 16.0);
         int j = Mth.floor((aABB.maxX + 2.0) / 16.0);
@@ -714,6 +715,7 @@ AutoCloseable {
     }
 
     public <T extends Entity> List<T> getEntities(@Nullable EntityType<T> entityType, AABB aABB, Predicate<? super T> predicate) {
+        this.getProfiler().incrementCounter("getEntities");
         int i = Mth.floor((aABB.minX - 2.0) / 16.0);
         int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
         int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
@@ -731,6 +733,7 @@ AutoCloseable {
 
     @Override
     public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+        this.getProfiler().incrementCounter("getEntities");
         int i = Mth.floor((aABB.minX - 2.0) / 16.0);
         int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
         int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
@@ -749,6 +752,7 @@ AutoCloseable {
 
     @Override
     public <T extends Entity> List<T> getLoadedEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
+        this.getProfiler().incrementCounter("getLoadedEntities");
         int i = Mth.floor((aABB.minX - 2.0) / 16.0);
         int j = Mth.ceil((aABB.maxX + 2.0) / 16.0);
         int k = Mth.floor((aABB.minZ - 2.0) / 16.0);

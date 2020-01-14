@@ -949,7 +949,7 @@ extends Entity {
     }
 
     public void die(DamageSource damageSource) {
-        if (this.dead) {
+        if (this.removed || this.dead) {
             return;
         }
         Entity entity = damageSource.getEntity();

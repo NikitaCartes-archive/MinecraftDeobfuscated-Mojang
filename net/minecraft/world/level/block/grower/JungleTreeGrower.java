@@ -19,7 +19,7 @@ public class JungleTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
         return new TreeFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
     }
 

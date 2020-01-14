@@ -42,7 +42,7 @@ public interface MultiBufferSource {
 
         @Override
         public VertexConsumer getBuffer(RenderType renderType) {
-            Optional<RenderType> optional = Optional.of(renderType);
+            Optional<RenderType> optional = renderType.asOptional();
             BufferBuilder bufferBuilder = this.getBuilderRaw(renderType);
             if (!Objects.equals(this.lastState, optional)) {
                 RenderType renderType2;
@@ -75,7 +75,7 @@ public interface MultiBufferSource {
 
         public void endBatch(RenderType renderType) {
             BufferBuilder bufferBuilder = this.getBuilderRaw(renderType);
-            boolean bl = Objects.equals(this.lastState, Optional.of(renderType));
+            boolean bl = Objects.equals(this.lastState, renderType.asOptional());
             if (!bl && bufferBuilder == this.builder) {
                 return;
             }

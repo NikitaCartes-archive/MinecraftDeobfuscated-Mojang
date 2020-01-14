@@ -120,6 +120,11 @@ public class ChunkRenderDispatcher {
         this.toBatchCount = this.toBatch.size();
         this.freeBufferCount = this.freeBuffers.size();
         ((CompletableFuture)CompletableFuture.runAsync(() -> {}, this.executor).thenCompose(void_ -> chunkCompileTask.doTask(chunkBufferBuilderPack))).whenComplete((chunkTaskResult, throwable) -> {
+            if (throwable != null) {
+                CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
+                Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
+                return;
+            }
             this.mailbox.tell(() -> {
                 if (chunkTaskResult == ChunkTaskResult.SUCCESSFUL) {
                     chunkBufferBuilderPack.clearAll();
@@ -130,10 +135,6 @@ public class ChunkRenderDispatcher {
                 this.freeBufferCount = this.freeBuffers.size();
                 this.runTask();
             });
-            if (throwable != null) {
-                CrashReport crashReport = CrashReport.forThrowable(throwable, "Batching chunks");
-                Minecraft.getInstance().delayCrash(Minecraft.getInstance().fillReport(crashReport));
-            }
         });
     }
 

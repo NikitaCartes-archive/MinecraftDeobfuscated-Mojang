@@ -53,26 +53,22 @@ implements AutoCloseable {
     }
 
     public void reload(List<GlyphProvider> list) {
-        for (GlyphProvider glyphProvider : this.providers) {
-            glyphProvider.close();
-        }
-        this.providers.clear();
+        this.closeProviders();
         this.closeTextures();
-        this.textures.clear();
         this.glyphs.clear();
         this.glyphInfos.clear();
         this.glyphsByWidth.clear();
         this.missingGlyph = this.stitch(MissingGlyph.INSTANCE);
         this.whiteGlyph = this.stitch(WhiteGlyph.INSTANCE);
         HashSet<GlyphProvider> set = Sets.newHashSet();
-        block1: for (char c = '\u0000'; c < '\uffff'; c = (char)((char)(c + 1))) {
-            for (GlyphProvider glyphProvider2 : list) {
-                GlyphInfo glyphInfo = c == ' ' ? SPACE_INFO : glyphProvider2.getGlyph(c);
+        block0: for (char c = '\u0000'; c < '\uffff'; c = (char)((char)(c + 1))) {
+            for (GlyphProvider glyphProvider : list) {
+                GlyphInfo glyphInfo = c == ' ' ? SPACE_INFO : glyphProvider.getGlyph(c);
                 if (glyphInfo == null) continue;
-                set.add(glyphProvider2);
-                if (glyphInfo == MissingGlyph.INSTANCE) continue block1;
+                set.add(glyphProvider);
+                if (glyphInfo == MissingGlyph.INSTANCE) continue block0;
                 this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), i -> new CharArrayList()).add(c);
-                continue block1;
+                continue block0;
             }
         }
         list.stream().filter(set::contains).forEach(this.providers::add);
@@ -80,13 +76,22 @@ implements AutoCloseable {
 
     @Override
     public void close() {
+        this.closeProviders();
         this.closeTextures();
     }
 
-    public void closeTextures() {
+    private void closeProviders() {
+        for (GlyphProvider glyphProvider : this.providers) {
+            glyphProvider.close();
+        }
+        this.providers.clear();
+    }
+
+    private void closeTextures() {
         for (FontTexture fontTexture : this.textures) {
             fontTexture.close();
         }
+        this.textures.clear();
     }
 
     public GlyphInfo getGlyphInfo(char c) {

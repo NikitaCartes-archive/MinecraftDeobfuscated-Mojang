@@ -3,8 +3,10 @@
  */
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -12,7 +14,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -40,7 +41,7 @@ extends AbstractContainerScreen<LoomMenu> {
     private static final int TOTAL_PATTERN_ROWS = (BannerPattern.COUNT - 5 - 1 + 4 - 1) / 4;
     private final ModelPart flag;
     @Nullable
-    private BannerBlockEntity resultBanner;
+    private List<Pair<BannerPattern, DyeColor>> resultBannerPatterns;
     private ItemStack bannerStack = ItemStack.EMPTY;
     private ItemStack dyeStack = ItemStack.EMPTY;
     private ItemStack patternStack = ItemStack.EMPTY;
@@ -91,14 +92,19 @@ extends AbstractContainerScreen<LoomMenu> {
         }
         int m = (int)(41.0f * this.scrollOffs);
         this.blit(k + 119, l + 13 + m, 232 + (this.displayPatterns ? 0 : 12), 0, 12, 15);
-        if (this.resultBanner != null && !this.hasMaxPatterns) {
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef(k + 139, l + 52, 0.0f);
-            RenderSystem.scalef(24.0f, -24.0f, 1.0f);
-            this.resultBanner.setOnlyRenderPattern(true);
-            BlockEntityRenderDispatcher.instance.renderItem(this.resultBanner, new PoseStack());
-            this.resultBanner.setOnlyRenderPattern(false);
-            RenderSystem.popMatrix();
+        Lighting.setupForFlatItems();
+        if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
+            MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
+            PoseStack poseStack = new PoseStack();
+            poseStack.translate(k + 139, l + 52, 0.0);
+            poseStack.scale(24.0f, -24.0f, 1.0f);
+            poseStack.translate(0.5, 0.5, 0.5);
+            float g = 0.6666667f;
+            poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
+            this.flag.xRot = 0.0f;
+            this.flag.y = -32.0f;
+            BannerRenderer.renderPatterns(poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, this.resultBannerPatterns);
+            bufferSource.endBatch();
         } else if (this.hasMaxPatterns) {
             this.blit(k + slot4.x - 2, l + slot4.y - 2, this.imageWidth, 17, 17, 16);
         }
@@ -128,28 +134,27 @@ extends AbstractContainerScreen<LoomMenu> {
             int p = ((LoomMenu)this.menu).getSelectedBannerPatternIndex();
             this.renderPattern(p, n, o);
         }
+        Lighting.setupFor3DItems();
     }
 
     private void renderPattern(int i, int j, int k) {
-        BannerBlockEntity bannerBlockEntity = new BannerBlockEntity();
-        bannerBlockEntity.setOnlyRenderPattern(true);
         ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
         CompoundTag compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.BASE, DyeColor.GRAY).addPattern(BannerPattern.values()[i], DyeColor.WHITE).toListTag();
         compoundTag.put("Patterns", listTag);
-        bannerBlockEntity.fromItem(itemStack, DyeColor.GRAY);
         PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate((float)j + 0.5f, k + 16, 0.0);
         poseStack.scale(6.0f, -6.0f, 1.0f);
         poseStack.translate(0.5, 0.5, 0.0);
-        float f = 0.6666667f;
         poseStack.translate(0.5, 0.5, 0.5);
+        float f = 0.6666667f;
         poseStack.scale(0.6666667f, -0.6666667f, -0.6666667f);
         MultiBufferSource.BufferSource bufferSource = this.minecraft.renderBuffers().bufferSource();
         this.flag.xRot = 0.0f;
         this.flag.y = -32.0f;
-        BannerRenderer.renderPatterns(bannerBlockEntity, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true);
+        List<Pair<BannerPattern, DyeColor>> list = BannerBlockEntity.createPatterns(DyeColor.GRAY, BannerBlockEntity.getItemPatterns(itemStack));
+        BannerRenderer.renderPatterns(poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, list);
         poseStack.popPose();
         bufferSource.endBatch();
     }
@@ -215,19 +220,14 @@ extends AbstractContainerScreen<LoomMenu> {
 
     private void containerChanged() {
         ItemStack itemStack = ((LoomMenu)this.menu).getResultSlot().getItem();
-        if (itemStack.isEmpty()) {
-            this.resultBanner = null;
-        } else {
-            this.resultBanner = new BannerBlockEntity();
-            this.resultBanner.fromItem(itemStack, ((BannerItem)itemStack.getItem()).getColor());
-        }
+        this.resultBannerPatterns = itemStack.isEmpty() ? null : BannerBlockEntity.createPatterns(((BannerItem)itemStack.getItem()).getColor(), BannerBlockEntity.getItemPatterns(itemStack));
         ItemStack itemStack2 = ((LoomMenu)this.menu).getBannerSlot().getItem();
         ItemStack itemStack3 = ((LoomMenu)this.menu).getDyeSlot().getItem();
         ItemStack itemStack4 = ((LoomMenu)this.menu).getPatternSlot().getItem();
         CompoundTag compoundTag = itemStack2.getOrCreateTagElement("BlockEntityTag");
         boolean bl = this.hasMaxPatterns = compoundTag.contains("Patterns", 9) && !itemStack2.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
         if (this.hasMaxPatterns) {
-            this.resultBanner = null;
+            this.resultBannerPatterns = null;
         }
         if (!(ItemStack.matches(itemStack2, this.bannerStack) && ItemStack.matches(itemStack3, this.dyeStack) && ItemStack.matches(itemStack4, this.patternStack))) {
             this.displayPatterns = !itemStack2.isEmpty() && !itemStack3.isEmpty() && itemStack4.isEmpty() && !this.hasMaxPatterns;

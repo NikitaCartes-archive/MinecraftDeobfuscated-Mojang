@@ -114,6 +114,7 @@ implements TickableBlockEntity {
         if (this.stored.size() >= 3) {
             return;
         }
+        entity.stopRiding();
         entity.ejectPassengers();
         CompoundTag compoundTag = new CompoundTag();
         entity.save(compoundTag);
@@ -130,6 +131,7 @@ implements TickableBlockEntity {
     }
 
     private boolean releaseOccupant(BlockState blockState, CompoundTag compoundTag, @Nullable List<Entity> list, BeeReleaseStatus beeReleaseStatus) {
+        boolean bl;
         BlockPos blockPos = this.getBlockPos();
         if ((this.level.isNight() || this.level.isRaining()) && beeReleaseStatus != BeeReleaseStatus.EMERGENCY) {
             return false;
@@ -139,13 +141,14 @@ implements TickableBlockEntity {
         compoundTag.removeUUID("UUID");
         Direction direction = blockState.getValue(BeehiveBlock.FACING);
         BlockPos blockPos2 = blockPos.relative(direction);
-        if (!this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
+        boolean bl2 = bl = !this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty();
+        if (bl && beeReleaseStatus != BeeReleaseStatus.EMERGENCY) {
             return false;
         }
         Entity entity2 = EntityType.loadEntityRecursive(compoundTag, this.level, entity -> entity);
         if (entity2 != null) {
             float f = entity2.getBbWidth();
-            double d = 0.55 + (double)(f / 2.0f);
+            double d = bl ? 0.0 : 0.55 + (double)(f / 2.0f);
             double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
             double g = (double)blockPos.getY() + 0.5 - (double)(entity2.getBbHeight() / 2.0f);
             double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();

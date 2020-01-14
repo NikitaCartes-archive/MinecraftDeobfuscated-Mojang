@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
@@ -19,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ArmorStandRenderer
@@ -59,8 +61,19 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
     }
 
     @Override
-    protected boolean isVisible(ArmorStand armorStand, boolean bl) {
-        return !armorStand.isInvisible();
+    @Nullable
+    protected RenderType getRenderType(ArmorStand armorStand, boolean bl, boolean bl2) {
+        if (!armorStand.isMarker()) {
+            return super.getRenderType(armorStand, bl, bl2);
+        }
+        ResourceLocation resourceLocation = this.getTextureLocation(armorStand);
+        if (bl2) {
+            return RenderType.entityTranslucent(resourceLocation, false);
+        }
+        if (bl) {
+            return RenderType.entityCutoutNoCull(resourceLocation, false);
+        }
+        return null;
     }
 
     @Override

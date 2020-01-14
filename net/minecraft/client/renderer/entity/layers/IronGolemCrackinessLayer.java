@@ -26,6 +26,9 @@ extends RenderLayer<IronGolem, IronGolemModel<IronGolem>> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, IronGolem ironGolem, float f, float g, float h, float j, float k, float l) {
+        if (ironGolem.isInvisible()) {
+            return;
+        }
         IronGolem.Crackiness crackiness = ironGolem.getCrackiness();
         if (crackiness == IronGolem.Crackiness.NONE) {
             return;

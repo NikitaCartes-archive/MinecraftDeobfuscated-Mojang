@@ -29,6 +29,10 @@ implements MultiBufferSource {
 
     @Override
     public VertexConsumer getBuffer(RenderType renderType) {
+        if (renderType.isOutline()) {
+            VertexConsumer vertexConsumer = this.outlineBufferSource.getBuffer(renderType);
+            return new EntityOutlineGenerator(vertexConsumer, this.teamR, this.teamG, this.teamB, this.teamA);
+        }
         VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
         Optional<RenderType> optional = renderType.outline();
         if (optional.isPresent()) {

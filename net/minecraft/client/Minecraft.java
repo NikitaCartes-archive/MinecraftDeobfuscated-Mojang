@@ -121,6 +121,7 @@ import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.resources.UnopenedResourcePack;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
@@ -370,7 +371,7 @@ WindowEventHandler {
         DisplayData displayData = this.options.overrideHeight > 0 && this.options.overrideWidth > 0 ? new DisplayData(this.options.overrideWidth, this.options.overrideHeight, gameConfig.display.fullscreenWidth, gameConfig.display.fullscreenHeight, gameConfig.display.isFullscreen) : gameConfig.display;
         Util.timeSource = RenderSystem.initBackendSystem();
         this.virtualScreen = new VirtualScreen(this);
-        this.window = this.virtualScreen.newWindow(displayData, this.options.fullscreenVideoModeString, "Minecraft " + SharedConstants.getCurrentVersion().getName());
+        this.window = this.virtualScreen.newWindow(displayData, this.options.fullscreenVideoModeString, this.createTitle());
         this.setWindowActive(true);
         try {
             InputStream inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
@@ -461,6 +462,37 @@ WindowEventHandler {
                 this.selfTest();
             }
         }), false));
+    }
+
+    public void updateTitle() {
+        this.window.setTitle(this.createTitle());
+    }
+
+    private String createTitle() {
+        StringBuilder stringBuilder = new StringBuilder("Minecraft");
+        if (this.isProbablyModded()) {
+            stringBuilder.append("*");
+        }
+        stringBuilder.append(" ");
+        stringBuilder.append(SharedConstants.getCurrentVersion().getName());
+        ClientPacketListener clientPacketListener = this.getConnection();
+        if (clientPacketListener != null) {
+            stringBuilder.append(" - ");
+            if (this.singleplayerServer != null && !this.singleplayerServer.isPublished()) {
+                stringBuilder.append(I18n.get("title.singleplayer", new Object[0]));
+            } else if (this.isConnectedToRealms()) {
+                stringBuilder.append(I18n.get("title.multiplayer.realms", new Object[0]));
+            } else if (this.singleplayerServer != null || this.currentServer != null && this.currentServer.isLan()) {
+                stringBuilder.append(I18n.get("title.multiplayer.lan", new Object[0]));
+            } else {
+                stringBuilder.append(I18n.get("title.multiplayer.other", new Object[0]));
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    public boolean isProbablyModded() {
+        return !"vanilla".equals(ClientBrandRetriever.getClientModName()) || Minecraft.class.getSigners() == null;
     }
 
     private void rollbackResourcePacks(Throwable throwable) {
@@ -688,6 +720,7 @@ WindowEventHandler {
             this.soundManager.resume();
             this.mouseHandler.grabMouse();
         }
+        this.updateTitle();
     }
 
     public void setOverlay(@Nullable Overlay overlay) {
@@ -697,7 +730,11 @@ WindowEventHandler {
     public void destroy() {
         try {
             LOGGER.info("Stopping!");
-            NarratorChatListener.INSTANCE.destroy();
+            try {
+                NarratorChatListener.INSTANCE.destroy();
+            } catch (Throwable throwable) {
+                // empty catch block
+            }
             try {
                 if (this.level != null) {
                     this.level.disconnect();
@@ -722,7 +759,6 @@ WindowEventHandler {
     public void close() {
         try {
             this.modelManager.close();
-            this.font.close();
             this.fontManager.close();
             this.gameRenderer.close();
             this.levelRenderer.close();
@@ -731,7 +767,11 @@ WindowEventHandler {
             this.particleEngine.close();
             this.mobEffectTextures.close();
             this.paintingTextures.close();
+            this.textureManager.close();
             Util.shutdownBackgroundExecutor();
+        } catch (Throwable throwable) {
+            LOGGER.error("Shutdown failure!", throwable);
+            throw throwable;
         } finally {
             this.virtualScreen.close();
             this.window.close();
@@ -1443,6 +1483,7 @@ WindowEventHandler {
         this.levelRenderer.setLevel(clientLevel);
         this.particleEngine.setLevel(clientLevel);
         BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
+        this.updateTitle();
     }
 
     public final boolean isDemo() {

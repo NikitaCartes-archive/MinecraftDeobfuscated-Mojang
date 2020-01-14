@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.PanoramaRenderer;
@@ -123,7 +124,13 @@ extends Screen {
 
     private void createNormalMenuOptions(int i, int j) {
         this.addButton(new Button(this.width / 2 - 100, i, 200, 20, I18n.get("menu.singleplayer", new Object[0]), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
-        this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, I18n.get("menu.multiplayer", new Object[0]), button -> this.minecraft.setScreen(new JoinMultiplayerScreen(this))));
+        this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, I18n.get("menu.multiplayer", new Object[0]), button -> {
+            if (this.minecraft.options.skipMultiplayerWarning) {
+                this.minecraft.setScreen(new JoinMultiplayerScreen(this));
+            } else {
+                this.minecraft.setScreen(new SafetyScreen(this));
+            }
+        }));
         this.addButton(new Button(this.width / 2 - 100, i + j * 2, 200, 20, I18n.get("menu.online", new Object[0]), button -> this.realmsButtonClicked()));
     }
 
@@ -195,6 +202,9 @@ extends Screen {
         }
         String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
         string = this.minecraft.isDemo() ? string + " Demo" : string + ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
+        if (this.minecraft.isProbablyModded()) {
+            string = string + I18n.get("menu.modded", new Object[0]);
+        }
         this.drawString(this.font, string, 2, this.height - 10, 0xFFFFFF | n);
         this.drawString(this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 0xFFFFFF | n);
         if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {

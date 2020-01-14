@@ -25,19 +25,24 @@ extends FallingBlock {
 
     @Override
     public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-        if (ConcretePowderBlock.canSolidify(blockState2)) {
+        if (ConcretePowderBlock.shouldSolidify(level, blockPos, blockState2)) {
             level.setBlock(blockPos, this.concrete, 3);
         }
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        BlockState blockState;
         BlockPos blockPos;
         Level blockGetter = blockPlaceContext.getLevel();
-        if (ConcretePowderBlock.canSolidify(blockGetter.getBlockState(blockPos = blockPlaceContext.getClickedPos())) || ConcretePowderBlock.touchesLiquid(blockGetter, blockPos)) {
+        if (ConcretePowderBlock.shouldSolidify(blockGetter, blockPos = blockPlaceContext.getClickedPos(), blockState = blockGetter.getBlockState(blockPos))) {
             return this.concrete;
         }
         return super.getStateForPlacement(blockPlaceContext);
+    }
+
+    private static boolean shouldSolidify(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+        return ConcretePowderBlock.canSolidify(blockState) || ConcretePowderBlock.touchesLiquid(blockGetter, blockPos);
     }
 
     private static boolean touchesLiquid(BlockGetter blockGetter, BlockPos blockPos) {

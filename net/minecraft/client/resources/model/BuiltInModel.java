@@ -23,11 +23,13 @@ implements BakedModel {
     private final ItemTransforms itemTransforms;
     private final ItemOverrides overrides;
     private final TextureAtlasSprite particleTexture;
+    private final boolean usesBlockLight;
 
-    public BuiltInModel(ItemTransforms itemTransforms, ItemOverrides itemOverrides, TextureAtlasSprite textureAtlasSprite) {
+    public BuiltInModel(ItemTransforms itemTransforms, ItemOverrides itemOverrides, TextureAtlasSprite textureAtlasSprite, boolean bl) {
         this.itemTransforms = itemTransforms;
         this.overrides = itemOverrides;
         this.particleTexture = textureAtlasSprite;
+        this.usesBlockLight = bl;
     }
 
     @Override
@@ -43,6 +45,11 @@ implements BakedModel {
     @Override
     public boolean isGui3d() {
         return true;
+    }
+
+    @Override
+    public boolean usesBlockLight() {
+        return this.usesBlockLight;
     }
 
     @Override

@@ -32,7 +32,10 @@ public class PoseStack {
         Pose pose = this.poseStack.getLast();
         pose.pose.multiply(Matrix4f.createScaleMatrix(f, g, h));
         if (f == g && g == h) {
-            return;
+            if (f > 0.0f) {
+                return;
+            }
+            pose.normal.mul(-1.0f);
         }
         float i = 1.0f / f;
         float j = 1.0f / g;

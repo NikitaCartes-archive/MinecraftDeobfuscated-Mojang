@@ -115,13 +115,6 @@ public class BlockEntityRenderDispatcher {
         blockEntityRenderer.render(blockEntity, f, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY);
     }
 
-    @Deprecated
-    public <E extends BlockEntity> void renderItem(E blockEntity, PoseStack poseStack) {
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(this.singleRenderBuffer);
-        this.renderItem(blockEntity, poseStack, bufferSource, 0xF000F0, OverlayTexture.NO_OVERLAY);
-        bufferSource.endBatch();
-    }
-
     public <E extends BlockEntity> boolean renderItem(E blockEntity, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         BlockEntityRenderer blockEntityRenderer = this.getRenderer(blockEntity);
         if (blockEntityRenderer == null) {

@@ -439,7 +439,7 @@ public class ModelBakery {
         }
         UnbakedModel unbakedModel = this.getModel(resourceLocation);
         if (unbakedModel instanceof BlockModel && (blockModel = (BlockModel)unbakedModel).getRootModel() == GENERATION_MARKER) {
-            return ITEM_MODEL_GENERATOR.generateBlockModel(this.atlasSet::getSprite, blockModel).bake(this, blockModel, this.atlasSet::getSprite, modelState, resourceLocation);
+            return ITEM_MODEL_GENERATOR.generateBlockModel(this.atlasSet::getSprite, blockModel).bake(this, blockModel, this.atlasSet::getSprite, modelState, resourceLocation, false);
         }
         BakedModel bakedModel = unbakedModel.bake(this, this.atlasSet::getSprite, modelState, resourceLocation);
         this.bakedCache.put(triple, bakedModel);

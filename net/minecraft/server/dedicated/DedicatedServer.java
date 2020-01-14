@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
@@ -293,15 +294,18 @@ implements ServerInterface {
     @Override
     public CrashReport fillReport(CrashReport crashReport) {
         crashReport = super.fillReport(crashReport);
-        crashReport.getSystemDetails().setDetail("Is Modded", () -> {
-            String string = this.getServerModName();
-            if (!"vanilla".equals(string)) {
-                return "Definitely; Server brand changed to '" + string + "'";
-            }
-            return "Unknown (can't tell)";
-        });
+        crashReport.getSystemDetails().setDetail("Is Modded", () -> this.getModdedStatus().orElse("Unknown (can't tell)"));
         crashReport.getSystemDetails().setDetail("Type", () -> "Dedicated Server (map_server.txt)");
         return crashReport;
+    }
+
+    @Override
+    public Optional<String> getModdedStatus() {
+        String string = this.getServerModName();
+        if (!"vanilla".equals(string)) {
+            return Optional.of("Definitely; Server brand changed to '" + string + "'");
+        }
+        return Optional.empty();
     }
 
     @Override

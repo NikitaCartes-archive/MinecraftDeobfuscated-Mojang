@@ -181,8 +181,7 @@ implements ResourceManagerReloadListener {
         RenderSystem.scalef(16.0f, 16.0f, 16.0f);
         PoseStack poseStack = new PoseStack();
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        Item item = itemStack.getItem();
-        boolean bl2 = bl = !bakedModel.isGui3d() || item == Items.SHIELD || item == Items.TRIDENT;
+        boolean bl2 = bl = !bakedModel.usesBlockLight();
         if (bl) {
             Lighting.setupForFlatItems();
         }

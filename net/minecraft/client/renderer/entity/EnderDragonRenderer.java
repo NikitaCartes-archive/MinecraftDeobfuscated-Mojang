@@ -149,13 +149,13 @@ extends EntityRenderer<EnderDragon> {
         Matrix4f matrix4f = pose.pose();
         Matrix3f matrix3f = pose.normal();
         for (int t = 1; t <= 8; ++t) {
-            float u = Mth.sin((float)(t % 8) * ((float)Math.PI * 2) / 8.0f) * 0.75f;
-            float v = Mth.cos((float)(t % 8) * ((float)Math.PI * 2) / 8.0f) * 0.75f;
-            float w = (float)(t % 8) / 8.0f;
-            vertexConsumer.vertex(matrix4f, q * 0.2f, r * 0.2f, 0.0f).color(0, 0, 0, 255).uv(s, n).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
-            vertexConsumer.vertex(matrix4f, q, r, m).color(255, 255, 255, 255).uv(s, o).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
-            vertexConsumer.vertex(matrix4f, u, v, m).color(255, 255, 255, 255).uv(w, o).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
-            vertexConsumer.vertex(matrix4f, u * 0.2f, v * 0.2f, 0.0f).color(0, 0, 0, 255).uv(w, n).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, 1.0f, 0.0f).endVertex();
+            float u = Mth.sin((float)t * ((float)Math.PI * 2) / 8.0f) * 0.75f;
+            float v = Mth.cos((float)t * ((float)Math.PI * 2) / 8.0f) * 0.75f;
+            float w = (float)t / 8.0f;
+            vertexConsumer.vertex(matrix4f, q * 0.2f, r * 0.2f, 0.0f).color(0, 0, 0, 255).uv(s, n).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, -1.0f, 0.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, q, r, m).color(255, 255, 255, 255).uv(s, o).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, -1.0f, 0.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, u, v, m).color(255, 255, 255, 255).uv(w, o).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, -1.0f, 0.0f).endVertex();
+            vertexConsumer.vertex(matrix4f, u * 0.2f, v * 0.2f, 0.0f).color(0, 0, 0, 255).uv(w, n).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(k).normal(matrix3f, 0.0f, -1.0f, 0.0f).endVertex();
             q = u;
             r = v;
             s = w;

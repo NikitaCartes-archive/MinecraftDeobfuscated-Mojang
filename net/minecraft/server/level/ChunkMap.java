@@ -434,6 +434,7 @@ implements ChunkHolder.PlayerProvider {
     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkLoad(ChunkPos chunkPos) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                this.level.getProfiler().incrementCounter("chunkLoad");
                 CompoundTag compoundTag = this.readChunk(chunkPos);
                 if (compoundTag != null) {
                     boolean bl;
@@ -461,6 +462,7 @@ implements ChunkHolder.PlayerProvider {
     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> scheduleChunkGeneration(ChunkHolder chunkHolder, ChunkStatus chunkStatus) {
         ChunkPos chunkPos = chunkHolder.getPos();
         CompletableFuture<Either<List<ChunkAccess>, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkRangeFuture(chunkPos, chunkStatus.getRange(), i -> this.getDependencyStatus(chunkStatus, i));
+        this.level.getProfiler().incrementCounter(() -> "chunkGenerate " + chunkStatus.getName());
         return completableFuture.thenComposeAsync(either -> either.map(list -> {
             try {
                 CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = chunkStatus.generate(this.level, this.generator, this.structureManager, this.lightEngine, chunkAccess -> this.protoChunkToFullChunk(chunkHolder), (List<ChunkAccess>)list);
@@ -585,6 +587,7 @@ implements ChunkHolder.PlayerProvider {
                     return false;
                 }
             }
+            this.level.getProfiler().incrementCounter("chunkSave");
             compoundTag = ChunkSerializer.write(this.level, chunkAccess);
             this.write(chunkPos, compoundTag);
             return true;

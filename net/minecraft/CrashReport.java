@@ -244,5 +244,9 @@ public class CrashReport {
         CrashReport crashReport = throwable instanceof ReportedException ? ((ReportedException)throwable).getReport() : new CrashReport(string, throwable);
         return crashReport;
     }
+
+    public static void preload() {
+        new CrashReport("Don't panic!", new Throwable()).getFriendlyReport();
+    }
 }
 

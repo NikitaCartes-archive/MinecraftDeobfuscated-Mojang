@@ -138,10 +138,11 @@ extends Entity {
                 if (blockState.getBlock() != Blocks.MOVING_PISTON) {
                     this.remove();
                     if (!this.cancelDrop) {
-                        boolean bl4;
+                        boolean bl5;
                         boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
-                        boolean bl5 = bl4 = this.blockState.canSurvive(this.level, blockPos) && !FallingBlock.isFree(this.level.getBlockState(blockPos.below()));
-                        if (bl3 && bl4) {
+                        boolean bl4 = FallingBlock.isFree(this.level.getBlockState(blockPos.below())) && (!bl || !bl2);
+                        boolean bl6 = bl5 = this.blockState.canSurvive(this.level, blockPos) && !bl4;
+                        if (bl3 && bl5) {
                             if (this.blockState.hasProperty(BlockStateProperties.WATERLOGGED) && this.level.getFluidState(blockPos).getType() == Fluids.WATER) {
                                 this.blockState = (BlockState)this.blockState.setValue(BlockStateProperties.WATERLOGGED, true);
                             }

@@ -16,7 +16,7 @@ public class DarkOakTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
         return null;
     }
 

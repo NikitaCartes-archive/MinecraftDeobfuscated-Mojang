@@ -3,8 +3,11 @@
  */
 package net.minecraft.util.profiling;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -12,13 +15,16 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.util.profiling.ProfileResults;
+import net.minecraft.util.profiling.ProfilerPathEntry;
 import net.minecraft.util.profiling.ResultField;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -27,17 +33,34 @@ import org.apache.logging.log4j.Logger;
 public class FilledProfileResults
 implements ProfileResults {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final Map<String, Long> times;
-    private final Map<String, Long> counts;
+    private static final ProfilerPathEntry EMPTY = new ProfilerPathEntry(){
+
+        @Override
+        public long getDuration() {
+            return 0L;
+        }
+
+        @Override
+        public long getCount() {
+            return 0L;
+        }
+
+        @Override
+        public Object2LongMap<String> getCounters() {
+            return Object2LongMaps.emptyMap();
+        }
+    };
+    private static final Splitter SPLITTER = Splitter.on('\u001e');
+    private static final Comparator<Map.Entry<String, CounterCollector>> COUNTER_ENTRY_COMPARATOR = Map.Entry.comparingByValue(Comparator.comparingLong(counterCollector -> CounterCollector.method_24265(counterCollector))).reversed();
+    private final Map<String, ? extends ProfilerPathEntry> entries;
     private final long startTimeNano;
     private final int startTimeTicks;
     private final long endTimeNano;
     private final int endTimeTicks;
     private final int tickDuration;
 
-    public FilledProfileResults(Map<String, Long> map, Map<String, Long> map2, long l, int i, long m, int j) {
-        this.times = map;
-        this.counts = map2;
+    public FilledProfileResults(Map<String, ? extends ProfilerPathEntry> map, long l, int i, long m, int j) {
+        this.entries = map;
         this.startTimeNano = l;
         this.startTimeTicks = i;
         this.endTimeNano = m;
@@ -45,20 +68,27 @@ implements ProfileResults {
         this.tickDuration = j - i;
     }
 
+    private ProfilerPathEntry getEntry(String string) {
+        ProfilerPathEntry profilerPathEntry = this.entries.get(string);
+        return profilerPathEntry != null ? profilerPathEntry : EMPTY;
+    }
+
     @Override
     public List<ResultField> getTimes(String string) {
         String string2 = string;
-        long l = this.times.containsKey("root") ? this.times.get("root") : 0L;
-        long m = this.times.getOrDefault(string, -1L);
-        long n = this.counts.getOrDefault(string, 0L);
+        ProfilerPathEntry profilerPathEntry = this.getEntry("root");
+        long l = profilerPathEntry.getDuration();
+        ProfilerPathEntry profilerPathEntry2 = this.getEntry(string);
+        long m = profilerPathEntry2.getDuration();
+        long n = profilerPathEntry2.getCount();
         ArrayList<ResultField> list = Lists.newArrayList();
         if (!string.isEmpty()) {
             string = string + '\u001e';
         }
         long o = 0L;
-        for (String string3 : this.times.keySet()) {
-            if (string3.length() <= string.length() || !string3.startsWith(string) || string3.indexOf(30, string.length() + 1) >= 0) continue;
-            o += this.times.get(string3).longValue();
+        for (String string3 : this.entries.keySet()) {
+            if (!FilledProfileResults.isDirectChild(string, string3)) continue;
+            o += this.getEntry(string3).getDuration();
         }
         float f = o;
         if (o < m) {
@@ -67,19 +97,14 @@ implements ProfileResults {
         if (l < o) {
             l = o;
         }
-        HashSet<String> set = Sets.newHashSet(this.times.keySet());
-        set.addAll(this.counts.keySet());
-        for (String string4 : set) {
-            if (string4.length() <= string.length() || !string4.startsWith(string) || string4.indexOf(30, string.length() + 1) >= 0) continue;
-            long p = this.times.getOrDefault(string4, 0L);
+        for (String string4 : this.entries.keySet()) {
+            if (!FilledProfileResults.isDirectChild(string, string4)) continue;
+            ProfilerPathEntry profilerPathEntry3 = this.getEntry(string4);
+            long p = profilerPathEntry3.getDuration();
             double d = (double)p * 100.0 / (double)o;
             double e = (double)p * 100.0 / (double)l;
             String string5 = string4.substring(string.length());
-            long q = this.counts.getOrDefault(string4, 0L);
-            list.add(new ResultField(string5, d, e, q));
-        }
-        for (String string4 : this.times.keySet()) {
-            this.times.put(string4, this.times.get(string4) * 999L / 1000L);
+            list.add(new ResultField(string5, d, e, profilerPathEntry3.getCount()));
         }
         if ((float)o > f) {
             list.add(new ResultField("unspecified", (double)((float)o - f) * 100.0 / (double)o, (double)((float)o - f) * 100.0 / (double)l, n));
@@ -87,6 +112,22 @@ implements ProfileResults {
         Collections.sort(list);
         list.add(0, new ResultField(string2, 100.0, (double)o * 100.0 / (double)l, n));
         return list;
+    }
+
+    private static boolean isDirectChild(String string, String string2) {
+        return string2.length() > string.length() && string2.startsWith(string) && string2.indexOf(30, string.length() + 1) < 0;
+    }
+
+    private Map<String, CounterCollector> getCounterValues() {
+        TreeMap<String, CounterCollector> map = Maps.newTreeMap();
+        this.entries.forEach((string, profilerPathEntry) -> {
+            Object2LongMap<String> object2LongMap = profilerPathEntry.getCounters();
+            if (!object2LongMap.isEmpty()) {
+                List<String> list = SPLITTER.splitToList((CharSequence)string);
+                object2LongMap.forEach((string2, long_) -> map.computeIfAbsent((String)string2, string -> new CounterCollector()).addValue(list.iterator(), (long)long_));
+            }
+        });
+        return map;
     }
 
     @Override
@@ -150,29 +191,54 @@ implements ProfileResults {
         stringBuilder.append("--- BEGIN PROFILE DUMP ---\n\n");
         this.appendProfilerResults(0, "root", stringBuilder);
         stringBuilder.append("--- END PROFILE DUMP ---\n\n");
+        Map<String, CounterCollector> map = this.getCounterValues();
+        if (!map.isEmpty()) {
+            stringBuilder.append("--- BEGIN COUNTER DUMP ---\n\n");
+            this.appendCounters(map, stringBuilder, i);
+            stringBuilder.append("--- END COUNTER DUMP ---\n\n");
+        }
         return stringBuilder.toString();
     }
 
-    private void appendProfilerResults(int i, String string, StringBuilder stringBuilder) {
-        List<ResultField> list = this.getTimes(string);
+    private static StringBuilder indentLine(StringBuilder stringBuilder, int i) {
+        stringBuilder.append(String.format("[%02d] ", i));
+        for (int j = 0; j < i; ++j) {
+            stringBuilder.append("|   ");
+        }
+        return stringBuilder;
+    }
+
+    private void appendProfilerResults(int i, String string2, StringBuilder stringBuilder) {
+        List<ResultField> list = this.getTimes(string2);
+        Object2LongMap<String> object2LongMap = this.entries.get(string2).getCounters();
+        object2LongMap.forEach((string, long_) -> FilledProfileResults.indentLine(stringBuilder, i).append('#').append((String)string).append(' ').append(long_).append('/').append(long_ / (long)this.tickDuration).append('\n'));
         if (list.size() < 3) {
             return;
         }
         for (int j = 1; j < list.size(); ++j) {
             ResultField resultField = list.get(j);
-            stringBuilder.append(String.format("[%02d] ", i));
-            for (int k = 0; k < i; ++k) {
-                stringBuilder.append("|   ");
-            }
-            stringBuilder.append(resultField.name).append('(').append(resultField.count).append('/').append(String.format(Locale.ROOT, "%.0f", Float.valueOf((float)resultField.count / (float)this.tickDuration))).append(')').append(" - ").append(String.format(Locale.ROOT, "%.2f", resultField.percentage)).append("%/").append(String.format(Locale.ROOT, "%.2f", resultField.globalPercentage)).append("%\n");
+            FilledProfileResults.indentLine(stringBuilder, i).append(resultField.name).append('(').append(resultField.count).append('/').append(String.format(Locale.ROOT, "%.0f", Float.valueOf((float)resultField.count / (float)this.tickDuration))).append(')').append(" - ").append(String.format(Locale.ROOT, "%.2f", resultField.percentage)).append("%/").append(String.format(Locale.ROOT, "%.2f", resultField.globalPercentage)).append("%\n");
             if ("unspecified".equals(resultField.name)) continue;
             try {
-                this.appendProfilerResults(i + 1, string + '\u001e' + resultField.name, stringBuilder);
+                this.appendProfilerResults(i + 1, string2 + '\u001e' + resultField.name, stringBuilder);
                 continue;
             } catch (Exception exception) {
                 stringBuilder.append("[[ EXCEPTION ").append(exception).append(" ]]");
             }
         }
+    }
+
+    private void appendCounterResults(int i, String string, CounterCollector counterCollector, int j, StringBuilder stringBuilder) {
+        FilledProfileResults.indentLine(stringBuilder, i).append(string).append(" total:").append(counterCollector.selfValue).append('/').append(counterCollector.totalValue).append(" average: ").append(counterCollector.selfValue / (long)j).append('/').append(counterCollector.totalValue / (long)j).append('\n');
+        counterCollector.children.entrySet().stream().sorted(COUNTER_ENTRY_COMPARATOR).forEach(entry -> this.appendCounterResults(i + 1, (String)entry.getKey(), (CounterCollector)entry.getValue(), j, stringBuilder));
+    }
+
+    private void appendCounters(Map<String, CounterCollector> map, StringBuilder stringBuilder, int i) {
+        map.forEach((string, counterCollector) -> {
+            stringBuilder.append("-- Counter: ").append((String)string).append(" --\n");
+            this.appendCounterResults(0, "root", (CounterCollector)((CounterCollector)counterCollector).children.get("root"), i, stringBuilder);
+            stringBuilder.append("\n\n");
+        });
     }
 
     private static String getComment() {
@@ -187,6 +253,24 @@ implements ProfileResults {
     @Override
     public int getTickDuration() {
         return this.tickDuration;
+    }
+
+    static class CounterCollector {
+        private long selfValue;
+        private long totalValue;
+        private final Map<String, CounterCollector> children = Maps.newHashMap();
+
+        private CounterCollector() {
+        }
+
+        public void addValue(Iterator<String> iterator, long l) {
+            this.totalValue += l;
+            if (!iterator.hasNext()) {
+                this.selfValue += l;
+            } else {
+                this.children.computeIfAbsent(iterator.next(), string -> new CounterCollector()).addValue(iterator, l);
+            }
+        }
     }
 }
 

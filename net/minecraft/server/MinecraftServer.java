@@ -364,6 +364,7 @@ Runnable {
             levelData.setLevelName(string2);
             levelSettings = new LevelSettings(levelData);
         }
+        levelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
         this.loadDataPacks(levelStorage.getFolder(), levelData);
         ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(levelStorage, levelData, levelSettings, chunkProgressListener);
@@ -678,6 +679,12 @@ Runnable {
         return false;
     }
 
+    @Override
+    protected void doRunTask(TickTask tickTask) {
+        this.getProfiler().incrementCounter("runTask");
+        super.doRunTask(tickTask);
+    }
+
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
@@ -845,6 +852,7 @@ Runnable {
                 LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
                 return;
             }
+            CrashReport.preload();
             Bootstrap.bootStrap();
             Bootstrap.validate();
             String string = optionSet.valueOf(optionSpec9);
@@ -976,6 +984,8 @@ Runnable {
         }
         return crashReport;
     }
+
+    public abstract Optional<String> getModdedStatus();
 
     public boolean isInitialized() {
         return this.universe != null;
@@ -1562,6 +1572,11 @@ Runnable {
 
     private void refreshRegistries() {
         Block.BLOCK_STATE_REGISTRY.forEach(BlockState::initCache);
+    }
+
+    @Override
+    public /* synthetic */ void doRunTask(Runnable runnable) {
+        this.doRunTask((TickTask)runnable);
     }
 
     @Override

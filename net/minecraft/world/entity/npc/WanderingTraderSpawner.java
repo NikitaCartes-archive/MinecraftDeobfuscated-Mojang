@@ -45,6 +45,9 @@ public class WanderingTraderSpawner {
     }
 
     public void tick() {
+        if (!this.level.getGameRules().getBoolean(GameRules.RULE_DO_TRADER_SPAWNING)) {
+            return;
+        }
         if (--this.tickDelay > 0) {
             return;
         }

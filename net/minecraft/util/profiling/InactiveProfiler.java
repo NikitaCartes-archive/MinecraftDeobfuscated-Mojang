@@ -47,6 +47,14 @@ implements ProfileCollector {
     }
 
     @Override
+    public void incrementCounter(String string) {
+    }
+
+    @Override
+    public void incrementCounter(Supplier<String> supplier) {
+    }
+
+    @Override
     public ProfileResults getResults() {
         return EmptyProfileResults.EMPTY;
     }
