@@ -8,6 +8,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import net.fabricmc.api.EnvType;
@@ -91,6 +92,7 @@ public class IntegratedServer extends MinecraftServer {
 			levelData.setLevelName(string2);
 		}
 
+		levelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
 		this.loadDataPacks(levelStorage.getFolder(), levelData);
 		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
 		this.createLevels(levelStorage, levelData, this.settings, chunkProgressListener);
@@ -196,23 +198,25 @@ public class IntegratedServer extends MinecraftServer {
 		crashReport.getSystemDetails()
 			.setDetail(
 				"Is Modded",
-				(CrashReportDetail<String>)(() -> {
-					String string = ClientBrandRetriever.getClientModName();
-					if (!string.equals("vanilla")) {
-						return "Definitely; Client brand changed to '" + string + "'";
-					} else {
-						string = this.getServerModName();
-						if (!"vanilla".equals(string)) {
-							return "Definitely; Server brand changed to '" + string + "'";
-						} else {
-							return Minecraft.class.getSigners() == null
-								? "Very likely; Jar signature invalidated"
-								: "Probably not. Jar signature remains and both client + server brands are untouched.";
-						}
-					}
-				})
+				(CrashReportDetail<String>)(() -> (String)this.getModdedStatus()
+						.orElse("Probably not. Jar signature remains and both client + server brands are untouched."))
 			);
 		return crashReport;
+	}
+
+	@Override
+	public Optional<String> getModdedStatus() {
+		String string = ClientBrandRetriever.getClientModName();
+		if (!string.equals("vanilla")) {
+			return Optional.of("Definitely; Client brand changed to '" + string + "'");
+		} else {
+			string = this.getServerModName();
+			if (!"vanilla".equals(string)) {
+				return Optional.of("Definitely; Server brand changed to '" + string + "'");
+			} else {
+				return Minecraft.class.getSigners() == null ? Optional.of("Very likely; Jar signature invalidated") : Optional.empty();
+			}
+		}
 	}
 
 	@Override

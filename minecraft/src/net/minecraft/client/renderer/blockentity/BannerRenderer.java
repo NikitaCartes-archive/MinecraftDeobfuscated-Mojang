@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Vector3f;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -42,7 +43,8 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 	}
 
 	public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-		if (bannerBlockEntity.getPatterns() != null) {
+		List<Pair<BannerPattern, DyeColor>> list = bannerBlockEntity.getPatterns();
+		if (list != null) {
 			float g = 0.6666667F;
 			boolean bl = bannerBlockEntity.getLevel() == null;
 			poseStack.pushPose();
@@ -50,7 +52,7 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 			if (bl) {
 				l = 0L;
 				poseStack.translate(0.5, 0.5, 0.5);
-				this.pole.visible = !bannerBlockEntity.onlyRenderPattern();
+				this.pole.visible = true;
 			} else {
 				l = bannerBlockEntity.getLevel().getGameTime();
 				BlockState blockState = bannerBlockEntity.getBlockState();
@@ -73,40 +75,32 @@ public class BannerRenderer extends BlockEntityRenderer<BannerBlockEntity> {
 			VertexConsumer vertexConsumer = ModelBakery.BANNER_BASE.buffer(multiBufferSource, RenderType::entitySolid);
 			this.pole.render(poseStack, vertexConsumer, i, j);
 			this.bar.render(poseStack, vertexConsumer, i, j);
-			if (bannerBlockEntity.onlyRenderPattern()) {
-				this.flag.xRot = 0.0F;
-			} else {
-				BlockPos blockPos = bannerBlockEntity.getBlockPos();
-				float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
-				this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
-			}
-
+			BlockPos blockPos = bannerBlockEntity.getBlockPos();
+			float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
+			this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
 			this.flag.y = -32.0F;
-			renderPatterns(bannerBlockEntity, poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true);
+			renderPatterns(poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, list);
 			poseStack.popPose();
 			poseStack.popPose();
 		}
 	}
 
 	public static void renderPatterns(
-		BannerBlockEntity bannerBlockEntity,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
 		int i,
 		int j,
 		ModelPart modelPart,
 		Material material,
-		boolean bl
+		boolean bl,
+		List<Pair<BannerPattern, DyeColor>> list
 	) {
 		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid), i, j);
-		List<BannerPattern> list = bannerBlockEntity.getPatterns();
-		List<DyeColor> list2 = bannerBlockEntity.getColors();
 
-		for (int k = 0; k < 17 && k < list.size() && k < list2.size(); k++) {
-			BannerPattern bannerPattern = (BannerPattern)list.get(k);
-			DyeColor dyeColor = (DyeColor)list2.get(k);
-			float[] fs = dyeColor.getTextureDiffuseColors();
-			Material material2 = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, bannerPattern.location(bl));
+		for (int k = 0; k < 17 && k < list.size(); k++) {
+			Pair<BannerPattern, DyeColor> pair = (Pair<BannerPattern, DyeColor>)list.get(k);
+			float[] fs = pair.getSecond().getTextureDiffuseColors();
+			Material material2 = new Material(bl ? Sheets.BANNER_SHEET : Sheets.SHIELD_SHEET, pair.getFirst().location(bl));
 			modelPart.render(poseStack, material2.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
 		}
 	}

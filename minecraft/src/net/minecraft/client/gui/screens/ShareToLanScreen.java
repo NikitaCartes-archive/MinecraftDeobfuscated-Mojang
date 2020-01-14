@@ -35,6 +35,7 @@ public class ShareToLanScreen extends Screen {
 			}
 
 			this.minecraft.gui.getChat().addMessage(component);
+			this.minecraft.updateTitle();
 		}));
 		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, I18n.get("gui.cancel"), button -> this.minecraft.setScreen(this.lastScreen)));
 		this.modeButton = this.addButton(new Button(this.width / 2 - 155, 100, 150, 20, I18n.get("selectWorld.gameMode"), button -> {

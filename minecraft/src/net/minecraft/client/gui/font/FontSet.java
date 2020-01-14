@@ -48,13 +48,8 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public void reload(List<GlyphProvider> list) {
-		for (GlyphProvider glyphProvider : this.providers) {
-			glyphProvider.close();
-		}
-
-		this.providers.clear();
+		this.closeProviders();
 		this.closeTextures();
-		this.textures.clear();
 		this.glyphs.clear();
 		this.glyphInfos.clear();
 		this.glyphsByWidth.clear();
@@ -63,10 +58,10 @@ public class FontSet implements AutoCloseable {
 		Set<GlyphProvider> set = Sets.<GlyphProvider>newHashSet();
 
 		for (char c = 0; c < '\uffff'; c++) {
-			for (GlyphProvider glyphProvider2 : list) {
-				GlyphInfo glyphInfo = (GlyphInfo)(c == ' ' ? SPACE_INFO : glyphProvider2.getGlyph(c));
+			for (GlyphProvider glyphProvider : list) {
+				GlyphInfo glyphInfo = (GlyphInfo)(c == ' ' ? SPACE_INFO : glyphProvider.getGlyph(c));
 				if (glyphInfo != null) {
-					set.add(glyphProvider2);
+					set.add(glyphProvider);
 					if (glyphInfo != MissingGlyph.INSTANCE) {
 						this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), i -> new CharArrayList()).add(c);
 					}
@@ -79,13 +74,24 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public void close() {
+		this.closeProviders();
 		this.closeTextures();
 	}
 
-	public void closeTextures() {
+	private void closeProviders() {
+		for (GlyphProvider glyphProvider : this.providers) {
+			glyphProvider.close();
+		}
+
+		this.providers.clear();
+	}
+
+	private void closeTextures() {
 		for (FontTexture fontTexture : this.textures) {
 			fontTexture.close();
 		}
+
+		this.textures.clear();
 	}
 
 	public GlyphInfo getGlyphInfo(char c) {

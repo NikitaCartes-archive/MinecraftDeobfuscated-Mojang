@@ -95,7 +95,7 @@ public final class Transformation {
 		if (vector3f != null) {
 			matrix4f.m03 = vector3f.x();
 			matrix4f.m13 = vector3f.y();
-			matrix4f.m32 = vector3f.z();
+			matrix4f.m23 = vector3f.z();
 		}
 
 		return matrix4f;

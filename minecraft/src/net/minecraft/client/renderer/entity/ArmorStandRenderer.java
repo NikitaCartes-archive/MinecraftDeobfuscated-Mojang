@@ -2,10 +2,12 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ArmorStandArmorModel;
 import net.minecraft.client.model.ArmorStandModel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -44,7 +46,17 @@ public class ArmorStandRenderer extends LivingEntityRenderer<ArmorStand, ArmorSt
 		return d >= (double)(f * f) ? false : armorStand.isCustomNameVisible();
 	}
 
-	protected boolean isVisible(ArmorStand armorStand, boolean bl) {
-		return !armorStand.isInvisible();
+	@Nullable
+	protected RenderType getRenderType(ArmorStand armorStand, boolean bl, boolean bl2) {
+		if (!armorStand.isMarker()) {
+			return super.getRenderType(armorStand, bl, bl2);
+		} else {
+			ResourceLocation resourceLocation = this.getTextureLocation(armorStand);
+			if (bl2) {
+				return RenderType.entityTranslucent(resourceLocation, false);
+			} else {
+				return bl ? RenderType.entityCutoutNoCull(resourceLocation, false) : null;
+			}
+		}
 	}
 }

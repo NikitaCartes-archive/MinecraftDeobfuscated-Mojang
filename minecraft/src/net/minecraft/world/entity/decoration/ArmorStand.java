@@ -80,11 +80,6 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public boolean isGlowing() {
-		return !this.isMarker() && super.isGlowing();
-	}
-
-	@Override
 	public void refreshDimensions() {
 		double d = this.getX();
 		double e = this.getY();
@@ -743,6 +738,11 @@ public class ArmorStand extends LivingEntity {
 	@Override
 	public boolean isPickable() {
 		return super.isPickable() && !this.isMarker();
+	}
+
+	@Override
+	public boolean skipAttackInteraction(Entity entity) {
+		return entity instanceof Player && !this.level.mayInteract((Player)entity, new BlockPos(this));
 	}
 
 	@Override

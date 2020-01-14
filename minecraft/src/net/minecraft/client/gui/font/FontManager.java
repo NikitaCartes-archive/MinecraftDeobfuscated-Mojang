@@ -2,7 +2,6 @@ package net.minecraft.client.gui.font;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -17,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
@@ -43,7 +41,6 @@ import org.apache.logging.log4j.Logger;
 public class FontManager implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Map<ResourceLocation, Font> fonts = Maps.<ResourceLocation, Font>newHashMap();
-	private final Set<GlyphProvider> providers = Sets.<GlyphProvider>newHashSet();
 	private final TextureManager textureManager;
 	private boolean forceUnicode;
 	private final PreparableReloadListener reloadListener = new SimplePreparableReloadListener<Map<ResourceLocation, List<GlyphProvider>>>() {
@@ -178,7 +175,6 @@ public class FontManager implements AutoCloseable {
 							.reload(list);
 					}
 				);
-			map.values().forEach(FontManager.this.providers::addAll);
 			profilerFiller.pop();
 			profilerFiller.endTick();
 		}
@@ -223,6 +219,5 @@ public class FontManager implements AutoCloseable {
 
 	public void close() {
 		this.fonts.values().forEach(Font::close);
-		this.providers.forEach(GlyphProvider::close);
 	}
 }

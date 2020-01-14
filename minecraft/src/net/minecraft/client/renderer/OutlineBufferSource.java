@@ -23,16 +23,21 @@ public class OutlineBufferSource implements MultiBufferSource {
 
 	@Override
 	public VertexConsumer getBuffer(RenderType renderType) {
-		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
-		Optional<RenderType> optional = renderType.outline();
-		if (optional.isPresent()) {
-			VertexConsumer vertexConsumer2 = this.outlineBufferSource.getBuffer((RenderType)optional.get());
-			OutlineBufferSource.EntityOutlineGenerator entityOutlineGenerator = new OutlineBufferSource.EntityOutlineGenerator(
-				vertexConsumer2, this.teamR, this.teamG, this.teamB, this.teamA
-			);
-			return VertexMultiConsumer.create(entityOutlineGenerator, vertexConsumer);
+		if (renderType.isOutline()) {
+			VertexConsumer vertexConsumer = this.outlineBufferSource.getBuffer(renderType);
+			return new OutlineBufferSource.EntityOutlineGenerator(vertexConsumer, this.teamR, this.teamG, this.teamB, this.teamA);
 		} else {
-			return vertexConsumer;
+			VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
+			Optional<RenderType> optional = renderType.outline();
+			if (optional.isPresent()) {
+				VertexConsumer vertexConsumer2 = this.outlineBufferSource.getBuffer((RenderType)optional.get());
+				OutlineBufferSource.EntityOutlineGenerator entityOutlineGenerator = new OutlineBufferSource.EntityOutlineGenerator(
+					vertexConsumer2, this.teamR, this.teamG, this.teamB, this.teamA
+				);
+				return VertexMultiConsumer.create(entityOutlineGenerator, vertexConsumer);
+			} else {
+				return vertexConsumer;
+			}
 		}
 	}
 

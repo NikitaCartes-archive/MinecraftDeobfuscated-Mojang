@@ -34,7 +34,7 @@ public class ItemModelGenerator {
 		}
 
 		map.put("particle", blockModel.hasTexture("particle") ? Either.left(blockModel.getMaterial("particle")) : (Either)map.get("layer0"));
-		BlockModel blockModel2 = new BlockModel(null, list, map, false, false, blockModel.getTransforms(), blockModel.getOverrides());
+		BlockModel blockModel2 = new BlockModel(null, list, map, false, blockModel.getGuiLight(), blockModel.getTransforms(), blockModel.getOverrides());
 		blockModel2.name = blockModel.name;
 		return blockModel2;
 	}

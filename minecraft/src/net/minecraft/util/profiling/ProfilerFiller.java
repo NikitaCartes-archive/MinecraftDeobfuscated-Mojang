@@ -19,4 +19,8 @@ public interface ProfilerFiller {
 
 	@Environment(EnvType.CLIENT)
 	void popPush(Supplier<String> supplier);
+
+	void incrementCounter(String string);
+
+	void incrementCounter(Supplier<String> supplier);
 }

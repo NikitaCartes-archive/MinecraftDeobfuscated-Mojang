@@ -365,6 +365,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			levelSettings = new LevelSettings(levelData);
 		}
 
+		levelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
 		this.loadDataPacks(levelStorage.getFolder(), levelData);
 		ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
 		this.createLevels(levelStorage, levelData, levelSettings, chunkProgressListener);
@@ -716,6 +717,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
+	protected void doRunTask(TickTask tickTask) {
+		this.getProfiler().incrementCounter("runTask");
+		super.doRunTask(tickTask);
+	}
+
 	public void updateStatusIcon(ServerStatus serverStatus) {
 		File file = this.getFile("server-icon.png");
 		if (!file.exists()) {
@@ -903,6 +909,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				return;
 			}
 
+			CrashReport.preload();
 			Bootstrap.bootStrap();
 			Bootstrap.validate();
 			String string = optionSet.valueOf(optionSpec9);
@@ -1053,6 +1060,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 		return crashReport;
 	}
+
+	public abstract Optional<String> getModdedStatus();
 
 	public boolean isInitialized() {
 		return this.universe != null;

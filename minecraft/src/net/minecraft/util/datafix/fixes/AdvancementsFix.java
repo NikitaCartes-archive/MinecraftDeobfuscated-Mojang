@@ -1,15 +1,11 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import java.util.Map;
 
-public class AdvancementsFix extends DataFix {
-	private static final Map<String, String> renames = ImmutableMap.<String, String>builder()
+public class AdvancementsFix extends AdvancementsRenameFix {
+	private static final Map<String, String> RENAMES = ImmutableMap.<String, String>builder()
 		.put("minecraft:recipes/brewing/speckled_melon", "minecraft:recipes/brewing/glistering_melon_slice")
 		.put("minecraft:recipes/building_blocks/black_stained_hardened_clay", "minecraft:recipes/building_blocks/black_terracotta")
 		.put("minecraft:recipes/building_blocks/blue_stained_hardened_clay", "minecraft:recipes/building_blocks/blue_terracotta")
@@ -68,18 +64,6 @@ public class AdvancementsFix extends DataFix {
 		.build();
 
 	public AdvancementsFix(Schema schema, boolean bl) {
-		super(schema, bl);
-	}
-
-	@Override
-	protected TypeRewriteRule makeRule() {
-		return this.fixTypeEverywhereTyped(
-			"AdvancementsFix",
-			this.getInputSchema().getType(References.ADVANCEMENTS),
-			typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.updateMapValues(pair -> {
-						String string = ((Dynamic)pair.getFirst()).asString("");
-						return pair.mapFirst(dynamic2 -> dynamic.createString((String)renames.getOrDefault(string, string)));
-					}))
-		);
+		super(schema, bl, "AdvancementsFix", string -> (String)RENAMES.getOrDefault(string, string));
 	}
 }

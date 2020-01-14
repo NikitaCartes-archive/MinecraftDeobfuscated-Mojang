@@ -42,6 +42,11 @@ public class WeightedBakedModel implements BakedModel {
 	}
 
 	@Override
+	public boolean usesBlockLight() {
+		return this.wrapped.usesBlockLight();
+	}
+
+	@Override
 	public boolean isCustomRenderer() {
 		return this.wrapped.isCustomRenderer();
 	}

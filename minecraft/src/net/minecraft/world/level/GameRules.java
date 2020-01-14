@@ -76,6 +76,8 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DROWNING_DAMAGE = register("drowningDamage", GameRules.BooleanValue.create(true));
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_FALL_DAMAGE = register("fallDamage", GameRules.BooleanValue.create(true));
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_FIRE_DAMAGE = register("fireDamage", GameRules.BooleanValue.create(true));
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_PATROL_SPAWNING = register("doPatrolSpawning", GameRules.BooleanValue.create(true));
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_TRADER_SPAWNING = register("doTraderSpawning", GameRules.BooleanValue.create(true));
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules = (Map<GameRules.Key<?>, GameRules.Value<?>>)GAME_RULE_TYPES.entrySet()
 		.stream()
 		.collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ((GameRules.Type)entry.getValue()).createRule()));

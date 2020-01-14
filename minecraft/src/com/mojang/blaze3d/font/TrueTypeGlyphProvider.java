@@ -3,21 +3,19 @@ package com.mojang.blaze3d.font;
 import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.chars.CharArraySet;
 import it.unimi.dsi.fastutil.chars.CharSet;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 @Environment(EnvType.CLIENT)
 public class TrueTypeGlyphProvider implements GlyphProvider {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private final ByteBuffer fontMemory;
 	private final STBTTFontinfo font;
 	private final float oversample;
 	private final CharSet skip = new CharArraySet();
@@ -26,7 +24,8 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 	private final float pointScale;
 	private final float ascent;
 
-	public TrueTypeGlyphProvider(STBTTFontinfo sTBTTFontinfo, float f, float g, float h, float i, String string) {
+	public TrueTypeGlyphProvider(ByteBuffer byteBuffer, STBTTFontinfo sTBTTFontinfo, float f, float g, float h, float i, String string) {
+		this.fontMemory = byteBuffer;
 		this.font = sTBTTFontinfo;
 		this.oversample = g;
 		string.chars().forEach(ix -> this.skip.add((char)(ix & 65535)));
@@ -86,13 +85,10 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 		}
 	}
 
-	public static STBTTFontinfo getStbttFontinfo(ByteBuffer byteBuffer) throws IOException {
-		STBTTFontinfo sTBTTFontinfo = STBTTFontinfo.create();
-		if (!STBTruetype.stbtt_InitFont(sTBTTFontinfo, byteBuffer)) {
-			throw new IOException("Invalid ttf");
-		} else {
-			return sTBTTFontinfo;
-		}
+	@Override
+	public void close() {
+		this.font.free();
+		MemoryUtil.memFree(this.fontMemory);
 	}
 
 	@Environment(EnvType.CLIENT)

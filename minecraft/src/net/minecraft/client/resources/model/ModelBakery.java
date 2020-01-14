@@ -512,7 +512,7 @@ public class ModelBakery {
 				BlockModel blockModel = (BlockModel)unbakedModel;
 				if (blockModel.getRootModel() == GENERATION_MARKER) {
 					return ITEM_MODEL_GENERATOR.generateBlockModel(this.atlasSet::getSprite, blockModel)
-						.bake(this, blockModel, this.atlasSet::getSprite, modelState, resourceLocation);
+						.bake(this, blockModel, this.atlasSet::getSprite, modelState, resourceLocation, false);
 				}
 			}
 

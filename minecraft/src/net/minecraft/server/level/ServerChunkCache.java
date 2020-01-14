@@ -121,6 +121,8 @@ public class ServerChunkCache extends ChunkSource {
 		if (Thread.currentThread() != this.mainThread) {
 			return (ChunkAccess)CompletableFuture.supplyAsync(() -> this.getChunk(i, j, chunkStatus, bl), this.mainThreadProcessor).join();
 		} else {
+			ProfilerFiller profilerFiller = this.level.getProfiler();
+			profilerFiller.incrementCounter("getChunk");
 			long l = ChunkPos.asLong(i, j);
 
 			for (int k = 0; k < 4; k++) {
@@ -132,6 +134,7 @@ public class ServerChunkCache extends ChunkSource {
 				}
 			}
 
+			profilerFiller.incrementCounter("getChunkCacheMiss");
 			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkFutureMainThread(i, j, chunkStatus, bl);
 			this.mainThreadProcessor.managedBlock(completableFuture::isDone);
 			ChunkAccess chunkAccess = ((Either)completableFuture.join()).map(chunkAccessx -> chunkAccessx, chunkLoadingFailure -> {
@@ -152,6 +155,7 @@ public class ServerChunkCache extends ChunkSource {
 		if (Thread.currentThread() != this.mainThread) {
 			return null;
 		} else {
+			this.level.getProfiler().incrementCounter("getChunkNow");
 			long l = ChunkPos.asLong(i, j);
 
 			for (int k = 0; k < 4; k++) {
@@ -525,6 +529,12 @@ public class ServerChunkCache extends ChunkSource {
 		@Override
 		protected Thread getRunningThread() {
 			return ServerChunkCache.this.mainThread;
+		}
+
+		@Override
+		protected void doRunTask(Runnable runnable) {
+			ServerChunkCache.this.level.getProfiler().incrementCounter("runTask");
+			super.doRunTask(runnable);
 		}
 
 		@Override

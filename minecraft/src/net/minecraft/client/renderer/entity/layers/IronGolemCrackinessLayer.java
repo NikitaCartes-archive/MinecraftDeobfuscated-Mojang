@@ -27,10 +27,12 @@ public class IronGolemCrackinessLayer extends RenderLayer<IronGolem, IronGolemMo
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, IronGolem ironGolem, float f, float g, float h, float j, float k, float l) {
-		IronGolem.Crackiness crackiness = ironGolem.getCrackiness();
-		if (crackiness != IronGolem.Crackiness.NONE) {
-			ResourceLocation resourceLocation = (ResourceLocation)resourceLocations.get(crackiness);
-			renderColoredCutoutModel(this.getParentModel(), resourceLocation, poseStack, multiBufferSource, i, ironGolem, 1.0F, 1.0F, 1.0F);
+		if (!ironGolem.isInvisible()) {
+			IronGolem.Crackiness crackiness = ironGolem.getCrackiness();
+			if (crackiness != IronGolem.Crackiness.NONE) {
+				ResourceLocation resourceLocation = (ResourceLocation)resourceLocations.get(crackiness);
+				renderColoredCutoutModel(this.getParentModel(), resourceLocation, poseStack, multiBufferSource, i, ironGolem, 1.0F, 1.0F, 1.0F);
+			}
 		}
 	}
 }

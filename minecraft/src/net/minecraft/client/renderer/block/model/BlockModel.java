@@ -60,7 +60,8 @@ public class BlockModel implements UnbakedModel {
 		.registerTypeAdapter(ItemOverride.class, new ItemOverride.Deserializer())
 		.create();
 	private final List<BlockElement> elements;
-	private final boolean isGui3d;
+	@Nullable
+	private final BlockModel.GuiLight guiLight;
 	private final boolean hasAmbientOcclusion;
 	private final ItemTransforms transforms;
 	private final List<ItemOverride> overrides;
@@ -85,13 +86,13 @@ public class BlockModel implements UnbakedModel {
 		List<BlockElement> list,
 		Map<String, Either<Material, String>> map,
 		boolean bl,
-		boolean bl2,
+		@Nullable BlockModel.GuiLight guiLight,
 		ItemTransforms itemTransforms,
 		List<ItemOverride> list2
 	) {
 		this.elements = list;
 		this.hasAmbientOcclusion = bl;
-		this.isGui3d = bl2;
+		this.guiLight = guiLight;
 		this.textureMap = map;
 		this.parentLocation = resourceLocation;
 		this.transforms = itemTransforms;
@@ -106,8 +107,12 @@ public class BlockModel implements UnbakedModel {
 		return this.parent != null ? this.parent.hasAmbientOcclusion() : this.hasAmbientOcclusion;
 	}
 
-	public boolean isGui3d() {
-		return this.isGui3d;
+	public BlockModel.GuiLight getGuiLight() {
+		if (this.guiLight != null) {
+			return this.guiLight;
+		} else {
+			return this.parent != null ? this.parent.getGuiLight() : BlockModel.GuiLight.SIDE;
+		}
 	}
 
 	public List<ItemOverride> getOverrides() {
@@ -194,17 +199,22 @@ public class BlockModel implements UnbakedModel {
 
 	@Override
 	public BakedModel bake(ModelBakery modelBakery, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
-		return this.bake(modelBakery, this, function, modelState, resourceLocation);
+		return this.bake(modelBakery, this, function, modelState, resourceLocation, true);
 	}
 
 	public BakedModel bake(
-		ModelBakery modelBakery, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation
+		ModelBakery modelBakery,
+		BlockModel blockModel,
+		Function<Material, TextureAtlasSprite> function,
+		ModelState modelState,
+		ResourceLocation resourceLocation,
+		boolean bl
 	) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)function.apply(this.getMaterial("particle"));
 		if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
-			return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBakery, blockModel), textureAtlasSprite);
+			return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBakery, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
 		} else {
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(modelBakery, blockModel)).particle(textureAtlasSprite);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(modelBakery, blockModel), bl).particle(textureAtlasSprite);
 
 			for (BlockElement blockElement : this.getElements()) {
 				for (Direction direction : blockElement.faces.keySet()) {
@@ -322,8 +332,13 @@ public class BlockModel implements UnbakedModel {
 			}
 
 			List<ItemOverride> list2 = this.getOverrides(jsonDeserializationContext, jsonObject);
+			BlockModel.GuiLight guiLight = null;
+			if (jsonObject.has("gui_light")) {
+				guiLight = BlockModel.GuiLight.getByName(GsonHelper.getAsString(jsonObject, "gui_light"));
+			}
+
 			ResourceLocation resourceLocation = string.isEmpty() ? null : new ResourceLocation(string);
-			return new BlockModel(resourceLocation, list, map, bl, true, itemTransforms, list2);
+			return new BlockModel(resourceLocation, list, map, bl, guiLight, itemTransforms, list2);
 		}
 
 		protected List<ItemOverride> getOverrides(JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
@@ -381,6 +396,32 @@ public class BlockModel implements UnbakedModel {
 			}
 
 			return list;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum GuiLight {
+		FRONT("front"),
+		SIDE("side");
+
+		private final String name;
+
+		private GuiLight(String string2) {
+			this.name = string2;
+		}
+
+		public static BlockModel.GuiLight getByName(String string) {
+			for (BlockModel.GuiLight guiLight : values()) {
+				if (guiLight.name.equals(string)) {
+					return guiLight;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid gui light: " + string);
+		}
+
+		public boolean lightLikeBlock() {
+			return this == SIDE;
 		}
 	}
 }

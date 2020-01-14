@@ -146,36 +146,36 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 		Matrix3f matrix3f = pose.normal();
 
 		for (int t = 1; t <= 8; t++) {
-			float u = Mth.sin((float)(t % 8) * (float) (Math.PI * 2) / 8.0F) * 0.75F;
-			float v = Mth.cos((float)(t % 8) * (float) (Math.PI * 2) / 8.0F) * 0.75F;
-			float w = (float)(t % 8) / 8.0F;
+			float u = Mth.sin((float)t * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+			float v = Mth.cos((float)t * (float) (Math.PI * 2) / 8.0F) * 0.75F;
+			float w = (float)t / 8.0F;
 			vertexConsumer.vertex(matrix4f, q * 0.2F, r * 0.2F, 0.0F)
 				.color(0, 0, 0, 255)
 				.uv(s, n)
 				.overlayCoords(OverlayTexture.NO_OVERLAY)
 				.uv2(k)
-				.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+				.normal(matrix3f, 0.0F, -1.0F, 0.0F)
 				.endVertex();
 			vertexConsumer.vertex(matrix4f, q, r, m)
 				.color(255, 255, 255, 255)
 				.uv(s, o)
 				.overlayCoords(OverlayTexture.NO_OVERLAY)
 				.uv2(k)
-				.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+				.normal(matrix3f, 0.0F, -1.0F, 0.0F)
 				.endVertex();
 			vertexConsumer.vertex(matrix4f, u, v, m)
 				.color(255, 255, 255, 255)
 				.uv(w, o)
 				.overlayCoords(OverlayTexture.NO_OVERLAY)
 				.uv2(k)
-				.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+				.normal(matrix3f, 0.0F, -1.0F, 0.0F)
 				.endVertex();
 			vertexConsumer.vertex(matrix4f, u * 0.2F, v * 0.2F, 0.0F)
 				.color(0, 0, 0, 255)
 				.uv(w, n)
 				.overlayCoords(OverlayTexture.NO_OVERLAY)
 				.uv2(k)
-				.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+				.normal(matrix3f, 0.0F, -1.0F, 0.0F)
 				.endVertex();
 			q = u;
 			r = v;

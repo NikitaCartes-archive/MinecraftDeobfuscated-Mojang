@@ -130,7 +130,12 @@ public abstract class HangingEntity extends Entity {
 
 	@Override
 	public boolean skipAttackInteraction(Entity entity) {
-		return entity instanceof Player ? this.hurt(DamageSource.playerAttack((Player)entity), 0.0F) : false;
+		if (entity instanceof Player) {
+			Player player = (Player)entity;
+			return !this.level.mayInteract(player, this.pos) ? true : this.hurt(DamageSource.playerAttack(player), 0.0F);
+		} else {
+			return false;
+		}
 	}
 
 	@Override

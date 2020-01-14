@@ -115,6 +115,7 @@ public class Options {
 	public boolean bobView = true;
 	public boolean toggleCrouch;
 	public boolean toggleSprint;
+	public boolean skipMultiplayerWarning;
 	public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
 	public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
 	public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
@@ -526,6 +527,10 @@ public class Options {
 						this.glDebugVerbosity = Integer.parseInt(string2);
 					}
 
+					if ("skipMultiplayerWarning".equals(string)) {
+						this.skipMultiplayerWarning = "true".equals(string2);
+					}
+
 					for (KeyMapping keyMapping : this.keyMappings) {
 						if (string.equals("key_" + keyMapping.getName())) {
 							keyMapping.setKey(InputConstants.getKey(string2));
@@ -652,6 +657,7 @@ public class Options {
 				printWriter.println("mouseWheelSensitivity:" + this.mouseWheelSensitivity);
 				printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
 				printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
+				printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
 
 				for (KeyMapping keyMapping : this.keyMappings) {
 					printWriter.println("key_" + keyMapping.getName() + ":" + keyMapping.saveString());

@@ -11,7 +11,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfig
 public class SpruceTreeGrower extends AbstractMegaTreeGrower {
 	@Nullable
 	@Override
-	protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+	protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
 		return Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.SPRUCE_TREE_CONFIG);
 	}
 

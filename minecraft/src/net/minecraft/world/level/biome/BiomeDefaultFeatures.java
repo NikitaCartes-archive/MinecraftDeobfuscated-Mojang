@@ -200,7 +200,16 @@ public class BiomeDefaultFeatures {
 		.foliageHeight(3)
 		.ignoreVines()
 		.build();
-	public static final SmallTreeConfiguration SUPER_BIRCH_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+		)
+		.baseHeight(5)
+		.heightRandA(2)
+		.foliageHeight(3)
+		.ignoreVines()
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
+		.build();
+	public static final SmallTreeConfiguration SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
 		)
 		.baseHeight(5)
@@ -208,6 +217,7 @@ public class BiomeDefaultFeatures {
 		.heightRandB(6)
 		.foliageHeight(3)
 		.ignoreVines()
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
 	public static final SmallTreeConfiguration SWAMP_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(3, 0)
@@ -231,33 +241,56 @@ public class BiomeDefaultFeatures {
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
+	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
+		)
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
+		.build();
 	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
 		)
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
-	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_001_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
 		)
 		.baseHeight(4)
 		.heightRandA(2)
 		.foliageHeight(3)
 		.ignoreVines()
-		.decorators(ImmutableList.of(new BeehiveDecorator(0.01F)))
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
-	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_001_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
+		)
+		.baseHeight(4)
+		.heightRandA(2)
+		.foliageHeight(3)
+		.ignoreVines()
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
+		.build();
+	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
 		)
-		.decorators(ImmutableList.of(new BeehiveDecorator(0.01F)))
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
 		.build();
-	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_001_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
 			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
 		)
 		.baseHeight(5)
 		.heightRandA(2)
 		.foliageHeight(3)
 		.ignoreVines()
-		.decorators(ImmutableList.of(new BeehiveDecorator(0.01F)))
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
+		.build();
+	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+		)
+		.baseHeight(5)
+		.heightRandA(2)
+		.foliageHeight(3)
+		.ignoreVines()
+		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
 	public static final TreeConfiguration JUNGLE_BUSH_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(
 			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(OAK_LEAVES)
@@ -788,7 +821,7 @@ public class BiomeDefaultFeatures {
 		biome.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
 			Feature.NORMAL_TREE
-				.configured(BIRCH_TREE_CONFIG)
+				.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
 		);
 	}
@@ -799,8 +832,11 @@ public class BiomeDefaultFeatures {
 			Feature.RANDOM_SELECTOR
 				.configured(
 					new RandomFeatureConfiguration(
-						ImmutableList.of(Feature.NORMAL_TREE.configured(BIRCH_TREE_CONFIG).weighted(0.2F), Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1F)),
-						Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG)
+						ImmutableList.of(
+							Feature.NORMAL_TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.2F),
+							Feature.FANCY_TREE.configured(FANCY_TREE_WITH_BEES_0002_CONFIG).weighted(0.1F)
+						),
+						Feature.NORMAL_TREE.configured(NORMAL_TREE_WITH_BEES_0002_CONFIG)
 					)
 				)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
@@ -813,7 +849,8 @@ public class BiomeDefaultFeatures {
 			Feature.RANDOM_SELECTOR
 				.configured(
 					new RandomFeatureConfiguration(
-						ImmutableList.of(Feature.NORMAL_TREE.configured(SUPER_BIRCH_TREE_CONFIG).weighted(0.5F)), Feature.NORMAL_TREE.configured(BIRCH_TREE_CONFIG)
+						ImmutableList.of(Feature.NORMAL_TREE.configured(SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.5F)),
+						Feature.NORMAL_TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG)
 					)
 				)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))

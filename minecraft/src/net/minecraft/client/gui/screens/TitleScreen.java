@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.PanoramaRenderer;
@@ -155,9 +156,13 @@ public class TitleScreen extends Screen {
 
 	private void createNormalMenuOptions(int i, int j) {
 		this.addButton(new Button(this.width / 2 - 100, i, 200, 20, I18n.get("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
-		this.addButton(
-			new Button(this.width / 2 - 100, i + j * 1, 200, 20, I18n.get("menu.multiplayer"), button -> this.minecraft.setScreen(new JoinMultiplayerScreen(this)))
-		);
+		this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, I18n.get("menu.multiplayer"), button -> {
+			if (this.minecraft.options.skipMultiplayerWarning) {
+				this.minecraft.setScreen(new JoinMultiplayerScreen(this));
+			} else {
+				this.minecraft.setScreen(new SafetyScreen(this));
+			}
+		}));
 		this.addButton(new Button(this.width / 2 - 100, i + j * 2, 200, 20, I18n.get("menu.online"), button -> this.realmsButtonClicked()));
 	}
 
@@ -260,6 +265,10 @@ public class TitleScreen extends Screen {
 				string = string + " Demo";
 			} else {
 				string = string + ("release".equalsIgnoreCase(this.minecraft.getVersionType()) ? "" : "/" + this.minecraft.getVersionType());
+			}
+
+			if (this.minecraft.isProbablyModded()) {
+				string = string + I18n.get("menu.modded");
 			}
 
 			this.drawString(this.font, string, 2, this.height - 10, 16777215 | n);

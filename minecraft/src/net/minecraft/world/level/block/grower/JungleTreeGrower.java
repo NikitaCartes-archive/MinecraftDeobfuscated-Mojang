@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfig
 public class JungleTreeGrower extends AbstractMegaTreeGrower {
 	@Nullable
 	@Override
-	protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random) {
+	protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
 		return new TreeFeature(SmallTreeConfiguration::deserialize).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
 	}
 

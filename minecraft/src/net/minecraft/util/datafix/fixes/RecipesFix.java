@@ -1,16 +1,10 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
-import com.mojang.datafixers.types.Type;
-import com.mojang.datafixers.util.Pair;
 import java.util.Map;
-import java.util.Objects;
 
-public class RecipesFix extends DataFix {
+public class RecipesFix extends RecipesRenameFix {
 	private static final Map<String, String> RECIPES = ImmutableMap.<String, String>builder()
 		.put("minecraft:acacia_wooden_slab", "minecraft:acacia_slab")
 		.put("minecraft:birch_wooden_slab", "minecraft:birch_slab")
@@ -69,16 +63,6 @@ public class RecipesFix extends DataFix {
 		.build();
 
 	public RecipesFix(Schema schema, boolean bl) {
-		super(schema, bl);
-	}
-
-	@Override
-	protected TypeRewriteRule makeRule() {
-		Type<Pair<String, String>> type = DSL.named(References.RECIPE.typeName(), DSL.namespacedString());
-		if (!Objects.equals(type, this.getInputSchema().getType(References.RECIPE))) {
-			throw new IllegalStateException("Recipe type is not what was expected.");
-		} else {
-			return this.fixTypeEverywhere("Recipes fix", type, dynamicOps -> pair -> pair.mapSecond(string -> (String)RECIPES.getOrDefault(string, string)));
-		}
+		super(schema, bl, "Recipes fix", string -> (String)RECIPES.getOrDefault(string, string));
 	}
 }

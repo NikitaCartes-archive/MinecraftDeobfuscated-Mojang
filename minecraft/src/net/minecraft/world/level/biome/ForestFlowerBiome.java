@@ -61,10 +61,10 @@ public final class ForestFlowerBiome extends Biome {
 				.configured(
 					new RandomFeatureConfiguration(
 						ImmutableList.of(
-							Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_001_CONFIG).weighted(0.2F),
-							Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_001_CONFIG).weighted(0.1F)
+							Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_002_CONFIG).weighted(0.2F),
+							Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_002_CONFIG).weighted(0.1F)
 						),
-						Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_001_CONFIG)
+						Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_002_CONFIG)
 					)
 				)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(6, 0.1F, 1)))

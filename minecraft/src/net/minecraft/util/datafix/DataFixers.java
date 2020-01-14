@@ -12,6 +12,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
+import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
 import net.minecraft.util.datafix.fixes.BedBlockEntityInjecter;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BeehivePoiRenameFix;
@@ -96,6 +97,7 @@ import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.util.datafix.fixes.OptionsKeyTranslationFix;
 import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
+import net.minecraft.util.datafix.fixes.RecipesRenameFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
@@ -519,6 +521,17 @@ public class DataFixers {
 		Schema schema96 = dataFixerBuilder.addSchema(2100, V2100::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema96, "Added Bee and Bee Stinger", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema96, "Add beehive", References.BLOCK_ENTITY));
+		dataFixerBuilder.addFixer(
+			new RecipesRenameFix(schema96, false, "Rename sugar recipe", string -> "minecraft:sugar".equals(string) ? "sugar_from_sugar_cane" : string)
+		);
+		dataFixerBuilder.addFixer(
+			new AdvancementsRenameFix(
+				schema96,
+				false,
+				"Rename sugar recipe advancement",
+				string -> "minecraft:recipes/misc/sugar".equals(string) ? "minecraft:recipes/misc/sugar_from_sugar_cane" : string
+			)
+		);
 		Schema schema97 = dataFixerBuilder.addSchema(2202, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ChunkBiomeFix(schema97, false));
 		Schema schema98 = dataFixerBuilder.addSchema(2209, SAME_NAMESPACED);

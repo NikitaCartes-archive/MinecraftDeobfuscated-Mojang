@@ -139,8 +139,9 @@ public class FallingBlockEntity extends Entity {
 						this.remove();
 						if (!this.cancelDrop) {
 							boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
-							boolean bl4 = this.blockState.canSurvive(this.level, blockPos) && !FallingBlock.isFree(this.level.getBlockState(blockPos.below()));
-							if (bl3 && bl4) {
+							boolean bl4 = FallingBlock.isFree(this.level.getBlockState(blockPos.below())) && (!bl || !bl2);
+							boolean bl5 = this.blockState.canSurvive(this.level, blockPos) && !bl4;
+							if (bl3 && bl5) {
 								if (this.blockState.hasProperty(BlockStateProperties.WATERLOGGED) && this.level.getFluidState(blockPos).getType() == Fluids.WATER) {
 									this.blockState = this.blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(true));
 								}

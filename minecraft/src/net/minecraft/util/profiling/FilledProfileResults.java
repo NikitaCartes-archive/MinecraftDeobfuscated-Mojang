@@ -1,17 +1,22 @@
 package net.minecraft.util.profiling;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import org.apache.commons.io.IOUtils;
@@ -20,17 +25,36 @@ import org.apache.logging.log4j.Logger;
 
 public class FilledProfileResults implements ProfileResults {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final Map<String, Long> times;
-	private final Map<String, Long> counts;
+	private static final ProfilerPathEntry EMPTY = new ProfilerPathEntry() {
+		@Override
+		public long getDuration() {
+			return 0L;
+		}
+
+		@Override
+		public long getCount() {
+			return 0L;
+		}
+
+		@Override
+		public Object2LongMap<String> getCounters() {
+			return Object2LongMaps.emptyMap();
+		}
+	};
+	private static final Splitter SPLITTER = Splitter.on('\u001e');
+	private static final Comparator<Entry<String, FilledProfileResults.CounterCollector>> COUNTER_ENTRY_COMPARATOR = Entry.comparingByValue(
+			Comparator.comparingLong(counterCollector -> counterCollector.totalValue)
+		)
+		.reversed();
+	private final Map<String, ? extends ProfilerPathEntry> entries;
 	private final long startTimeNano;
 	private final int startTimeTicks;
 	private final long endTimeNano;
 	private final int endTimeTicks;
 	private final int tickDuration;
 
-	public FilledProfileResults(Map<String, Long> map, Map<String, Long> map2, long l, int i, long m, int j) {
-		this.times = map;
-		this.counts = map2;
+	public FilledProfileResults(Map<String, ? extends ProfilerPathEntry> map, long l, int i, long m, int j) {
+		this.entries = map;
 		this.startTimeNano = l;
 		this.startTimeTicks = i;
 		this.endTimeNano = m;
@@ -38,12 +62,19 @@ public class FilledProfileResults implements ProfileResults {
 		this.tickDuration = j - i;
 	}
 
+	private ProfilerPathEntry getEntry(String string) {
+		ProfilerPathEntry profilerPathEntry = (ProfilerPathEntry)this.entries.get(string);
+		return profilerPathEntry != null ? profilerPathEntry : EMPTY;
+	}
+
 	@Override
 	public List<ResultField> getTimes(String string) {
 		String string2 = string;
-		long l = this.times.containsKey("root") ? (Long)this.times.get("root") : 0L;
-		long m = (Long)this.times.getOrDefault(string, -1L);
-		long n = (Long)this.counts.getOrDefault(string, 0L);
+		ProfilerPathEntry profilerPathEntry = this.getEntry("root");
+		long l = profilerPathEntry.getDuration();
+		ProfilerPathEntry profilerPathEntry2 = this.getEntry(string);
+		long m = profilerPathEntry2.getDuration();
+		long n = profilerPathEntry2.getCount();
 		List<ResultField> list = Lists.<ResultField>newArrayList();
 		if (!string.isEmpty()) {
 			string = string + '\u001e';
@@ -51,9 +82,9 @@ public class FilledProfileResults implements ProfileResults {
 
 		long o = 0L;
 
-		for (String string3 : this.times.keySet()) {
-			if (string3.length() > string.length() && string3.startsWith(string) && string3.indexOf(30, string.length() + 1) < 0) {
-				o += this.times.get(string3);
+		for (String string3 : this.entries.keySet()) {
+			if (isDirectChild(string, string3)) {
+				o += this.getEntry(string3).getDuration();
 			}
 		}
 
@@ -66,22 +97,15 @@ public class FilledProfileResults implements ProfileResults {
 			l = o;
 		}
 
-		Set<String> set = Sets.<String>newHashSet(this.times.keySet());
-		set.addAll(this.counts.keySet());
-
-		for (String string4 : set) {
-			if (string4.length() > string.length() && string4.startsWith(string) && string4.indexOf(30, string.length() + 1) < 0) {
-				long p = (Long)this.times.getOrDefault(string4, 0L);
+		for (String string4 : this.entries.keySet()) {
+			if (isDirectChild(string, string4)) {
+				ProfilerPathEntry profilerPathEntry3 = this.getEntry(string4);
+				long p = profilerPathEntry3.getDuration();
 				double d = (double)p * 100.0 / (double)o;
 				double e = (double)p * 100.0 / (double)l;
 				String string5 = string4.substring(string.length());
-				long q = (Long)this.counts.getOrDefault(string4, 0L);
-				list.add(new ResultField(string5, d, e, q));
+				list.add(new ResultField(string5, d, e, profilerPathEntry3.getCount()));
 			}
-		}
-
-		for (String string4x : this.times.keySet()) {
-			this.times.put(string4x, (Long)this.times.get(string4x) * 999L / 1000L);
 		}
 
 		if ((float)o > f) {
@@ -91,6 +115,28 @@ public class FilledProfileResults implements ProfileResults {
 		Collections.sort(list);
 		list.add(0, new ResultField(string2, 100.0, (double)o * 100.0 / (double)l, n));
 		return list;
+	}
+
+	private static boolean isDirectChild(String string, String string2) {
+		return string2.length() > string.length() && string2.startsWith(string) && string2.indexOf(30, string.length() + 1) < 0;
+	}
+
+	private Map<String, FilledProfileResults.CounterCollector> getCounterValues() {
+		Map<String, FilledProfileResults.CounterCollector> map = Maps.newTreeMap();
+		this.entries
+			.forEach(
+				(string, profilerPathEntry) -> {
+					Object2LongMap<String> object2LongMap = profilerPathEntry.getCounters();
+					if (!object2LongMap.isEmpty()) {
+						List<String> list = SPLITTER.splitToList(string);
+						object2LongMap.forEach(
+							(stringx, long_) -> ((FilledProfileResults.CounterCollector)map.computeIfAbsent(stringx, stringxx -> new FilledProfileResults.CounterCollector()))
+									.addValue(list.iterator(), long_)
+						);
+					}
+				}
+			);
+		return map;
 	}
 
 	@Override
@@ -150,21 +196,44 @@ public class FilledProfileResults implements ProfileResults {
 		stringBuilder.append("--- BEGIN PROFILE DUMP ---\n\n");
 		this.appendProfilerResults(0, "root", stringBuilder);
 		stringBuilder.append("--- END PROFILE DUMP ---\n\n");
+		Map<String, FilledProfileResults.CounterCollector> map = this.getCounterValues();
+		if (!map.isEmpty()) {
+			stringBuilder.append("--- BEGIN COUNTER DUMP ---\n\n");
+			this.appendCounters(map, stringBuilder, i);
+			stringBuilder.append("--- END COUNTER DUMP ---\n\n");
+		}
+
 		return stringBuilder.toString();
+	}
+
+	private static StringBuilder indentLine(StringBuilder stringBuilder, int i) {
+		stringBuilder.append(String.format("[%02d] ", i));
+
+		for (int j = 0; j < i; j++) {
+			stringBuilder.append("|   ");
+		}
+
+		return stringBuilder;
 	}
 
 	private void appendProfilerResults(int i, String string, StringBuilder stringBuilder) {
 		List<ResultField> list = this.getTimes(string);
+		Object2LongMap<String> object2LongMap = ((ProfilerPathEntry)this.entries.get(string)).getCounters();
+		object2LongMap.forEach(
+			(stringx, long_) -> indentLine(stringBuilder, i)
+					.append('#')
+					.append(stringx)
+					.append(' ')
+					.append(long_)
+					.append('/')
+					.append(long_ / (long)this.tickDuration)
+					.append('\n')
+		);
 		if (list.size() >= 3) {
 			for (int j = 1; j < list.size(); j++) {
 				ResultField resultField = (ResultField)list.get(j);
-				stringBuilder.append(String.format("[%02d] ", i));
-
-				for (int k = 0; k < i; k++) {
-					stringBuilder.append("|   ");
-				}
-
-				stringBuilder.append(resultField.name)
+				indentLine(stringBuilder, i)
+					.append(resultField.name)
 					.append('(')
 					.append(resultField.count)
 					.append('/')
@@ -178,12 +247,39 @@ public class FilledProfileResults implements ProfileResults {
 				if (!"unspecified".equals(resultField.name)) {
 					try {
 						this.appendProfilerResults(i + 1, string + '\u001e' + resultField.name, stringBuilder);
-					} catch (Exception var8) {
-						stringBuilder.append("[[ EXCEPTION ").append(var8).append(" ]]");
+					} catch (Exception var9) {
+						stringBuilder.append("[[ EXCEPTION ").append(var9).append(" ]]");
 					}
 				}
 			}
 		}
+	}
+
+	private void appendCounterResults(int i, String string, FilledProfileResults.CounterCollector counterCollector, int j, StringBuilder stringBuilder) {
+		indentLine(stringBuilder, i)
+			.append(string)
+			.append(" total:")
+			.append(counterCollector.selfValue)
+			.append('/')
+			.append(counterCollector.totalValue)
+			.append(" average: ")
+			.append(counterCollector.selfValue / (long)j)
+			.append('/')
+			.append(counterCollector.totalValue / (long)j)
+			.append('\n');
+		counterCollector.children
+			.entrySet()
+			.stream()
+			.sorted(COUNTER_ENTRY_COMPARATOR)
+			.forEach(entry -> this.appendCounterResults(i + 1, (String)entry.getKey(), (FilledProfileResults.CounterCollector)entry.getValue(), j, stringBuilder));
+	}
+
+	private void appendCounters(Map<String, FilledProfileResults.CounterCollector> map, StringBuilder stringBuilder, int i) {
+		map.forEach((string, counterCollector) -> {
+			stringBuilder.append("-- Counter: ").append(string).append(" --\n");
+			this.appendCounterResults(0, "root", (FilledProfileResults.CounterCollector)counterCollector.children.get("root"), i, stringBuilder);
+			stringBuilder.append("\n\n");
+		});
 	}
 
 	private static String getComment() {
@@ -214,5 +310,24 @@ public class FilledProfileResults implements ProfileResults {
 	@Override
 	public int getTickDuration() {
 		return this.tickDuration;
+	}
+
+	static class CounterCollector {
+		private long selfValue;
+		private long totalValue;
+		private final Map<String, FilledProfileResults.CounterCollector> children = Maps.<String, FilledProfileResults.CounterCollector>newHashMap();
+
+		private CounterCollector() {
+		}
+
+		public void addValue(Iterator<String> iterator, long l) {
+			this.totalValue += l;
+			if (!iterator.hasNext()) {
+				this.selfValue += l;
+			} else {
+				((FilledProfileResults.CounterCollector)this.children.computeIfAbsent(iterator.next(), string -> new FilledProfileResults.CounterCollector()))
+					.addValue(iterator, l);
+			}
+		}
 	}
 }

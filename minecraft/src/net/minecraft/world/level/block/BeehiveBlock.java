@@ -76,9 +76,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 			if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
 				beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 				level.updateNeighbourForOutputSignal(blockPos, this);
+				this.angerNearbyBees(level, blockPos);
 			}
 
-			this.angerNearbyBees(level, blockPos);
 			CriteriaTriggers.BEE_NEST_DESTROYED.trigger((ServerPlayer)player, blockState.getBlock(), itemStack, beehiveBlockEntity.getOccupantCount());
 		}
 	}
@@ -98,9 +98,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	public static void dropHoneycomb(Level level, BlockPos blockPos) {
-		for (int i = 0; i < 3; i++) {
-			popResource(level, blockPos, new ItemStack(Items.HONEYCOMB, 1));
-		}
+		popResource(level, blockPos, new ItemStack(Items.HONEYCOMB, 3));
 	}
 
 	@Override

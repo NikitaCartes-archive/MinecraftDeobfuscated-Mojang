@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -105,24 +106,14 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		}
 
 		this.model.prepareMobModel(livingEntity, o, n, g);
-		boolean bl = livingEntity.isGlowing();
-		boolean bl2 = this.isVisible(livingEntity, false);
-		boolean bl3 = !bl2 && !livingEntity.isInvisibleTo(Minecraft.getInstance().player);
 		this.model.setupAnim(livingEntity, o, n, lx, k, m);
-		ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
-		RenderType renderType;
-		if (bl3) {
-			renderType = RenderType.entityTranslucent(resourceLocation);
-		} else if (bl2) {
-			renderType = this.model.renderType(resourceLocation);
-		} else {
-			renderType = RenderType.outline(resourceLocation);
-		}
-
-		if (bl2 || bl3 || bl) {
+		boolean bl = this.isBodyVisible(livingEntity);
+		boolean bl2 = !bl && !livingEntity.isInvisibleTo(Minecraft.getInstance().player);
+		RenderType renderType = this.getRenderType(livingEntity, bl, bl2);
+		if (renderType != null) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
 			int p = getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, p, 1.0F, 1.0F, 1.0F, bl3 ? 0.15F : 1.0F);
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, p, 1.0F, 1.0F, 1.0F, bl2 ? 0.15F : 1.0F);
 		}
 
 		if (!livingEntity.isSpectator()) {
@@ -135,12 +126,24 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		super.render(livingEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
+	@Nullable
+	protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2) {
+		ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
+		if (bl2) {
+			return RenderType.entityTranslucent(resourceLocation);
+		} else if (bl) {
+			return this.model.renderType(resourceLocation);
+		} else {
+			return livingEntity.isGlowing() ? RenderType.outline(resourceLocation) : null;
+		}
+	}
+
 	public static int getOverlayCoords(LivingEntity livingEntity, float f) {
 		return OverlayTexture.pack(OverlayTexture.u(f), OverlayTexture.v(livingEntity.hurtTime > 0 || livingEntity.deathTime > 0));
 	}
 
-	protected boolean isVisible(T livingEntity, boolean bl) {
-		return !livingEntity.isInvisible() || bl;
+	protected boolean isBodyVisible(T livingEntity) {
+		return !livingEntity.isInvisible();
 	}
 
 	private static float sleepDirectionToRotation(Direction direction) {

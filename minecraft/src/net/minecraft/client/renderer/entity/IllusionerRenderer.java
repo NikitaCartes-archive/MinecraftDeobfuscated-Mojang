@@ -55,7 +55,7 @@ public class IllusionerRenderer extends IllagerRenderer<Illusioner> {
 		}
 	}
 
-	protected boolean isVisible(Illusioner illusioner, boolean bl) {
+	protected boolean isBodyVisible(Illusioner illusioner) {
 		return true;
 	}
 }

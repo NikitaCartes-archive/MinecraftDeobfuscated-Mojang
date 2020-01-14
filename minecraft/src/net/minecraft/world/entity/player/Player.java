@@ -1292,17 +1292,11 @@ public abstract class Player extends LivingEntity {
 			if (!this.isCreative()) {
 				double d = 8.0;
 				double e = 5.0;
+				Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 				List<Monster> list = this.level
 					.getEntitiesOfClass(
 						Monster.class,
-						new AABB(
-							(double)blockPos.getX() - 8.0,
-							(double)blockPos.getY() - 5.0,
-							(double)blockPos.getZ() - 8.0,
-							(double)blockPos.getX() + 8.0,
-							(double)blockPos.getY() + 5.0,
-							(double)blockPos.getZ() + 8.0
-						),
+						new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0),
 						monster -> monster.isPreventingPlayerRest(this)
 					);
 				if (!list.isEmpty()) {
@@ -1328,16 +1322,12 @@ public abstract class Player extends LivingEntity {
 	}
 
 	private boolean bedInRange(BlockPos blockPos, Direction direction) {
-		if (Math.abs(this.getX() - (double)blockPos.getX()) <= 3.0
-			&& Math.abs(this.getY() - (double)blockPos.getY()) <= 2.0
-			&& Math.abs(this.getZ() - (double)blockPos.getZ()) <= 3.0) {
-			return true;
-		} else {
-			BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-			return Math.abs(this.getX() - (double)blockPos2.getX()) <= 3.0
-				&& Math.abs(this.getY() - (double)blockPos2.getY()) <= 2.0
-				&& Math.abs(this.getZ() - (double)blockPos2.getZ()) <= 3.0;
-		}
+		return this.isReachableBedBlock(blockPos) || this.isReachableBedBlock(blockPos.relative(direction.getOpposite()));
+	}
+
+	private boolean isReachableBedBlock(BlockPos blockPos) {
+		Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
+		return Math.abs(this.getX() - vec3.x()) <= 3.0 && Math.abs(this.getY() - vec3.y()) <= 2.0 && Math.abs(this.getZ() - vec3.z()) <= 3.0;
 	}
 
 	private boolean bedBlocked(BlockPos blockPos, Direction direction) {

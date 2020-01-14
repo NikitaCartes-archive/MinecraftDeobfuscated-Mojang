@@ -294,4 +294,8 @@ public class CrashReport {
 
 		return crashReport;
 	}
+
+	public static void preload() {
+		new CrashReport("Don't panic!", new Throwable()).getFriendlyReport();
+	}
 }

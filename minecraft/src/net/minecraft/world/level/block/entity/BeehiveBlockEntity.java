@@ -109,6 +109,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	public void addOccupantWithPresetTicks(Entity entity, boolean bl, int i) {
 		if (this.stored.size() < 3) {
+			entity.stopRiding();
 			entity.ejectPassengers();
 			CompoundTag compoundTag = new CompoundTag();
 			entity.save(compoundTag);
@@ -142,13 +143,14 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 			compoundTag.removeUUID("UUID");
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (!this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
+			boolean bl = !this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty();
+			if (bl && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 				return false;
 			} else {
 				Entity entity = EntityType.loadEntityRecursive(compoundTag, this.level, entityx -> entityx);
 				if (entity != null) {
 					float f = entity.getBbWidth();
-					double d = 0.55 + (double)(f / 2.0F);
+					double d = bl ? 0.0 : 0.55 + (double)(f / 2.0F);
 					double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
 					double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
 					double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();

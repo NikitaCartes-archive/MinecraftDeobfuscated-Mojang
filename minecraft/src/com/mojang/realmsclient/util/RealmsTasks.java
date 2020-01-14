@@ -16,7 +16,6 @@ import com.mojang.realmsclient.gui.screens.RealmsDownloadLatestWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
-import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResourcePackScreen;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import java.io.IOException;
@@ -576,58 +575,6 @@ public class RealmsTasks {
 					RealmsTasks.LOGGER.error("Couldn't switch world!");
 					this.error(var6.toString());
 				}
-			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class TrialCreationTask extends LongRunningTask {
-		private final String name;
-		private final String motd;
-		private final RealmsMainScreen lastScreen;
-
-		public TrialCreationTask(String string, String string2, RealmsMainScreen realmsMainScreen) {
-			this.name = string;
-			this.motd = string2;
-			this.lastScreen = realmsMainScreen;
-		}
-
-		public void run() {
-			String string = RealmsScreen.getLocalizedString("mco.create.world.wait");
-			this.setTitle(string);
-			RealmsClient realmsClient = RealmsClient.createRealmsClient();
-
-			try {
-				RealmsServer realmsServer = realmsClient.createTrial(this.name, this.motd);
-				if (realmsServer != null) {
-					this.lastScreen.setCreatedTrial(true);
-					this.lastScreen.closePopup();
-					RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(
-						this.lastScreen,
-						realmsServer,
-						this.lastScreen.newScreen(),
-						RealmsScreen.getLocalizedString("mco.selectServer.create"),
-						RealmsScreen.getLocalizedString("mco.create.world.subtitle"),
-						10526880,
-						RealmsScreen.getLocalizedString("mco.create.world.skip")
-					);
-					realmsResetWorldScreen.setResetTitle(RealmsScreen.getLocalizedString("mco.create.world.reset.title"));
-					Realms.setScreen(realmsResetWorldScreen);
-				} else {
-					this.error(RealmsScreen.getLocalizedString("mco.trial.unavailable"));
-				}
-			} catch (RealmsServiceException var5) {
-				RealmsTasks.LOGGER.error("Couldn't create trial");
-				this.error(var5.toString());
-			} catch (UnsupportedEncodingException var6) {
-				RealmsTasks.LOGGER.error("Couldn't create trial");
-				this.error(var6.getLocalizedMessage());
-			} catch (IOException var7) {
-				RealmsTasks.LOGGER.error("Could not parse response creating trial");
-				this.error(var7.getLocalizedMessage());
-			} catch (Exception var8) {
-				RealmsTasks.LOGGER.error("Could not create trial");
-				this.error(var8.getLocalizedMessage());
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
@@ -17,6 +18,8 @@ public class PatrolSpawner {
 
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
 		if (!bl) {
+			return 0;
+		} else if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DO_PATROL_SPAWNING)) {
 			return 0;
 		} else {
 			Random random = serverLevel.random;

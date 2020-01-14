@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import com.google.common.base.Charsets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -526,17 +527,17 @@ public final class NativeImage implements AutoCloseable {
 	}
 
 	public static NativeImage fromBase64(String string) throws IOException {
-		NativeImage var6;
+		byte[] bs = Base64.getDecoder().decode(string.replaceAll("\n", "").getBytes(Charsets.UTF_8));
+
+		NativeImage var5;
 		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-			ByteBuffer byteBuffer = memoryStack.UTF8(string.replaceAll("\n", ""), false);
-			ByteBuffer byteBuffer2 = Base64.getDecoder().decode(byteBuffer);
-			ByteBuffer byteBuffer3 = memoryStack.malloc(byteBuffer2.remaining());
-			byteBuffer3.put(byteBuffer2);
-			byteBuffer3.rewind();
-			var6 = read(byteBuffer3);
+			ByteBuffer byteBuffer = memoryStack.malloc(bs.length);
+			byteBuffer.put(bs);
+			byteBuffer.rewind();
+			var5 = read(byteBuffer);
 		}
 
-		return var6;
+		return var5;
 	}
 
 	public static int getA(int i) {

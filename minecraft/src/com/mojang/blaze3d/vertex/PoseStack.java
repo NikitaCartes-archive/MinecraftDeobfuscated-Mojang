@@ -28,13 +28,19 @@ public class PoseStack {
 	public void scale(float f, float g, float h) {
 		PoseStack.Pose pose = (PoseStack.Pose)this.poseStack.getLast();
 		pose.pose.multiply(Matrix4f.createScaleMatrix(f, g, h));
-		if (f != g || g != h) {
-			float i = 1.0F / f;
-			float j = 1.0F / g;
-			float k = 1.0F / h;
-			float l = Mth.fastInvCubeRoot(i * j * k);
-			pose.normal.mul(Matrix3f.createScaleMatrix(l * i, l * j, l * k));
+		if (f == g && g == h) {
+			if (f > 0.0F) {
+				return;
+			}
+
+			pose.normal.mul(-1.0F);
 		}
+
+		float i = 1.0F / f;
+		float j = 1.0F / g;
+		float k = 1.0F / h;
+		float l = Mth.fastInvCubeRoot(i * j * k);
+		pose.normal.mul(Matrix3f.createScaleMatrix(l * i, l * j, l * k));
 	}
 
 	public void mulPose(Quaternion quaternion) {

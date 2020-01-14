@@ -212,8 +212,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		RenderSystem.scalef(16.0F, 16.0F, 16.0F);
 		PoseStack poseStack = new PoseStack();
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-		Item item = itemStack.getItem();
-		boolean bl = !bakedModel.isGui3d() || item == Items.SHIELD || item == Items.TRIDENT;
+		boolean bl = !bakedModel.usesBlockLight();
 		if (bl) {
 			Lighting.setupForFlatItems();
 		}
