@@ -27,10 +27,11 @@ public class SharedMonsterAttributes {
 		.setSyncable(true);
 	public static final Attribute ATTACK_DAMAGE = new RangedAttribute(null, "generic.attackDamage", 2.0, 0.0, 2048.0);
 	public static final Attribute ATTACK_KNOCKBACK = new RangedAttribute(null, "generic.attackKnockback", 0.0, 0.0, 5.0);
-	public static final Attribute ATTACK_SPEED = new RangedAttribute(null, "generic.attackSpeed", 4.0, 0.0, 1024.0).setSyncable(true);
+	public static final Attribute ATTACK_SPEED = new RangedAttribute(null, "generic.attackSpeed", 4.0, 0.1F, 1024.0).setSyncable(true);
 	public static final Attribute ARMOR = new RangedAttribute(null, "generic.armor", 0.0, 0.0, 30.0).setSyncable(true);
 	public static final Attribute ARMOR_TOUGHNESS = new RangedAttribute(null, "generic.armorToughness", 0.0, 0.0, 20.0).setSyncable(true);
 	public static final Attribute LUCK = new RangedAttribute(null, "generic.luck", 0.0, -1024.0, 1024.0).setSyncable(true);
+	public static final Attribute ATTACK_REACH = new RangedAttribute(null, "generic.attackReach", 2.5, 0.0, 6.0).setSyncable(true);
 
 	public static ListTag saveAttributes(BaseAttributeMap baseAttributeMap) {
 		ListTag listTag = new ListTag();

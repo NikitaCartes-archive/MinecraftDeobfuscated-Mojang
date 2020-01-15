@@ -1,6 +1,7 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 
 public class TridentImpalerEnchantment extends Enchantment {
@@ -24,7 +25,7 @@ public class TridentImpalerEnchantment extends Enchantment {
 	}
 
 	@Override
-	public float getDamageBonus(int i, MobType mobType) {
-		return mobType == MobType.WATER ? (float)i * 2.5F : 0.0F;
+	public float getDamageBonus(int i, LivingEntity livingEntity) {
+		return livingEntity == null || livingEntity.getMobType() != MobType.WATER && !livingEntity.isInWaterOrRain() ? 0.0F : (float)i * 2.5F;
 	}
 }

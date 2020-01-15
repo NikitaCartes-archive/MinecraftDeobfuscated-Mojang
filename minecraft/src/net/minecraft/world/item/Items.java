@@ -594,13 +594,9 @@ public class Items {
 		"turtle_helmet", new ArmorItem(ArmorMaterials.TURTLE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT))
 	);
 	public static final Item SCUTE = registerItem("scute", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item IRON_SHOVEL = registerItem(
-		"iron_shovel", new ShovelItem(Tiers.IRON, 1.5F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item IRON_PICKAXE = registerItem(
-		"iron_pickaxe", new PickaxeItem(Tiers.IRON, 1, -2.8F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item IRON_AXE = registerItem("iron_axe", new AxeItem(Tiers.IRON, 6.0F, -3.1F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item IRON_SHOVEL = registerItem("iron_shovel", new ShovelItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item IRON_PICKAXE = registerItem("iron_pickaxe", new PickaxeItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item IRON_AXE = registerItem("iron_axe", new AxeItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item FLINT_AND_STEEL = registerItem(
 		"flint_and_steel", new FlintAndSteelItem(new Item.Properties().durability(64).tab(CreativeModeTab.TAB_TOOLS))
 	);
@@ -612,60 +608,38 @@ public class Items {
 	public static final Item DIAMOND = registerItem("diamond", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item IRON_INGOT = registerItem("iron_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item GOLD_INGOT = registerItem("gold_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item IRON_SWORD = registerItem("iron_sword", new SwordItem(Tiers.IRON, 3, -2.4F, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
-	public static final Item WOODEN_SWORD = registerItem(
-		"wooden_sword", new SwordItem(Tiers.WOOD, 3, -2.4F, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT))
-	);
-	public static final Item WOODEN_SHOVEL = registerItem(
-		"wooden_shovel", new ShovelItem(Tiers.WOOD, 1.5F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item WOODEN_PICKAXE = registerItem(
-		"wooden_pickaxe", new PickaxeItem(Tiers.WOOD, 1, -2.8F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item WOODEN_AXE = registerItem("wooden_axe", new AxeItem(Tiers.WOOD, 6.0F, -3.2F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item STONE_SWORD = registerItem("stone_sword", new SwordItem(Tiers.STONE, 3, -2.4F, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
-	public static final Item STONE_SHOVEL = registerItem(
-		"stone_shovel", new ShovelItem(Tiers.STONE, 1.5F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item STONE_PICKAXE = registerItem(
-		"stone_pickaxe", new PickaxeItem(Tiers.STONE, 1, -2.8F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item STONE_AXE = registerItem("stone_axe", new AxeItem(Tiers.STONE, 7.0F, -3.2F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item DIAMOND_SWORD = registerItem(
-		"diamond_sword", new SwordItem(Tiers.DIAMOND, 3, -2.4F, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT))
-	);
-	public static final Item DIAMOND_SHOVEL = registerItem(
-		"diamond_shovel", new ShovelItem(Tiers.DIAMOND, 1.5F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
+	public static final Item IRON_SWORD = registerItem("iron_sword", new SwordItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+	public static final Item WOODEN_SWORD = registerItem("wooden_sword", new SwordItem(Tiers.WOOD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+	public static final Item WOODEN_SHOVEL = registerItem("wooden_shovel", new ShovelItem(Tiers.WOOD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item WOODEN_PICKAXE = registerItem("wooden_pickaxe", new PickaxeItem(Tiers.WOOD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item WOODEN_AXE = registerItem("wooden_axe", new AxeItem(Tiers.WOOD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item STONE_SWORD = registerItem("stone_sword", new SwordItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+	public static final Item STONE_SHOVEL = registerItem("stone_shovel", new ShovelItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item STONE_PICKAXE = registerItem("stone_pickaxe", new PickaxeItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item STONE_AXE = registerItem("stone_axe", new AxeItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item DIAMOND_SWORD = registerItem("diamond_sword", new SwordItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+	public static final Item DIAMOND_SHOVEL = registerItem("diamond_shovel", new ShovelItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item DIAMOND_PICKAXE = registerItem(
-		"diamond_pickaxe", new PickaxeItem(Tiers.DIAMOND, 1, -2.8F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
+		"diamond_pickaxe", new PickaxeItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
 	);
-	public static final Item DIAMOND_AXE = registerItem(
-		"diamond_axe", new AxeItem(Tiers.DIAMOND, 5.0F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
+	public static final Item DIAMOND_AXE = registerItem("diamond_axe", new AxeItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item STICK = registerItem("stick", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BOWL = registerItem("bowl", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item MUSHROOM_STEW = registerItem(
 		"mushroom_stew", new BowlFoodItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_FOOD).food(Foods.MUSHROOM_STEW))
 	);
-	public static final Item GOLDEN_SWORD = registerItem(
-		"golden_sword", new SwordItem(Tiers.GOLD, 3, -2.4F, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT))
-	);
-	public static final Item GOLDEN_SHOVEL = registerItem(
-		"golden_shovel", new ShovelItem(Tiers.GOLD, 1.5F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item GOLDEN_PICKAXE = registerItem(
-		"golden_pickaxe", new PickaxeItem(Tiers.GOLD, 1, -2.8F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS))
-	);
-	public static final Item GOLDEN_AXE = registerItem("golden_axe", new AxeItem(Tiers.GOLD, 6.0F, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item GOLDEN_SWORD = registerItem("golden_sword", new SwordItem(Tiers.GOLD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+	public static final Item GOLDEN_SHOVEL = registerItem("golden_shovel", new ShovelItem(Tiers.GOLD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item GOLDEN_PICKAXE = registerItem("golden_pickaxe", new PickaxeItem(Tiers.GOLD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item GOLDEN_AXE = registerItem("golden_axe", new AxeItem(Tiers.GOLD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item STRING = registerItem("string", new ItemNameBlockItem(Blocks.TRIPWIRE, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item FEATHER = registerItem("feather", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item GUNPOWDER = registerItem("gunpowder", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item WOODEN_HOE = registerItem("wooden_hoe", new HoeItem(Tiers.WOOD, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item STONE_HOE = registerItem("stone_hoe", new HoeItem(Tiers.STONE, -2.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item IRON_HOE = registerItem("iron_hoe", new HoeItem(Tiers.IRON, -1.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item DIAMOND_HOE = registerItem("diamond_hoe", new HoeItem(Tiers.DIAMOND, 0.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item GOLDEN_HOE = registerItem("golden_hoe", new HoeItem(Tiers.GOLD, -3.0F, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item WOODEN_HOE = registerItem("wooden_hoe", new HoeItem(Tiers.WOOD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item STONE_HOE = registerItem("stone_hoe", new HoeItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item IRON_HOE = registerItem("iron_hoe", new HoeItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item DIAMOND_HOE = registerItem("diamond_hoe", new HoeItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item GOLDEN_HOE = registerItem("golden_hoe", new HoeItem(Tiers.GOLD, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item WHEAT_SEEDS = registerItem(
 		"wheat_seeds", new ItemNameBlockItem(Blocks.WHEAT, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS))
 	);
@@ -778,7 +752,7 @@ public class Items {
 	public static final Item REDSTONE = registerItem(
 		"redstone", new ItemNameBlockItem(Blocks.REDSTONE_WIRE, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE))
 	);
-	public static final Item SNOWBALL = registerItem("snowball", new SnowballItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MISC)));
+	public static final Item SNOWBALL = registerItem("snowball", new SnowballItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item OAK_BOAT = registerItem(
 		"oak_boat", new BoatItem(Boat.Type.OAK, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_TRANSPORTATION))
 	);

@@ -229,6 +229,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public final Font font;
 	public final GameRenderer gameRenderer;
 	public final DebugRenderer debugRenderer;
+	protected boolean retainAttack;
 	private final AtomicReference<StoringChunkProgressListener> progressListener = new AtomicReference();
 	public final Gui gui;
 	public final Options options;
@@ -284,6 +285,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public Entity crosshairPickEntity;
 	@Nullable
 	public HitResult hitResult;
+	@Nullable
+	public HitResult hitResultAimAssist;
+	public int hitResultAimAssistTicks;
 	private int rightClickDelay;
 	protected int missTime;
 	private boolean pause;
@@ -487,7 +491,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		stringBuilder.append(" ");
 		stringBuilder.append(SharedConstants.getCurrentVersion().getName());
 		ClientPacketListener clientPacketListener = this.getConnection();
-		if (clientPacketListener != null && clientPacketListener.getConnection().isConnected()) {
+		if (clientPacketListener != null) {
 			stringBuilder.append(" - ");
 			if (this.singleplayerServer != null && !this.singleplayerServer.isPublished()) {
 				stringBuilder.append(I18n.get("title.singleplayer"));
@@ -1157,7 +1161,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		if (this.missTime <= 0 && !this.player.isUsingItem()) {
-			if (bl && this.hitResult != null && this.hitResult.getType() == HitResult.Type.BLOCK) {
+			if (bl && this.hitResult != null && this.hitResult.getType() == HitResult.Type.BLOCK && this.hitResultAimAssistTicks <= 0) {
 				BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
 				BlockPos blockPos = blockHitResult.getBlockPos();
 				if (!this.level.getBlockState(blockPos).isAir()) {
@@ -1167,6 +1171,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 						this.player.swing(InteractionHand.MAIN_HAND);
 					}
 				}
+
+				this.retainAttack = false;
+			} else if (bl && this.player.getAttackStrengthScale(0.0F) >= 1.2F) {
+				this.startAttack();
 			} else {
 				this.gameMode.stopDestroyBlock();
 			}
@@ -1180,27 +1188,47 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				if (this.gameMode.hasMissTime()) {
 					this.missTime = 10;
 				}
-			} else if (!this.player.isHandsBusy()) {
-				switch (this.hitResult.getType()) {
-					case ENTITY:
-						this.gameMode.attack(this.player, ((EntityHitResult)this.hitResult).getEntity());
-						break;
-					case BLOCK:
-						BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
-						BlockPos blockPos = blockHitResult.getBlockPos();
-						if (!this.level.getBlockState(blockPos).isAir()) {
-							this.gameMode.startDestroyBlock(blockPos, blockHitResult.getDirection());
-							break;
-						}
-					case MISS:
-						if (this.gameMode.hasMissTime()) {
-							this.missTime = 10;
-						}
-
-						this.player.resetAttackStrengthTicker();
+			} else {
+				HitResult hitResult = this.hitResult;
+				if (hitResult.getType() != HitResult.Type.ENTITY && this.hitResultAimAssistTicks > 0) {
+					hitResult = this.hitResultAimAssist;
 				}
 
-				this.player.swing(InteractionHand.MAIN_HAND);
+				if (hitResult.getType() != HitResult.Type.BLOCK) {
+					float f = this.player.getAttackStrengthScale(0.0F);
+					if (f < 0.8F) {
+						return;
+					}
+
+					if (f < 1.0F) {
+						this.retainAttack = true;
+						return;
+					}
+				}
+
+				this.retainAttack = false;
+				if (!this.player.isHandsBusy()) {
+					switch (hitResult.getType()) {
+						case ENTITY:
+							if (((EntityHitResult)hitResult).getInteractionDistance() <= this.player.getCurrentAttackReach(0.0F)) {
+								this.gameMode.attack(this.player, ((EntityHitResult)hitResult).getEntity());
+							} else {
+								this.gameMode.swingInAir(this.player);
+							}
+							break;
+						case BLOCK:
+							BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+							BlockPos blockPos = blockHitResult.getBlockPos();
+							if (!this.level.getBlockState(blockPos).isAir()) {
+								this.gameMode.startDestroyBlock(blockPos, blockHitResult.getDirection());
+								break;
+							}
+						case MISS:
+							this.gameMode.swingInAir(this.player);
+					}
+
+					this.player.swing(InteractionHand.MAIN_HAND);
+				}
 			}
 		}
 	}
@@ -1220,17 +1248,19 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 							case ENTITY:
 								EntityHitResult entityHitResult = (EntityHitResult)this.hitResult;
 								Entity entity = entityHitResult.getEntity();
-								InteractionResult interactionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand);
-								if (!interactionResult.consumesAction()) {
-									interactionResult = this.gameMode.interact(this.player, entity, interactionHand);
-								}
-
-								if (interactionResult.consumesAction()) {
-									if (interactionResult.shouldSwing()) {
-										this.player.swing(interactionHand);
+								if (!(entityHitResult.getInteractionDistance() > this.gameMode.getInteractionRange())) {
+									InteractionResult interactionResult = this.gameMode.interactAt(this.player, entity, entityHitResult, interactionHand);
+									if (!interactionResult.consumesAction()) {
+										interactionResult = this.gameMode.interact(this.player, entity, interactionHand);
 									}
 
-									return;
+									if (interactionResult.consumesAction()) {
+										if (interactionResult.shouldSwing()) {
+											this.player.swing(interactionHand);
+										}
+
+										return;
+									}
 								}
 								break;
 							case BLOCK:
@@ -1285,6 +1315,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		this.profiler.pop();
+		this.hitResultAimAssistTicks--;
 		this.gameRenderer.pick(1.0F);
 		this.tutorial.onLookAt(this.level, this.hitResult);
 		this.profiler.push("gameMode");
@@ -1495,7 +1526,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.startUseItem();
 		}
 
-		this.continueAttack(this.screen == null && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
+		this.continueAttack(this.screen == null && (this.options.keyAttack.isDown() || this.retainAttack) && this.mouseHandler.isMouseGrabbed());
 	}
 
 	public void selectLevel(String string, String string2, @Nullable LevelSettings levelSettings) {

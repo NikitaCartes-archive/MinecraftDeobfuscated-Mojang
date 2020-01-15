@@ -109,7 +109,7 @@ public final class ProjectileUtil {
 			}
 		}
 
-		return entity2 == null ? null : new EntityHitResult(entity2, vec33);
+		return entity2 == null ? null : new EntityHitResult(entity2, vec33, Mth.sqrt(e));
 	}
 
 	@Nullable
@@ -129,7 +129,7 @@ public final class ProjectileUtil {
 			}
 		}
 
-		return entity2 == null ? null : new EntityHitResult(entity2);
+		return entity2 == null ? null : new EntityHitResult(entity2, Mth.sqrt(e));
 	}
 
 	private static Set<Entity> getIgnoredEntities(Entity entity) {

@@ -46,7 +46,6 @@ import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
@@ -1184,7 +1183,7 @@ public abstract class Mob extends LivingEntity {
 		float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
 		float g = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
 		if (entity instanceof LivingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
+			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), (LivingEntity)entity);
 			g += (float)EnchantmentHelper.getKnockbackBonus(this);
 		}
 
@@ -1199,19 +1198,6 @@ public abstract class Mob extends LivingEntity {
 				((LivingEntity)entity)
 					.knockback(this, g * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
-			}
-
-			if (entity instanceof Player) {
-				Player player = (Player)entity;
-				ItemStack itemStack = this.getMainHandItem();
-				ItemStack itemStack2 = player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY;
-				if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
-					float h = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-					if (this.random.nextFloat() < h) {
-						player.getCooldowns().addCooldown(Items.SHIELD, 100);
-						this.level.broadcastEntityEvent(player, (byte)30);
-					}
-				}
 			}
 
 			this.doEnchantDamageEffects(this, entity);

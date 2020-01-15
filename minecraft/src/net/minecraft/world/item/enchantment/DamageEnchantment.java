@@ -6,8 +6,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.ItemStack;
 
 public class DamageEnchantment extends Enchantment {
 	private static final String[] NAMES = new String[]{"all", "undead", "arthropods"};
@@ -37,24 +35,19 @@ public class DamageEnchantment extends Enchantment {
 	}
 
 	@Override
-	public float getDamageBonus(int i, MobType mobType) {
+	public float getDamageBonus(int i, LivingEntity livingEntity) {
 		if (this.type == 0) {
 			return 1.0F + (float)Math.max(0, i - 1) * 0.5F;
-		} else if (this.type == 1 && mobType == MobType.UNDEAD) {
+		} else if (this.type == 1 && livingEntity != null && livingEntity.getMobType() == MobType.UNDEAD) {
 			return (float)i * 2.5F;
 		} else {
-			return this.type == 2 && mobType == MobType.ARTHROPOD ? (float)i * 2.5F : 0.0F;
+			return this.type == 2 && livingEntity != null && livingEntity.getMobType() == MobType.ARTHROPOD ? (float)i * 2.5F : 0.0F;
 		}
 	}
 
 	@Override
 	public boolean checkCompatibility(Enchantment enchantment) {
 		return !(enchantment instanceof DamageEnchantment);
-	}
-
-	@Override
-	public boolean canEnchant(ItemStack itemStack) {
-		return itemStack.getItem() instanceof AxeItem ? true : super.canEnchant(itemStack);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ public class EggItem extends Item {
 			itemStack.shrink(1);
 		}
 
+		player.getCooldowns().addCooldown(this, 4);
 		return InteractionResultHolder.success(itemStack);
 	}
 }

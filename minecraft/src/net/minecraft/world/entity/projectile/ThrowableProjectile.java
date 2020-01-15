@@ -65,8 +65,6 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		float l = -Mth.sin((f + h) * (float) (Math.PI / 180.0));
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		this.shoot((double)k, (double)l, (double)m, i, j);
-		Vec3 vec3 = entity.getDeltaMovement();
-		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround ? 0.0 : vec3.y, vec3.z));
 	}
 
 	@Override
@@ -112,22 +110,23 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		}
 
 		AABB aABB = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0);
+		if (this.owner != null && (this.tickCount < 2 || this.entityToIgnore != null)) {
+			for (Entity entity : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
+				if (entity == this.entityToIgnore) {
+					this.timeToIgnore++;
+					break;
+				}
 
-		for (Entity entity : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
-			if (entity == this.entityToIgnore) {
-				this.timeToIgnore++;
-				break;
-			}
-
-			if (this.owner != null && this.tickCount < 2 && this.entityToIgnore == null) {
-				this.entityToIgnore = entity;
-				this.timeToIgnore = 3;
-				break;
+				if (entity == this.owner) {
+					this.entityToIgnore = this.owner;
+					this.timeToIgnore = 3;
+					break;
+				}
 			}
 		}
 
 		HitResult hitResult = ProjectileUtil.getHitResult(
-			this, aABB, entity -> !entity.isSpectator() && entity.isPickable() && entity != this.entityToIgnore, ClipContext.Block.OUTLINE, true
+			this, aABB, entity -> !entity.isSpectator() && entity.isPickable() && entity != this.entityToIgnore, ClipContext.Block.COLLIDER, true
 		);
 		if (this.entityToIgnore != null && this.timeToIgnore-- <= 0) {
 			this.entityToIgnore = null;

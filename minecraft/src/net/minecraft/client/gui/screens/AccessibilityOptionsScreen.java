@@ -20,7 +20,8 @@ public class AccessibilityOptionsScreen extends OptionsSubScreen {
 		Option.CHAT_OPACITY,
 		Option.AUTO_JUMP,
 		Option.TOGGLE_CROUCH,
-		Option.TOGGLE_SPRINT
+		Option.TOGGLE_SPRINT,
+		Option.USE_SHIELD_ON_CROUCH
 	};
 	private AbstractWidget narratorButton;
 

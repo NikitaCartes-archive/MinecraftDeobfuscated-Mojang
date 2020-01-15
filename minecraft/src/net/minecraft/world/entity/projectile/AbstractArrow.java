@@ -113,9 +113,6 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 		float l = -Mth.sin(f * (float) (Math.PI / 180.0));
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		this.shoot((double)k, (double)l, (double)m, i, j);
-		this.setDeltaMovement(
-			this.getDeltaMovement().add(entity.getDeltaMovement().x, entity.onGround ? 0.0 : entity.getDeltaMovement().y, entity.getDeltaMovement().z)
-		);
 	}
 
 	@Override

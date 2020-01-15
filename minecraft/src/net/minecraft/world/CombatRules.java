@@ -1,4 +1,4 @@
-package net.minecraft.world.damagesource;
+package net.minecraft.world;
 
 import net.minecraft.util.Mth;
 
