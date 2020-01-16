@@ -41,19 +41,21 @@ public class BeehiveDecorator extends TreeDecorator {
 				? Math.max(((BlockPos)list2.get(0)).getY() - 1, ((BlockPos)list.get(0)).getY())
 				: Math.min(((BlockPos)list.get(0)).getY() + 1 + random.nextInt(3), ((BlockPos)list.get(list.size() - 1)).getY());
 			List<BlockPos> list3 = (List<BlockPos>)list.stream().filter(blockPosx -> blockPosx.getY() == i).collect(Collectors.toList());
-			BlockPos blockPos = (BlockPos)list3.get(random.nextInt(list3.size()));
-			BlockPos blockPos2 = blockPos.relative(direction);
-			if (AbstractTreeFeature.isAir(levelAccessor, blockPos2) && AbstractTreeFeature.isAir(levelAccessor, blockPos2.relative(Direction.SOUTH))) {
-				BlockState blockState = Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
-				this.setBlock(levelAccessor, blockPos2, blockState, set, boundingBox);
-				BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
-				if (blockEntity instanceof BeehiveBlockEntity) {
-					BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
-					int j = 2 + random.nextInt(2);
+			if (!list3.isEmpty()) {
+				BlockPos blockPos = (BlockPos)list3.get(random.nextInt(list3.size()));
+				BlockPos blockPos2 = blockPos.relative(direction);
+				if (AbstractTreeFeature.isAir(levelAccessor, blockPos2) && AbstractTreeFeature.isAir(levelAccessor, blockPos2.relative(Direction.SOUTH))) {
+					BlockState blockState = Blocks.BEE_NEST.defaultBlockState().setValue(BeehiveBlock.FACING, Direction.SOUTH);
+					this.setBlock(levelAccessor, blockPos2, blockState, set, boundingBox);
+					BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
+					if (blockEntity instanceof BeehiveBlockEntity) {
+						BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
+						int j = 2 + random.nextInt(2);
 
-					for (int k = 0; k < j; k++) {
-						Bee bee = new Bee(EntityType.BEE, levelAccessor.getLevel());
-						beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
+						for (int k = 0; k < j; k++) {
+							Bee bee = new Bee(EntityType.BEE, levelAccessor.getLevel());
+							beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
+						}
 					}
 				}
 			}

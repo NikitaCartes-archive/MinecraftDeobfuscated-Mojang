@@ -487,7 +487,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		stringBuilder.append(" ");
 		stringBuilder.append(SharedConstants.getCurrentVersion().getName());
 		ClientPacketListener clientPacketListener = this.getConnection();
-		if (clientPacketListener != null) {
+		if (clientPacketListener != null && clientPacketListener.getConnection().isConnected()) {
 			stringBuilder.append(" - ");
 			if (this.singleplayerServer != null && !this.singleplayerServer.isPublished()) {
 				stringBuilder.append(I18n.get("title.singleplayer"));
