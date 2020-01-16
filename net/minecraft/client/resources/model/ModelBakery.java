@@ -128,10 +128,10 @@ public class ModelBakery {
     private static final Map<String, String> BUILTIN_MODELS = Maps.newHashMap(ImmutableMap.of("missing", MISSING_MODEL_MESH));
     private static final Splitter COMMA_SPLITTER = Splitter.on(',');
     private static final Splitter EQUAL_SPLITTER = Splitter.on('=').limit(2);
-    public static final BlockModel GENERATION_MARKER = Util.make(BlockModel.fromString("{}"), blockModel -> {
+    public static final BlockModel GENERATION_MARKER = Util.make(BlockModel.fromString("{\"gui_light\": \"front\"}"), blockModel -> {
         blockModel.name = "generation marker";
     });
-    public static final BlockModel BLOCK_ENTITY_MARKER = Util.make(BlockModel.fromString("{}"), blockModel -> {
+    public static final BlockModel BLOCK_ENTITY_MARKER = Util.make(BlockModel.fromString("{\"gui_light\": \"side\"}"), blockModel -> {
         blockModel.name = "block entity marker";
     });
     private static final StateDefinition<Block, BlockState> ITEM_FRAME_FAKE_DEFINITION = new StateDefinition.Builder(Blocks.AIR).add(BooleanProperty.create("map")).create(BlockState::new);

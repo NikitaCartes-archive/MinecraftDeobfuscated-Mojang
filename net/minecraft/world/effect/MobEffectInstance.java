@@ -78,14 +78,22 @@ implements Comparable<MobEffectInstance> {
         boolean bl = false;
         if (mobEffectInstance.amplifier > this.amplifier) {
             if (mobEffectInstance.duration < this.duration) {
+                MobEffectInstance mobEffectInstance2 = this.hiddenEffect;
                 this.hiddenEffect = new MobEffectInstance(this);
+                this.hiddenEffect.hiddenEffect = mobEffectInstance2;
             }
             this.amplifier = mobEffectInstance.amplifier;
             this.duration = mobEffectInstance.duration;
             bl = true;
-        } else if (mobEffectInstance.amplifier == this.amplifier && this.duration < mobEffectInstance.duration) {
-            this.duration = mobEffectInstance.duration;
-            bl = true;
+        } else if (mobEffectInstance.duration > this.duration) {
+            if (mobEffectInstance.amplifier == this.amplifier) {
+                this.duration = mobEffectInstance.duration;
+                bl = true;
+            } else if (this.hiddenEffect == null) {
+                this.hiddenEffect = new MobEffectInstance(mobEffectInstance);
+            } else {
+                this.hiddenEffect.update(mobEffectInstance);
+            }
         }
         if (!mobEffectInstance.ambient && this.ambient || bl) {
             this.ambient = mobEffectInstance.ambient;
@@ -126,7 +134,7 @@ implements Comparable<MobEffectInstance> {
         return this.showIcon;
     }
 
-    public boolean tick(LivingEntity livingEntity) {
+    public boolean tick(LivingEntity livingEntity, Runnable runnable) {
         if (this.duration > 0) {
             if (this.effect.isDurationEffectTick(this.duration, this.amplifier)) {
                 this.applyEffect(livingEntity);
@@ -135,6 +143,7 @@ implements Comparable<MobEffectInstance> {
             if (this.duration == 0 && this.hiddenEffect != null) {
                 this.setDetailsFrom(this.hiddenEffect);
                 this.hiddenEffect = this.hiddenEffect.hiddenEffect;
+                runnable.run();
             }
         }
         return this.duration > 0;

@@ -550,7 +550,7 @@ extends Entity {
             while (iterator.hasNext()) {
                 MobEffect mobEffect = iterator.next();
                 MobEffectInstance mobEffectInstance = this.activeEffects.get(mobEffect);
-                if (!mobEffectInstance.tick(this)) {
+                if (!mobEffectInstance.tick(this, () -> this.onEffectUpdated(mobEffectInstance, true))) {
                     if (this.level.isClientSide) continue;
                     iterator.remove();
                     this.onEffectRemoved(mobEffectInstance);
