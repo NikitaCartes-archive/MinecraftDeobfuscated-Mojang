@@ -349,7 +349,7 @@ extends NodeEvaluator {
                             blockPathTypes = BlockPathTypes.DANGER_CACTUS;
                             continue;
                         }
-                        if (block == Blocks.FIRE || block == Blocks.LAVA) {
+                        if (block.is(BlockTags.FIRE) || block == Blocks.LAVA) {
                             blockPathTypes = BlockPathTypes.DANGER_FIRE;
                             continue;
                         }
@@ -373,7 +373,7 @@ extends NodeEvaluator {
         if (block.is(BlockTags.TRAPDOORS) || block == Blocks.LILY_PAD) {
             return BlockPathTypes.TRAPDOOR;
         }
-        if (block == Blocks.FIRE) {
+        if (blockState.is(BlockTags.FIRE)) {
             return BlockPathTypes.DAMAGE_FIRE;
         }
         if (block == Blocks.CACTUS) {

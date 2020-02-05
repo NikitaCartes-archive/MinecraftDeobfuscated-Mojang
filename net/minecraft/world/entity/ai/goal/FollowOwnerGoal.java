@@ -53,7 +53,7 @@ extends Goal {
         if (livingEntity.isSpectator()) {
             return false;
         }
-        if (this.tamable.isSitting()) {
+        if (this.tamable.isOrderedToSit()) {
             return false;
         }
         if (this.tamable.distanceToSqr(livingEntity) < (double)(this.startDistance * this.startDistance)) {
@@ -68,7 +68,7 @@ extends Goal {
         if (this.navigation.isDone()) {
             return false;
         }
-        if (this.tamable.isSitting()) {
+        if (this.tamable.isOrderedToSit()) {
             return false;
         }
         return !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));

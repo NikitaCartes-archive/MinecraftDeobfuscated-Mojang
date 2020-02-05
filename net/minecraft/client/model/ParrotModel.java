@@ -191,7 +191,7 @@ extends ListModel<Parrot> {
         if (parrot.isPartyParrot()) {
             return State.PARTY;
         }
-        if (parrot.isSitting()) {
+        if (parrot.isInSittingPose()) {
             return State.SITTING;
         }
         if (parrot.isFlying()) {

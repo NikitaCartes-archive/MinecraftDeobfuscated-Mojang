@@ -217,13 +217,8 @@ extends Dimension {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public Vec3 getFogColor(float f, float g) {
-        float h = Mth.cos(f * ((float)Math.PI * 2)) * 2.0f + 0.5f;
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        float i = 0.7529412f;
-        float j = 0.84705883f;
-        float k = 1.0f;
-        return new Vec3(i *= h * 0.94f + 0.06f, j *= h * 0.94f + 0.06f, k *= h * 0.91f + 0.09f);
+    public Vec3 getBrightnessDependentFogColor(int i, float f) {
+        return Vec3.fromRGB24(i).multiply(f * 0.94f + 0.06f, f * 0.94f + 0.06f, f * 0.91f + 0.09f);
     }
 
     @Override

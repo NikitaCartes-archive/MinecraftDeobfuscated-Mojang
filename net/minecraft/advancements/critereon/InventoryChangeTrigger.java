@@ -3,13 +3,11 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.Iterator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
@@ -43,8 +41,25 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         return new TriggerInstance(ints, ints2, ints3, itemPredicates);
     }
 
-    public void trigger(ServerPlayer serverPlayer, Inventory inventory) {
-        this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(inventory));
+    public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
+        int i = 0;
+        int j = 0;
+        int k = 0;
+        for (int l = 0; l < inventory.getContainerSize(); ++l) {
+            ItemStack itemStack2 = inventory.getItem(l);
+            if (itemStack2.isEmpty()) {
+                ++j;
+                continue;
+            }
+            ++k;
+            if (itemStack2.getCount() < itemStack2.getMaxStackSize()) continue;
+            ++i;
+        }
+        this.trigger(serverPlayer, inventory, itemStack, i, j, k);
+    }
+
+    private void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack, int i, int j, int k) {
+        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(inventory, itemStack, i, j, k));
     }
 
     @Override
@@ -99,28 +114,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             return jsonObject;
         }
 
-        public boolean matches(Inventory inventory) {
-            int i = 0;
-            int j = 0;
-            int k = 0;
-            ArrayList<ItemPredicate> list = Lists.newArrayList(this.predicates);
-            for (int l = 0; l < inventory.getContainerSize(); ++l) {
-                ItemStack itemStack = inventory.getItem(l);
-                if (itemStack.isEmpty()) {
-                    ++j;
-                    continue;
-                }
-                ++k;
-                if (itemStack.getCount() >= itemStack.getMaxStackSize()) {
-                    ++i;
-                }
-                Iterator iterator = list.iterator();
-                while (iterator.hasNext()) {
-                    ItemPredicate itemPredicate = (ItemPredicate)iterator.next();
-                    if (!itemPredicate.matches(itemStack)) continue;
-                    iterator.remove();
-                }
-            }
+        public boolean matches(Inventory inventory, ItemStack itemStack, int i, int j, int k) {
             if (!this.slotsFull.matches(i)) {
                 return false;
             }
@@ -129,6 +123,23 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             }
             if (!this.slotsOccupied.matches(k)) {
                 return false;
+            }
+            int l = this.predicates.length;
+            if (l == 0) {
+                return true;
+            }
+            if (l == 1) {
+                return !itemStack.isEmpty() && this.predicates[0].matches(itemStack);
+            }
+            ObjectArrayList<ItemPredicate> list = new ObjectArrayList<ItemPredicate>(this.predicates);
+            int m = inventory.getContainerSize();
+            for (int n = 0; n < m; ++n) {
+                if (list.isEmpty()) {
+                    return true;
+                }
+                ItemStack itemStack2 = inventory.getItem(n);
+                if (itemStack2.isEmpty()) continue;
+                list.removeIf(itemPredicate -> itemPredicate.matches(itemStack2));
             }
             return list.isEmpty();
         }

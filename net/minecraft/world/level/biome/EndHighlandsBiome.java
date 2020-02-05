@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public class EndHighlandsBiome
 extends Biome {
     public EndHighlandsBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_THEEND).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.THEEND).depth(0.1f).scale(0.2f).temperature(0.5f).downfall(0.5f).waterColor(4159204).waterFogColor(329011).parent(null));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_THEEND).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.THEEND).depth(0.1f).scale(0.2f).temperature(0.5f).downfall(0.5f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0xA080A0).build()).parent(null));
         this.addStructureStart(Feature.END_CITY.configured(FeatureConfiguration.NONE));
         this.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_GATEWAY.configured(EndGatewayConfiguration.knownExit(TheEndDimension.END_SPAWN_POINT, true)).decorated(FeatureDecorator.END_GATEWAY.configured(DecoratorConfiguration.NONE)));
         BiomeDefaultFeatures.addEndCity(this);

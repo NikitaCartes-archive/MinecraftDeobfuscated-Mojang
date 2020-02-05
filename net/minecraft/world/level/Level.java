@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -28,6 +29,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -70,7 +72,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class Level
@@ -94,14 +95,14 @@ AutoCloseable {
     public final Dimension dimension;
     protected final ChunkSource chunkSource;
     protected final LevelData levelData;
-    private final ProfilerFiller profiler;
+    private final Supplier<ProfilerFiller> profiler;
     public final boolean isClientSide;
     protected boolean updatingBlockEntities;
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
 
-    protected Level(LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, ProfilerFiller profilerFiller, boolean bl) {
-        this.profiler = profilerFiller;
+    protected Level(LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl) {
+        this.profiler = supplier;
         this.levelData = levelData;
         this.dimension = dimensionType.create(this);
         this.chunkSource = biFunction.apply(this, this.dimension);
@@ -178,9 +179,9 @@ AutoCloseable {
         if (blockState2 != null) {
             BlockState blockState3 = this.getBlockState(blockPos);
             if (blockState3 != blockState2 && (blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos) || blockState3.getLightEmission() != blockState2.getLightEmission() || blockState3.useShapeForLightOcclusion() || blockState2.useShapeForLightOcclusion())) {
-                this.profiler.push("queueCheckLight");
+                this.getProfiler().push("queueCheckLight");
                 this.getChunkSource().getLightEngine().checkBlock(blockPos);
-                this.profiler.pop();
+                this.getProfiler().pop();
             }
             if (blockState3 == blockState) {
                 if (blockState2 != blockState3) {
@@ -189,9 +190,9 @@ AutoCloseable {
                 if ((i & 2) != 0 && (!this.isClientSide || (i & 4) == 0) && (this.isClientSide || levelChunk.getFullStatus() != null && levelChunk.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING))) {
                     this.sendBlockUpdated(blockPos, blockState2, blockState, i);
                 }
-                if (!this.isClientSide && (i & 1) != 0) {
+                if ((i & 1) != 0) {
                     this.blockUpdated(blockPos, blockState2.getBlock());
-                    if (blockState.hasAnalogOutputSignal()) {
+                    if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
                         this.updateNeighbourForOutputSignal(blockPos, block);
                     }
                 }
@@ -237,13 +238,6 @@ AutoCloseable {
     }
 
     public abstract void sendBlockUpdated(BlockPos var1, BlockState var2, BlockState var3, int var4);
-
-    @Override
-    public void blockUpdated(BlockPos blockPos, Block block) {
-        if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
-            this.updateNeighborsAt(blockPos, block);
-        }
-    }
 
     public void setBlocksDirty(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
     }
@@ -371,7 +365,7 @@ AutoCloseable {
     public boolean addBlockEntity(BlockEntity blockEntity) {
         boolean bl;
         if (this.updatingBlockEntities) {
-            Supplier[] supplierArray = new Supplier[2];
+            org.apache.logging.log4j.util.Supplier[] supplierArray = new org.apache.logging.log4j.util.Supplier[2];
             supplierArray[0] = () -> Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
             supplierArray[1] = blockEntity::getBlockPos;
             LOGGER.error("Adding block entity while ticking: {} @ {}", supplierArray);
@@ -497,8 +491,8 @@ AutoCloseable {
                 for (int o = i; o < j; ++o) {
                     for (int p = k; p < l; ++p) {
                         for (int q = m; q < n; ++q) {
-                            Block block = this.getBlockState(pooledMutableBlockPos.set(o, p, q)).getBlock();
-                            if (block != Blocks.FIRE && block != Blocks.LAVA) continue;
+                            BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
+                            if (!blockState.is(BlockTags.FIRE) && blockState.getBlock() != Blocks.LAVA) continue;
                             boolean bl = true;
                             return bl;
                         }
@@ -565,7 +559,7 @@ AutoCloseable {
     }
 
     public boolean extinguishFire(@Nullable Player player, BlockPos blockPos, Direction direction) {
-        if (this.getBlockState(blockPos = blockPos.relative(direction)).getBlock() == Blocks.FIRE) {
+        if (this.getBlockState(blockPos = blockPos.relative(direction)).is(BlockTags.FIRE)) {
             this.levelEvent(player, 1009, blockPos, 0);
             this.removeBlock(blockPos, false);
             return true;
@@ -654,7 +648,7 @@ AutoCloseable {
         return this.chunkSource.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
     }
 
-    public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+    public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
         if (Level.isOutsideBuildHeight(blockPos)) {
             return false;
         }
@@ -662,7 +656,11 @@ AutoCloseable {
         if (chunkAccess == null) {
             return false;
         }
-        return chunkAccess.getBlockState(blockPos).entityCanStandOn(this, blockPos, entity);
+        return chunkAccess.getBlockState(blockPos).entityCanStandOnFace(this, blockPos, entity, direction);
+    }
+
+    public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+        return this.loadedAndEntityCanStandOnFace(blockPos, entity, Direction.UP);
     }
 
     public void updateSkyBrightness() {
@@ -1085,6 +1083,10 @@ AutoCloseable {
     }
 
     public ProfilerFiller getProfiler() {
+        return this.profiler.get();
+    }
+
+    public Supplier<ProfilerFiller> getProfilerSupplier() {
         return this.profiler;
     }
 

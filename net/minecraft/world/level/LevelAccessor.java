@@ -73,7 +73,8 @@ LevelSimulatedRW {
 
     public Random getRandom();
 
-    public void blockUpdated(BlockPos var1, Block var2);
+    default public void blockUpdated(BlockPos blockPos, Block block) {
+    }
 
     @Environment(value=EnvType.CLIENT)
     public BlockPos getSharedSpawnPos();

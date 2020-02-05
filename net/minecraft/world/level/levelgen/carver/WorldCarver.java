@@ -23,7 +23,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.CanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.CaveWorldCarver;
-import net.minecraft.world.level.levelgen.carver.HellCaveWorldCarver;
+import net.minecraft.world.level.levelgen.carver.NetherWorldCarver;
 import net.minecraft.world.level.levelgen.carver.UnderwaterCanyonWorldCarver;
 import net.minecraft.world.level.levelgen.carver.UnderwaterCaveWorldCarver;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
@@ -33,7 +33,7 @@ import net.minecraft.world.level.material.Fluids;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
     public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver((Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration>)((Function<Dynamic<?>, ProbabilityFeatureConfiguration>)ProbabilityFeatureConfiguration::deserialize), 256));
-    public static final WorldCarver<ProbabilityFeatureConfiguration> HELL_CAVE = WorldCarver.register("hell_cave", new HellCaveWorldCarver(ProbabilityFeatureConfiguration::deserialize));
+    public static final WorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = WorldCarver.register("nether_cave", new NetherWorldCarver(ProbabilityFeatureConfiguration::deserialize));
     public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = WorldCarver.register("canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration::deserialize));
     public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CANYON = WorldCarver.register("underwater_canyon", new UnderwaterCanyonWorldCarver(ProbabilityFeatureConfiguration::deserialize));
     public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CAVE = WorldCarver.register("underwater_cave", new UnderwaterCaveWorldCarver(ProbabilityFeatureConfiguration::deserialize));

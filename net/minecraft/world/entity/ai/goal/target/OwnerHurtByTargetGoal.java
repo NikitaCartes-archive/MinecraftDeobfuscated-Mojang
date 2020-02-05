@@ -24,7 +24,7 @@ extends TargetGoal {
 
     @Override
     public boolean canUse() {
-        if (!this.tameAnimal.isTame() || this.tameAnimal.isSitting()) {
+        if (!this.tameAnimal.isTame() || this.tameAnimal.isOrderedToSit()) {
             return false;
         }
         LivingEntity livingEntity = this.tameAnimal.getOwner();

@@ -41,7 +41,7 @@ extends OcelotModel<T> {
             this.backLegR.y = 18.0f;
         }
         super.prepareMobModel(cat, f, g, h);
-        if (((TamableAnimal)cat).isSitting()) {
+        if (((TamableAnimal)cat).isInSittingPose()) {
             this.body.xRot = 0.7853982f;
             this.body.y += -4.0f;
             this.body.z += 5.0f;

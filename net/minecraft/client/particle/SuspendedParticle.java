@@ -10,9 +10,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
@@ -25,6 +23,13 @@ extends TextureSheetParticle {
         this.bCol = 0.7f;
         this.setSize(0.01f, 0.01f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.2f;
+        this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+    }
+
+    private SuspendedParticle(Level level, double d, double e, double f, double g, double h, double i) {
+        super(level, d, e - 0.125, f, g, h, i);
+        this.setSize(0.01f, 0.01f);
+        this.quadSize *= this.random.nextFloat() * 0.6f + 0.6f;
         this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
     }
 
@@ -43,17 +48,51 @@ extends TextureSheetParticle {
             return;
         }
         this.move(this.xd, this.yd, this.zd);
-        if (!this.level.getFluidState(new BlockPos(this.x, this.y, this.z)).is(FluidTags.WATER)) {
-            this.remove();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class WarpedSporeProvider
+    implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprite;
+
+        public WarpedSporeProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            SuspendedParticle suspendedParticle = new SuspendedParticle(level, d, e, f, g, h, i);
+            suspendedParticle.pickSprite(this.sprite);
+            suspendedParticle.setColor(0.1f, 0.1f, 0.3f);
+            suspendedParticle.setSize(0.001f, 0.001f);
+            return suspendedParticle;
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class Provider
+    public static class CrimsonSporeProvider
     implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprite;
 
-        public Provider(SpriteSet spriteSet) {
+        public CrimsonSporeProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            SuspendedParticle suspendedParticle = new SuspendedParticle(level, d, e, f, g, h, i);
+            suspendedParticle.pickSprite(this.sprite);
+            suspendedParticle.setColor(0.9f, 0.4f, 0.5f);
+            return suspendedParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class UnderwaterProvider
+    implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprite;
+
+        public UnderwaterProvider(SpriteSet spriteSet) {
             this.sprite = spriteSet;
         }
 

@@ -16,6 +16,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -53,7 +54,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
         void var6_11;
         boolean bl;
         Biome biome = ((FlatLevelGeneratorSettings)this.settings).getBiome();
-        FlatLevelBiomeWrapper flatLevelBiomeWrapper = new FlatLevelBiomeWrapper(biome.getSurfaceBuilder(), biome.getPrecipitation(), biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getTemperature(), biome.getDownfall(), biome.getWaterColor(), biome.getWaterFogColor(), biome.getParent());
+        FlatLevelBiomeWrapper flatLevelBiomeWrapper = new FlatLevelBiomeWrapper(biome.getSurfaceBuilder(), biome.getPrecipitation(), biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getTemperature(), biome.getDownfall(), biome.getSpecialEffects(), biome.getParent());
         Map<String, Map<String, String>> map = ((FlatLevelGeneratorSettings)this.settings).getStructuresOptions();
         for (String string : map.keySet()) {
             ConfiguredFeature<?, ?>[] configuredFeatureArray = FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
@@ -169,8 +170,8 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
 
     class FlatLevelBiomeWrapper
     extends Biome {
-        protected FlatLevelBiomeWrapper(ConfiguredSurfaceBuilder<?> configuredSurfaceBuilder, Biome.Precipitation precipitation, Biome.BiomeCategory biomeCategory, float f, float g, float h, float i, int j, @Nullable int k, String string) {
-            super(new Biome.BiomeBuilder().surfaceBuilder(configuredSurfaceBuilder).precipitation(precipitation).biomeCategory(biomeCategory).depth(f).scale(g).temperature(h).downfall(i).waterColor(j).waterFogColor(k).parent(string));
+        protected FlatLevelBiomeWrapper(ConfiguredSurfaceBuilder<?> configuredSurfaceBuilder, Biome.Precipitation precipitation, Biome.BiomeCategory biomeCategory, float f, float g, float h, float i, @Nullable BiomeSpecialEffects biomeSpecialEffects, String string) {
+            super(new Biome.BiomeBuilder().surfaceBuilder(configuredSurfaceBuilder).precipitation(precipitation).biomeCategory(biomeCategory).depth(f).scale(g).temperature(h).downfall(i).specialEffects(biomeSpecialEffects).parent(string));
         }
     }
 }

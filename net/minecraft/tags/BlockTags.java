@@ -34,6 +34,8 @@ public class BlockTags {
     public static final Tag<Block> ACACIA_LOGS;
     public static final Tag<Block> JUNGLE_LOGS;
     public static final Tag<Block> SPRUCE_LOGS;
+    public static final Tag<Block> CRIMSON_STEMS;
+    public static final Tag<Block> WARPED_STEMS;
     public static final Tag<Block> BANNERS;
     public static final Tag<Block> SAND;
     public static final Tag<Block> STAIRS;
@@ -69,6 +71,9 @@ public class BlockTags {
     public static final Tag<Block> CROPS;
     public static final Tag<Block> BEE_GROWABLES;
     public static final Tag<Block> PORTALS;
+    public static final Tag<Block> FIRE;
+    public static final Tag<Block> NYLIUM;
+    public static final Tag<Block> WART_BLOCKS;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -105,6 +110,8 @@ public class BlockTags {
         ACACIA_LOGS = BlockTags.bind("acacia_logs");
         JUNGLE_LOGS = BlockTags.bind("jungle_logs");
         SPRUCE_LOGS = BlockTags.bind("spruce_logs");
+        CRIMSON_STEMS = BlockTags.bind("crimson_stems");
+        WARPED_STEMS = BlockTags.bind("warped_stems");
         BANNERS = BlockTags.bind("banners");
         SAND = BlockTags.bind("sand");
         STAIRS = BlockTags.bind("stairs");
@@ -140,6 +147,9 @@ public class BlockTags {
         CROPS = BlockTags.bind("crops");
         BEE_GROWABLES = BlockTags.bind("bee_growables");
         PORTALS = BlockTags.bind("portals");
+        FIRE = BlockTags.bind("fire");
+        NYLIUM = BlockTags.bind("nylium");
+        WART_BLOCKS = BlockTags.bind("wart_blocks");
     }
 
     static class Wrapper

@@ -1043,7 +1043,7 @@ extends Entity {
     }
 
     public void knockback(Entity entity, float f, double d, double e) {
-        if (this.random.nextDouble() < this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()) {
+        if ((f = (float)((double)f * (1.0 - this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()))) <= 0.0f) {
             return;
         }
         this.hasImpulse = true;
@@ -1148,7 +1148,7 @@ extends Entity {
         return Mth.floor(attributeInstance.getValue());
     }
 
-    protected void hurtArmor(float f) {
+    protected void hurtArmor(DamageSource damageSource, float f) {
     }
 
     protected void hurtCurrentlyUsedShield(float f) {
@@ -1156,7 +1156,7 @@ extends Entity {
 
     protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float f) {
         if (!damageSource.isBypassArmor()) {
-            this.hurtArmor(f);
+            this.hurtArmor(damageSource, f);
             f = CombatRules.getDamageAfterAbsorb(f, this.getArmorValue(), (float)this.getAttribute(SharedMonsterAttributes.ARMOR_TOUGHNESS).getValue());
         }
         return f;

@@ -120,6 +120,11 @@ extends RenderStateShard {
         return RenderType.create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
     }
 
+    public static RenderType entityShadow(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).setWriteMaskState(COLOR_WRITE).setDepthTestState(LEQUAL_DEPTH_TEST).setLayeringState(SHADOW_LAYERING).createCompositeState(false);
+        return RenderType.create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, false, compositeState);
+    }
+
     public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setAlphaState(new RenderStateShard.AlphaStateShard(f)).setCullState(NO_CULL).createCompositeState(true);
         return RenderType.create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, 7, 256, compositeState);
@@ -143,7 +148,11 @@ extends RenderStateShard {
     }
 
     public static RenderType outline(ResourceLocation resourceLocation) {
-        return RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(NO_CULL).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(OutlineProperty.IS_OUTLINE));
+        return RenderType.outline(resourceLocation, NO_CULL);
+    }
+
+    public static RenderType outline(ResourceLocation resourceLocation, RenderStateShard.CullStateShard cullStateShard) {
+        return RenderType.create("outline", DefaultVertexFormat.POSITION_COLOR_TEX, 7, 256, CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setCullState(cullStateShard).setDepthTestState(NO_DEPTH_TEST).setAlphaState(DEFAULT_ALPHA).setTexturingState(OUTLINE_TEXTURING).setFogState(NO_FOG).setOutputState(OUTLINE_TARGET).createCompositeState(OutlineProperty.IS_OUTLINE));
     }
 
     public static RenderType glint() {
@@ -219,6 +228,7 @@ extends RenderStateShard {
         this.clearRenderState();
     }
 
+    @Override
     public String toString() {
         return this.name;
     }
@@ -267,7 +277,7 @@ extends RenderStateShard {
         private CompositeRenderType(String string, VertexFormat vertexFormat, int i, int j, boolean bl, boolean bl2, CompositeState compositeState) {
             super(string, vertexFormat, i, j, bl, bl2, () -> compositeState.states.forEach(RenderStateShard::setupRenderState), () -> compositeState.states.forEach(RenderStateShard::clearRenderState));
             this.state = compositeState;
-            this.outline = compositeState.outlineProperty == OutlineProperty.AFFECTS_OUTLINE ? compositeState.textureState.texture().map(RenderType::outline) : Optional.empty();
+            this.outline = compositeState.outlineProperty == OutlineProperty.AFFECTS_OUTLINE ? compositeState.textureState.texture().map(resourceLocation -> CompositeRenderType.outline(resourceLocation, compositeState.cullState)) : Optional.empty();
             this.isOutline = compositeState.outlineProperty == OutlineProperty.IS_OUTLINE;
             this.hashCode = Objects.hash(super.hashCode(), compositeState);
         }
@@ -294,6 +304,11 @@ extends RenderStateShard {
         @Override
         public int hashCode() {
             return this.hashCode;
+        }
+
+        @Override
+        public String toString() {
+            return "RenderType[" + this.state + ']';
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -386,6 +401,10 @@ extends RenderStateShard {
 
         public int hashCode() {
             return Objects.hash(new Object[]{this.states, this.outlineProperty});
+        }
+
+        public String toString() {
+            return "CompositeState[" + this.states + ", outlineProperty=" + (Object)((Object)this.outlineProperty) + ']';
         }
 
         public static CompositeStateBuilder builder() {
@@ -500,10 +519,19 @@ extends RenderStateShard {
 
     @Environment(value=EnvType.CLIENT)
     static enum OutlineProperty {
-        NONE,
-        IS_OUTLINE,
-        AFFECTS_OUTLINE;
+        NONE("none"),
+        IS_OUTLINE("is_outline"),
+        AFFECTS_OUTLINE("affects_outline");
 
+        private final String name;
+
+        private OutlineProperty(String string2) {
+            this.name = string2;
+        }
+
+        public String toString() {
+            return this.name;
+        }
     }
 }
 

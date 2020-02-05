@@ -8,19 +8,18 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 
-public class SitGoal
+public class SitWhenOrderedToGoal
 extends Goal {
     private final TamableAnimal mob;
-    private boolean wantToSit;
 
-    public SitGoal(TamableAnimal tamableAnimal) {
+    public SitWhenOrderedToGoal(TamableAnimal tamableAnimal) {
         this.mob = tamableAnimal;
         this.setFlags(EnumSet.of(Goal.Flag.JUMP, Goal.Flag.MOVE));
     }
 
     @Override
     public boolean canContinueToUse() {
-        return this.wantToSit;
+        return this.mob.isOrderedToSit();
     }
 
     @Override
@@ -41,22 +40,18 @@ extends Goal {
         if (this.mob.distanceToSqr(livingEntity) < 144.0 && livingEntity.getLastHurtByMob() != null) {
             return false;
         }
-        return this.wantToSit;
+        return this.mob.isOrderedToSit();
     }
 
     @Override
     public void start() {
         this.mob.getNavigation().stop();
-        this.mob.setSitting(true);
+        this.mob.setInSittingPose(true);
     }
 
     @Override
     public void stop() {
-        this.mob.setSitting(false);
-    }
-
-    public void wantToSit(boolean bl) {
-        this.wantToSit = bl;
+        this.mob.setInSittingPose(false);
     }
 }
 

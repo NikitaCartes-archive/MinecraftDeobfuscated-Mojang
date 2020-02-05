@@ -3,8 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.synth;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
+import java.util.List;
 import java.util.stream.IntStream;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -18,11 +20,15 @@ implements SurfaceNoise {
     private final double highestFreqValueFactor;
     private final double highestFreqInputFactor;
 
-    public PerlinNoise(WorldgenRandom worldgenRandom, int i, int j) {
-        this(worldgenRandom, new IntRBTreeSet(IntStream.rangeClosed(-i, j).toArray()));
+    public PerlinNoise(WorldgenRandom worldgenRandom, IntStream intStream) {
+        this(worldgenRandom, intStream.boxed().collect(ImmutableList.toImmutableList()));
     }
 
-    public PerlinNoise(WorldgenRandom worldgenRandom, IntSortedSet intSortedSet) {
+    public PerlinNoise(WorldgenRandom worldgenRandom, List<Integer> list) {
+        this(worldgenRandom, new IntRBTreeSet(list));
+    }
+
+    private PerlinNoise(WorldgenRandom worldgenRandom, IntSortedSet intSortedSet) {
         int j;
         if (intSortedSet.isEmpty()) {
             throw new IllegalArgumentException("Need some octaves!");

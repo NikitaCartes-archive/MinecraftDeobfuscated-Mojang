@@ -39,6 +39,7 @@ public class ParticleTypes {
     public static final SimpleParticleType FIREWORK = ParticleTypes.register("firework", false);
     public static final SimpleParticleType FISHING = ParticleTypes.register("fishing", false);
     public static final SimpleParticleType FLAME = ParticleTypes.register("flame", false);
+    public static final SimpleParticleType SOUL_FIRE_FLAME = ParticleTypes.register("soul_fire_flame", false);
     public static final SimpleParticleType FLASH = ParticleTypes.register("flash", false);
     public static final SimpleParticleType HAPPY_VILLAGER = ParticleTypes.register("happy_villager", false);
     public static final SimpleParticleType COMPOSTER = ParticleTypes.register("composter", false);
@@ -74,6 +75,9 @@ public class ParticleTypes {
     public static final SimpleParticleType FALLING_HONEY = ParticleTypes.register("falling_honey", false);
     public static final SimpleParticleType LANDING_HONEY = ParticleTypes.register("landing_honey", false);
     public static final SimpleParticleType FALLING_NECTAR = ParticleTypes.register("falling_nectar", false);
+    public static final SimpleParticleType ASH = ParticleTypes.register("ash", false);
+    public static final SimpleParticleType CRIMSON_SPORE = ParticleTypes.register("crimson_spore", false);
+    public static final SimpleParticleType WARPED_SPORE = ParticleTypes.register("warped_spore", false);
 
     private static SimpleParticleType register(String string, boolean bl) {
         return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));

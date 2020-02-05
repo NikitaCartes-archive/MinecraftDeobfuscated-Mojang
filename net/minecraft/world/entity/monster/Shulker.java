@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -201,11 +202,9 @@ implements Enemy {
             this.yBodyRotO = f;
             this.clientSideTeleportInterpolation = 0;
         } else if (!this.level.isClientSide) {
-            BlockPos blockPos3;
-            BlockPos blockPos2;
+            Direction direction;
             BlockState blockState = this.level.getBlockState(blockPos);
             if (!blockState.isAir()) {
-                Direction direction;
                 if (blockState.getBlock() == Blocks.MOVING_PISTON) {
                     direction = blockState.getValue(PistonBaseBlock.FACING);
                     if (this.level.isEmptyBlock(blockPos.relative(direction))) {
@@ -226,21 +225,13 @@ implements Enemy {
                     this.teleportSomewhere();
                 }
             }
-            if (!this.level.loadedAndEntityCanStandOn(blockPos2 = blockPos.relative(this.getAttachFace()), this)) {
-                boolean bl = false;
-                for (Direction direction2 : Direction.values()) {
-                    blockPos2 = blockPos.relative(direction2);
-                    if (!this.level.loadedAndEntityCanStandOn(blockPos2, this)) continue;
+            if (!this.canAttachOnBlockFace(blockPos, direction = this.getAttachFace())) {
+                Direction direction2 = this.findAttachableFace(blockPos);
+                if (direction2 != null) {
                     this.entityData.set(DATA_ATTACH_FACE_ID, direction2);
-                    bl = true;
-                    break;
-                }
-                if (!bl) {
+                } else {
                     this.teleportSomewhere();
                 }
-            }
-            if (this.level.loadedAndEntityCanStandOn(blockPos3 = blockPos.relative(this.getAttachFace().getOpposite()), this)) {
-                this.teleportSomewhere();
             }
         }
         f = (float)this.getRawPeekAmount() * 0.01f;
@@ -298,22 +289,29 @@ implements Enemy {
         }
     }
 
+    @Nullable
+    protected Direction findAttachableFace(BlockPos blockPos) {
+        for (Direction direction : Direction.values()) {
+            if (!this.canAttachOnBlockFace(blockPos, direction)) continue;
+            return direction;
+        }
+        return null;
+    }
+
+    private boolean canAttachOnBlockFace(BlockPos blockPos, Direction direction) {
+        return this.level.loadedAndEntityCanStandOnFace(blockPos.relative(direction), this, direction.getOpposite()) && this.level.noCollision(this, ShulkerSharedHelper.openBoundingBox(blockPos, direction.getOpposite()));
+    }
+
     protected boolean teleportSomewhere() {
         if (this.isNoAi() || !this.isAlive()) {
             return true;
         }
         BlockPos blockPos = new BlockPos(this);
         for (int i = 0; i < 5; ++i) {
+            Direction direction;
             BlockPos blockPos2 = blockPos.offset(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));
-            if (blockPos2.getY() <= 0 || !this.level.isEmptyBlock(blockPos2) || !this.level.getWorldBorder().isWithinBounds(blockPos2) || !this.level.noCollision(this, new AABB(blockPos2))) continue;
-            boolean bl = false;
-            for (Direction direction : Direction.values()) {
-                if (!this.level.loadedAndEntityCanStandOn(blockPos2.relative(direction), this)) continue;
-                this.entityData.set(DATA_ATTACH_FACE_ID, direction);
-                bl = true;
-                break;
-            }
-            if (!bl) continue;
+            if (blockPos2.getY() <= 0 || !this.level.isEmptyBlock(blockPos2) || !this.level.getWorldBorder().isWithinBounds(blockPos2) || !this.level.noCollision(this, new AABB(blockPos2)) || (direction = this.findAttachableFace(blockPos2)) == null) continue;
+            this.entityData.set(DATA_ATTACH_FACE_ID, direction);
             this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0f, 1.0f);
             this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos2));
             this.entityData.set(DATA_PEEK_ID, (byte)0);

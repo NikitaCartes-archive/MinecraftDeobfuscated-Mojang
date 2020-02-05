@@ -105,7 +105,7 @@ extends Entity {
 
     @Override
     protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return 0.0f;
+        return 0.15f;
     }
 
     public void setFuse(int i) {

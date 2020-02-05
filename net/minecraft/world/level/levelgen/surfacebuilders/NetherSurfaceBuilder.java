@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -19,7 +20,6 @@ import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 public class NetherSurfaceBuilder
 extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
-    private static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
     private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
     private static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
     protected long seed;
@@ -40,12 +40,12 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int r = -1;
-        BlockState blockState3 = NETHERRACK;
-        BlockState blockState4 = NETHERRACK;
+        BlockState blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
+        BlockState blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
         for (int s = 127; s >= 0; --s) {
             mutableBlockPos.set(o, s, p);
             BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
-            if (blockState5.getBlock() == null || blockState5.isAir()) {
+            if (blockState5.isAir()) {
                 r = -1;
                 continue;
             }
@@ -53,20 +53,20 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             if (r == -1) {
                 if (q <= 0) {
                     blockState3 = AIR;
-                    blockState4 = NETHERRACK;
+                    blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                 } else if (s >= n - 4 && s <= n + 1) {
-                    blockState3 = NETHERRACK;
-                    blockState4 = NETHERRACK;
+                    blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
+                    blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                     if (bl2) {
                         blockState3 = GRAVEL;
-                        blockState4 = NETHERRACK;
+                        blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                     }
                     if (bl) {
                         blockState3 = SOUL_SAND;
                         blockState4 = SOUL_SAND;
                     }
                 }
-                if (s < n && (blockState3 == null || blockState3.isAir())) {
+                if (s < n && blockState3.isAir()) {
                     blockState3 = blockState2;
                 }
                 r = q;
@@ -86,7 +86,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     @Override
     public void initNoise(long l) {
         if (this.seed != l || this.decorationNoise == null) {
-            this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), 3, 0);
+            this.decorationNoise = new PerlinNoise(new WorldgenRandom(l), IntStream.rangeClosed(-3, 0));
         }
         this.seed = l;
     }

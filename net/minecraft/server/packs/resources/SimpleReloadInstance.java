@@ -34,7 +34,7 @@ implements ReloadInstance {
     private final AtomicInteger doneTaskCounter = new AtomicInteger();
 
     public static SimpleReloadInstance<Void> of(ResourceManager resourceManager2, List<PreparableReloadListener> list, Executor executor, Executor executor22, CompletableFuture<Unit> completableFuture) {
-        return new SimpleReloadInstance<Void>(executor, executor22, resourceManager2, list, (preparationBarrier, resourceManager, preparableReloadListener, executor2, executor3) -> preparableReloadListener.reload(preparationBarrier, resourceManager, InactiveProfiler.INACTIVE, InactiveProfiler.INACTIVE, executor, executor3), completableFuture);
+        return new SimpleReloadInstance<Void>(executor, executor22, resourceManager2, list, (preparationBarrier, resourceManager, preparableReloadListener, executor2, executor3) -> preparableReloadListener.reload(preparationBarrier, resourceManager, InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, executor, executor3), completableFuture);
     }
 
     protected SimpleReloadInstance(Executor executor, final Executor executor2, ResourceManager resourceManager, List<PreparableReloadListener> list, StateFactory<S> stateFactory, CompletableFuture<Unit> completableFuture) {

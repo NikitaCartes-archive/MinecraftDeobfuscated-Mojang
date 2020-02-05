@@ -42,34 +42,18 @@ implements LiquidBlockContainer {
         return SHAPE;
     }
 
-    @Override
-    @Nullable
-    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-        if (fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8) {
-            return this.getStateForPlacement(blockPlaceContext.getLevel());
-        }
-        return null;
-    }
-
     public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
         return (BlockState)this.defaultBlockState().setValue(AGE, levelAccessor.getRandom().nextInt(25));
     }
 
     @Override
-    public FluidState getFluidState(BlockState blockState) {
-        return Fluids.WATER.getSource(false);
-    }
-
-    @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BlockPos blockPos2;
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
             return;
         }
-        BlockPos blockPos2 = blockPos.above();
-        BlockState blockState2 = serverLevel.getBlockState(blockPos2);
-        if (blockState2.getBlock() == Blocks.WATER && blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14) {
+        if (blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14 && serverLevel.getBlockState(blockPos2 = blockPos.above()).getBlock() == Blocks.WATER) {
             serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState.cycle(AGE));
         }
     }
@@ -87,10 +71,7 @@ implements LiquidBlockContainer {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        if (!blockState.canSurvive(levelAccessor, blockPos)) {
-            if (direction == Direction.DOWN) {
-                return Blocks.AIR.defaultBlockState();
-            }
+        if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
         if (direction == Direction.UP && blockState2.getBlock() == this) {
@@ -113,6 +94,21 @@ implements LiquidBlockContainer {
     @Override
     public boolean placeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
         return false;
+    }
+
+    @Override
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
+        if (fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8) {
+            return this.getStateForPlacement(blockPlaceContext.getLevel());
+        }
+        return null;
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState blockState) {
+        return Fluids.WATER.getSource(false);
     }
 }
 

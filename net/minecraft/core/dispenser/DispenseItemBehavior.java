@@ -47,6 +47,7 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -319,7 +320,7 @@ public interface DispenseItemBehavior {
                 BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
                 BlockState blockState = level.getBlockState(blockPos);
                 if (FlintAndSteelItem.canUse(blockState, level, blockPos)) {
-                    level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
+                    level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
                 } else if (FlintAndSteelItem.canLightCampFire(blockState)) {
                     level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true));
                 } else if (blockState.getBlock() instanceof TntBlock) {

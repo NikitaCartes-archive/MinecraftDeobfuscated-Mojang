@@ -129,8 +129,7 @@ extends BaseRailBlock {
         if (blockState2.getBlock() == blockState.getBlock()) {
             return;
         }
-        super.onPlace(blockState, level, blockPos, blockState2, bl);
-        this.checkPressed(level, blockPos, blockState);
+        this.checkPressed(level, blockPos, this.updateState(blockState, level, blockPos, bl));
     }
 
     @Override

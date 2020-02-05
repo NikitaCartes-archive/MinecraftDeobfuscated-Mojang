@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.level.block;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -122,6 +124,12 @@ extends FallingBlock {
     @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public int getDustColor(BlockState blockState) {
+        return this.materialColor.col;
     }
 }
 

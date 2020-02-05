@@ -102,7 +102,13 @@ extends HumanoidModel<T> {
         this.leftSleeve.copyFrom(this.leftArm);
         this.rightSleeve.copyFrom(this.rightArm);
         this.jacket.copyFrom(this.body);
-        this.cloak.y = ((Entity)livingEntity).isCrouching() ? 2.0f : 0.0f;
+        if (((Entity)livingEntity).isCrouching()) {
+            this.cloak.z = 1.6f;
+            this.cloak.y = 1.8f;
+        } else {
+            this.cloak.z = 0.0f;
+            this.cloak.y = 0.0f;
+        }
     }
 
     @Override

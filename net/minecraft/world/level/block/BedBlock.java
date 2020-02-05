@@ -99,7 +99,7 @@ implements EntityBlock {
         if (blockState.getValue(PART) != BedPart.HEAD && (blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).getBlock() != this) {
             return InteractionResult.CONSUME;
         }
-        if (!level.dimension.mayRespawn() || level.getBiome(blockPos) == Biomes.NETHER) {
+        if (!level.dimension.mayRespawn() || level.getBiome(blockPos) == Biomes.NETHER_WASTES) {
             level.removeBlock(blockPos, false);
             BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite());
             if (level.getBlockState(blockPos2).getBlock() == this) {

@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.level.block;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -70,6 +72,12 @@ extends FallingBlock {
             return this.concrete;
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public int getDustColor(BlockState blockState) {
+        return this.materialColor.col;
     }
 }
 

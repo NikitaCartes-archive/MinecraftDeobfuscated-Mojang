@@ -24,5 +24,7 @@ public interface ArmorMaterial {
     public String getName();
 
     public float getToughness();
+
+    public float getKnockbackResistance();
 }
 

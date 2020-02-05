@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -221,6 +222,11 @@ public class EnchantmentHelper {
 
     @Nullable
     public static Map.Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity) {
+        return EnchantmentHelper.getRandomItemWith(enchantment, livingEntity, itemStack -> true);
+    }
+
+    @Nullable
+    public static Map.Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity, Predicate<ItemStack> predicate) {
         Map<EquipmentSlot, ItemStack> map = enchantment.getSlotItems(livingEntity);
         if (map.isEmpty()) {
             return null;
@@ -228,7 +234,7 @@ public class EnchantmentHelper {
         ArrayList<Map.Entry<EquipmentSlot, ItemStack>> list = Lists.newArrayList();
         for (Map.Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
             ItemStack itemStack = entry.getValue();
-            if (itemStack.isEmpty() || EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) <= 0) continue;
+            if (itemStack.isEmpty() || EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack) <= 0 || !predicate.test(itemStack)) continue;
             list.add(entry);
         }
         return list.isEmpty() ? null : (Map.Entry)list.get(livingEntity.getRandom().nextInt(list.size()));

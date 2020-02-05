@@ -121,7 +121,7 @@ implements Enemy {
 
     @Override
     protected float getSoundVolume() {
-        return 10.0f;
+        return 5.0f;
     }
 
     public static boolean checkGhastSpawnRules(EntityType<Ghast> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {

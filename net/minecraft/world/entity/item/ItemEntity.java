@@ -89,6 +89,8 @@ extends Entity {
         Vec3 vec3 = this.getDeltaMovement();
         if (this.isUnderLiquid(FluidTags.WATER)) {
             this.setUnderwaterMovement();
+        } else if (this.isUnderLiquid(FluidTags.LAVA)) {
+            this.setUnderLavaMovement();
         } else if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
         }
@@ -115,7 +117,6 @@ extends Entity {
         int n = i = bl ? 2 : 40;
         if (this.tickCount % i == 0) {
             if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
-                this.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.2f, 0.2f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
                 this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
             }
             if (!this.level.isClientSide && this.isMergable()) {
@@ -137,6 +138,11 @@ extends Entity {
     private void setUnderwaterMovement() {
         Vec3 vec3 = this.getDeltaMovement();
         this.setDeltaMovement(vec3.x * (double)0.99f, vec3.y + (double)(vec3.y < (double)0.06f ? 5.0E-4f : 0.0f), vec3.z * (double)0.99f);
+    }
+
+    private void setUnderLavaMovement() {
+        Vec3 vec3 = this.getDeltaMovement();
+        this.setDeltaMovement(vec3.x * (double)0.95f, vec3.y + (double)(vec3.y < (double)0.06f ? 5.0E-4f : 0.0f), vec3.z * (double)0.95f);
     }
 
     private void mergeWithNeighbours() {
@@ -206,16 +212,14 @@ extends Entity {
     }
 
     @Override
-    protected void burn(int i) {
-        this.hurt(DamageSource.IN_FIRE, i);
-    }
-
-    @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
         if (!this.getItem().isEmpty() && this.getItem().getItem() == Items.NETHER_STAR && damageSource.isExplosion()) {
+            return false;
+        }
+        if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
             return false;
         }
         this.markHurt();

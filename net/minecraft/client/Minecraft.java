@@ -168,10 +168,12 @@ import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.profiling.GameProfiler;
+import net.minecraft.util.profiling.ContinuousProfiler;
+import net.minecraft.util.profiling.InactiveProfiler;
 import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
+import net.minecraft.util.profiling.SingleTickProfiler;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
@@ -258,7 +260,6 @@ WindowEventHandler {
     public final FrameTimer frameTimer = new FrameTimer();
     private final boolean is64bit;
     private final boolean demo;
-    private final GameProfiler profiler = new GameProfiler(() -> this.timer.ticks);
     private final ReloadableResourceManager resourceManager;
     private final ClientPackSource clientPackSource;
     private final PackRepository<UnopenedResourcePack> resourcePackRepository;
@@ -325,6 +326,11 @@ WindowEventHandler {
     private final Queue<Runnable> progressTasks = Queues.newConcurrentLinkedQueue();
     @Nullable
     private CompletableFuture<Void> pendingReload;
+    private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
+    private int fpsPieRenderTicks;
+    private final ContinuousProfiler fpsPieProfiler = new ContinuousProfiler(Util.timeSource, () -> this.fpsPieRenderTicks);
+    @Nullable
+    private ProfileResults fpsPieResults;
     private String debugPath = "root";
 
     public Minecraft(GameConfig gameConfig) {
@@ -522,7 +528,13 @@ WindowEventHandler {
                     return;
                 }
                 try {
+                    SingleTickProfiler singleTickProfiler = SingleTickProfiler.createTickProfiler("Renderer");
+                    boolean bl2 = this.shouldRenderFpsPie();
+                    this.startProfilers(bl2, singleTickProfiler);
+                    this.profiler.startTick();
                     this.runTick(!bl);
+                    this.profiler.endTick();
+                    this.finishProfilers(bl2, singleTickProfiler);
                 } catch (OutOfMemoryError outOfMemoryError) {
                     if (bl) {
                         throw outOfMemoryError;
@@ -784,7 +796,6 @@ WindowEventHandler {
         Runnable runnable;
         this.window.setErrorSection("Pre render");
         long l = Util.getNanos();
-        this.profiler.startTick();
         if (this.window.shouldClose()) {
             this.stop();
         }
@@ -797,20 +808,20 @@ WindowEventHandler {
             runnable.run();
         }
         if (bl) {
-            this.timer.advanceTime(Util.getMillis());
+            i = this.timer.advanceTime(Util.getMillis());
             this.profiler.push("scheduledExecutables");
             this.runAllTasks();
             this.profiler.pop();
-        }
-        this.profiler.push("tick");
-        if (bl) {
-            for (i = 0; i < Math.min(10, this.timer.ticks); ++i) {
+            this.profiler.push("tick");
+            for (int j = 0; j < Math.min(10, i); ++j) {
+                this.profiler.incrementCounter("clientTick");
                 this.tick();
             }
+            this.profiler.pop();
         }
         this.mouseHandler.turnPlayer();
         this.window.setErrorSection("Render");
-        this.profiler.popPush("sound");
+        this.profiler.push("sound");
         this.soundManager.updateSource(this.gameRenderer.getMainCamera());
         this.profiler.pop();
         this.profiler.push("render");
@@ -820,6 +831,7 @@ WindowEventHandler {
         FogRenderer.setupNoFog();
         this.profiler.push("display");
         RenderSystem.enableTexture();
+        RenderSystem.enableCull();
         this.profiler.pop();
         if (!this.noRender) {
             this.profiler.popPush("gameRenderer");
@@ -828,20 +840,18 @@ WindowEventHandler {
             this.toast.render();
             this.profiler.pop();
         }
-        this.profiler.endTick();
-        if (this.options.renderDebug && this.options.renderDebugCharts && !this.options.hideGui) {
-            this.profiler.continuous().enable();
-            this.renderFpsMeter();
-        } else {
-            this.profiler.continuous().disable();
+        if (this.fpsPieResults != null) {
+            this.profiler.push("fpsPie");
+            this.renderFpsMeter(this.fpsPieResults);
+            this.profiler.pop();
         }
+        this.profiler.push("blit");
         this.mainRenderTarget.unbindWrite();
         RenderSystem.popMatrix();
         RenderSystem.pushMatrix();
         this.mainRenderTarget.blitToScreen(this.window.getWidth(), this.window.getHeight());
         RenderSystem.popMatrix();
-        this.profiler.startTick();
-        this.profiler.push("updateDisplay");
+        this.profiler.popPush("updateDisplay");
         this.window.updateDisplay();
         i = this.getFramerateLimit();
         if ((double)i < Option.FRAMERATE_LIMIT.getMaxValue()) {
@@ -864,6 +874,7 @@ WindowEventHandler {
         long m = Util.getNanos();
         this.frameTimer.logFrameDuration(m - this.lastNanoTime);
         this.lastNanoTime = m;
+        this.profiler.push("fpsUpdate");
         while (Util.getMillis() >= this.lastTime + 1000L) {
             fps = this.frames;
             Object[] objectArray = new Object[6];
@@ -880,7 +891,34 @@ WindowEventHandler {
             if (this.snooper.isStarted()) continue;
             this.snooper.start();
         }
-        this.profiler.endTick();
+        this.profiler.pop();
+    }
+
+    private boolean shouldRenderFpsPie() {
+        return this.options.renderDebug && this.options.renderDebugCharts && !this.options.hideGui;
+    }
+
+    private void startProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
+        if (bl) {
+            if (!this.fpsPieProfiler.isEnabled()) {
+                this.fpsPieRenderTicks = 0;
+                this.fpsPieProfiler.enable();
+            }
+            ++this.fpsPieRenderTicks;
+        } else {
+            this.fpsPieProfiler.disable();
+        }
+        this.profiler = SingleTickProfiler.decorateFiller(this.fpsPieProfiler.getFiller(), singleTickProfiler);
+    }
+
+    private void finishProfilers(boolean bl, @Nullable SingleTickProfiler singleTickProfiler) {
+        if (singleTickProfiler != null) {
+            singleTickProfiler.endTick();
+        }
+        if (bl) {
+            this.fpsPieResults = this.fpsPieProfiler.getResults();
+        }
+        this.profiler = this.fpsPieProfiler.getFiller();
     }
 
     @Override
@@ -923,8 +961,10 @@ WindowEventHandler {
     }
 
     void debugFpsMeterKeyPress(int i) {
-        ProfileResults profileResults = this.profiler.continuous().getResults();
-        List<ResultField> list = profileResults.getTimes(this.debugPath);
+        if (this.fpsPieResults == null) {
+            return;
+        }
+        List<ResultField> list = this.fpsPieResults.getTimes(this.debugPath);
         if (list.isEmpty()) {
             return;
         }
@@ -942,12 +982,8 @@ WindowEventHandler {
         }
     }
 
-    private void renderFpsMeter() {
+    private void renderFpsMeter(ProfileResults profileResults) {
         int m;
-        if (!this.profiler.continuous().isEnabled()) {
-            return;
-        }
-        ProfileResults profileResults = this.profiler.continuous().getResults();
         List<ResultField> list = profileResults.getTimes(this.debugPath);
         ResultField resultField = list.remove(0);
         RenderSystem.clear(256, ON_OSX);
@@ -1400,6 +1436,7 @@ WindowEventHandler {
         }
         LevelLoadingScreen levelLoadingScreen = new LevelLoadingScreen(this.progressListener.get());
         this.setScreen(levelLoadingScreen);
+        this.profiler.push("waitForServer");
         while (!this.singleplayerServer.isReady()) {
             levelLoadingScreen.tick();
             this.runTick(false);
@@ -1412,6 +1449,7 @@ WindowEventHandler {
             Minecraft.crash(this.delayedCrash);
             return;
         }
+        this.profiler.pop();
         SocketAddress socketAddress = this.singleplayerServer.getConnection().startMemoryChannel();
         Connection connection = Connection.connectToLocalServer(socketAddress);
         connection.setListener(new ClientHandshakePacketListenerImpl(connection, this, null, component -> {}));
@@ -1455,9 +1493,11 @@ WindowEventHandler {
         this.updateScreenAndTick(screen);
         if (this.level != null) {
             if (integratedServer != null) {
+                this.profiler.push("waitForServer");
                 while (!integratedServer.isShutdown()) {
                     this.runTick(false);
                 }
+                this.profiler.pop();
             }
             this.clientPackSource.clearServerPack();
             this.gui.onDisconnected();
@@ -1471,12 +1511,14 @@ WindowEventHandler {
     }
 
     private void updateScreenAndTick(Screen screen) {
+        this.profiler.push("forcedTick");
         this.musicManager.stopPlaying();
         this.soundManager.stop();
         this.cameraEntity = null;
         this.pendingConnection = null;
         this.setScreen(screen);
         this.runTick(false);
+        this.profiler.pop();
     }
 
     private void updateLevelInEngines(@Nullable ClientLevel clientLevel) {

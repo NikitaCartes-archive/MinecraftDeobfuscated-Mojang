@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -234,7 +235,7 @@ public class Explosion {
         if (this.fire) {
             for (BlockPos blockPos3 : this.toBlow) {
                 if (this.random.nextInt(3) != 0 || !this.level.getBlockState(blockPos3).isAir() || !this.level.getBlockState(blockPos3.below()).isSolidRender(this.level, blockPos3.below())) continue;
-                this.level.setBlockAndUpdate(blockPos3, Blocks.FIRE.defaultBlockState());
+                this.level.setBlockAndUpdate(blockPos3, BaseFireBlock.getState(this.level, blockPos3));
             }
         }
     }

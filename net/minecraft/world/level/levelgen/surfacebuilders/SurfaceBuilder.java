@@ -18,9 +18,11 @@ import net.minecraft.world.level.levelgen.surfacebuilders.FrozenOceanSurfaceBuil
 import net.minecraft.world.level.levelgen.surfacebuilders.GiantTreeTaigaSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.GravellyMountainSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.MountainSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.NetherForestSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.NetherSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.NopeSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.ShatteredSavanaSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.SoulSandValleySurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SwampSurfaceBuilder;
@@ -38,8 +40,13 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final BlockState RED_SAND = Blocks.RED_SAND.defaultBlockState();
     public static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
     public static final BlockState MYCELIUM = Blocks.MYCELIUM.defaultBlockState();
+    public static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
     public static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
     public static final BlockState ENDSTONE = Blocks.END_STONE.defaultBlockState();
+    public static final BlockState CRIMSON_NYLIUM = Blocks.CRIMSON_NYLIUM.defaultBlockState();
+    public static final BlockState WARPED_NYLIUM = Blocks.WARPED_NYLIUM.defaultBlockState();
+    public static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
+    public static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
     public static final SurfaceBuilderBaseConfiguration CONFIG_EMPTY = new SurfaceBuilderBaseConfiguration(AIR, AIR, AIR);
     public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
     public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
@@ -53,7 +60,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final SurfaceBuilderBaseConfiguration CONFIG_BADLANDS = new SurfaceBuilderBaseConfiguration(RED_SAND, WHITE_TERRACOTTA, GRAVEL);
     public static final SurfaceBuilderBaseConfiguration CONFIG_MYCELIUM = new SurfaceBuilderBaseConfiguration(MYCELIUM, DIRT, GRAVEL);
     public static final SurfaceBuilderBaseConfiguration CONFIG_HELL = new SurfaceBuilderBaseConfiguration(NETHERRACK, NETHERRACK, NETHERRACK);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_SOUL_SAND_VALLEY = new SurfaceBuilderBaseConfiguration(SOUL_SAND, SOUL_SAND, SOUL_SAND);
     public static final SurfaceBuilderBaseConfiguration CONFIG_THEEND = new SurfaceBuilderBaseConfiguration(ENDSTONE, ENDSTONE, ENDSTONE);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
+    public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = SurfaceBuilder.register("default", new DefaultSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> MOUNTAIN = SurfaceBuilder.register("mountain", new MountainSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SHATTERED_SAVANNA = SurfaceBuilder.register("shattered_savanna", new ShatteredSavanaSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
@@ -65,6 +75,8 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> ERODED_BADLANDS = SurfaceBuilder.register("eroded_badlands", new ErodedBadlandsSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> FROZEN_OCEAN = SurfaceBuilder.register("frozen_ocean", new FrozenOceanSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER = SurfaceBuilder.register("nether", new NetherSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER_FOREST = SurfaceBuilder.register("nether_forest", new NetherForestSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = SurfaceBuilder.register("soul_sand_valley", new SoulSandValleySurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = SurfaceBuilder.register("nope", new NopeSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
     private final Function<Dynamic<?>, ? extends C> configurationFactory;
 

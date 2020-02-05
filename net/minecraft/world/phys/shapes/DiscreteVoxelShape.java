@@ -56,25 +56,6 @@ public abstract class DiscreteVoxelShape {
     public abstract int lastFull(Direction.Axis var1);
 
     @Environment(value=EnvType.CLIENT)
-    public int firstFull(Direction.Axis axis, int i, int j) {
-        int k = this.getSize(axis);
-        if (i < 0 || j < 0) {
-            return k;
-        }
-        Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
-        Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);
-        if (i >= this.getSize(axis2) || j >= this.getSize(axis3)) {
-            return k;
-        }
-        AxisCycle axisCycle = AxisCycle.between(Direction.Axis.X, axis);
-        for (int l = 0; l < k; ++l) {
-            if (!this.isFull(axisCycle, l, i, j)) continue;
-            return l;
-        }
-        return k;
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public int lastFull(Direction.Axis axis, int i, int j) {
         if (i < 0 || j < 0) {
             return 0;

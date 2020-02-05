@@ -34,6 +34,8 @@ public class ItemTags {
     public static final Tag<Item> ACACIA_LOGS;
     public static final Tag<Item> JUNGLE_LOGS;
     public static final Tag<Item> SPRUCE_LOGS;
+    public static final Tag<Item> CRIMSON_STEMS;
+    public static final Tag<Item> WARPED_STEMS;
     public static final Tag<Item> BANNERS;
     public static final Tag<Item> SAND;
     public static final Tag<Item> STAIRS;
@@ -91,6 +93,8 @@ public class ItemTags {
         ACACIA_LOGS = ItemTags.bind("acacia_logs");
         JUNGLE_LOGS = ItemTags.bind("jungle_logs");
         SPRUCE_LOGS = ItemTags.bind("spruce_logs");
+        CRIMSON_STEMS = ItemTags.bind("crimson_stems");
+        WARPED_STEMS = ItemTags.bind("warped_stems");
         BANNERS = ItemTags.bind("banners");
         SAND = ItemTags.bind("sand");
         STAIRS = ItemTags.bind("stairs");

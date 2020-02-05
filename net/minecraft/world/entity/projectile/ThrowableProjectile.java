@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
@@ -37,8 +38,7 @@ implements Projectile {
     public int shakeTime;
     protected LivingEntity owner;
     private UUID ownerId;
-    private Entity entityToIgnore;
-    private int timeToIgnore;
+    private boolean leftOwner;
 
     protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, Level level) {
         super(entityType, level);
@@ -110,20 +110,21 @@ implements Projectile {
             this.setDeltaMovement(this.getDeltaMovement().multiply(this.random.nextFloat() * 0.2f, this.random.nextFloat() * 0.2f, this.random.nextFloat() * 0.2f));
         }
         AABB aABB = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0);
-        for (Entity entity2 : this.level.getEntities(this, aABB, entity -> !entity.isSpectator() && entity.isPickable())) {
-            if (entity2 == this.entityToIgnore) {
-                ++this.timeToIgnore;
+        if (this.owner == null) {
+            this.leftOwner = true;
+        } else if (!this.leftOwner) {
+            boolean bl = false;
+            for (Entity entity2 : this.level.getEntities(this, aABB, entity -> !entity.isSpectator() && entity.isPickable())) {
+                if (!this.isEntityOrVehicle(entity2, this.owner)) continue;
+                bl = true;
                 break;
             }
-            if (this.owner == null || this.tickCount >= 2 || this.entityToIgnore != null) continue;
-            this.entityToIgnore = entity2;
-            this.timeToIgnore = 3;
-            break;
+            if (!bl) {
+                this.leftOwner = true;
+            }
         }
-        HitResult hitResult = ProjectileUtil.getHitResult(this, aABB, entity -> !entity.isSpectator() && entity.isPickable() && entity != this.entityToIgnore, ClipContext.Block.OUTLINE, true);
-        if (this.entityToIgnore != null && this.timeToIgnore-- <= 0) {
-            this.entityToIgnore = null;
-        }
+        Predicate<Entity> predicate = entity -> !entity.isSpectator() && entity.isPickable() && (this.leftOwner || !this.isEntityOrVehicle((Entity)entity, this.owner));
+        HitResult hitResult = ProjectileUtil.getHitResult(this, aABB, predicate, ClipContext.Block.OUTLINE, true);
         if (hitResult.getType() != HitResult.Type.MISS) {
             if (hitResult.getType() == HitResult.Type.BLOCK && this.level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.NETHER_PORTAL) {
                 this.handleInsidePortal(((BlockHitResult)hitResult).getBlockPos());
@@ -167,6 +168,10 @@ implements Projectile {
             this.setDeltaMovement(vec32.x, vec32.y - (double)this.getGravity(), vec32.z);
         }
         this.setPos(d, e, f);
+    }
+
+    private boolean isEntityOrVehicle(Entity entity, Entity entity2) {
+        return entity == entity2 || entity.getPassengers().contains(entity2);
     }
 
     protected float getGravity() {

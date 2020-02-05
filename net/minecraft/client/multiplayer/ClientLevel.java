@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -98,8 +99,8 @@ extends Level {
         object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
     });
 
-    public ClientLevel(ClientPacketListener clientPacketListener, LevelSettings levelSettings, DimensionType dimensionType, int i, ProfilerFiller profilerFiller, LevelRenderer levelRenderer) {
-        super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), profilerFiller, true);
+    public ClientLevel(ClientPacketListener clientPacketListener, LevelSettings levelSettings, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
+        super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
         this.connection = clientPacketListener;
         this.levelRenderer = levelRenderer;
         this.setSpawnPos(new BlockPos(8, 64, 8));
@@ -355,6 +356,13 @@ extends Level {
         }
         if (bl && blockState.getBlock() == Blocks.BARRIER) {
             this.addParticle(ParticleTypes.BARRIER, (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
+        }
+        if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
+            this.getBiome(mutableBlockPos).getAmbientParticle().ifPresent(ambientParticleSettings -> {
+                if (ambientParticleSettings.canSpawn(this.random)) {
+                    this.addParticle(ambientParticleSettings.getParticleType(), (float)mutableBlockPos.getX() + this.random.nextFloat(), (float)mutableBlockPos.getY() + this.random.nextFloat(), (float)mutableBlockPos.getZ() + this.random.nextFloat(), ambientParticleSettings.getXVelocity(this.random), ambientParticleSettings.getYVelocity(this.random), ambientParticleSettings.getZVelocity(this.random));
+                }
+            });
         }
     }
 
@@ -660,11 +668,6 @@ extends Level {
             k = k * o + n * (1.0f - o);
         }
         return new Vec3(i, j, k);
-    }
-
-    public Vec3 getFogColor(float f) {
-        float g = this.getTimeOfDay(f);
-        return this.dimension.getFogColor(g, f);
     }
 
     public float getStarBrightness(float f) {

@@ -17,6 +17,8 @@ public class WoodType {
     public static final WoodType ACACIA = WoodType.register(new WoodType("acacia"));
     public static final WoodType JUNGLE = WoodType.register(new WoodType("jungle"));
     public static final WoodType DARK_OAK = WoodType.register(new WoodType("dark_oak"));
+    public static final WoodType CRIMSON = WoodType.register(new WoodType("crimson"));
+    public static final WoodType WARPED = WoodType.register(new WoodType("warped"));
     private final String name;
 
     protected WoodType(String string) {

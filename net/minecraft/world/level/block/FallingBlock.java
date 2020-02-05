@@ -11,12 +11,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
@@ -56,9 +56,8 @@ extends Block {
     }
 
     public static boolean isFree(BlockState blockState) {
-        Block block = blockState.getBlock();
         Material material = blockState.getMaterial();
-        return blockState.isAir() || block == Blocks.FIRE || material.isLiquid() || material.isReplaceable();
+        return blockState.isAir() || blockState.is(BlockTags.FIRE) || material.isLiquid() || material.isReplaceable();
     }
 
     public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {

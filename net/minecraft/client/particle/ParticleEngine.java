@@ -34,6 +34,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
+import net.minecraft.client.particle.AshParticle;
 import net.minecraft.client.particle.AttackSweepParticle;
 import net.minecraft.client.particle.BarrierParticle;
 import net.minecraft.client.particle.BreakingItemParticle;
@@ -161,6 +162,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
         this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
         this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
+        this.register(ParticleTypes.SOUL_FIRE_FLAME, FlameParticle.Provider::new);
         this.register(ParticleTypes.FLASH, FireworkParticles.FlashProvider::new);
         this.register(ParticleTypes.HAPPY_VILLAGER, SuspendedTownParticle.HappyVillagerProvider::new);
         this.register(ParticleTypes.HEART, HeartParticle.Provider::new);
@@ -182,13 +184,16 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.SWEEP_ATTACK, AttackSweepParticle.Provider::new);
         this.register(ParticleTypes.TOTEM_OF_UNDYING, TotemParticle.Provider::new);
         this.register(ParticleTypes.SQUID_INK, SquidInkParticle.Provider::new);
-        this.register(ParticleTypes.UNDERWATER, SuspendedParticle.Provider::new);
+        this.register(ParticleTypes.UNDERWATER, SuspendedParticle.UnderwaterProvider::new);
         this.register(ParticleTypes.SPLASH, SplashParticle.Provider::new);
         this.register(ParticleTypes.WITCH, SpellParticle.WitchProvider::new);
         this.register(ParticleTypes.DRIPPING_HONEY, DripParticle.HoneyHangProvider::new);
         this.register(ParticleTypes.FALLING_HONEY, DripParticle.HoneyFallProvider::new);
         this.register(ParticleTypes.LANDING_HONEY, DripParticle.HoneyLandProvider::new);
         this.register(ParticleTypes.FALLING_NECTAR, DripParticle.NectarFallProvider::new);
+        this.register(ParticleTypes.ASH, AshParticle.Provider::new);
+        this.register(ParticleTypes.CRIMSON_SPORE, SuspendedParticle.CrimsonSporeProvider::new);
+        this.register(ParticleTypes.WARPED_SPORE, SuspendedParticle.WarpedSporeProvider::new);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

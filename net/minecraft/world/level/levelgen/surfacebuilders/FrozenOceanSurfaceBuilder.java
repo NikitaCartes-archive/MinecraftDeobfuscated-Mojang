@@ -3,9 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -121,8 +123,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     public void initNoise(long l) {
         if (this.seed != l || this.icebergNoise == null || this.icebergRoofNoise == null) {
             WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-            this.icebergNoise = new PerlinSimplexNoise(worldgenRandom, 3, 0);
-            this.icebergRoofNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
+            this.icebergNoise = new PerlinSimplexNoise(worldgenRandom, IntStream.rangeClosed(-3, 0));
+            this.icebergRoofNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
         }
         this.seed = l;
     }

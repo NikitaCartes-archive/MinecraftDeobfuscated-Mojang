@@ -25,7 +25,7 @@ extends AbstractMinecart {
             return false;
         }
         if (this.isVehicle()) {
-            return true;
+            return false;
         }
         if (!this.level.isClientSide) {
             player.startRiding(this);

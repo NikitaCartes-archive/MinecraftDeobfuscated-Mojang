@@ -185,6 +185,7 @@ extends Animal {
         pigZombie.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
         pigZombie.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
         pigZombie.setNoAi(this.isNoAi());
+        pigZombie.setBaby(this.isBaby());
         if (this.hasCustomName()) {
             pigZombie.setCustomName(this.getCustomName());
             pigZombie.setCustomNameVisible(this.isCustomNameVisible());

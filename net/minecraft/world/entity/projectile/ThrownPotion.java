@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -185,7 +186,7 @@ implements ItemSupplier {
     private void dowseFire(BlockPos blockPos, Direction direction) {
         BlockState blockState = this.level.getBlockState(blockPos);
         Block block = blockState.getBlock();
-        if (block == Blocks.FIRE) {
+        if (blockState.is(BlockTags.FIRE)) {
             this.level.extinguishFire(null, blockPos.relative(direction), direction.getOpposite());
         } else if (block == Blocks.CAMPFIRE && blockState.getValue(CampfireBlock.LIT).booleanValue()) {
             this.level.levelEvent(null, 1009, blockPos, 0);

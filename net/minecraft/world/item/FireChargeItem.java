@@ -10,9 +10,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FireChargeItem
@@ -35,7 +35,7 @@ extends Item {
             }
         } else if (level.getBlockState(blockPos = blockPos.relative(useOnContext.getClickedFace())).isAir()) {
             this.playSound(level, blockPos);
-            level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
+            level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
             bl = true;
         }
         if (bl) {

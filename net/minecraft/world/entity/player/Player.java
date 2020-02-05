@@ -586,6 +586,9 @@ extends LivingEntity {
         if (itemStack.isEmpty()) {
             return null;
         }
+        if (this.level.isClientSide) {
+            this.swing(InteractionHand.MAIN_HAND);
+        }
         double d = this.getEyeY() - (double)0.3f;
         ItemEntity itemEntity = new ItemEntity(this.level, this.getX(), d, this.getZ(), itemStack);
         itemEntity.setPickUpDelay(40);
@@ -785,8 +788,8 @@ extends LivingEntity {
     }
 
     @Override
-    protected void hurtArmor(float f) {
-        this.inventory.hurtArmor(f);
+    protected void hurtArmor(DamageSource damageSource, float f) {
+        this.inventory.hurtArmor(damageSource, f);
     }
 
     @Override
@@ -1134,15 +1137,15 @@ extends LivingEntity {
             if (!this.level.dimension.isNaturalDimension()) {
                 return Either.left(BedSleepingProblem.NOT_POSSIBLE_HERE);
             }
-            if (this.level.isDay()) {
-                this.setRespawnPosition(blockPos, false, true);
-                return Either.left(BedSleepingProblem.NOT_POSSIBLE_NOW);
-            }
             if (!this.bedInRange(blockPos, direction)) {
                 return Either.left(BedSleepingProblem.TOO_FAR_AWAY);
             }
             if (this.bedBlocked(blockPos, direction)) {
                 return Either.left(BedSleepingProblem.OBSTRUCTED);
+            }
+            this.setRespawnPosition(blockPos, false, true);
+            if (this.level.isDay()) {
+                return Either.left(BedSleepingProblem.NOT_POSSIBLE_NOW);
             }
             if (!this.isCreative()) {
                 double d = 8.0;

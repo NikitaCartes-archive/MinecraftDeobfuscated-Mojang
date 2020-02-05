@@ -21,21 +21,20 @@ extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player2, InteractionHand interactionHand) {
+        Pig pig;
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (level.isClientSide) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (player2.isPassenger() && player2.getVehicle() instanceof Pig) {
-            Pig pig = (Pig)player2.getVehicle();
-            if (itemStack.getMaxDamage() - itemStack.getDamageValue() >= 7 && pig.boost()) {
-                itemStack.hurtAndBreak(7, player2, player -> player.broadcastBreakEvent(interactionHand));
-                if (itemStack.isEmpty()) {
-                    ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
-                    itemStack2.setTag(itemStack.getTag());
-                    return InteractionResultHolder.success(itemStack2);
-                }
-                return InteractionResultHolder.success(itemStack);
+        if (player2.isPassenger() && player2.getVehicle() instanceof Pig && (pig = (Pig)player2.getVehicle()).boost()) {
+            itemStack.hurtAndBreak(7, player2, player -> player.broadcastBreakEvent(interactionHand));
+            player2.swing(interactionHand, true);
+            if (itemStack.isEmpty()) {
+                ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
+                itemStack2.setTag(itemStack.getTag());
+                return InteractionResultHolder.consume(itemStack2);
             }
+            return InteractionResultHolder.consume(itemStack);
         }
         player2.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.pass(itemStack);

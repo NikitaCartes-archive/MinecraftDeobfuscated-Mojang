@@ -45,7 +45,7 @@ extends Mob {
         if (entity != null && entity.level == this.level) {
             this.restrictTo(new BlockPos(entity), 5);
             float f = this.distanceTo(entity);
-            if (this instanceof TamableAnimal && ((TamableAnimal)this).isSitting()) {
+            if (this instanceof TamableAnimal && ((TamableAnimal)this).isInSittingPose()) {
                 if (f > 10.0f) {
                     this.dropLeash(true, true);
                 }

@@ -575,6 +575,9 @@ public final class ItemStack {
                     } else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
                         d += player.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getBaseValue();
                         bl = true;
+                    } else if (entry.getKey().equals(SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName())) {
+                        d += player.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getBaseValue();
+                        d *= 10.0;
                     }
                 }
                 double e = attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? d * 100.0 : d;

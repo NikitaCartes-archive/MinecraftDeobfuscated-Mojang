@@ -19,11 +19,11 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class SoulsandBlock
+public class SoulSandBlock
 extends Block {
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0);
 
-    public SoulsandBlock(Block.Properties properties) {
+    public SoulSandBlock(Block.Properties properties) {
         super(properties);
     }
 

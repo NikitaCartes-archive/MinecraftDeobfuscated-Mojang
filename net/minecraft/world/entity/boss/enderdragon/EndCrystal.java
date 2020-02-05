@@ -20,7 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 import org.jetbrains.annotations.Nullable;
@@ -59,7 +59,7 @@ extends Entity {
         if (!this.level.isClientSide) {
             BlockPos blockPos = new BlockPos(this);
             if (this.level.dimension instanceof TheEndDimension && this.level.getBlockState(blockPos).isAir()) {
-                this.level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
+                this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
             }
         }
     }

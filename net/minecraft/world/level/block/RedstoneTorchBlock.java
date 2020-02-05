@@ -30,7 +30,7 @@ extends TorchBlock {
     private static final Map<BlockGetter, List<Toggle>> RECENT_TOGGLES = new WeakHashMap<BlockGetter, List<Toggle>>();
 
     protected RedstoneTorchBlock(Block.Properties properties) {
-        super(properties);
+        super(properties, DustParticleOptions.REDSTONE);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LIT, true));
     }
 
@@ -120,7 +120,7 @@ extends TorchBlock {
         double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
         double e = (double)blockPos.getY() + 0.7 + (random.nextDouble() - 0.5) * 0.2;
         double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
-        level.addParticle(DustParticleOptions.REDSTONE, d, e, f, 0.0, 0.0, 0.0);
+        level.addParticle(this.flameParticle, d, e, f, 0.0, 0.0, 0.0);
     }
 
     @Override

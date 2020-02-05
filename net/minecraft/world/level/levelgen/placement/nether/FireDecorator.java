@@ -13,9 +13,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
-public class HellFireDecorator
+public class FireDecorator
 extends SimpleFeatureDecorator<FrequencyDecoratorConfiguration> {
-    public HellFireDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
+    public FireDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
         super(function);
     }
 

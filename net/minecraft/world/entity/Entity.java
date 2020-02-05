@@ -539,19 +539,10 @@ CommandSource {
             throw new ReportedException(crashReport);
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(this.getBlockSpeedFactor(), 1.0, this.getBlockSpeedFactor()));
-        boolean bl = this.isInWaterRainOrBubble();
-        if (this.level.containsFireBlock(this.getBoundingBox().deflate(0.001))) {
-            if (!bl) {
-                ++this.remainingFireTicks;
-                if (this.remainingFireTicks == 0) {
-                    this.setSecondsOnFire(8);
-                }
-            }
-            this.burn(1);
-        } else if (this.remainingFireTicks <= 0) {
+        if (!this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)) && this.remainingFireTicks <= 0) {
             this.remainingFireTicks = -this.getFireImmuneTicks();
         }
-        if (bl && this.isOnFire()) {
+        if (this.isInWaterRainOrBubble() && this.isOnFire()) {
             this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
             this.remainingFireTicks = -this.getFireImmuneTicks();
         }
@@ -831,12 +822,6 @@ CommandSource {
     @Nullable
     public AABB getCollideBox() {
         return null;
-    }
-
-    protected void burn(int i) {
-        if (!this.fireImmune()) {
-            this.hurt(DamageSource.IN_FIRE, i);
-        }
     }
 
     public final boolean fireImmune() {

@@ -28,8 +28,8 @@ extends SimpleReloadInstance<State> {
         super(executor, executor22, resourceManager2, list, (preparationBarrier, resourceManager, preparableReloadListener, executor2, executor3) -> {
             AtomicLong atomicLong = new AtomicLong();
             AtomicLong atomicLong2 = new AtomicLong();
-            ActiveProfiler activeProfiler = new ActiveProfiler(Util.getNanos(), () -> 0, false);
-            ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.getNanos(), () -> 0, false);
+            ActiveProfiler activeProfiler = new ActiveProfiler(Util.timeSource, () -> 0, false);
+            ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.timeSource, () -> 0, false);
             CompletableFuture<Void> completableFuture = preparableReloadListener.reload(preparationBarrier, resourceManager, activeProfiler, activeProfiler2, runnable -> executor2.execute(() -> {
                 long l = Util.getNanos();
                 runnable.run();

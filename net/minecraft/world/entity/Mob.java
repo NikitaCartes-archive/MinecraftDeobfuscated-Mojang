@@ -108,8 +108,8 @@ extends LivingEntity {
 
     protected Mob(EntityType<? extends Mob> entityType, Level level) {
         super((EntityType<? extends LivingEntity>)entityType, level);
-        this.goalSelector = new GoalSelector(level == null || level.getProfiler() == null ? null : level.getProfiler());
-        this.targetSelector = new GoalSelector(level == null || level.getProfiler() == null ? null : level.getProfiler());
+        this.goalSelector = new GoalSelector(level.getProfilerSupplier());
+        this.targetSelector = new GoalSelector(level.getProfilerSupplier());
         this.lookControl = new LookControl(this);
         this.moveControl = new MoveControl(this);
         this.jumpControl = new JumpControl(this);

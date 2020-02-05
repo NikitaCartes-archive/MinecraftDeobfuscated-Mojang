@@ -30,8 +30,11 @@ extends BiomeSource {
 
     @Override
     @Nullable
-    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, List<Biome> list, Random random) {
+    public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
         if (list.contains(this.biome)) {
+            if (bl) {
+                return new BlockPos(i, j, k);
+            }
             return new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1));
         }
         return null;

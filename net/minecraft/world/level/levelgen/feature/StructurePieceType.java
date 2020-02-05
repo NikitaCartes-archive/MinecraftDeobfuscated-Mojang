@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.structure.IglooPieces;
 import net.minecraft.world.level.levelgen.structure.JunglePyramidPiece;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
+import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
 import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
@@ -80,6 +81,7 @@ public interface StructurePieceType {
     public static final StructurePieceType WOODLAND_MANSION_PIECE = StructurePieceType.setPieceId(WoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
     public static final StructurePieceType BURIED_TREASURE_PIECE = StructurePieceType.setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
     public static final StructurePieceType SHIPWRECK_PIECE = StructurePieceType.setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
+    public static final StructurePieceType NETHER_FOSSIL = StructurePieceType.setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
 
     public StructurePiece load(StructureManager var1, CompoundTag var2);
 

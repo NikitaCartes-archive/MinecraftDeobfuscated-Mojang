@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -32,12 +33,12 @@ public class GoalSelector {
     };
     private final Map<Goal.Flag, WrappedGoal> lockedFlags = new EnumMap<Goal.Flag, WrappedGoal>(Goal.Flag.class);
     private final Set<WrappedGoal> availableGoals = Sets.newLinkedHashSet();
-    private final ProfilerFiller profiler;
+    private final Supplier<ProfilerFiller> profiler;
     private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class);
     private int newGoalRate = 3;
 
-    public GoalSelector(ProfilerFiller profilerFiller) {
-        this.profiler = profilerFiller;
+    public GoalSelector(Supplier<ProfilerFiller> supplier) {
+        this.profiler = supplier;
     }
 
     public void addGoal(int i, Goal goal) {
@@ -50,7 +51,8 @@ public class GoalSelector {
     }
 
     public void tick() {
-        this.profiler.push("goalCleanup");
+        ProfilerFiller profilerFiller = this.profiler.get();
+        profilerFiller.push("goalCleanup");
         this.getRunningGoals().filter(wrappedGoal -> {
             if (!wrappedGoal.isRunning()) return true;
             if (wrappedGoal.getFlags().stream().anyMatch(this.disabledFlags::contains)) return true;
@@ -62,8 +64,8 @@ public class GoalSelector {
                 this.lockedFlags.remove(flag);
             }
         });
-        this.profiler.pop();
-        this.profiler.push("goalUpdate");
+        profilerFiller.pop();
+        profilerFiller.push("goalUpdate");
         this.availableGoals.stream().filter(wrappedGoal -> !wrappedGoal.isRunning()).filter(wrappedGoal -> wrappedGoal.getFlags().stream().noneMatch(this.disabledFlags::contains)).filter(wrappedGoal -> wrappedGoal.getFlags().stream().allMatch(flag -> this.lockedFlags.getOrDefault(flag, NO_GOAL).canBeReplacedBy((WrappedGoal)wrappedGoal))).filter(WrappedGoal::canUse).forEach(wrappedGoal -> {
             wrappedGoal.getFlags().forEach(flag -> {
                 WrappedGoal wrappedGoal2 = this.lockedFlags.getOrDefault(flag, NO_GOAL);
@@ -72,10 +74,10 @@ public class GoalSelector {
             });
             wrappedGoal.start();
         });
-        this.profiler.pop();
-        this.profiler.push("goalTick");
+        profilerFiller.pop();
+        profilerFiller.push("goalTick");
         this.getRunningGoals().forEach(WrappedGoal::tick);
-        this.profiler.pop();
+        profilerFiller.pop();
     }
 
     public Stream<WrappedGoal> getRunningGoals() {

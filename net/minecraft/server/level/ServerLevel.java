@@ -4,6 +4,7 @@
 package net.minecraft.server.level;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
@@ -174,8 +175,8 @@ extends Level {
     @Nullable
     private final WanderingTraderSpawner wanderingTraderSpawner;
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorage levelStorage, LevelData levelData, DimensionType dimensionType, ProfilerFiller profilerFiller, ChunkProgressListener chunkProgressListener) {
-        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorage.getFolder(), levelStorage.getFixerUpper(), levelStorage.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), profilerFiller, false);
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorage levelStorage, LevelData levelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
+        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorage.getFolder(), levelStorage.getFixerUpper(), levelStorage.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
         this.levelStorage = levelStorage;
         this.server = minecraftServer;
         this.portalForcer = new PortalForcer(this);
@@ -1022,6 +1023,11 @@ extends Level {
         return this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
     }
 
+    @Nullable
+    public BlockPos findNearestBiome(Biome biome, BlockPos blockPos, int i, int j) {
+        return this.getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, ImmutableList.of(biome), this.random, true);
+    }
+
     @Override
     public RecipeManager getRecipeManager() {
         return this.server.getRecipeManager();
@@ -1244,6 +1250,13 @@ extends Level {
     @VisibleForTesting
     public void clearBlockEvents(BoundingBox boundingBox) {
         this.blockEvents.removeIf(blockEventData -> boundingBox.isInside(blockEventData.getPos()));
+    }
+
+    @Override
+    public void blockUpdated(BlockPos blockPos, Block block) {
+        if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
+            this.updateNeighborsAt(blockPos, block);
+        }
     }
 
     @Override

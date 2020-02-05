@@ -69,49 +69,51 @@ public class FogRenderer {
             fogBlue = 0.0f;
             biomeChangedTime = -1L;
         } else {
-            float aa;
+            float h;
+            float r;
             float z;
-            float y;
             float u = 0.25f + 0.75f * (float)i / 32.0f;
             u = 1.0f - (float)Math.pow(u, 0.25);
             Vec3 vec3 = clientLevel.getSkyColor(camera.getBlockPosition(), f);
             float v = (float)vec3.x;
             float w = (float)vec3.y;
             float x = (float)vec3.z;
-            Vec3 vec32 = clientLevel.getFogColor(f);
+            int n = clientLevel.getBiome(camera.getBlockPosition()).getFogColor();
+            float y = Mth.cos(clientLevel.getTimeOfDay(f) * ((float)Math.PI * 2)) * 2.0f + 0.5f;
+            Vec3 vec32 = clientLevel.getDimension().getBrightnessDependentFogColor(n, Mth.clamp(y, 0.0f, 1.0f));
             fogRed = (float)vec32.x;
             fogGreen = (float)vec32.y;
             fogBlue = (float)vec32.z;
             if (i >= 4) {
                 float[] fs;
-                y = Mth.sin(clientLevel.getSunAngle(f)) > 0.0f ? -1.0f : 1.0f;
-                Vector3f vector3f = new Vector3f(y, 0.0f, 0.0f);
-                z = camera.getLookVector().dot(vector3f);
-                if (z < 0.0f) {
-                    z = 0.0f;
+                z = Mth.sin(clientLevel.getSunAngle(f)) > 0.0f ? -1.0f : 1.0f;
+                Vector3f vector3f = new Vector3f(z, 0.0f, 0.0f);
+                r = camera.getLookVector().dot(vector3f);
+                if (r < 0.0f) {
+                    r = 0.0f;
                 }
-                if (z > 0.0f && (fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f)) != null) {
-                    fogRed = fogRed * (1.0f - (z *= fs[3])) + fs[0] * z;
-                    fogGreen = fogGreen * (1.0f - z) + fs[1] * z;
-                    fogBlue = fogBlue * (1.0f - z) + fs[2] * z;
+                if (r > 0.0f && (fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f)) != null) {
+                    fogRed = fogRed * (1.0f - (r *= fs[3])) + fs[0] * r;
+                    fogGreen = fogGreen * (1.0f - r) + fs[1] * r;
+                    fogBlue = fogBlue * (1.0f - r) + fs[2] * r;
                 }
             }
             fogRed += (v - fogRed) * u;
             fogGreen += (w - fogGreen) * u;
             fogBlue += (x - fogBlue) * u;
-            y = clientLevel.getRainLevel(f);
-            if (y > 0.0f) {
-                float aa2 = 1.0f - y * 0.5f;
-                z = 1.0f - y * 0.4f;
-                fogRed *= aa2;
-                fogGreen *= aa2;
-                fogBlue *= z;
+            z = clientLevel.getRainLevel(f);
+            if (z > 0.0f) {
+                float h2 = 1.0f - z * 0.5f;
+                r = 1.0f - z * 0.4f;
+                fogRed *= h2;
+                fogGreen *= h2;
+                fogBlue *= r;
             }
-            if ((aa = clientLevel.getThunderLevel(f)) > 0.0f) {
-                z = 1.0f - aa * 0.5f;
-                fogRed *= z;
-                fogGreen *= z;
-                fogBlue *= z;
+            if ((h = clientLevel.getThunderLevel(f)) > 0.0f) {
+                r = 1.0f - h * 0.5f;
+                fogRed *= r;
+                fogGreen *= r;
+                fogBlue *= r;
             }
             biomeChangedTime = -1L;
         }

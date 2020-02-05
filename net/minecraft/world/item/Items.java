@@ -113,6 +113,8 @@ public class Items {
     public static final Item DIRT = Items.registerBlock(Blocks.DIRT, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item COARSE_DIRT = Items.registerBlock(Blocks.COARSE_DIRT, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item PODZOL = Items.registerBlock(Blocks.PODZOL, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item CRIMSON_NYLIUM = Items.registerBlock(Blocks.CRIMSON_NYLIUM, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_NYLIUM = Items.registerBlock(Blocks.WARPED_NYLIUM, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item COBBLESTONE = Items.registerBlock(Blocks.COBBLESTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_PLANKS = Items.registerBlock(Blocks.OAK_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item SPRUCE_PLANKS = Items.registerBlock(Blocks.SPRUCE_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -120,6 +122,8 @@ public class Items {
     public static final Item JUNGLE_PLANKS = Items.registerBlock(Blocks.JUNGLE_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item ACACIA_PLANKS = Items.registerBlock(Blocks.ACACIA_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item DARK_OAK_PLANKS = Items.registerBlock(Blocks.DARK_OAK_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item CRIMSON_PLANKS = Items.registerBlock(Blocks.CRIMSON_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_PLANKS = Items.registerBlock(Blocks.WARPED_PLANKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_SAPLING = Items.registerBlock(Blocks.OAK_SAPLING, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SPRUCE_SAPLING = Items.registerBlock(Blocks.SPRUCE_SAPLING, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BIRCH_SAPLING = Items.registerBlock(Blocks.BIRCH_SAPLING, CreativeModeTab.TAB_DECORATIONS);
@@ -139,12 +143,16 @@ public class Items {
     public static final Item JUNGLE_LOG = Items.registerBlock(Blocks.JUNGLE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item ACACIA_LOG = Items.registerBlock(Blocks.ACACIA_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item DARK_OAK_LOG = Items.registerBlock(Blocks.DARK_OAK_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item CRIMSON_STEM = Items.registerBlock(Blocks.CRIMSON_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_STEM = Items.registerBlock(Blocks.WARPED_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_OAK_LOG = Items.registerBlock(Blocks.STRIPPED_OAK_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_SPRUCE_LOG = Items.registerBlock(Blocks.STRIPPED_SPRUCE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_BIRCH_LOG = Items.registerBlock(Blocks.STRIPPED_BIRCH_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_JUNGLE_LOG = Items.registerBlock(Blocks.STRIPPED_JUNGLE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_ACACIA_LOG = Items.registerBlock(Blocks.STRIPPED_ACACIA_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_DARK_OAK_LOG = Items.registerBlock(Blocks.STRIPPED_DARK_OAK_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item STRIPPED_CRIMSON_STEM = Items.registerBlock(Blocks.STRIPPED_CRIMSON_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item STRIPPED_WARPED_STEM = Items.registerBlock(Blocks.STRIPPED_WARPED_STEM, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_OAK_WOOD = Items.registerBlock(Blocks.STRIPPED_OAK_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_SPRUCE_WOOD = Items.registerBlock(Blocks.STRIPPED_SPRUCE_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRIPPED_BIRCH_WOOD = Items.registerBlock(Blocks.STRIPPED_BIRCH_WOOD, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -214,6 +222,12 @@ public class Items {
     public static final Item WITHER_ROSE = Items.registerBlock(Blocks.WITHER_ROSE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BROWN_MUSHROOM = Items.registerBlock(Blocks.BROWN_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
     public static final Item RED_MUSHROOM = Items.registerBlock(Blocks.RED_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item CRIMSON_FUNGI = Items.registerBlock(Blocks.CRIMSON_FUNGI, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item WARPED_FUNGI = Items.registerBlock(Blocks.WARPED_FUNGI, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item CRIMSON_ROOTS = Items.registerBlock(Blocks.CRIMSON_ROOTS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item WARPED_ROOTS = Items.registerBlock(Blocks.WARPED_ROOTS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item NETHER_SPROUTS = Items.registerBlock(Blocks.NETHER_SPROUTS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item WEEPING_VINES = Items.registerBlock(Blocks.WEEPING_VINES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item GOLD_BLOCK = Items.registerBlock(Blocks.GOLD_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item IRON_BLOCK = Items.registerBlock(Blocks.IRON_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_SLAB = Items.registerBlock(Blocks.OAK_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -222,6 +236,8 @@ public class Items {
     public static final Item JUNGLE_SLAB = Items.registerBlock(Blocks.JUNGLE_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item ACACIA_SLAB = Items.registerBlock(Blocks.ACACIA_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item DARK_OAK_SLAB = Items.registerBlock(Blocks.DARK_OAK_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item CRIMSON_SLAB = Items.registerBlock(Blocks.CRIMSON_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_SLAB = Items.registerBlock(Blocks.WARPED_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STONE_SLAB = Items.registerBlock(Blocks.STONE_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item SMOOTH_STONE_SLAB = Items.registerBlock(Blocks.SMOOTH_STONE_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item SANDSTONE_SLAB = Items.registerBlock(Blocks.SANDSTONE_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -273,6 +289,8 @@ public class Items {
     public static final Item JUNGLE_PRESSURE_PLATE = Items.registerBlock(Blocks.JUNGLE_PRESSURE_PLATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item ACACIA_PRESSURE_PLATE = Items.registerBlock(Blocks.ACACIA_PRESSURE_PLATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item DARK_OAK_PRESSURE_PLATE = Items.registerBlock(Blocks.DARK_OAK_PRESSURE_PLATE, CreativeModeTab.TAB_REDSTONE);
+    public static final Item CRIMSON_PRESSURE_PLATE = Items.registerBlock(Blocks.CRIMSON_PRESSURE_PLATE, CreativeModeTab.TAB_REDSTONE);
+    public static final Item WARPED_PRESSURE_PLATE = Items.registerBlock(Blocks.WARPED_PRESSURE_PLATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item REDSTONE_ORE = Items.registerBlock(Blocks.REDSTONE_ORE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item REDSTONE_TORCH = Items.registerBlock(new StandingAndWallBlockItem(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
     public static final Item STONE_BUTTON = Items.registerBlock(Blocks.STONE_BUTTON, CreativeModeTab.TAB_REDSTONE);
@@ -288,10 +306,15 @@ public class Items {
     public static final Item JUNGLE_FENCE = Items.registerBlock(Blocks.JUNGLE_FENCE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item ACACIA_FENCE = Items.registerBlock(Blocks.ACACIA_FENCE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item DARK_OAK_FENCE = Items.registerBlock(Blocks.DARK_OAK_FENCE, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item CRIMSON_FENCE = Items.registerBlock(Blocks.CRIMSON_FENCE, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item WARPED_FENCE = Items.registerBlock(Blocks.WARPED_FENCE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item PUMPKIN = Items.registerBlock(Blocks.PUMPKIN, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item CARVED_PUMPKIN = Items.registerBlock(Blocks.CARVED_PUMPKIN, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item NETHERRACK = Items.registerBlock(Blocks.NETHERRACK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item SOUL_SAND = Items.registerBlock(Blocks.SOUL_SAND, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item SOUL_SOIL = Items.registerBlock(Blocks.SOUL_SOIL, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item BASALT = Items.registerBlock(Blocks.BASALT, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item SOUL_FIRE_TORCH = Items.registerBlock(new StandingAndWallBlockItem(Blocks.SOUL_FIRE_TORCH, Blocks.SOUL_FIRE_WALL_TORCH, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
     public static final Item GLOWSTONE = Items.registerBlock(Blocks.GLOWSTONE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item JACK_O_LANTERN = Items.registerBlock(Blocks.JACK_O_LANTERN, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_TRAPDOOR = Items.registerBlock(Blocks.OAK_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
@@ -300,6 +323,8 @@ public class Items {
     public static final Item JUNGLE_TRAPDOOR = Items.registerBlock(Blocks.JUNGLE_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
     public static final Item ACACIA_TRAPDOOR = Items.registerBlock(Blocks.ACACIA_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
     public static final Item DARK_OAK_TRAPDOOR = Items.registerBlock(Blocks.DARK_OAK_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
+    public static final Item CRIMSON_TRAPDOOR = Items.registerBlock(Blocks.CRIMSON_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
+    public static final Item WARPED_TRAPDOOR = Items.registerBlock(Blocks.WARPED_TRAPDOOR, CreativeModeTab.TAB_REDSTONE);
     public static final Item INFESTED_STONE = Items.registerBlock(Blocks.INFESTED_STONE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item INFESTED_COBBLESTONE = Items.registerBlock(Blocks.INFESTED_COBBLESTONE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item INFESTED_STONE_BRICKS = Items.registerBlock(Blocks.INFESTED_STONE_BRICKS, CreativeModeTab.TAB_DECORATIONS);
@@ -323,6 +348,8 @@ public class Items {
     public static final Item JUNGLE_FENCE_GATE = Items.registerBlock(Blocks.JUNGLE_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item ACACIA_FENCE_GATE = Items.registerBlock(Blocks.ACACIA_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item DARK_OAK_FENCE_GATE = Items.registerBlock(Blocks.DARK_OAK_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
+    public static final Item CRIMSON_FENCE_GATE = Items.registerBlock(Blocks.CRIMSON_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
+    public static final Item WARPED_FENCE_GATE = Items.registerBlock(Blocks.WARPED_FENCE_GATE, CreativeModeTab.TAB_REDSTONE);
     public static final Item BRICK_STAIRS = Items.registerBlock(Blocks.BRICK_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STONE_BRICK_STAIRS = Items.registerBlock(Blocks.STONE_BRICK_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item MYCELIUM = Items.registerBlock(Blocks.MYCELIUM, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -344,6 +371,8 @@ public class Items {
     public static final Item SPRUCE_STAIRS = Items.registerBlock(Blocks.SPRUCE_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item BIRCH_STAIRS = Items.registerBlock(Blocks.BIRCH_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item JUNGLE_STAIRS = Items.registerBlock(Blocks.JUNGLE_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item CRIMSON_STAIRS = Items.registerBlock(Blocks.CRIMSON_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_STAIRS = Items.registerBlock(Blocks.WARPED_STAIRS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item COMMAND_BLOCK = Items.registerBlock(new GameMasterBlockItem(Blocks.COMMAND_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
     public static final Item BEACON = Items.registerBlock(new BlockItem(Blocks.BEACON, new Item.Properties().tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item COBBLESTONE_WALL = Items.registerBlock(Blocks.COBBLESTONE_WALL, CreativeModeTab.TAB_DECORATIONS);
@@ -366,6 +395,8 @@ public class Items {
     public static final Item JUNGLE_BUTTON = Items.registerBlock(Blocks.JUNGLE_BUTTON, CreativeModeTab.TAB_REDSTONE);
     public static final Item ACACIA_BUTTON = Items.registerBlock(Blocks.ACACIA_BUTTON, CreativeModeTab.TAB_REDSTONE);
     public static final Item DARK_OAK_BUTTON = Items.registerBlock(Blocks.DARK_OAK_BUTTON, CreativeModeTab.TAB_REDSTONE);
+    public static final Item CRIMSON_BUTTON = Items.registerBlock(Blocks.CRIMSON_BUTTON, CreativeModeTab.TAB_REDSTONE);
+    public static final Item WARPED_BUTTON = Items.registerBlock(Blocks.WARPED_BUTTON, CreativeModeTab.TAB_REDSTONE);
     public static final Item ANVIL = Items.registerBlock(Blocks.ANVIL, CreativeModeTab.TAB_DECORATIONS);
     public static final Item CHIPPED_ANVIL = Items.registerBlock(Blocks.CHIPPED_ANVIL, CreativeModeTab.TAB_DECORATIONS);
     public static final Item DAMAGED_ANVIL = Items.registerBlock(Blocks.DAMAGED_ANVIL, CreativeModeTab.TAB_DECORATIONS);
@@ -477,6 +508,7 @@ public class Items {
     public static final Item CHAIN_COMMAND_BLOCK = Items.registerBlock(new GameMasterBlockItem(Blocks.CHAIN_COMMAND_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
     public static final Item MAGMA_BLOCK = Items.registerBlock(Blocks.MAGMA_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item NETHER_WART_BLOCK = Items.registerBlock(Blocks.NETHER_WART_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item WARPED_WART_BLOCK = Items.registerBlock(Blocks.WARPED_WART_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item RED_NETHER_BRICKS = Items.registerBlock(Blocks.RED_NETHER_BRICKS, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item BONE_BLOCK = Items.registerBlock(Blocks.BONE_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item STRUCTURE_VOID = Items.registerBlock(Blocks.STRUCTURE_VOID);
@@ -614,11 +646,12 @@ public class Items {
     public static final Item JUNGLE_DOOR = Items.registerBlock(new DoubleHighBlockItem(Blocks.JUNGLE_DOOR, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
     public static final Item ACACIA_DOOR = Items.registerBlock(new DoubleHighBlockItem(Blocks.ACACIA_DOOR, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
     public static final Item DARK_OAK_DOOR = Items.registerBlock(new DoubleHighBlockItem(Blocks.DARK_OAK_DOOR, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
+    public static final Item CRIMSON_DOOR = Items.registerBlock(new DoubleHighBlockItem(Blocks.CRIMSON_DOOR, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
+    public static final Item WARPED_DOOR = Items.registerBlock(new DoubleHighBlockItem(Blocks.WARPED_DOOR, new Item.Properties().tab(CreativeModeTab.TAB_REDSTONE)));
     public static final Item REPEATER = Items.registerBlock(Blocks.REPEATER, CreativeModeTab.TAB_REDSTONE);
     public static final Item COMPARATOR = Items.registerBlock(Blocks.COMPARATOR, CreativeModeTab.TAB_REDSTONE);
     public static final Item STRUCTURE_BLOCK = Items.registerBlock(new GameMasterBlockItem(Blocks.STRUCTURE_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
     public static final Item JIGSAW = Items.registerBlock(new GameMasterBlockItem(Blocks.JIGSAW, new Item.Properties().rarity(Rarity.EPIC)));
-    public static final Item COMPOSTER = Items.registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_MISC);
     public static final Item TURTLE_HELMET = Items.registerItem("turtle_helmet", (Item)new ArmorItem(ArmorMaterials.TURTLE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item SCUTE = Items.registerItem("scute", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item IRON_SHOVEL = Items.registerItem("iron_shovel", (Item)new ShovelItem(Tiers.IRON, 1.5f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
@@ -696,6 +729,8 @@ public class Items {
     public static final Item JUNGLE_SIGN = Items.registerItem("jungle_sign", (Item)new SignItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_DECORATIONS), Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN));
     public static final Item ACACIA_SIGN = Items.registerItem("acacia_sign", (Item)new SignItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_DECORATIONS), Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN));
     public static final Item DARK_OAK_SIGN = Items.registerItem("dark_oak_sign", (Item)new SignItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_DECORATIONS), Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN));
+    public static final Item CRIMSON_SIGN = Items.registerItem("crimson_sign", (Item)new SignItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_DECORATIONS), Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN));
+    public static final Item WARPED_SIGN = Items.registerItem("warped_sign", (Item)new SignItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_DECORATIONS), Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN));
     public static final Item BUCKET = Items.registerItem("bucket", (Item)new BucketItem(Fluids.EMPTY, new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MISC)));
     public static final Item WATER_BUCKET = Items.registerItem("water_bucket", (Item)new BucketItem(Fluids.WATER, new Item.Properties().craftRemainder(BUCKET).stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
     public static final Item LAVA_BUCKET = Items.registerItem("lava_bucket", (Item)new BucketItem(Fluids.LAVA, new Item.Properties().craftRemainder(BUCKET).stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
@@ -828,6 +863,7 @@ public class Items {
     public static final Item PARROT_SPAWN_EGG = Items.registerItem("parrot_spawn_egg", (Item)new SpawnEggItem(EntityType.PARROT, 894731, 0xFF0000, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PHANTOM_SPAWN_EGG = Items.registerItem("phantom_spawn_egg", (Item)new SpawnEggItem(EntityType.PHANTOM, 4411786, 0x88FF00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PIG_SPAWN_EGG = Items.registerItem("pig_spawn_egg", (Item)new SpawnEggItem(EntityType.PIG, 15771042, 14377823, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item HOGLIN_SPAWN_EGG = Items.registerItem("hoglin_spawn_egg", (Item)new SpawnEggItem(EntityType.HOGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PILLAGER_SPAWN_EGG = Items.registerItem("pillager_spawn_egg", (Item)new SpawnEggItem(EntityType.PILLAGER, 5451574, 0x959B9B, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item POLAR_BEAR_SPAWN_EGG = Items.registerItem("polar_bear_spawn_egg", (Item)new SpawnEggItem(EntityType.POLAR_BEAR, 0xF2F2F2, 0x959590, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PUFFERFISH_SPAWN_EGG = Items.registerItem("pufferfish_spawn_egg", (Item)new SpawnEggItem(EntityType.PUFFERFISH, 16167425, 3654642, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -966,6 +1002,7 @@ public class Items {
     public static final Item SKULL_BANNER_PATTERN = Items.registerItem("skull_banner_pattern", (Item)new BannerPatternItem(BannerPattern.SKULL, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON)));
     public static final Item MOJANG_BANNER_PATTERN = Items.registerItem("mojang_banner_pattern", (Item)new BannerPatternItem(BannerPattern.MOJANG, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.EPIC)));
     public static final Item GLOBE_BANNER_PATTER = Items.registerItem("globe_banner_pattern", (Item)new BannerPatternItem(BannerPattern.GLOBE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));
+    public static final Item COMPOSTER = Items.registerBlock(Blocks.COMPOSTER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BARREL = Items.registerBlock(Blocks.BARREL, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SMOKER = Items.registerBlock(Blocks.SMOKER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BLAST_FURNACE = Items.registerBlock(Blocks.BLAST_FURNACE, CreativeModeTab.TAB_DECORATIONS);
@@ -977,14 +1014,29 @@ public class Items {
     public static final Item STONECUTTER = Items.registerBlock(Blocks.STONECUTTER, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BELL = Items.registerBlock(Blocks.BELL, CreativeModeTab.TAB_DECORATIONS);
     public static final Item LANTERN = Items.registerBlock(Blocks.LANTERN, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item SOUL_FIRE_LANTERN = Items.registerBlock(Blocks.SOUL_FIRE_LANTERN, CreativeModeTab.TAB_DECORATIONS);
     public static final Item SWEET_BERRIES = Items.registerItem("sweet_berries", (Item)new ItemNameBlockItem(Blocks.SWEET_BERRY_BUSH, new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.SWEET_BERRIES)));
     public static final Item CAMPFIRE = Items.registerBlock(Blocks.CAMPFIRE, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item SHROOMLIGHT = Items.registerBlock(Blocks.SHROOMLIGHT, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEYCOMB = Items.registerItem("honeycomb", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item BEE_NEST = Items.registerBlock(Blocks.BEE_NEST, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BEEHIVE = Items.registerBlock(Blocks.BEEHIVE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEY_BOTTLE = Items.registerItem("honey_bottle", (Item)new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).tab(CreativeModeTab.TAB_FOOD).stacksTo(16)));
     public static final Item HONEY_BLOCK = Items.registerBlock(Blocks.HONEY_BLOCK, CreativeModeTab.TAB_DECORATIONS);
     public static final Item HONEYCOMB_BLOCK = Items.registerBlock(Blocks.HONEYCOMB_BLOCK, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item NETHERITE_BLOCK = Items.registerBlock(new BlockItem(Blocks.NETHERITE_BLOCK, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant()));
+    public static final Item ANCIENT_DEBRIS = Items.registerBlock(new BlockItem(Blocks.ANCIENT_DEBRIS, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant()));
+    public static final Item NETHERITE_INGOT = Items.registerItem("netherite_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).fireResistant()));
+    public static final Item NETHERITE_SCRAP = Items.registerItem("netherite_scrap", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).fireResistant()));
+    public static final Item NETHERITE_SWORD = Items.registerItem("netherite_sword", (Item)new SwordItem(Tiers.NETHERITE, 3, -2.4f, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_SHOVEL = Items.registerItem("netherite_shovel", (Item)new ShovelItem(Tiers.NETHERITE, 1.5f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_PICKAXE = Items.registerItem("netherite_pickaxe", (Item)new PickaxeItem(Tiers.NETHERITE, 1, -2.8f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_AXE = Items.registerItem("netherite_axe", (Item)new AxeItem(Tiers.NETHERITE, 5.0f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_HOE = Items.registerItem("netherite_hoe", (Item)new HoeItem(Tiers.NETHERITE, 0.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_HELMET = Items.registerItem("netherite_helmet", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_CHESTPLATE = Items.registerItem("netherite_chestplate", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.CHEST, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_LEGGINGS = Items.registerItem("netherite_leggings", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.LEGS, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_BOOTS = Items.registerItem("netherite_boots", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
 
     private static Item registerBlock(Block block) {
         return Items.registerBlock(new BlockItem(block, new Item.Properties()));

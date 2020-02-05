@@ -115,8 +115,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.Unit;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.util.profiling.GameProfiler;
+import net.minecraft.util.profiling.ContinuousProfiler;
+import net.minecraft.util.profiling.InactiveProfiler;
+import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.SingleTickProfiler;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.Difficulty;
@@ -165,7 +168,8 @@ Runnable {
     private final Snooper snooper = new Snooper("server", this, Util.getMillis());
     private final File universe;
     private final List<Runnable> tickables = Lists.newArrayList();
-    private final GameProfiler profiler = new GameProfiler(this::getTickCount);
+    private ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
+    private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
     private final ServerConnectionListener connection;
     protected final ChunkProgressListenerFactory progressListenerFactory;
     private final ServerStatus status = new ServerStatus();
@@ -376,7 +380,7 @@ Runnable {
         if (this.isDemo()) {
             levelData.setLevelSettings(DEMO_SETTINGS);
         }
-        ServerLevel serverLevel = new ServerLevel(this, this.executor, levelStorage, levelData, DimensionType.OVERWORLD, this.profiler, chunkProgressListener);
+        ServerLevel serverLevel = new ServerLevel(this, this.executor, levelStorage, levelData, DimensionType.OVERWORLD, chunkProgressListener);
         this.levels.put(DimensionType.OVERWORLD, serverLevel);
         DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
         this.readScoreboard(dimensionDataStorage);
@@ -407,7 +411,7 @@ Runnable {
         }
         for (DimensionType dimensionType : DimensionType.getAllTypes()) {
             if (dimensionType == DimensionType.OVERWORLD) continue;
-            this.levels.put(dimensionType, new DerivedServerLevel(serverLevel2, this, this.executor, levelStorage, dimensionType, (ProfilerFiller)this.profiler, chunkProgressListener));
+            this.levels.put(dimensionType, new DerivedServerLevel(serverLevel2, this, this.executor, levelStorage, dimensionType, chunkProgressListener));
         }
     }
 
@@ -600,10 +604,8 @@ Runnable {
                         this.lastOverloadWarning = this.nextTickTime;
                     }
                     this.nextTickTime += 50L;
-                    if (this.delayProfilerStart) {
-                        this.delayProfilerStart = false;
-                        this.profiler.continuous().enable();
-                    }
+                    SingleTickProfiler singleTickProfiler = SingleTickProfiler.createTickProfiler("Server");
+                    this.startProfilerTick(singleTickProfiler);
                     this.profiler.startTick();
                     this.profiler.push("tick");
                     this.tickServer(this::haveTime);
@@ -613,6 +615,7 @@ Runnable {
                     this.waitUntilNextTick();
                     this.profiler.pop();
                     this.profiler.endTick();
+                    this.endProfilerTick(singleTickProfiler);
                     this.isReady = true;
                 }
             } else {
@@ -1244,10 +1247,6 @@ Runnable {
         return this.tickCount;
     }
 
-    public void delayStartProfiler() {
-        this.delayProfilerStart = true;
-    }
-
     @Environment(value=EnvType.CLIENT)
     public Snooper getSnooper() {
         return this.snooper;
@@ -1488,7 +1487,7 @@ Runnable {
         return this.frameTimer;
     }
 
-    public GameProfiler getProfiler() {
+    public ProfilerFiller getProfiler() {
         return this.profiler;
     }
 
@@ -1572,6 +1571,35 @@ Runnable {
 
     private void refreshRegistries() {
         Block.BLOCK_STATE_REGISTRY.forEach(BlockState::initCache);
+    }
+
+    private void startProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
+        if (this.delayProfilerStart) {
+            this.delayProfilerStart = false;
+            this.continousProfiler.enable();
+        }
+        this.profiler = SingleTickProfiler.decorateFiller(this.continousProfiler.getFiller(), singleTickProfiler);
+    }
+
+    private void endProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
+        if (singleTickProfiler != null) {
+            singleTickProfiler.endTick();
+        }
+        this.profiler = this.continousProfiler.getFiller();
+    }
+
+    public boolean isProfiling() {
+        return this.continousProfiler.isEnabled();
+    }
+
+    public void startProfiling() {
+        this.delayProfilerStart = true;
+    }
+
+    public ProfileResults finishProfiling() {
+        ProfileResults profileResults = this.continousProfiler.getResults();
+        this.continousProfiler.disable();
+        return profileResults;
     }
 
     @Override

@@ -39,7 +39,7 @@ public class SetBlockCommand {
         }
         if (mode == Mode.DESTROY) {
             serverLevel.destroyBlock(blockPos, true);
-            bl = !blockInput.getState().isAir();
+            bl = !blockInput.getState().isAir() || !serverLevel.getBlockState(blockPos).isAir();
         } else {
             BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
             Clearable.tryClear(blockEntity);

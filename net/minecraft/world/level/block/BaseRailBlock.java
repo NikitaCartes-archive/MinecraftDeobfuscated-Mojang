@@ -62,10 +62,15 @@ extends Block {
         if (blockState2.getBlock() == blockState.getBlock()) {
             return;
         }
+        this.updateState(blockState, level, blockPos, bl);
+    }
+
+    protected BlockState updateState(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
         blockState = this.updateDir(level, blockPos, blockState, true);
         if (this.isStraight) {
             blockState.neighborChanged(level, blockPos, this, blockPos, bl);
         }
+        return blockState;
     }
 
     @Override

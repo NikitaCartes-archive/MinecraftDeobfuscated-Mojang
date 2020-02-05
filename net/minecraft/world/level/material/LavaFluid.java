@@ -20,6 +20,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -93,7 +94,7 @@ extends FlowingFluid {
                     return;
                 }
                 if (!level.isEmptyBlock(blockPos3.above()) || !this.isFlammable(level, blockPos3)) continue;
-                level.setBlockAndUpdate(blockPos3.above(), Blocks.FIRE.defaultBlockState());
+                level.setBlockAndUpdate(blockPos3.above(), BaseFireBlock.getState(level, blockPos3));
             }
         }
     }

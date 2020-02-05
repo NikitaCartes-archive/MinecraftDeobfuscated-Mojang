@@ -21,7 +21,7 @@ extends Goal {
     public boolean canUse() {
         ServerPlayer serverPlayer = (ServerPlayer)this.entity.getOwner();
         boolean bl = serverPlayer != null && !serverPlayer.isSpectator() && !serverPlayer.abilities.flying && !serverPlayer.isInWater();
-        return !this.entity.isSitting() && bl && this.entity.canSitOnShoulder();
+        return !this.entity.isOrderedToSit() && bl && this.entity.canSitOnShoulder();
     }
 
     @Override
@@ -37,7 +37,7 @@ extends Goal {
 
     @Override
     public void tick() {
-        if (this.isSittingOnShoulder || this.entity.isSitting() || this.entity.isLeashed()) {
+        if (this.isSittingOnShoulder || this.entity.isInSittingPose() || this.entity.isLeashed()) {
             return;
         }
         if (this.entity.getBoundingBox().intersects(this.owner.getBoundingBox())) {

@@ -516,7 +516,7 @@ implements Projectile {
 
     @Override
     protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-        return 0.0f;
+        return 0.13f;
     }
 
     public void setCritArrow(boolean bl) {

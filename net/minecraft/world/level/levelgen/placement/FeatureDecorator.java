@@ -64,7 +64,7 @@ import net.minecraft.world.level.levelgen.placement.TopSolidHeightMapNoiseBasedD
 import net.minecraft.world.level.levelgen.placement.TopSolidHeightMapRangeDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.ChanceRangeDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.CountRangeDecorator;
-import net.minecraft.world.level.levelgen.placement.nether.HellFireDecorator;
+import net.minecraft.world.level.levelgen.placement.nether.FireDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.LightGemChanceDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.MagmaDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.RandomCountRangeDecorator;
@@ -96,7 +96,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<NoiseCountFactorDecoratorConfiguration> TOP_SOLID_HEIGHTMAP_NOISE_BIASED = FeatureDecorator.register("top_solid_heightmap_noise_biased", new TopSolidHeightMapNoiseBasedDecorator((Function<Dynamic<?>, ? extends NoiseCountFactorDecoratorConfiguration>)((Function<Dynamic<?>, NoiseCountFactorDecoratorConfiguration>)NoiseCountFactorDecoratorConfiguration::deserialize)));
     public static final FeatureDecorator<CarvingMaskDecoratorConfiguration> CARVING_MASK = FeatureDecorator.register("carving_mask", new CarvingMaskDecorator((Function<Dynamic<?>, ? extends CarvingMaskDecoratorConfiguration>)((Function<Dynamic<?>, CarvingMaskDecoratorConfiguration>)CarvingMaskDecoratorConfiguration::deserialize)));
     public static final FeatureDecorator<FrequencyDecoratorConfiguration> FOREST_ROCK = FeatureDecorator.register("forest_rock", new ForestRockPlacementDecorator((Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration>)((Function<Dynamic<?>, FrequencyDecoratorConfiguration>)FrequencyDecoratorConfiguration::deserialize)));
-    public static final FeatureDecorator<FrequencyDecoratorConfiguration> HELL_FIRE = FeatureDecorator.register("hell_fire", new HellFireDecorator((Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration>)((Function<Dynamic<?>, FrequencyDecoratorConfiguration>)FrequencyDecoratorConfiguration::deserialize)));
+    public static final FeatureDecorator<FrequencyDecoratorConfiguration> FIRE = FeatureDecorator.register("fire", new FireDecorator((Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration>)((Function<Dynamic<?>, FrequencyDecoratorConfiguration>)FrequencyDecoratorConfiguration::deserialize)));
     public static final FeatureDecorator<FrequencyDecoratorConfiguration> MAGMA = FeatureDecorator.register("magma", new MagmaDecorator((Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration>)((Function<Dynamic<?>, FrequencyDecoratorConfiguration>)FrequencyDecoratorConfiguration::deserialize)));
     public static final FeatureDecorator<NoneDecoratorConfiguration> EMERALD_ORE = FeatureDecorator.register("emerald_ore", new EmeraldPlacementDecorator((Function<Dynamic<?>, ? extends NoneDecoratorConfiguration>)((Function<Dynamic<?>, NoneDecoratorConfiguration>)NoneDecoratorConfiguration::deserialize)));
     public static final FeatureDecorator<ChanceDecoratorConfiguration> LAVA_LAKE = FeatureDecorator.register("lava_lake", new LakeLavaPlacementDecorator((Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration>)((Function<Dynamic<?>, ChanceDecoratorConfiguration>)ChanceDecoratorConfiguration::deserialize)));

@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -400,8 +399,8 @@ public class ItemInHandRenderer {
             this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4f, 0.0f, 1.0f);
         } else {
             float f = localPlayer.getAttackStrengthScale(1.0f);
-            this.mainHandHeight += Mth.clamp((Objects.equals(this.mainHandItem, itemStack) ? f * f * f : 0.0f) - this.mainHandHeight, -0.4f, 0.4f);
-            this.offHandHeight += Mth.clamp((float)(Objects.equals(this.offHandItem, itemStack2) ? 1 : 0) - this.offHandHeight, -0.4f, 0.4f);
+            this.mainHandHeight += Mth.clamp((ItemStack.matches(this.mainHandItem, itemStack) ? f * f * f : 0.0f) - this.mainHandHeight, -0.4f, 0.4f);
+            this.offHandHeight += Mth.clamp((float)(ItemStack.matches(this.offHandItem, itemStack2) ? 1 : 0) - this.offHandHeight, -0.4f, 0.4f);
         }
         if (this.mainHandHeight < 0.1f) {
             this.mainHandItem = itemStack;

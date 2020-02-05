@@ -339,7 +339,7 @@ implements SimpleWaterloggedBlock {
         List<Cat> list = levelAccessor.getEntitiesOfClass(Cat.class, new AABB(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 2, blockPos.getZ() + 1));
         if (!list.isEmpty()) {
             for (Cat cat : list) {
-                if (!cat.isSitting()) continue;
+                if (!cat.isInSittingPose()) continue;
                 return true;
             }
         }

@@ -31,6 +31,7 @@ public final class Material {
     public static final Material SPONGE = new Builder(MaterialColor.COLOR_YELLOW).build();
     public static final Material SHULKER_SHELL = new Builder(MaterialColor.COLOR_PURPLE).build();
     public static final Material WOOD = new Builder(MaterialColor.WOOD).flammable().build();
+    public static final Material NETHER_WOOD = new Builder(MaterialColor.WOOD).build();
     public static final Material BAMBOO_SAPLING = new Builder(MaterialColor.WOOD).flammable().destroyOnPush().noCollider().build();
     public static final Material BAMBOO = new Builder(MaterialColor.WOOD).flammable().destroyOnPush().build();
     public static final Material WOOL = new Builder(MaterialColor.WOOL).flammable().build();

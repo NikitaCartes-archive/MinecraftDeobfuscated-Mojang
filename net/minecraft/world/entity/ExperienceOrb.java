@@ -118,11 +118,6 @@ extends Entity {
     }
 
     @Override
-    protected void burn(int i) {
-        this.hurt(DamageSource.IN_FIRE, i);
-    }
-
-    @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
@@ -158,7 +153,7 @@ extends Entity {
             ItemStack itemStack;
             player.takeXpDelay = 2;
             player.take(this, 1);
-            Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player);
+            Map.Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
             if (entry != null && !(itemStack = entry.getValue()).isEmpty() && itemStack.isDamaged()) {
                 int i = Math.min(this.xpToDurability(this.value), itemStack.getDamageValue());
                 this.value -= this.durabilityToXp(i);

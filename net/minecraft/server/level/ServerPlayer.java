@@ -798,7 +798,7 @@ implements ContainerListener {
             return;
         }
         if (abstractContainerMenu == this.inventoryMenu) {
-            CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory);
+            CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory, itemStack);
         }
         if (this.ignoreSlotUpdateHack) {
             return;

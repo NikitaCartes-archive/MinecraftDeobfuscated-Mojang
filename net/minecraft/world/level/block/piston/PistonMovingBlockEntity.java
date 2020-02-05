@@ -101,7 +101,7 @@ implements TickableBlockEntity {
 
     private BlockState getCollisionRelatedBlockState() {
         if (!this.isExtending() && this.isSourcePiston() && this.movedState.getBlock() instanceof PistonBaseBlock) {
-            return (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.TYPE, this.movedState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT)).setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING));
+            return (BlockState)((BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.SHORT, this.progress > 0.25f)).setValue(PistonHeadBlock.TYPE, this.movedState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT)).setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING));
         }
         return this.movedState;
     }
@@ -113,14 +113,14 @@ implements TickableBlockEntity {
         if (voxelShape.isEmpty()) {
             return;
         }
-        List<AABB> list = voxelShape.toAabbs();
-        AABB aABB = this.moveByPositionAndProgress(this.getMinMaxPiecesAABB(list));
-        List<Entity> list2 = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
-        if (list2.isEmpty()) {
+        AABB aABB = this.moveByPositionAndProgress(voxelShape.bounds());
+        List<Entity> list = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
+        if (list.isEmpty()) {
             return;
         }
+        List<AABB> list2 = voxelShape.toAabbs();
         boolean bl = this.movedState.getBlock() == Blocks.SLIME_BLOCK;
-        for (Entity entity : list2) {
+        for (Entity entity : list) {
             AABB aABB4;
             AABB aABB2;
             AABB aABB3;
@@ -146,7 +146,7 @@ implements TickableBlockEntity {
                 entity.setDeltaMovement(e, g, h);
             }
             double i = 0.0;
-            Iterator<AABB> iterator = list.iterator();
+            Iterator<AABB> iterator = list2.iterator();
             while (!(!iterator.hasNext() || (aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2 = iterator.next()), direction, d)).intersects(aABB4 = entity.getBoundingBox()) && (i = Math.max(i, PistonMovingBlockEntity.getMovement(aABB3, direction, aABB4))) >= d)) {
             }
             if (i <= 0.0) continue;
@@ -190,24 +190,6 @@ implements TickableBlockEntity {
 
     public Direction getMovementDirection() {
         return this.extending ? this.direction : this.direction.getOpposite();
-    }
-
-    private AABB getMinMaxPiecesAABB(List<AABB> list) {
-        double d = 0.0;
-        double e = 0.0;
-        double f = 0.0;
-        double g = 1.0;
-        double h = 1.0;
-        double i = 1.0;
-        for (AABB aABB : list) {
-            d = Math.min(aABB.minX, d);
-            e = Math.min(aABB.minY, e);
-            f = Math.min(aABB.minZ, f);
-            g = Math.max(aABB.maxX, g);
-            h = Math.max(aABB.maxY, h);
-            i = Math.max(aABB.maxZ, i);
-        }
-        return new AABB(d, e, f, g, h, i);
     }
 
     private static double getMovement(AABB aABB, Direction direction, AABB aABB2) {
@@ -324,7 +306,7 @@ implements TickableBlockEntity {
         if ((double)this.progress < 1.0 && direction == this.getMovementDirection()) {
             return voxelShape;
         }
-        BlockState blockState = this.isSourcePiston() ? (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, this.direction)).setValue(PistonHeadBlock.SHORT, this.extending != 1.0f - this.progress < 4.0f) : this.movedState;
+        BlockState blockState = this.isSourcePiston() ? (BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.FACING, this.direction)).setValue(PistonHeadBlock.SHORT, this.extending != 1.0f - this.progress < 0.25f) : this.movedState;
         float f = this.getExtendedProgress(this.progress);
         double d = (float)this.direction.getStepX() * f;
         double e = (float)this.direction.getStepY() * f;

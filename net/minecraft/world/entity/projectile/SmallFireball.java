@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -50,7 +50,7 @@ extends Fireball {
                     }
                 }
             } else if ((this.owner == null || !(this.owner instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && this.level.isEmptyBlock(blockPos = (blockHitResult = (BlockHitResult)hitResult).getBlockPos().relative(blockHitResult.getDirection()))) {
-                this.level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
+                this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
             }
             this.remove();
         }

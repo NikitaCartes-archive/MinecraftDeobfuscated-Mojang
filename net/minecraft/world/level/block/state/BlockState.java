@@ -234,7 +234,11 @@ implements StateHolder<BlockState> {
     }
 
     public final boolean entityCanStandOn(BlockGetter blockGetter, BlockPos blockPos, Entity entity) {
-        return Block.isFaceFull(this.getCollisionShape(blockGetter, blockPos, CollisionContext.of(entity)), Direction.UP);
+        return this.entityCanStandOnFace(blockGetter, blockPos, entity, Direction.UP);
+    }
+
+    public final boolean entityCanStandOnFace(BlockGetter blockGetter, BlockPos blockPos, Entity entity, Direction direction) {
+        return Block.isFaceFull(this.getCollisionShape(blockGetter, blockPos, CollisionContext.of(entity)), direction);
     }
 
     public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {

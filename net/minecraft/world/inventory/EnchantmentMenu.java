@@ -255,13 +255,10 @@ extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 }
             } else if (!((Slot)this.slots.get(0)).hasItem() && ((Slot)this.slots.get(0)).mayPlace(itemStack2)) {
-                if (itemStack2.hasTag() && itemStack2.getCount() == 1) {
-                    ((Slot)this.slots.get(0)).set(itemStack2.copy());
-                    itemStack2.setCount(0);
-                } else if (!itemStack2.isEmpty()) {
-                    ((Slot)this.slots.get(0)).set(new ItemStack(itemStack2.getItem()));
-                    itemStack2.shrink(1);
-                }
+                ItemStack itemStack3 = itemStack2.copy();
+                itemStack3.setCount(1);
+                itemStack2.shrink(1);
+                ((Slot)this.slots.get(0)).set(itemStack3);
             } else {
                 return ItemStack.EMPTY;
             }

@@ -24,7 +24,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
-import net.minecraft.util.profiling.GameProfiler;
 import net.minecraft.util.profiling.ProfileResults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,22 +42,20 @@ public class DebugCommand {
 
     private static int start(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
         MinecraftServer minecraftServer = commandSourceStack.getServer();
-        GameProfiler gameProfiler = minecraftServer.getProfiler();
-        if (gameProfiler.continuous().isEnabled()) {
+        if (minecraftServer.isProfiling()) {
             throw ERROR_ALREADY_RUNNING.create();
         }
-        minecraftServer.delayStartProfiler();
+        minecraftServer.startProfiling();
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.debug.started", "Started the debug profiler. Type '/debug stop' to stop it."), true);
         return 0;
     }
 
     private static int stop(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
         MinecraftServer minecraftServer = commandSourceStack.getServer();
-        GameProfiler gameProfiler = minecraftServer.getProfiler();
-        if (!gameProfiler.continuous().isEnabled()) {
+        if (!minecraftServer.isProfiling()) {
             throw ERROR_NOT_RUNNING.create();
         }
-        ProfileResults profileResults = gameProfiler.continuous().disable();
+        ProfileResults profileResults = minecraftServer.finishProfiling();
         File file = new File(minecraftServer.getFile("debug"), "profile-results-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + ".txt");
         profileResults.saveResults(file);
         float f = (float)profileResults.getNanoDuration() / 1.0E9f;

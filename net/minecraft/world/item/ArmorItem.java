@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -40,6 +41,7 @@ extends Item {
     protected final EquipmentSlot slot;
     protected final int defense;
     protected final float toughness;
+    protected final float knockbackResistance;
     protected final ArmorMaterial material;
 
     public static boolean dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
@@ -65,6 +67,7 @@ extends Item {
         this.slot = equipmentSlot;
         this.defense = armorMaterial.getDefenseForSlot(equipmentSlot);
         this.toughness = armorMaterial.getToughness();
+        this.knockbackResistance = armorMaterial.getKnockbackResistance();
         DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
     }
 
@@ -105,6 +108,9 @@ extends Item {
         if (equipmentSlot == this.slot) {
             multimap.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(ARMOR_MODIFIER_UUID_PER_SLOT[equipmentSlot.getIndex()], "Armor modifier", (double)this.defense, AttributeModifier.Operation.ADDITION));
             multimap.put(SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), new AttributeModifier(ARMOR_MODIFIER_UUID_PER_SLOT[equipmentSlot.getIndex()], "Armor toughness", (double)this.toughness, AttributeModifier.Operation.ADDITION));
+            if (this.material == ArmorMaterials.NETHERITE) {
+                multimap.put(SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName(), new AttributeModifier(ARMOR_MODIFIER_UUID_PER_SLOT[equipmentSlot.getIndex()], "Armor knockback resistance", (double)this.knockbackResistance, AttributeModifier.Operation.ADDITION));
+            }
         }
         return multimap;
     }

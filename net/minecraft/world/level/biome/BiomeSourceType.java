@@ -11,6 +11,8 @@ import net.minecraft.world.level.biome.CheckerboardBiomeSourceSettings;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.FixedBiomeSourceSettings;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceSettings;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.biome.OverworldBiomeSourceSettings;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
@@ -22,6 +24,7 @@ public class BiomeSourceType<C extends BiomeSourceSettings, T extends BiomeSourc
     public static final BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> FIXED = BiomeSourceType.register("fixed", FixedBiomeSource::new, FixedBiomeSourceSettings::new);
     public static final BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> VANILLA_LAYERED = BiomeSourceType.register("vanilla_layered", OverworldBiomeSource::new, OverworldBiomeSourceSettings::new);
     public static final BiomeSourceType<TheEndBiomeSourceSettings, TheEndBiomeSource> THE_END = BiomeSourceType.register("the_end", TheEndBiomeSource::new, TheEndBiomeSourceSettings::new);
+    public static final BiomeSourceType<MultiNoiseBiomeSourceSettings, MultiNoiseBiomeSource> MULTI_NOISE = BiomeSourceType.register("multi_noise", MultiNoiseBiomeSource::new, levelData -> new MultiNoiseBiomeSourceSettings(levelData.getSeed()));
     private final Function<C, T> factory;
     private final Function<LevelData, C> settingsFactory;
 

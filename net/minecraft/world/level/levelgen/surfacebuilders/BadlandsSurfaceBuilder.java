@@ -3,10 +3,12 @@
  */
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.Dynamic;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -105,8 +107,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         }
         if (this.seed != l || this.pillarNoise == null || this.pillarRoofNoise == null) {
             WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-            this.pillarNoise = new PerlinSimplexNoise(worldgenRandom, 3, 0);
-            this.pillarRoofNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
+            this.pillarNoise = new PerlinSimplexNoise(worldgenRandom, IntStream.rangeClosed(-3, 0));
+            this.pillarRoofNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
         }
         this.seed = l;
     }
@@ -122,7 +124,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         this.clayBands = new BlockState[64];
         Arrays.fill(this.clayBands, TERRACOTTA);
         WorldgenRandom worldgenRandom = new WorldgenRandom(l);
-        this.clayBandsOffsetNoise = new PerlinSimplexNoise(worldgenRandom, 0, 0);
+        this.clayBandsOffsetNoise = new PerlinSimplexNoise(worldgenRandom, ImmutableList.of(Integer.valueOf(0)));
         for (i = 0; i < 64; ++i) {
             if ((i += worldgenRandom.nextInt(5) + 1) >= 64) continue;
             this.clayBands[i] = ORANGE_TERRACOTTA;

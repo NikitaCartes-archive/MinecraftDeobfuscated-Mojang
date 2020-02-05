@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeSourceType;
@@ -57,14 +56,8 @@ extends Dimension {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public Vec3 getFogColor(float f, float g) {
-        int i = 0xA080A0;
-        float h = Mth.cos(f * ((float)Math.PI * 2)) * 2.0f + 0.5f;
-        h = Mth.clamp(h, 0.0f, 1.0f);
-        float j = 0.627451f;
-        float k = 0.5019608f;
-        float l = 0.627451f;
-        return new Vec3(j *= h * 0.0f + 0.15f, k *= h * 0.0f + 0.15f, l *= h * 0.0f + 0.15f);
+    public Vec3 getBrightnessDependentFogColor(int i, float f) {
+        return Vec3.fromRGB24(i).scale(0.15f);
     }
 
     @Override

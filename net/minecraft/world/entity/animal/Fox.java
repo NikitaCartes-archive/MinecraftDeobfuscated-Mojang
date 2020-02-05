@@ -69,6 +69,7 @@ import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.AbstractSchoolingFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.PolarBear;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.Wolf;
@@ -147,6 +148,7 @@ extends Animal {
         this.goalSelector.addGoal(3, new FoxBreedGoal(1.0));
         this.goalSelector.addGoal(4, new AvoidEntityGoal<Player>(this, Player.class, 16.0f, 1.6, 1.4, livingEntity -> AVOID_PLAYERS.test((Entity)livingEntity) && !this.trusts(livingEntity.getUUID()) && !this.isDefending()));
         this.goalSelector.addGoal(4, new AvoidEntityGoal<Wolf>(this, Wolf.class, 8.0f, 1.6, 1.4, livingEntity -> !((Wolf)livingEntity).isTame() && !this.isDefending()));
+        this.goalSelector.addGoal(4, new AvoidEntityGoal<PolarBear>(this, PolarBear.class, 8.0f, 1.6, 1.4, livingEntity -> !this.isDefending()));
         this.goalSelector.addGoal(5, new StalkPreyGoal());
         this.goalSelector.addGoal(6, new FoxPounceGoal());
         this.goalSelector.addGoal(6, new SeekShelterGoal(1.25));
@@ -1060,7 +1062,7 @@ extends Animal {
         }
 
         protected boolean hasShelter() {
-            BlockPos blockPos = new BlockPos(Fox.this);
+            BlockPos blockPos = new BlockPos(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
             return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0f;
         }
 
