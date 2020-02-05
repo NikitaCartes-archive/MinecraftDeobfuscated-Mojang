@@ -27,6 +27,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -84,16 +85,16 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final Dimension dimension;
 	protected final ChunkSource chunkSource;
 	protected final LevelData levelData;
-	private final ProfilerFiller profiler;
+	private final Supplier<ProfilerFiller> profiler;
 	public final boolean isClientSide;
 	protected boolean updatingBlockEntities;
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
 
 	protected Level(
-		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, ProfilerFiller profilerFiller, boolean bl
+		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl
 	) {
-		this.profiler = profilerFiller;
+		this.profiler = supplier;
 		this.levelData = levelData;
 		this.dimension = dimensionType.create(this);
 		this.chunkSource = (ChunkSource)biFunction.apply(this, this.dimension);
@@ -183,9 +184,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 							|| blockState3.useShapeForLightOcclusion()
 							|| blockState2.useShapeForLightOcclusion()
 					)) {
-					this.profiler.push("queueCheckLight");
+					this.getProfiler().push("queueCheckLight");
 					this.getChunkSource().getLightEngine().checkBlock(blockPos);
-					this.profiler.pop();
+					this.getProfiler().pop();
 				}
 
 				if (blockState3 == blockState) {
@@ -199,9 +200,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 						this.sendBlockUpdated(blockPos, blockState2, blockState, i);
 					}
 
-					if (!this.isClientSide && (i & 1) != 0) {
+					if ((i & 1) != 0) {
 						this.blockUpdated(blockPos, blockState2.getBlock());
-						if (blockState.hasAnalogOutputSignal()) {
+						if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
 							this.updateNeighbourForOutputSignal(blockPos, block);
 						}
 					}
@@ -252,13 +253,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public abstract void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i);
-
-	@Override
-	public void blockUpdated(BlockPos blockPos, Block block) {
-		if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
-			this.updateNeighborsAt(blockPos, block);
-		}
-	}
 
 	public void setBlocksDirty(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
 	}
@@ -545,8 +539,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				for (int o = i; o < j; o++) {
 					for (int p = k; p < l; p++) {
 						for (int q = m; q < n; q++) {
-							Block block = this.getBlockState(pooledMutableBlockPos.set(o, p, q)).getBlock();
-							if (block == Blocks.FIRE || block == Blocks.LAVA) {
+							BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
+							if (blockState.is(BlockTags.FIRE) || blockState.getBlock() == Blocks.LAVA) {
 								return true;
 							}
 						}
@@ -621,7 +615,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public boolean extinguishFire(@Nullable Player player, BlockPos blockPos, Direction direction) {
 		blockPos = blockPos.relative(direction);
-		if (this.getBlockState(blockPos).getBlock() == Blocks.FIRE) {
+		if (this.getBlockState(blockPos).is(BlockTags.FIRE)) {
 			this.levelEvent(player, 1009, blockPos, 0);
 			this.removeBlock(blockPos, false);
 			return true;
@@ -716,13 +710,17 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return isOutsideBuildHeight(blockPos) ? false : this.chunkSource.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
 	}
 
-	public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+	public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
 		if (isOutsideBuildHeight(blockPos)) {
 			return false;
 		} else {
 			ChunkAccess chunkAccess = this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
-			return chunkAccess == null ? false : chunkAccess.getBlockState(blockPos).entityCanStandOn(this, blockPos, entity);
+			return chunkAccess == null ? false : chunkAccess.getBlockState(blockPos).entityCanStandOnFace(this, blockPos, entity, direction);
 		}
+	}
+
+	public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+		return this.loadedAndEntityCanStandOnFace(blockPos, entity, Direction.UP);
 	}
 
 	public void updateSkyBrightness() {
@@ -1164,6 +1162,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public ProfilerFiller getProfiler() {
+		return (ProfilerFiller)this.profiler.get();
+	}
+
+	public Supplier<ProfilerFiller> getProfilerSupplier() {
 		return this.profiler;
 	}
 

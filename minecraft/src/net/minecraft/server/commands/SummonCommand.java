@@ -19,10 +19,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.global.LightningBolt;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class SummonCommand {
 	private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.summon.failed"));
+	private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(new TranslatableComponent("commands.summon.invalidPosition"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -69,31 +71,36 @@ public class SummonCommand {
 	}
 
 	private static int spawnEntity(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {
-		CompoundTag compoundTag2 = compoundTag.copy();
-		compoundTag2.putString("id", resourceLocation.toString());
-		if (EntityType.getKey(EntityType.LIGHTNING_BOLT).equals(resourceLocation)) {
-			LightningBolt lightningBolt = new LightningBolt(commandSourceStack.getLevel(), vec3.x, vec3.y, vec3.z, false);
-			commandSourceStack.getLevel().addGlobalEntity(lightningBolt);
-			commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", lightningBolt.getDisplayName()), true);
-			return 1;
+		BlockPos blockPos = new BlockPos(vec3);
+		if (!Level.isInWorldBounds(blockPos)) {
+			throw INVALID_POSITION.create();
 		} else {
-			ServerLevel serverLevel = commandSourceStack.getLevel();
-			Entity entity = EntityType.loadEntityRecursive(compoundTag2, serverLevel, entityx -> {
-				entityx.moveTo(vec3.x, vec3.y, vec3.z, entityx.yRot, entityx.xRot);
-				return !serverLevel.addWithUUID(entityx) ? null : entityx;
-			});
-			if (entity == null) {
-				throw ERROR_FAILED.create();
-			} else {
-				if (bl && entity instanceof Mob) {
-					((Mob)entity)
-						.finalizeSpawn(
-							commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(entity)), MobSpawnType.COMMAND, null, null
-						);
-				}
-
-				commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", entity.getDisplayName()), true);
+			CompoundTag compoundTag2 = compoundTag.copy();
+			compoundTag2.putString("id", resourceLocation.toString());
+			if (EntityType.getKey(EntityType.LIGHTNING_BOLT).equals(resourceLocation)) {
+				LightningBolt lightningBolt = new LightningBolt(commandSourceStack.getLevel(), vec3.x, vec3.y, vec3.z, false);
+				commandSourceStack.getLevel().addGlobalEntity(lightningBolt);
+				commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", lightningBolt.getDisplayName()), true);
 				return 1;
+			} else {
+				ServerLevel serverLevel = commandSourceStack.getLevel();
+				Entity entity = EntityType.loadEntityRecursive(compoundTag2, serverLevel, entityx -> {
+					entityx.moveTo(vec3.x, vec3.y, vec3.z, entityx.yRot, entityx.xRot);
+					return !serverLevel.addWithUUID(entityx) ? null : entityx;
+				});
+				if (entity == null) {
+					throw ERROR_FAILED.create();
+				} else {
+					if (bl && entity instanceof Mob) {
+						((Mob)entity)
+							.finalizeSpawn(
+								commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(entity)), MobSpawnType.COMMAND, null, null
+							);
+					}
+
+					commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", entity.getDisplayName()), true);
+					return 1;
+				}
 			}
 		}
 	}

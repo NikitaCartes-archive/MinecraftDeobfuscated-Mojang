@@ -19,13 +19,13 @@ public class CatLieOnBedGoal extends MoveToBlockGoal {
 
 	@Override
 	public boolean canUse() {
-		return this.cat.isTame() && !this.cat.isSitting() && !this.cat.isLying() && super.canUse();
+		return this.cat.isTame() && !this.cat.isOrderedToSit() && !this.cat.isLying() && super.canUse();
 	}
 
 	@Override
 	public void start() {
 		super.start();
-		this.cat.getSitGoal().wantToSit(false);
+		this.cat.setInSittingPose(false);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class CatLieOnBedGoal extends MoveToBlockGoal {
 	@Override
 	public void tick() {
 		super.tick();
-		this.cat.getSitGoal().wantToSit(false);
+		this.cat.setInSittingPose(false);
 		if (!this.isReachedTarget()) {
 			this.cat.setLying(false);
 		} else if (!this.cat.isLying()) {

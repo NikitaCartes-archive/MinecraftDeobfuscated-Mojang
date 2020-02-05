@@ -20,8 +20,7 @@ public final class SnowyBeachBiome extends Biome {
 				.scale(0.025F)
 				.temperature(0.05F)
 				.downfall(0.3F)
-				.waterColor(4020182)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

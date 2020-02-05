@@ -853,7 +853,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	public void slotChanged(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
 		if (!(abstractContainerMenu.getSlot(i) instanceof ResultSlot)) {
 			if (abstractContainerMenu == this.inventoryMenu) {
-				CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory);
+				CriteriaTriggers.INVENTORY_CHANGED.trigger(this, this.inventory, itemStack);
 			}
 
 			if (!this.ignoreSlotUpdateHack) {

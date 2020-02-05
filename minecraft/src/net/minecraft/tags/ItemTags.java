@@ -29,6 +29,8 @@ public class ItemTags {
 	public static final Tag<Item> ACACIA_LOGS = bind("acacia_logs");
 	public static final Tag<Item> JUNGLE_LOGS = bind("jungle_logs");
 	public static final Tag<Item> SPRUCE_LOGS = bind("spruce_logs");
+	public static final Tag<Item> CRIMSON_STEMS = bind("crimson_stems");
+	public static final Tag<Item> WARPED_STEMS = bind("warped_stems");
 	public static final Tag<Item> BANNERS = bind("banners");
 	public static final Tag<Item> SAND = bind("sand");
 	public static final Tag<Item> STAIRS = bind("stairs");

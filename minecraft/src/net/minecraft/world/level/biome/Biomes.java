@@ -14,7 +14,7 @@ public abstract class Biomes {
 	public static final Biome TAIGA = register(5, "taiga", new TaigaBiome());
 	public static final Biome SWAMP = register(6, "swamp", new SwampBiome());
 	public static final Biome RIVER = register(7, "river", new RiverBiome());
-	public static final Biome NETHER = register(8, "nether", new NetherBiome());
+	public static final Biome NETHER_WASTES = register(8, "nether_wastes", new NetherWastesBiome());
 	public static final Biome THE_END = register(9, "the_end", new TheEndBiome());
 	public static final Biome FROZEN_OCEAN = register(10, "frozen_ocean", new FrozenOceanBiome());
 	public static final Biome FROZEN_RIVER = register(11, "frozen_river", new FrozenRiverBiome());
@@ -81,6 +81,9 @@ public abstract class Biomes {
 	public static final Biome MODIFIED_BADLANDS_PLATEAU = register(167, "modified_badlands_plateau", new ModifiedBadlandsPlateauBiome());
 	public static final Biome BAMBOO_JUNGLE = register(168, "bamboo_jungle", new BambooJungleBiome());
 	public static final Biome BAMBOO_JUNGLE_HILLS = register(169, "bamboo_jungle_hills", new BambooJungleHillsBiome());
+	public static final Biome SOUL_SAND_VALLEY = register(170, "soul_sand_valley", new SoulSandValleyBiome());
+	public static final Biome CRIMSON_FOREST = register(171, "crimson_forest", new CrimsonForestBiome());
+	public static final Biome WARPED_FOREST = register(172, "warped_forest", new WarpedForestBiome());
 
 	private static Biome register(int i, String string, Biome biome) {
 		Registry.registerMapping(Registry.BIOME, i, string, biome);

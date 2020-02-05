@@ -376,16 +376,8 @@ public class KeyboardHandler {
 						KeyMapping.click(key);
 					}
 
-					if (this.minecraft.options.renderDebugCharts) {
-						if (i == 48) {
-							this.minecraft.debugFpsMeterKeyPress(0);
-						}
-
-						for (int n = 0; n < 9; n++) {
-							if (i == 49 + n) {
-								this.minecraft.debugFpsMeterKeyPress(n + 1);
-							}
-						}
+					if (this.minecraft.options.renderDebugCharts && i >= 48 && i <= 57) {
+						this.minecraft.debugFpsMeterKeyPress(i - 48);
 					}
 				}
 			}

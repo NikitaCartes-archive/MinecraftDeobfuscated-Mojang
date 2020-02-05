@@ -20,7 +20,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantD
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.nether.ChanceRangeDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.CountRangeDecorator;
-import net.minecraft.world.level.levelgen.placement.nether.HellFireDecorator;
+import net.minecraft.world.level.levelgen.placement.nether.FireDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.LightGemChanceDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.MagmaDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.RandomCountRangeDecorator;
@@ -102,9 +102,7 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	public static final FeatureDecorator<FrequencyDecoratorConfiguration> FOREST_ROCK = register(
 		"forest_rock", new ForestRockPlacementDecorator(FrequencyDecoratorConfiguration::deserialize)
 	);
-	public static final FeatureDecorator<FrequencyDecoratorConfiguration> HELL_FIRE = register(
-		"hell_fire", new HellFireDecorator(FrequencyDecoratorConfiguration::deserialize)
-	);
+	public static final FeatureDecorator<FrequencyDecoratorConfiguration> FIRE = register("fire", new FireDecorator(FrequencyDecoratorConfiguration::deserialize));
 	public static final FeatureDecorator<FrequencyDecoratorConfiguration> MAGMA = register(
 		"magma", new MagmaDecorator(FrequencyDecoratorConfiguration::deserialize)
 	);

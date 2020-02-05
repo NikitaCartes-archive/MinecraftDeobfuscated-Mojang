@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -99,14 +99,15 @@ public class LightningBolt extends Entity {
 
 	private void spawnFire(int i) {
 		if (!this.visualOnly && !this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
-			BlockState blockState = Blocks.FIRE.defaultBlockState();
 			BlockPos blockPos = new BlockPos(this);
+			BlockState blockState = BaseFireBlock.getState(this.level, blockPos);
 			if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
 				this.level.setBlockAndUpdate(blockPos, blockState);
 			}
 
 			for (int j = 0; j < i; j++) {
 				BlockPos blockPos2 = blockPos.offset(this.random.nextInt(3) - 1, this.random.nextInt(3) - 1, this.random.nextInt(3) - 1);
+				blockState = BaseFireBlock.getState(this.level, blockPos2);
 				if (this.level.getBlockState(blockPos2).isAir() && blockState.canSurvive(this.level, blockPos2)) {
 					this.level.setBlockAndUpdate(blockPos2, blockState);
 				}

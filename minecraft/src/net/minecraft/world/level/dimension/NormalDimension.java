@@ -227,16 +227,8 @@ public class NormalDimension extends Dimension {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public Vec3 getFogColor(float f, float g) {
-		float h = Mth.cos(f * (float) (Math.PI * 2)) * 2.0F + 0.5F;
-		h = Mth.clamp(h, 0.0F, 1.0F);
-		float i = 0.7529412F;
-		float j = 0.84705883F;
-		float k = 1.0F;
-		i *= h * 0.94F + 0.06F;
-		j *= h * 0.94F + 0.06F;
-		k *= h * 0.91F + 0.09F;
-		return new Vec3((double)i, (double)j, (double)k);
+	public Vec3 getBrightnessDependentFogColor(int i, float f) {
+		return Vec3.fromRGB24(i).multiply((double)(f * 0.94F + 0.06F), (double)(f * 0.94F + 0.06F), (double)(f * 0.91F + 0.09F));
 	}
 
 	@Override

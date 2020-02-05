@@ -19,8 +19,7 @@ public final class TallBirchHillsBiome extends Biome {
 				.scale(0.5F)
 				.temperature(0.6F)
 				.downfall(0.6F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent("birch_forest_hills")
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

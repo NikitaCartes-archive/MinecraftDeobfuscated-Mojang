@@ -26,8 +26,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = register(
 		"cave", new CaveWorldCarver(ProbabilityFeatureConfiguration::deserialize, 256)
 	);
-	public static final WorldCarver<ProbabilityFeatureConfiguration> HELL_CAVE = register(
-		"hell_cave", new HellCaveWorldCarver(ProbabilityFeatureConfiguration::deserialize)
+	public static final WorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = register(
+		"nether_cave", new NetherWorldCarver(ProbabilityFeatureConfiguration::deserialize)
 	);
 	public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = register(
 		"canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration::deserialize)

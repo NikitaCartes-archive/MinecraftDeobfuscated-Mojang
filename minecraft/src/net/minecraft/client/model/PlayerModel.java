@@ -98,8 +98,10 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 		this.rightSleeve.copyFrom(this.rightArm);
 		this.jacket.copyFrom(this.body);
 		if (livingEntity.isCrouching()) {
-			this.cloak.y = 2.0F;
+			this.cloak.z = 1.6F;
+			this.cloak.y = 1.8F;
 		} else {
+			this.cloak.z = 0.0F;
 			this.cloak.y = 0.0F;
 		}
 	}

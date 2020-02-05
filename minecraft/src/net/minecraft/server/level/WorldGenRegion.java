@@ -328,10 +328,6 @@ public class WorldGenRegion implements LevelAccessor {
 	}
 
 	@Override
-	public void blockUpdated(BlockPos blockPos, Block block) {
-	}
-
-	@Override
 	public int getHeight(Heightmap.Types types, int i, int j) {
 		return this.getChunk(i >> 4, j >> 4).getHeight(types, i & 15, j & 15) + 1;
 	}

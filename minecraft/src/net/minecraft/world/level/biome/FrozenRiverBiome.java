@@ -18,8 +18,7 @@ public final class FrozenRiverBiome extends Biome {
 				.scale(0.0F)
 				.temperature(0.0F)
 				.downfall(0.5F)
-				.waterColor(3750089)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(3750089).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

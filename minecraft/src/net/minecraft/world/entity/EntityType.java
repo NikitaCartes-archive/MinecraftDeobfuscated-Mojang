@@ -78,6 +78,7 @@ import net.minecraft.world.entity.monster.Evoker;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.monster.Hoglin;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.entity.monster.MagmaCube;
@@ -322,6 +323,7 @@ public class EntityType<T extends Entity> {
 	);
 	public static final EntityType<Phantom> PHANTOM = register("phantom", EntityType.Builder.of(Phantom::new, MobCategory.MONSTER).sized(0.9F, 0.5F));
 	public static final EntityType<Ravager> RAVAGER = register("ravager", EntityType.Builder.of(Ravager::new, MobCategory.MONSTER).sized(1.95F, 2.2F));
+	public static final EntityType<Hoglin> HOGLIN = register("hoglin", EntityType.Builder.of(Hoglin::new, MobCategory.MONSTER).sized(0.9F, 0.9F));
 	public static final EntityType<LightningBolt> LIGHTNING_BOLT = register(
 		"lightning_bolt", EntityType.Builder.<LightningBolt>createNothing(MobCategory.MISC).noSave().sized(0.0F, 0.0F)
 	);
@@ -721,7 +723,7 @@ public class EntityType<T extends Entity> {
 					DataFixers.getDataFixer()
 						.getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion()))
 						.getChoiceType(References.ENTITY_TREE, string);
-				} catch (IllegalStateException var3) {
+				} catch (IllegalArgumentException var3) {
 					if (SharedConstants.IS_RUNNING_IN_IDE) {
 						throw var3;
 					}

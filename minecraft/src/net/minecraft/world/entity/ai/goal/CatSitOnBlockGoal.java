@@ -22,30 +22,25 @@ public class CatSitOnBlockGoal extends MoveToBlockGoal {
 
 	@Override
 	public boolean canUse() {
-		return this.cat.isTame() && !this.cat.isSitting() && super.canUse();
+		return this.cat.isTame() && !this.cat.isOrderedToSit() && super.canUse();
 	}
 
 	@Override
 	public void start() {
 		super.start();
-		this.cat.getSitGoal().wantToSit(false);
+		this.cat.setInSittingPose(false);
 	}
 
 	@Override
 	public void stop() {
 		super.stop();
-		this.cat.setSitting(false);
+		this.cat.setInSittingPose(false);
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		this.cat.getSitGoal().wantToSit(false);
-		if (!this.isReachedTarget()) {
-			this.cat.setSitting(false);
-		} else if (!this.cat.isSitting()) {
-			this.cat.setSitting(true);
-		}
+		this.cat.setInSittingPose(this.isReachedTarget());
 	}
 
 	@Override

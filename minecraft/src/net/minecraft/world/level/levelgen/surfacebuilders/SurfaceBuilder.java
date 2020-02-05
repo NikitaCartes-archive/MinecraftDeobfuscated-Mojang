@@ -21,8 +21,13 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final BlockState RED_SAND = Blocks.RED_SAND.defaultBlockState();
 	public static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
 	public static final BlockState MYCELIUM = Blocks.MYCELIUM.defaultBlockState();
+	public static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
 	public static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
 	public static final BlockState ENDSTONE = Blocks.END_STONE.defaultBlockState();
+	public static final BlockState CRIMSON_NYLIUM = Blocks.CRIMSON_NYLIUM.defaultBlockState();
+	public static final BlockState WARPED_NYLIUM = Blocks.WARPED_NYLIUM.defaultBlockState();
+	public static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
+	public static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
 	public static final SurfaceBuilderBaseConfiguration CONFIG_EMPTY = new SurfaceBuilderBaseConfiguration(AIR, AIR, AIR);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
@@ -36,7 +41,10 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilderBaseConfiguration CONFIG_BADLANDS = new SurfaceBuilderBaseConfiguration(RED_SAND, WHITE_TERRACOTTA, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_MYCELIUM = new SurfaceBuilderBaseConfiguration(MYCELIUM, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_HELL = new SurfaceBuilderBaseConfiguration(NETHERRACK, NETHERRACK, NETHERRACK);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_SOUL_SAND_VALLEY = new SurfaceBuilderBaseConfiguration(SOUL_SAND, SOUL_SAND, SOUL_SAND);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_THEEND = new SurfaceBuilderBaseConfiguration(ENDSTONE, ENDSTONE, ENDSTONE);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = register(
 		"default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
 	);
@@ -69,6 +77,12 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER = register(
 		"nether", new NetherSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER_FOREST = register(
+		"nether_forest", new NetherForestSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = register(
+		"soul_sand_valley", new SoulSandValleySurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = register(
 		"nope", new NopeSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)

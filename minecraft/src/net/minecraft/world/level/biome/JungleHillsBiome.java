@@ -19,8 +19,7 @@ public final class JungleHillsBiome extends Biome {
 				.scale(0.3F)
 				.temperature(0.95F)
 				.downfall(0.9F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE));

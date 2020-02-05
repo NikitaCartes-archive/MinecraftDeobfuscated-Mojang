@@ -54,30 +54,49 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		return set;
 	}
 
-	@Nullable
 	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, List<Biome> list, Random random) {
-		int m = i - l >> 2;
-		int n = k - l >> 2;
-		int o = i + l >> 2;
-		int p = k + l >> 2;
-		int q = o - m + 1;
-		int r = p - n + 1;
-		int s = j >> 2;
-		BlockPos blockPos = null;
-		int t = 0;
+		return this.findBiomeHorizontal(i, j, k, l, 1, list, random, false);
+	}
 
-		for (int u = 0; u < r; u++) {
-			for (int v = 0; v < q; v++) {
-				int w = m + v;
-				int x = n + u;
-				if (list.contains(this.getNoiseBiome(w, s, x))) {
-					if (blockPos == null || random.nextInt(t + 1) == 0) {
-						blockPos = new BlockPos(w << 2, j, x << 2);
+	@Nullable
+	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
+		int n = i >> 2;
+		int o = k >> 2;
+		int p = l >> 2;
+		int q = j >> 2;
+		BlockPos blockPos = null;
+		int r = 0;
+		int s = bl ? 0 : p;
+		int t = s;
+
+		while (t <= p) {
+			for (int u = -t; u <= t; u += m) {
+				boolean bl2 = Math.abs(u) == t;
+
+				for (int v = -t; v <= t; v += m) {
+					if (bl) {
+						boolean bl3 = Math.abs(v) == t;
+						if (!bl3 && !bl2) {
+							continue;
+						}
 					}
 
-					t++;
+					int w = n + v;
+					int x = o + u;
+					if (list.contains(this.getNoiseBiome(w, q, x))) {
+						if (blockPos == null || random.nextInt(r + 1) == 0) {
+							blockPos = new BlockPos(w << 2, j, x << 2);
+							if (bl) {
+								return blockPos;
+							}
+						}
+
+						r++;
+					}
 				}
 			}
+
+			t += m;
 		}
 
 		return blockPos;

@@ -9,8 +9,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -38,7 +38,7 @@ public class FlintAndSteelItem extends Item {
 			BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
 			if (canUse(levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos2)) {
 				levelAccessor.playSound(player, blockPos2, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0F, random.nextFloat() * 0.4F + 0.8F);
-				BlockState blockState2 = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos2);
+				BlockState blockState2 = BaseFireBlock.getState(levelAccessor, blockPos2);
 				levelAccessor.setBlock(blockPos2, blockState2, 11);
 				ItemStack itemStack = useOnContext.getItemInHand();
 				if (player instanceof ServerPlayer) {
@@ -60,7 +60,7 @@ public class FlintAndSteelItem extends Item {
 	}
 
 	public static boolean canUse(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
-		BlockState blockState2 = ((FireBlock)Blocks.FIRE).getStateForPlacement(levelAccessor, blockPos);
+		BlockState blockState2 = BaseFireBlock.getState(levelAccessor, blockPos);
 		boolean bl = false;
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {

@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 
 public class DeepFrozenOceanBiome extends Biome {
-	protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), 2, 0);
+	protected static final PerlinSimplexNoise FROZEN_TEMPERATURE_NOISE = new PerlinSimplexNoise(new WorldgenRandom(3456L), ImmutableList.of(-2, -1, 0));
 
 	public DeepFrozenOceanBiome() {
 		super(
@@ -27,8 +28,7 @@ public class DeepFrozenOceanBiome extends Biome {
 				.scale(0.1F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.waterColor(3750089)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(3750089).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F)));

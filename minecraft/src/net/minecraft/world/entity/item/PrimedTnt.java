@@ -103,7 +103,7 @@ public class PrimedTnt extends Entity {
 
 	@Override
 	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.0F;
+		return 0.15F;
 	}
 
 	public void setFuse(int i) {

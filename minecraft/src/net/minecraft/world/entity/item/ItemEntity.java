@@ -82,6 +82,8 @@ public class ItemEntity extends Entity {
 			Vec3 vec3 = this.getDeltaMovement();
 			if (this.isUnderLiquid(FluidTags.WATER)) {
 				this.setUnderwaterMovement();
+			} else if (this.isUnderLiquid(FluidTags.LAVA)) {
+				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 			}
@@ -112,9 +114,6 @@ public class ItemEntity extends Entity {
 			int i = bl ? 2 : 40;
 			if (this.tickCount % i == 0) {
 				if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
-					this.setDeltaMovement(
-						(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.2F, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F)
-					);
 					this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 				}
 
@@ -144,6 +143,11 @@ public class ItemEntity extends Entity {
 	private void setUnderwaterMovement() {
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(vec3.x * 0.99F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.99F);
+	}
+
+	private void setUnderLavaMovement() {
+		Vec3 vec3 = this.getDeltaMovement();
+		this.setDeltaMovement(vec3.x * 0.95F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.95F);
 	}
 
 	private void mergeWithNeighbours() {
@@ -210,15 +214,12 @@ public class ItemEntity extends Entity {
 	}
 
 	@Override
-	protected void burn(int i) {
-		this.hurt(DamageSource.IN_FIRE, (float)i);
-	}
-
-	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.getItem().isEmpty() && this.getItem().getItem() == Items.NETHER_STAR && damageSource.isExplosion()) {
+			return false;
+		} else if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
 			return false;
 		} else {
 			this.markHurt();

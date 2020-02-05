@@ -589,7 +589,7 @@ public abstract class AbstractArrow extends Entity implements Projectile {
 
 	@Override
 	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.0F;
+		return 0.13F;
 	}
 
 	public void setCritArrow(boolean bl) {

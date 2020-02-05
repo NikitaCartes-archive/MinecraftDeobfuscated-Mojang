@@ -19,8 +19,7 @@ public final class SnowyTaigaBiome extends Biome {
 				.scale(0.2F)
 				.temperature(-0.5F)
 				.downfall(0.4F)
-				.waterColor(4020182)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.IGLOO.configured(FeatureConfiguration.NONE));

@@ -15,6 +15,9 @@ public class BiomeSourceType<C extends BiomeSourceSettings, T extends BiomeSourc
 	public static final BiomeSourceType<TheEndBiomeSourceSettings, TheEndBiomeSource> THE_END = register(
 		"the_end", TheEndBiomeSource::new, TheEndBiomeSourceSettings::new
 	);
+	public static final BiomeSourceType<MultiNoiseBiomeSourceSettings, MultiNoiseBiomeSource> MULTI_NOISE = register(
+		"multi_noise", MultiNoiseBiomeSource::new, levelData -> new MultiNoiseBiomeSourceSettings(levelData.getSeed())
+	);
 	private final Function<C, T> factory;
 	private final Function<LevelData, C> settingsFactory;
 

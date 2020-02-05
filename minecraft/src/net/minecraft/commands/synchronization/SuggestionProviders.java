@@ -30,6 +30,10 @@ public class SuggestionProviders {
 		new ResourceLocation("available_sounds"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSoundEvents(), suggestionsBuilder)
 	);
+	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_BIOMES = register(
+		new ResourceLocation("available_biomes"),
+		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(Registry.BIOME.keySet(), suggestionsBuilder)
+	);
 	public static final SuggestionProvider<CommandSourceStack> SUMMONABLE_ENTITIES = register(
 		new ResourceLocation("summonable_entities"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(

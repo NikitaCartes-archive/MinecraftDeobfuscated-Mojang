@@ -49,7 +49,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher {
-	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityNoOutline(new ResourceLocation("textures/misc/shadow.png"));
+	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(new ResourceLocation("textures/misc/shadow.png"));
 	private final Map<EntityType<?>, EntityRenderer<?>> renderers = Maps.<EntityType<?>, EntityRenderer<?>>newHashMap();
 	private final Map<String, PlayerRenderer> playerRenderers = Maps.<String, PlayerRenderer>newHashMap();
 	private final PlayerRenderer defaultPlayerRenderer;
@@ -112,13 +112,14 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.GHAST, new GhastRenderer(this));
 		this.register(EntityType.GIANT, new GiantMobRenderer(this, 6.0F));
 		this.register(EntityType.GUARDIAN, new GuardianRenderer(this));
+		this.register(EntityType.HOGLIN, new HoglinRenderer(this));
 		this.register(EntityType.HOPPER_MINECART, new MinecartRenderer<>(this));
 		this.register(EntityType.HORSE, new HorseRenderer(this));
 		this.register(EntityType.HUSK, new HuskRenderer(this));
 		this.register(EntityType.ILLUSIONER, new IllusionerRenderer(this));
 		this.register(EntityType.IRON_GOLEM, new IronGolemRenderer(this));
-		this.register(EntityType.ITEM_FRAME, new ItemFrameRenderer(this, itemRenderer));
 		this.register(EntityType.ITEM, new ItemEntityRenderer(this, itemRenderer));
+		this.register(EntityType.ITEM_FRAME, new ItemFrameRenderer(this, itemRenderer));
 		this.register(EntityType.LEASH_KNOT, new LeashKnotRenderer(this));
 		this.register(EntityType.LIGHTNING_BOLT, new LightningBoltRenderer(this));
 		this.register(EntityType.LLAMA, new LlamaRenderer(this));
@@ -426,7 +427,7 @@ public class EntityRenderDispatcher {
 						double n = (double)blockPos.getZ() + aABB.maxZ;
 						float o = (float)(j - d);
 						float p = (float)(k - d);
-						float q = (float)(l - e + 0.015625);
+						float q = (float)(l - e);
 						float r = (float)(m - f);
 						float s = (float)(n - f);
 						float t = -o / 2.0F / g + 0.5F;

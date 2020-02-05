@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -226,27 +227,14 @@ public class Shulker extends AbstractGolem implements Enemy {
 				}
 			}
 
-			BlockPos blockPos2 = blockPos.relative(this.getAttachFace());
-			if (!this.level.loadedAndEntityCanStandOn(blockPos2, this)) {
-				boolean bl = false;
-
-				for (Direction direction2 : Direction.values()) {
-					blockPos2 = blockPos.relative(direction2);
-					if (this.level.loadedAndEntityCanStandOn(blockPos2, this)) {
-						this.entityData.set(DATA_ATTACH_FACE_ID, direction2);
-						bl = true;
-						break;
-					}
-				}
-
-				if (!bl) {
+			Direction direction = this.getAttachFace();
+			if (!this.canAttachOnBlockFace(blockPos, direction)) {
+				Direction direction2 = this.findAttachableFace(blockPos);
+				if (direction2 != null) {
+					this.entityData.set(DATA_ATTACH_FACE_ID, direction2);
+				} else {
 					this.teleportSomewhere();
 				}
-			}
-
-			BlockPos blockPos3 = blockPos.relative(this.getAttachFace().getOpposite());
-			if (this.level.loadedAndEntityCanStandOn(blockPos3, this)) {
-				this.teleportSomewhere();
 			}
 		}
 
@@ -312,6 +300,22 @@ public class Shulker extends AbstractGolem implements Enemy {
 		}
 	}
 
+	@Nullable
+	protected Direction findAttachableFace(BlockPos blockPos) {
+		for (Direction direction : Direction.values()) {
+			if (this.canAttachOnBlockFace(blockPos, direction)) {
+				return direction;
+			}
+		}
+
+		return null;
+	}
+
+	private boolean canAttachOnBlockFace(BlockPos blockPos, Direction direction) {
+		return this.level.loadedAndEntityCanStandOnFace(blockPos.relative(direction), this, direction.getOpposite())
+			&& this.level.noCollision(this, ShulkerSharedHelper.openBoundingBox(blockPos, direction.getOpposite()));
+	}
+
 	protected boolean teleportSomewhere() {
 		if (!this.isNoAi() && this.isAlive()) {
 			BlockPos blockPos = new BlockPos(this);
@@ -322,17 +326,9 @@ public class Shulker extends AbstractGolem implements Enemy {
 					&& this.level.isEmptyBlock(blockPos2)
 					&& this.level.getWorldBorder().isWithinBounds(blockPos2)
 					&& this.level.noCollision(this, new AABB(blockPos2))) {
-					boolean bl = false;
-
-					for (Direction direction : Direction.values()) {
-						if (this.level.loadedAndEntityCanStandOn(blockPos2.relative(direction), this)) {
-							this.entityData.set(DATA_ATTACH_FACE_ID, direction);
-							bl = true;
-							break;
-						}
-					}
-
-					if (bl) {
+					Direction direction = this.findAttachableFace(blockPos2);
+					if (direction != null) {
+						this.entityData.set(DATA_ATTACH_FACE_ID, direction);
 						this.playSound(SoundEvents.SHULKER_TELEPORT, 1.0F, 1.0F);
 						this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos2));
 						this.entityData.set(DATA_PEEK_ID, (byte)0);

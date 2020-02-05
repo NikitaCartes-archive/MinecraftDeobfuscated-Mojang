@@ -20,15 +20,16 @@ public class CarrotOnAStickItem extends Item {
 		} else {
 			if (player.isPassenger() && player.getVehicle() instanceof Pig) {
 				Pig pig = (Pig)player.getVehicle();
-				if (itemStack.getMaxDamage() - itemStack.getDamageValue() >= 7 && pig.boost()) {
+				if (pig.boost()) {
 					itemStack.hurtAndBreak(7, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+					player.swing(interactionHand, true);
 					if (itemStack.isEmpty()) {
 						ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
 						itemStack2.setTag(itemStack.getTag());
-						return InteractionResultHolder.success(itemStack2);
+						return InteractionResultHolder.consume(itemStack2);
 					}
 
-					return InteractionResultHolder.success(itemStack);
+					return InteractionResultHolder.consume(itemStack);
 				}
 			}
 

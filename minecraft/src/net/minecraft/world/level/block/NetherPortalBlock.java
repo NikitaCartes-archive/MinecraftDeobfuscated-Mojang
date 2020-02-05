@@ -11,6 +11,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -341,7 +342,7 @@ public class NetherPortalBlock extends Block {
 
 		protected boolean isEmpty(BlockState blockState) {
 			Block block = blockState.getBlock();
-			return blockState.isAir() || block == Blocks.FIRE || block == Blocks.NETHER_PORTAL;
+			return blockState.isAir() || blockState.is(BlockTags.FIRE) || block == Blocks.NETHER_PORTAL;
 		}
 
 		public boolean isValid() {

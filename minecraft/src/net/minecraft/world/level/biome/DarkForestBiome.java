@@ -26,8 +26,7 @@ public final class DarkForestBiome extends Biome {
 				.scale(0.2F)
 				.temperature(0.7F)
 				.downfall(0.8F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE));

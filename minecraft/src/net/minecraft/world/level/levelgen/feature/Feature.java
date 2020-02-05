@@ -52,6 +52,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfigurat
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
+import net.minecraft.world.level.levelgen.structure.NetherFossilFeature;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 
 public abstract class Feature<FC extends FeatureConfiguration> {
@@ -86,6 +87,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"buried_treasure", new BuriedTreasureFeature(BuriedTreasureConfiguration::deserialize)
 	);
 	public static final StructureFeature<VillageConfiguration> VILLAGE = register("village", new VillageFeature(VillageConfiguration::deserialize));
+	public static final StructureFeature<NoneFeatureConfiguration> NETHER_FOSSIL = register(
+		"nether_fossil", new NetherFossilFeature(NoneFeatureConfiguration::deserialize)
+	);
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> NORMAL_TREE = register("normal_tree", new TreeFeature(SmallTreeConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> ACACIA_TREE = register("acacia_tree", new AcaciaFeature(SmallTreeConfiguration::deserialize));
@@ -142,8 +146,15 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<CountFeatureConfiguration> SEA_PICKLE = register("sea_pickle", new SeaPickleFeature(CountFeatureConfiguration::deserialize));
 	public static final Feature<SimpleBlockConfiguration> SIMPLE_BLOCK = register("simple_block", new SimpleBlockFeature(SimpleBlockConfiguration::deserialize));
 	public static final Feature<ProbabilityFeatureConfiguration> BAMBOO = register("bamboo", new BambooFeature(ProbabilityFeatureConfiguration::deserialize));
+	public static final Feature<HugeFungiConfiguration> HUGE_FUNGI = register("huge_fungi", new HugeFungiFeature(HugeFungiConfiguration::deserialize));
+	public static final Feature<BlockPileConfiguration> NETHER_FOREST_VEGETATION = register(
+		"nether_forest_vegetation", new NetherForestVegetationFeature(BlockPileConfiguration::deserialize)
+	);
+	public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<LayerConfiguration> FILL_LAYER = register("fill_layer", new FillLayerFeature(LayerConfiguration::deserialize));
 	public static final BonusChestFeature BONUS_CHEST = register("bonus_chest", new BonusChestFeature(NoneFeatureConfiguration::deserialize));
+	public static final Feature<NoneFeatureConfiguration> BASALT_PILLAR = register("basalt_pillar", new BasaltPillarFeature(NoneFeatureConfiguration::deserialize));
+	public static final Feature<OreConfiguration> NO_SURFACE_ORE = register("no_surface_ore", new NoSurfaceOreFeature(OreConfiguration::deserialize));
 	public static final Feature<RandomRandomFeatureConfiguration> RANDOM_RANDOM_SELECTOR = register(
 		"random_random_selector", new RandomRandomFeature(RandomRandomFeatureConfiguration::deserialize)
 	);
@@ -176,6 +187,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		hashBiMap.put("EndCity".toLowerCase(Locale.ROOT), END_CITY);
 		hashBiMap.put("Buried_Treasure".toLowerCase(Locale.ROOT), BURIED_TREASURE);
 		hashBiMap.put("Village".toLowerCase(Locale.ROOT), VILLAGE);
+		hashBiMap.put("Nether_Fossil".toLowerCase(Locale.ROOT), NETHER_FOSSIL);
 	});
 	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE);
 	private final Function<Dynamic<?>, ? extends FC> configurationFactory;

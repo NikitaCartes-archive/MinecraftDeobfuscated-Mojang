@@ -65,7 +65,7 @@ public class McRegionUpgrader {
 		convertRegions(
 			new File(file2, "region"),
 			list2,
-			biomeSourceType.create(biomeSourceType.createSettings(levelData).setBiome(Biomes.NETHER)),
+			biomeSourceType.create(biomeSourceType.createSettings(levelData).setBiome(Biomes.NETHER_WASTES)),
 			list.size(),
 			i,
 			progressListener

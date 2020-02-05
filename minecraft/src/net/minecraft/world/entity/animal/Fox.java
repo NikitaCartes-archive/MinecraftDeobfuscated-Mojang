@@ -146,6 +146,7 @@ public class Fox extends Animal {
 				)
 			);
 		this.goalSelector.addGoal(4, new AvoidEntityGoal(this, Wolf.class, 8.0F, 1.6, 1.4, livingEntity -> !((Wolf)livingEntity).isTame() && !this.isDefending()));
+		this.goalSelector.addGoal(4, new AvoidEntityGoal(this, PolarBear.class, 8.0F, 1.6, 1.4, livingEntity -> !this.isDefending()));
 		this.goalSelector.addGoal(5, new Fox.StalkPreyGoal());
 		this.goalSelector.addGoal(6, new Fox.FoxPounceGoal());
 		this.goalSelector.addGoal(6, new Fox.SeekShelterGoal(1.25));
@@ -789,7 +790,7 @@ public class Fox extends Animal {
 		}
 
 		protected boolean hasShelter() {
-			BlockPos blockPos = new BlockPos(Fox.this);
+			BlockPos blockPos = new BlockPos(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
 			return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0F;
 		}
 

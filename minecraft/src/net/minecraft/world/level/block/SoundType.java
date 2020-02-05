@@ -105,6 +105,93 @@ public class SoundType {
 	public static final SoundType LANTERN = new SoundType(
 		1.0F, 1.0F, SoundEvents.LANTERN_BREAK, SoundEvents.LANTERN_STEP, SoundEvents.LANTERN_PLACE, SoundEvents.LANTERN_HIT, SoundEvents.LANTERN_FALL
 	);
+	public static final SoundType STEM = new SoundType(
+		1.0F, 1.0F, SoundEvents.STEM_BREAK, SoundEvents.STEM_STEP, SoundEvents.STEM_PLACE, SoundEvents.STEM_HIT, SoundEvents.STEM_FALL
+	);
+	public static final SoundType NYLIUM = new SoundType(
+		1.0F, 1.0F, SoundEvents.NYLIUM_BREAK, SoundEvents.NYLIUM_STEP, SoundEvents.NYLIUM_PLACE, SoundEvents.NYLIUM_HIT, SoundEvents.NYLIUM_FALL
+	);
+	public static final SoundType FUNGI = new SoundType(
+		1.0F, 1.0F, SoundEvents.FUNGI_BREAK, SoundEvents.FUNGI_STEP, SoundEvents.FUNGI_PLACE, SoundEvents.FUNGI_HIT, SoundEvents.FUNGI_FALL
+	);
+	public static final SoundType ROOTS = new SoundType(
+		1.0F, 1.0F, SoundEvents.ROOTS_BREAK, SoundEvents.ROOTS_STEP, SoundEvents.ROOTS_PLACE, SoundEvents.ROOTS_HIT, SoundEvents.ROOTS_FALL
+	);
+	public static final SoundType SHROOMLIGHT = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.SHROOMLIGHT_BREAK,
+		SoundEvents.SHROOMLIGHT_STEP,
+		SoundEvents.SHROOMLIGHT_PLACE,
+		SoundEvents.SHROOMLIGHT_HIT,
+		SoundEvents.SHROOMLIGHT_FALL
+	);
+	public static final SoundType WEEPING_VINES = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.WEEPING_VINES_BREAK,
+		SoundEvents.WEEPING_VINES_STEP,
+		SoundEvents.WEEPING_VINES_PLACE,
+		SoundEvents.WEEPING_VINES_HIT,
+		SoundEvents.WEEPING_VINES_FALL
+	);
+	public static final SoundType SOUL_SAND = new SoundType(
+		1.0F, 1.0F, SoundEvents.SOUL_SAND_BREAK, SoundEvents.SOUL_SAND_STEP, SoundEvents.SOUL_SAND_PLACE, SoundEvents.SOUL_SAND_HIT, SoundEvents.SOUL_SAND_FALL
+	);
+	public static final SoundType SOUL_SOIL = new SoundType(
+		1.0F, 1.0F, SoundEvents.SOUL_SOIL_BREAK, SoundEvents.SOUL_SOIL_STEP, SoundEvents.SOUL_SOIL_PLACE, SoundEvents.SOUL_SOIL_HIT, SoundEvents.SOUL_SOIL_FALL
+	);
+	public static final SoundType BASALT = new SoundType(
+		1.0F, 1.0F, SoundEvents.BASALT_BREAK, SoundEvents.BASALT_STEP, SoundEvents.BASALT_PLACE, SoundEvents.BASALT_HIT, SoundEvents.BASALT_FALL
+	);
+	public static final SoundType WART_BLOCK = new SoundType(
+		1.0F, 1.0F, SoundEvents.WART_BLOCK_BREAK, SoundEvents.WART_BLOCK_STEP, SoundEvents.WART_BLOCK_PLACE, SoundEvents.WART_BLOCK_HIT, SoundEvents.WART_BLOCK_FALL
+	);
+	public static final SoundType NETHERRACK = new SoundType(
+		1.0F, 1.0F, SoundEvents.NETHERRACK_BREAK, SoundEvents.NETHERRACK_STEP, SoundEvents.NETHERRACK_PLACE, SoundEvents.NETHERRACK_HIT, SoundEvents.NETHERRACK_FALL
+	);
+	public static final SoundType NETHER_BRICKS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.NETHER_BRICKS_BREAK,
+		SoundEvents.NETHER_BRICKS_STEP,
+		SoundEvents.NETHER_BRICKS_PLACE,
+		SoundEvents.NETHER_BRICKS_HIT,
+		SoundEvents.NETHER_BRICKS_FALL
+	);
+	public static final SoundType NETHER_SPROUTS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.NETHER_SPROUTS_BREAK,
+		SoundEvents.NETHER_SPROUTS_STEP,
+		SoundEvents.NETHER_SPROUTS_PLACE,
+		SoundEvents.NETHER_SPROUTS_HIT,
+		SoundEvents.NETHER_SPROUTS_FALL
+	);
+	public static final SoundType NETHER_ORE = new SoundType(
+		1.0F, 1.0F, SoundEvents.NETHER_ORE_BREAK, SoundEvents.NETHER_ORE_STEP, SoundEvents.NETHER_ORE_PLACE, SoundEvents.NETHER_ORE_HIT, SoundEvents.NETHER_ORE_FALL
+	);
+	public static final SoundType BONE_BLOCK = new SoundType(
+		1.0F, 1.0F, SoundEvents.BONE_BLOCK_BREAK, SoundEvents.BONE_BLOCK_STEP, SoundEvents.BONE_BLOCK_PLACE, SoundEvents.BONE_BLOCK_HIT, SoundEvents.BONE_BLOCK_FALL
+	);
+	public static final SoundType NETHERITE_BLOCK = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.NETHERITE_BLOCK_BREAK,
+		SoundEvents.NETHERITE_BLOCK_STEP,
+		SoundEvents.NETHERITE_BLOCK_PLACE,
+		SoundEvents.NETHERITE_BLOCK_HIT,
+		SoundEvents.NETHERITE_BLOCK_FALL
+	);
+	public static final SoundType ANCIENT_DEBRIS = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.ANCIENT_DEBRIS_BREAK,
+		SoundEvents.ANCIENT_DEBRIS_STEP,
+		SoundEvents.ANCIENT_DEBRIS_PLACE,
+		SoundEvents.ANCIENT_DEBRIS_HIT,
+		SoundEvents.ANCIENT_DEBRIS_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

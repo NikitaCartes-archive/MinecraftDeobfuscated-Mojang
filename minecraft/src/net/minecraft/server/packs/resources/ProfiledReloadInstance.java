@@ -28,8 +28,8 @@ public class ProfiledReloadInstance extends SimpleReloadInstance<ProfiledReloadI
 			(preparationBarrier, resourceManagerx, preparableReloadListener, executor2x, executor3) -> {
 				AtomicLong atomicLong = new AtomicLong();
 				AtomicLong atomicLong2 = new AtomicLong();
-				ActiveProfiler activeProfiler = new ActiveProfiler(Util.getNanos(), () -> 0, false);
-				ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.getNanos(), () -> 0, false);
+				ActiveProfiler activeProfiler = new ActiveProfiler(Util.timeSource, () -> 0, false);
+				ActiveProfiler activeProfiler2 = new ActiveProfiler(Util.timeSource, () -> 0, false);
 				CompletableFuture<Void> completableFuturex = preparableReloadListener.reload(
 					preparationBarrier, resourceManagerx, activeProfiler, activeProfiler2, runnable -> executor2x.execute(() -> {
 							long l = Util.getNanos();

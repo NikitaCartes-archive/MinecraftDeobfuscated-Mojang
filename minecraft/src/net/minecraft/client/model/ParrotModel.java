@@ -180,7 +180,7 @@ public class ParrotModel extends ListModel<Parrot> {
 	private static ParrotModel.State getState(Parrot parrot) {
 		if (parrot.isPartyParrot()) {
 			return ParrotModel.State.PARTY;
-		} else if (parrot.isSitting()) {
+		} else if (parrot.isInSittingPose()) {
 			return ParrotModel.State.SITTING;
 		} else {
 			return parrot.isFlying() ? ParrotModel.State.FLYING : ParrotModel.State.STANDING;

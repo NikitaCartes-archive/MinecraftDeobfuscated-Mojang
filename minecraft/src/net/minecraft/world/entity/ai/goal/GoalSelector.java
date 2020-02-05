@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.apache.logging.log4j.LogManager;
@@ -25,12 +26,12 @@ public class GoalSelector {
 	};
 	private final Map<Goal.Flag, WrappedGoal> lockedFlags = new EnumMap(Goal.Flag.class);
 	private final Set<WrappedGoal> availableGoals = Sets.<WrappedGoal>newLinkedHashSet();
-	private final ProfilerFiller profiler;
+	private final Supplier<ProfilerFiller> profiler;
 	private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class);
 	private int newGoalRate = 3;
 
-	public GoalSelector(ProfilerFiller profilerFiller) {
-		this.profiler = profilerFiller;
+	public GoalSelector(Supplier<ProfilerFiller> supplier) {
+		this.profiler = supplier;
 	}
 
 	public void addGoal(int i, Goal goal) {
@@ -43,7 +44,8 @@ public class GoalSelector {
 	}
 
 	public void tick() {
-		this.profiler.push("goalCleanup");
+		ProfilerFiller profilerFiller = (ProfilerFiller)this.profiler.get();
+		profilerFiller.push("goalCleanup");
 		this.getRunningGoals()
 			.filter(wrappedGoal -> !wrappedGoal.isRunning() || wrappedGoal.getFlags().stream().anyMatch(this.disabledFlags::contains) || !wrappedGoal.canContinueToUse())
 			.forEach(Goal::stop);
@@ -52,8 +54,8 @@ public class GoalSelector {
 				this.lockedFlags.remove(flag);
 			}
 		});
-		this.profiler.pop();
-		this.profiler.push("goalUpdate");
+		profilerFiller.pop();
+		profilerFiller.push("goalUpdate");
 		this.availableGoals
 			.stream()
 			.filter(wrappedGoal -> !wrappedGoal.isRunning())
@@ -70,10 +72,10 @@ public class GoalSelector {
 				});
 				wrappedGoal.start();
 			});
-		this.profiler.pop();
-		this.profiler.push("goalTick");
+		profilerFiller.pop();
+		profilerFiller.push("goalTick");
 		this.getRunningGoals().forEach(WrappedGoal::tick);
-		this.profiler.pop();
+		profilerFiller.pop();
 	}
 
 	public Stream<WrappedGoal> getRunningGoals() {

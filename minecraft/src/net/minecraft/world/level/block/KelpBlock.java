@@ -34,20 +34,8 @@ public class KelpBlock extends Block implements LiquidBlockContainer {
 		return SHAPE;
 	}
 
-	@Nullable
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
-		return fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8 ? this.getStateForPlacement(blockPlaceContext.getLevel()) : null;
-	}
-
 	public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
 		return this.defaultBlockState().setValue(AGE, Integer.valueOf(levelAccessor.getRandom().nextInt(25)));
-	}
-
-	@Override
-	public FluidState getFluidState(BlockState blockState) {
-		return Fluids.WATER.getSource(false);
 	}
 
 	@Override
@@ -55,10 +43,11 @@ public class KelpBlock extends Block implements LiquidBlockContainer {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
 		} else {
-			BlockPos blockPos2 = blockPos.above();
-			BlockState blockState2 = serverLevel.getBlockState(blockPos2);
-			if (blockState2.getBlock() == Blocks.WATER && (Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14) {
-				serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
+			if ((Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < 0.14) {
+				BlockPos blockPos2 = blockPos.above();
+				if (serverLevel.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+					serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
+				}
 			}
 		}
 	}
@@ -75,11 +64,7 @@ public class KelpBlock extends Block implements LiquidBlockContainer {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if (!blockState.canSurvive(levelAccessor, blockPos)) {
-			if (direction == Direction.DOWN) {
-				return Blocks.AIR.defaultBlockState();
-			}
-
+		if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 		}
 
@@ -104,5 +89,17 @@ public class KelpBlock extends Block implements LiquidBlockContainer {
 	@Override
 	public boolean placeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
 		return false;
+	}
+
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+		FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
+		return fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8 ? this.getStateForPlacement(blockPlaceContext.getLevel()) : null;
+	}
+
+	@Override
+	public FluidState getFluidState(BlockState blockState) {
+		return Fluids.WATER.getSource(false);
 	}
 }

@@ -42,7 +42,7 @@ import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LandOnOwnersShoulderGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.SitGoal;
+import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -137,11 +137,10 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 
 	@Override
 	protected void registerGoals() {
-		this.sitGoal = new SitGoal(this);
 		this.goalSelector.addGoal(0, new PanicGoal(this, 1.25));
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8.0F));
-		this.goalSelector.addGoal(2, this.sitGoal);
+		this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F, true));
 		this.goalSelector.addGoal(2, new WaterAvoidingRandomFlyingGoal(this, 1.0));
 		this.goalSelector.addGoal(3, new LandOnOwnersShoulderGoal(this));
@@ -278,7 +277,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 			return true;
 		} else if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
 			if (!this.level.isClientSide) {
-				this.sitGoal.wantToSit(!this.isSitting());
+				this.setOrderedToSit(!this.isOrderedToSit());
 			}
 
 			return true;
@@ -407,10 +406,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			if (this.sitGoal != null) {
-				this.sitGoal.wantToSit(false);
-			}
-
+			this.setOrderedToSit(false);
 			return super.hurt(damageSource, f);
 		}
 	}

@@ -1,11 +1,10 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.Iterator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,8 +30,28 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 		return new InventoryChangeTrigger.TriggerInstance(ints, ints2, ints3, itemPredicates);
 	}
 
-	public void trigger(ServerPlayer serverPlayer, Inventory inventory) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(inventory));
+	public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
+		int i = 0;
+		int j = 0;
+		int k = 0;
+
+		for (int l = 0; l < inventory.getContainerSize(); l++) {
+			ItemStack itemStack2 = inventory.getItem(l);
+			if (itemStack2.isEmpty()) {
+				j++;
+			} else {
+				k++;
+				if (itemStack2.getCount() >= itemStack2.getMaxStackSize()) {
+					i++;
+				}
+			}
+		}
+
+		this.trigger(serverPlayer, inventory, itemStack, i, j, k);
+	}
+
+	private void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack, int i, int j, int k) {
+		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(inventory, itemStack, i, j, k));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
@@ -89,39 +108,36 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 			return jsonObject;
 		}
 
-		public boolean matches(Inventory inventory) {
-			int i = 0;
-			int j = 0;
-			int k = 0;
-			List<ItemPredicate> list = Lists.<ItemPredicate>newArrayList(this.predicates);
-
-			for (int l = 0; l < inventory.getContainerSize(); l++) {
-				ItemStack itemStack = inventory.getItem(l);
-				if (itemStack.isEmpty()) {
-					j++;
-				} else {
-					k++;
-					if (itemStack.getCount() >= itemStack.getMaxStackSize()) {
-						i++;
-					}
-
-					Iterator<ItemPredicate> iterator = list.iterator();
-
-					while (iterator.hasNext()) {
-						ItemPredicate itemPredicate = (ItemPredicate)iterator.next();
-						if (itemPredicate.matches(itemStack)) {
-							iterator.remove();
-						}
-					}
-				}
-			}
-
+		public boolean matches(Inventory inventory, ItemStack itemStack, int i, int j, int k) {
 			if (!this.slotsFull.matches(i)) {
 				return false;
 			} else if (!this.slotsEmpty.matches(j)) {
 				return false;
+			} else if (!this.slotsOccupied.matches(k)) {
+				return false;
 			} else {
-				return !this.slotsOccupied.matches(k) ? false : list.isEmpty();
+				int l = this.predicates.length;
+				if (l == 0) {
+					return true;
+				} else if (l != 1) {
+					List<ItemPredicate> list = new ObjectArrayList<>(this.predicates);
+					int m = inventory.getContainerSize();
+
+					for (int n = 0; n < m; n++) {
+						if (list.isEmpty()) {
+							return true;
+						}
+
+						ItemStack itemStack2 = inventory.getItem(n);
+						if (!itemStack2.isEmpty()) {
+							list.removeIf(itemPredicate -> itemPredicate.matches(itemStack2));
+						}
+					}
+
+					return list.isEmpty();
+				} else {
+					return !itemStack.isEmpty() && this.predicates[0].matches(itemStack);
+				}
 			}
 		}
 	}

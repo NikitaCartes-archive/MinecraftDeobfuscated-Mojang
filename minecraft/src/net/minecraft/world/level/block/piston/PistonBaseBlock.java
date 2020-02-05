@@ -189,21 +189,19 @@ public class PistonBaseBlock extends DirectionalBlock {
 				((PistonMovingBlockEntity)blockEntity).finalTick();
 			}
 
-			level.setBlock(
-				blockPos,
-				Blocks.MOVING_PISTON
-					.defaultBlockState()
-					.setValue(MovingPistonBlock.FACING, direction)
-					.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT),
-				3
-			);
+			BlockState blockState2 = Blocks.MOVING_PISTON
+				.defaultBlockState()
+				.setValue(MovingPistonBlock.FACING, direction)
+				.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
+			level.setBlock(blockPos, blockState2, 20);
 			level.setBlockEntity(
 				blockPos, MovingPistonBlock.newMovingBlockEntity(this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true)
 			);
+			level.blockUpdated(blockPos, blockState2.getBlock());
 			if (this.isSticky) {
 				BlockPos blockPos2 = blockPos.offset(direction.getStepX() * 2, direction.getStepY() * 2, direction.getStepZ() * 2);
-				BlockState blockState2 = level.getBlockState(blockPos2);
-				Block block = blockState2.getBlock();
+				BlockState blockState3 = level.getBlockState(blockPos2);
+				Block block = blockState3.getBlock();
 				boolean bl2 = false;
 				if (block == Blocks.MOVING_PISTON) {
 					BlockEntity blockEntity2 = level.getBlockEntity(blockPos2);
@@ -218,9 +216,9 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 				if (!bl2) {
 					if (i != 1
-						|| blockState2.isAir()
-						|| !isPushable(blockState2, level, blockPos2, direction.getOpposite(), false, direction)
-						|| blockState2.getPistonPushReaction() != PushReaction.NORMAL && block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
+						|| blockState3.isAir()
+						|| !isPushable(blockState3, level, blockPos2, direction.getOpposite(), false, direction)
+						|| blockState3.getPistonPushReaction() != PushReaction.NORMAL && block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
 						level.removeBlock(blockPos.relative(direction), false);
 					} else {
 						this.moveBlocks(level, blockPos, direction, false);

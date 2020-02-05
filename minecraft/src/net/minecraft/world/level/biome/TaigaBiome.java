@@ -20,8 +20,7 @@ public final class TaigaBiome extends Biome {
 				.scale(0.2F)
 				.temperature(0.25F)
 				.downfall(0.8F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/taiga/town_centers", 6)));

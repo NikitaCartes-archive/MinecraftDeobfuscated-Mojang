@@ -46,7 +46,7 @@ public class FollowOwnerGoal extends Goal {
 			return false;
 		} else if (livingEntity.isSpectator()) {
 			return false;
-		} else if (this.tamable.isSitting()) {
+		} else if (this.tamable.isOrderedToSit()) {
 			return false;
 		} else if (this.tamable.distanceToSqr(livingEntity) < (double)(this.startDistance * this.startDistance)) {
 			return false;
@@ -61,7 +61,7 @@ public class FollowOwnerGoal extends Goal {
 		if (this.navigation.isDone()) {
 			return false;
 		} else {
-			return this.tamable.isSitting() ? false : !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
+			return this.tamable.isOrderedToSit() ? false : !(this.tamable.distanceToSqr(this.owner) <= (double)(this.stopDistance * this.stopDistance));
 		}
 	}
 

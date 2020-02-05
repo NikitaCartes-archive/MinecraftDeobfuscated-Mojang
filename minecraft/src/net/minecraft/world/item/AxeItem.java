@@ -55,7 +55,15 @@ public class AxeItem extends DiggerItem {
 		Blocks.BIRCH_PRESSURE_PLATE,
 		Blocks.JUNGLE_PRESSURE_PLATE,
 		Blocks.DARK_OAK_PRESSURE_PLATE,
-		Blocks.ACACIA_PRESSURE_PLATE
+		Blocks.ACACIA_PRESSURE_PLATE,
+		Blocks.CRIMSON_PLANKS,
+		Blocks.CRIMSON_STEM,
+		Blocks.CRIMSON_BUTTON,
+		Blocks.CRIMSON_PRESSURE_PLATE,
+		Blocks.WARPED_PLANKS,
+		Blocks.WARPED_STEM,
+		Blocks.WARPED_BUTTON,
+		Blocks.WARPED_PRESSURE_PLATE
 	);
 	protected static final Map<Block, Block> STRIPABLES = new Builder<Block, Block>()
 		.put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
@@ -70,6 +78,8 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_LOG)
 		.put(Blocks.SPRUCE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD)
 		.put(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG)
+		.put(Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM)
+		.put(Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM)
 		.build();
 
 	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {

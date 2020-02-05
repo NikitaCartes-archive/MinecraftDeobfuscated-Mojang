@@ -66,6 +66,7 @@ public final class Material {
 	public static final Material SPONGE = new Material.Builder(MaterialColor.COLOR_YELLOW).build();
 	public static final Material SHULKER_SHELL = new Material.Builder(MaterialColor.COLOR_PURPLE).build();
 	public static final Material WOOD = new Material.Builder(MaterialColor.WOOD).flammable().build();
+	public static final Material NETHER_WOOD = new Material.Builder(MaterialColor.WOOD).build();
 	public static final Material BAMBOO_SAPLING = new Material.Builder(MaterialColor.WOOD).flammable().destroyOnPush().noCollider().build();
 	public static final Material BAMBOO = new Material.Builder(MaterialColor.WOOD).flammable().destroyOnPush().build();
 	public static final Material WOOL = new Material.Builder(MaterialColor.WOOL).flammable().build();

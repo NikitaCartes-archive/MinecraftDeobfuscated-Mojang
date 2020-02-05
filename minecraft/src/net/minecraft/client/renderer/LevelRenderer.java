@@ -368,86 +368,57 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 	}
 
 	public void tickRain(Camera camera) {
-		float f = this.minecraft.level.getRainLevel(1.0F);
-		if (!this.minecraft.options.fancyGraphics) {
-			f /= 2.0F;
-		}
-
-		if (f != 0.0F) {
+		float f = this.minecraft.level.getRainLevel(1.0F) / (this.minecraft.options.fancyGraphics ? 1.0F : 2.0F);
+		if (!(f <= 0.0F)) {
 			Random random = new Random((long)this.ticks * 312987231L);
 			LevelReader levelReader = this.minecraft.level;
 			BlockPos blockPos = new BlockPos(camera.getPosition());
-			int i = 10;
-			double d = 0.0;
-			double e = 0.0;
-			double g = 0.0;
-			int j = 0;
-			int k = (int)(100.0F * f * f);
-			if (this.minecraft.options.particles == ParticleStatus.DECREASED) {
-				k >>= 1;
-			} else if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
-				k = 0;
-			}
+			BlockPos blockPos2 = null;
+			int i = (int)(100.0F * f * f) / (this.minecraft.options.particles == ParticleStatus.DECREASED ? 2 : 1);
 
-			for (int l = 0; l < k; l++) {
-				BlockPos blockPos2 = levelReader.getHeightmapPos(
-					Heightmap.Types.MOTION_BLOCKING, blockPos.offset(random.nextInt(10) - random.nextInt(10), 0, random.nextInt(10) - random.nextInt(10))
-				);
-				Biome biome = levelReader.getBiome(blockPos2);
-				BlockPos blockPos3 = blockPos2.below();
-				if (blockPos2.getY() <= blockPos.getY() + 10
-					&& blockPos2.getY() >= blockPos.getY() - 10
+			for (int j = 0; j < i; j++) {
+				int k = random.nextInt(21) - 10;
+				int l = random.nextInt(21) - 10;
+				BlockPos blockPos3 = levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos.offset(k, 0, l)).below();
+				Biome biome = levelReader.getBiome(blockPos3);
+				if (blockPos3.getY() > 0
+					&& blockPos3.getY() <= blockPos.getY() + 10
+					&& blockPos3.getY() >= blockPos.getY() - 10
 					&& biome.getPrecipitation() == Biome.Precipitation.RAIN
-					&& biome.getTemperature(blockPos2) >= 0.15F) {
-					double h = random.nextDouble();
-					double m = random.nextDouble();
+					&& biome.getTemperature(blockPos3) >= 0.15F) {
+					blockPos2 = blockPos3;
+					if (this.minecraft.options.particles == ParticleStatus.MINIMAL) {
+						break;
+					}
+
+					float g = random.nextFloat();
+					float h = random.nextFloat();
 					BlockState blockState = levelReader.getBlockState(blockPos3);
-					FluidState fluidState = levelReader.getFluidState(blockPos2);
+					FluidState fluidState = levelReader.getFluidState(blockPos3);
 					VoxelShape voxelShape = blockState.getCollisionShape(levelReader, blockPos3);
-					double n = voxelShape.max(Direction.Axis.Y, h, m);
-					double o = (double)fluidState.getHeight(levelReader, blockPos2);
-					double p;
-					double q;
-					if (n >= o) {
-						p = n;
-						q = voxelShape.min(Direction.Axis.Y, h, m);
-					} else {
-						p = 0.0;
-						q = 0.0;
-					}
-
-					if (p > -Double.MAX_VALUE) {
-						if (!fluidState.is(FluidTags.LAVA)
+					float m = (float)voxelShape.max(Direction.Axis.Y, (double)g, (double)h);
+					float n = fluidState.getHeight(levelReader, blockPos3);
+					float o = Math.max(m, n);
+					ParticleOptions particleOptions = !fluidState.is(FluidTags.LAVA)
 							&& blockState.getBlock() != Blocks.MAGMA_BLOCK
-							&& (blockState.getBlock() != Blocks.CAMPFIRE || !(Boolean)blockState.getValue(CampfireBlock.LIT))) {
-							if (random.nextInt(++j) == 0) {
-								d = (double)blockPos3.getX() + h;
-								e = (double)((float)blockPos3.getY() + 0.1F) + p - 1.0;
-								g = (double)blockPos3.getZ() + m;
-							}
-
-							this.minecraft
-								.level
-								.addParticle(
-									ParticleTypes.RAIN, (double)blockPos3.getX() + h, (double)((float)blockPos3.getY() + 0.1F) + p, (double)blockPos3.getZ() + m, 0.0, 0.0, 0.0
-								);
-						} else {
-							this.minecraft
-								.level
-								.addParticle(
-									ParticleTypes.SMOKE, (double)blockPos2.getX() + h, (double)((float)blockPos2.getY() + 0.1F) - q, (double)blockPos2.getZ() + m, 0.0, 0.0, 0.0
-								);
-						}
-					}
+							&& (blockState.getBlock() != Blocks.CAMPFIRE || !blockState.getValue(CampfireBlock.LIT))
+						? ParticleTypes.RAIN
+						: ParticleTypes.SMOKE;
+					this.minecraft
+						.level
+						.addParticle(
+							particleOptions, (double)((float)blockPos3.getX() + g), (double)((float)blockPos3.getY() + o), (double)((float)blockPos3.getZ() + h), 0.0, 0.0, 0.0
+						);
 				}
 			}
 
-			if (j > 0 && random.nextInt(3) < this.rainSoundTime++) {
+			if (blockPos2 != null && random.nextInt(3) < this.rainSoundTime++) {
 				this.rainSoundTime = 0;
-				if (e > (double)(blockPos.getY() + 1) && levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > Mth.floor((float)blockPos.getY())) {
-					this.minecraft.level.playLocalSound(d, e, g, SoundEvents.WEATHER_RAIN_ABOVE, SoundSource.WEATHER, 0.1F, 0.5F, false);
+				if (blockPos2.getY() > blockPos.getY() + 1
+					&& levelReader.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > Mth.floor((float)blockPos.getY())) {
+					this.minecraft.level.playLocalSound(blockPos2, SoundEvents.WEATHER_RAIN_ABOVE, SoundSource.WEATHER, 0.1F, 0.5F, false);
 				} else {
-					this.minecraft.level.playLocalSound(d, e, g, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.2F, 1.0F, false);
+					this.minecraft.level.playLocalSound(blockPos2, SoundEvents.WEATHER_RAIN, SoundSource.WEATHER, 0.2F, 1.0F, false);
 				}
 			}
 		}
@@ -1119,7 +1090,7 @@ public class LevelRenderer implements AutoCloseable, ResourceManagerReloadListen
 		this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
 		this.renderWorldBounds(camera);
 		RenderSystem.popMatrix();
-		bufferSource.endBatch(Sheets.translucentBlockSheet());
+		bufferSource.endBatch(Sheets.translucentCullBlockSheet());
 		bufferSource.endBatch(Sheets.bannerSheet());
 		bufferSource.endBatch(Sheets.shieldSheet());
 		bufferSource.endBatch(RenderType.glint());

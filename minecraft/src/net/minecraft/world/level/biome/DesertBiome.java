@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -20,9 +21,9 @@ public final class DesertBiome extends Biome {
 				.scale(0.05F)
 				.temperature(2.0F)
 				.downfall(0.0F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5F, -0.5F, 0.0F, 0.0F, 1.0F)))
 		);
 		this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/desert/town_centers", 6)));
 		this.addStructureStart(Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE));

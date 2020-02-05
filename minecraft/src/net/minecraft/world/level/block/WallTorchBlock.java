@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -36,8 +37,8 @@ public class WallTorchBlock extends TorchBlock {
 		)
 	);
 
-	protected WallTorchBlock(Block.Properties properties) {
-		super(properties);
+	protected WallTorchBlock(Block.Properties properties, ParticleOptions particleOptions) {
+		super(properties, particleOptions);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
@@ -104,7 +105,7 @@ public class WallTorchBlock extends TorchBlock {
 		double h = 0.27;
 		Direction direction2 = direction.getOpposite();
 		level.addParticle(ParticleTypes.SMOKE, d + 0.27 * (double)direction2.getStepX(), e + 0.22, f + 0.27 * (double)direction2.getStepZ(), 0.0, 0.0, 0.0);
-		level.addParticle(ParticleTypes.FLAME, d + 0.27 * (double)direction2.getStepX(), e + 0.22, f + 0.27 * (double)direction2.getStepZ(), 0.0, 0.0, 0.0);
+		level.addParticle(this.flameParticle, d + 0.27 * (double)direction2.getStepX(), e + 0.22, f + 0.27 * (double)direction2.getStepZ(), 0.0, 0.0, 0.0);
 	}
 
 	@Override

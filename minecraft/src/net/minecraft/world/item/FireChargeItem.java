@@ -5,9 +5,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FireChargeItem extends Item {
@@ -31,7 +31,7 @@ public class FireChargeItem extends Item {
 			blockPos = blockPos.relative(useOnContext.getClickedFace());
 			if (level.getBlockState(blockPos).isAir()) {
 				this.playSound(level, blockPos);
-				level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
+				level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
 				bl = true;
 			}
 		}

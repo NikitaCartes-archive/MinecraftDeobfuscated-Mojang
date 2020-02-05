@@ -570,6 +570,9 @@ public final class ItemStack {
 						} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
 							d += player.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getBaseValue();
 							bl = true;
+						} else if (((String)entry.getKey()).equals(SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName())) {
+							d += player.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getBaseValue();
+							d *= 10.0;
 						}
 					}
 

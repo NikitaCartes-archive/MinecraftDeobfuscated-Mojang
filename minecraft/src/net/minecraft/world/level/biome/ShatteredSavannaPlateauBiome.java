@@ -19,8 +19,7 @@ public final class ShatteredSavannaPlateauBiome extends Biome {
 				.scale(1.2125001F)
 				.temperature(1.0F)
 				.downfall(0.0F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent("savanna_plateau")
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

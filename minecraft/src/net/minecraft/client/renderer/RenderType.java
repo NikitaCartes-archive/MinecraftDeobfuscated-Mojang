@@ -286,6 +286,22 @@ public abstract class RenderType extends RenderStateShard {
 		return create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
 	}
 
+	public static RenderType entityShadow(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setCullState(CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setWriteMaskState(COLOR_WRITE)
+			.setDepthTestState(LEQUAL_DEPTH_TEST)
+			.setLayeringState(SHADOW_LAYERING)
+			.createCompositeState(false);
+		return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, false, compositeState);
+	}
+
 	public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
@@ -344,6 +360,10 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType outline(ResourceLocation resourceLocation) {
+		return outline(resourceLocation, NO_CULL);
+	}
+
+	public static RenderType outline(ResourceLocation resourceLocation, RenderStateShard.CullStateShard cullStateShard) {
 		return create(
 			"outline",
 			DefaultVertexFormat.POSITION_COLOR_TEX,
@@ -351,7 +371,7 @@ public abstract class RenderType extends RenderStateShard {
 			256,
 			RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-				.setCullState(NO_CULL)
+				.setCullState(cullStateShard)
 				.setDepthTestState(NO_DEPTH_TEST)
 				.setAlphaState(DEFAULT_ALPHA)
 				.setTexturingState(OUTLINE_TEXTURING)
@@ -492,6 +512,7 @@ public abstract class RenderType extends RenderStateShard {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return this.name;
 	}
@@ -551,7 +572,7 @@ public abstract class RenderType extends RenderStateShard {
 			);
 			this.state = compositeState;
 			this.outline = compositeState.outlineProperty == RenderType.OutlineProperty.AFFECTS_OUTLINE
-				? compositeState.textureState.texture().map(RenderType::outline)
+				? compositeState.textureState.texture().map(resourceLocation -> outline(resourceLocation, compositeState.cullState))
 				: Optional.empty();
 			this.isOutline = compositeState.outlineProperty == RenderType.OutlineProperty.IS_OUTLINE;
 			this.hashCode = Objects.hash(new Object[]{super.hashCode(), compositeState});
@@ -581,6 +602,11 @@ public abstract class RenderType extends RenderStateShard {
 		@Override
 		public int hashCode() {
 			return this.hashCode;
+		}
+
+		@Override
+		public String toString() {
+			return "RenderType[" + this.state + ']';
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -687,6 +713,10 @@ public abstract class RenderType extends RenderStateShard {
 
 		public int hashCode() {
 			return Objects.hash(new Object[]{this.states, this.outlineProperty});
+		}
+
+		public String toString() {
+			return "CompositeState[" + this.states + ", outlineProperty=" + this.outlineProperty + ']';
 		}
 
 		public static RenderType.CompositeState.CompositeStateBuilder builder() {
@@ -818,8 +848,18 @@ public abstract class RenderType extends RenderStateShard {
 
 	@Environment(EnvType.CLIENT)
 	static enum OutlineProperty {
-		NONE,
-		IS_OUTLINE,
-		AFFECTS_OUTLINE;
+		NONE("none"),
+		IS_OUTLINE("is_outline"),
+		AFFECTS_OUTLINE("affects_outline");
+
+		private final String name;
+
+		private OutlineProperty(String string2) {
+			this.name = string2;
+		}
+
+		public String toString() {
+			return this.name;
+		}
 	}
 }

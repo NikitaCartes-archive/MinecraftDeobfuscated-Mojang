@@ -15,6 +15,14 @@ public class Vec3 implements Position {
 	public final double y;
 	public final double z;
 
+	@Environment(EnvType.CLIENT)
+	public static Vec3 fromRGB24(int i) {
+		double d = (double)(i >> 16 & 0xFF) / 255.0;
+		double e = (double)(i >> 8 & 0xFF) / 255.0;
+		double f = (double)(i & 0xFF) / 255.0;
+		return new Vec3(d, e, f);
+	}
+
 	public Vec3(double d, double e, double f) {
 		this.x = d;
 		this.y = e;

@@ -29,6 +29,8 @@ public class BlockTags {
 	public static final Tag<Block> ACACIA_LOGS = bind("acacia_logs");
 	public static final Tag<Block> JUNGLE_LOGS = bind("jungle_logs");
 	public static final Tag<Block> SPRUCE_LOGS = bind("spruce_logs");
+	public static final Tag<Block> CRIMSON_STEMS = bind("crimson_stems");
+	public static final Tag<Block> WARPED_STEMS = bind("warped_stems");
 	public static final Tag<Block> BANNERS = bind("banners");
 	public static final Tag<Block> SAND = bind("sand");
 	public static final Tag<Block> STAIRS = bind("stairs");
@@ -64,6 +66,9 @@ public class BlockTags {
 	public static final Tag<Block> CROPS = bind("crops");
 	public static final Tag<Block> BEE_GROWABLES = bind("bee_growables");
 	public static final Tag<Block> PORTALS = bind("portals");
+	public static final Tag<Block> FIRE = bind("fire");
+	public static final Tag<Block> NYLIUM = bind("nylium");
+	public static final Tag<Block> WART_BLOCKS = bind("wart_blocks");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

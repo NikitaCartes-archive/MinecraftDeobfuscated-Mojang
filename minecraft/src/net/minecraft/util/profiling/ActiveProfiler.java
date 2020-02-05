@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -26,6 +27,7 @@ public class ActiveProfiler implements ProfileCollector {
 	private final LongList startTimes = new LongArrayList();
 	private final Map<String, ActiveProfiler.PathEntry> entries = Maps.<String, ActiveProfiler.PathEntry>newHashMap();
 	private final IntSupplier getTickTime;
+	private final LongSupplier getRealTime;
 	private final long startTimeNano;
 	private final int startTimeTicks;
 	private String path = "";
@@ -34,8 +36,9 @@ public class ActiveProfiler implements ProfileCollector {
 	private ActiveProfiler.PathEntry currentEntry;
 	private final boolean warn;
 
-	public ActiveProfiler(long l, IntSupplier intSupplier, boolean bl) {
-		this.startTimeNano = l;
+	public ActiveProfiler(LongSupplier longSupplier, IntSupplier intSupplier, boolean bl) {
+		this.startTimeNano = longSupplier.getAsLong();
+		this.getRealTime = longSupplier;
 		this.startTimeTicks = intSupplier.getAsInt();
 		this.getTickTime = intSupplier;
 		this.warn = bl;
@@ -143,7 +146,7 @@ public class ActiveProfiler implements ProfileCollector {
 
 	@Override
 	public ProfileResults getResults() {
-		return new FilledProfileResults(this.entries, this.startTimeNano, this.startTimeTicks, Util.getNanos(), this.getTickTime.getAsInt());
+		return new FilledProfileResults(this.entries, this.startTimeNano, this.startTimeTicks, this.getRealTime.getAsLong(), this.getTickTime.getAsInt());
 	}
 
 	static class PathEntry implements ProfilerPathEntry {

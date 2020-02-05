@@ -424,7 +424,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 							Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, m + j, n + k)).getBlock();
 							if (block == Blocks.CACTUS) {
 								blockPathTypes = BlockPathTypes.DANGER_CACTUS;
-							} else if (block == Blocks.FIRE || block == Blocks.LAVA) {
+							} else if (block.is(BlockTags.FIRE) || block == Blocks.LAVA) {
 								blockPathTypes = BlockPathTypes.DANGER_FIRE;
 							} else if (block == Blocks.SWEET_BERRY_BUSH) {
 								blockPathTypes = BlockPathTypes.DANGER_OTHER;
@@ -447,7 +447,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			return BlockPathTypes.OPEN;
 		} else if (block.is(BlockTags.TRAPDOORS) || block == Blocks.LILY_PAD) {
 			return BlockPathTypes.TRAPDOOR;
-		} else if (block == Blocks.FIRE) {
+		} else if (blockState.is(BlockTags.FIRE)) {
 			return BlockPathTypes.DAMAGE_FIRE;
 		} else if (block == Blocks.CACTUS) {
 			return BlockPathTypes.DAMAGE_CACTUS;

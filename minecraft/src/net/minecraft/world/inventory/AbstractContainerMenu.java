@@ -115,11 +115,11 @@ public abstract class AbstractContainerMenu {
 			ItemStack itemStack = ((Slot)this.slots.get(i)).getItem();
 			ItemStack itemStack2 = this.lastSlots.get(i);
 			if (!ItemStack.matches(itemStack2, itemStack)) {
-				itemStack2 = itemStack.copy();
-				this.lastSlots.set(i, itemStack2);
+				ItemStack itemStack3 = itemStack.copy();
+				this.lastSlots.set(i, itemStack3);
 
 				for (ContainerListener containerListener : this.containerListeners) {
-					containerListener.slotChanged(this, i, itemStack2);
+					containerListener.slotChanged(this, i, itemStack3);
 				}
 			}
 		}

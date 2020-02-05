@@ -88,7 +88,10 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.PURPLE_SHULKER_BOX,
 		Blocks.RED_SHULKER_BOX,
 		Blocks.WHITE_SHULKER_BOX,
-		Blocks.YELLOW_SHULKER_BOX
+		Blocks.YELLOW_SHULKER_BOX,
+		Blocks.PISTON,
+		Blocks.STICKY_PISTON,
+		Blocks.PISTON_HEAD
 	);
 
 	protected PickaxeItem(Tier tier, int i, float f, Item.Properties properties) {
@@ -99,8 +102,8 @@ public class PickaxeItem extends DiggerItem {
 	public boolean canDestroySpecial(BlockState blockState) {
 		Block block = blockState.getBlock();
 		int i = this.getTier().getLevel();
-		if (block == Blocks.OBSIDIAN) {
-			return i == 3;
+		if (block == Blocks.OBSIDIAN || block == Blocks.NETHERITE_BLOCK || block == Blocks.ANCIENT_DEBRIS) {
+			return i >= 3;
 		} else if (block == Blocks.DIAMOND_BLOCK
 			|| block == Blocks.DIAMOND_ORE
 			|| block == Blocks.EMERALD_ORE

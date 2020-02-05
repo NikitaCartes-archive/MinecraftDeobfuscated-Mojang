@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -19,9 +20,9 @@ public final class BirchForestBiome extends Biome {
 				.scale(0.2F)
 				.temperature(0.6F)
 				.downfall(0.6F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.1F, 0.2F, 0.0F, 0.0F, 1.0F)))
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
 		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));

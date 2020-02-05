@@ -989,6 +989,9 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
+			EntityType.HOGLIN, LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add(LootItem.lootTableItem(Items.ROTTEN_FLESH)))
+		);
+		this.add(
 			EntityType.ZOMBIE_VILLAGER,
 			LootTable.lootTable()
 				.withPool(

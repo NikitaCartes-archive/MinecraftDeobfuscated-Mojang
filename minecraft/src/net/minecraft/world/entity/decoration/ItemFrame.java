@@ -318,7 +318,7 @@ public class ItemFrame extends HangingEntity {
 		boolean bl2 = !itemStack.isEmpty();
 		if (!this.level.isClientSide) {
 			if (!bl) {
-				if (bl2) {
+				if (bl2 && !this.removed) {
 					this.setItem(itemStack);
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);

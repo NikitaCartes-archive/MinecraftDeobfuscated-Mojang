@@ -32,7 +32,7 @@ import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.SitGoal;
+import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -78,9 +78,8 @@ public class Wolf extends TamableAnimal {
 
 	@Override
 	protected void registerGoals() {
-		this.sitGoal = new SitGoal(this);
 		this.goalSelector.addGoal(1, new FloatGoal(this));
-		this.goalSelector.addGoal(2, this.sitGoal);
+		this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(3, new Wolf.WolfAvoidEntityGoal(this, Llama.class, 24.0F, 1.5, 1.5));
 		this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
 		this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0, true));
@@ -278,7 +277,7 @@ public class Wolf extends TamableAnimal {
 
 	@Override
 	public int getMaxHeadXRot() {
-		return this.isSitting() ? 20 : super.getMaxHeadXRot();
+		return this.isInSittingPose() ? 20 : super.getMaxHeadXRot();
 	}
 
 	@Override
@@ -287,10 +286,7 @@ public class Wolf extends TamableAnimal {
 			return false;
 		} else {
 			Entity entity = damageSource.getEntity();
-			if (this.sitGoal != null) {
-				this.sitGoal.wantToSit(false);
-			}
-
+			this.setOrderedToSit(false);
 			if (entity != null && !(entity instanceof Player) && !(entity instanceof AbstractArrow)) {
 				f = (f + 1.0F) / 2.0F;
 			}
@@ -344,7 +340,7 @@ public class Wolf extends TamableAnimal {
 				if (!(item instanceof DyeItem)) {
 					boolean bl = super.mobInteract(player, interactionHand);
 					if (!bl || this.isBaby()) {
-						this.sitGoal.wantToSit(!this.isSitting());
+						this.setOrderedToSit(!this.isOrderedToSit());
 					}
 
 					return bl;
@@ -361,7 +357,7 @@ public class Wolf extends TamableAnimal {
 				}
 
 				if (this.isOwnedBy(player) && !this.isFood(itemStack)) {
-					this.sitGoal.wantToSit(!this.isSitting());
+					this.setOrderedToSit(!this.isOrderedToSit());
 					this.jumping = false;
 					this.navigation.stop();
 					this.setTarget(null);
@@ -375,7 +371,7 @@ public class Wolf extends TamableAnimal {
 					this.tame(player);
 					this.navigation.stop();
 					this.setTarget(null);
-					this.sitGoal.wantToSit(true);
+					this.setOrderedToSit(true);
 					this.level.broadcastEntityEvent(this, (byte)7);
 				} else {
 					this.level.broadcastEntityEvent(this, (byte)6);
@@ -469,7 +465,7 @@ public class Wolf extends TamableAnimal {
 			if (!wolf.isTame()) {
 				return false;
 			} else {
-				return wolf.isSitting() ? false : this.isInLove() && wolf.isInLove();
+				return wolf.isInSittingPose() ? false : this.isInLove() && wolf.isInLove();
 			}
 		}
 	}

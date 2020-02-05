@@ -19,8 +19,7 @@ public class EndMidlandsBiome extends Biome {
 				.scale(0.2F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(10518688).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.END_CITY.configured(FeatureConfiguration.NONE));

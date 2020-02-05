@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -30,8 +31,7 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 	public int shakeTime;
 	protected LivingEntity owner;
 	private UUID ownerId;
-	private Entity entityToIgnore;
-	private int timeToIgnore;
+	private boolean leftOwner;
 
 	protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, Level level) {
 		super(entityType, level);
@@ -112,27 +112,25 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		}
 
 		AABB aABB = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0);
+		if (this.owner == null) {
+			this.leftOwner = true;
+		} else if (!this.leftOwner) {
+			boolean bl = false;
 
-		for (Entity entity : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
-			if (entity == this.entityToIgnore) {
-				this.timeToIgnore++;
-				break;
+			for (Entity entity : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
+				if (this.isEntityOrVehicle(entity, this.owner)) {
+					bl = true;
+					break;
+				}
 			}
 
-			if (this.owner != null && this.tickCount < 2 && this.entityToIgnore == null) {
-				this.entityToIgnore = entity;
-				this.timeToIgnore = 3;
-				break;
+			if (!bl) {
+				this.leftOwner = true;
 			}
 		}
 
-		HitResult hitResult = ProjectileUtil.getHitResult(
-			this, aABB, entity -> !entity.isSpectator() && entity.isPickable() && entity != this.entityToIgnore, ClipContext.Block.OUTLINE, true
-		);
-		if (this.entityToIgnore != null && this.timeToIgnore-- <= 0) {
-			this.entityToIgnore = null;
-		}
-
+		Predicate<Entity> predicate = entityx -> !entityx.isSpectator() && entityx.isPickable() && (this.leftOwner || !this.isEntityOrVehicle(entityx, this.owner));
+		HitResult hitResult = ProjectileUtil.getHitResult(this, aABB, predicate, ClipContext.Block.OUTLINE, true);
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			if (hitResult.getType() == HitResult.Type.BLOCK && this.level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.NETHER_PORTAL) {
 				this.handleInsidePortal(((BlockHitResult)hitResult).getBlockPos());
@@ -186,6 +184,10 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		}
 
 		this.setPos(d, e, f);
+	}
+
+	private boolean isEntityOrVehicle(Entity entity, Entity entity2) {
+		return entity == entity2 || entity.getPassengers().contains(entity2);
 	}
 
 	protected float getGravity() {

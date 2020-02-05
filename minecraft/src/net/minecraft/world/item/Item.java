@@ -25,6 +25,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -64,6 +65,7 @@ public class Item implements ItemLike {
 	private final Rarity rarity;
 	private final int maxStackSize;
 	private final int maxDamage;
+	private final boolean isFireResistant;
 	private final Item craftingRemainingItem;
 	@Nullable
 	private String descriptionId;
@@ -93,6 +95,7 @@ public class Item implements ItemLike {
 		this.maxDamage = properties.maxDamage;
 		this.maxStackSize = properties.maxStackSize;
 		this.foodProperties = properties.foodProperties;
+		this.isFireResistant = properties.isFireResistant;
 		if (this.maxDamage > 0) {
 			this.addProperty(new ResourceLocation("damaged"), PROPERTY_DAMAGED);
 			this.addProperty(new ResourceLocation("damage"), PROPERTY_DAMAGE);
@@ -353,6 +356,14 @@ public class Item implements ItemLike {
 		return SoundEvents.GENERIC_EAT;
 	}
 
+	public boolean isFireResistant() {
+		return this.isFireResistant;
+	}
+
+	public boolean canBeHurtBy(DamageSource damageSource) {
+		return !this.isFireResistant || !damageSource.isFire();
+	}
+
 	public static class Properties {
 		private int maxStackSize = 64;
 		private int maxDamage;
@@ -360,6 +371,7 @@ public class Item implements ItemLike {
 		private CreativeModeTab category;
 		private Rarity rarity = Rarity.COMMON;
 		private FoodProperties foodProperties;
+		private boolean isFireResistant;
 
 		public Item.Properties food(FoodProperties foodProperties) {
 			this.foodProperties = foodProperties;
@@ -397,6 +409,11 @@ public class Item implements ItemLike {
 
 		public Item.Properties rarity(Rarity rarity) {
 			this.rarity = rarity;
+			return this;
+		}
+
+		public Item.Properties fireResistant() {
+			this.isFireResistant = true;
 			return this;
 		}
 	}

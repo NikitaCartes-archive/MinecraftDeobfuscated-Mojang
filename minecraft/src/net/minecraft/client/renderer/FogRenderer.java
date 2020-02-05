@@ -71,25 +71,27 @@ public class FogRenderer {
 			float v = (float)vec3.x;
 			float w = (float)vec3.y;
 			float x = (float)vec3.z;
-			Vec3 vec32 = clientLevel.getFogColor(f);
+			int n = clientLevel.getBiome(camera.getBlockPosition()).getFogColor();
+			float y = Mth.cos(clientLevel.getTimeOfDay(f) * (float) (Math.PI * 2)) * 2.0F + 0.5F;
+			Vec3 vec32 = clientLevel.getDimension().getBrightnessDependentFogColor(n, Mth.clamp(y, 0.0F, 1.0F));
 			fogRed = (float)vec32.x;
 			fogGreen = (float)vec32.y;
 			fogBlue = (float)vec32.z;
 			if (i >= 4) {
-				float y = Mth.sin(clientLevel.getSunAngle(f)) > 0.0F ? -1.0F : 1.0F;
-				Vector3f vector3f = new Vector3f(y, 0.0F, 0.0F);
-				float z = camera.getLookVector().dot(vector3f);
-				if (z < 0.0F) {
-					z = 0.0F;
+				float z = Mth.sin(clientLevel.getSunAngle(f)) > 0.0F ? -1.0F : 1.0F;
+				Vector3f vector3f = new Vector3f(z, 0.0F, 0.0F);
+				float r = camera.getLookVector().dot(vector3f);
+				if (r < 0.0F) {
+					r = 0.0F;
 				}
 
-				if (z > 0.0F) {
+				if (r > 0.0F) {
 					float[] fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f);
 					if (fs != null) {
-						z *= fs[3];
-						fogRed = fogRed * (1.0F - z) + fs[0] * z;
-						fogGreen = fogGreen * (1.0F - z) + fs[1] * z;
-						fogBlue = fogBlue * (1.0F - z) + fs[2] * z;
+						r *= fs[3];
+						fogRed = fogRed * (1.0F - r) + fs[0] * r;
+						fogGreen = fogGreen * (1.0F - r) + fs[1] * r;
+						fogBlue = fogBlue * (1.0F - r) + fs[2] * r;
 					}
 				}
 			}
@@ -97,21 +99,21 @@ public class FogRenderer {
 			fogRed = fogRed + (v - fogRed) * u;
 			fogGreen = fogGreen + (w - fogGreen) * u;
 			fogBlue = fogBlue + (x - fogBlue) * u;
-			float yx = clientLevel.getRainLevel(f);
-			if (yx > 0.0F) {
-				float aa = 1.0F - yx * 0.5F;
-				float zx = 1.0F - yx * 0.4F;
-				fogRed *= aa;
-				fogGreen *= aa;
-				fogBlue *= zx;
+			float zx = clientLevel.getRainLevel(f);
+			if (zx > 0.0F) {
+				float h = 1.0F - zx * 0.5F;
+				float rx = 1.0F - zx * 0.4F;
+				fogRed *= h;
+				fogGreen *= h;
+				fogBlue *= rx;
 			}
 
-			float aa = clientLevel.getThunderLevel(f);
-			if (aa > 0.0F) {
-				float zx = 1.0F - aa * 0.5F;
-				fogRed *= zx;
-				fogGreen *= zx;
-				fogBlue *= zx;
+			float h = clientLevel.getThunderLevel(f);
+			if (h > 0.0F) {
+				float rx = 1.0F - h * 0.5F;
+				fogRed *= rx;
+				fogGreen *= rx;
+				fogBlue *= rx;
 			}
 
 			biomeChangedTime = -1L;

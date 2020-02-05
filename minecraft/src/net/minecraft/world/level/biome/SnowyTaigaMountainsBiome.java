@@ -19,8 +19,7 @@ public final class SnowyTaigaMountainsBiome extends Biome {
 				.scale(0.4F)
 				.temperature(-0.5F)
 				.downfall(0.4F)
-				.waterColor(4020182)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).build())
 				.parent("snowy_taiga")
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

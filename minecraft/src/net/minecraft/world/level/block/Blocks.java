@@ -1,8 +1,10 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.AcaciaTreeGrower;
 import net.minecraft.world.level.block.grower.BirchTreeGrower;
@@ -15,6 +17,7 @@ import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
@@ -263,7 +266,7 @@ public class Blocks {
 	public static final Block DETECTOR_RAIL = register(
 		"detector_rail", new DetectorRailBlock(Block.Properties.of(Material.DECORATION).noCollission().strength(0.7F).sound(SoundType.METAL))
 	);
-	public static final Block STICKY_PISTON = register("sticky_piston", new PistonBaseBlock(true, Block.Properties.of(Material.PISTON).strength(0.5F)));
+	public static final Block STICKY_PISTON = register("sticky_piston", new PistonBaseBlock(true, Block.Properties.of(Material.PISTON).strength(1.5F)));
 	public static final Block COBWEB = register("cobweb", new WebBlock(Block.Properties.of(Material.WEB).noCollission().strength(4.0F)));
 	public static final Block GRASS = register(
 		"grass", new TallGrassBlock(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.GRASS))
@@ -280,8 +283,8 @@ public class Blocks {
 	public static final Block TALL_SEAGRASS = register(
 		"tall_seagrass", new TallSeagrass(Block.Properties.of(Material.REPLACEABLE_WATER_PLANT).noCollission().instabreak().sound(SoundType.WET_GRASS))
 	);
-	public static final Block PISTON = register("piston", new PistonBaseBlock(false, Block.Properties.of(Material.PISTON).strength(0.5F)));
-	public static final Block PISTON_HEAD = register("piston_head", new PistonHeadBlock(Block.Properties.of(Material.PISTON).strength(0.5F).noDrops()));
+	public static final Block PISTON = register("piston", new PistonBaseBlock(false, Block.Properties.of(Material.PISTON).strength(1.5F)));
+	public static final Block PISTON_HEAD = register("piston_head", new PistonHeadBlock(Block.Properties.of(Material.PISTON).strength(1.5F).noDrops()));
 	public static final Block WHITE_WOOL = register(
 		"white_wool", new Block(Block.Properties.of(Material.WOOL, MaterialColor.SNOW).strength(0.8F).sound(SoundType.WOOL))
 	);
@@ -390,14 +393,23 @@ public class Blocks {
 	public static final Block MOSSY_COBBLESTONE = register("mossy_cobblestone", new Block(Block.Properties.of(Material.STONE).strength(2.0F, 6.0F)));
 	public static final Block OBSIDIAN = register("obsidian", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).strength(50.0F, 1200.0F)));
 	public static final Block TORCH = register(
-		"torch", new TorchBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(14).sound(SoundType.WOOD))
+		"torch", new TorchBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(14).sound(SoundType.WOOD), ParticleTypes.FLAME)
 	);
 	public static final Block WALL_TORCH = register(
-		"wall_torch", new WallTorchBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(14).sound(SoundType.WOOD).dropsLike(TORCH))
+		"wall_torch",
+		new WallTorchBlock(
+			Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(14).sound(SoundType.WOOD).dropsLike(TORCH), ParticleTypes.FLAME
+		)
 	);
 	public static final Block FIRE = register(
 		"fire",
 		new FireBlock(Block.Properties.of(Material.FIRE, MaterialColor.FIRE).noCollission().randomTicks().instabreak().lightLevel(15).sound(SoundType.WOOL).noDrops())
+	);
+	public static final Block SOUL_FIRE = register(
+		"soul_fire",
+		new SoulFireBlock(
+			Block.Properties.of(Material.FIRE, MaterialColor.COLOR_LIGHT_BLUE).noCollission().randomTicks().instabreak().lightLevel(10).sound(SoundType.WOOL).noDrops()
+		)
 	);
 	public static final Block SPAWNER = register(
 		"spawner", new SpawnerBlock(Block.Properties.of(Material.STONE).strength(5.0F).sound(SoundType.METAL).noOcclusion())
@@ -570,10 +582,29 @@ public class Blocks {
 	public static final Block PUMPKIN = register(
 		"pumpkin", new PumpkinBlock(Block.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD))
 	);
-	public static final Block NETHERRACK = register("netherrack", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(0.4F)));
+	public static final Block NETHERRACK = register(
+		"netherrack", new NetherrackBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(0.4F).sound(SoundType.NETHERRACK))
+	);
 	public static final Block SOUL_SAND = register(
 		"soul_sand",
-		new SoulsandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5F).speedFactor(0.4F).sound(SoundType.SAND))
+		new SoulSandBlock(Block.Properties.of(Material.SAND, MaterialColor.COLOR_BROWN).randomTicks().strength(0.5F).speedFactor(0.4F).sound(SoundType.SOUL_SAND))
+	);
+	public static final Block SOUL_SOIL = register(
+		"soul_soil", new Block(Block.Properties.of(Material.DIRT, MaterialColor.COLOR_BROWN).strength(0.5F).sound(SoundType.SOUL_SOIL))
+	);
+	public static final Block BASALT = register(
+		"basalt", new RotatedPillarBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).strength(1.25F, 4.2F).sound(SoundType.BASALT))
+	);
+	public static final Block SOUL_FIRE_TORCH = register(
+		"soul_fire_torch",
+		new TorchBlock(Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(10).sound(SoundType.WOOD), ParticleTypes.SOUL_FIRE_FLAME)
+	);
+	public static final Block SOUL_FIRE_WALL_TORCH = register(
+		"soul_fire_wall_torch",
+		new WallTorchBlock(
+			Block.Properties.of(Material.DECORATION).noCollission().instabreak().lightLevel(10).sound(SoundType.WOOD).dropsLike(SOUL_FIRE_TORCH),
+			ParticleTypes.SOUL_FIRE_FLAME
+		)
 	);
 	public static final Block GLOWSTONE = register(
 		"glowstone", new Block(Block.Properties.of(Material.GLASS, MaterialColor.SAND).strength(0.3F).sound(SoundType.GLASS).lightLevel(15))
@@ -741,9 +772,11 @@ public class Blocks {
 	public static final Block LILY_PAD = register(
 		"lily_pad", new WaterlilyBlock(Block.Properties.of(Material.PLANT).instabreak().sound(SoundType.GRASS).noOcclusion())
 	);
-	public static final Block NETHER_BRICKS = register("nether_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F)));
+	public static final Block NETHER_BRICKS = register(
+		"nether_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS))
+	);
 	public static final Block NETHER_BRICK_FENCE = register(
-		"nether_brick_fence", new FenceBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F))
+		"nether_brick_fence", new FenceBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS))
 	);
 	public static final Block NETHER_BRICK_STAIRS = register(
 		"nether_brick_stairs", new StairBlock(NETHER_BRICKS.defaultBlockState(), Block.Properties.copy(NETHER_BRICKS))
@@ -957,7 +990,7 @@ public class Blocks {
 		"redstone_block", new PoweredBlock(Block.Properties.of(Material.METAL, MaterialColor.FIRE).strength(5.0F, 6.0F).sound(SoundType.METAL))
 	);
 	public static final Block NETHER_QUARTZ_ORE = register(
-		"nether_quartz_ore", new OreBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(3.0F, 3.0F))
+		"nether_quartz_ore", new OreBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(3.0F, 3.0F).sound(SoundType.NETHER_ORE))
 	);
 	public static final Block HOPPER = register(
 		"hopper", new HopperBlock(Block.Properties.of(Material.METAL, MaterialColor.STONE).strength(3.0F, 4.8F).sound(SoundType.METAL).noOcclusion())
@@ -1368,7 +1401,7 @@ public class Blocks {
 		"stone_brick_slab", new SlabBlock(Block.Properties.of(Material.STONE, MaterialColor.STONE).strength(2.0F, 6.0F))
 	);
 	public static final Block NETHER_BRICK_SLAB = register(
-		"nether_brick_slab", new SlabBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F))
+		"nether_brick_slab", new SlabBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS))
 	);
 	public static final Block QUARTZ_SLAB = register("quartz_slab", new SlabBlock(Block.Properties.of(Material.STONE, MaterialColor.QUARTZ).strength(2.0F, 6.0F)));
 	public static final Block RED_SANDSTONE_SLAB = register(
@@ -1477,12 +1510,14 @@ public class Blocks {
 		"magma_block", new MagmaBlock(Block.Properties.of(Material.STONE, MaterialColor.NETHER).lightLevel(3).randomTicks().strength(0.5F))
 	);
 	public static final Block NETHER_WART_BLOCK = register(
-		"nether_wart_block", new Block(Block.Properties.of(Material.GRASS, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.WOOD))
+		"nether_wart_block", new Block(Block.Properties.of(Material.GRASS, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.WART_BLOCK))
 	);
 	public static final Block RED_NETHER_BRICKS = register(
-		"red_nether_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F))
+		"red_nether_bricks", new Block(Block.Properties.of(Material.STONE, MaterialColor.NETHER).strength(2.0F, 6.0F).sound(SoundType.NETHER_BRICKS))
 	);
-	public static final Block BONE_BLOCK = register("bone_block", new RotatedPillarBlock(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(2.0F)));
+	public static final Block BONE_BLOCK = register(
+		"bone_block", new RotatedPillarBlock(Block.Properties.of(Material.STONE, MaterialColor.SAND).strength(2.0F).sound(SoundType.BONE_BLOCK))
+	);
 	public static final Block STRUCTURE_VOID = register(
 		"structure_void", new StructureVoidBlock(Block.Properties.of(Material.STRUCTURAL_AIR).noCollission().noDrops())
 	);
@@ -1979,12 +2014,150 @@ public class Blocks {
 	public static final Block LANTERN = register(
 		"lantern", new Lantern(Block.Properties.of(Material.METAL).strength(3.5F).sound(SoundType.LANTERN).lightLevel(15).noOcclusion())
 	);
+	public static final Block SOUL_FIRE_LANTERN = register(
+		"soul_fire_lantern", new Lantern(Block.Properties.of(Material.METAL).strength(3.5F).sound(SoundType.LANTERN).lightLevel(10).noOcclusion())
+	);
 	public static final Block CAMPFIRE = register(
 		"campfire",
 		new CampfireBlock(Block.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F).sound(SoundType.WOOD).lightLevel(15).randomTicks().noOcclusion())
 	);
 	public static final Block SWEET_BERRY_BUSH = register(
 		"sweet_berry_bush", new SweetBerryBushBlock(Block.Properties.of(Material.PLANT).randomTicks().noCollission().sound(SoundType.SWEET_BERRY_BUSH))
+	);
+	public static final Block WARPED_STEM = register(
+		"warped_stem", new LogBlock(MaterialColor.COLOR_CYAN, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.STEM))
+	);
+	public static final Block STRIPPED_WARPED_STEM = register(
+		"stripped_warped_stem",
+		new LogBlock(MaterialColor.COLOR_CYAN, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.STEM))
+	);
+	public static final Block WARPED_NYLIUM = register(
+		"warped_nylium", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.NYLIUM))
+	);
+	public static final Block WARPED_FUNGI = register(
+		"warped_fungi",
+		new FungiBlock(
+			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGI),
+			() -> Feature.HUGE_FUNGI.configured(BiomeDefaultFeatures.HUGE_WARPED_FUNGI_CONFIG)
+		)
+	);
+	public static final Block WARPED_WART_BLOCK = register(
+		"warped_wart_block", new Block(Block.Properties.of(Material.GRASS, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.WART_BLOCK))
+	);
+	public static final Block WARPED_ROOTS = register(
+		"warped_roots", new RootsBlock(Block.Properties.of(Material.PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.ROOTS))
+	);
+	public static final Block NETHER_SPROUTS = register(
+		"nether_sprouts",
+		new NetherSproutsBlock(Block.Properties.of(Material.PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.NETHER_SPROUTS))
+	);
+	public static final Block CRIMSON_STEM = register(
+		"crimson_stem", new LogBlock(MaterialColor.COLOR_RED, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.STEM))
+	);
+	public static final Block STRIPPED_CRIMSON_STEM = register(
+		"stripped_crimson_stem",
+		new LogBlock(MaterialColor.COLOR_RED, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.STEM))
+	);
+	public static final Block CRIMSON_NYLIUM = register(
+		"crimson_nylium", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.NYLIUM))
+	);
+	public static final Block CRIMSON_FUNGI = register(
+		"crimson_fungi",
+		new FungiBlock(
+			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGI),
+			() -> Feature.HUGE_FUNGI.configured(BiomeDefaultFeatures.HUGE_CRIMSON_FUNGI_CONFIG)
+		)
+	);
+	public static final Block SHROOMLIGHT = register(
+		"shroomlight", new Block(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.SHROOMLIGHT).lightLevel(15))
+	);
+	public static final Block WEEPING_VINES = register(
+		"weeping_vines", new WeepingVines(Block.Properties.of(Material.PLANT).randomTicks().noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+	);
+	public static final Block WEEPING_VINES_PLANT = register(
+		"weeping_vines_plant",
+		new WeepingVinesPlant((WeepingVines)WEEPING_VINES, Block.Properties.of(Material.PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+	);
+	public static final Block CRIMSON_ROOTS = register(
+		"crimson_roots", new RootsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))
+	);
+	public static final Block CRIMSON_PLANKS = register(
+		"crimson_planks", new Block(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block WARPED_PLANKS = register(
+		"warped_planks", new Block(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block CRIMSON_SLAB = register(
+		"crimson_slab", new SlabBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block WARPED_SLAB = register(
+		"warped_slab", new SlabBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block CRIMSON_PRESSURE_PLATE = register(
+		"crimson_pressure_plate",
+		new PressurePlateBlock(
+			PressurePlateBlock.Sensitivity.EVERYTHING,
+			Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).noCollission().strength(0.5F).sound(SoundType.WOOD)
+		)
+	);
+	public static final Block WARPED_PRESSURE_PLATE = register(
+		"warped_pressure_plate",
+		new PressurePlateBlock(
+			PressurePlateBlock.Sensitivity.EVERYTHING,
+			Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).noCollission().strength(0.5F).sound(SoundType.WOOD)
+		)
+	);
+	public static final Block CRIMSON_FENCE = register(
+		"crimson_fence", new FenceBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block WARPED_FENCE = register(
+		"warped_fence", new FenceBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block CRIMSON_TRAPDOOR = register(
+		"crimson_trapdoor", new TrapDoorBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).strength(3.0F).sound(SoundType.WOOD).noOcclusion())
+	);
+	public static final Block WARPED_TRAPDOOR = register(
+		"warped_trapdoor", new TrapDoorBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).strength(3.0F).sound(SoundType.WOOD).noOcclusion())
+	);
+	public static final Block CRIMSON_FENCE_GATE = register(
+		"crimson_fence_gate", new FenceGateBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block WARPED_FENCE_GATE = register(
+		"warped_fence_gate", new FenceGateBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).strength(2.0F, 3.0F).sound(SoundType.WOOD))
+	);
+	public static final Block CRIMSON_STAIRS = register(
+		"crimson_stairs", new StairBlock(CRIMSON_PLANKS.defaultBlockState(), Block.Properties.copy(CRIMSON_PLANKS))
+	);
+	public static final Block WARPED_STAIRS = register("warped_stairs", new StairBlock(WARPED_PLANKS.defaultBlockState(), Block.Properties.copy(WARPED_PLANKS)));
+	public static final Block CRIMSON_BUTTON = register(
+		"crimson_button", new WoodButtonBlock(Block.Properties.of(Material.DECORATION).noCollission().strength(0.5F).sound(SoundType.WOOD))
+	);
+	public static final Block WARPED_BUTTON = register(
+		"warped_button", new WoodButtonBlock(Block.Properties.of(Material.DECORATION).noCollission().strength(0.5F).sound(SoundType.WOOD))
+	);
+	public static final Block CRIMSON_DOOR = register(
+		"crimson_door", new DoorBlock(Block.Properties.of(Material.NETHER_WOOD, CRIMSON_PLANKS.materialColor).strength(3.0F).sound(SoundType.WOOD).noOcclusion())
+	);
+	public static final Block WARPED_DOOR = register(
+		"warped_door", new DoorBlock(Block.Properties.of(Material.NETHER_WOOD, WARPED_PLANKS.materialColor).strength(3.0F).sound(SoundType.WOOD).noOcclusion())
+	);
+	public static final Block CRIMSON_SIGN = register(
+		"crimson_sign",
+		new StandingSignBlock(Block.Properties.of(Material.NETHER_WOOD, MaterialColor.NETHER).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.CRIMSON)
+	);
+	public static final Block WARPED_SIGN = register(
+		"warped_sign",
+		new StandingSignBlock(
+			Block.Properties.of(Material.NETHER_WOOD, MaterialColor.COLOR_CYAN).noCollission().strength(1.0F).sound(SoundType.WOOD), WoodType.WARPED
+		)
+	);
+	public static final Block CRIMSON_WALL_SIGN = register(
+		"crimson_wall_sign",
+		new WallSignBlock(Block.Properties.of(Material.NETHER_WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(CRIMSON_SIGN), WoodType.CRIMSON)
+	);
+	public static final Block WARPED_WALL_SIGN = register(
+		"warped_wall_sign",
+		new WallSignBlock(Block.Properties.of(Material.NETHER_WOOD).noCollission().strength(1.0F).sound(SoundType.WOOD).dropsLike(WARPED_SIGN), WoodType.WARPED)
 	);
 	public static final Block STRUCTURE_BLOCK = register(
 		"structure_block", new StructureBlock(Block.Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).strength(-1.0F, 3600000.0F).noDrops())
@@ -2001,6 +2174,12 @@ public class Blocks {
 	);
 	public static final Block HONEYCOMB_BLOCK = register(
 		"honeycomb_block", new Block(Block.Properties.of(Material.CLAY, MaterialColor.COLOR_ORANGE).strength(0.6F).sound(SoundType.CORAL_BLOCK))
+	);
+	public static final Block NETHERITE_BLOCK = register(
+		"netherite_block", new Block(Block.Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).strength(50.0F, 1200.0F).sound(SoundType.NETHERITE_BLOCK))
+	);
+	public static final Block ANCIENT_DEBRIS = register(
+		"ancient_debris", new Block(Block.Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).strength(30.0F, 1200.0F).sound(SoundType.ANCIENT_DEBRIS))
 	);
 
 	private static Block register(String string, Block block) {

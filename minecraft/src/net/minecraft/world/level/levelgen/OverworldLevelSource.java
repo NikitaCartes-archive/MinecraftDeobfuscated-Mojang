@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen;
 
 import java.util.List;
+import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -37,7 +38,7 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	public OverworldLevelSource(LevelAccessor levelAccessor, BiomeSource biomeSource, OverworldGeneratorSettings overworldGeneratorSettings) {
 		super(levelAccessor, biomeSource, 4, 8, 256, overworldGeneratorSettings, true);
 		this.random.consumeCount(2620);
-		this.depthNoise = new PerlinNoise(this.random, 15, 0);
+		this.depthNoise = new PerlinNoise(this.random, IntStream.rangeClosed(-15, 0));
 		this.isAmplified = levelAccessor.getLevelData().getGeneratorType() == LevelType.AMPLIFIED;
 	}
 

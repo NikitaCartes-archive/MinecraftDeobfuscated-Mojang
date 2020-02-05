@@ -46,7 +46,7 @@ public class SimpleCookingRecipeBuilder {
 		return cooking(ingredient, itemLike, f, i, RecipeSerializer.SMELTING_RECIPE);
 	}
 
-	public SimpleCookingRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+	public SimpleCookingRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
 		this.advancement.addCriterion(string, criterionTriggerInstance);
 		return this;
 	}

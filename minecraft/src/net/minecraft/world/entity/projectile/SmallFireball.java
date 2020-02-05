@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -46,7 +46,7 @@ public class SmallFireball extends Fireball {
 				BlockHitResult blockHitResult = (BlockHitResult)hitResult;
 				BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
 				if (this.level.isEmptyBlock(blockPos)) {
-					this.level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
+					this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
 				}
 			}
 

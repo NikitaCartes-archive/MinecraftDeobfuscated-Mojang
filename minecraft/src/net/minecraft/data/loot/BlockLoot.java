@@ -511,6 +511,8 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.STRIPPED_ACACIA_LOG);
 		this.dropSelf(Blocks.STRIPPED_DARK_OAK_LOG);
 		this.dropSelf(Blocks.STRIPPED_OAK_LOG);
+		this.dropSelf(Blocks.STRIPPED_WARPED_STEM);
+		this.dropSelf(Blocks.STRIPPED_CRIMSON_STEM);
 		this.dropSelf(Blocks.OAK_WOOD);
 		this.dropSelf(Blocks.SPRUCE_WOOD);
 		this.dropSelf(Blocks.BIRCH_WOOD);
@@ -601,6 +603,9 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.PUMPKIN);
 		this.dropSelf(Blocks.NETHERRACK);
 		this.dropSelf(Blocks.SOUL_SAND);
+		this.dropSelf(Blocks.SOUL_SOIL);
+		this.dropSelf(Blocks.BASALT);
+		this.dropSelf(Blocks.SOUL_FIRE_TORCH);
 		this.dropSelf(Blocks.CARVED_PUMPKIN);
 		this.dropSelf(Blocks.JACK_O_LANTERN);
 		this.dropSelf(Blocks.REPEATER);
@@ -819,11 +824,43 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.SCAFFOLDING);
 		this.dropSelf(Blocks.HONEY_BLOCK);
 		this.dropSelf(Blocks.HONEYCOMB_BLOCK);
+		this.dropSelf(Blocks.WARPED_STEM);
+		this.dropSelf(Blocks.WARPED_NYLIUM);
+		this.dropSelf(Blocks.WARPED_FUNGI);
+		this.dropSelf(Blocks.WARPED_WART_BLOCK);
+		this.dropSelf(Blocks.WARPED_ROOTS);
+		this.dropSelf(Blocks.CRIMSON_STEM);
+		this.dropSelf(Blocks.CRIMSON_NYLIUM);
+		this.dropSelf(Blocks.CRIMSON_FUNGI);
+		this.dropSelf(Blocks.SHROOMLIGHT);
+		this.dropSelf(Blocks.CRIMSON_ROOTS);
+		this.dropSelf(Blocks.WEEPING_VINES);
+		this.dropSelf(Blocks.CRIMSON_PLANKS);
+		this.dropSelf(Blocks.WARPED_PLANKS);
+		this.dropSelf(Blocks.WARPED_PRESSURE_PLATE);
+		this.dropSelf(Blocks.WARPED_FENCE);
+		this.dropSelf(Blocks.WARPED_TRAPDOOR);
+		this.dropSelf(Blocks.WARPED_FENCE_GATE);
+		this.dropSelf(Blocks.WARPED_STAIRS);
+		this.dropSelf(Blocks.WARPED_BUTTON);
+		this.dropSelf(Blocks.WARPED_DOOR);
+		this.dropSelf(Blocks.WARPED_SIGN);
+		this.dropSelf(Blocks.CRIMSON_PRESSURE_PLATE);
+		this.dropSelf(Blocks.CRIMSON_FENCE);
+		this.dropSelf(Blocks.CRIMSON_TRAPDOOR);
+		this.dropSelf(Blocks.CRIMSON_FENCE_GATE);
+		this.dropSelf(Blocks.CRIMSON_STAIRS);
+		this.dropSelf(Blocks.CRIMSON_BUTTON);
+		this.dropSelf(Blocks.CRIMSON_DOOR);
+		this.dropSelf(Blocks.CRIMSON_SIGN);
+		this.dropSelf(Blocks.NETHERITE_BLOCK);
+		this.dropSelf(Blocks.ANCIENT_DEBRIS);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
 		this.dropOther(Blocks.KELP_PLANT, Blocks.KELP);
 		this.dropOther(Blocks.BAMBOO_SAPLING, Blocks.BAMBOO);
+		this.dropOther(Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES);
 		this.add(Blocks.STONE, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.COBBLESTONE));
 		this.add(Blocks.GRASS_BLOCK, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DIRT));
 		this.add(Blocks.PODZOL, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DIRT));
@@ -898,6 +935,8 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.RED_NETHER_BRICK_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.POLISHED_ANDESITE_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.DIORITE_SLAB, BlockLoot::createSlabItemTable);
+		this.add(Blocks.CRIMSON_SLAB, BlockLoot::createSlabItemTable);
+		this.add(Blocks.WARPED_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.ACACIA_DOOR, blockx -> createSinglePropConditionTable(blockx, DoorBlock.HALF, DoubleBlockHalf.LOWER));
 		this.add(Blocks.BIRCH_DOOR, blockx -> createSinglePropConditionTable(blockx, DoorBlock.HALF, DoubleBlockHalf.LOWER));
 		this.add(Blocks.DARK_OAK_DOOR, blockx -> createSinglePropConditionTable(blockx, DoorBlock.HALF, DoubleBlockHalf.LOWER));
@@ -1032,6 +1071,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.STONECUTTER, BlockLoot::createNameableBlockEntityTable);
 		this.add(Blocks.BELL, BlockLoot::createSingleItemTable);
 		this.add(Blocks.LANTERN, BlockLoot::createSingleItemTable);
+		this.add(Blocks.SOUL_FIRE_LANTERN, BlockLoot::createSingleItemTable);
 		this.add(Blocks.SHULKER_BOX, BlockLoot::createShulkerBoxDrop);
 		this.add(Blocks.BLACK_SHULKER_BOX, BlockLoot::createShulkerBoxDrop);
 		this.add(Blocks.BLUE_SHULKER_BOX, BlockLoot::createShulkerBoxDrop);
@@ -1180,6 +1220,12 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 					(LootPoolEntryContainer.Builder<?>)applyExplosionDecay(
 						blockx, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(RandomValueBounds.between(0.0F, 2.0F)))
 					)
+				)
+		);
+		this.add(
+			Blocks.NETHER_SPROUTS,
+			blockx -> createSilkTouchOrShearsDispatchTable(
+					blockx, (LootPoolEntryContainer.Builder<?>)applyExplosionCondition(blockx, LootItem.lootTableItem(Blocks.NETHER_SPROUTS))
 				)
 		);
 		this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);

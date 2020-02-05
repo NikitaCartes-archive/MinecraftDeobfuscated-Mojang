@@ -46,7 +46,7 @@ public class Endermite extends Monster {
 
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.1F;
+		return 0.13F;
 	}
 
 	@Override

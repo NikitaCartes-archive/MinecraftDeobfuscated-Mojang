@@ -19,8 +19,7 @@ public final class WoodedHillsBiome extends Biome {
 				.scale(0.3F)
 				.temperature(0.7F)
 				.downfall(0.8F)
-				.waterColor(4159204)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

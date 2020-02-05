@@ -19,7 +19,7 @@ public class Minecart extends AbstractMinecart {
 		if (player.isSecondaryUseActive()) {
 			return false;
 		} else if (this.isVehicle()) {
-			return true;
+			return false;
 		} else {
 			if (!this.level.isClientSide) {
 				player.startRiding(this);

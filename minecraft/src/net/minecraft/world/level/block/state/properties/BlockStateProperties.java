@@ -48,6 +48,10 @@ public class BlockStateProperties {
 	public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.create("facing", Direction.Plane.HORIZONTAL);
 	public static final EnumProperty<AttachFace> ATTACH_FACE = EnumProperty.create("face", AttachFace.class);
 	public static final EnumProperty<BellAttachType> BELL_ATTACHMENT = EnumProperty.create("attachment", BellAttachType.class);
+	public static final EnumProperty<WallSide> EAST_WALL = EnumProperty.create("east", WallSide.class);
+	public static final EnumProperty<WallSide> NORTH_WALL = EnumProperty.create("north", WallSide.class);
+	public static final EnumProperty<WallSide> SOUTH_WALL = EnumProperty.create("south", WallSide.class);
+	public static final EnumProperty<WallSide> WEST_WALL = EnumProperty.create("west", WallSide.class);
 	public static final EnumProperty<RedstoneSide> EAST_REDSTONE = EnumProperty.create("east", RedstoneSide.class);
 	public static final EnumProperty<RedstoneSide> NORTH_REDSTONE = EnumProperty.create("north", RedstoneSide.class);
 	public static final EnumProperty<RedstoneSide> SOUTH_REDSTONE = EnumProperty.create("south", RedstoneSide.class);

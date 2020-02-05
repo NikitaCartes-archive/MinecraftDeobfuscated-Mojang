@@ -41,7 +41,7 @@ public class PatrolSpawner {
 						Player player = (Player)serverLevel.players().get(random.nextInt(i));
 						if (player.isSpectator()) {
 							return 0;
-						} else if (serverLevel.isVillage(player.getCommandSenderBlockPosition())) {
+						} else if (serverLevel.closeToVillage(player.getCommandSenderBlockPosition(), 2)) {
 							return 0;
 						} else {
 							int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);

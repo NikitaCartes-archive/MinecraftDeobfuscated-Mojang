@@ -44,6 +44,8 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.ACACIA_LOGS, ItemTags.ACACIA_LOGS);
 		this.copy(BlockTags.SPRUCE_LOGS, ItemTags.SPRUCE_LOGS);
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
+		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
+		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
 		this.copy(BlockTags.LOGS, ItemTags.LOGS);
 		this.copy(BlockTags.SAND, ItemTags.SAND);
 		this.copy(BlockTags.SLABS, ItemTags.SLABS);

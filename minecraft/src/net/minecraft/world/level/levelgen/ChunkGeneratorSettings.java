@@ -13,12 +13,12 @@ public class ChunkGeneratorSettings {
 	protected int strongholdsSpread = 3;
 	protected int templesSpacing = 32;
 	protected final int templesSeparation = 8;
-	protected final int oceanRuinSpacing = 16;
+	protected final int oceanRuinSpacing = 20;
 	protected final int oceanRuinSeparation = 8;
 	protected int endCitySpacing = 20;
 	protected final int endCitySeparation = 11;
-	protected final int shipwreckSpacing = 16;
-	protected final int shipwreckSeparation = 8;
+	protected final int shipwreckSpacing = 24;
+	protected final int shipwreckSeparation = 4;
 	protected int woodlandMansionSpacing = 80;
 	protected final int woodlandMangionSeparation = 20;
 	protected BlockState defaultBlock = Blocks.STONE.defaultBlockState();
@@ -61,15 +61,15 @@ public class ChunkGeneratorSettings {
 	}
 
 	public int getShipwreckSpacing() {
-		return 16;
+		return 24;
 	}
 
 	public int getShipwreckSeparation() {
-		return 8;
+		return 4;
 	}
 
 	public int getOceanRuinSpacing() {
-		return 16;
+		return 20;
 	}
 
 	public int getOceanRuinSeparation() {

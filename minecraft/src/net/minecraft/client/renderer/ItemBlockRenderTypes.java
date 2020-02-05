@@ -80,7 +80,10 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.RED_MUSHROOM, renderType2);
 		hashMap.put(Blocks.TORCH, renderType2);
 		hashMap.put(Blocks.WALL_TORCH, renderType2);
+		hashMap.put(Blocks.SOUL_FIRE_TORCH, renderType2);
+		hashMap.put(Blocks.SOUL_FIRE_WALL_TORCH, renderType2);
 		hashMap.put(Blocks.FIRE, renderType2);
+		hashMap.put(Blocks.SOUL_FIRE, renderType2);
 		hashMap.put(Blocks.SPAWNER, renderType2);
 		hashMap.put(Blocks.REDSTONE_WIRE, renderType2);
 		hashMap.put(Blocks.WHEAT, renderType2);
@@ -99,6 +102,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.JUNGLE_TRAPDOOR, renderType2);
 		hashMap.put(Blocks.ACACIA_TRAPDOOR, renderType2);
 		hashMap.put(Blocks.DARK_OAK_TRAPDOOR, renderType2);
+		hashMap.put(Blocks.CRIMSON_TRAPDOOR, renderType2);
+		hashMap.put(Blocks.WARPED_TRAPDOOR, renderType2);
 		hashMap.put(Blocks.ATTACHED_PUMPKIN_STEM, renderType2);
 		hashMap.put(Blocks.ATTACHED_MELON_STEM, renderType2);
 		hashMap.put(Blocks.PUMPKIN_STEM, renderType2);
@@ -195,8 +200,16 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SCAFFOLDING, renderType2);
 		hashMap.put(Blocks.STONECUTTER, renderType2);
 		hashMap.put(Blocks.LANTERN, renderType2);
+		hashMap.put(Blocks.SOUL_FIRE_LANTERN, renderType2);
 		hashMap.put(Blocks.CAMPFIRE, renderType2);
 		hashMap.put(Blocks.SWEET_BERRY_BUSH, renderType2);
+		hashMap.put(Blocks.WEEPING_VINES_PLANT, renderType2);
+		hashMap.put(Blocks.WEEPING_VINES, renderType2);
+		hashMap.put(Blocks.NETHER_SPROUTS, renderType2);
+		hashMap.put(Blocks.CRIMSON_FUNGI, renderType2);
+		hashMap.put(Blocks.WARPED_FUNGI, renderType2);
+		hashMap.put(Blocks.CRIMSON_ROOTS, renderType2);
+		hashMap.put(Blocks.WARPED_ROOTS, renderType2);
 		RenderType renderType3 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType3);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType3);
@@ -257,7 +270,7 @@ public class ItemBlockRenderTypes {
 
 	public static RenderType getRenderType(BlockState blockState) {
 		RenderType renderType = getChunkRenderType(blockState);
-		return renderType == RenderType.translucent() ? Sheets.translucentBlockSheet() : Sheets.cutoutBlockSheet();
+		return renderType == RenderType.translucent() ? Sheets.translucentCullBlockSheet() : Sheets.cutoutBlockSheet();
 	}
 
 	public static RenderType getRenderType(ItemStack itemStack) {
@@ -266,7 +279,7 @@ public class ItemBlockRenderTypes {
 			Block block = ((BlockItem)item).getBlock();
 			return getRenderType(block.defaultBlockState());
 		} else {
-			return Sheets.translucentBlockSheet();
+			return Sheets.translucentCullBlockSheet();
 		}
 	}
 

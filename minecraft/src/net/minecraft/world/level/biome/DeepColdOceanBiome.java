@@ -26,8 +26,7 @@ public class DeepColdOceanBiome extends Biome {
 				.scale(0.1F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.waterColor(4020182)
-				.waterFogColor(329011)
+				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).build())
 				.parent(null)
 		);
 		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3F, 0.9F)));

@@ -18,6 +18,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +38,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -83,18 +83,8 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 			if (blockEntity instanceof ShulkerBoxBlockEntity) {
 				Direction direction = blockState.getValue(FACING);
 				ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockEntity;
-				boolean bl;
-				if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
-					AABB aABB = Shapes.block()
-						.bounds()
-						.expandTowards((double)(0.5F * (float)direction.getStepX()), (double)(0.5F * (float)direction.getStepY()), (double)(0.5F * (float)direction.getStepZ()))
-						.contract((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ());
-					bl = level.noCollision(aABB.move(blockPos.relative(direction)));
-				} else {
-					bl = true;
-				}
-
-				if (bl) {
+				if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED
+					&& level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction))) {
 					player.openMenu(shulkerBoxBlockEntity);
 					player.awardStat(Stats.OPEN_SHULKER_BOX);
 				}
@@ -132,7 +122,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 					itemStack.setHoverName(shulkerBoxBlockEntity.getCustomName());
 				}
 
-				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, itemStack);
 				itemEntity.setDefaultPickUpDelay();
 				level.addFreshEntity(itemEntity);
 			} else {
