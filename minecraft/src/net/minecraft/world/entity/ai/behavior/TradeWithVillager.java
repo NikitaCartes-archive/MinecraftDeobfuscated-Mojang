@@ -97,7 +97,7 @@ public class TradeWithVillager extends Behavior<Villager> {
 		}
 
 		if (!itemStack.isEmpty()) {
-			BehaviorUtils.throwItem(villager, itemStack, livingEntity);
+			BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
 		}
 	}
 }

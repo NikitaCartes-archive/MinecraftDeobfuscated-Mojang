@@ -1006,6 +1006,9 @@ public class Items {
 	public static final Item GUARDIAN_SPAWN_EGG = registerItem(
 		"guardian_spawn_egg", new SpawnEggItem(EntityType.GUARDIAN, 5931634, 15826224, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item HOGLIN_SPAWN_EGG = registerItem(
+		"hoglin_spawn_egg", new SpawnEggItem(EntityType.HOGLIN, 13004373, 6251620, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item HORSE_SPAWN_EGG = registerItem(
 		"horse_spawn_egg", new SpawnEggItem(EntityType.HORSE, 12623485, 15656192, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
@@ -1039,8 +1042,8 @@ public class Items {
 	public static final Item PIG_SPAWN_EGG = registerItem(
 		"pig_spawn_egg", new SpawnEggItem(EntityType.PIG, 15771042, 14377823, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item HOGLIN_SPAWN_EGG = registerItem(
-		"hoglin_spawn_egg", new SpawnEggItem(EntityType.HOGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	public static final Item PIGLIN_SPAWN_EGG = registerItem(
+		"piglin_spawn_egg", new SpawnEggItem(EntityType.PIGLIN, 10051392, 16380836, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item PILLAGER_SPAWN_EGG = registerItem(
 		"pillager_spawn_egg", new SpawnEggItem(EntityType.PILLAGER, 5451574, 9804699, new Item.Properties().tab(CreativeModeTab.TAB_MISC))

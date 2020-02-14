@@ -17,11 +17,11 @@ import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-public class Celebrate extends Behavior<Villager> {
+public class CelebrateVillagersSurvivedRaid extends Behavior<Villager> {
 	@Nullable
 	private Raid currentRaid;
 
-	public Celebrate(int i, int j) {
+	public CelebrateVillagersSurvivedRaid(int i, int j) {
 		super(ImmutableMap.of(), i, j);
 	}
 
@@ -37,7 +37,7 @@ public class Celebrate extends Behavior<Villager> {
 
 	protected void stop(ServerLevel serverLevel, Villager villager, long l) {
 		this.currentRaid = null;
-		villager.getBrain().updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+		villager.getBrain().updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
 	}
 
 	protected void tick(ServerLevel serverLevel, Villager villager, long l) {

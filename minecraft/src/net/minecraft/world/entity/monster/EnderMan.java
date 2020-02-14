@@ -456,6 +456,10 @@ public class EnderMan extends Monster {
 
 		@Override
 		public void tick() {
+			if (this.enderman.getTarget() == null) {
+				super.setTarget(null);
+			}
+
 			if (this.pendingTarget != null) {
 				if (--this.aggroTime <= 0) {
 					this.target = this.pendingTarget;

@@ -989,8 +989,29 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
-			EntityType.HOGLIN, LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add(LootItem.lootTableItem(Items.ROTTEN_FLESH)))
+			EntityType.HOGLIN,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.PORKCHOP)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 4.0F)))
+								.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.LEATHER)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(0.0F, 1.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
 		);
+		this.add(EntityType.PIGLIN, LootTable.lootTable());
 		this.add(
 			EntityType.ZOMBIE_VILLAGER,
 			LootTable.lootTable()

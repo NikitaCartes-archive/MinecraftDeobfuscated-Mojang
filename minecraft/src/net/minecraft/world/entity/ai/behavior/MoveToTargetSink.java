@@ -25,7 +25,17 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	private int remainingDelay;
 
 	public MoveToTargetSink(int i) {
-		super(ImmutableMap.of(MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), i);
+		super(
+			ImmutableMap.of(
+				MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+				MemoryStatus.REGISTERED,
+				MemoryModuleType.PATH,
+				MemoryStatus.VALUE_ABSENT,
+				MemoryModuleType.WALK_TARGET,
+				MemoryStatus.VALUE_PRESENT
+			),
+			i
+		);
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
@@ -87,11 +97,13 @@ public class MoveToTargetSink extends Behavior<Mob> {
 		BlockPos blockPos = walkTarget.getTarget().getPos();
 		this.path = mob.getNavigation().createPath(blockPos, 0);
 		this.speed = walkTarget.getSpeed();
-		if (!this.reachedTarget(mob, walkTarget)) {
-			Brain<?> brain = mob.getBrain();
+		Brain<?> brain = mob.getBrain();
+		if (this.reachedTarget(mob, walkTarget)) {
+			brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+		} else {
 			boolean bl = this.path != null && this.path.canReach();
 			if (bl) {
-				brain.setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, Optional.empty());
+				brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 			} else if (!brain.hasMemoryValue(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)) {
 				brain.setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, l);
 			}

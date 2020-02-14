@@ -130,11 +130,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public static boolean isInWorldBounds(BlockPos blockPos) {
-		return !isOutsideBuildHeight(blockPos)
-			&& blockPos.getX() >= -30000000
-			&& blockPos.getZ() >= -30000000
-			&& blockPos.getX() < 30000000
-			&& blockPos.getZ() < 30000000;
+		return !isOutsideBuildHeight(blockPos) && isInWorldBoundsHorizontal(blockPos);
+	}
+
+	public static boolean isInWorldBoundsHorizontal(BlockPos blockPos) {
+		return blockPos.getX() >= -30000000 && blockPos.getZ() >= -30000000 && blockPos.getX() < 30000000 && blockPos.getZ() < 30000000;
 	}
 
 	public static boolean isOutsideBuildHeight(BlockPos blockPos) {
@@ -1036,10 +1036,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			return false;
 		} else if (!this.canSeeSky(blockPos)) {
 			return false;
+		} else if (this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()) {
+			return false;
 		} else {
-			return this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()
-				? false
-				: this.getBiome(blockPos).getPrecipitation() == Biome.Precipitation.RAIN;
+			Biome biome = this.getBiome(blockPos);
+			return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.getTemperature(blockPos) >= 0.15F;
 		}
 	}
 

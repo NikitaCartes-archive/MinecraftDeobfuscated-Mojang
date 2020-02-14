@@ -127,7 +127,7 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
-			.setLayeringState(PROJECTION_LAYERING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setWriteMaskState(COLOR_WRITE)
 			.createCompositeState(false)
@@ -297,7 +297,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setOverlayState(OVERLAY)
 			.setWriteMaskState(COLOR_WRITE)
 			.setDepthTestState(LEQUAL_DEPTH_TEST)
-			.setLayeringState(SHADOW_LAYERING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false);
 		return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, false, compositeState);
 	}

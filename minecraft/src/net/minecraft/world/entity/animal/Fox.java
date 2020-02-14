@@ -453,7 +453,7 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	protected boolean canHoldItem(ItemStack itemStack) {
+	public boolean canHoldItem(ItemStack itemStack) {
 		Item item = itemStack.getItem();
 		ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.MAINHAND);
 		return itemStack2.isEmpty() || this.ticksSinceEaten > 0 && item.isEdible() && !itemStack2.getItem().isEdible();
@@ -536,8 +536,8 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	protected void onOffspringSpawnedFromEgg(Player player, AgableMob agableMob) {
-		((Fox)agableMob).addTrustedUUID(player.getUUID());
+	protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
+		((Fox)mob).addTrustedUUID(player.getUUID());
 	}
 
 	public boolean isPouncing() {
@@ -718,7 +718,7 @@ public class Fox extends Animal {
 
 		@Override
 		public void start() {
-			Fox.this.setTarget(this.trustedLastHurtBy);
+			this.setTarget(this.trustedLastHurtBy);
 			this.target = this.trustedLastHurtBy;
 			if (this.trustedLastHurt != null) {
 				this.timestamp = this.trustedLastHurt.getLastHurtByMobTimestamp();
@@ -835,7 +835,6 @@ public class Fox extends Animal {
 					CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer3, this.animal, this.partner, fox);
 				}
 
-				int i = 6000;
 				this.animal.setAge(6000);
 				this.partner.setAge(6000);
 				this.animal.resetLove();

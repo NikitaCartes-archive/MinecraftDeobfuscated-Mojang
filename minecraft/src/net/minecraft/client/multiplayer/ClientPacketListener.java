@@ -53,9 +53,9 @@ import net.minecraft.client.player.KeyboardInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.client.renderer.debug.BeeDebugRenderer;
+import net.minecraft.client.renderer.debug.BrainDebugRenderer;
 import net.minecraft.client.renderer.debug.GoalSelectorDebugRenderer;
 import net.minecraft.client.renderer.debug.NeighborsUpdateRenderer;
-import net.minecraft.client.renderer.debug.VillageDebugRenderer;
 import net.minecraft.client.renderer.debug.WorldGenAttemptRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.BeeAggressiveSoundInstance;
@@ -843,14 +843,19 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					);
 			}
 
-			if (entity instanceof ItemEntity) {
-				((ItemEntity)entity).getItem().setCount(clientboundTakeItemEntityPacket.getAmount());
-			}
-
 			this.minecraft
 				.particleEngine
 				.add(new ItemPickupParticle(this.minecraft.getEntityRenderDispatcher(), this.minecraft.renderBuffers(), this.level, entity, livingEntity));
-			this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
+			if (entity instanceof ItemEntity) {
+				ItemEntity itemEntity = (ItemEntity)entity;
+				ItemStack itemStack = itemEntity.getItem();
+				itemStack.shrink(clientboundTakeItemEntityPacket.getAmount());
+				if (itemStack.isEmpty()) {
+					this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
+				}
+			} else {
+				this.level.removeEntity(clientboundTakeItemEntityPacket.getItemId());
+			}
 		}
 	}
 
@@ -1920,27 +1925,27 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				int i = friendlyByteBuf.readInt();
 
 				for (int j = 0; j < i; j++) {
-					this.minecraft.debugRenderer.villageDebugRenderer.setVillageSection(friendlyByteBuf.readSectionPos());
+					this.minecraft.debugRenderer.villageSectionsDebugRenderer.setVillageSection(friendlyByteBuf.readSectionPos());
 				}
 
 				int j = friendlyByteBuf.readInt();
 
 				for (int m = 0; m < j; m++) {
-					this.minecraft.debugRenderer.villageDebugRenderer.setNotVillageSection(friendlyByteBuf.readSectionPos());
+					this.minecraft.debugRenderer.villageSectionsDebugRenderer.setNotVillageSection(friendlyByteBuf.readSectionPos());
 				}
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_ADDED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
 				int m = friendlyByteBuf.readInt();
-				VillageDebugRenderer.PoiInfo poiInfo = new VillageDebugRenderer.PoiInfo(blockPos2, string, m);
-				this.minecraft.debugRenderer.villageDebugRenderer.addPoi(poiInfo);
+				BrainDebugRenderer.PoiInfo poiInfo = new BrainDebugRenderer.PoiInfo(blockPos2, string, m);
+				this.minecraft.debugRenderer.brainDebugRenderer.addPoi(poiInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_REMOVED_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
-				this.minecraft.debugRenderer.villageDebugRenderer.removePoi(blockPos2);
+				this.minecraft.debugRenderer.brainDebugRenderer.removePoi(blockPos2);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_POI_TICKET_COUNT_PACKET.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int j = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.villageDebugRenderer.setFreeTicketCount(blockPos2, j);
+				this.minecraft.debugRenderer.brainDebugRenderer.setFreeTicketCount(blockPos2, j);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GOAL_SELECTOR.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int j = friendlyByteBuf.readInt();
@@ -1974,6 +1979,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				String string3 = friendlyByteBuf.readUtf();
 				String string4 = friendlyByteBuf.readUtf();
 				int p = friendlyByteBuf.readInt();
+				float h = friendlyByteBuf.readFloat();
+				float q = friendlyByteBuf.readFloat();
 				String string5 = friendlyByteBuf.readUtf();
 				boolean bl2 = friendlyByteBuf.readBoolean();
 				Path path2;
@@ -1984,43 +1991,43 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				}
 
 				boolean bl3 = friendlyByteBuf.readBoolean();
-				VillageDebugRenderer.BrainDump brainDump = new VillageDebugRenderer.BrainDump(uUID, o, string3, string4, p, position, string5, path2, bl3);
-				int q = friendlyByteBuf.readInt();
-
-				for (int r = 0; r < q; r++) {
-					String string6 = friendlyByteBuf.readUtf();
-					brainDump.activities.add(string6);
-				}
-
+				BrainDebugRenderer.BrainDump brainDump = new BrainDebugRenderer.BrainDump(uUID, o, string3, string4, p, h, q, position, string5, path2, bl3);
 				int r = friendlyByteBuf.readInt();
 
 				for (int s = 0; s < r; s++) {
-					String string7 = friendlyByteBuf.readUtf();
-					brainDump.behaviors.add(string7);
+					String string6 = friendlyByteBuf.readUtf();
+					brainDump.activities.add(string6);
 				}
 
 				int s = friendlyByteBuf.readInt();
 
 				for (int t = 0; t < s; t++) {
-					String string8 = friendlyByteBuf.readUtf();
-					brainDump.memories.add(string8);
+					String string7 = friendlyByteBuf.readUtf();
+					brainDump.behaviors.add(string7);
 				}
 
 				int t = friendlyByteBuf.readInt();
 
 				for (int u = 0; u < t; u++) {
-					BlockPos blockPos3 = friendlyByteBuf.readBlockPos();
-					brainDump.pois.add(blockPos3);
+					String string8 = friendlyByteBuf.readUtf();
+					brainDump.memories.add(string8);
 				}
 
 				int u = friendlyByteBuf.readInt();
 
 				for (int v = 0; v < u; v++) {
+					BlockPos blockPos3 = friendlyByteBuf.readBlockPos();
+					brainDump.pois.add(blockPos3);
+				}
+
+				int v = friendlyByteBuf.readInt();
+
+				for (int w = 0; w < v; w++) {
 					String string9 = friendlyByteBuf.readUtf();
 					brainDump.gossips.add(string9);
 				}
 
-				this.minecraft.debugRenderer.villageDebugRenderer.addOrUpdateBrainDump(brainDump);
+				this.minecraft.debugRenderer.brainDebugRenderer.addOrUpdateBrainDump(brainDump);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_BEE.equals(resourceLocation)) {
 				double d = friendlyByteBuf.readDouble();
 				double e = friendlyByteBuf.readDouble();
@@ -2040,24 +2047,24 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					blockPos5 = friendlyByteBuf.readBlockPos();
 				}
 
-				int w = friendlyByteBuf.readInt();
+				int x = friendlyByteBuf.readInt();
 				boolean bl6 = friendlyByteBuf.readBoolean();
 				Path path3 = null;
 				if (bl6) {
 					path3 = Path.createFromStream(friendlyByteBuf);
 				}
 
-				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos4, blockPos5, w);
-				int q = friendlyByteBuf.readInt();
+				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos4, blockPos5, x);
+				int y = friendlyByteBuf.readInt();
 
-				for (int r = 0; r < q; r++) {
-					String string6 = friendlyByteBuf.readUtf();
-					beeInfo.goals.add(string6);
+				for (int z = 0; z < y; z++) {
+					String string10 = friendlyByteBuf.readUtf();
+					beeInfo.goals.add(string10);
 				}
 
-				int r = friendlyByteBuf.readInt();
+				int z = friendlyByteBuf.readInt();
 
-				for (int s = 0; s < r; s++) {
+				for (int r = 0; r < z; r++) {
 					BlockPos blockPos6 = friendlyByteBuf.readBlockPos();
 					beeInfo.blacklistedHives.add(blockPos6);
 				}
@@ -2067,18 +2074,18 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
 				int m = friendlyByteBuf.readInt();
-				int x = friendlyByteBuf.readInt();
+				int aa = friendlyByteBuf.readInt();
 				boolean bl7 = friendlyByteBuf.readBoolean();
-				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, x, bl7, this.level.getGameTime());
+				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, aa, bl7, this.level.getGameTime());
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.clear();
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_ADD_MARKER.equals(resourceLocation)) {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int j = friendlyByteBuf.readInt();
-				String string10 = friendlyByteBuf.readUtf();
-				int x = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string10, x);
+				String string11 = friendlyByteBuf.readUtf();
+				int aa = friendlyByteBuf.readInt();
+				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, aa);
 			} else {
 				LOGGER.warn("Unknown custom packed identifier: {}", resourceLocation);
 			}

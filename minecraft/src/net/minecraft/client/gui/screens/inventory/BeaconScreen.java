@@ -141,8 +141,9 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		int l = (this.height - this.imageHeight) / 2;
 		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
 		this.itemRenderer.blitOffset = 100.0F;
-		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.EMERALD), k + 42, l + 109);
-		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.DIAMOND), k + 42 + 22, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.EMERALD), k + 41, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.DIAMOND), k + 41 + 22, l + 109);
 		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.GOLD_INGOT), k + 42 + 44, l + 109);
 		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.IRON_INGOT), k + 42 + 66, l + 109);
 		this.itemRenderer.blitOffset = 0.0F;

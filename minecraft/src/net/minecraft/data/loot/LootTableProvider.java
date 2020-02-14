@@ -36,6 +36,7 @@ public class LootTableProvider implements DataProvider {
 		Pair.of(ChestLoot::new, LootContextParamSets.CHEST),
 		Pair.of(EntityLoot::new, LootContextParamSets.ENTITY),
 		Pair.of(BlockLoot::new, LootContextParamSets.BLOCK),
+		Pair.of(PiglinBarterLoot::new, LootContextParamSets.PIGLIN_BARTER),
 		Pair.of(GiftLoot::new, LootContextParamSets.GIFT)
 	);
 

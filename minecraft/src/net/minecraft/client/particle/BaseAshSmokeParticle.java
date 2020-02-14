@@ -11,7 +11,22 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 	private final double fallSpeed;
 
 	protected BaseAshSmokeParticle(
-		Level level, double d, double e, double f, float g, float h, float i, double j, double k, double l, float m, SpriteSet spriteSet, float n, int o, double p
+		Level level,
+		double d,
+		double e,
+		double f,
+		float g,
+		float h,
+		float i,
+		double j,
+		double k,
+		double l,
+		float m,
+		SpriteSet spriteSet,
+		float n,
+		int o,
+		double p,
+		boolean bl
 	) {
 		super(level, d, e, f, 0.0, 0.0, 0.0);
 		this.fallSpeed = p;
@@ -31,6 +46,7 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 		this.lifetime = (int)((float)this.lifetime * m);
 		this.lifetime = Math.max(this.lifetime, 1);
 		this.setSpriteFromAge(spriteSet);
+		this.hasPhysics = bl;
 	}
 
 	@Override

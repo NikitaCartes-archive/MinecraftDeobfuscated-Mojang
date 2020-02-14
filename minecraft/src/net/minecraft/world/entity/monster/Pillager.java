@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import com.google.common.collect.Maps;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -15,10 +13,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -40,11 +36,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,9 +50,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
 
-public class Pillager extends AbstractIllager implements CrossbowAttackMob, RangedAttackMob {
+public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 	private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Pillager.class, EntityDataSerializers.BOOLEAN);
 	private final SimpleContainer inventory = new SimpleContainer(5);
 
@@ -104,6 +97,11 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Rang
 	@Override
 	public void setChargingCrossbow(boolean bl) {
 		this.entityData.set(IS_CHARGING_CROSSBOW, bl);
+	}
+
+	@Override
+	public void onCrossbowAttackPerformed() {
+		this.noActionTime = 0;
 	}
 
 	@Override
@@ -211,41 +209,12 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Rang
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		InteractionHand interactionHand = ProjectileUtil.getWeaponHoldingHand(this, Items.CROSSBOW);
-		ItemStack itemStack = this.getItemInHand(interactionHand);
-		if (this.isHolding(Items.CROSSBOW)) {
-			CrossbowItem.performShooting(this.level, this, interactionHand, itemStack, 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
-		}
-
-		this.noActionTime = 0;
+		this.performCrossbowAttack(this, 1.6F);
 	}
 
 	@Override
-	public void shootProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
-		Entity entity = (Entity)projectile;
-		double d = livingEntity.getX() - this.getX();
-		double e = livingEntity.getZ() - this.getZ();
-		double g = (double)Mth.sqrt(d * d + e * e);
-		double h = livingEntity.getY(0.3333333333333333) - entity.getY() + g * 0.2F;
-		Vector3f vector3f = this.getProjectileShotVector(new Vec3(d, h, e), f);
-		projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), 1.6F, (float)(14 - this.level.getDifficulty().getId() * 4));
-		this.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-	}
-
-	private Vector3f getProjectileShotVector(Vec3 vec3, float f) {
-		Vec3 vec32 = vec3.normalize();
-		Vec3 vec33 = vec32.cross(new Vec3(0.0, 1.0, 0.0));
-		if (vec33.lengthSqr() <= 1.0E-7) {
-			vec33 = vec32.cross(this.getUpVector(1.0F));
-		}
-
-		Quaternion quaternion = new Quaternion(new Vector3f(vec33), 90.0F, true);
-		Vector3f vector3f = new Vector3f(vec32);
-		vector3f.transform(quaternion);
-		Quaternion quaternion2 = new Quaternion(vector3f, f, true);
-		Vector3f vector3f2 = new Vector3f(vec32);
-		vector3f2.transform(quaternion2);
-		return vector3f2;
+	public void shootCrossbowProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
+		this.shootCrossbowProjectile(this, livingEntity, projectile, f, 1.6F);
 	}
 
 	@Override

@@ -134,6 +134,7 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.PARROT, new ParrotRenderer(this));
 		this.register(EntityType.PHANTOM, new PhantomRenderer(this));
 		this.register(EntityType.PIG, new PigRenderer(this));
+		this.register(EntityType.PIGLIN, new PiglinRenderer(this));
 		this.register(EntityType.PILLAGER, new PillagerRenderer(this));
 		this.register(EntityType.POLAR_BEAR, new PolarBearRenderer(this));
 		this.register(EntityType.POTION, new ThrownItemRenderer<>(this, itemRenderer));

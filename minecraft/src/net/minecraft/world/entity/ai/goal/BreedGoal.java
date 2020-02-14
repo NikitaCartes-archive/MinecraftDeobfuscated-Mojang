@@ -3,14 +3,8 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.entity.AgableMob;
-import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
 public class BreedGoal extends Goal {
@@ -82,30 +76,6 @@ public class BreedGoal extends Goal {
 	}
 
 	protected void breed() {
-		AgableMob agableMob = this.animal.getBreedOffspring(this.partner);
-		if (agableMob != null) {
-			ServerPlayer serverPlayer = this.animal.getLoveCause();
-			if (serverPlayer == null && this.partner.getLoveCause() != null) {
-				serverPlayer = this.partner.getLoveCause();
-			}
-
-			if (serverPlayer != null) {
-				serverPlayer.awardStat(Stats.ANIMALS_BRED);
-				CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this.animal, this.partner, agableMob);
-			}
-
-			this.animal.setAge(6000);
-			this.partner.setAge(6000);
-			this.animal.resetLove();
-			this.partner.resetLove();
-			agableMob.setAge(-24000);
-			agableMob.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0F, 0.0F);
-			this.level.addFreshEntity(agableMob);
-			this.level.broadcastEntityEvent(this.animal, (byte)18);
-			if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-				this.level
-					.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
-			}
-		}
+		this.animal.spawnChildFromBreeding(this.level, this.partner);
 	}
 }

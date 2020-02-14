@@ -3,23 +3,19 @@ package net.minecraft.world.inventory;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 public class BeaconMenu extends AbstractContainerMenu {
 	private final Container beacon = new SimpleContainer(1) {
 		@Override
 		public boolean canPlaceItem(int i, ItemStack itemStack) {
-			return itemStack.getItem() == Items.EMERALD
-				|| itemStack.getItem() == Items.DIAMOND
-				|| itemStack.getItem() == Items.GOLD_INGOT
-				|| itemStack.getItem() == Items.IRON_INGOT;
+			return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
 		}
 
 		@Override
@@ -161,8 +157,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 
 		@Override
 		public boolean mayPlace(ItemStack itemStack) {
-			Item item = itemStack.getItem();
-			return item == Items.EMERALD || item == Items.DIAMOND || item == Items.GOLD_INGOT || item == Items.IRON_INGOT;
+			return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
 		}
 
 		@Override

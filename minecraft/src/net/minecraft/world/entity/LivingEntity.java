@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -923,7 +924,7 @@ public abstract class LivingEntity extends Entity {
 					}
 
 					this.hurtDir = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI - (double)this.yRot);
-					this.knockback(entity2, 0.4F, d, e);
+					this.knockback(0.4F, d, e);
 				} else {
 					this.hurtDir = (float)((int)(Math.random() * 2.0) * 180);
 				}
@@ -968,7 +969,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected void blockedByShield(LivingEntity livingEntity) {
-		livingEntity.knockback(this, 0.5F, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
+		livingEntity.knockback(0.5F, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
 	}
 
 	private boolean checkTotemDeathProtection(DamageSource damageSource) {
@@ -1175,7 +1176,7 @@ public abstract class LivingEntity extends Entity {
 		return builder;
 	}
 
-	public void knockback(Entity entity, float f, double d, double e) {
+	public void knockback(float f, double d, double e) {
 		f = (float)((double)f * (1.0 - this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()));
 		if (!(f <= 0.0F)) {
 			this.hasImpulse = true;
@@ -1593,6 +1594,14 @@ public abstract class LivingEntity extends Entity {
 
 	public ItemStack getOffhandItem() {
 		return this.getItemBySlot(EquipmentSlot.OFFHAND);
+	}
+
+	public boolean isHolding(Item item) {
+		return this.isHolding(item2 -> item2 == item);
+	}
+
+	public boolean isHolding(Predicate<Item> predicate) {
+		return predicate.test(this.getMainHandItem().getItem()) || predicate.test(this.getOffhandItem().getItem());
 	}
 
 	public ItemStack getItemInHand(InteractionHand interactionHand) {

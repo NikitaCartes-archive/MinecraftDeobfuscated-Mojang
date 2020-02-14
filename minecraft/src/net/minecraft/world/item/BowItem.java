@@ -134,4 +134,9 @@ public class BowItem extends ProjectileWeaponItem {
 	public Predicate<ItemStack> getAllSupportedProjectiles() {
 		return ARROW_ONLY;
 	}
+
+	@Override
+	public int getDefaultProjectileRange() {
+		return 15;
+	}
 }

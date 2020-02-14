@@ -312,6 +312,17 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.entityData.get(DATA_POSE);
 	}
 
+	public boolean closerThan(Entity entity, double d) {
+		double e = entity.x - this.x;
+		double f = entity.y - this.y;
+		double g = entity.z - this.z;
+		return e * e + f * f + g * g < d * d;
+	}
+
+	public BlockPos getBlockPos() {
+		return new BlockPos(this);
+	}
+
 	protected void setRot(float f, float g) {
 		this.yRot = f % 360.0F;
 		this.xRot = g % 360.0F;

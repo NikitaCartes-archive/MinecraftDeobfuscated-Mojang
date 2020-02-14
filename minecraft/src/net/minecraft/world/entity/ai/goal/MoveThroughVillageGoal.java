@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
@@ -88,7 +89,7 @@ public class MoveThroughVillageGoal extends Goal {
 						for (int i = 0; i < this.path.getSize(); i++) {
 							Node node = this.path.get(i);
 							BlockPos blockPos2 = new BlockPos(node.x, node.y + 1, node.z);
-							if (DoorInteractGoal.isDoor(this.mob.level, blockPos2)) {
+							if (DoorBlock.isWoodenDoor(this.mob.level, blockPos2)) {
 								this.path = this.mob.getNavigation().createPath((double)node.x, (double)node.y, (double)node.z, 0);
 								break;
 							}

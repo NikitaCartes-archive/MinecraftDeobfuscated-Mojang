@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HoglinModel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.Hoglin;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
 
 @Environment(EnvType.CLIENT)
 public class HoglinRenderer extends MobRenderer<Hoglin, HoglinModel> {

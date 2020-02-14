@@ -3,6 +3,7 @@ package net.minecraft.world.entity;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -52,6 +53,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
@@ -471,7 +473,7 @@ public abstract class Mob extends LivingEntity {
 		this.level.getProfiler().push("looting");
 		if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			for (ItemEntity itemEntity : this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0))) {
-				if (!itemEntity.removed && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay()) {
+				if (!itemEntity.removed && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
 					this.pickUpItem(itemEntity);
 				}
 			}
@@ -482,6 +484,13 @@ public abstract class Mob extends LivingEntity {
 
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
+		if (this.equipItemIfPossible(itemStack)) {
+			this.take(itemEntity, itemStack.getCount());
+			itemEntity.remove();
+		}
+	}
+
+	public boolean equipItemIfPossible(ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 		boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
@@ -501,8 +510,9 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			this.persistenceRequired = true;
-			this.take(itemEntity, itemStack.getCount());
-			itemEntity.remove();
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -543,8 +553,12 @@ public abstract class Mob extends LivingEntity {
 		return bl;
 	}
 
-	protected boolean canHoldItem(ItemStack itemStack) {
+	public boolean canHoldItem(ItemStack itemStack) {
 		return true;
+	}
+
+	public boolean wantsToPickUp(ItemStack itemStack) {
+		return this.canHoldItem(itemStack);
 	}
 
 	public boolean removeWhenFarAway(double d) {
@@ -969,7 +983,18 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
+	protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
+	}
+
 	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		Item item = itemStack.getItem();
+		if (!this.level.isClientSide && item instanceof SpawnEggItem) {
+			SpawnEggItem spawnEggItem = (SpawnEggItem)item;
+			Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, (EntityType<? extends Mob>)this.getType(), this.level, this.position(), itemStack);
+			optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
+		}
+
 		return false;
 	}
 
@@ -1169,6 +1194,9 @@ public abstract class Mob extends LivingEntity {
 		return (this.entityData.get(DATA_MOB_FLAGS_ID) & 4) != 0;
 	}
 
+	public void setBaby(boolean bl) {
+	}
+
 	@Override
 	public HumanoidArm getMainArm() {
 		return this.isLeftHanded() ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
@@ -1197,21 +1225,13 @@ public abstract class Mob extends LivingEntity {
 		if (bl) {
 			if (g > 0.0F && entity instanceof LivingEntity) {
 				((LivingEntity)entity)
-					.knockback(this, g * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+					.knockback(g * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 
 			if (entity instanceof Player) {
 				Player player = (Player)entity;
-				ItemStack itemStack = this.getMainHandItem();
-				ItemStack itemStack2 = player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY;
-				if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
-					float h = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-					if (this.random.nextFloat() < h) {
-						player.getCooldowns().addCooldown(Items.SHIELD, 100);
-						this.level.broadcastEntityEvent(player, (byte)30);
-					}
-				}
+				this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
 			}
 
 			this.doEnchantDamageEffects(this, entity);
@@ -1219,6 +1239,16 @@ public abstract class Mob extends LivingEntity {
 		}
 
 		return bl;
+	}
+
+	private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
+		if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
+			float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
+			if (this.random.nextFloat() < f) {
+				player.getCooldowns().addCooldown(Items.SHIELD, 100);
+				this.level.broadcastEntityEvent(player, (byte)30);
+			}
+		}
 	}
 
 	protected boolean isSunBurnTick() {
@@ -1242,9 +1272,5 @@ public abstract class Mob extends LivingEntity {
 		} else {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
 		}
-	}
-
-	public boolean isHolding(Item item) {
-		return this.getMainHandItem().getItem() == item || this.getOffhandItem().getItem() == item;
 	}
 }

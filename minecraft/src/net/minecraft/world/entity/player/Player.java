@@ -1118,7 +1118,7 @@ public abstract class Player extends LivingEntity {
 						if (i > 0) {
 							if (entity instanceof LivingEntity) {
 								((LivingEntity)entity)
-									.knockback(this, (float)i * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+									.knockback((float)i * 0.5F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
 							} else {
 								entity.push(
 									(double)(-Mth.sin(this.yRot * (float) (Math.PI / 180.0)) * (float)i * 0.5F),
@@ -1140,7 +1140,7 @@ public abstract class Player extends LivingEntity {
 									&& !this.isAlliedTo(livingEntity)
 									&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
 									&& this.distanceToSqr(livingEntity) < 9.0) {
-									livingEntity.knockback(this, 0.4F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
+									livingEntity.knockback(0.4F, (double)Mth.sin(this.yRot * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.yRot * (float) (Math.PI / 180.0))));
 									livingEntity.hurt(DamageSource.playerAttack(this), l);
 								}
 							}

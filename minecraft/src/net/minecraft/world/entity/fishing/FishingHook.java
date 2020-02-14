@@ -46,7 +46,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class FishingHook extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_HOOKED_ENTITY = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.INT);
-	private boolean inGround;
 	private int life;
 	private final Player owner;
 	private int flightTime;
@@ -136,7 +135,7 @@ public class FishingHook extends Entity {
 		if (this.owner == null) {
 			this.remove();
 		} else if (this.level.isClientSide || !this.shouldStopFishing()) {
-			if (this.inGround) {
+			if (this.onGround) {
 				this.life++;
 				if (this.life >= 1200) {
 					this.remove();
@@ -164,16 +163,7 @@ public class FishingHook extends Entity {
 					return;
 				}
 
-				if (!this.level.isClientSide) {
-					this.checkCollision();
-				}
-
-				if (!this.inGround && !this.onGround && !this.horizontalCollision) {
-					this.flightTime++;
-				} else {
-					this.flightTime = 0;
-					this.setDeltaMovement(Vec3.ZERO);
-				}
+				this.checkCollision();
 			} else {
 				if (this.currentState == FishingHook.FishHookState.HOOKED_IN_ENTITY) {
 					if (this.hookedIn != null) {
@@ -208,6 +198,15 @@ public class FishingHook extends Entity {
 
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.updateRotation();
+			if (this.currentState == FishingHook.FishHookState.FLYING) {
+				if (!this.onGround && !this.horizontalCollision) {
+					this.flightTime++;
+				} else {
+					this.flightTime = 0;
+					this.setDeltaMovement(Vec3.ZERO);
+				}
+			}
+
 			double e = 0.92;
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
 			this.reapplyPosition();
@@ -263,10 +262,12 @@ public class FishingHook extends Entity {
 		);
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			if (hitResult.getType() == HitResult.Type.ENTITY) {
-				this.hookedIn = ((EntityHitResult)hitResult).getEntity();
-				this.setHookedEntity();
+				if (!this.level.isClientSide) {
+					this.hookedIn = ((EntityHitResult)hitResult).getEntity();
+					this.setHookedEntity();
+				}
 			} else {
-				this.inGround = true;
+				this.setDeltaMovement(this.getDeltaMovement().normalize().scale(hitResult.distanceTo(this)));
 			}
 		}
 	}
@@ -423,7 +424,7 @@ public class FishingHook extends Entity {
 				i = 1;
 			}
 
-			if (this.inGround) {
+			if (this.onGround) {
 				i = 2;
 			}
 

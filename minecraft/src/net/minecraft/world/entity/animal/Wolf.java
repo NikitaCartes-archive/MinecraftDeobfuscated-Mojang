@@ -325,10 +325,10 @@ public class Wolf extends TamableAnimal {
 		if (itemStack.getItem() instanceof SpawnEggItem) {
 			return super.mobInteract(player, interactionHand);
 		} else if (this.level.isClientSide) {
-			return this.isOwnedBy(player) || item == Items.BONE && !this.isAngry();
+			return this.isOwnedBy(player) || item == Items.BONE && !this.isTame() && !this.isAngry();
 		} else {
 			if (this.isTame()) {
-				if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < this.getMaxHealth()) {
+				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);
 					}
@@ -339,8 +339,11 @@ public class Wolf extends TamableAnimal {
 
 				if (!(item instanceof DyeItem)) {
 					boolean bl = super.mobInteract(player, interactionHand);
-					if (!bl || this.isBaby()) {
+					if ((!bl || this.isBaby()) && this.isOwnedBy(player) && !this.isFood(itemStack)) {
 						this.setOrderedToSit(!this.isOrderedToSit());
+						this.jumping = false;
+						this.navigation.stop();
+						this.setTarget(null);
 					}
 
 					return bl;
@@ -354,13 +357,6 @@ public class Wolf extends TamableAnimal {
 					}
 
 					return true;
-				}
-
-				if (this.isOwnedBy(player) && !this.isFood(itemStack)) {
-					this.setOrderedToSit(!this.isOrderedToSit());
-					this.jumping = false;
-					this.navigation.stop();
-					this.setTarget(null);
 				}
 			} else if (item == Items.BONE && !this.isAngry()) {
 				if (!player.abilities.instabuild) {

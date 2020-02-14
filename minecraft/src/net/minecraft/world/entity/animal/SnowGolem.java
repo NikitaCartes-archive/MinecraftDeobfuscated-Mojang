@@ -120,7 +120,7 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 		double h = livingEntity.getZ() - this.getZ();
 		float i = Mth.sqrt(e * e + h * h) * 0.2F;
 		snowball.shoot(e, g + (double)i, h, 1.6F, 12.0F);
-		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
 		this.level.addFreshEntity(snowball);
 	}
 
@@ -136,6 +136,8 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 			if (!this.level.isClientSide) {
 				this.setPumpkin(false);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), 1.7F);
+				this.playSound(SoundEvents.SNOW_GOLEM_SHEAR, 1.0F, 1.0F);
 			}
 
 			return true;

@@ -62,6 +62,7 @@ public class BlockTags {
 	public static final Tag<Block> SIGNS = bind("signs");
 	public static final Tag<Block> DRAGON_IMMUNE = bind("dragon_immune");
 	public static final Tag<Block> WITHER_IMMUNE = bind("wither_immune");
+	public static final Tag<Block> WITHER_SUMMON_BASE_BLOCKS = bind("wither_summon_base_blocks");
 	public static final Tag<Block> BEEHIVES = bind("beehives");
 	public static final Tag<Block> CROPS = bind("crops");
 	public static final Tag<Block> BEE_GROWABLES = bind("bee_growables");
@@ -69,6 +70,8 @@ public class BlockTags {
 	public static final Tag<Block> FIRE = bind("fire");
 	public static final Tag<Block> NYLIUM = bind("nylium");
 	public static final Tag<Block> WART_BLOCKS = bind("wart_blocks");
+	public static final Tag<Block> BEACON_BASE_BLOCKS = bind("beacon_base_blocks");
+	public static final Tag<Block> WALL_POST_OVERRIDE = bind("wall_post_override");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

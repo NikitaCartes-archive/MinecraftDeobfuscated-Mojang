@@ -101,6 +101,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
+		this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
 	}
 
 	protected void copy(Tag<Block> tag, Tag<Item> tag2) {

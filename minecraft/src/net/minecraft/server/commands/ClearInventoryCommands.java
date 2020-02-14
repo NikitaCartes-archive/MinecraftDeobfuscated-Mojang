@@ -63,7 +63,9 @@ public class ClearInventoryCommands {
 
 		for (ServerPlayer serverPlayer : collection) {
 			j += serverPlayer.inventory.clearInventory(predicate, i);
+			serverPlayer.inventoryMenu.clearCraftingContent();
 			serverPlayer.containerMenu.broadcastChanges();
+			serverPlayer.inventoryMenu.slotsChanged(serverPlayer.inventory);
 			serverPlayer.broadcastCarriedItem();
 		}
 

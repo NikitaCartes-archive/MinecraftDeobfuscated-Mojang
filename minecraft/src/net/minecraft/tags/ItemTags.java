@@ -52,6 +52,7 @@ public class ItemTags {
 	public static final Tag<Item> COALS = bind("coals");
 	public static final Tag<Item> ARROWS = bind("arrows");
 	public static final Tag<Item> LECTERN_BOOKS = bind("lectern_books");
+	public static final Tag<Item> BEACON_PAYMENT_ITEMS = bind("beacon_payment_items");
 
 	public static void reset(TagCollection<Item> tagCollection) {
 		source = tagCollection;

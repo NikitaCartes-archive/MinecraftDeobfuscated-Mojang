@@ -45,12 +45,18 @@ public class DebugPackets {
 	}
 
 	public static void sendPoiAddedPacket(ServerLevel serverLevel, BlockPos blockPos) {
+		sendVillageSectionsPacket(serverLevel, blockPos);
 	}
 
 	public static void sendPoiRemovedPacket(ServerLevel serverLevel, BlockPos blockPos) {
+		sendVillageSectionsPacket(serverLevel, blockPos);
 	}
 
 	public static void sendPoiTicketCountPacket(ServerLevel serverLevel, BlockPos blockPos) {
+		sendVillageSectionsPacket(serverLevel, blockPos);
+	}
+
+	private static void sendVillageSectionsPacket(ServerLevel serverLevel, BlockPos blockPos) {
 	}
 
 	public static void sendPathFindingPacket(Level level, Mob mob, @Nullable Path path, float f) {

@@ -24,7 +24,7 @@ public class ResetRaidStatus extends Behavior<LivingEntity> {
 		Raid raid = serverLevel.getRaidAt(new BlockPos(livingEntity));
 		if (raid == null || raid.isStopped() || raid.isLoss()) {
 			brain.setDefaultActivity(Activity.IDLE);
-			brain.updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+			brain.updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
 		}
 	}
 }

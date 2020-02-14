@@ -107,6 +107,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		MemoryModuleType.VISIBLE_VILLAGER_BABIES,
 		MemoryModuleType.NEAREST_PLAYERS,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.LOOK_TARGET,
 		MemoryModuleType.INTERACTION_TARGET,
@@ -130,6 +132,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES,
 		SensorType.NEAREST_PLAYERS,
+		SensorType.NEAREST_ITEMS,
 		SensorType.INTERACTABLE_DOORS,
 		SensorType.NEAREST_BED,
 		SensorType.HURT_BY,
@@ -175,7 +178,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void refreshBrain(ServerLevel serverLevel) {
 		Brain<Villager> brain = this.getBrain();
 		brain.stopAll(serverLevel, this);
-		this.brain = brain.copyWithoutGoals();
+		this.brain = brain.copyWithoutBehaviors();
 		this.registerBrainGoals(this.getBrain());
 	}
 
@@ -187,13 +190,13 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(f));
 		} else {
 			brain.setSchedule(Schedule.VILLAGER_DEFAULT);
-			brain.addActivity(
+			brain.addActivityWithConditions(
 				Activity.WORK, VillagerGoalPackages.getWorkPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT))
 			);
 		}
 
 		brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, f));
-		brain.addActivity(
+		brain.addActivityWithConditions(
 			Activity.MEET,
 			VillagerGoalPackages.getMeetPackage(villagerProfession, f),
 			ImmutableSet.of(Pair.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT))
@@ -206,8 +209,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, f));
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
-		brain.setActivity(Activity.IDLE);
-		brain.updateActivity(this.level.getDayTime(), this.level.getGameTime());
+		brain.setActiveActivityIfPossible(Activity.IDLE);
+		brain.updateActivityFromSchedule(this.level.getDayTime(), this.level.getGameTime());
 	}
 
 	@Override
@@ -227,7 +230,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("brain");
+		this.level.getProfiler().push("villagerBrain");
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
 		if (!this.isTrading() && this.updateMerchantTimer > 0) {
@@ -599,6 +602,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
+	@Override
 	public boolean canBreed() {
 		return this.foodLevel + this.countFoodPointsInInventory() >= 12 && this.getAge() == 0;
 	}
@@ -736,8 +740,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
-		Item item = itemStack.getItem();
-		if (this.wantToPickUp(item)) {
+		if (this.wantsToPickUp(itemStack)) {
+			Item item = itemStack.getItem();
 			SimpleContainer simpleContainer = this.getInventory();
 			boolean bl = false;
 
@@ -773,8 +777,9 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public boolean wantToPickUp(Item item) {
-		return WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item);
+	@Override
+	public boolean wantsToPickUp(ItemStack itemStack) {
+		return WANTED_ITEMS.contains(itemStack.getItem()) || this.getVillagerData().getProfession().getRequestedItems().contains(itemStack.getItem());
 	}
 
 	public boolean hasExcessFood() {

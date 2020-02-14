@@ -36,7 +36,7 @@ public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
 		} else {
 			PathfinderMob pathfinderMob = (PathfinderMob)livingEntity;
 			PoiManager poiManager = serverLevel.getPoiManager();
-			Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), blockPos -> true, new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
+			Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
 			return optional.isPresent() && !(((BlockPos)optional.get()).distSqr(new BlockPos(pathfinderMob)) <= 4.0);
 		}
 	}

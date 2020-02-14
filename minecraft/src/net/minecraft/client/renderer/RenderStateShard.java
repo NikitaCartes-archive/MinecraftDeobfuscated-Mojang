@@ -124,20 +124,10 @@ public abstract class RenderStateShard {
 			RenderSystem.disablePolygonOffset();
 		}
 	);
-	protected static final RenderStateShard.LayeringStateShard SHADOW_LAYERING = new RenderStateShard.LayeringStateShard("shadow_layering", () -> {
+	protected static final RenderStateShard.LayeringStateShard VIEW_OFFSET_Z_LAYERING = new RenderStateShard.LayeringStateShard("view_offset_z_layering", () -> {
 		RenderSystem.pushMatrix();
 		RenderSystem.scalef(0.99975586F, 0.99975586F, 0.99975586F);
 	}, RenderSystem::popMatrix);
-	protected static final RenderStateShard.LayeringStateShard PROJECTION_LAYERING = new RenderStateShard.LayeringStateShard("projection_layering", () -> {
-		RenderSystem.matrixMode(5889);
-		RenderSystem.pushMatrix();
-		RenderSystem.scalef(1.0F, 1.0F, 0.999F);
-		RenderSystem.matrixMode(5888);
-	}, () -> {
-		RenderSystem.matrixMode(5889);
-		RenderSystem.popMatrix();
-		RenderSystem.matrixMode(5888);
-	});
 	protected static final RenderStateShard.FogStateShard NO_FOG = new RenderStateShard.FogStateShard("no_fog", () -> {
 	}, () -> {
 	});

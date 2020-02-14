@@ -376,13 +376,17 @@ public class Blocks {
 		"lily_of_the_valley", new FlowerBlock(MobEffects.POISON, 12, Block.Properties.of(Material.PLANT).noCollission().instabreak().sound(SoundType.GRASS))
 	);
 	public static final Block BROWN_MUSHROOM = register(
-		"brown_mushroom", new MushroomBlock(Block.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.GRASS).lightLevel(1))
+		"brown_mushroom",
+		new MushroomBlock(
+			Block.Properties.of(Material.PLANT, MaterialColor.COLOR_BROWN).noCollission().randomTicks().instabreak().sound(SoundType.GRASS).lightLevel(1)
+		)
 	);
 	public static final Block RED_MUSHROOM = register(
-		"red_mushroom", new MushroomBlock(Block.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.GRASS))
+		"red_mushroom",
+		new MushroomBlock(Block.Properties.of(Material.PLANT, MaterialColor.COLOR_RED).noCollission().randomTicks().instabreak().sound(SoundType.GRASS))
 	);
 	public static final Block GOLD_BLOCK = register(
-		"gold_block", new Block(Block.Properties.of(Material.METAL, MaterialColor.GOLD).strength(3.0F, 6.0F).sound(SoundType.METAL))
+		"gold_block", new GoldBlock(Block.Properties.of(Material.METAL, MaterialColor.GOLD).strength(3.0F, 6.0F).sound(SoundType.METAL))
 	);
 	public static final Block IRON_BLOCK = register(
 		"iron_block", new Block(Block.Properties.of(Material.METAL, MaterialColor.METAL).strength(5.0F, 6.0F).sound(SoundType.METAL))

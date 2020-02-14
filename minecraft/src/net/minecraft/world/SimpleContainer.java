@@ -42,6 +42,12 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 		return i >= 0 && i < this.items.size() ? this.items.get(i) : ItemStack.EMPTY;
 	}
 
+	public List<ItemStack> removeAllItems() {
+		List<ItemStack> list = (List<ItemStack>)this.items.stream().filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList());
+		this.clearContent();
+		return list;
+	}
+
 	@Override
 	public ItemStack removeItem(int i, int j) {
 		ItemStack itemStack = ContainerHelper.removeItem(this.items, i, j);

@@ -70,6 +70,10 @@ public class Vec3 implements Position {
 		return new Vec3(this.x + d, this.y + e, this.z + f);
 	}
 
+	public boolean closerThan(Position position, double d) {
+		return this.distanceToSqr(position.x(), position.y(), position.z()) < d * d;
+	}
+
 	public double distanceTo(Vec3 vec3) {
 		double d = vec3.x - this.x;
 		double e = vec3.y - this.y;

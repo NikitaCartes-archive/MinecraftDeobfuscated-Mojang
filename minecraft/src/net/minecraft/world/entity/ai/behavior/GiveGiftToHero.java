@@ -93,7 +93,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 				this.giftGivenDuringThisRun = true;
 			}
 		} else {
-			BehaviorUtils.walkToEntity(villager, player, 5);
+			BehaviorUtils.setWalkAndLookTargetMemories(villager, player, 5);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 
 	private void throwGift(Villager villager, LivingEntity livingEntity) {
 		for (ItemStack itemStack : this.getItemToThrow(villager)) {
-			BehaviorUtils.throwItem(villager, itemStack, livingEntity);
+			BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
 		}
 	}
 

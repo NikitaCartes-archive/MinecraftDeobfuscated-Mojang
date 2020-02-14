@@ -90,7 +90,7 @@ public class RavagerModel extends ListModel<Ravager> {
 		int l = ravager.getAttackTick();
 		int m = 10;
 		if (l > 0) {
-			float n = this.triangleWave((float)l - h, 10.0F);
+			float n = Mth.triangleWave((float)l - h, 10.0F);
 			float o = (1.0F + n) * 0.5F;
 			float p = o * o * o * 12.0F;
 			float q = p * Mth.sin(this.neck.xRot);
@@ -120,9 +120,5 @@ public class RavagerModel extends ListModel<Ravager> {
 				this.mouth.xRot = (float) (Math.PI / 2) * q;
 			}
 		}
-	}
-
-	private float triangleWave(float f, float g) {
-		return (Math.abs(f % g - g * 0.5F) - g * 0.25F) / (g * 0.25F);
 	}
 }

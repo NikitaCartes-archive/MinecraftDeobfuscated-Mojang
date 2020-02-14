@@ -103,7 +103,9 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.PHANTOM,
 		EntityType.DROWNED,
 		EntityType.PILLAGER,
-		EntityType.RAVAGER
+		EntityType.RAVAGER,
+		EntityType.HOGLIN,
+		EntityType.PIGLIN
 	};
 
 	public void accept(Consumer<Advancement> consumer) {

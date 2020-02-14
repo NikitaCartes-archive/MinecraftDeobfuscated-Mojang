@@ -16,11 +16,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.PathNavigationRegion;
 
 public class PathFinder {
-	private final BinaryHeap openSet = new BinaryHeap();
-	private final Set<Node> closedSet = Sets.<Node>newHashSet();
 	private final Node[] neighbors = new Node[32];
 	private final int maxVisitedNodes;
 	private final NodeEvaluator nodeEvaluator;
+	private final BinaryHeap openSet = new BinaryHeap();
 
 	public PathFinder(NodeEvaluator nodeEvaluator, int i) {
 		this.nodeEvaluator = nodeEvaluator;
@@ -48,8 +47,8 @@ public class PathFinder {
 		node.h = this.getBestH(node, set);
 		node.f = node.h;
 		this.openSet.clear();
-		this.closedSet.clear();
 		this.openSet.insert(node);
+		Set<Node> set2 = Sets.<Node>newHashSet();
 		int j = 0;
 		int k = (int)((float)this.maxVisitedNodes * g);
 

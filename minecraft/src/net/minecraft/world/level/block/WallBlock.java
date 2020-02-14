@@ -132,10 +132,6 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 		return !isExceptionForConnection(block) && bl || bl2;
 	}
 
-	private static boolean specialPostBlock(Block block) {
-		return block == Blocks.LANTERN || block == Blocks.TORCH || block == Blocks.REDSTONE_TORCH;
-	}
-
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		LevelReader levelReader = blockPlaceContext.getLevel();
@@ -150,7 +146,7 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 		BlockState blockState2 = levelReader.getBlockState(blockPos3);
 		BlockState blockState3 = levelReader.getBlockState(blockPos4);
 		BlockState blockState4 = levelReader.getBlockState(blockPos5);
-		BlockState blockState5 = levelReader.getBlockState(blockPos5);
+		BlockState blockState5 = levelReader.getBlockState(blockPos6);
 		boolean bl = this.connectsTo(blockState, blockState.isFaceSturdy(levelReader, blockPos2, Direction.SOUTH), Direction.SOUTH);
 		boolean bl2 = this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos3, Direction.WEST), Direction.WEST);
 		boolean bl3 = this.connectsTo(blockState3, blockState3.isFaceSturdy(levelReader, blockPos4, Direction.NORTH), Direction.NORTH);
@@ -218,7 +214,7 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	) {
 		VoxelShape voxelShape = blockState2.getCollisionShape(levelReader, blockPos).getFaceShape(Direction.DOWN);
 		boolean bl5 = (!bl || bl2 || !bl3 || bl4) && (bl || !bl2 || bl3 || !bl4);
-		boolean bl6 = bl5 || specialPostBlock(blockState2.getBlock()) || isCovered(voxelShape, POST_TEST);
+		boolean bl6 = bl5 || blockState2.getBlock().is(BlockTags.WALL_POST_OVERRIDE) || isCovered(voxelShape, POST_TEST);
 		return this.updateSides(blockState.setValue(UP, Boolean.valueOf(bl6)), bl, bl2, bl3, bl4, voxelShape);
 	}
 

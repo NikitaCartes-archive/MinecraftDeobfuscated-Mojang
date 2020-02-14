@@ -29,8 +29,6 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.WALK_TARGET,
 				MemoryStatus.VALUE_ABSENT,
-				memoryModuleType,
-				MemoryStatus.VALUE_ABSENT,
 				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
 				MemoryStatus.VALUE_PRESENT
 			)
@@ -52,10 +50,16 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
-		return this.selfFilter.test(livingEntity)
-			&& ((List)livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
-				.stream()
-				.anyMatch(livingEntityx -> this.type.equals(livingEntityx.getType()) && this.targetFilter.test(livingEntityx));
+		return this.selfFilter.test(livingEntity) && this.seesAtLeastOneValidTarget(livingEntity);
+	}
+
+	private boolean seesAtLeastOneValidTarget(E livingEntity) {
+		List<LivingEntity> list = (List<LivingEntity>)livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get();
+		return list.stream().anyMatch(this::isTargetValid);
+	}
+
+	private boolean isTargetValid(LivingEntity livingEntity) {
+		return this.type.equals(livingEntity.getType()) && this.targetFilter.test(livingEntity);
 	}
 
 	@Override
