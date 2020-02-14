@@ -136,7 +136,11 @@ AutoCloseable {
     }
 
     public static boolean isInWorldBounds(BlockPos blockPos) {
-        return !Level.isOutsideBuildHeight(blockPos) && blockPos.getX() >= -30000000 && blockPos.getZ() >= -30000000 && blockPos.getX() < 30000000 && blockPos.getZ() < 30000000;
+        return !Level.isOutsideBuildHeight(blockPos) && Level.isInWorldBoundsHorizontal(blockPos);
+    }
+
+    public static boolean isInWorldBoundsHorizontal(BlockPos blockPos) {
+        return blockPos.getX() >= -30000000 && blockPos.getZ() >= -30000000 && blockPos.getX() < 30000000 && blockPos.getZ() < 30000000;
     }
 
     public static boolean isOutsideBuildHeight(BlockPos blockPos) {
@@ -968,7 +972,8 @@ AutoCloseable {
         if (this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()) {
             return false;
         }
-        return this.getBiome(blockPos).getPrecipitation() == Biome.Precipitation.RAIN;
+        Biome biome = this.getBiome(blockPos);
+        return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.getTemperature(blockPos) >= 0.15f;
     }
 
     public boolean isHumidAt(BlockPos blockPos) {

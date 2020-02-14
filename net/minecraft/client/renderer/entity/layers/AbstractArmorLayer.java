@@ -30,7 +30,7 @@ public abstract class AbstractArmorLayer<T extends LivingEntity, M extends Human
 extends RenderLayer<T, M> {
     protected final A innerModel;
     protected final A outerModel;
-    private static final Map<String, ResourceLocation> ARMOR_LOCATION_CACHE = Maps.newHashMap();
+    protected static final Map<String, ResourceLocation> ARMOR_LOCATION_CACHE = Maps.newHashMap();
 
     protected AbstractArmorLayer(RenderLayerParent<T, M> renderLayerParent, A humanoidModel, A humanoidModel2) {
         super(renderLayerParent);
@@ -40,13 +40,13 @@ extends RenderLayer<T, M> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.CHEST, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.LEGS, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.FEET, i);
-        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.HEAD, i);
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.CHEST, i, this.getArmorModel(EquipmentSlot.CHEST));
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.LEGS, i, this.getArmorModel(EquipmentSlot.LEGS));
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.FEET, i, this.getArmorModel(EquipmentSlot.FEET));
+        this.renderArmorPiece(poseStack, multiBufferSource, livingEntity, f, g, h, j, k, l, EquipmentSlot.HEAD, i, this.getArmorModel(EquipmentSlot.HEAD));
     }
 
-    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, float f, float g, float h, float i, float j, float k, EquipmentSlot equipmentSlot, int l) {
+    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T livingEntity, float f, float g, float h, float i, float j, float k, EquipmentSlot equipmentSlot, int l, A humanoidModel) {
         ItemStack itemStack = ((LivingEntity)livingEntity).getItemBySlot(equipmentSlot);
         if (!(itemStack.getItem() instanceof ArmorItem)) {
             return;
@@ -55,7 +55,6 @@ extends RenderLayer<T, M> {
         if (armorItem.getSlot() != equipmentSlot) {
             return;
         }
-        A humanoidModel = this.getArmorModel(equipmentSlot);
         ((HumanoidModel)this.getParentModel()).copyPropertiesTo(humanoidModel);
         ((HumanoidModel)humanoidModel).prepareMobModel(livingEntity, f, g, h);
         this.setPartVisibility(humanoidModel, equipmentSlot);
@@ -67,15 +66,15 @@ extends RenderLayer<T, M> {
             float n = (float)(m >> 16 & 0xFF) / 255.0f;
             float o = (float)(m >> 8 & 0xFF) / 255.0f;
             float p = (float)(m & 0xFF) / 255.0f;
-            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, n, o, p, null);
-            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, "overlay");
+            this.renderModel(equipmentSlot, poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, n, o, p, null);
+            this.renderModel(equipmentSlot, poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, "overlay");
         } else {
-            this.renderModel(poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, null);
+            this.renderModel(equipmentSlot, poseStack, multiBufferSource, l, armorItem, bl2, humanoidModel, bl, 1.0f, 1.0f, 1.0f, null);
         }
     }
 
-    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorItem armorItem, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h, @Nullable String string) {
-        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.entityCutoutNoCull(this.getArmorLocation(armorItem, bl2, string)), false, bl);
+    private void renderModel(EquipmentSlot equipmentSlot, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorItem armorItem, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h, @Nullable String string) {
+        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.entityCutoutNoCull(this.getArmorLocation(equipmentSlot, armorItem, bl2, string)), false, bl);
         ((AgeableListModel)humanoidModel).renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0f);
     }
 
@@ -87,7 +86,7 @@ extends RenderLayer<T, M> {
         return equipmentSlot == EquipmentSlot.LEGS;
     }
 
-    private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, @Nullable String string) {
+    protected ResourceLocation getArmorLocation(EquipmentSlot equipmentSlot, ArmorItem armorItem, boolean bl, @Nullable String string) {
         String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (bl ? 2 : 1) + (string == null ? "" : "_" + string) + ".png";
         return ARMOR_LOCATION_CACHE.computeIfAbsent(string2, ResourceLocation::new);
     }

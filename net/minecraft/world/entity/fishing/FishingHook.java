@@ -50,7 +50,6 @@ import org.jetbrains.annotations.Nullable;
 public class FishingHook
 extends Entity {
     private static final EntityDataAccessor<Integer> DATA_HOOKED_ENTITY = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.INT);
-    private boolean inGround;
     private int life;
     private final Player owner;
     private int flightTime;
@@ -139,7 +138,7 @@ extends Entity {
         if (!this.level.isClientSide && this.shouldStopFishing()) {
             return;
         }
-        if (this.inGround) {
+        if (this.onGround) {
             ++this.life;
             if (this.life >= 1200) {
                 this.remove();
@@ -163,15 +162,7 @@ extends Entity {
                 this.currentState = FishHookState.BOBBING;
                 return;
             }
-            if (!this.level.isClientSide) {
-                this.checkCollision();
-            }
-            if (this.inGround || this.onGround || this.horizontalCollision) {
-                this.flightTime = 0;
-                this.setDeltaMovement(Vec3.ZERO);
-            } else {
-                ++this.flightTime;
-            }
+            this.checkCollision();
         } else {
             if (this.currentState == FishHookState.HOOKED_IN_ENTITY) {
                 if (this.hookedIn != null) {
@@ -201,6 +192,14 @@ extends Entity {
         }
         this.move(MoverType.SELF, this.getDeltaMovement());
         this.updateRotation();
+        if (this.currentState == FishHookState.FLYING) {
+            if (this.onGround || this.horizontalCollision) {
+                this.flightTime = 0;
+                this.setDeltaMovement(Vec3.ZERO);
+            } else {
+                ++this.flightTime;
+            }
+        }
         double e = 0.92;
         this.setDeltaMovement(this.getDeltaMovement().scale(0.92));
         this.reapplyPosition();
@@ -244,10 +243,12 @@ extends Entity {
         HitResult hitResult = ProjectileUtil.getHitResult(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entity -> !(entity.isSpectator() || !entity.isPickable() && !(entity instanceof ItemEntity) || entity == this.owner && this.flightTime < 5), ClipContext.Block.COLLIDER, true);
         if (hitResult.getType() != HitResult.Type.MISS) {
             if (hitResult.getType() == HitResult.Type.ENTITY) {
-                this.hookedIn = ((EntityHitResult)hitResult).getEntity();
-                this.setHookedEntity();
+                if (!this.level.isClientSide) {
+                    this.hookedIn = ((EntityHitResult)hitResult).getEntity();
+                    this.setHookedEntity();
+                }
             } else {
-                this.inGround = true;
+                this.setDeltaMovement(this.getDeltaMovement().normalize().scale(hitResult.distanceTo(this)));
             }
         }
     }
@@ -371,7 +372,7 @@ extends Entity {
             }
             i = 1;
         }
-        if (this.inGround) {
+        if (this.onGround) {
             i = 2;
         }
         this.remove();

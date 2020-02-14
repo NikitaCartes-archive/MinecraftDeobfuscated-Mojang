@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 public class SmokeParticle
 extends BaseAshSmokeParticle {
     protected SmokeParticle(Level level, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
-        super(level, d, e, f, 0.1f, 0.1f, 0.1f, g, h, i, j, spriteSet, 0.3f, 8, 0.004);
+        super(level, d, e, f, 0.1f, 0.1f, 0.1f, g, h, i, j, spriteSet, 0.3f, 8, 0.004, true);
     }
 
     @Environment(value=EnvType.CLIENT)

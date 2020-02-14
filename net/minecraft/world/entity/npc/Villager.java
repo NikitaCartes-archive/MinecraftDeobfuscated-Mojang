@@ -108,8 +108,8 @@ VillagerDataHolder {
     private long lastRestockGameTime;
     private int numberOfRestocksToday;
     private long lastRestockCheckDayTime;
-    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, new MemoryModuleType[]{MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_LAST_SEEN_TIME});
-    private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.INTERACTABLE_DOORS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_LAST_SEEN);
+    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, new MemoryModuleType[]{MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_LAST_SEEN_TIME});
+    private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.INTERACTABLE_DOORS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_LAST_SEEN);
     public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(MemoryModuleType.HOME, (villager, poiType) -> poiType == PoiType.HOME, MemoryModuleType.JOB_SITE, (villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType, MemoryModuleType.MEETING_POINT, (villager, poiType) -> poiType == PoiType.MEETING);
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
@@ -139,7 +139,7 @@ VillagerDataHolder {
     public void refreshBrain(ServerLevel serverLevel) {
         Brain<Villager> brain = this.getBrain();
         brain.stopAll(serverLevel, this);
-        this.brain = brain.copyWithoutGoals();
+        this.brain = brain.copyWithoutBehaviors();
         this.registerBrainGoals(this.getBrain());
     }
 
@@ -151,10 +151,10 @@ VillagerDataHolder {
             brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(f));
         } else {
             brain.setSchedule(Schedule.VILLAGER_DEFAULT);
-            brain.addActivity(Activity.WORK, VillagerGoalPackages.getWorkPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)));
+            brain.addActivityWithConditions(Activity.WORK, VillagerGoalPackages.getWorkPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT)));
         }
         brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, f));
-        brain.addActivity(Activity.MEET, VillagerGoalPackages.getMeetPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT)));
+        brain.addActivityWithConditions(Activity.MEET, VillagerGoalPackages.getMeetPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT)));
         brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(villagerProfession, f));
         brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(villagerProfession, f));
         brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(villagerProfession, f));
@@ -163,8 +163,8 @@ VillagerDataHolder {
         brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, f));
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
-        brain.setActivity(Activity.IDLE);
-        brain.updateActivity(this.level.getDayTime(), this.level.getGameTime());
+        brain.setActiveActivityIfPossible(Activity.IDLE);
+        brain.updateActivityFromSchedule(this.level.getDayTime(), this.level.getGameTime());
     }
 
     @Override
@@ -185,7 +185,7 @@ VillagerDataHolder {
     @Override
     protected void customServerAiStep() {
         Raid raid;
-        this.level.getProfiler().push("brain");
+        this.level.getProfiler().push("villagerBrain");
         this.getBrain().tick((ServerLevel)this.level, this);
         this.level.getProfiler().pop();
         if (!this.isTrading() && this.updateMerchantTimer > 0) {
@@ -529,6 +529,7 @@ VillagerDataHolder {
         });
     }
 
+    @Override
     public boolean canBreed() {
         return this.foodLevel + this.countFoodPointsInInventory() >= 12 && this.getAge() == 0;
     }
@@ -641,10 +642,10 @@ VillagerDataHolder {
     @Override
     protected void pickUpItem(ItemEntity itemEntity) {
         ItemStack itemStack = itemEntity.getItem();
-        Item item = itemStack.getItem();
-        if (this.wantToPickUp(item)) {
+        if (this.wantsToPickUp(itemStack)) {
             ItemStack itemStack2;
             int i;
+            Item item = itemStack.getItem();
             SimpleContainer simpleContainer = this.getInventory();
             boolean bl = false;
             for (i = 0; i < simpleContainer.getContainerSize(); ++i) {
@@ -674,8 +675,9 @@ VillagerDataHolder {
         }
     }
 
-    public boolean wantToPickUp(Item item) {
-        return WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item);
+    @Override
+    public boolean wantsToPickUp(ItemStack itemStack) {
+        return WANTED_ITEMS.contains(itemStack.getItem()) || this.getVillagerData().getProfession().getRequestedItems().contains(itemStack.getItem());
     }
 
     public boolean hasExcessFood() {

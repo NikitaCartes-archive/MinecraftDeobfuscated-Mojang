@@ -388,7 +388,7 @@ extends NodeEvaluator {
         if (block == Blocks.COCOA) {
             return BlockPathTypes.COCOA;
         }
-        if (block instanceof DoorBlock && material == Material.WOOD && !blockState.getValue(DoorBlock.OPEN).booleanValue()) {
+        if (DoorBlock.isWoodenDoor(blockState) && !blockState.getValue(DoorBlock.OPEN).booleanValue()) {
             return BlockPathTypes.DOOR_WOOD_CLOSED;
         }
         if (block instanceof DoorBlock && material == Material.METAL && !blockState.getValue(DoorBlock.OPEN).booleanValue()) {

@@ -25,6 +25,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -270,6 +271,7 @@ implements SimpleWaterloggedBlock {
         if (menuProvider != null) {
             player.openMenu(menuProvider);
             player.awardStat(this.getOpenChestStat());
+            PiglinAi.angerNearbyPiglinsThatSee(player);
         }
         return InteractionResult.SUCCESS;
     }
@@ -374,6 +376,12 @@ implements SimpleWaterloggedBlock {
     @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
+    }
+
+    @Override
+    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+        super.playerWillDestroy(level, blockPos, blockState, player);
+        PiglinAi.angerNearbyPiglinsThatSee(player);
     }
 }
 

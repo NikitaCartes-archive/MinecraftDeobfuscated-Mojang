@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -96,6 +97,7 @@ extends BaseEntityBlock {
             if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED && level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction))) {
                 player.openMenu(shulkerBoxBlockEntity);
                 player.awardStat(Stats.OPEN_SHULKER_BOX);
+                PiglinAi.angerNearbyPiglinsThatSee(player);
             }
             return InteractionResult.SUCCESS;
         }
@@ -133,6 +135,7 @@ extends BaseEntityBlock {
                 shulkerBoxBlockEntity.unpackLootTable(player);
             }
         }
+        PiglinAi.angerNearbyPiglinsThatSee(player);
         super.playerWillDestroy(level, blockPos, blockState, player);
     }
 

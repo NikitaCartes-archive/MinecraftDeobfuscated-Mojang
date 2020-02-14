@@ -23,12 +23,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
-public class Celebrate
+public class CelebrateVillagersSurvivedRaid
 extends Behavior<Villager> {
     @Nullable
     private Raid currentRaid;
 
-    public Celebrate(int i, int j) {
+    public CelebrateVillagersSurvivedRaid(int i, int j) {
         super(ImmutableMap.of(), i, j);
     }
 
@@ -47,7 +47,7 @@ extends Behavior<Villager> {
     @Override
     protected void stop(ServerLevel serverLevel, Villager villager, long l) {
         this.currentRaid = null;
-        villager.getBrain().updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+        villager.getBrain().updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
     }
 
     @Override

@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -128,10 +127,6 @@ implements SimpleWaterloggedBlock {
         return !WallBlock.isExceptionForConnection(block) && bl || bl2;
     }
 
-    private static boolean specialPostBlock(Block block) {
-        return block == Blocks.LANTERN || block == Blocks.TORCH || block == Blocks.REDSTONE_TORCH;
-    }
-
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         Level levelReader = blockPlaceContext.getLevel();
@@ -146,7 +141,7 @@ implements SimpleWaterloggedBlock {
         BlockState blockState2 = levelReader.getBlockState(blockPos3);
         BlockState blockState3 = levelReader.getBlockState(blockPos4);
         BlockState blockState4 = levelReader.getBlockState(blockPos5);
-        BlockState blockState5 = levelReader.getBlockState(blockPos5);
+        BlockState blockState5 = levelReader.getBlockState(blockPos6);
         boolean bl = this.connectsTo(blockState, blockState.isFaceSturdy(levelReader, blockPos2, Direction.SOUTH), Direction.SOUTH);
         boolean bl2 = this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos3, Direction.WEST), Direction.WEST);
         boolean bl3 = this.connectsTo(blockState3, blockState3.isFaceSturdy(levelReader, blockPos4, Direction.NORTH), Direction.NORTH);
@@ -199,7 +194,7 @@ implements SimpleWaterloggedBlock {
     private BlockState updateShape(LevelReader levelReader, BlockState blockState, BlockPos blockPos, BlockState blockState2, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
         VoxelShape voxelShape = blockState2.getCollisionShape(levelReader, blockPos).getFaceShape(Direction.DOWN);
         boolean bl5 = !(bl && !bl2 && bl3 && !bl4 || !bl && bl2 && !bl3 && bl4);
-        boolean bl6 = bl5 || WallBlock.specialPostBlock(blockState2.getBlock()) || WallBlock.isCovered(voxelShape, POST_TEST);
+        boolean bl6 = bl5 || blockState2.getBlock().is(BlockTags.WALL_POST_OVERRIDE) || WallBlock.isCovered(voxelShape, POST_TEST);
         return this.updateSides((BlockState)blockState.setValue(UP, bl6), bl, bl2, bl3, bl4, voxelShape);
     }
 

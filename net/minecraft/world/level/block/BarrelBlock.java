@@ -13,6 +13,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -53,6 +54,7 @@ extends BaseEntityBlock {
         if (blockEntity instanceof BarrelBlockEntity) {
             player.openMenu((BarrelBlockEntity)blockEntity);
             player.awardStat(Stats.OPEN_BARREL);
+            PiglinAi.angerNearbyPiglinsThatSee(player);
         }
         return InteractionResult.SUCCESS;
     }
@@ -125,6 +127,12 @@ extends BaseEntityBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         return (BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getNearestLookingDirection().getOpposite());
+    }
+
+    @Override
+    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+        super.playerWillDestroy(level, blockPos, blockState, player);
+        PiglinAi.angerNearbyPiglinsThatSee(player);
     }
 }
 

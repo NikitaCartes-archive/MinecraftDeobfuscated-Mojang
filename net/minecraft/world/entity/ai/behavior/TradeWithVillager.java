@@ -91,7 +91,7 @@ extends Behavior<Villager> {
             break;
         }
         if (!itemStack.isEmpty()) {
-            BehaviorUtils.throwItem(villager, itemStack, livingEntity);
+            BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
         }
     }
 

@@ -394,9 +394,9 @@ extends GuiComponent {
             int aa = x >> 8 & 0xFF;
             int ab = x & 0xFF;
             bufferBuilder.vertex(matrix4f, n + 1, t, 0.0f).color(z, aa, ab, y).endVertex();
-            bufferBuilder.vertex(matrix4f, n, t, 0.0f).color(z, aa, ab, y).endVertex();
-            bufferBuilder.vertex(matrix4f, n, t - v + 1, 0.0f).color(z, aa, ab, y).endVertex();
             bufferBuilder.vertex(matrix4f, n + 1, t - v + 1, 0.0f).color(z, aa, ab, y).endVertex();
+            bufferBuilder.vertex(matrix4f, n, t - v + 1, 0.0f).color(z, aa, ab, y).endVertex();
+            bufferBuilder.vertex(matrix4f, n, t, 0.0f).color(z, aa, ab, y).endVertex();
             ++n;
             m = frameTimer.wrapIndex(m + 1);
         }

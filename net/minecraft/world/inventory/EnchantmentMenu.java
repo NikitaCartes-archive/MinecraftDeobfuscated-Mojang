@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -170,6 +171,10 @@ extends AbstractContainerMenu {
                     boolean bl2 = bl = itemStack3.getItem() == Items.BOOK;
                     if (bl) {
                         itemStack3 = new ItemStack(Items.ENCHANTED_BOOK);
+                        CompoundTag compoundTag = itemStack.getTag();
+                        if (compoundTag != null) {
+                            itemStack3.setTag(compoundTag.copy());
+                        }
                         this.enchantSlots.setItem(0, itemStack3);
                     }
                     for (int k = 0; k < list.size(); ++k) {

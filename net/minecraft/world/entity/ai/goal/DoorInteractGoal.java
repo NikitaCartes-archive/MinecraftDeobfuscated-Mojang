@@ -7,10 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 
@@ -63,12 +61,12 @@ extends Goal {
             Node node = path.get(i);
             this.doorPos = new BlockPos(node.x, node.y + 1, node.z);
             if (this.mob.distanceToSqr(this.doorPos.getX(), this.mob.getY(), this.doorPos.getZ()) > 2.25) continue;
-            this.hasDoor = DoorInteractGoal.isDoor(this.mob.level, this.doorPos);
+            this.hasDoor = DoorBlock.isWoodenDoor(this.mob.level, this.doorPos);
             if (!this.hasDoor) continue;
             return true;
         }
         this.doorPos = new BlockPos(this.mob).above();
-        this.hasDoor = DoorInteractGoal.isDoor(this.mob.level, this.doorPos);
+        this.hasDoor = DoorBlock.isWoodenDoor(this.mob.level, this.doorPos);
         return this.hasDoor;
     }
 
@@ -92,11 +90,6 @@ extends Goal {
         if (h < 0.0f) {
             this.passed = true;
         }
-    }
-
-    public static boolean isDoor(Level level, BlockPos blockPos) {
-        BlockState blockState = level.getBlockState(blockPos);
-        return blockState.getBlock() instanceof DoorBlock && blockState.getMaterial() == Material.WOOD;
     }
 }
 

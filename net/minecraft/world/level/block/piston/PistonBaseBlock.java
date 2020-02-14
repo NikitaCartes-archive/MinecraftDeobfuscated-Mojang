@@ -190,6 +190,7 @@ extends DirectionalBlock {
             level.setBlock(blockPos, blockState2, 20);
             level.setBlockEntity(blockPos, MovingPistonBlock.newMovingBlockEntity((BlockState)this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true));
             level.blockUpdated(blockPos, blockState2.getBlock());
+            blockState2.updateNeighbourShapes(level, blockPos, 2);
             if (this.isSticky) {
                 PistonMovingBlockEntity pistonMovingBlockEntity;
                 BlockEntity blockEntity2;

@@ -5,6 +5,7 @@ package net.minecraft.world.inventory;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
@@ -15,9 +16,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +26,7 @@ extends AbstractContainerMenu {
 
         @Override
         public boolean canPlaceItem(int i, ItemStack itemStack) {
-            return itemStack.getItem() == Items.EMERALD || itemStack.getItem() == Items.DIAMOND || itemStack.getItem() == Items.GOLD_INGOT || itemStack.getItem() == Items.IRON_INGOT;
+            return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
         }
 
         @Override
@@ -153,8 +152,7 @@ extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(ItemStack itemStack) {
-            Item item = itemStack.getItem();
-            return item == Items.EMERALD || item == Items.DIAMOND || item == Items.GOLD_INGOT || item == Items.IRON_INGOT;
+            return itemStack.getItem().is(ItemTags.BEACON_PAYMENT_ITEMS);
         }
 
         @Override

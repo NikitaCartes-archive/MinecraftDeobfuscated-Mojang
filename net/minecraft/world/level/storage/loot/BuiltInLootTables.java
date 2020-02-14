@@ -82,6 +82,7 @@ public class BuiltInLootTables {
     public static final ResourceLocation SHEPHERD_GIFT = BuiltInLootTables.register("gameplay/hero_of_the_village/shepherd_gift");
     public static final ResourceLocation TOOLSMITH_GIFT = BuiltInLootTables.register("gameplay/hero_of_the_village/toolsmith_gift");
     public static final ResourceLocation WEAPONSMITH_GIFT = BuiltInLootTables.register("gameplay/hero_of_the_village/weaponsmith_gift");
+    public static final ResourceLocation PIGLIN_BARTERING = BuiltInLootTables.register("gameplay/piglin_bartering");
 
     private static ResourceLocation register(String string) {
         return BuiltInLootTables.register(new ResourceLocation(string));

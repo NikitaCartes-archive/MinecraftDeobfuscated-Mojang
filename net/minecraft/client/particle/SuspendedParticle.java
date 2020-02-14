@@ -24,6 +24,7 @@ extends TextureSheetParticle {
         this.setSize(0.01f, 0.01f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.2f;
         this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+        this.hasPhysics = false;
     }
 
     private SuspendedParticle(Level level, double d, double e, double f, double g, double h, double i) {

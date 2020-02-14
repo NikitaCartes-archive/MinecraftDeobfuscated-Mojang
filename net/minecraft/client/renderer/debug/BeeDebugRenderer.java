@@ -29,7 +29,7 @@ import net.minecraft.client.renderer.debug.PathfindingRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.protocol.game.DebugMobNameGenerator;
+import net.minecraft.network.protocol.game.DebugEntityNameGenerator;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.pathfinder.Path;
 import org.jetbrains.annotations.Nullable;
@@ -132,7 +132,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         map.entrySet().forEach(entry -> {
             BlockPos blockPos = (BlockPos)entry.getKey();
             Set set = (Set)entry.getValue();
-            Set set2 = set.stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet());
+            Set set2 = set.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet());
             int i = 1;
             BeeDebugRenderer.renderTextOverPos(set2.toString(), blockPos, i++, -256);
             BeeDebugRenderer.renderTextOverPos("Flower", blockPos, i++, -1);
@@ -148,7 +148,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         if (collection.size() > 3) {
             return "" + collection.size() + " bees";
         }
-        return collection.stream().map(DebugMobNameGenerator::getMobName).collect(Collectors.toSet()).toString();
+        return collection.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet()).toString();
     }
 
     private static void addBeeToSetInMap(Map<BlockPos, Set<UUID>> map, BeeInfo beeInfo, BlockPos blockPos) {
@@ -331,7 +331,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         }
 
         public String getName() {
-            return DebugMobNameGenerator.getMobName(this.uuid);
+            return DebugEntityNameGenerator.getEntityName(this.uuid);
         }
 
         public String toString() {

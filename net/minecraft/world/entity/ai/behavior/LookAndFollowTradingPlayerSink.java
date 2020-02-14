@@ -70,11 +70,6 @@ extends Behavior<Villager> {
     }
 
     @Override
-    protected /* synthetic */ void stop(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.stop(serverLevel, (Villager)livingEntity, l);
-    }
-
-    @Override
     protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         this.start(serverLevel, (Villager)livingEntity, l);
     }

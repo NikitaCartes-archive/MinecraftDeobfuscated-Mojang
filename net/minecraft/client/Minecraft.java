@@ -915,9 +915,7 @@ WindowEventHandler {
         if (singleTickProfiler != null) {
             singleTickProfiler.endTick();
         }
-        if (bl) {
-            this.fpsPieResults = this.fpsPieProfiler.getResults();
-        }
+        this.fpsPieResults = bl ? this.fpsPieProfiler.getResults() : null;
         this.profiler = this.fpsPieProfiler.getFiller();
     }
 

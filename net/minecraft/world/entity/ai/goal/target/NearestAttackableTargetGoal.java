@@ -60,5 +60,9 @@ extends TargetGoal {
         this.mob.setTarget(this.target);
         super.start();
     }
+
+    public void setTarget(@Nullable LivingEntity livingEntity) {
+        this.target = livingEntity;
+    }
 }
 

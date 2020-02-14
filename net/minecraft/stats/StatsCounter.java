@@ -20,7 +20,8 @@ public class StatsCounter {
     }
 
     public void increment(Player player, Stat<?> stat, int i) {
-        this.setValue(player, stat, this.getValue(stat) + i);
+        int j = (int)Math.min((long)this.getValue(stat) + (long)i, Integer.MAX_VALUE);
+        this.setValue(player, stat, j);
     }
 
     public void setValue(Player player, Stat<?> stat, int i) {

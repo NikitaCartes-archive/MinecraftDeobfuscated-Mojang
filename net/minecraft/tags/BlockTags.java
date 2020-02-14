@@ -67,6 +67,7 @@ public class BlockTags {
     public static final Tag<Block> SIGNS;
     public static final Tag<Block> DRAGON_IMMUNE;
     public static final Tag<Block> WITHER_IMMUNE;
+    public static final Tag<Block> WITHER_SUMMON_BASE_BLOCKS;
     public static final Tag<Block> BEEHIVES;
     public static final Tag<Block> CROPS;
     public static final Tag<Block> BEE_GROWABLES;
@@ -74,6 +75,8 @@ public class BlockTags {
     public static final Tag<Block> FIRE;
     public static final Tag<Block> NYLIUM;
     public static final Tag<Block> WART_BLOCKS;
+    public static final Tag<Block> BEACON_BASE_BLOCKS;
+    public static final Tag<Block> WALL_POST_OVERRIDE;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -143,6 +146,7 @@ public class BlockTags {
         SIGNS = BlockTags.bind("signs");
         DRAGON_IMMUNE = BlockTags.bind("dragon_immune");
         WITHER_IMMUNE = BlockTags.bind("wither_immune");
+        WITHER_SUMMON_BASE_BLOCKS = BlockTags.bind("wither_summon_base_blocks");
         BEEHIVES = BlockTags.bind("beehives");
         CROPS = BlockTags.bind("crops");
         BEE_GROWABLES = BlockTags.bind("bee_growables");
@@ -150,6 +154,8 @@ public class BlockTags {
         FIRE = BlockTags.bind("fire");
         NYLIUM = BlockTags.bind("nylium");
         WART_BLOCKS = BlockTags.bind("wart_blocks");
+        BEACON_BASE_BLOCKS = BlockTags.bind("beacon_base_blocks");
+        WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
     }
 
     static class Wrapper

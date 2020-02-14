@@ -16,7 +16,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        livingEntity.getBrain().updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+        livingEntity.getBrain().updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
     }
 }
 

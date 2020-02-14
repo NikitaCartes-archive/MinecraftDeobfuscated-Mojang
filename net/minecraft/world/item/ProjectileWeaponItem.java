@@ -40,5 +40,7 @@ extends Item {
     public int getEnchantmentValue() {
         return 1;
     }
+
+    public abstract int getDefaultProjectileRange();
 }
 

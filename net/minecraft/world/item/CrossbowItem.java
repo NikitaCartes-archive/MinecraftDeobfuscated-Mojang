@@ -209,7 +209,7 @@ extends ProjectileWeaponItem {
         }
         if (livingEntity2 instanceof CrossbowAttackMob) {
             CrossbowAttackMob crossbowAttackMob = (CrossbowAttackMob)((Object)livingEntity2);
-            crossbowAttackMob.shootProjectile(crossbowAttackMob.getTarget(), itemStack, (Projectile)((Object)projectile), i);
+            crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, (Projectile)((Object)projectile), i);
         } else {
             Vec3 vec3 = livingEntity2.getUpVector(1.0f);
             Quaternion quaternion = new Quaternion(new Vector3f(vec3), i, true);
@@ -367,6 +367,11 @@ extends ProjectileWeaponItem {
             return 1.6f;
         }
         return 3.15f;
+    }
+
+    @Override
+    public int getDefaultProjectileRange() {
+        return 8;
     }
 }
 

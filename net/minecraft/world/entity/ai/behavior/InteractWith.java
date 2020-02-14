@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -27,7 +28,7 @@ extends Behavior<E> {
     private final MemoryModuleType<T> memory;
 
     public InteractWith(EntityType<? extends T> entityType, int i, Predicate<E> predicate, Predicate<T> predicate2, MemoryModuleType<T> memoryModuleType, float f, int j) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, memoryModuleType, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.type = entityType;
         this.speed = f;
         this.interactionRangeSqr = i * i;
@@ -42,8 +43,17 @@ extends Behavior<E> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity2) {
-        return this.selfFilter.test(livingEntity2) && ((LivingEntity)livingEntity2).getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(livingEntity -> this.type.equals(livingEntity.getType()) && this.targetFilter.test((LivingEntity)livingEntity));
+    protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
+        return this.selfFilter.test(livingEntity) && this.seesAtLeastOneValidTarget(livingEntity);
+    }
+
+    private boolean seesAtLeastOneValidTarget(E livingEntity) {
+        List<LivingEntity> list = ((LivingEntity)livingEntity).getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get();
+        return list.stream().anyMatch(this::isTargetValid);
+    }
+
+    private boolean isTargetValid(LivingEntity livingEntity) {
+        return this.type.equals(livingEntity.getType()) && this.targetFilter.test(livingEntity);
     }
 
     @Override

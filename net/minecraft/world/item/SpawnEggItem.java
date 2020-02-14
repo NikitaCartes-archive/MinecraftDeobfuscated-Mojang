@@ -7,6 +7,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class SpawnEggItem
@@ -133,6 +136,26 @@ extends Item {
             return EntityType.byString(compoundTag2.getString("id")).orElse(this.defaultType);
         }
         return this.defaultType;
+    }
+
+    public Optional<Mob> spawnOffspringFromSpawnEgg(Player player, EntityType<? extends Mob> entityType, Level level, Vec3 vec3, ItemStack itemStack) {
+        if (!this.spawnsEntity(itemStack.getTag(), entityType)) {
+            return Optional.empty();
+        }
+        Mob mob = entityType.create(level);
+        if (mob == null) {
+            return Optional.empty();
+        }
+        mob.setBaby(true);
+        mob.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0f, 0.0f);
+        level.addFreshEntity(mob);
+        if (itemStack.hasCustomHoverName()) {
+            mob.setCustomName(itemStack.getHoverName());
+        }
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
+        return Optional.of(mob);
     }
 }
 

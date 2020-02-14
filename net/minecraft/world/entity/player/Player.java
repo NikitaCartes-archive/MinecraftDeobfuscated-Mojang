@@ -1002,7 +1002,7 @@ extends LivingEntity {
             if (bl6) {
                 if (i > 0) {
                     if (entity instanceof LivingEntity) {
-                        ((LivingEntity)entity).knockback(this, (float)i * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                        ((LivingEntity)entity).knockback((float)i * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
                     } else {
                         entity.push(-Mth.sin(this.yRot * ((float)Math.PI / 180)) * (float)i * 0.5f, 0.1, Mth.cos(this.yRot * ((float)Math.PI / 180)) * (float)i * 0.5f);
                     }
@@ -1014,7 +1014,7 @@ extends LivingEntity {
                     List<LivingEntity> list = this.level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0));
                     for (LivingEntity livingEntity : list) {
                         if (livingEntity == this || livingEntity == entity || this.isAlliedTo(livingEntity) || livingEntity instanceof ArmorStand && ((ArmorStand)livingEntity).isMarker() || !(this.distanceToSqr(livingEntity) < 9.0)) continue;
-                        livingEntity.knockback(this, 0.4f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                        livingEntity.knockback(0.4f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
                         livingEntity.hurt(DamageSource.playerAttack(this), l);
                     }
                     this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0f, 1.0f);

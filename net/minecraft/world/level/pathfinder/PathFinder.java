@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,11 +25,10 @@ import net.minecraft.world.level.pathfinder.Target;
 import org.jetbrains.annotations.Nullable;
 
 public class PathFinder {
-    private final BinaryHeap openSet = new BinaryHeap();
-    private final Set<Node> closedSet = Sets.newHashSet();
     private final Node[] neighbors = new Node[32];
     private final int maxVisitedNodes;
     private final NodeEvaluator nodeEvaluator;
+    private final BinaryHeap openSet = new BinaryHeap();
 
     public PathFinder(NodeEvaluator nodeEvaluator, int i) {
         this.nodeEvaluator = nodeEvaluator;
@@ -54,8 +54,8 @@ public class PathFinder {
         node.g = 0.0f;
         node.f = node.h = this.getBestH(node, set);
         this.openSet.clear();
-        this.closedSet.clear();
         this.openSet.insert(node);
+        HashSet set2 = Sets.newHashSet();
         int j = 0;
         int k = (int)((float)this.maxVisitedNodes * g);
         while (!this.openSet.isEmpty() && ++j < k) {

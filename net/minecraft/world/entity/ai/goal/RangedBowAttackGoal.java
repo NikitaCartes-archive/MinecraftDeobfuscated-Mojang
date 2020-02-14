@@ -47,7 +47,7 @@ extends Goal {
     }
 
     protected boolean isHoldingBow() {
-        return ((Mob)this.mob).isHolding(Items.BOW);
+        return ((LivingEntity)this.mob).isHolding(Items.BOW);
     }
 
     @Override

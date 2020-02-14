@@ -52,6 +52,12 @@ StackedContentsCompatible {
         return this.items.get(i);
     }
 
+    public List<ItemStack> removeAllItems() {
+        List<ItemStack> list = this.items.stream().filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList());
+        this.clearContent();
+        return list;
+    }
+
     @Override
     public ItemStack removeItem(int i, int j) {
         ItemStack itemStack = ContainerHelper.removeItem(this.items, i, j);

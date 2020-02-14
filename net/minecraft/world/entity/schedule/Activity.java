@@ -16,6 +16,11 @@ public class Activity {
     public static final Activity RAID = Activity.register("raid");
     public static final Activity PRE_RAID = Activity.register("pre_raid");
     public static final Activity HIDE = Activity.register("hide");
+    public static final Activity FIGHT = Activity.register("fight");
+    public static final Activity CELEBRATE = Activity.register("celebrate");
+    public static final Activity ADMIRE_ITEM = Activity.register("admire_item");
+    public static final Activity AVOID = Activity.register("avoid");
+    public static final Activity RIDE = Activity.register("ride");
     private final String name;
 
     private Activity(String string) {

@@ -8,10 +8,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.sensing.DummySensor;
 import net.minecraft.world.entity.ai.sensing.GolemSensor;
+import net.minecraft.world.entity.ai.sensing.HoglinSpecificSensor;
 import net.minecraft.world.entity.ai.sensing.HurtBySensor;
 import net.minecraft.world.entity.ai.sensing.InteractableDoorsSensor;
 import net.minecraft.world.entity.ai.sensing.NearestBedSensor;
+import net.minecraft.world.entity.ai.sensing.NearestItemSensor;
 import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
+import net.minecraft.world.entity.ai.sensing.PiglinSpecificSensor;
 import net.minecraft.world.entity.ai.sensing.PlayerSensor;
 import net.minecraft.world.entity.ai.sensing.SecondaryPoiSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -20,6 +23,7 @@ import net.minecraft.world.entity.ai.sensing.VillagerHostilesSensor;
 
 public class SensorType<U extends Sensor<?>> {
     public static final SensorType<DummySensor> DUMMY = SensorType.register("dummy", DummySensor::new);
+    public static final SensorType<NearestItemSensor> NEAREST_ITEMS = SensorType.register("nearest_items", NearestItemSensor::new);
     public static final SensorType<NearestLivingEntitySensor> NEAREST_LIVING_ENTITIES = SensorType.register("nearest_living_entities", NearestLivingEntitySensor::new);
     public static final SensorType<PlayerSensor> NEAREST_PLAYERS = SensorType.register("nearest_players", PlayerSensor::new);
     public static final SensorType<InteractableDoorsSensor> INTERACTABLE_DOORS = SensorType.register("interactable_doors", InteractableDoorsSensor::new);
@@ -29,6 +33,8 @@ public class SensorType<U extends Sensor<?>> {
     public static final SensorType<VillagerBabiesSensor> VILLAGER_BABIES = SensorType.register("villager_babies", VillagerBabiesSensor::new);
     public static final SensorType<SecondaryPoiSensor> SECONDARY_POIS = SensorType.register("secondary_pois", SecondaryPoiSensor::new);
     public static final SensorType<GolemSensor> GOLEM_LAST_SEEN = SensorType.register("golem_last_seen", GolemSensor::new);
+    public static final SensorType<PiglinSpecificSensor> PIGLIN_SPECIFIC_SENSOR = SensorType.register("piglin_specific_sensor", PiglinSpecificSensor::new);
+    public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = SensorType.register("hoglin_specific_sensor", HoglinSpecificSensor::new);
     private final Supplier<U> factory;
 
     private SensorType(Supplier<U> supplier) {

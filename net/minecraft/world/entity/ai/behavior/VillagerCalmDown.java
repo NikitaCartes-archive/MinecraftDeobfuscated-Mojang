@@ -23,7 +23,7 @@ extends Behavior<Villager> {
         if (!bl) {
             villager.getBrain().eraseMemory(MemoryModuleType.HURT_BY);
             villager.getBrain().eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
-            villager.getBrain().updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+            villager.getBrain().updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
         }
     }
 

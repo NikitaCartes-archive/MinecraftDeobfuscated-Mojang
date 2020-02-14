@@ -91,7 +91,7 @@ extends Behavior<Villager> {
                 this.giftGivenDuringThisRun = true;
             }
         } else {
-            BehaviorUtils.walkToEntity(villager, player, 5);
+            BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)villager, player, 5);
         }
     }
 
@@ -106,7 +106,7 @@ extends Behavior<Villager> {
     private void throwGift(Villager villager, LivingEntity livingEntity) {
         List<ItemStack> list = this.getItemToThrow(villager);
         for (ItemStack itemStack : list) {
-            BehaviorUtils.throwItem(villager, itemStack, livingEntity);
+            BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
         }
     }
 
@@ -143,11 +143,6 @@ extends Behavior<Villager> {
 
     private static int calculateTimeUntilNextGift(ServerLevel serverLevel) {
         return 600 + serverLevel.random.nextInt(6001);
-    }
-
-    @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Villager)livingEntity, l);
     }
 
     @Override

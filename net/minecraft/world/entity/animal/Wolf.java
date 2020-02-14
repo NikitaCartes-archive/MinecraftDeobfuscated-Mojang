@@ -317,6 +317,10 @@ extends TamableAnimal {
         this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0);
     }
 
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
@@ -325,10 +329,14 @@ extends TamableAnimal {
             return super.mobInteract(player, interactionHand);
         }
         if (this.level.isClientSide) {
-            return this.isOwnedBy(player) || item == Items.BONE && !this.isAngry();
+            if (this.isOwnedBy(player)) return true;
+            if (item != Items.BONE) return false;
+            if (this.isTame()) return false;
+            if (this.isAngry()) return false;
+            return true;
         }
         if (this.isTame()) {
-            if (item.isEdible() && item.getFoodProperties().isMeat() && this.getHealth() < this.getMaxHealth()) {
+            if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
                 if (!player.abilities.instabuild) {
                     itemStack.shrink(1);
                 }
@@ -337,42 +345,40 @@ extends TamableAnimal {
             }
             if (item instanceof DyeItem) {
                 DyeColor dyeColor = ((DyeItem)item).getDyeColor();
-                if (dyeColor != this.getCollarColor()) {
-                    this.setCollarColor(dyeColor);
-                    if (!player.abilities.instabuild) {
-                        itemStack.shrink(1);
-                    }
-                    return true;
-                }
-            } else {
-                boolean bl = super.mobInteract(player, interactionHand);
-                if (!bl || this.isBaby()) {
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                }
-                return bl;
-            }
-            if (this.isOwnedBy(player) && !this.isFood(itemStack)) {
-                this.setOrderedToSit(!this.isOrderedToSit());
-                this.jumping = false;
-                this.navigation.stop();
-                this.setTarget(null);
-            }
-        } else if (item == Items.BONE && !this.isAngry()) {
-            if (!player.abilities.instabuild) {
+                if (dyeColor == this.getCollarColor()) return super.mobInteract(player, interactionHand);
+                this.setCollarColor(dyeColor);
+                if (player.abilities.instabuild) return true;
                 itemStack.shrink(1);
+                return true;
             }
-            if (this.random.nextInt(3) == 0) {
-                this.tame(player);
-                this.navigation.stop();
-                this.setTarget(null);
-                this.setOrderedToSit(true);
-                this.level.broadcastEntityEvent(this, (byte)7);
-            } else {
-                this.level.broadcastEntityEvent(this, (byte)6);
+            boolean bl = super.mobInteract(player, interactionHand);
+            if (bl) {
+                if (!this.isBaby()) return bl;
             }
-            return true;
+            if (!this.isOwnedBy(player)) return bl;
+            if (this.isFood(itemStack)) return bl;
+            this.setOrderedToSit(!this.isOrderedToSit());
+            this.jumping = false;
+            this.navigation.stop();
+            this.setTarget(null);
+            return bl;
         }
-        return super.mobInteract(player, interactionHand);
+        if (item != Items.BONE) return super.mobInteract(player, interactionHand);
+        if (this.isAngry()) return super.mobInteract(player, interactionHand);
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
+        if (this.random.nextInt(3) == 0) {
+            this.tame(player);
+            this.navigation.stop();
+            this.setTarget(null);
+            this.setOrderedToSit(true);
+            this.level.broadcastEntityEvent(this, (byte)7);
+            return true;
+        } else {
+            this.level.broadcastEntityEvent(this, (byte)6);
+        }
+        return true;
     }
 
     @Override

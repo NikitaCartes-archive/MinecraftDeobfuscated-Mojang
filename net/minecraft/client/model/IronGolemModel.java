@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.IronGolem;
 
 @Environment(value=EnvType.CLIENT)
@@ -55,8 +56,8 @@ extends ListModel<T> {
     public void setupAnim(T ironGolem, float f, float g, float h, float i, float j) {
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
-        this.leg0.xRot = -1.5f * this.triangleWave(f, 13.0f) * g;
-        this.leg1.xRot = 1.5f * this.triangleWave(f, 13.0f) * g;
+        this.leg0.xRot = -1.5f * Mth.triangleWave(f, 13.0f) * g;
+        this.leg1.xRot = 1.5f * Mth.triangleWave(f, 13.0f) * g;
         this.leg0.yRot = 0.0f;
         this.leg1.yRot = 0.0f;
     }
@@ -65,22 +66,18 @@ extends ListModel<T> {
     public void prepareMobModel(T ironGolem, float f, float g, float h) {
         int i = ((IronGolem)ironGolem).getAttackAnimationTick();
         if (i > 0) {
-            this.arm0.xRot = -2.0f + 1.5f * this.triangleWave((float)i - h, 10.0f);
-            this.arm1.xRot = -2.0f + 1.5f * this.triangleWave((float)i - h, 10.0f);
+            this.arm0.xRot = -2.0f + 1.5f * Mth.triangleWave((float)i - h, 10.0f);
+            this.arm1.xRot = -2.0f + 1.5f * Mth.triangleWave((float)i - h, 10.0f);
         } else {
             int j = ((IronGolem)ironGolem).getOfferFlowerTick();
             if (j > 0) {
-                this.arm0.xRot = -0.8f + 0.025f * this.triangleWave(j, 70.0f);
+                this.arm0.xRot = -0.8f + 0.025f * Mth.triangleWave(j, 70.0f);
                 this.arm1.xRot = 0.0f;
             } else {
-                this.arm0.xRot = (-0.2f + 1.5f * this.triangleWave(f, 13.0f)) * g;
-                this.arm1.xRot = (-0.2f - 1.5f * this.triangleWave(f, 13.0f)) * g;
+                this.arm0.xRot = (-0.2f + 1.5f * Mth.triangleWave(f, 13.0f)) * g;
+                this.arm1.xRot = (-0.2f - 1.5f * Mth.triangleWave(f, 13.0f)) * g;
             }
         }
-    }
-
-    private float triangleWave(float f, float g) {
-        return (Math.abs(f % g - g * 0.5f) - g * 0.25f) / (g * 0.25f);
     }
 
     public ModelPart getFlowerHoldingArm() {

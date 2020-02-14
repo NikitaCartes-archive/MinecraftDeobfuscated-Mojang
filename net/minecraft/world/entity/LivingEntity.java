@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -836,7 +837,7 @@ extends Entity {
                     e = (Math.random() - Math.random()) * 0.01;
                 }
                 this.hurtDir = (float)(Mth.atan2(e, d) * 57.2957763671875 - (double)this.yRot);
-                this.knockback(entity2, 0.4f, d, e);
+                this.knockback(0.4f, d, e);
             } else {
                 this.hurtDir = (int)(Math.random() * 2.0) * 180;
             }
@@ -874,7 +875,7 @@ extends Entity {
     }
 
     protected void blockedByShield(LivingEntity livingEntity) {
-        livingEntity.knockback(this, 0.5f, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
+        livingEntity.knockback(0.5f, livingEntity.getX() - this.getX(), livingEntity.getZ() - this.getZ());
     }
 
     private boolean checkTotemDeathProtection(DamageSource damageSource) {
@@ -1042,7 +1043,7 @@ extends Entity {
         return builder;
     }
 
-    public void knockback(Entity entity, float f, double d, double e) {
+    public void knockback(float f, double d, double e) {
         if ((f = (float)((double)f * (1.0 - this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue()))) <= 0.0f) {
             return;
         }
@@ -1412,6 +1413,14 @@ extends Entity {
 
     public ItemStack getOffhandItem() {
         return this.getItemBySlot(EquipmentSlot.OFFHAND);
+    }
+
+    public boolean isHolding(Item item) {
+        return this.isHolding((Item item2) -> item2 == item);
+    }
+
+    public boolean isHolding(Predicate<Item> predicate) {
+        return predicate.test(this.getMainHandItem().getItem()) || predicate.test(this.getOffhandItem().getItem());
     }
 
     public ItemStack getItemInHand(InteractionHand interactionHand) {

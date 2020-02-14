@@ -34,7 +34,7 @@ extends Behavior<Villager> {
                 brain.eraseMemory(MemoryModuleType.BREED_TARGET);
                 brain.eraseMemory(MemoryModuleType.INTERACTION_TARGET);
             }
-            brain.setActivity(Activity.PANIC);
+            brain.setActiveActivityIfPossible(Activity.PANIC);
         }
     }
 

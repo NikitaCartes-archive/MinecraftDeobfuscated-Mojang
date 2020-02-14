@@ -35,12 +35,12 @@ extends Behavior<LivingEntity> {
         if (this.ticksHidden > this.stayHiddenTicks || bl) {
             brain.eraseMemory(MemoryModuleType.HEARD_BELL_TIME);
             brain.eraseMemory(MemoryModuleType.HIDING_PLACE);
-            brain.updateActivity(serverLevel.getDayTime(), serverLevel.getGameTime());
+            brain.updateActivityFromSchedule(serverLevel.getDayTime(), serverLevel.getGameTime());
             this.ticksHidden = 0;
             return;
         }
         BlockPos blockPos = brain.getMemory(MemoryModuleType.HIDING_PLACE).get().pos();
-        if (blockPos.closerThan(new BlockPos(livingEntity), (double)(this.closeEnoughDist + 1))) {
+        if (blockPos.closerThan(new BlockPos(livingEntity), (double)this.closeEnoughDist)) {
             ++this.ticksHidden;
         }
     }

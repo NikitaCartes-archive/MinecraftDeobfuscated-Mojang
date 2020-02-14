@@ -68,7 +68,7 @@ extends AbstractIllager {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new VindicatorBreakDoorGoal(this));
         this.goalSelector.addGoal(2, new AbstractIllager.RaiderOpenDoorGoal(this));
-        this.goalSelector.addGoal(3, new Raider.HoldGroundAttackGoal(this, this, 10.0f));
+        this.goalSelector.addGoal(3, new Raider.HoldGroundAttackGoal(this, 10.0f));
         this.goalSelector.addGoal(4, new VindicatorMeleeAttackGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Raider.class).setAlertOthers(new Class[0]));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<Player>((Mob)this, Player.class, true));

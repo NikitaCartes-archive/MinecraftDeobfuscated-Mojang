@@ -57,6 +57,7 @@ public class ItemTags {
     public static final Tag<Item> COALS;
     public static final Tag<Item> ARROWS;
     public static final Tag<Item> LECTERN_BOOKS;
+    public static final Tag<Item> BEACON_PAYMENT_ITEMS;
 
     public static void reset(TagCollection<Item> tagCollection) {
         source = tagCollection;
@@ -116,6 +117,7 @@ public class ItemTags {
         COALS = ItemTags.bind("coals");
         ARROWS = ItemTags.bind("arrows");
         LECTERN_BOOKS = ItemTags.bind("lectern_books");
+        BEACON_PAYMENT_ITEMS = ItemTags.bind("beacon_payment_items");
     }
 
     public static class Wrapper

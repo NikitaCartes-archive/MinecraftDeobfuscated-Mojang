@@ -14,6 +14,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
@@ -98,6 +99,7 @@ implements SimpleWaterloggedBlock {
         playerEnderChestContainer.setActiveChest(enderChestBlockEntity);
         player2.openMenu(new SimpleMenuProvider((i, inventory, player) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
         player2.awardStat(Stats.OPEN_ENDERCHEST);
+        PiglinAi.angerNearbyPiglinsThatSee(player2);
         return InteractionResult.SUCCESS;
     }
 
@@ -156,6 +158,12 @@ implements SimpleWaterloggedBlock {
     @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
+    }
+
+    @Override
+    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+        super.playerWillDestroy(level, blockPos, blockState, player);
+        PiglinAi.angerNearbyPiglinsThatSee(player);
     }
 }
 

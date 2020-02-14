@@ -30,10 +30,10 @@ extends Behavior<LivingEntity> {
         if (raid != null) {
             if (!raid.hasFirstWaveSpawned() || raid.isBetweenWaves()) {
                 brain.setDefaultActivity(Activity.PRE_RAID);
-                brain.setActivity(Activity.PRE_RAID);
+                brain.setActiveActivityIfPossible(Activity.PRE_RAID);
             } else {
                 brain.setDefaultActivity(Activity.RAID);
-                brain.setActivity(Activity.RAID);
+                brain.setActiveActivityIfPossible(Activity.RAID);
             }
         }
     }

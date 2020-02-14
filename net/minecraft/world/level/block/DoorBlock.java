@@ -263,5 +263,13 @@ extends Block {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(HALF, FACING, OPEN, HINGE, POWERED);
     }
+
+    public static boolean isWoodenDoor(Level level, BlockPos blockPos) {
+        return DoorBlock.isWoodenDoor(level.getBlockState(blockPos));
+    }
+
+    public static boolean isWoodenDoor(BlockState blockState) {
+        return blockState.getBlock() instanceof DoorBlock && (blockState.getMaterial() == Material.WOOD || blockState.getMaterial() == Material.NETHER_WOOD);
+    }
 }
 

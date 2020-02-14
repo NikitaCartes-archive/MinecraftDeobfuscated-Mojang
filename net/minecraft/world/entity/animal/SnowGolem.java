@@ -120,7 +120,7 @@ implements RangedAttackMob {
         double h = livingEntity.getZ() - this.getZ();
         float i = Mth.sqrt(e * e + h * h) * 0.2f;
         snowball.shoot(e, g + (double)i, h, 1.6f, 12.0f);
-        this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0f, 1.0f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
+        this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0f, 0.4f / (this.getRandom().nextFloat() * 0.4f + 0.8f));
         this.level.addFreshEntity(snowball);
     }
 
@@ -136,6 +136,8 @@ implements RangedAttackMob {
             if (!this.level.isClientSide) {
                 this.setPumpkin(false);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
+                this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), 1.7f);
+                this.playSound(SoundEvents.SNOW_GOLEM_SHEAR, 1.0f, 1.0f);
             }
             return true;
         }

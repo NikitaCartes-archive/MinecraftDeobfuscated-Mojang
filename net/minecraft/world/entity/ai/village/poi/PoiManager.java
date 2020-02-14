@@ -59,7 +59,8 @@ extends SectionStorage<PoiSection> {
     }
 
     public Stream<PoiRecord> getInSquare(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
-        return ChunkPos.rangeClosed(new ChunkPos(blockPos), Math.floorDiv(i, 16)).flatMap(chunkPos -> this.getInChunk(predicate, (ChunkPos)chunkPos, occupancy));
+        int j = Math.floorDiv(i, 16) + 1;
+        return ChunkPos.rangeClosed(new ChunkPos(blockPos), j).flatMap(chunkPos -> this.getInChunk(predicate, (ChunkPos)chunkPos, occupancy));
     }
 
     public Stream<PoiRecord> getInRange(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
@@ -83,8 +84,8 @@ extends SectionStorage<PoiSection> {
         return this.findAll(predicate, predicate2, blockPos, i, occupancy).findFirst();
     }
 
-    public Optional<BlockPos> findClosest(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, Occupancy occupancy) {
-        return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).sorted(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos))).filter(predicate2).findFirst();
+    public Optional<BlockPos> findClosest(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
+        return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).sorted(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos))).findFirst();
     }
 
     public Optional<BlockPos> take(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i) {

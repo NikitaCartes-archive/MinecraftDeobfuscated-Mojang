@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -62,6 +63,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
@@ -454,7 +456,7 @@ extends LivingEntity {
         if (!this.level.isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             List<ItemEntity> list = this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(1.0, 0.0, 1.0));
             for (ItemEntity itemEntity : list) {
-                if (itemEntity.removed || itemEntity.getItem().isEmpty() || itemEntity.hasPickUpDelay()) continue;
+                if (itemEntity.removed || itemEntity.getItem().isEmpty() || itemEntity.hasPickUpDelay() || !this.wantsToPickUp(itemEntity.getItem())) continue;
                 this.pickUpItem(itemEntity);
             }
         }
@@ -462,10 +464,17 @@ extends LivingEntity {
     }
 
     protected void pickUpItem(ItemEntity itemEntity) {
-        EquipmentSlot equipmentSlot;
-        ItemStack itemStack2;
         ItemStack itemStack = itemEntity.getItem();
-        boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2 = this.getItemBySlot(equipmentSlot = Mob.getEquipmentSlotForItem(itemStack)), equipmentSlot);
+        if (this.equipItemIfPossible(itemStack)) {
+            this.take(itemEntity, itemStack.getCount());
+            itemEntity.remove();
+        }
+    }
+
+    public boolean equipItemIfPossible(ItemStack itemStack) {
+        EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+        ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
+        boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
         if (bl && this.canHoldItem(itemStack)) {
             double d = this.getEquipmentDropChance(equipmentSlot);
             if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
@@ -482,9 +491,9 @@ extends LivingEntity {
                 }
             }
             this.persistenceRequired = true;
-            this.take(itemEntity, itemStack.getCount());
-            itemEntity.remove();
+            return true;
         }
+        return false;
     }
 
     protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
@@ -513,8 +522,12 @@ extends LivingEntity {
         return bl;
     }
 
-    protected boolean canHoldItem(ItemStack itemStack) {
+    public boolean canHoldItem(ItemStack itemStack) {
         return true;
+    }
+
+    public boolean wantsToPickUp(ItemStack itemStack) {
+        return this.canHoldItem(itemStack);
     }
 
     public boolean removeWhenFarAway(double d) {
@@ -933,7 +946,17 @@ extends LivingEntity {
         return super.interact(player, interactionHand);
     }
 
+    protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
+    }
+
     protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+        ItemStack itemStack = player.getItemInHand(interactionHand);
+        Item item = itemStack.getItem();
+        if (!this.level.isClientSide && item instanceof SpawnEggItem) {
+            SpawnEggItem spawnEggItem = (SpawnEggItem)item;
+            Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this.getType(), this.level, this.position(), itemStack);
+            optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, (Mob)mob));
+        }
         return false;
     }
 
@@ -1123,6 +1146,9 @@ extends LivingEntity {
         return (this.entityData.get(DATA_MOB_FLAGS_ID) & 4) != 0;
     }
 
+    public void setBaby(boolean bl) {
+    }
+
     @Override
     public HumanoidArm getMainArm() {
         return this.isLeftHanded() ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
@@ -1151,26 +1177,27 @@ extends LivingEntity {
         }
         if (bl = entity.hurt(DamageSource.mobAttack(this), f)) {
             if (g > 0.0f && entity instanceof LivingEntity) {
-                ((LivingEntity)entity).knockback(this, g * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
+                ((LivingEntity)entity).knockback(g * 0.5f, Mth.sin(this.yRot * ((float)Math.PI / 180)), -Mth.cos(this.yRot * ((float)Math.PI / 180)));
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
             }
             if (entity instanceof Player) {
-                ItemStack itemStack2;
                 Player player = (Player)entity;
-                ItemStack itemStack = this.getMainHandItem();
-                ItemStack itemStack3 = itemStack2 = player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY;
-                if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
-                    float h = 0.25f + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05f;
-                    if (this.random.nextFloat() < h) {
-                        player.getCooldowns().addCooldown(Items.SHIELD, 100);
-                        this.level.broadcastEntityEvent(player, (byte)30);
-                    }
-                }
+                this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
             }
             this.doEnchantDamageEffects(this, entity);
             this.setLastHurtMob(entity);
         }
         return bl;
+    }
+
+    private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
+        if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
+            float f = 0.25f + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05f;
+            if (this.random.nextFloat() < f) {
+                player.getCooldowns().addCooldown(Items.SHIELD, 100);
+                this.level.broadcastEntityEvent(player, (byte)30);
+            }
+        }
     }
 
     protected boolean isSunBurnTick() {
@@ -1192,10 +1219,6 @@ extends LivingEntity {
         } else {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
         }
-    }
-
-    public boolean isHolding(Item item) {
-        return this.getMainHandItem().getItem() == item || this.getOffhandItem().getItem() == item;
     }
 }
 

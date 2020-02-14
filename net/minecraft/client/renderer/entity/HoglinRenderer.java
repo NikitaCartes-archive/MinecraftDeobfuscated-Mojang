@@ -9,7 +9,7 @@ import net.minecraft.client.model.HoglinModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.Hoglin;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
 
 @Environment(value=EnvType.CLIENT)
 public class HoglinRenderer

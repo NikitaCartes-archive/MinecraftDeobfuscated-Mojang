@@ -79,6 +79,7 @@ import net.minecraft.client.renderer.entity.ParrotRenderer;
 import net.minecraft.client.renderer.entity.PhantomRenderer;
 import net.minecraft.client.renderer.entity.PigRenderer;
 import net.minecraft.client.renderer.entity.PigZombieRenderer;
+import net.minecraft.client.renderer.entity.PiglinRenderer;
 import net.minecraft.client.renderer.entity.PillagerRenderer;
 import net.minecraft.client.renderer.entity.PolarBearRenderer;
 import net.minecraft.client.renderer.entity.PufferfishRenderer;
@@ -227,6 +228,7 @@ public class EntityRenderDispatcher {
         this.register(EntityType.PARROT, new ParrotRenderer(this));
         this.register(EntityType.PHANTOM, new PhantomRenderer(this));
         this.register(EntityType.PIG, new PigRenderer(this));
+        this.register(EntityType.PIGLIN, new PiglinRenderer(this));
         this.register(EntityType.PILLAGER, new PillagerRenderer(this));
         this.register(EntityType.POLAR_BEAR, new PolarBearRenderer(this));
         this.register(EntityType.POTION, new ThrownItemRenderer(this, itemRenderer));

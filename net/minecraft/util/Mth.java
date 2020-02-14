@@ -581,6 +581,11 @@ public class Mth {
         return (float)d;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static float triangleWave(float f, float g) {
+        return (Math.abs(f % g - g * 0.5f) - g * 0.25f) / (g * 0.25f);
+    }
+
     static {
         for (int i = 0; i < 257; ++i) {
             double d = (double)i / 256.0;
