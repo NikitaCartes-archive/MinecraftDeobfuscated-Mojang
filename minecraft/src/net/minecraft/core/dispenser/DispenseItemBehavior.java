@@ -474,6 +474,7 @@ public interface DispenseItemBehavior {
 						for (Sheep sheep : level.getEntitiesOfClass(Sheep.class, new AABB(blockPos))) {
 							if (sheep.isAlive() && !sheep.isSheared() && !sheep.isBaby()) {
 								sheep.shear();
+								level.playSound(null, blockPos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
 								if (itemStack.hurt(1, level.random, null)) {
 									itemStack.setCount(0);
 								}

@@ -66,7 +66,7 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		this.shoot((double)k, (double)l, (double)m, i, j);
 		Vec3 vec3 = entity.getDeltaMovement();
-		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround ? 0.0 : vec3.y, vec3.z));
+		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.isOnGround() ? 0.0 : vec3.y, vec3.z));
 	}
 
 	@Override

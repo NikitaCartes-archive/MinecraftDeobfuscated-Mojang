@@ -60,10 +60,24 @@ public class AxeItem extends DiggerItem {
 		Blocks.CRIMSON_STEM,
 		Blocks.CRIMSON_BUTTON,
 		Blocks.CRIMSON_PRESSURE_PLATE,
+		Blocks.CRIMSON_FENCE,
+		Blocks.CRIMSON_FENCE_GATE,
+		Blocks.CRIMSON_STAIRS,
+		Blocks.CRIMSON_DOOR,
+		Blocks.CRIMSON_TRAPDOOR,
+		Blocks.CRIMSON_SIGN,
+		Blocks.CRIMSON_SLAB,
 		Blocks.WARPED_PLANKS,
 		Blocks.WARPED_STEM,
 		Blocks.WARPED_BUTTON,
-		Blocks.WARPED_PRESSURE_PLATE
+		Blocks.WARPED_PRESSURE_PLATE,
+		Blocks.WARPED_FENCE,
+		Blocks.WARPED_FENCE_GATE,
+		Blocks.WARPED_STAIRS,
+		Blocks.WARPED_DOOR,
+		Blocks.WARPED_TRAPDOOR,
+		Blocks.WARPED_SIGN,
+		Blocks.WARPED_SLAB
 	);
 	protected static final Map<Block, Block> STRIPABLES = new Builder<Block, Block>()
 		.put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)

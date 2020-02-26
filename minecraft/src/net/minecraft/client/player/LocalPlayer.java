@@ -795,7 +795,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			if (this.portalTime == 0.0F) {
-				this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PORTAL_TRIGGER, this.random.nextFloat() * 0.4F + 0.8F));
+				this.minecraft.getSoundManager().play(SimpleSoundInstance.forLocalAmbience(SoundEvents.PORTAL_TRIGGER, this.random.nextFloat() * 0.4F + 0.8F, 0.25F));
 			}
 
 			this.portalTime += 0.0125F;

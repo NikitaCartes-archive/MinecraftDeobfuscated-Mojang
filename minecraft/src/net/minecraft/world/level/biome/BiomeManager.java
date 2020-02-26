@@ -1,5 +1,7 @@
 package net.minecraft.world.level.biome;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 
 public class BiomeManager {
@@ -19,6 +21,11 @@ public class BiomeManager {
 
 	public Biome getBiome(BlockPos blockPos) {
 		return this.zoomer.getBiome(this.biomeZoomSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.noiseBiomeSource);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Biome getNoiseBiome(int i, int j, int k) {
+		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}
 
 	public interface NoiseBiomeSource {

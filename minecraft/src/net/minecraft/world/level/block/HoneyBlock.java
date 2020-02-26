@@ -60,7 +60,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 	}
 
 	private boolean isSlidingDown(BlockPos blockPos, Entity entity) {
-		if (entity.onGround) {
+		if (entity.isOnGround()) {
 			return false;
 		} else if (entity.getY() > (double)blockPos.getY() + 0.9375 - 1.0E-7) {
 			return false;

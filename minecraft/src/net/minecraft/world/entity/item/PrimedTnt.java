@@ -74,7 +74,7 @@ public class PrimedTnt extends Entity {
 				this.explode();
 			}
 		} else {
-			this.updateInWaterState();
+			this.updateInWaterStateAndDoFluidPushing();
 			if (this.level.isClientSide) {
 				this.level.addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
 			}

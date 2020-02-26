@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,6 +38,20 @@ public class HoeItem extends TieredItem {
 	public HoeItem(Tier tier, float f, Item.Properties properties) {
 		super(tier, properties);
 		this.attackSpeed = f;
+	}
+
+	@Override
+	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
+		return blockState.is(BlockTags.WART_BLOCKS) ? 15.0F : 1.0F;
+	}
+
+	@Override
+	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
+		if (!level.isClientSide) {
+			itemStack.hurtAndBreak(1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		}
+
+		return blockState.is(BlockTags.WART_BLOCKS) ? true : super.mineBlock(itemStack, level, blockState, blockPos, livingEntity);
 	}
 
 	@Override

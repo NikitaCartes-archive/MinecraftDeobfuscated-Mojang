@@ -146,7 +146,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<CountFeatureConfiguration> SEA_PICKLE = register("sea_pickle", new SeaPickleFeature(CountFeatureConfiguration::deserialize));
 	public static final Feature<SimpleBlockConfiguration> SIMPLE_BLOCK = register("simple_block", new SimpleBlockFeature(SimpleBlockConfiguration::deserialize));
 	public static final Feature<ProbabilityFeatureConfiguration> BAMBOO = register("bamboo", new BambooFeature(ProbabilityFeatureConfiguration::deserialize));
-	public static final Feature<HugeFungiConfiguration> HUGE_FUNGI = register("huge_fungi", new HugeFungiFeature(HugeFungiConfiguration::deserialize));
+	public static final Feature<HugeFungusConfiguration> HUGE_FUNGUS = register("huge_fungus", new HugeFungusFeature(HugeFungusConfiguration::deserialize));
 	public static final Feature<BlockPileConfiguration> NETHER_FOREST_VEGETATION = register(
 		"nether_forest_vegetation", new NetherForestVegetationFeature(BlockPileConfiguration::deserialize)
 	);
@@ -189,7 +189,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		hashBiMap.put("Village".toLowerCase(Locale.ROOT), VILLAGE);
 		hashBiMap.put("Nether_Fossil".toLowerCase(Locale.ROOT), NETHER_FOSSIL);
 	});
-	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE);
+	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
 	private final Function<Dynamic<?>, ? extends FC> configurationFactory;
 
 	private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

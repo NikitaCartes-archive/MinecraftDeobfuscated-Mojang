@@ -498,7 +498,7 @@ public class Raid {
 				raider.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.0, (double)blockPos.getZ() + 0.5);
 				raider.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.EVENT, null, null);
 				raider.applyRaidBuffs(i, false);
-				raider.onGround = true;
+				raider.setOnGround(true);
 				this.level.addFreshEntity(raider);
 			}
 		}

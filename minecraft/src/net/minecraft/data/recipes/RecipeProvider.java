@@ -20,6 +20,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -183,6 +184,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.ACACIA_SLAB, Blocks.ACACIA_PLANKS);
 		woodenStairs(consumer, Blocks.ACACIA_STAIRS, Blocks.ACACIA_PLANKS);
 		woodenTrapdoor(consumer, Blocks.ACACIA_TRAPDOOR, Blocks.ACACIA_PLANKS);
+		woodenSign(consumer, Blocks.ACACIA_SIGN, Blocks.ACACIA_PLANKS);
 		woodenButton(consumer, Blocks.BIRCH_BUTTON, Blocks.BIRCH_PLANKS);
 		woodenDoor(consumer, Blocks.BIRCH_DOOR, Blocks.BIRCH_PLANKS);
 		woodenFence(consumer, Blocks.BIRCH_FENCE, Blocks.BIRCH_PLANKS);
@@ -191,6 +193,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.BIRCH_SLAB, Blocks.BIRCH_PLANKS);
 		woodenStairs(consumer, Blocks.BIRCH_STAIRS, Blocks.BIRCH_PLANKS);
 		woodenTrapdoor(consumer, Blocks.BIRCH_TRAPDOOR, Blocks.BIRCH_PLANKS);
+		woodenSign(consumer, Blocks.BIRCH_SIGN, Blocks.BIRCH_PLANKS);
 		woodenButton(consumer, Blocks.CRIMSON_BUTTON, Blocks.CRIMSON_PLANKS);
 		woodenDoor(consumer, Blocks.CRIMSON_DOOR, Blocks.CRIMSON_PLANKS);
 		woodenFence(consumer, Blocks.CRIMSON_FENCE, Blocks.CRIMSON_PLANKS);
@@ -199,6 +202,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.CRIMSON_SLAB, Blocks.CRIMSON_PLANKS);
 		woodenStairs(consumer, Blocks.CRIMSON_STAIRS, Blocks.CRIMSON_PLANKS);
 		woodenTrapdoor(consumer, Blocks.CRIMSON_TRAPDOOR, Blocks.CRIMSON_PLANKS);
+		woodenSign(consumer, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_PLANKS);
 		woodenButton(consumer, Blocks.DARK_OAK_BUTTON, Blocks.DARK_OAK_PLANKS);
 		woodenDoor(consumer, Blocks.DARK_OAK_DOOR, Blocks.DARK_OAK_PLANKS);
 		woodenFence(consumer, Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_PLANKS);
@@ -207,6 +211,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.DARK_OAK_SLAB, Blocks.DARK_OAK_PLANKS);
 		woodenStairs(consumer, Blocks.DARK_OAK_STAIRS, Blocks.DARK_OAK_PLANKS);
 		woodenTrapdoor(consumer, Blocks.DARK_OAK_TRAPDOOR, Blocks.DARK_OAK_PLANKS);
+		woodenSign(consumer, Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_PLANKS);
 		woodenButton(consumer, Blocks.JUNGLE_BUTTON, Blocks.JUNGLE_PLANKS);
 		woodenDoor(consumer, Blocks.JUNGLE_DOOR, Blocks.JUNGLE_PLANKS);
 		woodenFence(consumer, Blocks.JUNGLE_FENCE, Blocks.JUNGLE_PLANKS);
@@ -215,6 +220,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.JUNGLE_SLAB, Blocks.JUNGLE_PLANKS);
 		woodenStairs(consumer, Blocks.JUNGLE_STAIRS, Blocks.JUNGLE_PLANKS);
 		woodenTrapdoor(consumer, Blocks.JUNGLE_TRAPDOOR, Blocks.JUNGLE_PLANKS);
+		woodenSign(consumer, Blocks.JUNGLE_SIGN, Blocks.JUNGLE_PLANKS);
 		woodenButton(consumer, Blocks.OAK_BUTTON, Blocks.OAK_PLANKS);
 		woodenDoor(consumer, Blocks.OAK_DOOR, Blocks.OAK_PLANKS);
 		woodenFence(consumer, Blocks.OAK_FENCE, Blocks.OAK_PLANKS);
@@ -223,6 +229,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.OAK_SLAB, Blocks.OAK_PLANKS);
 		woodenStairs(consumer, Blocks.OAK_STAIRS, Blocks.OAK_PLANKS);
 		woodenTrapdoor(consumer, Blocks.OAK_TRAPDOOR, Blocks.OAK_PLANKS);
+		woodenSign(consumer, Blocks.OAK_SIGN, Blocks.OAK_PLANKS);
 		woodenButton(consumer, Blocks.SPRUCE_BUTTON, Blocks.SPRUCE_PLANKS);
 		woodenDoor(consumer, Blocks.SPRUCE_DOOR, Blocks.SPRUCE_PLANKS);
 		woodenFence(consumer, Blocks.SPRUCE_FENCE, Blocks.SPRUCE_PLANKS);
@@ -231,6 +238,7 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.SPRUCE_SLAB, Blocks.SPRUCE_PLANKS);
 		woodenStairs(consumer, Blocks.SPRUCE_STAIRS, Blocks.SPRUCE_PLANKS);
 		woodenTrapdoor(consumer, Blocks.SPRUCE_TRAPDOOR, Blocks.SPRUCE_PLANKS);
+		woodenSign(consumer, Blocks.SPRUCE_SIGN, Blocks.SPRUCE_PLANKS);
 		woodenButton(consumer, Blocks.WARPED_BUTTON, Blocks.WARPED_PLANKS);
 		woodenDoor(consumer, Blocks.WARPED_DOOR, Blocks.WARPED_PLANKS);
 		woodenFence(consumer, Blocks.WARPED_FENCE, Blocks.WARPED_PLANKS);
@@ -239,6 +247,180 @@ public class RecipeProvider implements DataProvider {
 		woodenSlab(consumer, Blocks.WARPED_SLAB, Blocks.WARPED_PLANKS);
 		woodenStairs(consumer, Blocks.WARPED_STAIRS, Blocks.WARPED_PLANKS);
 		woodenTrapdoor(consumer, Blocks.WARPED_TRAPDOOR, Blocks.WARPED_PLANKS);
+		woodenSign(consumer, Blocks.WARPED_SIGN, Blocks.WARPED_PLANKS);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLACK_WOOL, Items.BLACK_DYE);
+		carpetFromWool(consumer, Blocks.BLACK_CARPET, Blocks.BLACK_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLACK_CARPET, Items.BLACK_DYE);
+		bedFromPlanksAndWool(consumer, Items.BLACK_BED, Blocks.BLACK_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.BLACK_BED, Items.BLACK_DYE);
+		banner(consumer, Items.BLACK_BANNER, Blocks.BLACK_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BLUE_WOOL, Items.BLUE_DYE);
+		carpetFromWool(consumer, Blocks.BLUE_CARPET, Blocks.BLUE_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BLUE_CARPET, Items.BLUE_DYE);
+		bedFromPlanksAndWool(consumer, Items.BLUE_BED, Blocks.BLUE_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.BLUE_BED, Items.BLUE_DYE);
+		banner(consumer, Items.BLUE_BANNER, Blocks.BLUE_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.BROWN_WOOL, Items.BROWN_DYE);
+		carpetFromWool(consumer, Blocks.BROWN_CARPET, Blocks.BROWN_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.BROWN_CARPET, Items.BROWN_DYE);
+		bedFromPlanksAndWool(consumer, Items.BROWN_BED, Blocks.BROWN_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.BROWN_BED, Items.BROWN_DYE);
+		banner(consumer, Items.BROWN_BANNER, Blocks.BROWN_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.CYAN_WOOL, Items.CYAN_DYE);
+		carpetFromWool(consumer, Blocks.CYAN_CARPET, Blocks.CYAN_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.CYAN_CARPET, Items.CYAN_DYE);
+		bedFromPlanksAndWool(consumer, Items.CYAN_BED, Blocks.CYAN_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.CYAN_BED, Items.CYAN_DYE);
+		banner(consumer, Items.CYAN_BANNER, Blocks.CYAN_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GRAY_WOOL, Items.GRAY_DYE);
+		carpetFromWool(consumer, Blocks.GRAY_CARPET, Blocks.GRAY_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GRAY_CARPET, Items.GRAY_DYE);
+		bedFromPlanksAndWool(consumer, Items.GRAY_BED, Blocks.GRAY_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.GRAY_BED, Items.GRAY_DYE);
+		banner(consumer, Items.GRAY_BANNER, Blocks.GRAY_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.GREEN_WOOL, Items.GREEN_DYE);
+		carpetFromWool(consumer, Blocks.GREEN_CARPET, Blocks.GREEN_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.GREEN_CARPET, Items.GREEN_DYE);
+		bedFromPlanksAndWool(consumer, Items.GREEN_BED, Blocks.GREEN_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.GREEN_BED, Items.GREEN_DYE);
+		banner(consumer, Items.GREEN_BANNER, Blocks.GREEN_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_BLUE_WOOL, Items.LIGHT_BLUE_DYE);
+		carpetFromWool(consumer, Blocks.LIGHT_BLUE_CARPET, Blocks.LIGHT_BLUE_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_BLUE_CARPET, Items.LIGHT_BLUE_DYE);
+		bedFromPlanksAndWool(consumer, Items.LIGHT_BLUE_BED, Blocks.LIGHT_BLUE_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.LIGHT_BLUE_BED, Items.LIGHT_BLUE_DYE);
+		banner(consumer, Items.LIGHT_BLUE_BANNER, Blocks.LIGHT_BLUE_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIGHT_GRAY_WOOL, Items.LIGHT_GRAY_DYE);
+		carpetFromWool(consumer, Blocks.LIGHT_GRAY_CARPET, Blocks.LIGHT_GRAY_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIGHT_GRAY_CARPET, Items.LIGHT_GRAY_DYE);
+		bedFromPlanksAndWool(consumer, Items.LIGHT_GRAY_BED, Blocks.LIGHT_GRAY_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.LIGHT_GRAY_BED, Items.LIGHT_GRAY_DYE);
+		banner(consumer, Items.LIGHT_GRAY_BANNER, Blocks.LIGHT_GRAY_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.LIME_WOOL, Items.LIME_DYE);
+		carpetFromWool(consumer, Blocks.LIME_CARPET, Blocks.LIME_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.LIME_CARPET, Items.LIME_DYE);
+		bedFromPlanksAndWool(consumer, Items.LIME_BED, Blocks.LIME_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.LIME_BED, Items.LIME_DYE);
+		banner(consumer, Items.LIME_BANNER, Blocks.LIME_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.MAGENTA_WOOL, Items.MAGENTA_DYE);
+		carpetFromWool(consumer, Blocks.MAGENTA_CARPET, Blocks.MAGENTA_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.MAGENTA_CARPET, Items.MAGENTA_DYE);
+		bedFromPlanksAndWool(consumer, Items.MAGENTA_BED, Blocks.MAGENTA_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.MAGENTA_BED, Items.MAGENTA_DYE);
+		banner(consumer, Items.MAGENTA_BANNER, Blocks.MAGENTA_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.ORANGE_WOOL, Items.ORANGE_DYE);
+		carpetFromWool(consumer, Blocks.ORANGE_CARPET, Blocks.ORANGE_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.ORANGE_CARPET, Items.ORANGE_DYE);
+		bedFromPlanksAndWool(consumer, Items.ORANGE_BED, Blocks.ORANGE_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.ORANGE_BED, Items.ORANGE_DYE);
+		banner(consumer, Items.ORANGE_BANNER, Blocks.ORANGE_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PINK_WOOL, Items.PINK_DYE);
+		carpetFromWool(consumer, Blocks.PINK_CARPET, Blocks.PINK_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PINK_CARPET, Items.PINK_DYE);
+		bedFromPlanksAndWool(consumer, Items.PINK_BED, Blocks.PINK_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.PINK_BED, Items.PINK_DYE);
+		banner(consumer, Items.PINK_BANNER, Blocks.PINK_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.PURPLE_WOOL, Items.PURPLE_DYE);
+		carpetFromWool(consumer, Blocks.PURPLE_CARPET, Blocks.PURPLE_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.PURPLE_CARPET, Items.PURPLE_DYE);
+		bedFromPlanksAndWool(consumer, Items.PURPLE_BED, Blocks.PURPLE_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.PURPLE_BED, Items.PURPLE_DYE);
+		banner(consumer, Items.PURPLE_BANNER, Blocks.PURPLE_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.RED_WOOL, Items.RED_DYE);
+		carpetFromWool(consumer, Blocks.RED_CARPET, Blocks.RED_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.RED_CARPET, Items.RED_DYE);
+		bedFromPlanksAndWool(consumer, Items.RED_BED, Blocks.RED_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.RED_BED, Items.RED_DYE);
+		banner(consumer, Items.RED_BANNER, Blocks.RED_WOOL);
+		carpetFromWool(consumer, Blocks.WHITE_CARPET, Blocks.WHITE_WOOL);
+		bedFromPlanksAndWool(consumer, Items.WHITE_BED, Blocks.WHITE_WOOL);
+		banner(consumer, Items.WHITE_BANNER, Blocks.WHITE_WOOL);
+		coloredWoolFromWhiteWoolAndDye(consumer, Blocks.YELLOW_WOOL, Items.YELLOW_DYE);
+		carpetFromWool(consumer, Blocks.YELLOW_CARPET, Blocks.YELLOW_WOOL);
+		coloredCarpetFromWhiteCarpetAndDye(consumer, Blocks.YELLOW_CARPET, Items.YELLOW_DYE);
+		bedFromPlanksAndWool(consumer, Items.YELLOW_BED, Blocks.YELLOW_WOOL);
+		bedFromWhiteBedAndDye(consumer, Items.YELLOW_BED, Items.YELLOW_DYE);
+		banner(consumer, Items.YELLOW_BANNER, Blocks.YELLOW_WOOL);
+		stainedGlassFromGlassAndDye(consumer, Blocks.BLACK_STAINED_GLASS, Items.BLACK_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.BLACK_STAINED_GLASS_PANE, Blocks.BLACK_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.BLACK_STAINED_GLASS_PANE, Items.BLACK_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.BLUE_STAINED_GLASS, Items.BLUE_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.BLUE_STAINED_GLASS_PANE, Blocks.BLUE_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.BLUE_STAINED_GLASS_PANE, Items.BLUE_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.BROWN_STAINED_GLASS, Items.BROWN_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.BROWN_STAINED_GLASS_PANE, Blocks.BROWN_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.BROWN_STAINED_GLASS_PANE, Items.BROWN_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.CYAN_STAINED_GLASS, Items.CYAN_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.CYAN_STAINED_GLASS_PANE, Blocks.CYAN_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.CYAN_STAINED_GLASS_PANE, Items.CYAN_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.GRAY_STAINED_GLASS, Items.GRAY_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.GRAY_STAINED_GLASS_PANE, Blocks.GRAY_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.GRAY_STAINED_GLASS_PANE, Items.GRAY_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.GREEN_STAINED_GLASS, Items.GREEN_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.GREEN_STAINED_GLASS_PANE, Blocks.GREEN_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.GREEN_STAINED_GLASS_PANE, Items.GREEN_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.LIGHT_BLUE_STAINED_GLASS, Items.LIGHT_BLUE_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, Blocks.LIGHT_BLUE_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, Items.LIGHT_BLUE_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.LIGHT_GRAY_STAINED_GLASS, Items.LIGHT_GRAY_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.LIGHT_GRAY_STAINED_GLASS_PANE, Blocks.LIGHT_GRAY_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.LIGHT_GRAY_STAINED_GLASS_PANE, Items.LIGHT_GRAY_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.LIME_STAINED_GLASS, Items.LIME_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.LIME_STAINED_GLASS_PANE, Blocks.LIME_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.LIME_STAINED_GLASS_PANE, Items.LIME_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.MAGENTA_STAINED_GLASS, Items.MAGENTA_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.MAGENTA_STAINED_GLASS_PANE, Blocks.MAGENTA_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.MAGENTA_STAINED_GLASS_PANE, Items.MAGENTA_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.ORANGE_STAINED_GLASS, Items.ORANGE_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.ORANGE_STAINED_GLASS_PANE, Blocks.ORANGE_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.ORANGE_STAINED_GLASS_PANE, Items.ORANGE_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.PINK_STAINED_GLASS, Items.PINK_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.PINK_STAINED_GLASS_PANE, Blocks.PINK_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.PINK_STAINED_GLASS_PANE, Items.PINK_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.PURPLE_STAINED_GLASS, Items.PURPLE_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.PURPLE_STAINED_GLASS_PANE, Blocks.PURPLE_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.PURPLE_STAINED_GLASS_PANE, Items.PURPLE_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.RED_STAINED_GLASS, Items.RED_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.RED_STAINED_GLASS_PANE, Blocks.RED_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.RED_STAINED_GLASS_PANE, Items.RED_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.WHITE_STAINED_GLASS, Items.WHITE_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.WHITE_STAINED_GLASS_PANE, Blocks.WHITE_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.WHITE_STAINED_GLASS_PANE, Items.WHITE_DYE);
+		stainedGlassFromGlassAndDye(consumer, Blocks.YELLOW_STAINED_GLASS, Items.YELLOW_DYE);
+		stainedGlassPaneFromStainedGlass(consumer, Blocks.YELLOW_STAINED_GLASS_PANE, Blocks.YELLOW_STAINED_GLASS);
+		stainedGlassPaneFromGlassPaneAndDye(consumer, Blocks.YELLOW_STAINED_GLASS_PANE, Items.YELLOW_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.BLACK_TERRACOTTA, Items.BLACK_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.BLUE_TERRACOTTA, Items.BLUE_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.BROWN_TERRACOTTA, Items.BROWN_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.CYAN_TERRACOTTA, Items.CYAN_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.GRAY_TERRACOTTA, Items.GRAY_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.GREEN_TERRACOTTA, Items.GREEN_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.LIGHT_BLUE_TERRACOTTA, Items.LIGHT_BLUE_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.LIGHT_GRAY_TERRACOTTA, Items.LIGHT_GRAY_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.LIME_TERRACOTTA, Items.LIME_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.MAGENTA_TERRACOTTA, Items.MAGENTA_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.ORANGE_TERRACOTTA, Items.ORANGE_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.PINK_TERRACOTTA, Items.PINK_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.PURPLE_TERRACOTTA, Items.PURPLE_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.RED_TERRACOTTA, Items.RED_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.WHITE_TERRACOTTA, Items.WHITE_DYE);
+		coloredTerracottaFromTerracottaAndDye(consumer, Blocks.YELLOW_TERRACOTTA, Items.YELLOW_DYE);
+		concretePowder(consumer, Blocks.BLACK_CONCRETE_POWDER, Items.BLACK_DYE);
+		concretePowder(consumer, Blocks.BLUE_CONCRETE_POWDER, Items.BLUE_DYE);
+		concretePowder(consumer, Blocks.BROWN_CONCRETE_POWDER, Items.BROWN_DYE);
+		concretePowder(consumer, Blocks.CYAN_CONCRETE_POWDER, Items.CYAN_DYE);
+		concretePowder(consumer, Blocks.GRAY_CONCRETE_POWDER, Items.GRAY_DYE);
+		concretePowder(consumer, Blocks.GREEN_CONCRETE_POWDER, Items.GREEN_DYE);
+		concretePowder(consumer, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Items.LIGHT_BLUE_DYE);
+		concretePowder(consumer, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Items.LIGHT_GRAY_DYE);
+		concretePowder(consumer, Blocks.LIME_CONCRETE_POWDER, Items.LIME_DYE);
+		concretePowder(consumer, Blocks.MAGENTA_CONCRETE_POWDER, Items.MAGENTA_DYE);
+		concretePowder(consumer, Blocks.ORANGE_CONCRETE_POWDER, Items.ORANGE_DYE);
+		concretePowder(consumer, Blocks.PINK_CONCRETE_POWDER, Items.PINK_DYE);
+		concretePowder(consumer, Blocks.PURPLE_CONCRETE_POWDER, Items.PURPLE_DYE);
+		concretePowder(consumer, Blocks.RED_CONCRETE_POWDER, Items.RED_DYE);
+		concretePowder(consumer, Blocks.WHITE_CONCRETE_POWDER, Items.WHITE_DYE);
+		concretePowder(consumer, Blocks.YELLOW_CONCRETE_POWDER, Items.YELLOW_DYE);
 		ShapedRecipeBuilder.shaped(Blocks.ACTIVATOR_RAIL, 6)
 			.define('#', Blocks.REDSTONE_TORCH)
 			.define('S', Items.STICK)
@@ -310,148 +492,13 @@ public class RecipeProvider implements DataProvider {
 			.requires(Items.BEETROOT, 6)
 			.unlockedBy("has_beetroot", has(Items.BEETROOT))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BLACK_BANNER)
-			.define('#', Blocks.BLACK_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_black_wool", has(Blocks.BLACK_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BLACK_BED)
-			.define('#', Blocks.BLACK_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_black_wool", has(Blocks.BLACK_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.BLACK_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.BLACK_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "black_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_CARPET, 3)
-			.define('#', Blocks.BLACK_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_black_wool", has(Blocks.BLACK_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.BLACK_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_black_dye", has(Items.BLACK_DYE))
-			.save(consumer, "black_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.BLACK_CONCRETE_POWDER, 8)
-			.requires(Items.BLACK_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BLACK_DYE).requires(Items.INK_SAC).group("black_dye").unlockedBy("has_ink_sac", has(Items.INK_SAC)).save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BLACK_DYE)
 			.requires(Blocks.WITHER_ROSE)
 			.group("black_dye")
 			.unlockedBy("has_black_flower", has(Blocks.WITHER_ROSE))
 			.save(consumer, "black_dye_from_wither_rose");
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.BLACK_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.BLACK_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.BLACK_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_black_dye", has(Items.BLACK_DYE))
-			.save(consumer, "black_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.BLACK_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.BLACK_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.BLACK_WOOL)
-			.requires(Items.BLACK_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BLAZE_POWDER, 2).requires(Items.BLAZE_ROD).unlockedBy("has_blaze_rod", has(Items.BLAZE_ROD)).save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BLUE_BANNER)
-			.define('#', Blocks.BLUE_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_blue_wool", has(Blocks.BLUE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BLUE_BED)
-			.define('#', Blocks.BLUE_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_blue_wool", has(Blocks.BLUE_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.BLUE_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.BLUE_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "blue_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_CARPET, 3)
-			.define('#', Blocks.BLUE_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_blue_wool", has(Blocks.BLUE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.BLUE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_blue_dye", has(Items.BLUE_DYE))
-			.save(consumer, "blue_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.BLUE_CONCRETE_POWDER, 8)
-			.requires(Items.BLUE_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BLUE_DYE)
 			.requires(Items.LAPIS_LAZULI)
 			.group("blue_dye")
@@ -468,47 +515,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.pattern("###")
 			.unlockedBy("has_packed_ice", has(Blocks.PACKED_ICE))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.BLUE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.BLUE_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.BLUE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_blue_dye", has(Items.BLUE_DYE))
-			.save(consumer, "blue_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.BLUE_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.BLUE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.BLUE_WOOL)
-			.requires(Items.BLUE_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.BONE_BLOCK)
 			.define('X', Items.BONE_MEAL)
@@ -565,98 +571,10 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.unlockedBy("has_brick_block", has(Blocks.BRICKS))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BROWN_BANNER)
-			.define('#', Blocks.BROWN_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_brown_wool", has(Blocks.BROWN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BROWN_BED)
-			.define('#', Blocks.BROWN_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_brown_wool", has(Blocks.BROWN_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.BROWN_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.BROWN_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "brown_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_CARPET, 3)
-			.define('#', Blocks.BROWN_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_brown_wool", has(Blocks.BROWN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.BROWN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_brown_dye", has(Items.BROWN_DYE))
-			.save(consumer, "brown_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.BROWN_CONCRETE_POWDER, 8)
-			.requires(Items.BROWN_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.BROWN_DYE)
 			.requires(Items.COCOA_BEANS)
 			.group("brown_dye")
 			.unlockedBy("has_cocoa_beans", has(Items.COCOA_BEANS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.BROWN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.BROWN_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.BROWN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_brown_dye", has(Items.BROWN_DYE))
-			.save(consumer, "brown_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.BROWN_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.BROWN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.BROWN_WOOL)
-			.requires(Items.BROWN_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.BUCKET)
 			.define('#', Items.IRON_INGOT)
@@ -839,99 +757,11 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#")
 			.unlockedBy("has_stone_slab", has(Blocks.SANDSTONE_SLAB))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.CYAN_BANNER)
-			.define('#', Blocks.CYAN_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_cyan_wool", has(Blocks.CYAN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.CYAN_BED)
-			.define('#', Blocks.CYAN_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_cyan_wool", has(Blocks.CYAN_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.CYAN_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.CYAN_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "cyan_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_CARPET, 3)
-			.define('#', Blocks.CYAN_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_cyan_wool", has(Blocks.CYAN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.CYAN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_cyan_dye", has(Items.CYAN_DYE))
-			.save(consumer, "cyan_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.CYAN_CONCRETE_POWDER, 8)
-			.requires(Items.CYAN_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.CYAN_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.GREEN_DYE)
 			.unlockedBy("has_green_dye", has(Items.GREEN_DYE))
 			.unlockedBy("has_blue_dye", has(Items.BLUE_DYE))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.CYAN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.CYAN_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.CYAN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_cyan_dye", has(Items.CYAN_DYE))
-			.save(consumer, "cyan_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.CYAN_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.CYAN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.CYAN_WOOL)
-			.requires(Items.CYAN_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.DARK_PRISMARINE)
 			.define('S', Items.PRISMARINE_SHARD)
@@ -1302,187 +1132,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer, "gold_ingot_from_nuggets");
 		ShapelessRecipeBuilder.shapeless(Items.GOLD_NUGGET, 9).requires(Items.GOLD_INGOT).unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT)).save(consumer);
 		ShapelessRecipeBuilder.shapeless(Blocks.GRANITE).requires(Blocks.DIORITE).requires(Items.QUARTZ).unlockedBy("has_quartz", has(Items.QUARTZ)).save(consumer);
-		ShapedRecipeBuilder.shaped(Items.GRAY_BANNER)
-			.define('#', Blocks.GRAY_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_gray_wool", has(Blocks.GRAY_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.GRAY_BED)
-			.define('#', Blocks.GRAY_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_gray_wool", has(Blocks.GRAY_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.GRAY_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.GRAY_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "gray_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_CARPET, 3)
-			.define('#', Blocks.GRAY_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_gray_wool", has(Blocks.GRAY_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.GRAY_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_gray_dye", has(Items.GRAY_DYE))
-			.save(consumer, "gray_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.GRAY_CONCRETE_POWDER, 8)
-			.requires(Items.GRAY_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.GRAY_DYE, 2)
 			.requires(Items.BLACK_DYE)
 			.requires(Items.WHITE_DYE)
 			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
 			.unlockedBy("has_black_dye", has(Items.BLACK_DYE))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.GRAY_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.GRAY_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.GRAY_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_gray_dye", has(Items.GRAY_DYE))
-			.save(consumer, "gray_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.GRAY_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.GRAY_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.GRAY_WOOL)
-			.requires(Items.GRAY_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.GREEN_BANNER)
-			.define('#', Blocks.GREEN_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_green_wool", has(Blocks.GREEN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.GREEN_BED)
-			.define('#', Blocks.GREEN_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_green_wool", has(Blocks.GREEN_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.GREEN_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.GREEN_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "green_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_CARPET, 3)
-			.define('#', Blocks.GREEN_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_green_wool", has(Blocks.GREEN_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.GREEN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_green_dye", has(Items.GREEN_DYE))
-			.save(consumer, "green_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.GREEN_CONCRETE_POWDER, 8)
-			.requires(Items.GREEN_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.GREEN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.GREEN_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.GREEN_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_green_dye", has(Items.GREEN_DYE))
-			.save(consumer, "green_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.GREEN_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.GREEN_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.GREEN_WOOL)
-			.requires(Items.GREEN_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.HAY_BLOCK)
 			.define('#', Items.WHEAT)
@@ -1727,53 +1381,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#")
 			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIGHT_BLUE_BANNER)
-			.define('#', Blocks.LIGHT_BLUE_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_light_blue_wool", has(Blocks.LIGHT_BLUE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIGHT_BLUE_BED)
-			.define('#', Blocks.LIGHT_BLUE_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_light_blue_wool", has(Blocks.LIGHT_BLUE_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.LIGHT_BLUE_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.LIGHT_BLUE_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "light_blue_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_CARPET, 3)
-			.define('#', Blocks.LIGHT_BLUE_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_light_blue_wool", has(Blocks.LIGHT_BLUE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.LIGHT_BLUE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_light_blue_dye", has(Items.LIGHT_BLUE_DYE))
-			.save(consumer, "light_blue_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.LIGHT_BLUE_CONCRETE_POWDER, 8)
-			.requires(Items.LIGHT_BLUE_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.LIGHT_BLUE_DYE)
 			.requires(Blocks.BLUE_ORCHID)
 			.group("light_blue_dye")
@@ -1786,94 +1393,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_blue_dye", has(Items.BLUE_DYE))
 			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
 			.save(consumer, "light_blue_dye_from_blue_white_dye");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.LIGHT_BLUE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.LIGHT_BLUE_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.LIGHT_BLUE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_light_blue_dye", has(Items.LIGHT_BLUE_DYE))
-			.save(consumer, "light_blue_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_BLUE_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.LIGHT_BLUE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.LIGHT_BLUE_WOOL)
-			.requires(Items.LIGHT_BLUE_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIGHT_GRAY_BANNER)
-			.define('#', Blocks.LIGHT_GRAY_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_light_gray_wool", has(Blocks.LIGHT_GRAY_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIGHT_GRAY_BED)
-			.define('#', Blocks.LIGHT_GRAY_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_light_gray_wool", has(Blocks.LIGHT_GRAY_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.LIGHT_GRAY_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.LIGHT_GRAY_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "light_gray_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_CARPET, 3)
-			.define('#', Blocks.LIGHT_GRAY_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_light_gray_wool", has(Blocks.LIGHT_GRAY_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.LIGHT_GRAY_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_light_gray_dye", has(Items.LIGHT_GRAY_DYE))
-			.save(consumer, "light_gray_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.LIGHT_GRAY_CONCRETE_POWDER, 8)
-			.requires(Items.LIGHT_GRAY_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.LIGHT_GRAY_DYE)
 			.requires(Blocks.AZURE_BLUET)
 			.group("light_gray_dye")
@@ -1903,98 +1422,10 @@ public class RecipeProvider implements DataProvider {
 			.group("light_gray_dye")
 			.unlockedBy("has_red_flower", has(Blocks.WHITE_TULIP))
 			.save(consumer, "light_gray_dye_from_white_tulip");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.LIGHT_GRAY_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.LIGHT_GRAY_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.LIGHT_GRAY_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_light_gray_dye", has(Items.LIGHT_GRAY_DYE))
-			.save(consumer, "light_gray_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.LIGHT_GRAY_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.LIGHT_GRAY_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.LIGHT_GRAY_WOOL)
-			.requires(Items.LIGHT_GRAY_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE)
 			.define('#', Items.GOLD_INGOT)
 			.pattern("##")
 			.unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIME_BANNER)
-			.define('#', Blocks.LIME_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_lime_wool", has(Blocks.LIME_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.LIME_BED)
-			.define('#', Blocks.LIME_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_lime_wool", has(Blocks.LIME_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.LIME_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.LIME_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "lime_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.LIME_CARPET, 3)
-			.define('#', Blocks.LIME_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_lime_wool", has(Blocks.LIME_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIME_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.LIME_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_lime_dye", has(Items.LIME_DYE))
-			.save(consumer, "lime_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.LIME_CONCRETE_POWDER, 8)
-			.requires(Items.LIME_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.LIME_DYE, 2)
 			.requires(Items.GREEN_DYE)
@@ -2002,100 +1433,12 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_green_dye", has(Items.GREEN_DYE))
 			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIME_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.LIME_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIME_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.LIME_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.LIME_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.LIME_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_lime_dye", has(Items.LIME_DYE))
-			.save(consumer, "lime_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.LIME_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.LIME_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.LIME_WOOL)
-			.requires(Items.LIME_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.JACK_O_LANTERN)
 			.define('A', Blocks.CARVED_PUMPKIN)
 			.define('B', Blocks.TORCH)
 			.pattern("A")
 			.pattern("B")
 			.unlockedBy("has_carved_pumpkin", has(Blocks.CARVED_PUMPKIN))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.MAGENTA_BANNER)
-			.define('#', Blocks.MAGENTA_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_magenta_wool", has(Blocks.MAGENTA_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.MAGENTA_BED)
-			.define('#', Blocks.MAGENTA_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_magenta_wool", has(Blocks.MAGENTA_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.MAGENTA_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.MAGENTA_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "magenta_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_CARPET, 3)
-			.define('#', Blocks.MAGENTA_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_magenta_wool", has(Blocks.MAGENTA_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.MAGENTA_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_magenta_dye", has(Items.MAGENTA_DYE))
-			.save(consumer, "magenta_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.MAGENTA_CONCRETE_POWDER, 8)
-			.requires(Items.MAGENTA_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.MAGENTA_DYE)
 			.requires(Blocks.ALLIUM)
@@ -2132,47 +1475,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_pink_dye", has(Items.PINK_DYE))
 			.unlockedBy("has_purple_dye", has(Items.PURPLE_DYE))
 			.save(consumer, "magenta_dye_from_purple_and_pink");
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.MAGENTA_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.MAGENTA_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.MAGENTA_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_magenta_dye", has(Items.MAGENTA_DYE))
-			.save(consumer, "magenta_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.MAGENTA_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.MAGENTA_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.MAGENTA_WOOL)
-			.requires(Items.MAGENTA_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.MAGMA_BLOCK)
 			.define('#', Items.MAGMA_CREAM)
 			.pattern("##")
@@ -2325,53 +1627,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.unlockedBy("has_quartz", has(Items.QUARTZ))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.ORANGE_BANNER)
-			.define('#', Blocks.ORANGE_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_orange_wool", has(Blocks.ORANGE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.ORANGE_BED)
-			.define('#', Blocks.ORANGE_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_orange_wool", has(Blocks.ORANGE_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.ORANGE_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.ORANGE_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "orange_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_CARPET, 3)
-			.define('#', Blocks.ORANGE_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_orange_wool", has(Blocks.ORANGE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.ORANGE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_oramge_dye", has(Items.ORANGE_DYE))
-			.save(consumer, "orange_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.ORANGE_CONCRETE_POWDER, 8)
-			.requires(Items.ORANGE_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.ORANGE_DYE)
 			.requires(Blocks.ORANGE_TULIP)
 			.group("orange_dye")
@@ -2384,47 +1639,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_red_dye", has(Items.RED_DYE))
 			.unlockedBy("has_yellow_dye", has(Items.YELLOW_DYE))
 			.save(consumer, "orange_dye_from_red_yellow");
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.ORANGE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.ORANGE_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.ORANGE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_orange_dye", has(Items.ORANGE_DYE))
-			.save(consumer, "orange_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.ORANGE_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.ORANGE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.ORANGE_WOOL)
-			.requires(Items.ORANGE_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.PAINTING)
 			.define('#', Items.STICK)
 			.define('X', Ingredient.of(ItemTags.WOOL))
@@ -2443,53 +1657,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_quartz_pillar", has(Blocks.QUARTZ_PILLAR))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Blocks.PACKED_ICE).requires(Blocks.ICE, 9).unlockedBy("has_ice", has(Blocks.ICE)).save(consumer);
-		ShapedRecipeBuilder.shaped(Items.PINK_BANNER)
-			.define('#', Blocks.PINK_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_pink_wool", has(Blocks.PINK_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.PINK_BED)
-			.define('#', Blocks.PINK_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_pink_wool", has(Blocks.PINK_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.PINK_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.PINK_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "pink_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.PINK_CARPET, 3)
-			.define('#', Blocks.PINK_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_pink_wool", has(Blocks.PINK_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PINK_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.PINK_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_pink_dye", has(Items.PINK_DYE))
-			.save(consumer, "pink_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.PINK_CONCRETE_POWDER, 8)
-			.requires(Items.PINK_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.PINK_DYE, 2)
 			.requires(Blocks.PEONY)
 			.group("pink_dye")
@@ -2507,47 +1674,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
 			.unlockedBy("has_red_dye", has(Items.RED_DYE))
 			.save(consumer, "pink_dye_from_red_white_dye");
-		ShapedRecipeBuilder.shaped(Blocks.PINK_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.PINK_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PINK_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.PINK_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PINK_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.PINK_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_pink_dye", has(Items.PINK_DYE))
-			.save(consumer, "pink_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.PINK_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.PINK_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.PINK_WOOL)
-			.requires(Items.PINK_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.PISTON)
 			.define('R', Items.REDSTONE)
 			.define('#', Blocks.COBBLESTONE)
@@ -2612,53 +1738,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_pumpkin", has(Blocks.PUMPKIN))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.PUMPKIN_SEEDS, 4).requires(Blocks.PUMPKIN).unlockedBy("has_pumpkin", has(Blocks.PUMPKIN)).save(consumer);
-		ShapedRecipeBuilder.shaped(Items.PURPLE_BANNER)
-			.define('#', Blocks.PURPLE_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_purple_wool", has(Blocks.PURPLE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.PURPLE_BED)
-			.define('#', Blocks.PURPLE_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_purple_wool", has(Blocks.PURPLE_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.PURPLE_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.PURPLE_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "purple_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_CARPET, 3)
-			.define('#', Blocks.PURPLE_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_purple_wool", has(Blocks.PURPLE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.PURPLE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_purple_dye", has(Items.PURPLE_DYE))
-			.save(consumer, "purple_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.PURPLE_CONCRETE_POWDER, 8)
-			.requires(Items.PURPLE_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.PURPLE_DYE, 2)
 			.requires(Items.BLUE_DYE)
 			.requires(Items.RED_DYE)
@@ -2672,47 +1751,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#")
 			.pattern("-")
 			.unlockedBy("has_shulker_shell", has(Items.SHULKER_SHELL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.PURPLE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.PURPLE_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.PURPLE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_purple_dye", has(Items.PURPLE_DYE))
-			.save(consumer, "purple_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.PURPLE_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.PURPLE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.PURPLE_WOOL)
-			.requires(Items.PURPLE_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.PURPUR_BLOCK, 4)
 			.define('F', Items.POPPED_CHORUS_FRUIT)
@@ -2812,53 +1850,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#")
 			.unlockedBy("has_redstone", has(Items.REDSTONE))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.RED_BANNER)
-			.define('#', Blocks.RED_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_red_wool", has(Blocks.RED_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.RED_BED)
-			.define('#', Blocks.RED_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_red_wool", has(Blocks.RED_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.RED_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.RED_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "red_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.RED_CARPET, 3)
-			.define('#', Blocks.RED_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_red_wool", has(Blocks.RED_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.RED_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.RED_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_red_dye", has(Items.RED_DYE))
-			.save(consumer, "red_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.RED_CONCRETE_POWDER, 8)
-			.requires(Items.RED_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.RED_DYE)
 			.requires(Items.BEETROOT)
 			.group("red_dye")
@@ -2912,47 +1903,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_chiseled_red_sandstone", has(Blocks.CHISELED_RED_SANDSTONE))
 			.unlockedBy("has_cut_red_sandstone", has(Blocks.CUT_RED_SANDSTONE))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.RED_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.RED_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.RED_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.RED_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.RED_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.RED_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_red_dye", has(Items.RED_DYE))
-			.save(consumer, "red_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.RED_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.RED_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.RED_WOOL)
-			.requires(Items.RED_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.REPEATER)
 			.define('#', Blocks.REDSTONE_TORCH)
 			.define('X', Items.REDSTONE)
@@ -3003,54 +1953,6 @@ public class RecipeProvider implements DataProvider {
 			.pattern("WWW")
 			.pattern(" W ")
 			.unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.OAK_SIGN, 3)
-			.define('#', Items.OAK_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_oak_planks", has(Items.OAK_PLANKS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.SPRUCE_SIGN, 3)
-			.define('#', Items.SPRUCE_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_spruce_planks", has(Items.SPRUCE_PLANKS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.BIRCH_SIGN, 3)
-			.define('#', Items.BIRCH_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_birch_planks", has(Items.BIRCH_PLANKS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.ACACIA_SIGN, 3)
-			.define('#', Items.ACACIA_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_acacia_planks", has(Items.ACACIA_PLANKS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.JUNGLE_SIGN, 3)
-			.define('#', Items.JUNGLE_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_jungle_planks", has(Items.JUNGLE_PLANKS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.DARK_OAK_SIGN, 3)
-			.define('#', Items.DARK_OAK_PLANKS)
-			.define('X', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" X ")
-			.unlockedBy("has_dark_oak_planks", has(Items.DARK_OAK_PLANKS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.SLIME_BLOCK)
 			.define('#', Items.SLIME_BALL)
@@ -3205,6 +2107,15 @@ public class RecipeProvider implements DataProvider {
 			.group("sugar")
 			.unlockedBy("has_honey_bottle", has(Items.HONEY_BOTTLE))
 			.save(consumer, "sugar_from_honey_bottle");
+		ShapedRecipeBuilder.shaped(Blocks.TARGET)
+			.define('H', Items.HAY_BLOCK)
+			.define('R', Items.REDSTONE)
+			.pattern(" R ")
+			.pattern("RHR")
+			.pattern(" R ")
+			.unlockedBy("has_redstone", has(Items.REDSTONE))
+			.unlockedBy("has_hay_block", has(Blocks.HAY_BLOCK))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.TNT)
 			.define('#', Ingredient.of(Blocks.SAND, Blocks.RED_SAND))
 			.define('X', Items.GUNPOWDER)
@@ -3274,37 +2185,6 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_scute", has(Items.SCUTE))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.WHEAT, 9).requires(Blocks.HAY_BLOCK).unlockedBy("has_hay_block", has(Blocks.HAY_BLOCK)).save(consumer);
-		ShapedRecipeBuilder.shaped(Items.WHITE_BANNER)
-			.define('#', Blocks.WHITE_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.WHITE_BED)
-			.define('#', Blocks.WHITE_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.WHITE_CARPET, 3)
-			.define('#', Blocks.WHITE_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.WHITE_CONCRETE_POWDER, 8)
-			.requires(Items.WHITE_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.WHITE_DYE)
 			.requires(Items.BONE_MEAL)
 			.group("white_dye")
@@ -3315,41 +2195,6 @@ public class RecipeProvider implements DataProvider {
 			.group("white_dye")
 			.unlockedBy("has_white_flower", has(Blocks.LILY_OF_THE_VALLEY))
 			.save(consumer, "white_dye_from_lily_of_the_valley");
-		ShapedRecipeBuilder.shaped(Blocks.WHITE_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.WHITE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.WHITE_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.WHITE_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.WHITE_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.WHITE_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_white_dye", has(Items.WHITE_DYE))
-			.save(consumer, "white_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.WHITE_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.WHITE_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.WOODEN_AXE)
 			.define('#', Items.STICK)
 			.define('X', ItemTags.PLANKS)
@@ -3396,53 +2241,6 @@ public class RecipeProvider implements DataProvider {
 			.requires(Items.FEATHER)
 			.unlockedBy("has_book", has(Items.BOOK))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.YELLOW_BANNER)
-			.define('#', Blocks.YELLOW_WOOL)
-			.define('|', Items.STICK)
-			.pattern("###")
-			.pattern("###")
-			.pattern(" | ")
-			.group("banner")
-			.unlockedBy("has_yellow_wool", has(Blocks.YELLOW_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Items.YELLOW_BED)
-			.define('#', Blocks.YELLOW_WOOL)
-			.define('X', ItemTags.PLANKS)
-			.pattern("###")
-			.pattern("XXX")
-			.group("bed")
-			.unlockedBy("has_yellow_wool", has(Blocks.YELLOW_WOOL))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Items.YELLOW_BED)
-			.requires(Items.WHITE_BED)
-			.requires(Items.YELLOW_DYE)
-			.group("dyed_bed")
-			.unlockedBy("has_bed", has(Items.WHITE_BED))
-			.save(consumer, "yellow_bed_from_white_bed");
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_CARPET, 3)
-			.define('#', Blocks.YELLOW_WOOL)
-			.pattern("##")
-			.group("carpet")
-			.unlockedBy("has_yellow_wool", has(Blocks.YELLOW_WOOL))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_CARPET, 8)
-			.define('#', Blocks.WHITE_CARPET)
-			.define('$', Items.YELLOW_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("carpet")
-			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
-			.unlockedBy("has_yellow_dye", has(Items.YELLOW_DYE))
-			.save(consumer, "yellow_carpet_from_white_carpet");
-		ShapelessRecipeBuilder.shapeless(Blocks.YELLOW_CONCRETE_POWDER, 8)
-			.requires(Items.YELLOW_DYE)
-			.requires(Blocks.SAND, 4)
-			.requires(Blocks.GRAVEL, 4)
-			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.YELLOW_DYE)
 			.requires(Blocks.DANDELION)
 			.group("yellow_dye")
@@ -3453,47 +2251,6 @@ public class RecipeProvider implements DataProvider {
 			.group("yellow_dye")
 			.unlockedBy("has_double_plant", has(Blocks.SUNFLOWER))
 			.save(consumer, "yellow_dye_from_sunflower");
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_STAINED_GLASS, 8)
-			.define('#', Blocks.GLASS)
-			.define('X', Items.YELLOW_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_STAINED_GLASS_PANE, 16)
-			.define('#', Blocks.YELLOW_STAINED_GLASS)
-			.pattern("###")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_STAINED_GLASS_PANE, 8)
-			.define('#', Blocks.GLASS_PANE)
-			.define('$', Items.YELLOW_DYE)
-			.pattern("###")
-			.pattern("#$#")
-			.pattern("###")
-			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy("has_yellow_dye", has(Items.YELLOW_DYE))
-			.save(consumer, "yellow_stained_glass_pane_from_glass_pane");
-		ShapedRecipeBuilder.shaped(Blocks.YELLOW_TERRACOTTA, 8)
-			.define('#', Blocks.TERRACOTTA)
-			.define('X', Items.YELLOW_DYE)
-			.pattern("###")
-			.pattern("#X#")
-			.pattern("###")
-			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(consumer);
-		ShapelessRecipeBuilder.shapeless(Blocks.YELLOW_WOOL)
-			.requires(Items.YELLOW_DYE)
-			.requires(Blocks.WHITE_WOOL)
-			.group("wool")
-			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
-			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Items.DRIED_KELP, 9)
 			.requires(Blocks.DRIED_KELP_BLOCK)
 			.unlockedBy("has_dried_kelp_block", has(Blocks.DRIED_KELP_BLOCK))
@@ -4512,6 +3269,142 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.group("wooden_trapdoor")
 			.unlockedBy("has_planks", has(itemLike2))
+			.save(consumer);
+	}
+
+	private static void woodenSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike, 3)
+			.define('#', itemLike2)
+			.define('X', Items.STICK)
+			.pattern("###")
+			.pattern("###")
+			.pattern(" X ")
+			.unlockedBy("has_" + string, has(itemLike2))
+			.save(consumer);
+	}
+
+	private static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapelessRecipeBuilder.shapeless(itemLike)
+			.requires(itemLike2)
+			.requires(Blocks.WHITE_WOOL)
+			.group("wool")
+			.unlockedBy("has_white_wool", has(Blocks.WHITE_WOOL))
+			.save(consumer);
+	}
+
+	private static void carpetFromWool(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike, 3).define('#', itemLike2).pattern("##").group("carpet").unlockedBy("has_" + string, has(itemLike2)).save(consumer);
+	}
+
+	private static void coloredCarpetFromWhiteCarpetAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike.asItem()).getPath();
+		String string2 = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike, 8)
+			.define('#', Blocks.WHITE_CARPET)
+			.define('$', itemLike2)
+			.pattern("###")
+			.pattern("#$#")
+			.pattern("###")
+			.group("carpet")
+			.unlockedBy("has_white_carpet", has(Blocks.WHITE_CARPET))
+			.unlockedBy("has_" + string2, has(itemLike2))
+			.save(consumer, string + "_from_white_carpet");
+	}
+
+	private static void bedFromPlanksAndWool(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike)
+			.define('#', itemLike2)
+			.define('X', ItemTags.PLANKS)
+			.pattern("###")
+			.pattern("XXX")
+			.group("bed")
+			.unlockedBy("has_" + string, has(itemLike2))
+			.save(consumer);
+	}
+
+	private static void bedFromWhiteBedAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike.asItem()).getPath();
+		ShapelessRecipeBuilder.shapeless(itemLike)
+			.requires(Items.WHITE_BED)
+			.requires(itemLike2)
+			.group("dyed_bed")
+			.unlockedBy("has_bed", has(Items.WHITE_BED))
+			.save(consumer, string + "_from_white_bed");
+	}
+
+	private static void banner(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike)
+			.define('#', itemLike2)
+			.define('|', Items.STICK)
+			.pattern("###")
+			.pattern("###")
+			.pattern(" | ")
+			.group("banner")
+			.unlockedBy("has_" + string, has(itemLike2))
+			.save(consumer);
+	}
+
+	private static void stainedGlassFromGlassAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapedRecipeBuilder.shaped(itemLike, 8)
+			.define('#', Blocks.GLASS)
+			.define('X', itemLike2)
+			.pattern("###")
+			.pattern("#X#")
+			.pattern("###")
+			.group("stained_glass")
+			.unlockedBy("has_glass", has(Blocks.GLASS))
+			.save(consumer);
+	}
+
+	private static void stainedGlassPaneFromStainedGlass(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapedRecipeBuilder.shaped(itemLike, 16)
+			.define('#', itemLike2)
+			.pattern("###")
+			.pattern("###")
+			.group("stained_glass_pane")
+			.unlockedBy("has_glass", has(itemLike2))
+			.save(consumer);
+	}
+
+	private static void stainedGlassPaneFromGlassPaneAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		String string = Registry.ITEM.getKey(itemLike.asItem()).getPath();
+		String string2 = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
+		ShapedRecipeBuilder.shaped(itemLike, 8)
+			.define('#', Blocks.GLASS_PANE)
+			.define('$', itemLike2)
+			.pattern("###")
+			.pattern("#$#")
+			.pattern("###")
+			.group("stained_glass_pane")
+			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
+			.unlockedBy("has_" + string2, has(itemLike2))
+			.save(consumer, string + "_from_glass_pane");
+	}
+
+	private static void coloredTerracottaFromTerracottaAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapedRecipeBuilder.shaped(itemLike, 8)
+			.define('#', Blocks.TERRACOTTA)
+			.define('X', itemLike2)
+			.pattern("###")
+			.pattern("#X#")
+			.pattern("###")
+			.group("stained_terracotta")
+			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
+			.save(consumer);
+	}
+
+	private static void concretePowder(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
+		ShapelessRecipeBuilder.shapeless(itemLike, 8)
+			.requires(itemLike2)
+			.requires(Blocks.SAND, 4)
+			.requires(Blocks.GRAVEL, 4)
+			.group("concrete_powder")
+			.unlockedBy("has_sand", has(Blocks.SAND))
+			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
 			.save(consumer);
 	}
 

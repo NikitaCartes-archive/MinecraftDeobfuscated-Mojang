@@ -12,6 +12,7 @@ public class EntityTypeTags {
 	public static final Tag<EntityType<?>> RAIDERS = bind("raiders");
 	public static final Tag<EntityType<?>> BEEHIVE_INHABITORS = bind("beehive_inhabitors");
 	public static final Tag<EntityType<?>> ARROWS = bind("arrows");
+	public static final Tag<EntityType<?>> IMPACT_PROJECTILES = bind("impact_projectiles");
 
 	public static void reset(TagCollection<EntityType<?>> tagCollection) {
 		source = tagCollection;

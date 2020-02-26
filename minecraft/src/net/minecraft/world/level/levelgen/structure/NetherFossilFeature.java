@@ -54,9 +54,8 @@ public class NetherFossilFeature extends RandomScatteredFeature<NoneFeatureConfi
 		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			int k = i * 16;
 			int l = j * 16;
-			NetherFossilPieces.addPieces(
-				structureManager, this.pieces, this.random, new BlockPos(k + this.random.nextInt(16), chunkGenerator.getSeaLevel(), l + this.random.nextInt(16))
-			);
+			int m = chunkGenerator.getSeaLevel() + this.random.nextInt(126 - chunkGenerator.getSeaLevel());
+			NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(k + this.random.nextInt(16), m, l + this.random.nextInt(16)));
 			this.calculateBoundingBox();
 		}
 	}

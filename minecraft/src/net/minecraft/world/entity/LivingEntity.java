@@ -2,7 +2,6 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.Dynamic;
 import java.util.Collection;
@@ -67,13 +66,11 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ElytraItem;
@@ -187,6 +184,7 @@ public abstract class LivingEntity extends Entity {
 	protected int useItemRemaining;
 	protected int fallFlyTicks;
 	private BlockPos lastPos;
+	private Optional<BlockPos> lastLadderPos = Optional.empty();
 	private DamageSource lastDamageSource;
 	private long lastDamageStamp;
 	protected int autoSpinAttackTicks;
@@ -247,7 +245,7 @@ public abstract class LivingEntity extends Entity {
 	@Override
 	protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
 		if (!this.isInWater()) {
-			this.updateInWaterState();
+			this.updateInWaterStateAndDoWaterCurrentPushing();
 		}
 
 		if (!this.level.isClientSide && this.fallDistance > 3.0F && bl) {
@@ -1208,15 +1206,34 @@ public abstract class LivingEntity extends Entity {
 		return itemStack.getEatingSound();
 	}
 
+	@Override
+	public void setOnGround(boolean bl) {
+		super.setOnGround(bl);
+		if (bl) {
+			this.lastLadderPos = Optional.empty();
+		}
+	}
+
+	public Optional<BlockPos> lastLadderPos() {
+		return this.lastLadderPos;
+	}
+
 	public boolean onLadder() {
 		if (this.isSpectator()) {
 			return false;
 		} else {
+			BlockPos blockPos = this.getBlockPos();
 			BlockState blockState = this.getFeetBlockState();
 			Block block = blockState.getBlock();
-			return block != Blocks.LADDER && block != Blocks.VINE && block != Blocks.SCAFFOLDING
-				? block instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(new BlockPos(this), blockState)
-				: true;
+			if (block.is(BlockTags.CLIMBABLE)) {
+				this.lastLadderPos = Optional.of(blockPos);
+				return true;
+			} else if (block instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
+				this.lastLadderPos = Optional.of(blockPos);
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
@@ -1686,94 +1703,15 @@ public abstract class LivingEntity extends Entity {
 		}
 	}
 
-	private void findStandUpPosition(Entity entity) {
+	private void dismountVehicle(Entity entity) {
+		Vec3 vec3;
 		if (this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS)) {
-			this.setPos(entity.getX(), entity.getY(1.0) + 0.001, entity.getZ());
-		} else if (!(entity instanceof Boat) && !(entity instanceof AbstractHorse)) {
-			double q = entity.getX();
-			double r = entity.getY(1.0);
-			double s = entity.getZ();
-			Direction direction = entity.getMotionDirection();
-			if (direction != null && direction.getAxis() != Direction.Axis.Y) {
-				Direction direction2 = direction.getClockWise();
-				int[][] is = new int[][]{{0, 1}, {0, -1}, {-1, 1}, {-1, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {0, 1}};
-				double k = Math.floor(this.getX()) + 0.5;
-				double t = Math.floor(this.getZ()) + 0.5;
-				double l = this.getBoundingBox().maxX - this.getBoundingBox().minX;
-				double m = this.getBoundingBox().maxZ - this.getBoundingBox().minZ;
-				AABB aABB3 = new AABB(
-					k - l / 2.0, entity.getBoundingBox().minY, t - m / 2.0, k + l / 2.0, Math.floor(entity.getBoundingBox().minY) + (double)this.getBbHeight(), t + m / 2.0
-				);
-
-				for (int[] js : is) {
-					double u = (double)(direction.getStepX() * js[0] + direction2.getStepX() * js[1]);
-					double v = (double)(direction.getStepZ() * js[0] + direction2.getStepZ() * js[1]);
-					double w = k + u;
-					double x = t + v;
-					AABB aABB4 = aABB3.move(u, 0.0, v);
-					if (this.level.noCollision(this, aABB4)) {
-						BlockPos blockPos = new BlockPos(w, this.getY(), x);
-						if (this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, this)) {
-							this.teleportTo(w, this.getY() + 1.0, x);
-							return;
-						}
-
-						BlockPos blockPos2 = new BlockPos(w, this.getY() - 1.0, x);
-						if (this.level.getBlockState(blockPos2).entityCanStandOn(this.level, blockPos2, this) || this.level.getFluidState(blockPos2).is(FluidTags.WATER)) {
-							q = w;
-							r = this.getY() + 1.0;
-							s = x;
-						}
-					} else {
-						BlockPos blockPosx = new BlockPos(w, this.getY() + 1.0, x);
-						if (this.level.noCollision(this, aABB4.move(0.0, 1.0, 0.0)) && this.level.getBlockState(blockPosx).entityCanStandOn(this.level, blockPosx, this)) {
-							q = w;
-							r = this.getY() + 2.0;
-							s = x;
-						}
-					}
-				}
-			}
-
-			this.teleportTo(q, r, s);
+			vec3 = new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ());
 		} else {
-			double d = (double)(this.getBbWidth() / 2.0F + entity.getBbWidth() / 2.0F) + 0.4;
-			AABB aABB = entity.getBoundingBox();
-			float f;
-			double e;
-			int i;
-			if (entity instanceof Boat) {
-				e = aABB.maxY;
-				i = 2;
-				f = 0.0F;
-			} else {
-				e = aABB.minY;
-				i = 3;
-				f = (float) (Math.PI / 2) * (float)(this.getMainArm() == HumanoidArm.RIGHT ? -1 : 1);
-			}
-
-			float g = -this.yRot * (float) (Math.PI / 180.0) - (float) Math.PI + f;
-			float h = -Mth.sin(g);
-			float j = -Mth.cos(g);
-			double k = Math.abs(h) > Math.abs(j) ? d / (double)Math.abs(h) : d / (double)Math.abs(j);
-			AABB aABB2 = this.getBoundingBox().move(-this.getX(), -this.getY(), -this.getZ());
-			ImmutableSet<Entity> immutableSet = ImmutableSet.of(this, entity);
-			double l = this.getX() + (double)h * k;
-			double m = this.getZ() + (double)j * k;
-			double n = 0.001;
-
-			for (int o = 0; o < i; o++) {
-				double p = e + n;
-				if (this.level.noCollision(this, aABB2.move(l, p, m), immutableSet)) {
-					this.setPos(l, p, m);
-					return;
-				}
-
-				n++;
-			}
-
-			this.setPos(entity.getX(), entity.getY(1.0) + 0.001, entity.getZ());
+			vec3 = entity.getDismountLocationForPassenger(this);
 		}
+
+		this.setPos(vec3.x, vec3.y, vec3.z);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -2251,10 +2189,11 @@ public abstract class LivingEntity extends Entity {
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("jump");
 		if (this.jumping) {
-			if (!(this.waterHeight > 0.0) || this.onGround && !(this.waterHeight > 0.4)) {
+			boolean bl = this.isInWater() && this.fluidHeight > 0.0;
+			if (!bl || this.onGround && !(this.fluidHeight > 0.4)) {
 				if (this.isInLava()) {
 					this.jumpInLiquid(FluidTags.LAVA);
-				} else if ((this.onGround || this.waterHeight > 0.0 && this.waterHeight <= 0.4) && this.noJumpDelay == 0) {
+				} else if ((this.onGround || bl && this.fluidHeight <= 0.4) && this.noJumpDelay == 0) {
 					this.jumpFromGround();
 					this.noJumpDelay = 10;
 				}
@@ -2377,7 +2316,7 @@ public abstract class LivingEntity extends Entity {
 		Entity entity = this.getVehicle();
 		super.stopRiding();
 		if (entity != null && entity != this.getVehicle() && !this.level.isClientSide) {
-			this.findStandUpPosition(entity);
+			this.dismountVehicle(entity);
 		}
 	}
 
@@ -2759,6 +2698,22 @@ public abstract class LivingEntity extends Entity {
 	@Override
 	public EntityDimensions getDimensions(Pose pose) {
 		return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
+	}
+
+	public ImmutableList<Pose> getDismountPoses() {
+		return ImmutableList.of(Pose.STANDING);
+	}
+
+	public AABB getLocalBoundsForPose(Pose pose) {
+		EntityDimensions entityDimensions = this.getDimensions(pose);
+		return new AABB(
+			(double)(-entityDimensions.width / 2.0F),
+			0.0,
+			(double)(-entityDimensions.width / 2.0F),
+			(double)(entityDimensions.width / 2.0F),
+			(double)entityDimensions.height,
+			(double)(entityDimensions.width / 2.0F)
+		);
 	}
 
 	public Optional<BlockPos> getSleepingPos() {

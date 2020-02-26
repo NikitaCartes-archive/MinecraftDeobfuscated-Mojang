@@ -82,7 +82,6 @@ import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.entity.monster.MagmaCube;
 import net.minecraft.world.entity.monster.Phantom;
-import net.minecraft.world.entity.monster.PigZombie;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.entity.monster.Shulker;
@@ -97,6 +96,7 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.Villager;
@@ -241,8 +241,8 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<Pufferfish> PUFFERFISH = register(
 		"pufferfish", EntityType.Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7F, 0.7F)
 	);
-	public static final EntityType<PigZombie> ZOMBIE_PIGMAN = register(
-		"zombie_pigman", EntityType.Builder.of(PigZombie::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F)
+	public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = register(
+		"zombified_piglin", EntityType.Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F)
 	);
 	public static final EntityType<PolarBear> POLAR_BEAR = register("polar_bear", EntityType.Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4F, 1.4F));
 	public static final EntityType<PrimedTnt> TNT = register(

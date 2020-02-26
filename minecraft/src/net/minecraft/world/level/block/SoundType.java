@@ -111,8 +111,8 @@ public class SoundType {
 	public static final SoundType NYLIUM = new SoundType(
 		1.0F, 1.0F, SoundEvents.NYLIUM_BREAK, SoundEvents.NYLIUM_STEP, SoundEvents.NYLIUM_PLACE, SoundEvents.NYLIUM_HIT, SoundEvents.NYLIUM_FALL
 	);
-	public static final SoundType FUNGI = new SoundType(
-		1.0F, 1.0F, SoundEvents.FUNGI_BREAK, SoundEvents.FUNGI_STEP, SoundEvents.FUNGI_PLACE, SoundEvents.FUNGI_HIT, SoundEvents.FUNGI_FALL
+	public static final SoundType FUNGUS = new SoundType(
+		1.0F, 1.0F, SoundEvents.FUNGUS_BREAK, SoundEvents.FUNGUS_STEP, SoundEvents.FUNGUS_PLACE, SoundEvents.FUNGUS_HIT, SoundEvents.FUNGUS_FALL
 	);
 	public static final SoundType ROOTS = new SoundType(
 		1.0F, 1.0F, SoundEvents.ROOTS_BREAK, SoundEvents.ROOTS_STEP, SoundEvents.ROOTS_PLACE, SoundEvents.ROOTS_HIT, SoundEvents.ROOTS_FALL

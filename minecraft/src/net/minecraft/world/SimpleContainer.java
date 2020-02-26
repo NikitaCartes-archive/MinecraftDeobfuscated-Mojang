@@ -173,13 +173,17 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	private void moveItemToOccupiedSlotsWithSameType(ItemStack itemStack) {
 		for (int i = 0; i < this.size; i++) {
 			ItemStack itemStack2 = this.getItem(i);
-			if (ItemStack.isSame(itemStack2, itemStack)) {
+			if (this.isSameItem(itemStack2, itemStack)) {
 				this.moveItemsBetweenStacks(itemStack, itemStack2);
 				if (itemStack.isEmpty()) {
 					return;
 				}
 			}
 		}
+	}
+
+	private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
+		return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
 	}
 
 	private void moveItemsBetweenStacks(ItemStack itemStack, ItemStack itemStack2) {

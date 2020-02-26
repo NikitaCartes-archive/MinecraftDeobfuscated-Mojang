@@ -176,10 +176,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CARVED_PUMPKIN,
 				Blocks.MELON,
 				Blocks.MYCELIUM,
-				Blocks.CRIMSON_FUNGI,
+				Blocks.CRIMSON_FUNGUS,
 				Blocks.CRIMSON_NYLIUM,
 				Blocks.CRIMSON_ROOTS,
-				Blocks.WARPED_FUNGI,
+				Blocks.WARPED_FUNGUS,
 				Blocks.WARPED_NYLIUM,
 				Blocks.WARPED_ROOTS
 			);
@@ -210,7 +210,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.POTTED_CORNFLOWER,
 				Blocks.POTTED_LILY_OF_THE_VALLEY,
 				Blocks.POTTED_WITHER_ROSE,
-				Blocks.POTTED_BAMBOO
+				Blocks.POTTED_BAMBOO,
+				Blocks.POTTED_CRIMSON_FUNGUS,
+				Blocks.POTTED_WARPED_FUNGUS,
+				Blocks.POTTED_CRIMSON_ROOTS,
+				Blocks.POTTED_WARPED_ROOTS
 			);
 		this.tag(BlockTags.BANNERS)
 			.add(
@@ -511,6 +515,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.SOUL_FIRE_TORCH)
 			.add(Blocks.REDSTONE_TORCH)
 			.add(Blocks.TRIPWIRE);
+		this.tag(BlockTags.CLIMBABLE).add(Blocks.LADDER).add(Blocks.VINE).add(Blocks.SCAFFOLDING).add(Blocks.WEEPING_VINES).add(Blocks.WEEPING_VINES_PLANT);
 	}
 
 	@Override

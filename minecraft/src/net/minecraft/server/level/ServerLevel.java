@@ -39,6 +39,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -1560,5 +1561,11 @@ public class ServerLevel extends Level {
 		if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
 			this.updateNeighborsAt(blockPos, block);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public float getShade(Direction direction, boolean bl) {
+		return 1.0F;
 	}
 }

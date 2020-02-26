@@ -20,6 +20,7 @@ import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.core.Registry;
@@ -81,7 +82,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 	private static final EntityType<?>[] MOBS_TO_KILL = new EntityType[]{
 		EntityType.CAVE_SPIDER,
 		EntityType.SPIDER,
-		EntityType.ZOMBIE_PIGMAN,
+		EntityType.ZOMBIFIED_PIGLIN,
 		EntityType.ENDERMAN,
 		EntityType.BLAZE,
 		EntityType.CREEPER,
@@ -408,6 +409,20 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("honey_block_slide", SlideDownBlockTrigger.TriggerInstance.slidesDownBlock(Blocks.HONEY_BLOCK))
 			.save(consumer, "adventure/honey_block_slide");
+		Advancement advancement20 = Advancement.Builder.advancement()
+			.parent(advancement7)
+			.display(
+				Blocks.TARGET.asItem(),
+				new TranslatableComponent("advancements.adventure.bullseye.title"),
+				new TranslatableComponent("advancements.adventure.bullseye.description"),
+				null,
+				FrameType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion("bullseye", TargetBlockTrigger.TriggerInstance.targetHit(MinMaxBounds.Ints.exactly(15)))
+			.save(consumer, "adventure/bullseye");
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

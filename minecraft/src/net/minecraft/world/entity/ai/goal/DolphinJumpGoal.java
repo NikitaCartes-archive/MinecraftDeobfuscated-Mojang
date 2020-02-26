@@ -54,7 +54,7 @@ public class DolphinJumpGoal extends JumpGoal {
 	@Override
 	public boolean canContinueToUse() {
 		double d = this.dolphin.getDeltaMovement().y;
-		return (!(d * d < 0.03F) || this.dolphin.xRot == 0.0F || !(Math.abs(this.dolphin.xRot) < 10.0F) || !this.dolphin.isInWater()) && !this.dolphin.onGround;
+		return (!(d * d < 0.03F) || this.dolphin.xRot == 0.0F || !(Math.abs(this.dolphin.xRot) < 10.0F) || !this.dolphin.isInWater()) && !this.dolphin.isOnGround();
 	}
 
 	@Override

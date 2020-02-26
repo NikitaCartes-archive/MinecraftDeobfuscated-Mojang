@@ -72,6 +72,7 @@ public class BlockTags {
 	public static final Tag<Block> WART_BLOCKS = bind("wart_blocks");
 	public static final Tag<Block> BEACON_BASE_BLOCKS = bind("beacon_base_blocks");
 	public static final Tag<Block> WALL_POST_OVERRIDE = bind("wall_post_override");
+	public static final Tag<Block> CLIMBABLE = bind("climbable");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

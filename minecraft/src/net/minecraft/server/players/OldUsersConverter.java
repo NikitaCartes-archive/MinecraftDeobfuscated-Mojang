@@ -8,7 +8,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -65,7 +64,7 @@ public class OldUsersConverter {
 			if (userBanList.getFile().exists()) {
 				try {
 					userBanList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", userBanList.getFile().getName(), var6);
 				}
 			}
@@ -120,7 +119,7 @@ public class OldUsersConverter {
 			if (ipBanList.getFile().exists()) {
 				try {
 					ipBanList.load();
-				} catch (FileNotFoundException var11) {
+				} catch (IOException var11) {
 					LOGGER.warn("Could not load existing file {}", ipBanList.getFile().getName(), var11);
 				}
 			}
@@ -156,7 +155,7 @@ public class OldUsersConverter {
 			if (serverOpList.getFile().exists()) {
 				try {
 					serverOpList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", serverOpList.getFile().getName(), var6);
 				}
 			}
@@ -200,7 +199,7 @@ public class OldUsersConverter {
 			if (userWhiteList.getFile().exists()) {
 				try {
 					userWhiteList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", userWhiteList.getFile().getName(), var6);
 				}
 			}

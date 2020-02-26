@@ -74,6 +74,10 @@ public interface LevelAccessor extends EntityGetter, LevelReader, LevelSimulated
 
 	void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j);
 
+	default int getHeight() {
+		return this.getDimension().isHasCeiling() ? 128 : 256;
+	}
+
 	default void levelEvent(int i, BlockPos blockPos, int j) {
 		this.levelEvent(null, i, blockPos, j);
 	}

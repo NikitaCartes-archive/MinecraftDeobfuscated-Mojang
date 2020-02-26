@@ -960,7 +960,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
-			EntityType.ZOMBIE_PIGMAN,
+			EntityType.ZOMBIFIED_PIGLIN,
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()

@@ -572,6 +572,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.BRICKS);
 		this.dropSelf(Blocks.MOSSY_COBBLESTONE);
 		this.dropSelf(Blocks.OBSIDIAN);
+		this.dropSelf(Blocks.CRYING_OBSIDIAN);
 		this.dropSelf(Blocks.TORCH);
 		this.dropSelf(Blocks.OAK_STAIRS);
 		this.dropSelf(Blocks.REDSTONE_WIRE);
@@ -736,6 +737,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.RED_NETHER_BRICKS);
 		this.dropSelf(Blocks.BONE_BLOCK);
 		this.dropSelf(Blocks.OBSERVER);
+		this.dropSelf(Blocks.TARGET);
 		this.dropSelf(Blocks.WHITE_GLAZED_TERRACOTTA);
 		this.dropSelf(Blocks.ORANGE_GLAZED_TERRACOTTA);
 		this.dropSelf(Blocks.MAGENTA_GLAZED_TERRACOTTA);
@@ -826,12 +828,12 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.HONEYCOMB_BLOCK);
 		this.dropSelf(Blocks.WARPED_STEM);
 		this.dropSelf(Blocks.WARPED_NYLIUM);
-		this.dropSelf(Blocks.WARPED_FUNGI);
+		this.dropSelf(Blocks.WARPED_FUNGUS);
 		this.dropSelf(Blocks.WARPED_WART_BLOCK);
 		this.dropSelf(Blocks.WARPED_ROOTS);
 		this.dropSelf(Blocks.CRIMSON_STEM);
 		this.dropSelf(Blocks.CRIMSON_NYLIUM);
-		this.dropSelf(Blocks.CRIMSON_FUNGI);
+		this.dropSelf(Blocks.CRIMSON_FUNGUS);
 		this.dropSelf(Blocks.SHROOMLIGHT);
 		this.dropSelf(Blocks.CRIMSON_ROOTS);
 		this.dropSelf(Blocks.WEEPING_VINES);
@@ -898,6 +900,10 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropPottedContents(Blocks.POTTED_DEAD_BUSH);
 		this.dropPottedContents(Blocks.POTTED_CACTUS);
 		this.dropPottedContents(Blocks.POTTED_BAMBOO);
+		this.dropPottedContents(Blocks.POTTED_CRIMSON_FUNGUS);
+		this.dropPottedContents(Blocks.POTTED_WARPED_FUNGUS);
+		this.dropPottedContents(Blocks.POTTED_CRIMSON_ROOTS);
+		this.dropPottedContents(Blocks.POTTED_WARPED_ROOTS);
 		this.add(Blocks.ACACIA_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.BIRCH_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.BRICK_SLAB, BlockLoot::createSlabItemTable);

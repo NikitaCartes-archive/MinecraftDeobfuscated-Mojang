@@ -11,14 +11,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class FungiBlock extends BushBlock implements BonemealableBlock {
+public class FungusBlock extends BushBlock implements BonemealableBlock {
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
-	private final Supplier<ConfiguredFeature<?, ?>> feature;
+	private final Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> feature;
 
-	protected FungiBlock(Block.Properties properties, Supplier<ConfiguredFeature<?, ?>> supplier) {
+	protected FungusBlock(Block.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
 		super(properties);
 		this.feature = supplier;
 	}
@@ -36,7 +37,9 @@ public class FungiBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
-		return true;
+		Block block = ((HugeFungusConfiguration)((ConfiguredFeature)this.feature.get()).config).validBaseState.getBlock();
+		Block block2 = blockGetter.getBlockState(blockPos.below()).getBlock();
+		return block2 == block;
 	}
 
 	@Override

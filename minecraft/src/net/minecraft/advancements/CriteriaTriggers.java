@@ -33,6 +33,7 @@ import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
+import net.minecraft.advancements.critereon.TargetBlockTrigger;
 import net.minecraft.advancements.critereon.TickTrigger;
 import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedEnderEyeTrigger;
@@ -79,6 +80,7 @@ public class CriteriaTriggers {
 	public static final ItemUsedOnBlockTrigger SAFELY_HARVEST_HONEY = register(new ItemUsedOnBlockTrigger(new ResourceLocation("safely_harvest_honey")));
 	public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = register(new SlideDownBlockTrigger());
 	public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = register(new BeeNestDestroyedTrigger());
+	public static final TargetBlockTrigger TARGET_BLOCK_HIT = register(new TargetBlockTrigger());
 
 	private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
 		if (CRITERIA.containsKey(criterionTrigger.getId())) {

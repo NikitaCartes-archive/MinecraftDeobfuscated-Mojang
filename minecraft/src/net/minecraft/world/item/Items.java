@@ -135,8 +135,8 @@ public class Items {
 	public static final Item WITHER_ROSE = registerBlock(Blocks.WITHER_ROSE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item BROWN_MUSHROOM = registerBlock(Blocks.BROWN_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item RED_MUSHROOM = registerBlock(Blocks.RED_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item CRIMSON_FUNGI = registerBlock(Blocks.CRIMSON_FUNGI, CreativeModeTab.TAB_DECORATIONS);
-	public static final Item WARPED_FUNGI = registerBlock(Blocks.WARPED_FUNGI, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item CRIMSON_FUNGUS = registerBlock(Blocks.CRIMSON_FUNGUS, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item WARPED_FUNGUS = registerBlock(Blocks.WARPED_FUNGUS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item CRIMSON_ROOTS = registerBlock(Blocks.CRIMSON_ROOTS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item WARPED_ROOTS = registerBlock(Blocks.WARPED_ROOTS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item NETHER_SPROUTS = registerBlock(Blocks.NETHER_SPROUTS, CreativeModeTab.TAB_DECORATIONS);
@@ -1126,8 +1126,8 @@ public class Items {
 	public static final Item ZOMBIE_HORSE_SPAWN_EGG = registerItem(
 		"zombie_horse_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE_HORSE, 3232308, 9945732, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item ZOMBIE_PIGMAN_SPAWN_EGG = registerItem(
-		"zombie_pigman_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE_PIGMAN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = registerItem(
+		"zombified_piglin_spawn_egg", new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item ZOMBIE_VILLAGER_SPAWN_EGG = registerItem(
 		"zombie_villager_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE_VILLAGER, 5651507, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
@@ -1453,6 +1453,8 @@ public class Items {
 	public static final Item NETHERITE_BOOTS = registerItem(
 		"netherite_boots", new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant())
 	);
+	public static final Item TARGET = registerBlock(Blocks.TARGET, CreativeModeTab.TAB_REDSTONE);
+	public static final Item CRYING_OBSIDIAN = registerBlock(Blocks.CRYING_OBSIDIAN, CreativeModeTab.TAB_BUILDING_BLOCKS);
 
 	private static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

@@ -500,57 +500,52 @@ public abstract class Mob extends LivingEntity {
 				this.spawnAtLocation(itemStack2);
 			}
 
-			this.setItemSlot(equipmentSlot, itemStack);
-			switch (equipmentSlot.getType()) {
-				case HAND:
-					this.handDropChances[equipmentSlot.getIndex()] = 2.0F;
-					break;
-				case ARMOR:
-					this.armorDropChances[equipmentSlot.getIndex()] = 2.0F;
-			}
-
-			this.persistenceRequired = true;
+			this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
-		boolean bl = true;
-		if (!itemStack2.isEmpty()) {
-			if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
-				if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
-					bl = true;
-				} else if (itemStack.getItem() instanceof SwordItem && itemStack2.getItem() instanceof SwordItem) {
-					SwordItem swordItem = (SwordItem)itemStack.getItem();
-					SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
-					if (swordItem.getDamage() == swordItem2.getDamage()) {
-						bl = itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
-					} else {
-						bl = swordItem.getDamage() > swordItem2.getDamage();
-					}
-				} else if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
-					bl = itemStack.hasTag() && !itemStack2.hasTag();
-				} else {
-					bl = false;
-				}
-			} else if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
-				bl = true;
-			} else if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
-				ArmorItem armorItem = (ArmorItem)itemStack.getItem();
-				ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
-				if (armorItem.getDefense() == armorItem2.getDefense()) {
-					bl = itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
-				} else {
-					bl = armorItem.getDefense() > armorItem2.getDefense();
-				}
-			} else {
-				bl = false;
-			}
+	protected void setItemSlotAndDropWhenKilled(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.setItemSlot(equipmentSlot, itemStack);
+		switch (equipmentSlot.getType()) {
+			case HAND:
+				this.handDropChances[equipmentSlot.getIndex()] = 2.0F;
+				break;
+			case ARMOR:
+				this.armorDropChances[equipmentSlot.getIndex()] = 2.0F;
 		}
 
-		return bl;
+		this.persistenceRequired = true;
+	}
+
+	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+		if (itemStack2.isEmpty()) {
+			return true;
+		} else if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
+			if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
+				return true;
+			} else if (itemStack.getItem() instanceof SwordItem) {
+				SwordItem swordItem = (SwordItem)itemStack.getItem();
+				SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
+				return swordItem.getDamage() != swordItem2.getDamage()
+					? swordItem.getDamage() > swordItem2.getDamage()
+					: itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+			} else {
+				return itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem ? itemStack.hasTag() && !itemStack2.hasTag() : false;
+			}
+		} else if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
+			return true;
+		} else if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
+			ArmorItem armorItem = (ArmorItem)itemStack.getItem();
+			ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
+			return armorItem.getDefense() != armorItem2.getDefense()
+				? armorItem.getDefense() > armorItem2.getDefense()
+				: itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+		} else {
+			return false;
+		}
 	}
 
 	public boolean canHoldItem(ItemStack itemStack) {

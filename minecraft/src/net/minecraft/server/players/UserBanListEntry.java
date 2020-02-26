@@ -23,15 +23,6 @@ public class UserBanListEntry extends BanListEntry<GameProfile> {
 	}
 
 	@Override
-	protected void serialize(JsonObject jsonObject) {
-		if (this.getUser() != null) {
-			jsonObject.addProperty("uuid", this.getUser().getId() == null ? "" : this.getUser().getId().toString());
-			jsonObject.addProperty("name", this.getUser().getName());
-			super.serialize(jsonObject);
-		}
-	}
-
-	@Override
 	public Component getDisplayName() {
 		GameProfile gameProfile = this.getUser();
 		return new TextComponent(gameProfile.getName() != null ? gameProfile.getName() : Objects.toString(gameProfile.getId(), "(Unknown)"));

@@ -206,10 +206,14 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.WEEPING_VINES_PLANT, renderType2);
 		hashMap.put(Blocks.WEEPING_VINES, renderType2);
 		hashMap.put(Blocks.NETHER_SPROUTS, renderType2);
-		hashMap.put(Blocks.CRIMSON_FUNGI, renderType2);
-		hashMap.put(Blocks.WARPED_FUNGI, renderType2);
+		hashMap.put(Blocks.CRIMSON_FUNGUS, renderType2);
+		hashMap.put(Blocks.WARPED_FUNGUS, renderType2);
 		hashMap.put(Blocks.CRIMSON_ROOTS, renderType2);
 		hashMap.put(Blocks.WARPED_ROOTS, renderType2);
+		hashMap.put(Blocks.POTTED_CRIMSON_FUNGUS, renderType2);
+		hashMap.put(Blocks.POTTED_WARPED_FUNGUS, renderType2);
+		hashMap.put(Blocks.POTTED_CRIMSON_ROOTS, renderType2);
+		hashMap.put(Blocks.POTTED_WARPED_ROOTS, renderType2);
 		RenderType renderType3 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType3);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType3);

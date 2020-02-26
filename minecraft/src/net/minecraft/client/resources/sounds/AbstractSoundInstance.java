@@ -1,6 +1,5 @@
 package net.minecraft.client.resources.sounds;
 
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.SoundManager;
@@ -12,8 +11,6 @@ import net.minecraft.sounds.SoundSource;
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSoundInstance implements SoundInstance {
 	protected Sound sound;
-	@Nullable
-	private WeighedSoundEvents soundEvent;
 	protected final SoundSource source;
 	protected final ResourceLocation location;
 	protected float volume = 1.0F;
@@ -43,14 +40,14 @@ public abstract class AbstractSoundInstance implements SoundInstance {
 
 	@Override
 	public WeighedSoundEvents resolve(SoundManager soundManager) {
-		this.soundEvent = soundManager.getSoundEvent(this.location);
-		if (this.soundEvent == null) {
+		WeighedSoundEvents weighedSoundEvents = soundManager.getSoundEvent(this.location);
+		if (weighedSoundEvents == null) {
 			this.sound = SoundManager.EMPTY_SOUND;
 		} else {
-			this.sound = this.soundEvent.getSound();
+			this.sound = weighedSoundEvents.getSound();
 		}
 
-		return this.soundEvent;
+		return weighedSoundEvents;
 	}
 
 	@Override

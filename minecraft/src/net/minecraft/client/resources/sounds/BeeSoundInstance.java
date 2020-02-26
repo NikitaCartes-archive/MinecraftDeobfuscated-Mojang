@@ -28,7 +28,7 @@ public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
 	@Override
 	public void tick() {
 		boolean bl = this.shouldSwitchSounds();
-		if (bl && !this.stopped) {
+		if (bl && !this.isStopped()) {
 			Minecraft.getInstance().getSoundManager().queueTickingSound(this.getAlternativeSoundInstance());
 			this.hasSwitched = true;
 		}
@@ -46,7 +46,7 @@ public abstract class BeeSoundInstance extends AbstractTickableSoundInstance {
 				this.volume = 0.0F;
 			}
 		} else {
-			this.stopped = true;
+			this.stop();
 		}
 	}
 

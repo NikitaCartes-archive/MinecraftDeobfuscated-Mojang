@@ -4,7 +4,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.grower.AcaciaTreeGrower;
 import net.minecraft.world.level.block.grower.BirchTreeGrower;
@@ -18,6 +17,7 @@ import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
@@ -2036,24 +2036,24 @@ public class Blocks {
 		new LogBlock(MaterialColor.COLOR_CYAN, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.STEM))
 	);
 	public static final Block WARPED_NYLIUM = register(
-		"warped_nylium", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.NYLIUM))
+		"warped_nylium", new NyliumBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.NYLIUM).randomTicks())
 	);
-	public static final Block WARPED_FUNGI = register(
-		"warped_fungi",
-		new FungiBlock(
-			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGI),
-			() -> Feature.HUGE_FUNGI.configured(BiomeDefaultFeatures.HUGE_WARPED_FUNGI_CONFIG)
+	public static final Block WARPED_FUNGUS = register(
+		"warped_fungus",
+		new FungusBlock(
+			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGUS),
+			() -> Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_WARPED_FUNGI_PLANTED_CONFIG)
 		)
 	);
 	public static final Block WARPED_WART_BLOCK = register(
 		"warped_wart_block", new Block(Block.Properties.of(Material.GRASS, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.WART_BLOCK))
 	);
 	public static final Block WARPED_ROOTS = register(
-		"warped_roots", new RootsBlock(Block.Properties.of(Material.PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.ROOTS))
+		"warped_roots", new RootsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.ROOTS))
 	);
 	public static final Block NETHER_SPROUTS = register(
 		"nether_sprouts",
-		new NetherSproutsBlock(Block.Properties.of(Material.PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.NETHER_SPROUTS))
+		new NetherSproutsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.NETHER_SPROUTS))
 	);
 	public static final Block CRIMSON_STEM = register(
 		"crimson_stem", new LogBlock(MaterialColor.COLOR_RED, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.STEM))
@@ -2063,24 +2063,24 @@ public class Blocks {
 		new LogBlock(MaterialColor.COLOR_RED, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.STEM))
 	);
 	public static final Block CRIMSON_NYLIUM = register(
-		"crimson_nylium", new Block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.NYLIUM))
+		"crimson_nylium", new NyliumBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.NYLIUM).randomTicks())
 	);
-	public static final Block CRIMSON_FUNGI = register(
-		"crimson_fungi",
-		new FungiBlock(
-			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGI),
-			() -> Feature.HUGE_FUNGI.configured(BiomeDefaultFeatures.HUGE_CRIMSON_FUNGI_CONFIG)
+	public static final Block CRIMSON_FUNGUS = register(
+		"crimson_fungus",
+		new FungusBlock(
+			Block.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.FUNGUS),
+			() -> Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG)
 		)
 	);
 	public static final Block SHROOMLIGHT = register(
 		"shroomlight", new Block(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.SHROOMLIGHT).lightLevel(15))
 	);
 	public static final Block WEEPING_VINES = register(
-		"weeping_vines", new WeepingVines(Block.Properties.of(Material.PLANT).randomTicks().noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+		"weeping_vines", new WeepingVines(Block.Properties.of(Material.REPLACEABLE_PLANT).randomTicks().noCollission().instabreak().sound(SoundType.WEEPING_VINES))
 	);
 	public static final Block WEEPING_VINES_PLANT = register(
 		"weeping_vines_plant",
-		new WeepingVinesPlant((WeepingVines)WEEPING_VINES, Block.Properties.of(Material.PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+		new WeepingVinesPlant((WeepingVines)WEEPING_VINES, Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
 	);
 	public static final Block CRIMSON_ROOTS = register(
 		"crimson_roots", new RootsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))
@@ -2170,6 +2170,9 @@ public class Blocks {
 		"jigsaw", new JigsawBlock(Block.Properties.of(Material.METAL, MaterialColor.COLOR_LIGHT_GRAY).strength(-1.0F, 3600000.0F).noDrops())
 	);
 	public static final Block COMPOSTER = register("composter", new ComposterBlock(Block.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD)));
+	public static final Block TARGET = register(
+		"target", new TargetBlock(Block.Properties.of(Material.GRASS, MaterialColor.QUARTZ).strength(0.5F).sound(SoundType.GRASS))
+	);
 	public static final Block BEE_NEST = register("bee_nest", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.3F).sound(SoundType.WOOD)));
 	public static final Block BEEHIVE = register("beehive", new BeehiveBlock(Block.Properties.of(Material.WOOD).strength(0.6F).sound(SoundType.WOOD)));
 	public static final Block HONEY_BLOCK = register(
@@ -2184,6 +2187,21 @@ public class Blocks {
 	);
 	public static final Block ANCIENT_DEBRIS = register(
 		"ancient_debris", new Block(Block.Properties.of(Material.METAL, MaterialColor.COLOR_BLACK).strength(30.0F, 1200.0F).sound(SoundType.ANCIENT_DEBRIS))
+	);
+	public static final Block CRYING_OBSIDIAN = register(
+		"crying_obsidian", new CryingObsidianBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).strength(50.0F, 1200.0F).lightLevel(10))
+	);
+	public static final Block POTTED_CRIMSON_FUNGUS = register(
+		"potted_crimson_fungus", new FlowerPotBlock(CRIMSON_FUNGUS, Block.Properties.of(Material.DECORATION).instabreak().noOcclusion())
+	);
+	public static final Block POTTED_WARPED_FUNGUS = register(
+		"potted_warped_fungus", new FlowerPotBlock(WARPED_FUNGUS, Block.Properties.of(Material.DECORATION).instabreak().noOcclusion())
+	);
+	public static final Block POTTED_CRIMSON_ROOTS = register(
+		"potted_crimson_roots", new FlowerPotBlock(CRIMSON_ROOTS, Block.Properties.of(Material.DECORATION).instabreak().noOcclusion())
+	);
+	public static final Block POTTED_WARPED_ROOTS = register(
+		"potted_warped_roots", new FlowerPotBlock(WARPED_ROOTS, Block.Properties.of(Material.DECORATION).instabreak().noOcclusion())
 	);
 
 	private static Block register(String string, Block block) {

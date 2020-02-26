@@ -47,7 +47,7 @@ public class ElytraOnPlayerSoundInstance extends AbstractTickableSoundInstance {
 				this.pitch = 1.0F;
 			}
 		} else {
-			this.stopped = true;
+			this.stop();
 		}
 	}
 }

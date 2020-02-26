@@ -126,7 +126,7 @@ public class ItemEntity extends Entity {
 				this.age++;
 			}
 
-			this.hasImpulse = this.hasImpulse | this.updateInWaterState();
+			this.hasImpulse = this.hasImpulse | this.updateInWaterStateAndDoFluidPushing();
 			if (!this.level.isClientSide) {
 				double d = this.getDeltaMovement().subtract(vec3).lengthSqr();
 				if (d > 0.01) {

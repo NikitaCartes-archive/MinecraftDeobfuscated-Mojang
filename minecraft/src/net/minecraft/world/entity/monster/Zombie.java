@@ -95,7 +95,7 @@ public class Zombie extends Monster {
 		this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0, false));
 		this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0, true, 4, this::canBreakDoors));
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
-		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(PigZombie.class));
+		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(ZombifiedPiglin.class));
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, AbstractVillager.class, false));
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));

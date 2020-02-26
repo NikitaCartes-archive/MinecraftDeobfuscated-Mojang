@@ -4,10 +4,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 
 @Environment(EnvType.CLIENT)
-public class PiglinModel<T extends Piglin> extends HumanoidModel<T> {
+public class PiglinModel<T extends Mob> extends HumanoidModel<T> {
 	public final ModelPart earRight;
 	public final ModelPart earLeft;
 
@@ -44,32 +45,35 @@ public class PiglinModel<T extends Piglin> extends HumanoidModel<T> {
 		this.leftLeg.texOffs(0, 16).addBox(-1.9F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 	}
 
-	public void setupAnim(T piglin, float f, float g, float h, float i, float j) {
-		super.setupAnim(piglin, f, g, h, i, j);
+	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
+		super.setupAnim(mob, f, g, h, i, j);
 		float k = (float) (Math.PI / 6);
 		float l = h * 0.1F + f * 0.5F;
 		float m = 0.08F + g * 0.4F;
 		this.earRight.zRot = (float) (-Math.PI / 6) - Mth.cos(l * 1.2F) * m;
 		this.earLeft.zRot = (float) (Math.PI / 6) + Mth.cos(l) * m;
-		Piglin.PiglinArmPose piglinArmPose = piglin.getArmPose();
-		if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
-			this.rightArm.yRot = -0.3F + this.head.yRot;
-			this.leftArm.yRot = 0.6F + this.head.yRot;
-			this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
-			this.leftArm.xRot = -1.5F + this.head.xRot;
-		} else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_CHARGE) {
-			this.rightArm.yRot = -0.8F;
-			this.rightArm.xRot = -0.97079635F;
-			this.leftArm.xRot = -0.97079635F;
-			float n = (float)Mth.clamp(piglin.getTicksUsingItem(), 0, 25);
-			float o = n / 25.0F;
-			this.leftArm.yRot = Mth.lerp(o, 0.4F, 0.85F);
-			this.leftArm.xRot = Mth.lerp(o, this.leftArm.xRot, (float) (-Math.PI / 2));
-		} else if (piglinArmPose == Piglin.PiglinArmPose.ADMIRING_ITEM) {
-			this.leftArm.yRot = 0.5F;
-			this.leftArm.xRot = -0.9F;
-			this.head.xRot = 0.5F;
-			this.head.yRot = 0.0F;
+		if (mob instanceof Piglin) {
+			Piglin piglin = (Piglin)mob;
+			Piglin.PiglinArmPose piglinArmPose = piglin.getArmPose();
+			if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
+				this.rightArm.yRot = -0.3F + this.head.yRot;
+				this.leftArm.yRot = 0.6F + this.head.yRot;
+				this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
+				this.leftArm.xRot = -1.5F + this.head.xRot;
+			} else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_CHARGE) {
+				this.rightArm.yRot = -0.8F;
+				this.rightArm.xRot = -0.97079635F;
+				this.leftArm.xRot = -0.97079635F;
+				float n = (float)Mth.clamp(piglin.getTicksUsingItem(), 0, 25);
+				float o = n / 25.0F;
+				this.leftArm.yRot = Mth.lerp(o, 0.4F, 0.85F);
+				this.leftArm.xRot = Mth.lerp(o, this.leftArm.xRot, (float) (-Math.PI / 2));
+			} else if (piglinArmPose == Piglin.PiglinArmPose.ADMIRING_ITEM) {
+				this.leftArm.yRot = 0.5F;
+				this.leftArm.xRot = -0.9F;
+				this.head.xRot = 0.5F;
+				this.head.yRot = 0.0F;
+			}
 		}
 	}
 }

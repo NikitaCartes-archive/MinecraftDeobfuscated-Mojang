@@ -594,7 +594,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					entity.lerpTo(d, e, f, g, h, 3, true);
 				}
 
-				entity.onGround = clientboundTeleportEntityPacket.isOnGround();
+				entity.setOnGround(clientboundTeleportEntityPacket.isOnGround());
 			}
 		}
 	}
@@ -627,7 +627,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, f, 3, false);
 				}
 
-				entity.onGround = clientboundMoveEntityPacket.isOnGround();
+				entity.setOnGround(clientboundMoveEntityPacket.isOnGround());
 			}
 		}
 	}

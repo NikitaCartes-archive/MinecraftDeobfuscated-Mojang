@@ -11,10 +11,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -25,6 +27,11 @@ public abstract class BaseFireBlock extends Block {
 	public BaseFireBlock(Block.Properties properties, float f) {
 		super(properties);
 		this.fireDamage = f;
+	}
+
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+		return getState(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
 	}
 
 	public static BlockState getState(BlockGetter blockGetter, BlockPos blockPos) {
@@ -127,5 +134,17 @@ public abstract class BaseFireBlock extends Block {
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);
+	}
+
+	@Override
+	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		if (blockState2.getBlock() != blockState.getBlock()) {
+			if (level.dimension.getType() != DimensionType.OVERWORLD && level.dimension.getType() != DimensionType.NETHER
+				|| !((NetherPortalBlock)Blocks.NETHER_PORTAL).trySpawnPortal(level, blockPos)) {
+				if (!blockState.canSurvive(level, blockPos)) {
+					level.removeBlock(blockPos, false);
+				}
+			}
+		}
 	}
 }

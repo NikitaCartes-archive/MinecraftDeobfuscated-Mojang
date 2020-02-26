@@ -8,7 +8,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -19,7 +18,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 
 public class FireBlock extends BaseFireBlock {
@@ -56,16 +54,11 @@ public class FireBlock extends BaseFireBlock {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return this.canSurvive(blockState, levelAccessor, blockPos)
-			? this.getStateForPlacement(levelAccessor, blockPos).setValue(AGE, blockState.getValue(AGE))
+			? this.getStateWithAge(levelAccessor, blockPos, (Integer)blockState.getValue(AGE))
 			: Blocks.AIR.defaultBlockState();
 	}
 
-	@Override
-	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return this.getStateForPlacement(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
-	}
-
-	public BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
+	protected BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
 		if (!this.canBurn(blockState) && !blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) {
@@ -160,7 +153,7 @@ public class FireBlock extends BaseFireBlock {
 
 									if (q > 0 && random.nextInt(o) <= q && (!serverLevel.isRaining() || !this.isNearRain(serverLevel, mutableBlockPos))) {
 										int r = Math.min(15, i + random.nextInt(5) / 4);
-										serverLevel.setBlock(mutableBlockPos, this.getStateForPlacement(serverLevel, mutableBlockPos).setValue(AGE, Integer.valueOf(r)), 3);
+										serverLevel.setBlock(mutableBlockPos, this.getStateWithAge(serverLevel, mutableBlockPos, r), 3);
 									}
 								}
 							}
@@ -197,7 +190,7 @@ public class FireBlock extends BaseFireBlock {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (random.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
 				int l = Math.min(j + random.nextInt(5) / 4, 15);
-				level.setBlock(blockPos, this.getStateForPlacement(level, blockPos).setValue(AGE, Integer.valueOf(l)), 3);
+				level.setBlock(blockPos, this.getStateWithAge(level, blockPos, l), 3);
 			} else {
 				level.removeBlock(blockPos, false);
 			}
@@ -207,6 +200,11 @@ public class FireBlock extends BaseFireBlock {
 				TntBlock.explode(level, blockPos);
 			}
 		}
+	}
+
+	private BlockState getStateWithAge(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+		BlockState blockState = getState(levelAccessor, blockPos);
+		return blockState.getBlock() == Blocks.FIRE ? blockState.setValue(AGE, Integer.valueOf(i)) : blockState;
 	}
 
 	private boolean isValidFireLocation(BlockGetter blockGetter, BlockPos blockPos) {
@@ -241,16 +239,8 @@ public class FireBlock extends BaseFireBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
-			if (level.dimension.getType() != DimensionType.OVERWORLD && level.dimension.getType() != DimensionType.NETHER
-				|| !((NetherPortalBlock)Blocks.NETHER_PORTAL).trySpawnPortal(level, blockPos)) {
-				if (!blockState.canSurvive(level, blockPos)) {
-					level.removeBlock(blockPos, false);
-				} else {
-					level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
-				}
-			}
-		}
+		super.onPlace(blockState, level, blockPos, blockState2, bl);
+		level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
 	}
 
 	@Override

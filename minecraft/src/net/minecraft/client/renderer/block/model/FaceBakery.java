@@ -57,7 +57,7 @@ public class FaceBakery {
 			this.recalculateWinding(is, direction2);
 		}
 
-		return new BakedQuad(is, blockElementFace.tintIndex, direction2, textureAtlasSprite);
+		return new BakedQuad(is, blockElementFace.tintIndex, direction2, textureAtlasSprite, bl);
 	}
 
 	public static BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, Transformation transformation, ResourceLocation resourceLocation) {
@@ -120,29 +120,6 @@ public class FaceBakery {
 		return is;
 	}
 
-	private int getShadeValue(Direction direction) {
-		float f = this.getShade(direction);
-		int i = Mth.clamp((int)(f * 255.0F), 0, 255);
-		return 0xFF000000 | i << 16 | i << 8 | i;
-	}
-
-	private float getShade(Direction direction) {
-		switch (direction) {
-			case DOWN:
-				return 0.5F;
-			case UP:
-				return 1.0F;
-			case NORTH:
-			case SOUTH:
-				return 0.8F;
-			case WEST:
-			case EAST:
-				return 0.6F;
-			default:
-				return 1.0F;
-		}
-	}
-
 	private float[] setupShape(Vector3f vector3f, Vector3f vector3f2) {
 		float[] fs = new float[Direction.values().length];
 		fs[FaceInfo.Constants.MIN_X] = vector3f.x() / 16.0F;
@@ -165,23 +142,21 @@ public class FaceBakery {
 		@Nullable BlockElementRotation blockElementRotation,
 		boolean bl
 	) {
-		Direction direction2 = Direction.rotate(transformation.getMatrix(), direction);
-		int j = bl ? this.getShadeValue(direction2) : -1;
 		FaceInfo.VertexInfo vertexInfo = FaceInfo.fromFacing(direction).getVertexInfo(i);
 		Vector3f vector3f = new Vector3f(fs[vertexInfo.xFace], fs[vertexInfo.yFace], fs[vertexInfo.zFace]);
 		this.applyElementRotation(vector3f, blockElementRotation);
 		this.applyModelRotation(vector3f, transformation);
-		this.fillVertex(is, i, vector3f, j, textureAtlasSprite, blockFaceUV);
+		this.fillVertex(is, i, vector3f, textureAtlasSprite, blockFaceUV);
 	}
 
-	private void fillVertex(int[] is, int i, Vector3f vector3f, int j, TextureAtlasSprite textureAtlasSprite, BlockFaceUV blockFaceUV) {
-		int k = i * 8;
-		is[k] = Float.floatToRawIntBits(vector3f.x());
-		is[k + 1] = Float.floatToRawIntBits(vector3f.y());
-		is[k + 2] = Float.floatToRawIntBits(vector3f.z());
-		is[k + 3] = j;
-		is[k + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU((double)blockFaceUV.getU(i)));
-		is[k + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV((double)blockFaceUV.getV(i)));
+	private void fillVertex(int[] is, int i, Vector3f vector3f, TextureAtlasSprite textureAtlasSprite, BlockFaceUV blockFaceUV) {
+		int j = i * 8;
+		is[j] = Float.floatToRawIntBits(vector3f.x());
+		is[j + 1] = Float.floatToRawIntBits(vector3f.y());
+		is[j + 2] = Float.floatToRawIntBits(vector3f.z());
+		is[j + 3] = -1;
+		is[j + 4] = Float.floatToRawIntBits(textureAtlasSprite.getU((double)blockFaceUV.getU(i)));
+		is[j + 4 + 1] = Float.floatToRawIntBits(textureAtlasSprite.getV((double)blockFaceUV.getV(i)));
 	}
 
 	private void applyElementRotation(Vector3f vector3f, @Nullable BlockElementRotation blockElementRotation) {

@@ -32,7 +32,7 @@ public class MinecartSoundInstance extends AbstractTickableSoundInstance {
 	@Override
 	public void tick() {
 		if (this.minecart.removed) {
-			this.stopped = true;
+			this.stop();
 		} else {
 			this.x = (float)this.minecart.getX();
 			this.y = (float)this.minecart.getY();

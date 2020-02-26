@@ -86,7 +86,7 @@ public class TridentItem extends Item {
 						m *= o / n;
 						player.push((double)h, (double)l, (double)m);
 						player.startAutoSpinAttack(20);
-						if (player.onGround) {
+						if (player.isOnGround()) {
 							float p = 1.1999999F;
 							player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
 						}

@@ -23,7 +23,7 @@ public abstract class BanListEntry<T> extends StoredUserEntry<T> {
 	}
 
 	protected BanListEntry(T object, JsonObject jsonObject) {
-		super(object, jsonObject);
+		super(object);
 
 		Date date;
 		try {
@@ -63,13 +63,5 @@ public abstract class BanListEntry<T> extends StoredUserEntry<T> {
 	@Override
 	boolean hasExpired() {
 		return this.expires == null ? false : this.expires.before(new Date());
-	}
-
-	@Override
-	protected void serialize(JsonObject jsonObject) {
-		jsonObject.addProperty("created", DATE_FORMAT.format(this.created));
-		jsonObject.addProperty("source", this.source);
-		jsonObject.addProperty("expires", this.expires == null ? "forever" : DATE_FORMAT.format(this.expires));
-		jsonObject.addProperty("reason", this.reason);
 	}
 }

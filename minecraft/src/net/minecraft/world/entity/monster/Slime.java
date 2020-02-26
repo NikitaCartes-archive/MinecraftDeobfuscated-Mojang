@@ -482,7 +482,7 @@ public class Slime extends Mob implements Enemy {
 				this.mob.setZza(0.0F);
 			} else {
 				this.operation = MoveControl.Operation.WAIT;
-				if (this.mob.onGround) {
+				if (this.mob.isOnGround()) {
 					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
 					if (this.jumpDelay-- <= 0) {
 						this.jumpDelay = this.slime.getJumpDelay();

@@ -187,7 +187,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 
 	private static boolean matchesStickyCritera(AABB aABB, Entity entity) {
 		return entity.getPistonPushReaction() == PushReaction.NORMAL
-			&& entity.onGround
+			&& entity.isOnGround()
 			&& entity.getX() >= aABB.minX
 			&& entity.getX() <= aABB.maxX
 			&& entity.getZ() >= aABB.minZ

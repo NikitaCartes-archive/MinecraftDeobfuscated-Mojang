@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.player;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
@@ -458,7 +459,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public void rideTick() {
-		if (!this.level.isClientSide && this.wantsToStopRiding() && this.isPassenger()) {
+		if (this.wantsToStopRiding() && this.isPassenger()) {
 			this.stopRiding();
 			this.setShiftKeyDown(false);
 		} else {
@@ -1840,7 +1841,7 @@ public abstract class Player extends LivingEntity {
 	public abstract boolean isCreative();
 
 	@Override
-	public boolean isPushedByWater() {
+	public boolean isPushedByFluid() {
 		return !this.abilities.flying;
 	}
 
@@ -2041,6 +2042,11 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public EntityDimensions getDimensions(Pose pose) {
 		return (EntityDimensions)POSES.getOrDefault(pose, STANDING_DIMENSIONS);
+	}
+
+	@Override
+	public ImmutableList<Pose> getDismountPoses() {
+		return ImmutableList.of(Pose.STANDING, Pose.CROUCHING, Pose.SWIMMING);
 	}
 
 	@Override

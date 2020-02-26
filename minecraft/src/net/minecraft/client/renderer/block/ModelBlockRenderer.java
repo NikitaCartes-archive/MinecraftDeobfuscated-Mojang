@@ -150,7 +150,7 @@ public class ModelBlockRenderer {
 	) {
 		for (BakedQuad bakedQuad : list) {
 			this.calculateShape(blockAndTintGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), fs, bitSet);
-			ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet);
+			ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet, bakedQuad.isShade());
 			this.putQuadData(
 				blockAndTintGetter,
 				blockState,
@@ -291,7 +291,8 @@ public class ModelBlockRenderer {
 				i = LevelRenderer.getLightColor(blockAndTintGetter, blockState, blockPos2);
 			}
 
-			this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, 1.0F, 1.0F, 1.0F, 1.0F, i, i, i, i, j);
+			float f = blockAndTintGetter.getShade(bakedQuad.getDirection(), bakedQuad.isShade());
+			this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, f, f, f, f, i, i, i, i, j);
 		}
 	}
 
@@ -655,7 +656,9 @@ public class ModelBlockRenderer {
 		public AmbientOcclusionFace() {
 		}
 
-		public void calculate(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet) {
+		public void calculate(
+			BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet, boolean bl
+		) {
 			BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(direction) : blockPos;
 			ModelBlockRenderer.AdjacencyInfo adjacencyInfo = ModelBlockRenderer.AdjacencyInfo.fromFacing(direction);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -677,16 +680,16 @@ public class ModelBlockRenderer {
 			int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
 			float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
 			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[0]).move(direction);
-			boolean bl = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(direction);
 			boolean bl2 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[2]).move(direction);
+			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(direction);
 			boolean bl3 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[3]).move(direction);
+			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[2]).move(direction);
 			boolean bl4 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+			mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[3]).move(direction);
+			boolean bl5 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
 			float n;
 			int o;
-			if (!bl3 && !bl) {
+			if (!bl4 && !bl2) {
 				n = f;
 				o = i;
 			} else {
@@ -698,7 +701,7 @@ public class ModelBlockRenderer {
 
 			float p;
 			int q;
-			if (!bl4 && !bl) {
+			if (!bl5 && !bl2) {
 				p = f;
 				q = i;
 			} else {
@@ -710,7 +713,7 @@ public class ModelBlockRenderer {
 
 			float r;
 			int s;
-			if (!bl3 && !bl2) {
+			if (!bl4 && !bl3) {
 				r = f;
 				s = i;
 			} else {
@@ -722,7 +725,7 @@ public class ModelBlockRenderer {
 
 			float t;
 			int u;
-			if (!bl4 && !bl2) {
+			if (!bl5 && !bl3) {
 				t = f;
 				u = i;
 			} else {
@@ -789,6 +792,12 @@ public class ModelBlockRenderer {
 				this.brightness[ambientVertexRemap.vert1] = y;
 				this.brightness[ambientVertexRemap.vert2] = z;
 				this.brightness[ambientVertexRemap.vert3] = aa;
+			}
+
+			float x = blockAndTintGetter.getShade(direction, bl);
+
+			for (int av = 0; av < this.brightness.length; av++) {
+				this.brightness[av] = this.brightness[av] * x;
 			}
 		}
 
