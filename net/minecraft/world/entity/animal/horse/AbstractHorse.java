@@ -10,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
@@ -31,10 +32,10 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -62,7 +63,10 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractHorse
@@ -158,11 +162,6 @@ PlayerRideableJumping {
 
     public void setIsJumping(boolean bl) {
         this.isJumping = bl;
-    }
-
-    @Override
-    public boolean canBeLeashed(Player player) {
-        return super.canBeLeashed(player) && this.getMobType() != MobType.UNDEAD;
     }
 
     @Override
@@ -911,6 +910,28 @@ PlayerRideableJumping {
             return null;
         }
         return this.getPassengers().get(0);
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+        Vec3 vec3 = AbstractHorse.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0f : -90.0f));
+        double d = this.getX() + vec3.x;
+        double e = this.getBoundingBox().minY;
+        double f = this.getZ() + vec3.z;
+        CollisionContext collisionContext = CollisionContext.of(livingEntity);
+        AABB aABB = livingEntity.getLocalBoundsForPose(Pose.SWIMMING).move(d, e, f);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
+        double g = this.getBoundingBox().maxY + 0.75;
+        do {
+            AABB aABB2;
+            double h = AbstractHorse.getDismountTargetFloorHeight(this.level, mutableBlockPos, collisionContext);
+            if ((double)mutableBlockPos.getY() + h > g) break;
+            if (!Double.isInfinite(h) && h < 1.0 && this.level.getBlockCollisions(livingEntity, aABB2 = aABB.move(d, (double)mutableBlockPos.getY() + h, f)).allMatch(VoxelShape::isEmpty)) {
+                return new Vec3(d, (double)mutableBlockPos.getY() + h, f);
+            }
+            mutableBlockPos.move(Direction.UP);
+        } while ((double)mutableBlockPos.getY() < g);
+        return new Vec3(this.getX(), this.getY(), this.getZ());
     }
 
     @Override

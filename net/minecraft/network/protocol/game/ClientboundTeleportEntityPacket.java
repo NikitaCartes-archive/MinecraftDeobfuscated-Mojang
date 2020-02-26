@@ -31,7 +31,7 @@ implements Packet<ClientGamePacketListener> {
         this.z = entity.getZ();
         this.yRot = (byte)(entity.yRot * 256.0f / 360.0f);
         this.xRot = (byte)(entity.xRot * 256.0f / 360.0f);
-        this.onGround = entity.onGround;
+        this.onGround = entity.isOnGround();
     }
 
     @Override

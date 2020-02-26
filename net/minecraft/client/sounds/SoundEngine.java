@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
@@ -101,7 +102,7 @@ public class SoundEngine {
         }
     }
 
-    private float getVolume(SoundSource soundSource) {
+    private float getVolume(@Nullable SoundSource soundSource) {
         if (soundSource == null || soundSource == SoundSource.MASTER) {
             return 1.0f;
         }
@@ -207,9 +208,8 @@ public class SoundEngine {
                 continue;
             }
             if (!channelHandle2.isStopped() || (i = this.soundDeleteTime.get(soundInstance).intValue()) > this.tickCount) continue;
-            int j = soundInstance.getDelay();
-            if (soundInstance.isLooping() && j > 0) {
-                this.queuedSounds.put(soundInstance, this.tickCount + j);
+            if (SoundEngine.shouldLoopManually(soundInstance)) {
+                this.queuedSounds.put(soundInstance, this.tickCount + soundInstance.getDelay());
             }
             iterator.remove();
             LOGGER.debug(MARKER, "Removed channel {} because it's not playing anymore", (Object)channelHandle2);
@@ -233,6 +233,18 @@ public class SoundEngine {
             this.play(soundInstance);
             iterator2.remove();
         }
+    }
+
+    private static boolean requiresManualLooping(SoundInstance soundInstance) {
+        return soundInstance.getDelay() > 0;
+    }
+
+    private static boolean shouldLoopManually(SoundInstance soundInstance) {
+        return soundInstance.isLooping() && SoundEngine.requiresManualLooping(soundInstance);
+    }
+
+    private static boolean shouldLoopAutomatically(SoundInstance soundInstance) {
+        return soundInstance.isLooping() && !SoundEngine.requiresManualLooping(soundInstance);
     }
 
     public boolean isActive(SoundInstance soundInstance) {
@@ -284,9 +296,15 @@ public class SoundEngine {
             LOGGER.debug(MARKER, "Skipped playing sound {}, volume was zero.", (Object)sound.getLocation());
             return;
         }
-        boolean bl2 = soundInstance.isLooping() && soundInstance.getDelay() == 0;
+        boolean bl2 = SoundEngine.shouldLoopAutomatically(soundInstance);
+        boolean bl3 = sound.shouldStream();
         Vec3 vec3 = new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ());
-        ChannelAccess.ChannelHandle channelHandle = this.channelAccess.createHandle(sound.shouldStream() ? Library.Pool.STREAMING : Library.Pool.STATIC);
+        CompletableFuture<ChannelAccess.ChannelHandle> completableFuture = this.channelAccess.createHandle(sound.shouldStream() ? Library.Pool.STREAMING : Library.Pool.STATIC);
+        ChannelAccess.ChannelHandle channelHandle = completableFuture.join();
+        if (channelHandle == null) {
+            LOGGER.warn("Failed to create new sound handle");
+            return;
+        }
         LOGGER.debug(MARKER, "Playing sound {} for event {}", (Object)sound.getLocation(), (Object)resourceLocation);
         this.soundDeleteTime.put(soundInstance, this.tickCount + 20);
         this.instanceToChannel.put(soundInstance, channelHandle);
@@ -299,17 +317,17 @@ public class SoundEngine {
             } else {
                 channel.disableAttenuation();
             }
-            channel.setLooping(bl2);
+            channel.setLooping(bl2 && !bl3);
             channel.setSelfPosition(vec3);
             channel.setRelative(bl);
         });
-        if (!sound.shouldStream()) {
+        if (!bl3) {
             this.soundBuffers.getCompleteBuffer(sound.getPath()).thenAccept(soundBuffer -> channelHandle.execute(channel -> {
                 channel.attachStaticBuffer((SoundBuffer)soundBuffer);
                 channel.play();
             }));
         } else {
-            this.soundBuffers.getStream(sound.getPath()).thenAccept(audioStream -> channelHandle.execute(channel -> {
+            this.soundBuffers.getStream(sound.getPath(), bl2).thenAccept(audioStream -> channelHandle.execute(channel -> {
                 channel.attachBufferStream((AudioStream)audioStream);
                 channel.play();
             }));

@@ -126,7 +126,7 @@ extends Entity {
         if (this.age != Short.MIN_VALUE) {
             ++this.age;
         }
-        this.hasImpulse |= this.updateInWaterState();
+        this.hasImpulse |= this.updateInWaterStateAndDoFluidPushing();
         if (!this.level.isClientSide && (d = this.getDeltaMovement().subtract(vec3).lengthSqr()) > 0.01) {
             this.hasImpulse = true;
         }

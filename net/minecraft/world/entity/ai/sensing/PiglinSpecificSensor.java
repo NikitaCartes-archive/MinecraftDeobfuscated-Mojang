@@ -17,8 +17,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.monster.PigZombie;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -59,8 +59,8 @@ extends Sensor<LivingEntity> {
                 optional4 = Optional.of((Piglin)livingEntity2);
             } else if (!optional2.isPresent() && livingEntity2 instanceof Hoglin && !livingEntity2.isBaby()) {
                 optional2 = Optional.of((Hoglin)livingEntity2);
-            } else if (!optional5.isPresent() && livingEntity2 instanceof PigZombie) {
-                optional5 = Optional.of((PigZombie)livingEntity2);
+            } else if (!optional5.isPresent() && livingEntity2 instanceof ZombifiedPiglin) {
+                optional5 = Optional.of((ZombifiedPiglin)livingEntity2);
             }
             if (livingEntity2 instanceof Piglin && !livingEntity2.isBaby()) {
                 list.add((Piglin)livingEntity2);

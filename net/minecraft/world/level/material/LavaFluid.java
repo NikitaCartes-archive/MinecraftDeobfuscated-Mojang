@@ -81,7 +81,7 @@ extends FlowingFluid {
                 BlockState blockState = level.getBlockState(blockPos2);
                 if (blockState.isAir()) {
                     if (!this.hasFlammableNeighbours(level, blockPos2)) continue;
-                    level.setBlockAndUpdate(blockPos2, Blocks.FIRE.defaultBlockState());
+                    level.setBlockAndUpdate(blockPos2, BaseFireBlock.getState(level, blockPos2));
                     return;
                 }
                 if (!blockState.getMaterial().blocksMotion()) continue;

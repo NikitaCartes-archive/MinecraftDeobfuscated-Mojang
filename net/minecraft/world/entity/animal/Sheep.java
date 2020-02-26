@@ -19,6 +19,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -240,6 +241,7 @@ extends Animal {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.SHEARS && !this.isSheared() && !this.isBaby()) {
             this.shear();
+            this.level.playSound(null, this, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1.0f, 1.0f);
             if (!this.level.isClientSide) {
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
@@ -258,7 +260,6 @@ extends Animal {
                 itemEntity.setDeltaMovement(itemEntity.getDeltaMovement().add((this.random.nextFloat() - this.random.nextFloat()) * 0.1f, this.random.nextFloat() * 0.05f, (this.random.nextFloat() - this.random.nextFloat()) * 0.1f));
             }
         }
-        this.playSound(SoundEvents.SHEEP_SHEAR, 1.0f, 1.0f);
     }
 
     @Override

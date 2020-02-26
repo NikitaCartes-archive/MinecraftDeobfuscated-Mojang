@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -164,6 +165,12 @@ implements LevelAccessor {
     @Override
     public Biome getUncachedNoiseBiome(int i, int j, int k) {
         return this.level.getUncachedNoiseBiome(i, j, k);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public float getShade(Direction direction, boolean bl) {
+        return 1.0f;
     }
 
     @Override

@@ -18,6 +18,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -59,10 +61,15 @@ extends ThrowableItemProjectile {
 
     @Override
     protected void onHit(HitResult hitResult) {
-        if (hitResult.getType() == HitResult.Type.ENTITY) {
+        HitResult.Type type = hitResult.getType();
+        if (type == HitResult.Type.ENTITY) {
             Entity entity = ((EntityHitResult)hitResult).getEntity();
             int i = entity instanceof Blaze ? 3 : 0;
             entity.hurt(DamageSource.thrown(this, this.getOwner()), i);
+        } else if (type == HitResult.Type.BLOCK) {
+            BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+            BlockState blockState = this.level.getBlockState(blockHitResult.getBlockPos());
+            blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
         }
         if (!this.level.isClientSide) {
             this.level.broadcastEntityEvent(this, (byte)3);

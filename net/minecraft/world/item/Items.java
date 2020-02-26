@@ -222,8 +222,8 @@ public class Items {
     public static final Item WITHER_ROSE = Items.registerBlock(Blocks.WITHER_ROSE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item BROWN_MUSHROOM = Items.registerBlock(Blocks.BROWN_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
     public static final Item RED_MUSHROOM = Items.registerBlock(Blocks.RED_MUSHROOM, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item CRIMSON_FUNGI = Items.registerBlock(Blocks.CRIMSON_FUNGI, CreativeModeTab.TAB_DECORATIONS);
-    public static final Item WARPED_FUNGI = Items.registerBlock(Blocks.WARPED_FUNGI, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item CRIMSON_FUNGUS = Items.registerBlock(Blocks.CRIMSON_FUNGUS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item WARPED_FUNGUS = Items.registerBlock(Blocks.WARPED_FUNGUS, CreativeModeTab.TAB_DECORATIONS);
     public static final Item CRIMSON_ROOTS = Items.registerBlock(Blocks.CRIMSON_ROOTS, CreativeModeTab.TAB_DECORATIONS);
     public static final Item WARPED_ROOTS = Items.registerBlock(Blocks.WARPED_ROOTS, CreativeModeTab.TAB_DECORATIONS);
     public static final Item NETHER_SPROUTS = Items.registerBlock(Blocks.NETHER_SPROUTS, CreativeModeTab.TAB_DECORATIONS);
@@ -892,7 +892,7 @@ public class Items {
     public static final Item WOLF_SPAWN_EGG = Items.registerItem("wolf_spawn_egg", (Item)new SpawnEggItem(EntityType.WOLF, 0xD7D3D3, 13545366, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_SPAWN_EGG = Items.registerItem("zombie_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE, 44975, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_HORSE_SPAWN_EGG = Items.registerItem("zombie_horse_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_HORSE, 3232308, 9945732, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
-    public static final Item ZOMBIE_PIGMAN_SPAWN_EGG = Items.registerItem("zombie_pigman_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_PIGMAN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = Items.registerItem("zombified_piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_VILLAGER_SPAWN_EGG = Items.registerItem("zombie_villager_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_VILLAGER, 5651507, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item EXPERIENCE_BOTTLE = Items.registerItem("experience_bottle", (Item)new ExperienceBottleItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON)));
     public static final Item FIRE_CHARGE = Items.registerItem("fire_charge", (Item)new FireChargeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -1038,6 +1038,8 @@ public class Items {
     public static final Item NETHERITE_CHESTPLATE = Items.registerItem("netherite_chestplate", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.CHEST, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
     public static final Item NETHERITE_LEGGINGS = Items.registerItem("netherite_leggings", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.LEGS, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
     public static final Item NETHERITE_BOOTS = Items.registerItem("netherite_boots", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item TARGET = Items.registerBlock(Blocks.TARGET, CreativeModeTab.TAB_REDSTONE);
+    public static final Item CRYING_OBSIDIAN = Items.registerBlock(Blocks.CRYING_OBSIDIAN, CreativeModeTab.TAB_BUILDING_BLOCKS);
 
     private static Item registerBlock(Block block) {
         return Items.registerBlock(new BlockItem(block, new Item.Properties()));

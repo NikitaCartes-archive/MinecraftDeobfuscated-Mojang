@@ -20,7 +20,7 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        return this.mob.onGround && !this.mob.level.getFluidState(new BlockPos(this.mob)).is(FluidTags.WATER);
+        return this.mob.isOnGround() && !this.mob.level.getFluidState(new BlockPos(this.mob)).is(FluidTags.WATER);
     }
 
     @Override

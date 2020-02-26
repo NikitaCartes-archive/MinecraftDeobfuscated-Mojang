@@ -1975,7 +1975,7 @@ ResourceManagerReloadListener {
                 break;
             }
             case 1032: {
-                this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PORTAL_TRAVEL, random.nextFloat() * 0.4f + 0.8f));
+                this.minecraft.getSoundManager().play(SimpleSoundInstance.forLocalAmbience(SoundEvents.PORTAL_TRAVEL, random.nextFloat() * 0.4f + 0.8f, 0.25f));
                 break;
             }
             case 1001: {

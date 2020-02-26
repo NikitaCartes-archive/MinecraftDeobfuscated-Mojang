@@ -71,7 +71,7 @@ public class ServerEntity {
         this.yRotp = Mth.floor(entity.yRot * 256.0f / 360.0f);
         this.xRotp = Mth.floor(entity.xRot * 256.0f / 360.0f);
         this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0f / 360.0f);
-        this.wasOnGround = entity.onGround;
+        this.wasOnGround = entity.isOnGround();
     }
 
     public void sendChanges() {
@@ -102,7 +102,7 @@ public class ServerEntity {
                 int j = Mth.floor(this.entity.xRot * 256.0f / 360.0f);
                 boolean bl2 = bl = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
                 if (bl) {
-                    this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround));
+                    this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround()));
                     this.yRotp = i;
                     this.xRotp = j;
                 }
@@ -127,16 +127,16 @@ public class ServerEntity {
                     long m = ClientboundMoveEntityPacket.entityToPacket(vec3.y);
                     long n = ClientboundMoveEntityPacket.entityToPacket(vec3.z);
                     boolean bl6 = bl5 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
-                    if (bl5 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.onGround) {
-                        this.wasOnGround = this.entity.onGround;
+                    if (bl5 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.isOnGround()) {
+                        this.wasOnGround = this.entity.isOnGround();
                         this.teleportDelay = 0;
                         packet2 = new ClientboundTeleportEntityPacket(this.entity);
                     } else if (bl3 && bl4 || this.entity instanceof AbstractArrow) {
-                        packet2 = new ClientboundMoveEntityPacket.PosRot(this.entity.getId(), (short)l, (short)m, (short)n, (byte)i, (byte)j, this.entity.onGround);
+                        packet2 = new ClientboundMoveEntityPacket.PosRot(this.entity.getId(), (short)l, (short)m, (short)n, (byte)i, (byte)j, this.entity.isOnGround());
                     } else if (bl3) {
-                        packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)l, (short)m, (short)n, this.entity.onGround);
+                        packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)l, (short)m, (short)n, this.entity.isOnGround());
                     } else if (bl4) {
-                        packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround);
+                        packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround());
                     }
                 }
                 if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity)this.entity).isFallFlying()) && this.tickCount > 0 && ((d = (vec32 = this.entity.getDeltaMovement()).distanceToSqr(this.ap)) > 1.0E-7 || d > 0.0 && vec32.lengthSqr() == 0.0)) {

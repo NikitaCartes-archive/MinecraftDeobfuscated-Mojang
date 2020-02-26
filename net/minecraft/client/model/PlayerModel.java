@@ -16,6 +16,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -102,12 +103,20 @@ extends HumanoidModel<T> {
         this.leftSleeve.copyFrom(this.leftArm);
         this.rightSleeve.copyFrom(this.rightArm);
         this.jacket.copyFrom(this.body);
-        if (((Entity)livingEntity).isCrouching()) {
-            this.cloak.z = 1.6f;
-            this.cloak.y = 1.8f;
+        if (((LivingEntity)livingEntity).getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
+            if (((Entity)livingEntity).isCrouching()) {
+                this.cloak.z = 1.4f;
+                this.cloak.y = 1.85f;
+            } else {
+                this.cloak.z = 0.0f;
+                this.cloak.y = 0.0f;
+            }
+        } else if (((Entity)livingEntity).isCrouching()) {
+            this.cloak.z = 0.3f;
+            this.cloak.y = 0.8f;
         } else {
-            this.cloak.z = 0.0f;
-            this.cloak.y = 0.0f;
+            this.cloak.z = -1.1f;
+            this.cloak.y = -0.85f;
         }
     }
 

@@ -68,7 +68,7 @@ extends QuadrupedModel<T> {
         this.leg0.yRot = 0.0f;
         this.leg1.yRot = 0.0f;
         this.eggBelly.xRot = 1.5707964f;
-        if (!((Entity)turtle).isInWater() && ((Turtle)turtle).onGround) {
+        if (!((Entity)turtle).isInWater() && ((Entity)turtle).isOnGround()) {
             float k = ((Turtle)turtle).isLayingEgg() ? 4.0f : 1.0f;
             float l = ((Turtle)turtle).isLayingEgg() ? 2.0f : 1.0f;
             float m = 5.0f;

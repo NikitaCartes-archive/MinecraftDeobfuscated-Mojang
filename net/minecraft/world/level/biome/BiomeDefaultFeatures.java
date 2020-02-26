@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.HugeFungiConfiguration;
+import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.blockplacers.ColumnPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.DoublePlantPlacer;
@@ -210,10 +210,8 @@ public class BiomeDefaultFeatures {
     public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK));
     public static final HugeMushroomFeatureConfiguration HUGE_RED_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_RED_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 2);
     public static final HugeMushroomFeatureConfiguration HUGE_BROWN_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_BROWN_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 3);
-    public static final HugeFungiConfiguration HUGE_CRIMSON_FUNGI_CONFIG = new HugeFungiConfiguration(CRIMSON_STEM, NETHER_WART_BLOCK, SHROOMLIGHT, false);
-    public static final HugeFungiConfiguration HUGE_WARPED_FUNGI_CONFIG = new HugeFungiConfiguration(WARPED_STEM, WARPED_WART_BLOCK, SHROOMLIGHT, false);
-    public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87).add(Blocks.CRIMSON_FUNGI.defaultBlockState(), 11).add(Blocks.WARPED_FUNGI.defaultBlockState(), 2));
-    public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.WARPED_ROOTS.defaultBlockState(), 85).add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 1).add(Blocks.WARPED_FUNGI.defaultBlockState(), 13).add(Blocks.CRIMSON_FUNGI.defaultBlockState(), 1));
+    public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 2));
+    public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.WARPED_ROOTS.defaultBlockState(), 85).add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 1).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 13).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 1));
     public static final BlockPileConfiguration NETHER_SPROUTS_CONFIG = new BlockPileConfiguration(new SimpleStateProvider(Blocks.NETHER_SPROUTS.defaultBlockState()));
 
     public static void addDefaultCarvers(Biome biome) {
@@ -555,12 +553,12 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addCrimsonForestVegetation(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.HUGE_FUNGI.configured(HUGE_CRIMSON_FUNGI_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(8))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_NOT_PLANTED_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(8))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NETHER_FOREST_VEGETATION.configured(CRIMSON_FOREST_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(6))));
     }
 
     public static void addWarpedForestVegetation(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.HUGE_FUNGI.configured(HUGE_WARPED_FUNGI_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(8))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_WARPED_FUNGI_NOT_PLANTED_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(8))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NETHER_FOREST_VEGETATION.configured(WARPED_FOREST_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(5))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NETHER_FOREST_VEGETATION.configured(NETHER_SPROUTS_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(4))));
     }

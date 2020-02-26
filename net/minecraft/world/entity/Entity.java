@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.entity;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -11,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -119,6 +122,7 @@ CommandSource {
     protected static final Logger LOGGER = LogManager.getLogger();
     private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
     private static final List<ItemStack> EMPTY_LIST = Collections.emptyList();
+    private static final ImmutableMap<Pose, ImmutableList<Integer>> POSE_DISMOUNT_HEIGHTS = ImmutableMap.of(Pose.STANDING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(-1)), Pose.CROUCHING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1), Integer.valueOf(-1)), Pose.SWIMMING, ImmutableList.of(Integer.valueOf(0), Integer.valueOf(1)));
     private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     private static double viewScale = 1.0;
     private final EntityType<?> type;
@@ -142,7 +146,7 @@ CommandSource {
     public float yRotO;
     public float xRotO;
     private AABB bb = INITIAL_AABB;
-    public boolean onGround;
+    protected boolean onGround;
     public boolean horizontalCollision;
     public boolean verticalCollision;
     public boolean collision;
@@ -165,7 +169,7 @@ CommandSource {
     public int tickCount;
     private int remainingFireTicks = -this.getFireImmuneTicks();
     protected boolean wasInWater;
-    protected double waterHeight;
+    protected double fluidHeight;
     protected boolean wasUnderWater;
     protected boolean isInLava;
     public int invulnerableTime;
@@ -388,7 +392,9 @@ CommandSource {
         this.yRotO = this.yRot;
         this.handleNetherPortal();
         this.updateSprintingState();
-        this.updateWaterState();
+        this.updateInWaterStateAndDoFluidPushing();
+        this.updateUnderWaterState();
+        this.updateSwimming();
         if (this.level.isClientSide) {
             this.clearFire();
         } else if (this.remainingFireTicks > 0) {
@@ -468,6 +474,14 @@ CommandSource {
 
     private boolean isFree(AABB aABB) {
         return this.level.noCollision(this, aABB) && !this.level.containsAnyLiquid(aABB);
+    }
+
+    public void setOnGround(boolean bl) {
+        this.onGround = bl;
+    }
+
+    public boolean isOnGround() {
+        return this.onGround;
     }
 
     public void move(MoverType moverType, Vec3 vec3) {
@@ -879,12 +893,6 @@ CommandSource {
         return this.wasUnderWater && this.isInWater();
     }
 
-    private void updateWaterState() {
-        this.updateInWaterState();
-        this.updateUnderWaterState();
-        this.updateSwimming();
-    }
-
     public void updateSwimming() {
         if (this.isSwimming()) {
             this.setSwimming(this.isSprinting() && this.isInWater() && !this.isPassenger());
@@ -893,10 +901,19 @@ CommandSource {
         }
     }
 
-    public boolean updateInWaterState() {
+    protected boolean updateInWaterStateAndDoFluidPushing() {
+        this.updateInWaterStateAndDoWaterCurrentPushing();
+        if (this.isInWater()) {
+            return true;
+        }
+        double d = this.level.getDimension().isHasCeiling() ? 0.007 : 0.0023333333333333335;
+        return this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
+    }
+
+    void updateInWaterStateAndDoWaterCurrentPushing() {
         if (this.getVehicle() instanceof Boat) {
             this.wasInWater = false;
-        } else if (this.checkAndHandleWater(FluidTags.WATER)) {
+        } else if (this.updateFluidHeightAndDoFluidPushing(FluidTags.WATER, 0.014)) {
             if (!this.wasInWater && !this.firstTick) {
                 this.doWaterSplashEffect();
             }
@@ -906,7 +923,6 @@ CommandSource {
         } else {
             this.wasInWater = false;
         }
-        return this.wasInWater;
     }
 
     private void updateUnderWaterState() {
@@ -2054,7 +2070,7 @@ CommandSource {
         return this.stringUUID;
     }
 
-    public boolean isPushedByWater() {
+    public boolean isPushedByFluid() {
         return true;
     }
 
@@ -2384,6 +2400,56 @@ CommandSource {
         return !this.level.isClientSide;
     }
 
+    protected static Vec3 getCollisionHorizontalEscapeVector(double d, double e, float f) {
+        double g = (d + e + (double)1.0E-5f) / 2.0;
+        float h = -Mth.sin(f * ((float)Math.PI / 180));
+        float i = Mth.cos(f * ((float)Math.PI / 180));
+        float j = Math.max(Math.abs(h), Math.abs(i));
+        return new Vec3((double)h * g / (double)j, 0.0, (double)i * g / (double)j);
+    }
+
+    protected static double getDismountTargetFloorHeight(Level level, BlockPos blockPos, CollisionContext collisionContext) {
+        VoxelShape voxelShape = level.getBlockState(blockPos).getCollisionShape(level, blockPos, collisionContext);
+        if (voxelShape.isEmpty()) {
+            BlockPos blockPos2 = blockPos.below();
+            VoxelShape voxelShape2 = level.getBlockState(blockPos2).getCollisionShape(level, blockPos2, collisionContext);
+            double d = voxelShape2.max(Direction.Axis.Y);
+            if (d >= 1.0) {
+                return d - 1.0;
+            }
+            return Double.NEGATIVE_INFINITY;
+        }
+        return voxelShape.max(Direction.Axis.Y);
+    }
+
+    public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+        Direction direction = this.getMotionDirection();
+        if (direction.getAxis() == Direction.Axis.Y) {
+            return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());
+        }
+        Direction direction2 = direction.getClockWise();
+        int[][] is = new int[][]{{direction2.getStepX(), direction2.getStepZ()}, {-direction2.getStepX(), -direction2.getStepZ()}, {-direction.getStepX() + direction2.getStepX(), -direction.getStepZ() + direction2.getStepZ()}, {-direction.getStepX() - direction2.getStepX(), -direction.getStepZ() - direction2.getStepZ()}, {direction.getStepX() + direction2.getStepX(), direction.getStepZ() + direction2.getStepZ()}, {direction.getStepX() - direction2.getStepX(), direction.getStepZ() - direction2.getStepZ()}, {-direction.getStepX(), -direction.getStepZ()}, {direction.getStepX(), direction.getStepZ()}};
+        BlockPos blockPos = new BlockPos(this.getX(), this.getY(), this.getZ());
+        CollisionContext collisionContext = CollisionContext.of(livingEntity);
+        ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
+        for (Pose pose : immutableList) {
+            Iterator iterator = POSE_DISMOUNT_HEIGHTS.get((Object)pose).iterator();
+            while (iterator.hasNext()) {
+                int i = (Integer)iterator.next();
+                for (int[] js : is) {
+                    BlockPos blockPos2 = blockPos.offset(js[0], i, js[1]);
+                    double d = Entity.getDismountTargetFloorHeight(this.level, blockPos2, collisionContext);
+                    if (Double.isInfinite(d) || d >= 1.0) continue;
+                    double e = (double)blockPos2.getY() + d;
+                    AABB aABB = new AABB(blockPos2.getX(), e, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, e + (double)livingEntity.getDimensions((Pose)pose).height, (double)blockPos2.getZ() + 1.0);
+                    if (!this.level.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty)) continue;
+                    return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + d, (double)blockPos2.getZ() + 0.5);
+                }
+            }
+        }
+        return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());
+    }
+
     @Nullable
     public Entity getVehicle() {
         return this.vehicle;
@@ -2441,7 +2507,7 @@ CommandSource {
         this.yRotO = this.yRot;
     }
 
-    public boolean checkAndHandleWater(Tag<Fluid> tag) {
+    public boolean updateFluidHeightAndDoFluidPushing(Tag<Fluid> tag, double d) {
         int n;
         AABB aABB = this.getBoundingBox().deflate(0.001);
         int i = Mth.floor(aABB.minX);
@@ -2452,8 +2518,8 @@ CommandSource {
         if (!this.level.hasChunksAt(i, k, m, j, l, n = Mth.ceil(aABB.maxZ))) {
             return false;
         }
-        double d = 0.0;
-        boolean bl = this.isPushedByWater();
+        double e = 0.0;
+        boolean bl = this.isPushedByFluid();
         boolean bl2 = false;
         Vec3 vec3 = Vec3.ZERO;
         int o = 0;
@@ -2461,16 +2527,16 @@ CommandSource {
             for (int p = i; p < j; ++p) {
                 for (int q = k; q < l; ++q) {
                     for (int r = m; r < n; ++r) {
-                        double e;
+                        double f;
                         pooledMutableBlockPos.set(p, q, r);
                         FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-                        if (!fluidState.is(tag) || !((e = (double)((float)q + fluidState.getHeight(this.level, pooledMutableBlockPos))) >= aABB.minY)) continue;
+                        if (!fluidState.is(tag) || !((f = (double)((float)q + fluidState.getHeight(this.level, pooledMutableBlockPos))) >= aABB.minY)) continue;
                         bl2 = true;
-                        d = Math.max(e - aABB.minY, d);
+                        e = Math.max(f - aABB.minY, e);
                         if (!bl) continue;
                         Vec3 vec32 = fluidState.getFlow(this.level, pooledMutableBlockPos);
-                        if (d < 0.4) {
-                            vec32 = vec32.scale(d);
+                        if (e < 0.4) {
+                            vec32 = vec32.scale(e);
                         }
                         vec3 = vec3.add(vec32);
                         ++o;
@@ -2485,14 +2551,14 @@ CommandSource {
             if (!(this instanceof Player)) {
                 vec3 = vec3.normalize();
             }
-            this.setDeltaMovement(this.getDeltaMovement().add(vec3.scale(0.014)));
+            this.setDeltaMovement(this.getDeltaMovement().add(vec3.scale(d)));
         }
-        this.waterHeight = d;
+        this.fluidHeight = e;
         return bl2;
     }
 
-    public double getWaterHeight() {
-        return this.waterHeight;
+    public double getFluidHeight() {
+        return this.fluidHeight;
     }
 
     public final float getBbWidth() {

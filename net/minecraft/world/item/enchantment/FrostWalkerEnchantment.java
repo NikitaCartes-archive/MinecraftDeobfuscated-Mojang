@@ -44,7 +44,7 @@ extends Enchantment {
     }
 
     public static void onEntityMoved(LivingEntity livingEntity, Level level, BlockPos blockPos, int i) {
-        if (!livingEntity.onGround) {
+        if (!livingEntity.isOnGround()) {
             return;
         }
         BlockState blockState = Blocks.FROSTED_ICE.defaultBlockState();

@@ -38,7 +38,7 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         if (this.minecart.removed || !this.player.isPassenger() || this.player.getVehicle() != this.minecart) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         float f = Mth.sqrt(Entity.getHorizontalDistanceSqr(this.minecart.getDeltaMovement()));

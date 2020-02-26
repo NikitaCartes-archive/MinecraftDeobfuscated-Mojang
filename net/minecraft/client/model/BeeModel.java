@@ -94,7 +94,7 @@ extends AgeableListModel<T> {
         this.rightAntenna.xRot = 0.0f;
         this.bone.xRot = 0.0f;
         this.bone.y = 19.0f;
-        boolean bl2 = bl = ((Bee)bee).onGround && ((Entity)bee).getDeltaMovement().lengthSqr() < 1.0E-7;
+        boolean bl2 = bl = ((Entity)bee).isOnGround() && ((Entity)bee).getDeltaMovement().lengthSqr() < 1.0E-7;
         if (bl) {
             this.rightWing.yRot = -0.2618f;
             this.rightWing.zRot = 0.0f;

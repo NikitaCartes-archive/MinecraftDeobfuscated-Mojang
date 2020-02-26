@@ -217,8 +217,8 @@ extends Dimension {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public Vec3 getBrightnessDependentFogColor(int i, float f) {
-        return Vec3.fromRGB24(i).multiply(f * 0.94f + 0.06f, f * 0.94f + 0.06f, f * 0.91f + 0.09f);
+    public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+        return vec3.multiply(f * 0.94f + 0.06f, f * 0.94f + 0.06f, f * 0.91f + 0.09f);
     }
 
     @Override

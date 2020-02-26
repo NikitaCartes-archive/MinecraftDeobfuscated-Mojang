@@ -991,10 +991,6 @@ AutoCloseable {
     public void globalLevelEvent(int i, BlockPos blockPos, int j) {
     }
 
-    public int getHeight() {
-        return this.dimension.isHasCeiling() ? 128 : 256;
-    }
-
     public CrashReportCategory fillReportDetails(CrashReport crashReport) {
         CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level", 1);
         crashReportCategory.setDetail("All players", () -> this.players().size() + " total; " + this.players());

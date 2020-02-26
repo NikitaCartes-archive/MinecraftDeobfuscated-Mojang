@@ -91,7 +91,7 @@ extends Item {
             float o = 3.0f * ((1.0f + (float)k) / 4.0f);
             player2.push(h *= o / n, l *= o / n, m *= o / n);
             player2.startAutoSpinAttack(20);
-            if (player2.onGround) {
+            if (player2.isOnGround()) {
                 float p = 1.1999999f;
                 player2.move(MoverType.SELF, new Vec3(0.0, 1.1999999284744263, 0.0));
             }

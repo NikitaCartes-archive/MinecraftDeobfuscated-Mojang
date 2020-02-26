@@ -27,7 +27,7 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         if (this.guardian.removed || this.guardian.getTarget() != null) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         this.x = (float)this.guardian.getX();

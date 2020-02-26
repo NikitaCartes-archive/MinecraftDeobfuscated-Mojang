@@ -302,7 +302,7 @@ extends Entity {
                 entity2.push(this);
             }
         }
-        this.updateInWaterState();
+        this.updateInWaterStateAndDoFluidPushing();
     }
 
     protected double getMaxSpeed() {

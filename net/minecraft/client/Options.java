@@ -11,6 +11,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,8 +19,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -60,23 +59,7 @@ import org.jetbrains.annotations.Nullable;
 public class Options {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
-    private static final Type RESOURCE_PACK_TYPE = new ParameterizedType(){
-
-        @Override
-        public Type[] getActualTypeArguments() {
-            return new Type[]{String.class};
-        }
-
-        @Override
-        public Type getRawType() {
-            return List.class;
-        }
-
-        @Override
-        public Type getOwnerType() {
-            return null;
-        }
-    };
+    private static final TypeToken<List<String>> RESOURCE_PACK_TYPE = new TypeToken<List<String>>(){};
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
     public double sensitivity = 0.5;
     public int renderDistance = -1;
@@ -349,13 +332,13 @@ public class Options {
                         this.attackIndicator = AttackIndicatorStatus.byId(Integer.parseInt(string22));
                     }
                     if ("resourcePacks".equals(string2)) {
-                        this.resourcePacks = (List)GsonHelper.fromJson(GSON, string22, RESOURCE_PACK_TYPE);
+                        this.resourcePacks = GsonHelper.fromJson(GSON, string22, RESOURCE_PACK_TYPE);
                         if (this.resourcePacks == null) {
                             this.resourcePacks = Lists.newArrayList();
                         }
                     }
                     if ("incompatibleResourcePacks".equals(string2)) {
-                        this.incompatibleResourcePacks = (List)GsonHelper.fromJson(GSON, string22, RESOURCE_PACK_TYPE);
+                        this.incompatibleResourcePacks = GsonHelper.fromJson(GSON, string22, RESOURCE_PACK_TYPE);
                         if (this.incompatibleResourcePacks == null) {
                             this.incompatibleResourcePacks = Lists.newArrayList();
                         }

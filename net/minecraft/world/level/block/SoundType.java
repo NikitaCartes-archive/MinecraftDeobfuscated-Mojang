@@ -34,7 +34,7 @@ public class SoundType {
     public static final SoundType LANTERN = new SoundType(1.0f, 1.0f, SoundEvents.LANTERN_BREAK, SoundEvents.LANTERN_STEP, SoundEvents.LANTERN_PLACE, SoundEvents.LANTERN_HIT, SoundEvents.LANTERN_FALL);
     public static final SoundType STEM = new SoundType(1.0f, 1.0f, SoundEvents.STEM_BREAK, SoundEvents.STEM_STEP, SoundEvents.STEM_PLACE, SoundEvents.STEM_HIT, SoundEvents.STEM_FALL);
     public static final SoundType NYLIUM = new SoundType(1.0f, 1.0f, SoundEvents.NYLIUM_BREAK, SoundEvents.NYLIUM_STEP, SoundEvents.NYLIUM_PLACE, SoundEvents.NYLIUM_HIT, SoundEvents.NYLIUM_FALL);
-    public static final SoundType FUNGI = new SoundType(1.0f, 1.0f, SoundEvents.FUNGI_BREAK, SoundEvents.FUNGI_STEP, SoundEvents.FUNGI_PLACE, SoundEvents.FUNGI_HIT, SoundEvents.FUNGI_FALL);
+    public static final SoundType FUNGUS = new SoundType(1.0f, 1.0f, SoundEvents.FUNGUS_BREAK, SoundEvents.FUNGUS_STEP, SoundEvents.FUNGUS_PLACE, SoundEvents.FUNGUS_HIT, SoundEvents.FUNGUS_FALL);
     public static final SoundType ROOTS = new SoundType(1.0f, 1.0f, SoundEvents.ROOTS_BREAK, SoundEvents.ROOTS_STEP, SoundEvents.ROOTS_PLACE, SoundEvents.ROOTS_HIT, SoundEvents.ROOTS_FALL);
     public static final SoundType SHROOMLIGHT = new SoundType(1.0f, 1.0f, SoundEvents.SHROOMLIGHT_BREAK, SoundEvents.SHROOMLIGHT_STEP, SoundEvents.SHROOMLIGHT_PLACE, SoundEvents.SHROOMLIGHT_HIT, SoundEvents.SHROOMLIGHT_FALL);
     public static final SoundType WEEPING_VINES = new SoundType(1.0f, 1.0f, SoundEvents.WEEPING_VINES_BREAK, SoundEvents.WEEPING_VINES_STEP, SoundEvents.WEEPING_VINES_PLACE, SoundEvents.WEEPING_VINES_HIT, SoundEvents.WEEPING_VINES_FALL);

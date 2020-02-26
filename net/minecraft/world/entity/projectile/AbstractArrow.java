@@ -116,7 +116,7 @@ implements Projectile {
         float l = -Mth.sin(f * ((float)Math.PI / 180));
         float m = Mth.cos(g * ((float)Math.PI / 180)) * Mth.cos(f * ((float)Math.PI / 180));
         this.shoot(k, l, m, i, j);
-        this.setDeltaMovement(this.getDeltaMovement().add(entity.getDeltaMovement().x, entity.onGround ? 0.0 : entity.getDeltaMovement().y, entity.getDeltaMovement().z));
+        this.setDeltaMovement(this.getDeltaMovement().add(entity.getDeltaMovement().x, entity.isOnGround() ? 0.0 : entity.getDeltaMovement().y, entity.getDeltaMovement().z));
     }
 
     @Override

@@ -792,7 +792,7 @@ extends Animal {
 
         @Override
         public boolean canUse() {
-            return Fox.this.isInWater() && Fox.this.getWaterHeight() > 0.25 || Fox.this.isInLava();
+            return Fox.this.isInWater() && Fox.this.getFluidHeight() > 0.25 || Fox.this.isInLava();
         }
     }
 

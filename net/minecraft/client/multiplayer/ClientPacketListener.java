@@ -537,7 +537,7 @@ implements ClientGamePacketListener {
             } else {
                 entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), g, h, 3, true);
             }
-            entity.onGround = clientboundTeleportEntityPacket.isOnGround();
+            entity.setOnGround(clientboundTeleportEntityPacket.isOnGround());
         }
     }
 
@@ -570,7 +570,7 @@ implements ClientGamePacketListener {
                 float f = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0f;
                 entity.lerpTo(entity.getX(), entity.getY(), entity.getZ(), h, f, 3, false);
             }
-            entity.onGround = clientboundMoveEntityPacket.isOnGround();
+            entity.setOnGround(clientboundMoveEntityPacket.isOnGround());
         }
     }
 

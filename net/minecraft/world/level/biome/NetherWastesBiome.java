@@ -43,7 +43,7 @@ extends Biome {
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.CLOSED_NETHER_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128))));
         BiomeDefaultFeatures.addNetherDefaultOres(this);
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 50, 4, 4));
-        this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ZOMBIE_PIGMAN, 100, 4, 4));
+        this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 100, 4, 4));
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.MAGMA_CUBE, 2, 4, 4));
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 1, 4, 4));
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.PIGLIN, 15, 4, 4));

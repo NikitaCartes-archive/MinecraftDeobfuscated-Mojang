@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -53,7 +53,7 @@ public class GameProfileCache {
     private final GameProfileRepository profileRepository;
     protected final Gson gson;
     private final File file;
-    private static final ParameterizedType GAMEPROFILE_ENTRY_TYPE;
+    private static final TypeToken<List<GameProfileInfo>> GAMEPROFILE_ENTRY_TYPE;
 
     public GameProfileCache(GameProfileRepository gameProfileRepository, File file) {
         this.profileRepository = gameProfileRepository;
@@ -169,7 +169,7 @@ public class GameProfileCache {
             bufferedReader = null;
             try {
                 bufferedReader = Files.newReader(this.file, StandardCharsets.UTF_8);
-                List list = (List)GsonHelper.fromJson(this.gson, (Reader)bufferedReader, (Type)GAMEPROFILE_ENTRY_TYPE);
+                List<GameProfileInfo> list = GsonHelper.fromJson(this.gson, (Reader)bufferedReader, GAMEPROFILE_ENTRY_TYPE);
                 this.profilesByName.clear();
                 this.profilesByUUID.clear();
                 this.profileMRUList.clear();
@@ -224,23 +224,7 @@ public class GameProfileCache {
     }
 
     static {
-        GAMEPROFILE_ENTRY_TYPE = new ParameterizedType(){
-
-            @Override
-            public Type[] getActualTypeArguments() {
-                return new Type[]{GameProfileInfo.class};
-            }
-
-            @Override
-            public Type getRawType() {
-                return List.class;
-            }
-
-            @Override
-            public Type getOwnerType() {
-                return null;
-            }
-        };
+        GAMEPROFILE_ENTRY_TYPE = new TypeToken<List<GameProfileInfo>>(){};
     }
 
     class GameProfileInfo {

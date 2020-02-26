@@ -469,6 +469,7 @@ public interface DispenseItemBehavior {
                     for (Sheep sheep : list) {
                         if (!sheep.isAlive() || sheep.isSheared() || sheep.isBaby()) continue;
                         sheep.shear();
+                        level.playSound(null, blockPos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0f, 1.0f);
                         if (itemStack.hurt(1, level.random, null)) {
                             itemStack.setCount(0);
                         }

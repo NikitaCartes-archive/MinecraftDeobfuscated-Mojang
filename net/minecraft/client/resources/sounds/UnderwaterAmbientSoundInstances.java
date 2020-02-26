@@ -33,7 +33,7 @@ public class UnderwaterAmbientSoundInstances {
         @Override
         public void tick() {
             if (this.player.removed || this.fade < 0) {
-                this.stopped = true;
+                this.stop();
                 return;
             }
             this.fade = this.player.isUnderWater() ? ++this.fade : (this.fade -= 2);
@@ -60,7 +60,7 @@ public class UnderwaterAmbientSoundInstances {
         @Override
         public void tick() {
             if (this.player.removed || !this.player.isUnderWater()) {
-                this.stopped = true;
+                this.stop();
             }
         }
     }

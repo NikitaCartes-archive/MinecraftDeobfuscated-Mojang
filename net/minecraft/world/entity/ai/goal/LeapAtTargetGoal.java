@@ -34,7 +34,7 @@ extends Goal {
         if (d < 4.0 || d > 16.0) {
             return false;
         }
-        if (!this.mob.onGround) {
+        if (!this.mob.isOnGround()) {
             return false;
         }
         return this.mob.getRandom().nextInt(5) == 0;
@@ -42,7 +42,7 @@ extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return !this.mob.onGround;
+        return !this.mob.isOnGround();
     }
 
     @Override

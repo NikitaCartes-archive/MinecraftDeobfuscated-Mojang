@@ -9,11 +9,13 @@ import com.mojang.blaze3d.audio.Library;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ChannelAccess {
@@ -26,16 +28,19 @@ public class ChannelAccess {
         this.executor = executor;
     }
 
-    public ChannelHandle createHandle(Library.Pool pool) {
-        ChannelHandle channelHandle = new ChannelHandle();
+    public CompletableFuture<ChannelHandle> createHandle(Library.Pool pool) {
+        CompletableFuture<ChannelHandle> completableFuture = new CompletableFuture<ChannelHandle>();
         this.executor.execute(() -> {
             Channel channel = this.library.acquireChannel(pool);
             if (channel != null) {
-                channelHandle.channel = channel;
+                ChannelHandle channelHandle = new ChannelHandle(channel);
                 this.channels.add(channelHandle);
+                completableFuture.complete(channelHandle);
+            } else {
+                completableFuture.complete(null);
             }
         });
-        return channelHandle;
+        return completableFuture;
     }
 
     public void executeOnChannels(Consumer<Stream<Channel>> consumer) {
@@ -62,11 +67,16 @@ public class ChannelAccess {
 
     @Environment(value=EnvType.CLIENT)
     public class ChannelHandle {
+        @Nullable
         private Channel channel;
         private boolean stopped;
 
         public boolean isStopped() {
             return this.stopped;
+        }
+
+        public ChannelHandle(Channel channel) {
+            this.channel = channel;
         }
 
         public void execute(Consumer<Channel> consumer) {

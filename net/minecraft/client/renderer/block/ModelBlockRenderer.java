@@ -101,7 +101,7 @@ public class ModelBlockRenderer {
     private void renderModelFaceAO(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, float[] fs, BitSet bitSet, AmbientOcclusionFace ambientOcclusionFace, int i) {
         for (BakedQuad bakedQuad : list) {
             this.calculateShape(blockAndTintGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), fs, bitSet);
-            ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet);
+            ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet, bakedQuad.isShade());
             this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, ambientOcclusionFace.brightness[0], ambientOcclusionFace.brightness[1], ambientOcclusionFace.brightness[2], ambientOcclusionFace.brightness[3], ambientOcclusionFace.lightmap[0], ambientOcclusionFace.lightmap[1], ambientOcclusionFace.lightmap[2], ambientOcclusionFace.lightmap[3], i);
         }
     }
@@ -200,7 +200,8 @@ public class ModelBlockRenderer {
                 BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(bakedQuad.getDirection()) : blockPos;
                 i = LevelRenderer.getLightColor(blockAndTintGetter, blockState, blockPos2);
             }
-            this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, 1.0f, 1.0f, 1.0f, 1.0f, i, i, i, i, j);
+            float f = blockAndTintGetter.getShade(bakedQuad.getDirection(), bakedQuad.isShade());
+            this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, f, f, f, f, i, i, i, i, j);
         }
     }
 
@@ -310,7 +311,11 @@ public class ModelBlockRenderer {
         private final float[] brightness = new float[4];
         private final int[] lightmap = new int[4];
 
-        public void calculate(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet) {
+        public void calculate(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet, boolean bl) {
+            float aa;
+            float z;
+            float y;
+            float x;
             int u;
             float t;
             int s;
@@ -320,7 +325,7 @@ public class ModelBlockRenderer {
             int o;
             float n;
             BlockState blockState6;
-            boolean bl4;
+            boolean bl5;
             BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(direction) : blockPos;
             AdjacencyInfo adjacencyInfo = AdjacencyInfo.fromFacing(direction);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -342,14 +347,14 @@ public class ModelBlockRenderer {
             int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
             float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
             mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[0]).move(direction);
-            boolean bl = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(direction);
             boolean bl2 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[2]).move(direction);
+            mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(direction);
             boolean bl3 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[2]).move(direction);
+            boolean bl4 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
             mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[3]).move(direction);
-            boolean bl5 = bl4 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
-            if (bl3 || bl) {
+            boolean bl6 = bl5 = blockAndTintGetter.getBlockState(mutableBlockPos).getLightBlock(blockAndTintGetter, mutableBlockPos) == 0;
+            if (bl4 || bl2) {
                 mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[0]).move(adjacencyInfo.corners[2]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 n = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -358,7 +363,7 @@ public class ModelBlockRenderer {
                 n = f;
                 o = i;
             }
-            if (bl4 || bl) {
+            if (bl5 || bl2) {
                 mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[0]).move(adjacencyInfo.corners[3]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 p = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -367,7 +372,7 @@ public class ModelBlockRenderer {
                 p = f;
                 q = i;
             }
-            if (bl3 || bl2) {
+            if (bl4 || bl3) {
                 mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(adjacencyInfo.corners[2]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 r = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -376,7 +381,7 @@ public class ModelBlockRenderer {
                 r = f;
                 s = i;
             }
-            if (bl4 || bl2) {
+            if (bl5 || bl3) {
                 mutableBlockPos.set(blockPos2).move(adjacencyInfo.corners[1]).move(adjacencyInfo.corners[3]);
                 blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos);
                 t = cache.getShadeBrightness(blockState6, blockAndTintGetter, mutableBlockPos);
@@ -394,10 +399,10 @@ public class ModelBlockRenderer {
             float w = bitSet.get(0) ? cache.getShadeBrightness(blockAndTintGetter.getBlockState(blockPos2), blockAndTintGetter, blockPos2) : cache.getShadeBrightness(blockAndTintGetter.getBlockState(blockPos), blockAndTintGetter, blockPos);
             AmbientVertexRemap ambientVertexRemap = AmbientVertexRemap.fromFacing(direction);
             if (!bitSet.get(1) || !adjacencyInfo.doNonCubicWeight) {
-                float x = (m + f + p + w) * 0.25f;
-                float y = (h + f + n + w) * 0.25f;
-                float z = (h + g + r + w) * 0.25f;
-                float aa = (m + g + t + w) * 0.25f;
+                x = (m + f + p + w) * 0.25f;
+                y = (h + f + n + w) * 0.25f;
+                z = (h + g + r + w) * 0.25f;
+                aa = (m + g + t + w) * 0.25f;
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert0] = this.blend(l, i, q, v);
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert1] = this.blend(k, i, o, v);
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert2] = this.blend(k, j, s, v);
@@ -407,10 +412,10 @@ public class ModelBlockRenderer {
                 this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert2] = z;
                 this.brightness[((AmbientVertexRemap)ambientVertexRemap).vert3] = aa;
             } else {
-                float x = (m + f + p + w) * 0.25f;
-                float y = (h + f + n + w) * 0.25f;
-                float z = (h + g + r + w) * 0.25f;
-                float aa = (m + g + t + w) * 0.25f;
+                x = (m + f + p + w) * 0.25f;
+                y = (h + f + n + w) * 0.25f;
+                z = (h + g + r + w) * 0.25f;
+                aa = (m + g + t + w) * 0.25f;
                 float ab = fs[adjacencyInfo.vert0Weights[0].shape] * fs[adjacencyInfo.vert0Weights[1].shape];
                 float ac = fs[adjacencyInfo.vert0Weights[2].shape] * fs[adjacencyInfo.vert0Weights[3].shape];
                 float ad = fs[adjacencyInfo.vert0Weights[4].shape] * fs[adjacencyInfo.vert0Weights[5].shape];
@@ -439,6 +444,12 @@ public class ModelBlockRenderer {
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert1] = this.blend(ar, as, at, au, af, ag, ah, ai);
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert2] = this.blend(ar, as, at, au, aj, ak, al, am);
                 this.lightmap[((AmbientVertexRemap)ambientVertexRemap).vert3] = this.blend(ar, as, at, au, an, ao, ap, aq);
+            }
+            x = blockAndTintGetter.getShade(direction, bl);
+            int av = 0;
+            while (av < this.brightness.length) {
+                int n2 = av++;
+                this.brightness[n2] = this.brightness[n2] * x;
             }
         }
 

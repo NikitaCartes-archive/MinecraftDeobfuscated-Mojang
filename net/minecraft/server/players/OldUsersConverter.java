@@ -11,7 +11,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -76,8 +75,8 @@ public class OldUsersConverter {
             if (userBanList.getFile().exists()) {
                 try {
                     userBanList.load();
-                } catch (FileNotFoundException fileNotFoundException) {
-                    LOGGER.warn("Could not load existing file {}", (Object)userBanList.getFile().getName(), (Object)fileNotFoundException);
+                } catch (IOException iOException) {
+                    LOGGER.warn("Could not load existing file {}", (Object)userBanList.getFile().getName(), (Object)iOException);
                 }
             }
             try {
@@ -129,8 +128,8 @@ public class OldUsersConverter {
             if (ipBanList.getFile().exists()) {
                 try {
                     ipBanList.load();
-                } catch (FileNotFoundException fileNotFoundException) {
-                    LOGGER.warn("Could not load existing file {}", (Object)ipBanList.getFile().getName(), (Object)fileNotFoundException);
+                } catch (IOException iOException) {
+                    LOGGER.warn("Could not load existing file {}", (Object)ipBanList.getFile().getName(), (Object)iOException);
                 }
             }
             try {
@@ -161,8 +160,8 @@ public class OldUsersConverter {
             if (serverOpList.getFile().exists()) {
                 try {
                     serverOpList.load();
-                } catch (FileNotFoundException fileNotFoundException) {
-                    LOGGER.warn("Could not load existing file {}", (Object)serverOpList.getFile().getName(), (Object)fileNotFoundException);
+                } catch (IOException iOException) {
+                    LOGGER.warn("Could not load existing file {}", (Object)serverOpList.getFile().getName(), (Object)iOException);
                 }
             }
             try {
@@ -204,8 +203,8 @@ public class OldUsersConverter {
             if (userWhiteList.getFile().exists()) {
                 try {
                     userWhiteList.load();
-                } catch (FileNotFoundException fileNotFoundException) {
-                    LOGGER.warn("Could not load existing file {}", (Object)userWhiteList.getFile().getName(), (Object)fileNotFoundException);
+                } catch (IOException iOException) {
+                    LOGGER.warn("Could not load existing file {}", (Object)userWhiteList.getFile().getName(), (Object)iOException);
                 }
             }
             try {

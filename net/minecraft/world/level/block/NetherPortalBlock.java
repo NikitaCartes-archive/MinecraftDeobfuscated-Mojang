@@ -17,7 +17,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.monster.PigZombie;
+import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -60,11 +60,11 @@ extends Block {
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.dimension.isNaturalDimension() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
-            PigZombie entity;
+            ZombifiedPiglin entity;
             while (serverLevel.getBlockState(blockPos).getBlock() == this) {
                 blockPos = blockPos.below();
             }
-            if (serverLevel.getBlockState(blockPos).isValidSpawn(serverLevel, blockPos, EntityType.ZOMBIE_PIGMAN) && (entity = EntityType.ZOMBIE_PIGMAN.spawn(serverLevel, null, null, null, blockPos.above(), MobSpawnType.STRUCTURE, false, false)) != null) {
+            if (serverLevel.getBlockState(blockPos).isValidSpawn(serverLevel, blockPos, EntityType.ZOMBIFIED_PIGLIN) && (entity = EntityType.ZOMBIFIED_PIGLIN.spawn(serverLevel, null, null, null, blockPos.above(), MobSpawnType.STRUCTURE, false, false)) != null) {
                 entity.changingDimensionDelay = entity.getDimensionChangingDelay();
             }
         }

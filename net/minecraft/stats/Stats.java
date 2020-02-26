@@ -92,6 +92,7 @@ public class Stats {
     public static final ResourceLocation RAID_WIN = Stats.makeCustomStat("raid_win", StatFormatter.DEFAULT);
     public static final ResourceLocation INTERACT_WITH_ANVIL = Stats.makeCustomStat("interact_with_anvil", StatFormatter.DEFAULT);
     public static final ResourceLocation INTERACT_WITH_GRINDSTONE = Stats.makeCustomStat("interact_with_grindstone", StatFormatter.DEFAULT);
+    public static final ResourceLocation TARGET_HIT = Stats.makeCustomStat("target_hit", StatFormatter.DEFAULT);
 
     private static ResourceLocation makeCustomStat(String string, StatFormatter statFormatter) {
         ResourceLocation resourceLocation = new ResourceLocation(string);

@@ -6,6 +6,7 @@ package net.minecraft.world.level;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
@@ -13,6 +14,9 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public interface BlockAndTintGetter
 extends BlockGetter {
+    @Environment(value=EnvType.CLIENT)
+    public float getShade(Direction var1, boolean var2);
+
     public LevelLightEngine getLightEngine();
 
     @Environment(value=EnvType.CLIENT)

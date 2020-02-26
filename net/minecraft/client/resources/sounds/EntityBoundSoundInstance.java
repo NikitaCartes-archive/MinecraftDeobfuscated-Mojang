@@ -32,7 +32,7 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         if (this.entity.removed) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         this.x = (float)this.entity.getX();

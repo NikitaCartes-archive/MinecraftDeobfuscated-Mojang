@@ -25,7 +25,7 @@ extends Goal {
         if (this.mob.isInWater()) {
             return false;
         }
-        if (!this.mob.onGround) {
+        if (!this.mob.isOnGround()) {
             return false;
         }
         if (this.mob.hurtMarked) {

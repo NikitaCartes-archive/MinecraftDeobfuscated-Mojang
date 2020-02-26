@@ -53,8 +53,8 @@ import net.minecraft.world.level.levelgen.feature.FossilFeature;
 import net.minecraft.world.level.levelgen.feature.GlowstoneFeature;
 import net.minecraft.world.level.levelgen.feature.GroundBushFeature;
 import net.minecraft.world.level.levelgen.feature.HugeBrownMushroomFeature;
-import net.minecraft.world.level.levelgen.feature.HugeFungiConfiguration;
-import net.minecraft.world.level.levelgen.feature.HugeFungiFeature;
+import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
+import net.minecraft.world.level.levelgen.feature.HugeFungusFeature;
 import net.minecraft.world.level.levelgen.feature.HugeRedMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.IcePatchFeature;
 import net.minecraft.world.level.levelgen.feature.IceSpikeFeature;
@@ -190,7 +190,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<CountFeatureConfiguration> SEA_PICKLE = Feature.register("sea_pickle", new SeaPickleFeature((Function<Dynamic<?>, ? extends CountFeatureConfiguration>)((Function<Dynamic<?>, CountFeatureConfiguration>)CountFeatureConfiguration::deserialize)));
     public static final Feature<SimpleBlockConfiguration> SIMPLE_BLOCK = Feature.register("simple_block", new SimpleBlockFeature((Function<Dynamic<?>, ? extends SimpleBlockConfiguration>)((Function<Dynamic<?>, SimpleBlockConfiguration>)SimpleBlockConfiguration::deserialize)));
     public static final Feature<ProbabilityFeatureConfiguration> BAMBOO = Feature.register("bamboo", new BambooFeature((Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration>)((Function<Dynamic<?>, ProbabilityFeatureConfiguration>)ProbabilityFeatureConfiguration::deserialize)));
-    public static final Feature<HugeFungiConfiguration> HUGE_FUNGI = Feature.register("huge_fungi", new HugeFungiFeature((Function<Dynamic<?>, ? extends HugeFungiConfiguration>)((Function<Dynamic<?>, HugeFungiConfiguration>)HugeFungiConfiguration::deserialize)));
+    public static final Feature<HugeFungusConfiguration> HUGE_FUNGUS = Feature.register("huge_fungus", new HugeFungusFeature((Function<Dynamic<?>, ? extends HugeFungusConfiguration>)((Function<Dynamic<?>, HugeFungusConfiguration>)HugeFungusConfiguration::deserialize)));
     public static final Feature<BlockPileConfiguration> NETHER_FOREST_VEGETATION = Feature.register("nether_forest_vegetation", new NetherForestVegetationFeature((Function<Dynamic<?>, ? extends BlockPileConfiguration>)((Function<Dynamic<?>, BlockPileConfiguration>)BlockPileConfiguration::deserialize)));
     public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = Feature.register("weeping_vines", new WeepingVinesFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<LayerConfiguration> FILL_LAYER = Feature.register("fill_layer", new FillLayerFeature((Function<Dynamic<?>, ? extends LayerConfiguration>)((Function<Dynamic<?>, LayerConfiguration>)LayerConfiguration::deserialize)));
@@ -221,7 +221,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
         hashBiMap.put("Village".toLowerCase(Locale.ROOT), VILLAGE);
         hashBiMap.put("Nether_Fossil".toLowerCase(Locale.ROOT), NETHER_FOSSIL);
     });
-    public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE);
+    public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
     private final Function<Dynamic<?>, ? extends FC> configurationFactory;
 
     private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -43,6 +44,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -601,6 +603,32 @@ extends Entity {
             entity.setYBodyRot(((Animal)entity).yBodyRot + (float)j);
             entity.setYHeadRot(entity.getYHeadRot() + (float)j);
         }
+    }
+
+    @Override
+    public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+        double f;
+        double e;
+        Vec3 vec3 = Boat.getCollisionHorizontalEscapeVector(Math.sqrt((double)(this.getBbWidth() * this.getBbWidth()) * 2.0), livingEntity.getBbWidth(), this.yRot);
+        double d = this.getX() + vec3.x;
+        BlockPos blockPos = new BlockPos(d, e = this.getBoundingBox().maxY + 0.001, f = this.getZ() + vec3.z);
+        BlockPos blockPos2 = blockPos.below();
+        if (!this.level.isWaterAt(blockPos2)) {
+            AABB aABB3;
+            double h;
+            CollisionContext collisionContext = CollisionContext.of(livingEntity);
+            AABB aABB = livingEntity.getLocalBoundsForPose(Pose.SWIMMING).move(d, e, f);
+            double g = Boat.getDismountTargetFloorHeight(this.level, blockPos, collisionContext);
+            if (!Double.isInfinite(g) && g < 1.0) {
+                AABB aABB2 = aABB.move(d, (double)blockPos.getY() + g, f);
+                if (this.level.getBlockCollisions(livingEntity, aABB2).allMatch(VoxelShape::isEmpty)) {
+                    return new Vec3(d, (double)blockPos.getY() + g, f);
+                }
+            } else if (g < 1.0 && !Double.isInfinite(h = Boat.getDismountTargetFloorHeight(this.level, blockPos2, collisionContext)) && h <= 0.5 && this.level.getBlockCollisions(livingEntity, aABB3 = aABB.move(d, (double)blockPos2.getY() + h, f)).allMatch(VoxelShape::isEmpty)) {
+                return new Vec3(d, (double)blockPos2.getY() + h, f);
+            }
+        }
+        return new Vec3(this.getX(), e, this.getZ());
     }
 
     protected void clampRotation(Entity entity) {

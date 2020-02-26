@@ -33,12 +33,12 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         boolean bl = this.shouldSwitchSounds();
-        if (bl && !this.stopped) {
+        if (bl && !this.isStopped()) {
             Minecraft.getInstance().getSoundManager().queueTickingSound(this.getAlternativeSoundInstance());
             this.hasSwitched = true;
         }
         if (this.bee.removed || this.hasSwitched) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         this.x = (float)this.bee.getX();

@@ -186,7 +186,7 @@ implements TickableBlockEntity {
     }
 
     private static boolean matchesStickyCritera(AABB aABB, Entity entity) {
-        return entity.getPistonPushReaction() == PushReaction.NORMAL && entity.onGround && entity.getX() >= aABB.minX && entity.getX() <= aABB.maxX && entity.getZ() >= aABB.minZ && entity.getZ() <= aABB.maxZ;
+        return entity.getPistonPushReaction() == PushReaction.NORMAL && entity.isOnGround() && entity.getX() >= aABB.minX && entity.getX() <= aABB.maxX && entity.getZ() >= aABB.minZ && entity.getZ() <= aABB.maxZ;
     }
 
     private boolean isStickyForEntities() {

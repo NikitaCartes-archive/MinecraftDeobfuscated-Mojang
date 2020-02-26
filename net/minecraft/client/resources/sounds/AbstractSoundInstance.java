@@ -12,14 +12,11 @@ import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractSoundInstance
 implements SoundInstance {
     protected Sound sound;
-    @Nullable
-    private WeighedSoundEvents soundEvent;
     protected final SoundSource source;
     protected final ResourceLocation location;
     protected float volume = 1.0f;
@@ -49,9 +46,9 @@ implements SoundInstance {
 
     @Override
     public WeighedSoundEvents resolve(SoundManager soundManager) {
-        this.soundEvent = soundManager.getSoundEvent(this.location);
-        this.sound = this.soundEvent == null ? SoundManager.EMPTY_SOUND : this.soundEvent.getSound();
-        return this.soundEvent;
+        WeighedSoundEvents weighedSoundEvents = soundManager.getSoundEvent(this.location);
+        this.sound = weighedSoundEvents == null ? SoundManager.EMPTY_SOUND : weighedSoundEvents.getSound();
+        return weighedSoundEvents;
     }
 
     @Override

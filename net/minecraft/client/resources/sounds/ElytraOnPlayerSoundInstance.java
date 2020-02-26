@@ -29,7 +29,7 @@ extends AbstractTickableSoundInstance {
     public void tick() {
         ++this.time;
         if (this.player.removed || this.time > 20 && !this.player.isFallFlying()) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         this.x = (float)this.player.getX();

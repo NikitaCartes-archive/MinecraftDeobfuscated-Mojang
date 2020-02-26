@@ -480,46 +480,59 @@ extends LivingEntity {
             if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
                 this.spawnAtLocation(itemStack2);
             }
-            this.setItemSlot(equipmentSlot, itemStack);
-            switch (equipmentSlot.getType()) {
-                case HAND: {
-                    this.handDropChances[equipmentSlot.getIndex()] = 2.0f;
-                    break;
-                }
-                case ARMOR: {
-                    this.armorDropChances[equipmentSlot.getIndex()] = 2.0f;
-                }
-            }
-            this.persistenceRequired = true;
+            this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
             return true;
         }
         return false;
     }
 
-    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
-        boolean bl = true;
-        if (!itemStack2.isEmpty()) {
-            if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
-                if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
-                    bl = true;
-                } else if (itemStack.getItem() instanceof SwordItem && itemStack2.getItem() instanceof SwordItem) {
-                    SwordItem swordItem = (SwordItem)itemStack.getItem();
-                    SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
-                    bl = swordItem.getDamage() == swordItem2.getDamage() ? itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag() : swordItem.getDamage() > swordItem2.getDamage();
-                } else {
-                    bl = itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem ? itemStack.hasTag() && !itemStack2.hasTag() : false;
-                }
-            } else if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
-                bl = true;
-            } else if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
-                ArmorItem armorItem = (ArmorItem)itemStack.getItem();
-                ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
-                bl = armorItem.getDefense() == armorItem2.getDefense() ? itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag() : armorItem.getDefense() > armorItem2.getDefense();
-            } else {
-                bl = false;
+    protected void setItemSlotAndDropWhenKilled(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+        this.setItemSlot(equipmentSlot, itemStack);
+        switch (equipmentSlot.getType()) {
+            case HAND: {
+                this.handDropChances[equipmentSlot.getIndex()] = 2.0f;
+                break;
+            }
+            case ARMOR: {
+                this.armorDropChances[equipmentSlot.getIndex()] = 2.0f;
             }
         }
-        return bl;
+        this.persistenceRequired = true;
+    }
+
+    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+        if (itemStack2.isEmpty()) {
+            return true;
+        }
+        if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
+            if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
+                return true;
+            }
+            if (itemStack.getItem() instanceof SwordItem) {
+                SwordItem swordItem = (SwordItem)itemStack.getItem();
+                SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
+                if (swordItem.getDamage() == swordItem2.getDamage()) {
+                    return itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+                }
+                return swordItem.getDamage() > swordItem2.getDamage();
+            }
+            if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
+                return itemStack.hasTag() && !itemStack2.hasTag();
+            }
+            return false;
+        }
+        if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
+            return true;
+        }
+        if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
+            ArmorItem armorItem = (ArmorItem)itemStack.getItem();
+            ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
+            if (armorItem.getDefense() == armorItem2.getDefense()) {
+                return itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+            }
+            return armorItem.getDefense() > armorItem2.getDefense();
+        }
+        return false;
     }
 
     public boolean canHoldItem(ItemStack itemStack) {

@@ -62,7 +62,7 @@ extends NodeEvaluator {
                 blockState = this.level.getBlockState(mutableBlockPos);
             }
             --i;
-        } else if (this.mob.onGround) {
+        } else if (this.mob.isOnGround()) {
             i = Mth.floor(this.mob.getY() + 0.5);
         } else {
             blockPos = new BlockPos(this.mob);

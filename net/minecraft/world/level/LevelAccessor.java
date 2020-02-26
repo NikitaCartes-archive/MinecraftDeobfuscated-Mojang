@@ -85,6 +85,10 @@ LevelSimulatedRW {
 
     public void levelEvent(@Nullable Player var1, int var2, BlockPos var3, int var4);
 
+    default public int getHeight() {
+        return this.getDimension().isHasCeiling() ? 128 : 256;
+    }
+
     default public void levelEvent(int i, BlockPos blockPos, int j) {
         this.levelEvent(null, i, blockPos, j);
     }

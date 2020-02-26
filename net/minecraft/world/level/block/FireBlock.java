@@ -11,7 +11,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +26,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 
 public class FireBlock
@@ -51,17 +48,12 @@ extends BaseFireBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (this.canSurvive(blockState, levelAccessor, blockPos)) {
-            return (BlockState)this.getStateForPlacement(levelAccessor, blockPos).setValue(AGE, blockState.getValue(AGE));
+            return this.getStateWithAge(levelAccessor, blockPos, blockState.getValue(AGE));
         }
         return Blocks.AIR.defaultBlockState();
     }
 
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return this.getStateForPlacement(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
-    }
-
-    public BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
+    protected BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState = blockGetter.getBlockState(blockPos2);
         if (this.canBurn(blockState) || blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) {
@@ -147,7 +139,7 @@ extends BaseFireBlock {
                     }
                     if (q <= 0 || random.nextInt(o) > q || serverLevel.isRaining() && this.isNearRain(serverLevel, mutableBlockPos)) continue;
                     int r = Math.min(15, i + random.nextInt(5) / 4);
-                    serverLevel.setBlock(mutableBlockPos, (BlockState)this.getStateForPlacement(serverLevel, mutableBlockPos).setValue(AGE, r), 3);
+                    serverLevel.setBlock(mutableBlockPos, this.getStateWithAge(serverLevel, mutableBlockPos, r), 3);
                 }
             }
         }
@@ -177,7 +169,7 @@ extends BaseFireBlock {
             BlockState blockState = level.getBlockState(blockPos);
             if (random.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
                 int l = Math.min(j + random.nextInt(5) / 4, 15);
-                level.setBlock(blockPos, (BlockState)this.getStateForPlacement(level, blockPos).setValue(AGE, l), 3);
+                level.setBlock(blockPos, this.getStateWithAge(level, blockPos, l), 3);
             } else {
                 level.removeBlock(blockPos, false);
             }
@@ -187,6 +179,14 @@ extends BaseFireBlock {
                 TntBlock.explode(level, blockPos);
             }
         }
+    }
+
+    private BlockState getStateWithAge(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+        BlockState blockState = FireBlock.getState(levelAccessor, blockPos);
+        if (blockState.getBlock() == Blocks.FIRE) {
+            return (BlockState)blockState.setValue(AGE, i);
+        }
+        return blockState;
     }
 
     private boolean isValidFireLocation(BlockGetter blockGetter, BlockPos blockPos) {
@@ -216,16 +216,7 @@ extends BaseFireBlock {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState2.getBlock() == blockState.getBlock()) {
-            return;
-        }
-        if ((level.dimension.getType() == DimensionType.OVERWORLD || level.dimension.getType() == DimensionType.NETHER) && ((NetherPortalBlock)Blocks.NETHER_PORTAL).trySpawnPortal(level, blockPos)) {
-            return;
-        }
-        if (!blockState.canSurvive(level, blockPos)) {
-            level.removeBlock(blockPos, false);
-            return;
-        }
+        super.onPlace(blockState, level, blockPos, blockState2, bl);
         level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
     }
 

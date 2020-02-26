@@ -5,7 +5,6 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.Dynamic;
 import java.util.Collection;
@@ -79,13 +78,11 @@ import net.minecraft.world.entity.ai.attributes.ModifiableAttributeMap;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ElytraItem;
@@ -196,6 +193,7 @@ extends Entity {
     protected int useItemRemaining;
     protected int fallFlyTicks;
     private BlockPos lastPos;
+    private Optional<BlockPos> lastLadderPos = Optional.empty();
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
     protected int autoSpinAttackTicks;
@@ -255,7 +253,7 @@ extends Entity {
     @Override
     protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
         if (!this.isInWater()) {
-            this.updateInWaterState();
+            this.updateInWaterStateAndDoWaterCurrentPushing();
         }
         if (!this.level.isClientSide && this.fallDistance > 3.0f && bl) {
             float f = Mth.ceil(this.fallDistance - 3.0f);
@@ -1078,16 +1076,34 @@ extends Entity {
         return itemStack.getEatingSound();
     }
 
+    @Override
+    public void setOnGround(boolean bl) {
+        super.setOnGround(bl);
+        if (bl) {
+            this.lastLadderPos = Optional.empty();
+        }
+    }
+
+    public Optional<BlockPos> lastLadderPos() {
+        return this.lastLadderPos;
+    }
+
     public boolean onLadder() {
         if (this.isSpectator()) {
             return false;
         }
+        BlockPos blockPos = this.getBlockPos();
         BlockState blockState = this.getFeetBlockState();
         Block block = blockState.getBlock();
-        if (block == Blocks.LADDER || block == Blocks.VINE || block == Blocks.SCAFFOLDING) {
+        if (block.is(BlockTags.CLIMBABLE)) {
+            this.lastLadderPos = Optional.of(blockPos);
             return true;
         }
-        return block instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(new BlockPos(this), blockState);
+        if (block instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
+            this.lastLadderPos = Optional.of(blockPos);
+            return true;
+        }
+        return false;
     }
 
     public BlockState getFeetBlockState() {
@@ -1502,86 +1518,9 @@ extends Entity {
         }
     }
 
-    private void findStandUpPosition(Entity entity) {
-        if (this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS)) {
-            this.setPos(entity.getX(), entity.getY(1.0) + 0.001, entity.getZ());
-            return;
-        }
-        if (entity instanceof Boat || entity instanceof AbstractHorse) {
-            float f;
-            int i;
-            double e;
-            double d = (double)(this.getBbWidth() / 2.0f + entity.getBbWidth() / 2.0f) + 0.4;
-            AABB aABB = entity.getBoundingBox();
-            if (entity instanceof Boat) {
-                e = aABB.maxY;
-                i = 2;
-                f = 0.0f;
-            } else {
-                e = aABB.minY;
-                i = 3;
-                f = 1.5707964f * (float)(this.getMainArm() == HumanoidArm.RIGHT ? -1 : 1);
-            }
-            float g = -this.yRot * ((float)Math.PI / 180) - (float)Math.PI + f;
-            float h = -Mth.sin(g);
-            float j = -Mth.cos(g);
-            double k = Math.abs(h) > Math.abs(j) ? d / (double)Math.abs(h) : d / (double)Math.abs(j);
-            AABB aABB2 = this.getBoundingBox().move(-this.getX(), -this.getY(), -this.getZ());
-            ImmutableSet<Entity> immutableSet = ImmutableSet.of(this, entity);
-            double l = this.getX() + (double)h * k;
-            double m = this.getZ() + (double)j * k;
-            double n = 0.001;
-            for (int o = 0; o < i; ++o) {
-                double p = e + n;
-                if (this.level.noCollision(this, aABB2.move(l, p, m), immutableSet)) {
-                    this.setPos(l, p, m);
-                    return;
-                }
-                n += 1.0;
-            }
-            this.setPos(entity.getX(), entity.getY(1.0) + 0.001, entity.getZ());
-            return;
-        }
-        double q = entity.getX();
-        double r = entity.getY(1.0);
-        double s = entity.getZ();
-        Direction direction = entity.getMotionDirection();
-        if (direction != null && direction.getAxis() != Direction.Axis.Y) {
-            Direction direction2 = direction.getClockWise();
-            int[][] is = new int[][]{{0, 1}, {0, -1}, {-1, 1}, {-1, -1}, {1, 1}, {1, -1}, {-1, 0}, {1, 0}, {0, 1}};
-            double k = Math.floor(this.getX()) + 0.5;
-            double t = Math.floor(this.getZ()) + 0.5;
-            double l = this.getBoundingBox().maxX - this.getBoundingBox().minX;
-            double m = this.getBoundingBox().maxZ - this.getBoundingBox().minZ;
-            AABB aABB3 = new AABB(k - l / 2.0, entity.getBoundingBox().minY, t - m / 2.0, k + l / 2.0, Math.floor(entity.getBoundingBox().minY) + (double)this.getBbHeight(), t + m / 2.0);
-            for (int[] js : is) {
-                BlockPos blockPos;
-                double u = direction.getStepX() * js[0] + direction2.getStepX() * js[1];
-                double v = direction.getStepZ() * js[0] + direction2.getStepZ() * js[1];
-                double w = k + u;
-                double x = t + v;
-                AABB aABB4 = aABB3.move(u, 0.0, v);
-                if (this.level.noCollision(this, aABB4)) {
-                    blockPos = new BlockPos(w, this.getY(), x);
-                    if (this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, this)) {
-                        this.teleportTo(w, this.getY() + 1.0, x);
-                        return;
-                    }
-                    BlockPos blockPos2 = new BlockPos(w, this.getY() - 1.0, x);
-                    if (!this.level.getBlockState(blockPos2).entityCanStandOn(this.level, blockPos2, this) && !this.level.getFluidState(blockPos2).is(FluidTags.WATER)) continue;
-                    q = w;
-                    r = this.getY() + 1.0;
-                    s = x;
-                    continue;
-                }
-                blockPos = new BlockPos(w, this.getY() + 1.0, x);
-                if (!this.level.noCollision(this, aABB4.move(0.0, 1.0, 0.0)) || !this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, this)) continue;
-                q = w;
-                r = this.getY() + 2.0;
-                s = x;
-            }
-        }
-        this.teleportTo(q, r, s);
+    private void dismountVehicle(Entity entity) {
+        Vec3 vec3 = this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
+        this.setPos(vec3.x, vec3.y, vec3.z);
     }
 
     @Override
@@ -1991,11 +1930,13 @@ extends Entity {
         this.level.getProfiler().pop();
         this.level.getProfiler().push("jump");
         if (this.jumping) {
-            if (this.waterHeight > 0.0 && (!this.onGround || this.waterHeight > 0.4)) {
+            boolean bl;
+            boolean bl2 = bl = this.isInWater() && this.fluidHeight > 0.0;
+            if (bl && (!this.onGround || this.fluidHeight > 0.4)) {
                 this.jumpInLiquid(FluidTags.WATER);
             } else if (this.isInLava()) {
                 this.jumpInLiquid(FluidTags.LAVA);
-            } else if ((this.onGround || this.waterHeight > 0.0 && this.waterHeight <= 0.4) && this.noJumpDelay == 0) {
+            } else if ((this.onGround || bl && this.fluidHeight <= 0.4) && this.noJumpDelay == 0) {
                 this.jumpFromGround();
                 this.noJumpDelay = 10;
             }
@@ -2107,7 +2048,7 @@ extends Entity {
         Entity entity = this.getVehicle();
         super.stopRiding();
         if (entity != null && entity != this.getVehicle() && !this.level.isClientSide) {
-            this.findStandUpPosition(entity);
+            this.dismountVehicle(entity);
         }
     }
 
@@ -2474,6 +2415,15 @@ extends Entity {
     @Override
     public EntityDimensions getDimensions(Pose pose) {
         return pose == Pose.SLEEPING ? SLEEPING_DIMENSIONS : super.getDimensions(pose).scale(this.getScale());
+    }
+
+    public ImmutableList<Pose> getDismountPoses() {
+        return ImmutableList.of(Pose.STANDING);
+    }
+
+    public AABB getLocalBoundsForPose(Pose pose) {
+        EntityDimensions entityDimensions = this.getDimensions(pose);
+        return new AABB(-entityDimensions.width / 2.0f, 0.0, -entityDimensions.width / 2.0f, entityDimensions.width / 2.0f, entityDimensions.height, entityDimensions.width / 2.0f);
     }
 
     public Optional<BlockPos> getSleepingPos() {

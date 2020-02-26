@@ -17,6 +17,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.AudioStream;
+import net.minecraft.client.sounds.LoopingAudioStream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -97,12 +98,12 @@ public class SoundBufferLibrary {
         }, Util.backgroundExecutor()));
     }
 
-    public CompletableFuture<AudioStream> getStream(ResourceLocation resourceLocation) {
+    public CompletableFuture<AudioStream> getStream(ResourceLocation resourceLocation, boolean bl) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 Resource resource = this.resourceManager.getResource(resourceLocation);
                 InputStream inputStream = resource.getInputStream();
-                return new OggAudioStream(inputStream);
+                return bl ? new LoopingAudioStream(OggAudioStream::new, inputStream) : new OggAudioStream(inputStream);
             } catch (IOException iOException) {
                 throw new CompletionException(iOException);
             }

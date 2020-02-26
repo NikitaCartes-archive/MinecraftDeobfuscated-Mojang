@@ -15,7 +15,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.stb.STBVorbis;
@@ -168,7 +167,6 @@ implements AudioStream {
     }
 
     @Override
-    @Nullable
     public ByteBuffer read(int i) throws IOException {
         OutputConcat outputConcat = new OutputConcat(i + 8192);
         while (this.readFrame(outputConcat) && outputConcat.byteCount < i) {
@@ -176,7 +174,6 @@ implements AudioStream {
         return outputConcat.get();
     }
 
-    @Override
     public ByteBuffer readAll() throws IOException {
         OutputConcat outputConcat = new OutputConcat(16384);
         while (this.readFrame(outputConcat)) {

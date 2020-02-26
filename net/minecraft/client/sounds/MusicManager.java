@@ -12,11 +12,13 @@ import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class MusicManager {
     private final Random random = new Random();
     private final Minecraft minecraft;
+    @Nullable
     private SoundInstance currentMusic;
     private int nextSongDelay = 100;
 

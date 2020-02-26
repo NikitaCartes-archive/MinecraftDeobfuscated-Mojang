@@ -15,17 +15,7 @@ extends StoredUserEntry<GameProfile> {
     }
 
     public UserWhiteListEntry(JsonObject jsonObject) {
-        super(UserWhiteListEntry.createGameProfile(jsonObject), jsonObject);
-    }
-
-    @Override
-    protected void serialize(JsonObject jsonObject) {
-        if (this.getUser() == null) {
-            return;
-        }
-        jsonObject.addProperty("uuid", ((GameProfile)this.getUser()).getId() == null ? "" : ((GameProfile)this.getUser()).getId().toString());
-        jsonObject.addProperty("name", ((GameProfile)this.getUser()).getName());
-        super.serialize(jsonObject);
+        super(UserWhiteListEntry.createGameProfile(jsonObject));
     }
 
     private static GameProfile createGameProfile(JsonObject jsonObject) {

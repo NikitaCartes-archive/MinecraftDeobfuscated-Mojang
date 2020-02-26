@@ -100,14 +100,19 @@ implements ItemSupplier {
         Potion potion = PotionUtils.getPotion(itemStack);
         List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
         boolean bl2 = bl = potion == Potions.WATER && list.isEmpty();
-        if (hitResult.getType() == HitResult.Type.BLOCK && bl) {
+        if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockHitResult blockHitResult = (BlockHitResult)hitResult;
             Direction direction = blockHitResult.getDirection();
-            BlockPos blockPos = blockHitResult.getBlockPos().relative(direction);
-            this.dowseFire(blockPos, direction);
-            this.dowseFire(blockPos.relative(direction.getOpposite()), direction);
-            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                this.dowseFire(blockPos.relative(direction2), direction2);
+            BlockPos blockPos = blockHitResult.getBlockPos();
+            BlockPos blockPos2 = blockPos.relative(direction);
+            BlockState blockState = this.level.getBlockState(blockPos);
+            blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
+            if (bl) {
+                this.dowseFire(blockPos2, direction);
+                this.dowseFire(blockPos2.relative(direction.getOpposite()), direction);
+                for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+                    this.dowseFire(blockPos2.relative(direction2), direction2);
+                }
             }
         }
         if (bl) {

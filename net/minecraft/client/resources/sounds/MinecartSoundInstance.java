@@ -37,7 +37,7 @@ extends AbstractTickableSoundInstance {
     @Override
     public void tick() {
         if (this.minecart.removed) {
-            this.stopped = true;
+            this.stop();
             return;
         }
         this.x = (float)this.minecart.getX();

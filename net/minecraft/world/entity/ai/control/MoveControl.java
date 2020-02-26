@@ -104,7 +104,7 @@ public class MoveControl {
             }
         } else if (this.operation == Operation.JUMPING) {
             this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
-            if (this.mob.onGround) {
+            if (this.mob.isOnGround()) {
                 this.operation = Operation.WAIT;
             }
         } else {

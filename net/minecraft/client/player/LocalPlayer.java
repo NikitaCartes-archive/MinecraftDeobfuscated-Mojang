@@ -755,7 +755,7 @@ extends AbstractClientPlayer {
                 this.minecraft.setScreen(null);
             }
             if (this.portalTime == 0.0f) {
-                this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.PORTAL_TRIGGER, this.random.nextFloat() * 0.4f + 0.8f));
+                this.minecraft.getSoundManager().play(SimpleSoundInstance.forLocalAmbience(SoundEvents.PORTAL_TRIGGER, this.random.nextFloat() * 0.4f + 0.8f, 0.25f));
             }
             this.portalTime += 0.0125f;
             if (this.portalTime >= 1.0f) {

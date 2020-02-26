@@ -694,6 +694,32 @@ extends Level {
     }
 
     @Override
+    public float getShade(Direction direction, boolean bl) {
+        boolean bl2;
+        boolean bl3 = bl2 = this.dimension.getType() == DimensionType.NETHER;
+        if (!bl) {
+            return bl2 ? 0.9f : 1.0f;
+        }
+        switch (direction) {
+            case DOWN: {
+                return bl2 ? 0.9f : 0.5f;
+            }
+            case UP: {
+                return bl2 ? 0.9f : 1.0f;
+            }
+            case NORTH: 
+            case SOUTH: {
+                return 0.8f;
+            }
+            case WEST: 
+            case EAST: {
+                return 0.6f;
+            }
+        }
+        return 1.0f;
+    }
+
+    @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
         return blockTintCache.getColor(blockPos, () -> this.calculateBlockTint(blockPos, colorResolver));

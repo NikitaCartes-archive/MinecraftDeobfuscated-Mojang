@@ -64,7 +64,7 @@ extends PathfinderMob {
     }
 
     @Override
-    public boolean isPushedByWater() {
+    public boolean isPushedByFluid() {
         return false;
     }
 

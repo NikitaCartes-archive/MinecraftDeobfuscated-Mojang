@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +54,7 @@ implements Enemy {
     private static int killedByPiglinCounter = 0;
     private static int removeCounter = 0;
     protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Hoglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HOGLIN_SPECIFIC_SENSOR);
-    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, MemoryModuleType.AVOID_TARGET, new MemoryModuleType[]{MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS, MemoryModuleType.NEAREST_WARPED_FUNGI, MemoryModuleType.PACIFIED});
+    protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.BREED_TARGET, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.PATH, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, MemoryModuleType.AVOID_TARGET, new MemoryModuleType[]{MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS, MemoryModuleType.NEAREST_WARPED_FUNGUS, MemoryModuleType.PACIFIED});
 
     public Hoglin(EntityType<? extends Hoglin> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
@@ -134,9 +135,6 @@ implements Enemy {
         this.level.getProfiler().pop();
         HoglinAi.updateActivity(this);
         HoglinAi.maybePlayActivitySound(this);
-        if (HoglinAi.seesPlayer(this)) {
-            this.setPersistenceRequired();
-        }
     }
 
     @Override
@@ -167,13 +165,22 @@ implements Enemy {
 
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-        if (HoglinAi.isPosNearNearestWarpedFungi(this, blockPos)) {
+        if (HoglinAi.isPosNearNearestWarpedFungus(this, blockPos)) {
             return -1.0f;
         }
         if (levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.CRIMSON_NYLIUM) {
             return 10.0f;
         }
         return 0.0f;
+    }
+
+    @Override
+    public boolean mobInteract(Player player, InteractionHand interactionHand) {
+        boolean bl = super.mobInteract(player, interactionHand);
+        if (bl) {
+            this.setPersistenceRequired();
+        }
+        return bl;
     }
 
     @Override
@@ -199,7 +206,7 @@ implements Enemy {
 
     @Override
     public boolean isFood(ItemStack itemStack) {
-        return itemStack.getItem() == Items.CRIMSON_FUNGI;
+        return itemStack.getItem() == Items.CRIMSON_FUNGUS;
     }
 
     public boolean isAdult() {
@@ -209,7 +216,11 @@ implements Enemy {
     @Override
     @Nullable
     public AgableMob getBreedOffspring(AgableMob agableMob) {
-        return EntityType.HOGLIN.create(this.level);
+        Hoglin hoglin = EntityType.HOGLIN.create(this.level);
+        if (hoglin != null) {
+            hoglin.setPersistenceRequired();
+        }
+        return hoglin;
     }
 
     @Override
@@ -261,10 +272,6 @@ implements Enemy {
 
     protected void playAngrySound() {
         this.playSound(SoundEvents.HOGLIN_ANGRY, 1.0f, this.getVoicePitch());
-    }
-
-    protected void playHurtSound() {
-        this.playRetreatSound();
     }
 
     protected void playRetreatSound() {

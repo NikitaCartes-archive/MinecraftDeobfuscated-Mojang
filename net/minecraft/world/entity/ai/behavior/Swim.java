@@ -22,7 +22,7 @@ extends Behavior<Mob> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        return mob.isInWater() && mob.getWaterHeight() > (double)this.height || mob.isInLava();
+        return mob.isInWater() && mob.getFluidHeight() > (double)this.height || mob.isInLava();
     }
 
     @Override

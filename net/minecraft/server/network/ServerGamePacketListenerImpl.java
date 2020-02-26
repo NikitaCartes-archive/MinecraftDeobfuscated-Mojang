@@ -729,11 +729,10 @@ implements ServerGamePacketListener {
         if (n > 0.0) {
             this.player.fallDistance = 0.0f;
         }
-        if (this.player.onGround && !serverboundMovePlayerPacket.isOnGround() && n > 0.0) {
+        if (this.player.isOnGround() && !serverboundMovePlayerPacket.isOnGround() && n > 0.0) {
             this.player.jumpFromGround();
         }
         this.player.move(MoverType.PLAYER, new Vec3(m, n, o));
-        this.player.onGround = serverboundMovePlayerPacket.isOnGround();
         double t = n;
         m = h - this.player.getX();
         n = i - this.player.getY();
@@ -757,9 +756,9 @@ implements ServerGamePacketListener {
             }
         }
         this.clientIsFloating = t >= -0.03125 && this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR && !this.server.isFlightAllowed() && !this.player.abilities.mayfly && !this.player.hasEffect(MobEffects.LEVITATION) && !this.player.isFallFlying() && !serverLevel.containsAnyBlocks(this.player.getBoundingBox().inflate(0.0625).expandTowards(0.0, -0.55, 0.0));
-        this.player.onGround = serverboundMovePlayerPacket.isOnGround();
         this.player.getLevel().getChunkSource().move(this.player);
         this.player.doCheckFallDamage(this.player.getY() - g, serverboundMovePlayerPacket.isOnGround());
+        this.player.setOnGround(serverboundMovePlayerPacket.isOnGround());
         this.lastGoodX = this.player.getX();
         this.lastGoodY = this.player.getY();
         this.lastGoodZ = this.player.getZ();

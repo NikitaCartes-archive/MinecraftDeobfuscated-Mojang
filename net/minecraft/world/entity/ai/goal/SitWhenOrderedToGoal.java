@@ -30,7 +30,7 @@ extends Goal {
         if (this.mob.isInWaterOrBubble()) {
             return false;
         }
-        if (!this.mob.onGround) {
+        if (!this.mob.isOnGround()) {
             return false;
         }
         LivingEntity livingEntity = this.mob.getOwner();

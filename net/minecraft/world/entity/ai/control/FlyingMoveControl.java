@@ -35,7 +35,7 @@ extends MoveControl {
             }
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
             this.mob.yRot = this.rotlerp(this.mob.yRot, h, 90.0f);
-            float i = this.mob.onGround ? (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()) : (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.FLYING_SPEED).getValue());
+            float i = this.mob.isOnGround() ? (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()) : (float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.FLYING_SPEED).getValue());
             this.mob.setSpeed(i);
             double j = Mth.sqrt(d * d + f * f);
             float k = (float)(-(Mth.atan2(e, j) * 57.2957763671875));

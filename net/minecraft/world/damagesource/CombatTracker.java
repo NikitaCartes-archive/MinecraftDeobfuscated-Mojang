@@ -5,6 +5,7 @@ package net.minecraft.world.damagesource;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -34,13 +35,10 @@ public class CombatTracker {
 
     public void prepareForDamage() {
         this.resetPreparedStatus();
-        if (this.mob.onLadder()) {
-            Block block = this.mob.level.getBlockState(new BlockPos(this.mob)).getBlock();
-            if (block == Blocks.LADDER) {
-                this.nextLocation = "ladder";
-            } else if (block == Blocks.VINE) {
-                this.nextLocation = "vines";
-            }
+        Optional<BlockPos> optional = this.mob.lastLadderPos();
+        if (optional.isPresent()) {
+            Block block = this.mob.level.getBlockState(optional.get()).getBlock();
+            this.nextLocation = block == Blocks.LADDER ? "ladder" : (block == Blocks.VINE ? "vines" : (block == Blocks.WEEPING_VINES_PLANT || block == Blocks.WEEPING_VINES ? "weeping_vines" : "other_climbable"));
         } else if (this.mob.isInWater()) {
             this.nextLocation = "water";
         }

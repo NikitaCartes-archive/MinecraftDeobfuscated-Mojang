@@ -6,6 +6,7 @@ package net.minecraft.client.renderer.chunk;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
@@ -100,6 +101,11 @@ implements BlockAndTintGetter {
     @Override
     public FluidState getFluidState(BlockPos blockPos) {
         return this.fluidStates[this.index(blockPos)];
+    }
+
+    @Override
+    public float getShade(Direction direction, boolean bl) {
+        return this.level.getShade(direction, bl);
     }
 
     @Override

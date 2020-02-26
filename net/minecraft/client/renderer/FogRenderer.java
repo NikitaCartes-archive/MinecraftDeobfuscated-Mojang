@@ -15,12 +15,15 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
@@ -34,32 +37,32 @@ public class FogRenderer {
     private static int previousBiomeFog;
     private static long biomeChangedTime;
 
-    public static void setupColor(Camera camera, float f, ClientLevel clientLevel, int i, float g) {
-        int j;
+    public static void setupColor(Camera camera, float f, ClientLevel clientLevel, int i2, float g) {
+        int j2;
         FluidState fluidState = camera.getFluidInCamera();
         if (fluidState.is(FluidTags.WATER)) {
             long l = Util.getMillis();
-            j = clientLevel.getBiome(new BlockPos(camera.getPosition())).getWaterFogColor();
+            j2 = clientLevel.getBiome(new BlockPos(camera.getPosition())).getWaterFogColor();
             if (biomeChangedTime < 0L) {
-                targetBiomeFog = j;
-                previousBiomeFog = j;
+                targetBiomeFog = j2;
+                previousBiomeFog = j2;
                 biomeChangedTime = l;
             }
-            int k = targetBiomeFog >> 16 & 0xFF;
+            int k2 = targetBiomeFog >> 16 & 0xFF;
             int m = targetBiomeFog >> 8 & 0xFF;
             int n = targetBiomeFog & 0xFF;
             int o = previousBiomeFog >> 16 & 0xFF;
             int p = previousBiomeFog >> 8 & 0xFF;
             int q = previousBiomeFog & 0xFF;
             float h = Mth.clamp((float)(l - biomeChangedTime) / 5000.0f, 0.0f, 1.0f);
-            float r = Mth.lerp(h, o, k);
+            float r = Mth.lerp(h, o, k2);
             float s = Mth.lerp(h, p, m);
             float t = Mth.lerp(h, q, n);
             fogRed = r / 255.0f;
             fogGreen = s / 255.0f;
             fogBlue = t / 255.0f;
-            if (targetBiomeFog != j) {
-                targetBiomeFog = j;
+            if (targetBiomeFog != j2) {
+                targetBiomeFog = j2;
                 previousBiomeFog = Mth.floor(r) << 16 | Mth.floor(s) << 8 | Mth.floor(t);
                 biomeChangedTime = l;
             }
@@ -69,58 +72,60 @@ public class FogRenderer {
             fogBlue = 0.0f;
             biomeChangedTime = -1L;
         } else {
-            float h;
+            float s;
+            float t;
             float r;
-            float z;
-            float u = 0.25f + 0.75f * (float)i / 32.0f;
+            float u = 0.25f + 0.75f * (float)i2 / 32.0f;
             u = 1.0f - (float)Math.pow(u, 0.25);
             Vec3 vec3 = clientLevel.getSkyColor(camera.getBlockPosition(), f);
             float v = (float)vec3.x;
             float w = (float)vec3.y;
             float x = (float)vec3.z;
-            int n = clientLevel.getBiome(camera.getBlockPosition()).getFogColor();
-            float y = Mth.cos(clientLevel.getTimeOfDay(f) * ((float)Math.PI * 2)) * 2.0f + 0.5f;
-            Vec3 vec32 = clientLevel.getDimension().getBrightnessDependentFogColor(n, Mth.clamp(y, 0.0f, 1.0f));
-            fogRed = (float)vec32.x;
-            fogGreen = (float)vec32.y;
-            fogBlue = (float)vec32.z;
-            if (i >= 4) {
+            float y = Mth.clamp(Mth.cos(clientLevel.getTimeOfDay(f) * ((float)Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
+            BiomeManager biomeManager = clientLevel.getBiomeManager();
+            Dimension dimension = clientLevel.getDimension();
+            Vec3 vec32 = camera.getPosition().subtract(2.0, 2.0, 2.0).scale(0.25);
+            Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (i, j, k) -> dimension.getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiome(i, j, k).getFogColor()), y));
+            fogRed = (float)vec33.x();
+            fogGreen = (float)vec33.y();
+            fogBlue = (float)vec33.z();
+            if (i2 >= 4) {
                 float[] fs;
-                z = Mth.sin(clientLevel.getSunAngle(f)) > 0.0f ? -1.0f : 1.0f;
-                Vector3f vector3f = new Vector3f(z, 0.0f, 0.0f);
-                r = camera.getLookVector().dot(vector3f);
-                if (r < 0.0f) {
-                    r = 0.0f;
+                r = Mth.sin(clientLevel.getSunAngle(f)) > 0.0f ? -1.0f : 1.0f;
+                Vector3f vector3f = new Vector3f(r, 0.0f, 0.0f);
+                t = camera.getLookVector().dot(vector3f);
+                if (t < 0.0f) {
+                    t = 0.0f;
                 }
-                if (r > 0.0f && (fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f)) != null) {
-                    fogRed = fogRed * (1.0f - (r *= fs[3])) + fs[0] * r;
-                    fogGreen = fogGreen * (1.0f - r) + fs[1] * r;
-                    fogBlue = fogBlue * (1.0f - r) + fs[2] * r;
+                if (t > 0.0f && (fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f)) != null) {
+                    fogRed = fogRed * (1.0f - (t *= fs[3])) + fs[0] * t;
+                    fogGreen = fogGreen * (1.0f - t) + fs[1] * t;
+                    fogBlue = fogBlue * (1.0f - t) + fs[2] * t;
                 }
             }
             fogRed += (v - fogRed) * u;
             fogGreen += (w - fogGreen) * u;
             fogBlue += (x - fogBlue) * u;
-            z = clientLevel.getRainLevel(f);
-            if (z > 0.0f) {
-                float h2 = 1.0f - z * 0.5f;
-                r = 1.0f - z * 0.4f;
-                fogRed *= h2;
-                fogGreen *= h2;
-                fogBlue *= r;
+            r = clientLevel.getRainLevel(f);
+            if (r > 0.0f) {
+                float s2 = 1.0f - r * 0.5f;
+                t = 1.0f - r * 0.4f;
+                fogRed *= s2;
+                fogGreen *= s2;
+                fogBlue *= t;
             }
-            if ((h = clientLevel.getThunderLevel(f)) > 0.0f) {
-                r = 1.0f - h * 0.5f;
-                fogRed *= r;
-                fogGreen *= r;
-                fogBlue *= r;
+            if ((s = clientLevel.getThunderLevel(f)) > 0.0f) {
+                t = 1.0f - s * 0.5f;
+                fogRed *= t;
+                fogGreen *= t;
+                fogBlue *= t;
             }
             biomeChangedTime = -1L;
         }
         double d = camera.getPosition().y * clientLevel.dimension.getClearColorScale();
         if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
-            j = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
-            d = j < 20 ? (d *= (double)(1.0f - (float)j / 20.0f)) : 0.0;
+            j2 = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
+            d = j2 < 20 ? (d *= (double)(1.0f - (float)j2 / 20.0f)) : 0.0;
         }
         if (d < 1.0) {
             if (d < 0.0) {

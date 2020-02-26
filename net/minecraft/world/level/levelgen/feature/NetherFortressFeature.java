@@ -22,7 +22,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class NetherFortressFeature
 extends StructureFeature<NoneFeatureConfiguration> {
-    private static final List<Biome.SpawnerData> FORTRESS_ENEMIES = Lists.newArrayList(new Biome.SpawnerData(EntityType.BLAZE, 10, 2, 3), new Biome.SpawnerData(EntityType.ZOMBIE_PIGMAN, 5, 4, 4), new Biome.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5), new Biome.SpawnerData(EntityType.SKELETON, 2, 5, 5), new Biome.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4));
+    private static final List<Biome.SpawnerData> FORTRESS_ENEMIES = Lists.newArrayList(new Biome.SpawnerData(EntityType.BLAZE, 10, 2, 3), new Biome.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 5, 4, 4), new Biome.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5), new Biome.SpawnerData(EntityType.SKELETON, 2, 5, 5), new Biome.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4));
 
     public NetherFortressFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
         super(function);

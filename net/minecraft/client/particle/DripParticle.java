@@ -16,7 +16,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -26,6 +25,7 @@ import net.minecraft.world.level.material.Fluids;
 public class DripParticle
 extends TextureSheetParticle {
     private final Fluid type;
+    protected boolean isGlowing;
 
     private DripParticle(Level level, double d, double e, double f, Fluid fluid) {
         super(level, d, e, f);
@@ -41,7 +41,7 @@ extends TextureSheetParticle {
 
     @Override
     public int getLightColor(float f) {
-        if (this.type.is(FluidTags.LAVA)) {
+        if (this.isGlowing) {
             return 240;
         }
         return super.getLightColor(f);
@@ -79,6 +79,67 @@ extends TextureSheetParticle {
     }
 
     protected void postMoveUpdate() {
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ObsidianTearLandProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public ObsidianTearLandProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripLandParticle dripParticle = new DripLandParticle(level, d, e, f, Fluids.EMPTY);
+            dripParticle.isGlowing = true;
+            dripParticle.lifetime = (int)(28.0 / (Math.random() * 0.8 + 0.2));
+            dripParticle.setColor(0.51171875f, 0.03125f, 0.890625f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ObsidianTearFallProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public ObsidianTearFallProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            FallAndLandParticle dripParticle = new FallAndLandParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_OBSIDIAN_TEAR);
+            dripParticle.isGlowing = true;
+            dripParticle.gravity = 0.01f;
+            dripParticle.setColor(0.51171875f, 0.03125f, 0.890625f);
+            dripParticle.pickSprite(this.sprite);
+            return dripParticle;
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ObsidianTearHangProvider
+    implements ParticleProvider<SimpleParticleType> {
+        protected final SpriteSet sprite;
+
+        public ObsidianTearHangProvider(SpriteSet spriteSet) {
+            this.sprite = spriteSet;
+        }
+
+        @Override
+        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+            DripHangParticle dripHangParticle = new DripHangParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_OBSIDIAN_TEAR);
+            dripHangParticle.isGlowing = true;
+            dripHangParticle.gravity *= 0.01f;
+            dripHangParticle.lifetime = 100;
+            dripHangParticle.setColor(0.51171875f, 0.03125f, 0.890625f);
+            dripHangParticle.pickSprite(this.sprite);
+            return dripHangParticle;
+        }
     }
 
     @Environment(value=EnvType.CLIENT)
