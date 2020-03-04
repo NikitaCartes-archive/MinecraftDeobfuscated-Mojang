@@ -92,20 +92,20 @@ extends AbstractTreeFeature<T> {
     protected void placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, int i, Set<BlockPos> set, BoundingBox boundingBox, MegaTreeConfiguration megaTreeConfiguration) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int j = 0; j < i; ++j) {
-            mutableBlockPos.set(blockPos).move(0, j, 0);
+            mutableBlockPos.setWithOffset(blockPos, 0, j, 0);
             if (MegaTreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) {
                 this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
             }
             if (j >= i - 1) continue;
-            mutableBlockPos.set(blockPos).move(1, j, 0);
+            mutableBlockPos.setWithOffset(blockPos, 1, j, 0);
             if (MegaTreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) {
                 this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
             }
-            mutableBlockPos.set(blockPos).move(1, j, 1);
+            mutableBlockPos.setWithOffset(blockPos, 1, j, 1);
             if (MegaTreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) {
                 this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
             }
-            mutableBlockPos.set(blockPos).move(0, j, 1);
+            mutableBlockPos.setWithOffset(blockPos, 0, j, 1);
             if (!MegaTreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) continue;
             this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
         }

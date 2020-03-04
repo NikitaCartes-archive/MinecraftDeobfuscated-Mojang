@@ -24,7 +24,6 @@ public class CatSpawner {
     private int nextTick;
 
     public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
-        int j;
         if (!bl2 || !serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
             return 0;
         }
@@ -39,7 +38,8 @@ public class CatSpawner {
         }
         Random random = serverLevel.random;
         int i = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-        BlockPos blockPos = new BlockPos(player).offset(i, 0, j = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1));
+        int j = (8 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
+        BlockPos blockPos = player.blockPosition().offset(i, 0, j);
         if (!serverLevel.hasChunksAt(blockPos.getX() - 10, blockPos.getY() - 10, blockPos.getZ() - 10, blockPos.getX() + 10, blockPos.getY() + 10, blockPos.getZ() + 10)) {
             return 0;
         }

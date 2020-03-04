@@ -44,6 +44,7 @@ extends EntityRenderer<ItemFrame> {
 
     @Override
     public void render(ItemFrame itemFrame, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        ItemStack itemStack;
         super.render(itemFrame, f, g, poseStack, multiBufferSource, i);
         poseStack.pushPose();
         Direction direction = itemFrame.getDirection();
@@ -53,20 +54,27 @@ extends EntityRenderer<ItemFrame> {
         poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - itemFrame.yRot));
-        BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
-        ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
-        ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
-        poseStack.pushPose();
-        poseStack.translate(-0.5, -0.5, -0.5);
-        blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, i, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
-        ItemStack itemStack = itemFrame.getItem();
-        if (!itemStack.isEmpty()) {
-            boolean bl = itemStack.getItem() == Items.FILLED_MAP;
-            poseStack.translate(0.0, 0.0, 0.4375);
-            int j = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0f / 8.0f));
+        boolean bl = itemFrame.isInvisible();
+        if (!bl) {
+            BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
+            ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
+            ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
+            poseStack.pushPose();
+            poseStack.translate(-0.5, -0.5, -0.5);
+            blockRenderDispatcher.getModelRenderer().renderModel(poseStack.last(), multiBufferSource.getBuffer(Sheets.solidBlockSheet()), null, modelManager.getModel(modelResourceLocation), 1.0f, 1.0f, 1.0f, i, OverlayTexture.NO_OVERLAY);
+            poseStack.popPose();
+        }
+        if (!(itemStack = itemFrame.getItem()).isEmpty()) {
+            boolean bl2;
+            boolean bl3 = bl2 = itemStack.getItem() == Items.FILLED_MAP;
             if (bl) {
+                poseStack.translate(0.0, 0.0, 0.5);
+            } else {
+                poseStack.translate(0.0, 0.0, 0.4375);
+            }
+            int j = bl2 ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0f / 8.0f));
+            if (bl2) {
                 poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0f));
                 float h = 0.0078125f;
                 poseStack.scale(0.0078125f, 0.0078125f, 0.0078125f);

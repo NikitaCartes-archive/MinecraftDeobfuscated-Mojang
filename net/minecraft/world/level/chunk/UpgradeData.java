@@ -98,7 +98,7 @@ public class UpgradeData {
             BlockState blockState;
             BlockState blockState2 = blockState = level.getBlockState(blockPos);
             for (Direction direction : directions) {
-                mutableBlockPos.set(blockPos).move(direction);
+                mutableBlockPos.setWithOffset(blockPos, direction);
                 blockState2 = UpgradeData.updateState(blockState2, direction, level, blockPos, mutableBlockPos);
             }
             Block.updateOrDestroy(blockState, blockState2, level, blockPos, 18);
@@ -110,39 +110,38 @@ public class UpgradeData {
     }
 
     private void upgradeInside(LevelChunk levelChunk) {
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();
-             BlockPos.PooledMutableBlockPos pooledMutableBlockPos2 = BlockPos.PooledMutableBlockPos.acquire();){
-            int i;
-            ChunkPos chunkPos = levelChunk.getPos();
-            Level levelAccessor = levelChunk.getLevel();
-            for (i = 0; i < 16; ++i) {
-                LevelChunkSection levelChunkSection = levelChunk.getSections()[i];
-                int[] is = this.index[i];
-                this.index[i] = null;
-                if (levelChunkSection == null || is == null || is.length <= 0) continue;
-                Direction[] directions = Direction.values();
-                PalettedContainer<BlockState> palettedContainer = levelChunkSection.getStates();
-                for (int j : is) {
-                    BlockState blockState;
-                    int k = j & 0xF;
-                    int l = j >> 8 & 0xF;
-                    int m = j >> 4 & 0xF;
-                    pooledMutableBlockPos.set(chunkPos.getMinBlockX() + k, (i << 4) + l, chunkPos.getMinBlockZ() + m);
-                    BlockState blockState2 = blockState = palettedContainer.get(j);
-                    for (Direction direction : directions) {
-                        pooledMutableBlockPos2.set(pooledMutableBlockPos).move(direction);
-                        if (pooledMutableBlockPos.getX() >> 4 != chunkPos.x || pooledMutableBlockPos.getZ() >> 4 != chunkPos.z) continue;
-                        blockState2 = UpgradeData.updateState(blockState2, direction, levelAccessor, pooledMutableBlockPos, pooledMutableBlockPos2);
-                    }
-                    Block.updateOrDestroy(blockState, blockState2, levelAccessor, pooledMutableBlockPos, 18);
+        int i;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
+        ChunkPos chunkPos = levelChunk.getPos();
+        Level levelAccessor = levelChunk.getLevel();
+        for (i = 0; i < 16; ++i) {
+            LevelChunkSection levelChunkSection = levelChunk.getSections()[i];
+            int[] is = this.index[i];
+            this.index[i] = null;
+            if (levelChunkSection == null || is == null || is.length <= 0) continue;
+            Direction[] directions = Direction.values();
+            PalettedContainer<BlockState> palettedContainer = levelChunkSection.getStates();
+            for (int j : is) {
+                BlockState blockState;
+                int k = j & 0xF;
+                int l = j >> 8 & 0xF;
+                int m = j >> 4 & 0xF;
+                mutableBlockPos.set(chunkPos.getMinBlockX() + k, (i << 4) + l, chunkPos.getMinBlockZ() + m);
+                BlockState blockState2 = blockState = palettedContainer.get(j);
+                for (Direction direction : directions) {
+                    mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+                    if (mutableBlockPos.getX() >> 4 != chunkPos.x || mutableBlockPos.getZ() >> 4 != chunkPos.z) continue;
+                    blockState2 = UpgradeData.updateState(blockState2, direction, levelAccessor, mutableBlockPos, mutableBlockPos2);
                 }
+                Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, 18);
             }
-            for (i = 0; i < this.index.length; ++i) {
-                if (this.index[i] != null) {
-                    LOGGER.warn("Discarding update data for section {} for chunk ({} {})", (Object)i, (Object)chunkPos.x, (Object)chunkPos.z);
-                }
-                this.index[i] = null;
+        }
+        for (i = 0; i < this.index.length; ++i) {
+            if (this.index[i] != null) {
+                LOGGER.warn("Discarding update data for section {} for chunk ({} {})", (Object)i, (Object)chunkPos.x, (Object)chunkPos.z);
             }
+            this.index[i] = null;
         }
     }
 
@@ -248,7 +247,7 @@ public class UpgradeData {
                         levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.DISTANCE, j), 18);
                         if (i == 7) continue;
                         for (Direction direction : DIRECTIONS) {
-                            mutableBlockPos.set(blockPos).move(direction);
+                            mutableBlockPos.setWithOffset(blockPos, direction);
                             BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
                             if (!blockState2.hasProperty(BlockStateProperties.DISTANCE) || blockState.getValue(BlockStateProperties.DISTANCE) <= i) continue;
                             objectSet2.add(mutableBlockPos.immutable());

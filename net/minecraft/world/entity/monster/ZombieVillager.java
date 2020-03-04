@@ -194,7 +194,7 @@ implements VillagerDataHolder {
             villager.setOffers(new MerchantOffers(this.tradeOffers));
         }
         villager.setVillagerXp(this.villagerXp);
-        villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(new BlockPos(villager)), MobSpawnType.CONVERSION, null, null);
+        villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
         if (this.isBaby()) {
             villager.setAge(-24000);
         }
@@ -214,7 +214,7 @@ implements VillagerDataHolder {
             serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);
         }
         villager.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
-        serverLevel.levelEvent(null, 1027, new BlockPos(this), 0);
+        serverLevel.levelEvent(null, 1027, this.blockPosition(), 0);
     }
 
     private int getConversionProgress() {
@@ -282,7 +282,7 @@ implements VillagerDataHolder {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(new BlockPos(this)))));
+        this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(this.blockPosition()))));
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 

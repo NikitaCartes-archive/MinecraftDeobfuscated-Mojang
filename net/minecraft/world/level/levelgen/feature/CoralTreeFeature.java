@@ -25,7 +25,7 @@ extends CoralFeature {
 
     @Override
     protected boolean placeFeature(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockState blockState) {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         int i = random.nextInt(3) + 1;
         for (int j = 0; j < i; ++j) {
             if (!this.placeCoralBlock(levelAccessor, random, mutableBlockPos, blockState)) {

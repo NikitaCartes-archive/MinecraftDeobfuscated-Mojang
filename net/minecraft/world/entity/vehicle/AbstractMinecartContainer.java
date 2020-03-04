@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.vehicle;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -178,7 +177,7 @@ MenuProvider {
         if (this.lootTable != null && this.level.getServer() != null) {
             LootTable lootTable = this.level.getServer().getLootTables().get(this.lootTable);
             this.lootTable = null;
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withParameter(LootContextParams.BLOCK_POS, new BlockPos(this)).withOptionalRandomSeed(this.lootTableSeed);
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withParameter(LootContextParams.BLOCK_POS, this.blockPosition()).withOptionalRandomSeed(this.lootTableSeed);
             if (player != null) {
                 builder.withLuck(player.getLuck()).withParameter(LootContextParams.THIS_ENTITY, player);
             }

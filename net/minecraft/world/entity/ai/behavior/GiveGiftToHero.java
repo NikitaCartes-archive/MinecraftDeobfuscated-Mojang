@@ -117,7 +117,7 @@ extends Behavior<Villager> {
         VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
         if (gifts.containsKey(villagerProfession)) {
             LootTable lootTable = villager.level.getServer().getLootTables().get(gifts.get(villagerProfession));
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level).withParameter(LootContextParams.BLOCK_POS, new BlockPos(villager)).withParameter(LootContextParams.THIS_ENTITY, villager).withRandom(villager.getRandom());
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level).withParameter(LootContextParams.BLOCK_POS, villager.blockPosition()).withParameter(LootContextParams.THIS_ENTITY, villager).withRandom(villager.getRandom());
             return lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
         }
         return ImmutableList.of(new ItemStack(Items.WHEAT_SEEDS));
@@ -136,8 +136,8 @@ extends Behavior<Villager> {
     }
 
     private boolean isWithinThrowingDistance(Villager villager, Player player) {
-        BlockPos blockPos = new BlockPos(player);
-        BlockPos blockPos2 = new BlockPos(villager);
+        BlockPos blockPos = player.blockPosition();
+        BlockPos blockPos2 = villager.blockPosition();
         return blockPos2.closerThan(blockPos, 5.0);
     }
 

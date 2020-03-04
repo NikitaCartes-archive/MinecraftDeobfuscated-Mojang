@@ -41,8 +41,8 @@ extends Behavior<LivingEntity> {
         }
         PathfinderMob pathfinderMob = (PathfinderMob)livingEntity;
         PoiManager poiManager = serverLevel.getPoiManager();
-        Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
-        return optional.isPresent() && !(optional.get().distSqr(new BlockPos(pathfinderMob)) <= 4.0);
+        Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
+        return optional.isPresent() && !(optional.get().distSqr(pathfinderMob.blockPosition()) <= 4.0);
     }
 
     @Override
@@ -62,7 +62,7 @@ extends Behavior<LivingEntity> {
             this.batchCache.put(l, this.lastUpdate + 40L);
             return true;
         };
-        Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
+        Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
         Path path = pathfinderMob.getNavigation().createPath(stream, PoiType.HOME.getValidRange());
         if (path != null && path.canReach()) {
             BlockPos blockPos2 = path.getTarget();

@@ -68,5 +68,13 @@ extends StoredUserEntry<T> {
         }
         return this.expires.before(new Date());
     }
+
+    @Override
+    protected void serialize(JsonObject jsonObject) {
+        jsonObject.addProperty("created", DATE_FORMAT.format(this.created));
+        jsonObject.addProperty("source", this.source);
+        jsonObject.addProperty("expires", this.expires == null ? "forever" : DATE_FORMAT.format(this.expires));
+        jsonObject.addProperty("reason", this.reason);
+    }
 }
 

@@ -7,6 +7,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.ContainerListener;
@@ -192,6 +194,24 @@ StackedContentsCompatible {
             itemStack.shrink(j);
             this.setChanged();
         }
+    }
+
+    public void fromTag(ListTag listTag) {
+        for (int i = 0; i < listTag.size(); ++i) {
+            ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
+            if (itemStack.isEmpty()) continue;
+            this.addItem(itemStack);
+        }
+    }
+
+    public ListTag createTag() {
+        ListTag listTag = new ListTag();
+        for (int i = 0; i < this.getContainerSize(); ++i) {
+            ItemStack itemStack = this.getItem(i);
+            if (itemStack.isEmpty()) continue;
+            listTag.add(itemStack.save(new CompoundTag()));
+        }
+        return listTag;
     }
 }
 

@@ -223,7 +223,7 @@ extends Monster {
             if (this.lookForFriends <= 0) {
                 Level level = this.silverfish.level;
                 Random random = this.silverfish.getRandom();
-                BlockPos blockPos = new BlockPos(this.silverfish);
+                BlockPos blockPos = this.silverfish.blockPosition();
                 int i = 0;
                 block0: while (i <= 5 && i >= -5) {
                     int j = 0;

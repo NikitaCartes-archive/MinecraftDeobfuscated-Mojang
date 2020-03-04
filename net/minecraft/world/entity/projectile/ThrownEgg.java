@@ -15,8 +15,6 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -46,15 +44,14 @@ extends ThrowableItemProjectile {
     }
 
     @Override
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
+        entityHitResult.getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0f);
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
-        HitResult.Type type = hitResult.getType();
-        if (type == HitResult.Type.ENTITY) {
-            ((EntityHitResult)hitResult).getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0f);
-        } else if (type == HitResult.Type.BLOCK) {
-            BlockHitResult blockHitResult = (BlockHitResult)hitResult;
-            BlockState blockState = this.level.getBlockState(blockHitResult.getBlockPos());
-            blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
-        }
+        super.onHit(hitResult);
         if (!this.level.isClientSide) {
             if (this.random.nextInt(8) == 0) {
                 int i = 1;

@@ -6,9 +6,10 @@ package com.mojang.realmsclient.dto;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.dto.ValueObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.RealmsScreen;
+import net.minecraft.client.resources.language.I18n;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsWorldOptions
@@ -27,19 +28,7 @@ extends ValueObject {
     public String templateImage;
     public boolean adventureMap;
     public boolean empty;
-    private static final boolean forceGameModeDefault = false;
-    private static final boolean pvpDefault = true;
-    private static final boolean spawnAnimalsDefault = true;
-    private static final boolean spawnMonstersDefault = true;
-    private static final boolean spawnNPCsDefault = true;
-    private static final int spawnProtectionDefault = 0;
-    private static final boolean commandBlocksDefault = false;
-    private static final int difficultyDefault = 2;
-    private static final int gameModeDefault = 0;
-    private static final String slotNameDefault = "";
-    private static final long templateIdDefault = -1L;
-    private static final String templateImageDefault = null;
-    private static final boolean adventureMapDefault = false;
+    private static final String DEFAULT_TEMPLATE_IMAGE = null;
 
     public RealmsWorldOptions(Boolean boolean_, Boolean boolean2, Boolean boolean3, Boolean boolean4, Integer integer, Boolean boolean5, Integer integer2, Integer integer3, Boolean boolean6, String string) {
         this.pvp = boolean_;
@@ -54,12 +43,12 @@ extends ValueObject {
         this.slotName = string;
     }
 
-    public static RealmsWorldOptions getDefaults() {
-        return new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
+    public static RealmsWorldOptions createDefaults() {
+        return new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, "");
     }
 
-    public static RealmsWorldOptions getEmptyDefaults() {
-        RealmsWorldOptions realmsWorldOptions = new RealmsWorldOptions(true, true, true, true, 0, false, 2, 0, false, slotNameDefault);
+    public static RealmsWorldOptions createEmptyDefaults() {
+        RealmsWorldOptions realmsWorldOptions = RealmsWorldOptions.createDefaults();
         realmsWorldOptions.setEmpty(true);
         return realmsWorldOptions;
     }
@@ -69,9 +58,9 @@ extends ValueObject {
     }
 
     public static RealmsWorldOptions parse(JsonObject jsonObject) {
-        RealmsWorldOptions realmsWorldOptions = new RealmsWorldOptions(JsonUtils.getBooleanOr("pvp", jsonObject, true), JsonUtils.getBooleanOr("spawnAnimals", jsonObject, true), JsonUtils.getBooleanOr("spawnMonsters", jsonObject, true), JsonUtils.getBooleanOr("spawnNPCs", jsonObject, true), JsonUtils.getIntOr("spawnProtection", jsonObject, 0), JsonUtils.getBooleanOr("commandBlocks", jsonObject, false), JsonUtils.getIntOr("difficulty", jsonObject, 2), JsonUtils.getIntOr("gameMode", jsonObject, 0), JsonUtils.getBooleanOr("forceGameMode", jsonObject, false), JsonUtils.getStringOr("slotName", jsonObject, slotNameDefault));
+        RealmsWorldOptions realmsWorldOptions = new RealmsWorldOptions(JsonUtils.getBooleanOr("pvp", jsonObject, true), JsonUtils.getBooleanOr("spawnAnimals", jsonObject, true), JsonUtils.getBooleanOr("spawnMonsters", jsonObject, true), JsonUtils.getBooleanOr("spawnNPCs", jsonObject, true), JsonUtils.getIntOr("spawnProtection", jsonObject, 0), JsonUtils.getBooleanOr("commandBlocks", jsonObject, false), JsonUtils.getIntOr("difficulty", jsonObject, 2), JsonUtils.getIntOr("gameMode", jsonObject, 0), JsonUtils.getBooleanOr("forceGameMode", jsonObject, false), JsonUtils.getStringOr("slotName", jsonObject, ""));
         realmsWorldOptions.templateId = JsonUtils.getLongOr("worldTemplateId", jsonObject, -1L);
-        realmsWorldOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, templateImageDefault);
+        realmsWorldOptions.templateImage = JsonUtils.getStringOr("worldTemplateImage", jsonObject, DEFAULT_TEMPLATE_IMAGE);
         realmsWorldOptions.adventureMap = JsonUtils.getBooleanOr("adventureMap", jsonObject, false);
         return realmsWorldOptions;
     }
@@ -79,7 +68,7 @@ extends ValueObject {
     public String getSlotName(int i) {
         if (this.slotName == null || this.slotName.isEmpty()) {
             if (this.empty) {
-                return RealmsScreen.getLocalizedString("mco.configure.world.slot.empty");
+                return I18n.get("mco.configure.world.slot.empty", new Object[0]);
             }
             return this.getDefaultSlotName(i);
         }
@@ -87,7 +76,7 @@ extends ValueObject {
     }
 
     public String getDefaultSlotName(int i) {
-        return RealmsScreen.getLocalizedString("mco.configure.world.slot", i);
+        return I18n.get("mco.configure.world.slot", i);
     }
 
     public String toJson() {
@@ -119,7 +108,7 @@ extends ValueObject {
         if (this.forceGameMode.booleanValue()) {
             jsonObject.addProperty("forceGameMode", this.forceGameMode);
         }
-        if (this.slotName != null && !this.slotName.equals(slotNameDefault)) {
+        if (!Objects.equals(this.slotName, "")) {
             jsonObject.addProperty("slotName", this.slotName);
         }
         return jsonObject.toString();
@@ -127,6 +116,10 @@ extends ValueObject {
 
     public RealmsWorldOptions clone() {
         return new RealmsWorldOptions(this.pvp, this.spawnAnimals, this.spawnMonsters, this.spawnNPCs, this.spawnProtection, this.commandBlocks, this.difficulty, this.gameMode, this.forceGameMode, this.slotName);
+    }
+
+    public /* synthetic */ Object clone() throws CloneNotSupportedException {
+        return this.clone();
     }
 }
 

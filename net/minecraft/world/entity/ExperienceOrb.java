@@ -71,7 +71,7 @@ extends Entity {
         } else if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
         }
-        if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
+        if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {
             this.setDeltaMovement((this.random.nextFloat() - this.random.nextFloat()) * 0.2f, 0.2f, (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
             this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
         }

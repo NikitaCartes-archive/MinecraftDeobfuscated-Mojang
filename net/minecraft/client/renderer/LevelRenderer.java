@@ -136,8 +136,8 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class LevelRenderer
-implements AutoCloseable,
-ResourceManagerReloadListener {
+implements ResourceManagerReloadListener,
+AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation MOON_LOCATION = new ResourceLocation("textures/environment/moon_phases.png");
     private static final ResourceLocation SUN_LOCATION = new ResourceLocation("textures/environment/sun.png");
@@ -2189,6 +2189,10 @@ ResourceManagerReloadListener {
             }
             case 1030: {
                 this.level.playLocalSound(blockPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                break;
+            }
+            case 1044: {
+                this.level.playLocalSound(blockPos, SoundEvents.SMITHING_TABLE_USE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1031: {

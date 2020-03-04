@@ -268,7 +268,7 @@ extends AbstractGolem {
 
     @Override
     public boolean checkSpawnObstruction(LevelReader levelReader) {
-        BlockPos blockPos = new BlockPos(this);
+        BlockPos blockPos = this.blockPosition();
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState = levelReader.getBlockState(blockPos2);
         if (blockState.entityCanStandOn(levelReader, blockPos2, this)) {

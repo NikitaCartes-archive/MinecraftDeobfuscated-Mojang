@@ -27,12 +27,12 @@ extends Behavior<PathfinderMob> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-        return !serverLevel.canSeeSky(new BlockPos(pathfinderMob));
+        return !serverLevel.canSeeSky(pathfinderMob.blockPosition());
     }
 
     @Override
     protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-        BlockPos blockPos2 = new BlockPos(pathfinderMob);
+        BlockPos blockPos2 = pathfinderMob.blockPosition();
         List list = BlockPos.betweenClosedStream(blockPos2.offset(-1, -1, -1), blockPos2.offset(1, 1, 1)).map(BlockPos::immutable).collect(Collectors.toList());
         Collections.shuffle(list);
         Optional<BlockPos> optional = list.stream().filter(blockPos -> !serverLevel.canSeeSky((BlockPos)blockPos)).filter(blockPos -> serverLevel.loadedAndEntityCanStandOn((BlockPos)blockPos, pathfinderMob)).filter(blockPos -> serverLevel.noCollision(pathfinderMob)).findFirst();

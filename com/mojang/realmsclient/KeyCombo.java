@@ -19,20 +19,18 @@ public class KeyCombo {
             throw new IllegalArgumentException("Must have at least one char");
         }
         this.chars = cs;
-        this.matchIndex = 0;
     }
 
     public boolean keyPressed(char c) {
-        if (c == this.chars[this.matchIndex]) {
-            ++this.matchIndex;
+        if (c == this.chars[this.matchIndex++]) {
             if (this.matchIndex == this.chars.length) {
                 this.reset();
                 this.onCompletion.run();
                 return true;
             }
-            return false;
+        } else {
+            this.reset();
         }
-        this.reset();
         return false;
     }
 

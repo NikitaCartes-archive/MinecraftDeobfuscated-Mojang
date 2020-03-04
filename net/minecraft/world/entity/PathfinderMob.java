@@ -31,7 +31,7 @@ extends Mob {
 
     @Override
     public boolean checkSpawnRules(LevelAccessor levelAccessor, MobSpawnType mobSpawnType) {
-        return this.getWalkTargetValue(new BlockPos(this), levelAccessor) >= 0.0f;
+        return this.getWalkTargetValue(this.blockPosition(), levelAccessor) >= 0.0f;
     }
 
     public boolean isPathFinding() {
@@ -43,7 +43,7 @@ extends Mob {
         super.tickLeash();
         Entity entity = this.getLeashHolder();
         if (entity != null && entity.level == this.level) {
-            this.restrictTo(new BlockPos(entity), 5);
+            this.restrictTo(entity.blockPosition(), 5);
             float f = this.distanceTo(entity);
             if (this instanceof TamableAnimal && ((TamableAnimal)this).isInSittingPose()) {
                 if (f > 10.0f) {

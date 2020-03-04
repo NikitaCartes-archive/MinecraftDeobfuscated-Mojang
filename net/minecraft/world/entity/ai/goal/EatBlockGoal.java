@@ -33,7 +33,7 @@ extends Goal {
         if (this.mob.getRandom().nextInt(this.mob.isBaby() ? 50 : 1000) != 0) {
             return false;
         }
-        BlockPos blockPos = new BlockPos(this.mob);
+        BlockPos blockPos = this.mob.blockPosition();
         if (IS_TALL_GRASS.test(this.level.getBlockState(blockPos))) {
             return true;
         }
@@ -67,7 +67,7 @@ extends Goal {
         if (this.eatAnimationTick != 4) {
             return;
         }
-        BlockPos blockPos = new BlockPos(this.mob);
+        BlockPos blockPos = this.mob.blockPosition();
         if (IS_TALL_GRASS.test(this.level.getBlockState(blockPos))) {
             if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
                 this.level.destroyBlock(blockPos, false);

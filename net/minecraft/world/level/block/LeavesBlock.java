@@ -67,13 +67,11 @@ extends Block {
 
     private static BlockState updateDistance(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
         int i = 7;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (Direction direction : Direction.values()) {
-                pooledMutableBlockPos.set(blockPos).move(direction);
-                i = Math.min(i, LeavesBlock.getDistanceAt(levelAccessor.getBlockState(pooledMutableBlockPos)) + 1);
-                if (i != 1) continue;
-                break;
-            }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (Direction direction : Direction.values()) {
+            mutableBlockPos.setWithOffset(blockPos, direction);
+            i = Math.min(i, LeavesBlock.getDistanceAt(levelAccessor.getBlockState(mutableBlockPos)) + 1);
+            if (i == 1) break;
         }
         return (BlockState)blockState.setValue(DISTANCE, i);
     }

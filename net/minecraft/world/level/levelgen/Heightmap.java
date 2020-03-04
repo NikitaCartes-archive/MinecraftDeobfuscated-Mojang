@@ -36,25 +36,24 @@ public class Heightmap {
         ObjectArrayList objectList = new ObjectArrayList(i);
         Iterator objectListIterator = objectList.iterator();
         int j = chunkAccess.getHighestSectionPosition() + 16;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int k = 0; k < 16; ++k) {
-                block10: for (int l = 0; l < 16; ++l) {
-                    for (Types types : set) {
-                        objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int k = 0; k < 16; ++k) {
+            block1: for (int l = 0; l < 16; ++l) {
+                for (Types types : set) {
+                    objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
+                }
+                for (int m = j - 1; m >= 0; --m) {
+                    mutableBlockPos.set(k, m, l);
+                    BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
+                    if (blockState.getBlock() == Blocks.AIR) continue;
+                    while (objectListIterator.hasNext()) {
+                        Heightmap heightmap = (Heightmap)objectListIterator.next();
+                        if (!heightmap.isOpaque.test(blockState)) continue;
+                        heightmap.setHeight(k, l, m + 1);
+                        objectListIterator.remove();
                     }
-                    for (int m = j - 1; m >= 0; --m) {
-                        pooledMutableBlockPos.set(k, m, l);
-                        BlockState blockState = chunkAccess.getBlockState(pooledMutableBlockPos);
-                        if (blockState.getBlock() == Blocks.AIR) continue;
-                        while (objectListIterator.hasNext()) {
-                            Heightmap heightmap = (Heightmap)objectListIterator.next();
-                            if (!heightmap.isOpaque.test(blockState)) continue;
-                            heightmap.setHeight(k, l, m + 1);
-                            objectListIterator.remove();
-                        }
-                        if (objectList.isEmpty()) continue block10;
-                        objectListIterator.back(i);
-                    }
+                    if (objectList.isEmpty()) continue block1;
+                    objectListIterator.back(i);
                 }
             }
         }

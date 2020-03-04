@@ -28,6 +28,18 @@ implements Position {
         return new Vec3(d, e, f);
     }
 
+    public static Vec3 atCenterOf(Vec3i vec3i) {
+        return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY() + 0.5, (double)vec3i.getZ() + 0.5);
+    }
+
+    public static Vec3 atLowerCornerOf(Vec3i vec3i) {
+        return new Vec3(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+    }
+
+    public static Vec3 atBottomCenterOf(Vec3i vec3i) {
+        return new Vec3((double)vec3i.getX() + 0.5, vec3i.getY(), (double)vec3i.getZ() + 0.5);
+    }
+
     public Vec3(double d, double e, double f) {
         this.x = d;
         this.y = e;
@@ -36,10 +48,6 @@ implements Position {
 
     public Vec3(Vector3f vector3f) {
         this(vector3f.x(), vector3f.y(), vector3f.z());
-    }
-
-    public Vec3(Vec3i vec3i) {
-        this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
     }
 
     public Vec3 vectorTo(Vec3 vec3) {

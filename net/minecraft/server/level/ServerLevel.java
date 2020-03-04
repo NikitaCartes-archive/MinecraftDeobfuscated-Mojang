@@ -422,9 +422,9 @@ extends Level {
     protected BlockPos findLightingTargetAround(BlockPos blockPos) {
         BlockPos blockPos2 = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos);
         AABB aABB = new AABB(blockPos2, new BlockPos(blockPos2.getX(), this.getMaxBuildHeight(), blockPos2.getZ())).inflate(3.0);
-        List<LivingEntity> list = this.getEntitiesOfClass(LivingEntity.class, aABB, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.getCommandSenderBlockPosition()));
+        List<LivingEntity> list = this.getEntitiesOfClass(LivingEntity.class, aABB, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition()));
         if (!list.isEmpty()) {
-            return list.get(this.random.nextInt(list.size())).getCommandSenderBlockPosition();
+            return list.get(this.random.nextInt(list.size())).blockPosition();
         }
         if (blockPos2.getY() == -1) {
             blockPos2 = blockPos2.above(2);
@@ -1000,7 +1000,7 @@ extends Level {
         if (serverPlayer.getLevel() != this) {
             return false;
         }
-        BlockPos blockPos = serverPlayer.getCommandSenderBlockPosition();
+        BlockPos blockPos = serverPlayer.blockPosition();
         if (blockPos.closerThan(new Vec3(d, e, f), bl ? 512.0 : 32.0)) {
             serverPlayer.connection.send(packet);
             return true;

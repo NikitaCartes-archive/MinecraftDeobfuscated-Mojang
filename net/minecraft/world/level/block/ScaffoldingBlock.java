@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Iterator;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -136,7 +137,9 @@ implements SimpleWaterloggedBlock {
     }
 
     public static int getDistance(BlockGetter blockGetter, BlockPos blockPos) {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(Direction.DOWN);
+        Direction direction;
+        BlockState blockState2;
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
         BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
         int i = 7;
         if (blockState.getBlock() == Blocks.SCAFFOLDING) {
@@ -144,10 +147,8 @@ implements SimpleWaterloggedBlock {
         } else if (blockState.isFaceSturdy(blockGetter, mutableBlockPos, Direction.UP)) {
             return 0;
         }
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos.set(blockPos).move(direction));
-            if (blockState2.getBlock() != Blocks.SCAFFOLDING || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1) continue;
-            break;
+        Iterator<Direction> iterator = Direction.Plane.HORIZONTAL.iterator();
+        while (iterator.hasNext() && ((blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction = iterator.next()))).getBlock() != Blocks.SCAFFOLDING || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1)) {
         }
         return i;
     }

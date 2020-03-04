@@ -196,7 +196,7 @@ MenuProvider {
             string = player.getName().getString();
             component = player.getDisplayName();
         }
-        Vec3 vec3 = new Vec3((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5);
+        Vec3 vec3 = Vec3.atCenterOf(this.worldPosition);
         return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), player);
     }
 

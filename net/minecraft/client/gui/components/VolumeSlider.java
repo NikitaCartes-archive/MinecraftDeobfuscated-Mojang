@@ -6,17 +6,17 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.AbstractOptionSliderButton;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.sounds.SoundSource;
 
 @Environment(value=EnvType.CLIENT)
 public class VolumeSlider
-extends AbstractSliderButton {
+extends AbstractOptionSliderButton {
     private final SoundSource source;
 
     public VolumeSlider(Minecraft minecraft, int i, int j, SoundSource soundSource, int k) {
-        super(minecraft.options, i, j, k, 20, minecraft.options.getSoundSourceVolume(soundSource));
+        super(minecraft.options, i, j, k, 20, (double)minecraft.options.getSoundSourceVolume(soundSource));
         this.source = soundSource;
         this.updateMessage();
     }

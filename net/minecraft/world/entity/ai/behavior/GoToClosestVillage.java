@@ -29,13 +29,13 @@ extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-        return !serverLevel.isVillage(new BlockPos(villager));
+        return !serverLevel.isVillage(villager.blockPosition());
     }
 
     @Override
     protected void start(ServerLevel serverLevel, Villager villager, long l) {
         PoiManager poiManager = serverLevel.getPoiManager();
-        int i = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(villager)));
+        int i = poiManager.sectionsToVillage(SectionPos.of(villager.blockPosition()));
         Vec3 vec3 = null;
         for (int j = 0; j < 5; ++j) {
             Vec3 vec32 = RandomPos.getLandPos(villager, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));

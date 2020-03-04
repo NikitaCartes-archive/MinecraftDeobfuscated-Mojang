@@ -192,7 +192,7 @@ implements Enemy {
         super.tick();
         BlockPos blockPos = this.entityData.get(DATA_ATTACH_POS_ID).orElse(null);
         if (blockPos == null && !this.level.isClientSide) {
-            blockPos = new BlockPos(this);
+            blockPos = this.blockPosition();
             this.entityData.set(DATA_ATTACH_POS_ID, Optional.of(blockPos));
         }
         if (this.isPassenger()) {
@@ -306,7 +306,7 @@ implements Enemy {
         if (this.isNoAi() || !this.isAlive()) {
             return true;
         }
-        BlockPos blockPos = new BlockPos(this);
+        BlockPos blockPos = this.blockPosition();
         for (int i = 0; i < 5; ++i) {
             Direction direction;
             BlockPos blockPos2 = blockPos.offset(8 - this.random.nextInt(17), 8 - this.random.nextInt(17), 8 - this.random.nextInt(17));

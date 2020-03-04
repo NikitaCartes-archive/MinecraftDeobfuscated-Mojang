@@ -21,7 +21,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.PACIFIED, true, l, this.pacifyDuration);
+        livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.PACIFIED, true, this.pacifyDuration);
         livingEntity.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
     }
 }

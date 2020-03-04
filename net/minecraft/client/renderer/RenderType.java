@@ -67,6 +67,11 @@ extends RenderStateShard {
         return TRANSLUCENT_NO_CRUMBLING;
     }
 
+    public static RenderType armorCutoutNoCull(ResourceLocation resourceLocation) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
+        return RenderType.create("armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+    }
+
     public static RenderType entitySolid(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
         return RenderType.create("entity_solid", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);

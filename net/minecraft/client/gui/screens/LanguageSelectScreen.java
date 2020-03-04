@@ -9,7 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.OptionButton;
@@ -110,11 +109,6 @@ extends OptionsSubScreen {
         @Override
         protected boolean isFocused() {
             return LanguageSelectScreen.this.getFocused() == this;
-        }
-
-        @Override
-        public /* synthetic */ void setSelected(@Nullable AbstractSelectionList.Entry entry) {
-            this.setSelected((Entry)entry);
         }
 
         @Environment(value=EnvType.CLIENT)

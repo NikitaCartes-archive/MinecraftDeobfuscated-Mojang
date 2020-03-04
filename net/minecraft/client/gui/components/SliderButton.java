@@ -7,15 +7,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.ProgressOption;
-import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.AbstractOptionSliderButton;
 
 @Environment(value=EnvType.CLIENT)
 public class SliderButton
-extends AbstractSliderButton {
+extends AbstractOptionSliderButton {
     private final ProgressOption option;
 
     public SliderButton(Options options, int i, int j, int k, int l, ProgressOption progressOption) {
-        super(options, i, j, k, l, (float)progressOption.toPct(progressOption.get(options)));
+        super(options, i, j, k, l, (double)((float)progressOption.toPct(progressOption.get(options))));
         this.option = progressOption;
         this.updateMessage();
     }

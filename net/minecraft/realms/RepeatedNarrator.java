@@ -14,34 +14,29 @@ import net.minecraft.network.chat.TextComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class RepeatedNarrator {
-    final Duration repeatDelay;
     private final float permitsPerSecond;
-    final AtomicReference<Params> params;
+    private final AtomicReference<Params> params = new AtomicReference();
 
     public RepeatedNarrator(Duration duration) {
-        this.repeatDelay = duration;
-        this.params = new AtomicReference();
-        float f = (float)duration.toMillis() / 1000.0f;
-        this.permitsPerSecond = 1.0f / f;
+        this.permitsPerSecond = 1000.0f / (float)duration.toMillis();
     }
 
     public void narrate(String string) {
         Params params2 = this.params.updateAndGet(params -> {
-            if (params == null || !string.equals(params.narration)) {
+            if (params == null || !string.equals(((Params)params).narration)) {
                 return new Params(string, RateLimiter.create(this.permitsPerSecond));
             }
             return params;
         });
         if (params2.rateLimiter.tryAcquire(1)) {
-            NarratorChatListener narratorChatListener = NarratorChatListener.INSTANCE;
-            narratorChatListener.handle(ChatType.SYSTEM, new TextComponent(string));
+            NarratorChatListener.INSTANCE.handle(ChatType.SYSTEM, new TextComponent(string));
         }
     }
 
     @Environment(value=EnvType.CLIENT)
     static class Params {
-        String narration;
-        RateLimiter rateLimiter;
+        private final String narration;
+        private final RateLimiter rateLimiter;
 
         Params(String string, RateLimiter rateLimiter) {
             this.narration = string;

@@ -24,7 +24,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
@@ -129,11 +128,6 @@ extends ObjectSelectionList<WorldListEntry> {
 
     public SelectWorldScreen getScreen() {
         return this.screen;
-    }
-
-    @Override
-    public /* synthetic */ void setSelected(@Nullable AbstractSelectionList.Entry entry) {
-        this.setSelected((WorldListEntry)entry);
     }
 
     @Environment(value=EnvType.CLIENT)

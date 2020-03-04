@@ -97,13 +97,13 @@ public class ExecuteCommand {
         })))).then(Commands.literal("at").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
             ArrayList<CommandSourceStack> list = Lists.newArrayList();
             for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-                list.add(((CommandSourceStack)commandContext.getSource()).withLevel((ServerLevel)entity.level).withPosition(entity.getCommandSenderWorldPosition()).withRotation(entity.getRotationVector()));
+                list.add(((CommandSourceStack)commandContext.getSource()).withLevel((ServerLevel)entity.level).withPosition(entity.position()).withRotation(entity.getRotationVector()));
             }
             return list;
         })))).then(((LiteralArgumentBuilder)Commands.literal("store").then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("result"), true))).then(ExecuteCommand.wrapStores(literalCommandNode, Commands.literal("success"), false)))).then(((LiteralArgumentBuilder)Commands.literal("positioned").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("pos", Vec3Argument.vec3()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withPosition(Vec3Argument.getVec3(commandContext, "pos")).withAnchor(EntityAnchorArgument.Anchor.FEET)))).then(Commands.literal("as").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
             ArrayList<CommandSourceStack> list = Lists.newArrayList();
             for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-                list.add(((CommandSourceStack)commandContext.getSource()).withPosition(entity.getCommandSenderWorldPosition()));
+                list.add(((CommandSourceStack)commandContext.getSource()).withPosition(entity.position()));
             }
             return list;
         }))))).then(((LiteralArgumentBuilder)Commands.literal("rotated").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("rot", RotationArgument.rotation()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withRotation(RotationArgument.getRotation(commandContext, "rot").getRotation((CommandSourceStack)commandContext.getSource()))))).then(Commands.literal("as").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {

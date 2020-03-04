@@ -5,6 +5,7 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
@@ -35,7 +36,6 @@ extends HumanoidModel<T> {
         this.head.addChild(this.earLeft);
         this.earLeft.texOffs(57, 22).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
         this.hat = new ModelPart(this);
-        this.hat.setPos(0.0f, 0.0f, 0.0f);
         this.rightArm = new ModelPart(this);
         this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
         this.rightArm.texOffs(40, 16).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
@@ -62,18 +62,9 @@ extends HumanoidModel<T> {
             Piglin piglin = (Piglin)mob;
             Piglin.PiglinArmPose piglinArmPose = piglin.getArmPose();
             if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
-                this.rightArm.yRot = -0.3f + this.head.yRot;
-                this.leftArm.yRot = 0.6f + this.head.yRot;
-                this.rightArm.xRot = -1.5707964f + this.head.xRot + 0.1f;
-                this.leftArm.xRot = -1.5f + this.head.xRot;
+                AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
             } else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_CHARGE) {
-                this.rightArm.yRot = -0.8f;
-                this.rightArm.xRot = -0.97079635f;
-                this.leftArm.xRot = -0.97079635f;
-                float n = Mth.clamp(piglin.getTicksUsingItem(), 0, 25);
-                float o = n / 25.0f;
-                this.leftArm.yRot = Mth.lerp(o, 0.4f, 0.85f);
-                this.leftArm.xRot = Mth.lerp(o, this.leftArm.xRot, -1.5707964f);
+                AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, mob, true);
             } else if (piglinArmPose == Piglin.PiglinArmPose.ADMIRING_ITEM) {
                 this.leftArm.yRot = 0.5f;
                 this.leftArm.xRot = -0.9f;

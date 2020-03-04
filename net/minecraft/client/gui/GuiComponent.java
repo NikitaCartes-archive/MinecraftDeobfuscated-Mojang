@@ -108,10 +108,6 @@ public abstract class GuiComponent {
         font.drawShadow(string, i - font.width(string) / 2, j, k);
     }
 
-    public void drawRightAlignedString(Font font, String string, int i, int j, int k) {
-        font.drawShadow(string, i - font.width(string), j, k);
-    }
-
     public void drawString(Font font, String string, int i, int j, int k) {
         font.drawShadow(string, i, j, k);
     }

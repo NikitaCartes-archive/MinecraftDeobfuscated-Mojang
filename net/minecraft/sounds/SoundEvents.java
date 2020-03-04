@@ -9,6 +9,18 @@ import net.minecraft.sounds.SoundEvent;
 
 public class SoundEvents {
     public static final SoundEvent AMBIENT_CAVE = SoundEvents.register("ambient.cave");
+    public static final SoundEvent AMBIENT_CRIMSON_FOREST_ADDITIONS = SoundEvents.register("ambient.crimson_forest.additions");
+    public static final SoundEvent AMBIENT_CRIMSON_FOREST_LOOP = SoundEvents.register("ambient.crimson_forest.loop");
+    public static final SoundEvent AMBIENT_CRIMSON_FOREST_MOOD = SoundEvents.register("ambient.crimson_forest.mood");
+    public static final SoundEvent AMBIENT_NETHER_WASTES_ADDITIONS = SoundEvents.register("ambient.nether_wastes.additions");
+    public static final SoundEvent AMBIENT_NETHER_WASTES_LOOP = SoundEvents.register("ambient.nether_wastes.loop");
+    public static final SoundEvent AMBIENT_NETHER_WASTES_MOOD = SoundEvents.register("ambient.nether_wastes.mood");
+    public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_ADDITIONS = SoundEvents.register("ambient.soul_sand_valley.additions");
+    public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_LOOP = SoundEvents.register("ambient.soul_sand_valley.loop");
+    public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_MOOD = SoundEvents.register("ambient.soul_sand_valley.mood");
+    public static final SoundEvent AMBIENT_WARPED_FOREST_ADDITIONS = SoundEvents.register("ambient.warped_forest.additions");
+    public static final SoundEvent AMBIENT_WARPED_FOREST_LOOP = SoundEvents.register("ambient.warped_forest.loop");
+    public static final SoundEvent AMBIENT_WARPED_FOREST_MOOD = SoundEvents.register("ambient.warped_forest.mood");
     public static final SoundEvent AMBIENT_UNDERWATER_ENTER = SoundEvents.register("ambient.underwater.enter");
     public static final SoundEvent AMBIENT_UNDERWATER_EXIT = SoundEvents.register("ambient.underwater.exit");
     public static final SoundEvent AMBIENT_UNDERWATER_LOOP = SoundEvents.register("ambient.underwater.loop");
@@ -731,6 +743,7 @@ public class SoundEvents {
     public static final SoundEvent SLIME_HURT_SMALL = SoundEvents.register("entity.slime.hurt_small");
     public static final SoundEvent SLIME_JUMP_SMALL = SoundEvents.register("entity.slime.jump_small");
     public static final SoundEvent SLIME_SQUISH_SMALL = SoundEvents.register("entity.slime.squish_small");
+    public static final SoundEvent SMITHING_TABLE_USE = SoundEvents.register("block.smithing_table.use");
     public static final SoundEvent SMOKER_SMOKE = SoundEvents.register("block.smoker.smoke");
     public static final SoundEvent SNOWBALL_THROW = SoundEvents.register("entity.snowball.throw");
     public static final SoundEvent SNOW_BREAK = SoundEvents.register("block.snow.break");

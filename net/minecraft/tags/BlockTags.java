@@ -78,6 +78,8 @@ public class BlockTags {
     public static final Tag<Block> BEACON_BASE_BLOCKS;
     public static final Tag<Block> WALL_POST_OVERRIDE;
     public static final Tag<Block> CLIMBABLE;
+    public static final Tag<Block> PIGLIN_REPELLENTS;
+    public static final Tag<Block> HOGLIN_REPELLENTS;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -158,6 +160,8 @@ public class BlockTags {
         BEACON_BASE_BLOCKS = BlockTags.bind("beacon_base_blocks");
         WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
         CLIMBABLE = BlockTags.bind("climbable");
+        PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
+        HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
     }
 
     static class Wrapper

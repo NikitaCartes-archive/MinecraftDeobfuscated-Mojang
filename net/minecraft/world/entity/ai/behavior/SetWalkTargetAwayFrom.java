@@ -34,7 +34,7 @@ extends Behavior<PathfinderMob> {
     }
 
     public static SetWalkTargetAwayFrom<BlockPos> pos(MemoryModuleType<BlockPos> memoryModuleType, float f, int i, boolean bl) {
-        return new SetWalkTargetAwayFrom<BlockPos>(memoryModuleType, f, i, bl, Vec3::new);
+        return new SetWalkTargetAwayFrom<BlockPos>(memoryModuleType, f, i, bl, Vec3::atBottomCenterOf);
     }
 
     public static SetWalkTargetAwayFrom<? extends Entity> entity(MemoryModuleType<? extends Entity> memoryModuleType, float f, int i, boolean bl) {

@@ -5,6 +5,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public class CrimsonForestBiome
 extends Biome {
     protected CrimsonForestBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.NETHER_FOREST, SurfaceBuilder.CONFIG_CRIMSON_FOREST).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.NETHER).depth(0.1f).scale(0.2f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0x330303).ambientParticle(new AmbientParticleSettings(ParticleTypes.CRIMSON_SPORE, 0.025f, random -> random.nextGaussian() * (double)1.0E-6f, random -> random.nextGaussian() * (double)1.0E-4f, random -> random.nextGaussian() * (double)1.0E-6f)).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0f, -0.5f, 0.0f, 0.0f, 1.0f))));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.NETHER_FOREST, SurfaceBuilder.CONFIG_CRIMSON_FOREST).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.NETHER).depth(0.1f).scale(0.2f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0x330303).ambientParticle(new AmbientParticleSettings(ParticleTypes.CRIMSON_SPORE, 0.025f, random -> random.nextGaussian() * (double)1.0E-6f, random -> random.nextGaussian() * (double)1.0E-4f, random -> random.nextGaussian() * (double)1.0E-6f)).ambientLoopSound(SoundEvents.AMBIENT_CRIMSON_FOREST_LOOP).ambientMoodSound(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD).ambientAdditionsSound(SoundEvents.AMBIENT_CRIMSON_FOREST_ADDITIONS).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0f, -0.5f, 0.0f, 0.0f, 1.0f))));
         this.addCarver(GenerationStep.Carving.AIR, CrimsonForestBiome.makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2f)));
         this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.LAVA_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256))));
         BiomeDefaultFeatures.addDefaultMushrooms(this);

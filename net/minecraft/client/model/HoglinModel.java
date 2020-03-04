@@ -87,17 +87,9 @@ extends AgeableListModel<Hoglin> {
         this.rightEar.zRot = -0.6981317f - g * Mth.sin(f);
         this.leftEar.zRot = 0.6981317f + g * Mth.sin(f);
         this.head.yRot = i * ((float)Math.PI / 180);
-        int k = hoglin.getAttackAnimationRemainingTicks();
-        if (k > 0) {
-            int l = 10 - k;
-            float m = Mth.triangleWave(l, 10.0f);
-            float n = (-m + 1.0f) / 2.0f;
-            float o = -1.2217305f * n;
-            this.head.xRot = 0.87266463f + o;
-        } else {
-            this.head.xRot = 0.87266463f;
-        }
-        float p = 1.2f;
+        float k = 1.0f - (float)Mth.abs(10 - 2 * hoglin.getAttackAnimationRemainingTicks()) / 10.0f;
+        this.head.xRot = Mth.lerp(k, 0.87266463f, -0.34906584f);
+        float l = 1.2f;
         this.frontRightLeg.xRot = Mth.cos(f) * 1.2f * g;
         this.backRightLeg.xRot = this.frontLeftLeg.xRot = Mth.cos(f + (float)Math.PI) * 1.2f * g;
         this.backLeftLeg.xRot = this.frontRightLeg.xRot;

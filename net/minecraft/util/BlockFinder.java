@@ -13,7 +13,7 @@ public class BlockFinder {
             return Optional.of(blockPos);
         }
         int k = Math.max(i, j);
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (int l = 1; l <= k; ++l) {
             for (int m = -l; m <= l; ++m) {
                 if (m > i || m < -i) continue;
@@ -25,7 +25,7 @@ public class BlockFinder {
                         boolean bl3;
                         if (o > i || o < -i) continue;
                         boolean bl4 = bl3 = o == -l || o == l;
-                        if (!bl && !bl2 && !bl3 || !predicate.test(mutableBlockPos.set(blockPos).move(m, n, o))) continue;
+                        if (!bl && !bl2 && !bl3 || !predicate.test(mutableBlockPos.setWithOffset(blockPos, m, n, o))) continue;
                         return Optional.of(blockPos.offset(m, n, o));
                     }
                 }

@@ -1405,7 +1405,7 @@ Runnable {
     }
 
     public CommandSourceStack createCommandSourceStack() {
-        return new CommandSourceStack(this, this.getLevel(DimensionType.OVERWORLD) == null ? Vec3.ZERO : new Vec3(this.getLevel(DimensionType.OVERWORLD).getSharedSpawnPos()), Vec2.ZERO, this.getLevel(DimensionType.OVERWORLD), 4, "Server", new TextComponent("Server"), this, null);
+        return new CommandSourceStack(this, this.getLevel(DimensionType.OVERWORLD) == null ? Vec3.ZERO : Vec3.atLowerCornerOf(this.getLevel(DimensionType.OVERWORLD).getSharedSpawnPos()), Vec2.ZERO, this.getLevel(DimensionType.OVERWORLD), 4, "Server", new TextComponent("Server"), this, null);
     }
 
     @Override

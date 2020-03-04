@@ -49,7 +49,7 @@ extends WalkNodeEvaluator {
         } else {
             i = Mth.floor(this.mob.getY() + 0.5);
         }
-        if (this.mob.getPathfindingMalus(blockPathTypes = this.getBlockPathType(this.mob, (blockPos = new BlockPos(this.mob)).getX(), i, blockPos.getZ())) < 0.0f) {
+        if (this.mob.getPathfindingMalus(blockPathTypes = this.getBlockPathType(this.mob, (blockPos = this.mob.blockPosition()).getX(), i, blockPos.getZ())) < 0.0f) {
             HashSet<BlockPos> set = Sets.newHashSet();
             set.add(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().minZ));
             set.add(new BlockPos(this.mob.getBoundingBox().minX, (double)i, this.mob.getBoundingBox().maxZ));
@@ -211,7 +211,7 @@ extends WalkNodeEvaluator {
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob, int l, int m, int n, boolean bl, boolean bl2) {
         EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
         BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
-        BlockPos blockPos = new BlockPos(mob);
+        BlockPos blockPos = mob.blockPosition();
         blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
         if (enumSet.contains((Object)BlockPathTypes.FENCE)) {
             return BlockPathTypes.FENCE;

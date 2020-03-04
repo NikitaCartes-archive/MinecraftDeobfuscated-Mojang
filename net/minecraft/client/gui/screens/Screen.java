@@ -113,8 +113,12 @@ implements Widget {
 
     protected <T extends AbstractWidget> T addButton(T abstractWidget) {
         this.buttons.add(abstractWidget);
-        this.children.add(abstractWidget);
-        return abstractWidget;
+        return this.addWidget(abstractWidget);
+    }
+
+    protected <T extends GuiEventListener> T addWidget(T guiEventListener) {
+        this.children.add(guiEventListener);
+        return guiEventListener;
     }
 
     protected void renderTooltip(ItemStack itemStack, int i, int j) {
@@ -314,11 +318,6 @@ implements Widget {
         this.children.clear();
         this.setFocused(null);
         this.init();
-    }
-
-    public void setSize(int i, int j) {
-        this.width = i;
-        this.height = j;
     }
 
     @Override

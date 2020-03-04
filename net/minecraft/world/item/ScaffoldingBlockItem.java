@@ -36,7 +36,7 @@ extends BlockItem {
         if (blockState.getBlock() == block) {
             Direction direction = blockPlaceContext.isSecondaryUseActive() ? (blockPlaceContext.isInside() ? blockPlaceContext.getClickedFace().getOpposite() : blockPlaceContext.getClickedFace()) : (blockPlaceContext.getClickedFace() == Direction.UP ? blockPlaceContext.getHorizontalDirection() : Direction.UP);
             int i = 0;
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(direction);
+            BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(direction);
             while (i < 7) {
                 if (!level.isClientSide && !Level.isInWorldBounds(mutableBlockPos)) {
                     Player player = blockPlaceContext.getPlayer();

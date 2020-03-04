@@ -65,7 +65,7 @@ extends Item {
         BlockState blockState2 = BaseFireBlock.getState(levelAccessor, blockPos);
         boolean bl = false;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            if (levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() != Blocks.OBSIDIAN || ((NetherPortalBlock)Blocks.NETHER_PORTAL).isPortal(levelAccessor, blockPos) == null) continue;
+            if (levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() != Blocks.OBSIDIAN || NetherPortalBlock.isPortal(levelAccessor, blockPos) == null) continue;
             bl = true;
         }
         return blockState.isAir() && (blockState2.canSurvive(levelAccessor, blockPos) || bl);

@@ -69,7 +69,7 @@ extends Entity {
     public ShulkerBullet(Level level, LivingEntity livingEntity, Entity entity, Direction.Axis axis) {
         this((EntityType<? extends ShulkerBullet>)EntityType.SHULKER_BULLET, level);
         this.owner = livingEntity;
-        BlockPos blockPos = new BlockPos(livingEntity);
+        BlockPos blockPos = livingEntity.blockPosition();
         double d = (double)blockPos.getX() + 0.5;
         double e = (double)blockPos.getY() + 0.5;
         double f = (double)blockPos.getZ() + 0.5;
@@ -89,7 +89,7 @@ extends Entity {
         CompoundTag compoundTag2;
         BlockPos blockPos;
         if (this.owner != null) {
-            blockPos = new BlockPos(this.owner);
+            blockPos = this.owner.blockPosition();
             compoundTag2 = NbtUtils.createUUIDTag(this.owner.getUUID());
             compoundTag2.putInt("X", blockPos.getX());
             compoundTag2.putInt("Y", blockPos.getY());
@@ -97,7 +97,7 @@ extends Entity {
             compoundTag.put("Owner", compoundTag2);
         }
         if (this.finalTarget != null) {
-            blockPos = new BlockPos(this.finalTarget);
+            blockPos = this.finalTarget.blockPosition();
             compoundTag2 = NbtUtils.createUUIDTag(this.finalTarget.getUUID());
             compoundTag2.putInt("X", blockPos.getX());
             compoundTag2.putInt("Y", blockPos.getY());
@@ -147,7 +147,7 @@ extends Entity {
         BlockPos blockPos;
         double d = 0.5;
         if (this.finalTarget == null) {
-            blockPos = new BlockPos(this).below();
+            blockPos = this.blockPosition().below();
         } else {
             d = (double)this.finalTarget.getBbHeight() * 0.5;
             blockPos = new BlockPos(this.finalTarget.getX(), this.finalTarget.getY() + d, this.finalTarget.getZ());
@@ -157,7 +157,7 @@ extends Entity {
         double g = (double)blockPos.getZ() + 0.5;
         Direction direction = null;
         if (!blockPos.closerThan(this.position(), 2.0)) {
-            BlockPos blockPos2 = new BlockPos(this);
+            BlockPos blockPos2 = this.blockPosition();
             ArrayList<Direction> list = Lists.newArrayList();
             if (axis != Direction.Axis.X) {
                 if (blockPos2.getX() < blockPos.getX() && this.level.isEmptyBlock(blockPos2.east())) {
@@ -268,12 +268,12 @@ extends Entity {
                 }
             }
             if (this.currentMoveDirection != null) {
-                BlockPos blockPos = new BlockPos(this);
+                BlockPos blockPos = this.blockPosition();
                 Direction.Axis axis = this.currentMoveDirection.getAxis();
                 if (this.level.loadedAndEntityCanStandOn(blockPos.relative(this.currentMoveDirection), this)) {
                     this.selectNextMoveDirection(axis);
                 } else {
-                    BlockPos blockPos2 = new BlockPos(this.finalTarget);
+                    BlockPos blockPos2 = this.finalTarget.blockPosition();
                     if (axis == Direction.Axis.X && blockPos.getX() == blockPos2.getX() || axis == Direction.Axis.Z && blockPos.getZ() == blockPos2.getZ() || axis == Direction.Axis.Y && blockPos.getY() == blockPos2.getY()) {
                         this.selectNextMoveDirection(axis);
                     }

@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
@@ -33,7 +32,7 @@ extends Goal {
 
     @Override
     public void tick() {
-        DifficultyInstance difficultyInstance = this.horse.level.getCurrentDifficultyAt(new BlockPos(this.horse));
+        DifficultyInstance difficultyInstance = this.horse.level.getCurrentDifficultyAt(this.horse.blockPosition());
         this.horse.setTrap(false);
         this.horse.setTamed(true);
         this.horse.setAge(0);

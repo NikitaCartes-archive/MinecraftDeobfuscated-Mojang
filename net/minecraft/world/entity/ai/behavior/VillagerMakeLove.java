@@ -97,7 +97,7 @@ extends Behavior<Villager> {
     }
 
     private Optional<BlockPos> takeVacantBed(ServerLevel serverLevel, Villager villager) {
-        return serverLevel.getPoiManager().take(PoiType.HOME.getPredicate(), blockPos -> this.canReach(villager, (BlockPos)blockPos), new BlockPos(villager), 48);
+        return serverLevel.getPoiManager().take(PoiType.HOME.getPredicate(), blockPos -> this.canReach(villager, (BlockPos)blockPos), villager.blockPosition(), 48);
     }
 
     private boolean canReach(Villager villager, BlockPos blockPos) {

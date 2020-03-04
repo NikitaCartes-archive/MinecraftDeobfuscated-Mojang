@@ -28,7 +28,7 @@ implements DebugRenderer.SimpleDebugRenderer {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
         FluidState fluidState;
-        BlockPos blockPos = this.minecraft.player.getCommandSenderBlockPosition();
+        BlockPos blockPos = this.minecraft.player.blockPosition();
         Level levelReader = this.minecraft.player.level;
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();

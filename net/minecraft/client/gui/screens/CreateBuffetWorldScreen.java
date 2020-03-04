@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -143,11 +142,6 @@ extends Screen {
         protected void moveSelection(int i) {
             super.moveSelection(i);
             CreateBuffetWorldScreen.this.updateButtonValidity();
-        }
-
-        @Override
-        public /* synthetic */ void setSelected(@Nullable AbstractSelectionList.Entry entry) {
-            this.setSelected((Entry)entry);
         }
 
         @Environment(value=EnvType.CLIENT)

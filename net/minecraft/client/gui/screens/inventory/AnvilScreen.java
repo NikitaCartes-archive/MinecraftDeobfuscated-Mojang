@@ -8,33 +8,29 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
-import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(value=EnvType.CLIENT)
 public class AnvilScreen
-extends AbstractContainerScreen<AnvilMenu>
-implements ContainerListener {
+extends ItemCombinerScreen<AnvilMenu> {
     private static final ResourceLocation ANVIL_LOCATION = new ResourceLocation("textures/gui/container/anvil.png");
     private EditBox name;
 
     public AnvilScreen(AnvilMenu anvilMenu, Inventory inventory, Component component) {
-        super(anvilMenu, inventory, component);
+        super(anvilMenu, inventory, component, ANVIL_LOCATION);
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void subInit() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         int i = (this.width - this.imageWidth) / 2;
         int j = (this.height - this.imageHeight) / 2;
@@ -47,7 +43,6 @@ implements ContainerListener {
         this.name.setMaxLength(35);
         this.name.setResponder(this::onNameChanged);
         this.children.add(this.name);
-        ((AnvilMenu)this.menu).addSlotListener(this);
         this.setInitialFocus(this.name);
     }
 
@@ -62,7 +57,6 @@ implements ContainerListener {
     public void removed() {
         super.removed();
         this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
-        ((AnvilMenu)this.menu).removeSlotListener(this);
     }
 
     @Override
@@ -74,6 +68,19 @@ implements ContainerListener {
             return true;
         }
         return super.keyPressed(i, j, k);
+    }
+
+    private void onNameChanged(String string) {
+        if (string.isEmpty()) {
+            return;
+        }
+        String string2 = string;
+        Slot slot = ((AnvilMenu)this.menu).getSlot(0);
+        if (slot != null && slot.hasItem() && !slot.getItem().hasCustomHoverName() && string2.equals(slot.getItem().getHoverName().getString())) {
+            string2 = "";
+        }
+        ((AnvilMenu)this.menu).setItemName(string2);
+        this.minecraft.player.connection.send(new ServerboundRenameItemPacket(string2));
     }
 
     @Override
@@ -102,44 +109,9 @@ implements ContainerListener {
         }
     }
 
-    private void onNameChanged(String string) {
-        if (string.isEmpty()) {
-            return;
-        }
-        String string2 = string;
-        Slot slot = ((AnvilMenu)this.menu).getSlot(0);
-        if (slot != null && slot.hasItem() && !slot.getItem().hasCustomHoverName() && string2.equals(slot.getItem().getHoverName().getString())) {
-            string2 = "";
-        }
-        ((AnvilMenu)this.menu).setItemName(string2);
-        this.minecraft.player.connection.send(new ServerboundRenameItemPacket(string2));
-    }
-
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        super.render(i, j, f);
-        RenderSystem.disableBlend();
+    public void renderFg(int i, int j, float f) {
         this.name.render(i, j, f);
-        this.renderTooltip(i, j);
-    }
-
-    @Override
-    protected void renderBg(float f, int i, int j) {
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.minecraft.getTextureManager().bind(ANVIL_LOCATION);
-        int k = (this.width - this.imageWidth) / 2;
-        int l = (this.height - this.imageHeight) / 2;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-        this.blit(k + 59, l + 20, 0, this.imageHeight + (((AnvilMenu)this.menu).getSlot(0).hasItem() ? 0 : 16), 110, 16);
-        if ((((AnvilMenu)this.menu).getSlot(0).hasItem() || ((AnvilMenu)this.menu).getSlot(1).hasItem()) && !((AnvilMenu)this.menu).getSlot(2).hasItem()) {
-            this.blit(k + 99, l + 45, this.imageWidth, 0, 28, 21);
-        }
-    }
-
-    @Override
-    public void refreshContainer(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList) {
-        this.slotChanged(abstractContainerMenu, 0, abstractContainerMenu.getSlot(0).getItem());
     }
 
     @Override
@@ -148,10 +120,6 @@ implements ContainerListener {
             this.name.setValue(itemStack.isEmpty() ? "" : itemStack.getHoverName().getString());
             this.name.setEditable(!itemStack.isEmpty());
         }
-    }
-
-    @Override
-    public void setContainerData(AbstractContainerMenu abstractContainerMenu, int i, int j) {
     }
 }
 

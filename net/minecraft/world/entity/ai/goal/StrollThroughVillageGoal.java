@@ -41,7 +41,7 @@ extends Goal {
             return false;
         }
         ServerLevel serverLevel = (ServerLevel)this.mob.level;
-        BlockPos blockPos2 = new BlockPos(this.mob);
+        BlockPos blockPos2 = this.mob.blockPosition();
         if (!serverLevel.closeToVillage(blockPos2, 6)) {
             return false;
         }
@@ -62,7 +62,7 @@ extends Goal {
         }
         PathNavigation pathNavigation = this.mob.getNavigation();
         if (pathNavigation.isDone() && !this.wantedPos.closerThan(this.mob.position(), 10.0)) {
-            Vec3 vec3 = new Vec3(this.wantedPos);
+            Vec3 vec3 = Vec3.atBottomCenterOf(this.wantedPos);
             Vec3 vec32 = this.mob.position();
             Vec3 vec33 = vec32.subtract(vec3);
             vec3 = vec33.scale(0.4).add(vec3);
@@ -76,7 +76,7 @@ extends Goal {
 
     private void moveRandomly() {
         Random random = this.mob.getRandom();
-        BlockPos blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(this.mob).offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
+        BlockPos blockPos = this.mob.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
         this.mob.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0);
     }
 }

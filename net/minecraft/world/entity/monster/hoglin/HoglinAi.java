@@ -5,7 +5,6 @@ package net.minecraft.world.entity.monster.hoglin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
@@ -39,7 +38,6 @@ import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -63,18 +61,18 @@ public class HoglinAi {
     }
 
     private static void initIdleActivity(Hoglin hoglin, Brain<Hoglin> brain) {
-        float f = HoglinAi.getMovementSpeed(hoglin);
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_WARPED_FUNGUS, 200), new AnimalMakeLove(EntityType.HOGLIN), SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_WARPED_FUNGUS, f * 1.8f, 8, true), new StartAttacking<Hoglin>(HoglinAi::findNearestValidAttackTarget), new RunIf<PathfinderMob>(Hoglin::isAdult, SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, f, 8, false)), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), HoglinAi.createIdleMovementBehaviors(f)));
+        float f = hoglin.getMovementSpeed();
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200), new AnimalMakeLove(EntityType.HOGLIN), SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, f * 1.8f, 8, true), new StartAttacking<Hoglin>(HoglinAi::findNearestValidAttackTarget), new RunIf<PathfinderMob>(Hoglin::isAdult, SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, f, 8, false)), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), HoglinAi.createIdleMovementBehaviors(f)));
     }
 
     private static void initFightActivity(Hoglin hoglin, Brain<Hoglin> brain) {
-        float f = HoglinAi.getMovementSpeed(hoglin);
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_WARPED_FUNGUS, 200), new AnimalMakeLove(EntityType.HOGLIN), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.8f), new RunIf<Mob>(Hoglin::isAdult, new MeleeAttack(1.5, 40)), new RunIf<Mob>(AgableMob::isBaby, new MeleeAttack(1.5, 15)), new StopAttackingIfTargetInvalid()), MemoryModuleType.ATTACK_TARGET);
+        float f = hoglin.getMovementSpeed();
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200), new AnimalMakeLove(EntityType.HOGLIN), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.8f), new RunIf<Mob>(Hoglin::isAdult, new MeleeAttack(1.5, 40)), new RunIf<Mob>(AgableMob::isBaby, new MeleeAttack(1.5, 15)), new StopAttackingIfTargetInvalid()), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static void initRetreatActivity(Hoglin hoglin, Brain<Hoglin> brain) {
-        float f = HoglinAi.getMovementSpeed(hoglin) * 2.0f;
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, f, 15, false), HoglinAi.createIdleMovementBehaviors(HoglinAi.getMovementSpeed(hoglin)), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), new EraseMemoryIf<Hoglin>(HoglinAi::hoglinsOutnumberPiglins, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
+        float f = hoglin.getMovementSpeed() * 2.0f;
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, f, 15, false), HoglinAi.createIdleMovementBehaviors(hoglin.getMovementSpeed()), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), new EraseMemoryIf<Hoglin>(HoglinAi::hoglinsOutnumberPiglins, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
     }
 
     private static RunOne<Hoglin> createIdleMovementBehaviors(float f) {
@@ -118,7 +116,7 @@ public class HoglinAi {
 
     private static void setAvoidTarget(Hoglin hoglin, LivingEntity livingEntity) {
         hoglin.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-        hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, hoglin.level.getGameTime(), RETREAT_DURATION.randomValue(hoglin.level.random));
+        hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, RETREAT_DURATION.randomValue(hoglin.level.random));
     }
 
     private static Optional<? extends LivingEntity> findNearestValidAttackTarget(Hoglin hoglin) {
@@ -128,8 +126,8 @@ public class HoglinAi {
         return hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER);
     }
 
-    static boolean isPosNearNearestWarpedFungus(Hoglin hoglin, BlockPos blockPos) {
-        Optional<BlockPos> optional = hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_WARPED_FUNGUS);
+    static boolean isPosNearNearestRepellent(Hoglin hoglin, BlockPos blockPos) {
+        Optional<BlockPos> optional = hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_REPELLENT);
         return optional.isPresent() && optional.get().closerThan(blockPos, 8.0);
     }
 
@@ -172,7 +170,7 @@ public class HoglinAi {
 
     private static void setAttackTarget(Hoglin hoglin, LivingEntity livingEntity) {
         hoglin.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-        hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, livingEntity, hoglin.level.getGameTime(), 200L);
+        hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_TARGET, livingEntity, 200L);
     }
 
     private static void broadcastAttackTarget(Hoglin hoglin2, LivingEntity livingEntity) {
@@ -202,14 +200,7 @@ public class HoglinAi {
     }
 
     private static List<Hoglin> getVisibleAdultHoglins(Hoglin hoglin) {
-        if (hoglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS)) {
-            return hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS).get();
-        }
-        return Lists.newArrayList();
-    }
-
-    public static float getMovementSpeed(Hoglin hoglin) {
-        return (float)hoglin.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+        return hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS).orElse(ImmutableList.of());
     }
 
     private static boolean isBreeding(Hoglin hoglin) {

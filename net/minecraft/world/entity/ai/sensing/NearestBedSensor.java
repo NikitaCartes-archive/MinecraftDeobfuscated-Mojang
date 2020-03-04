@@ -53,7 +53,7 @@ extends Sensor<Mob> {
             this.batchCache.put(l, this.lastUpdate + 40L);
             return true;
         };
-        Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, new BlockPos(mob), 48, PoiManager.Occupancy.ANY);
+        Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, mob.blockPosition(), 48, PoiManager.Occupancy.ANY);
         Path path = mob.getNavigation().createPath(stream, PoiType.HOME.getValidRange());
         if (path != null && path.canReach()) {
             BlockPos blockPos2 = path.getTarget();

@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -168,13 +167,7 @@ Merchant {
         if (!merchantOffers.isEmpty()) {
             compoundTag.put("Offers", merchantOffers.createTag());
         }
-        ListTag listTag = new ListTag();
-        for (int i = 0; i < this.inventory.getContainerSize(); ++i) {
-            ItemStack itemStack = this.inventory.getItem(i);
-            if (itemStack.isEmpty()) continue;
-            listTag.add(itemStack.save(new CompoundTag()));
-        }
-        compoundTag.put("Inventory", listTag);
+        compoundTag.put("Inventory", this.inventory.createTag());
     }
 
     @Override
@@ -183,12 +176,7 @@ Merchant {
         if (compoundTag.contains("Offers", 10)) {
             this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
         }
-        ListTag listTag = compoundTag.getList("Inventory", 10);
-        for (int i = 0; i < listTag.size(); ++i) {
-            ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
-            if (itemStack.isEmpty()) continue;
-            this.inventory.addItem(itemStack);
-        }
+        this.inventory.fromTag(compoundTag.getList("Inventory", 10));
     }
 
     @Override

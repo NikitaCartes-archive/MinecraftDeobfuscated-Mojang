@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -84,7 +83,7 @@ extends AbstractIllager {
     protected void customServerAiStep() {
         PathNavigation pathNavigation;
         if (!this.isNoAi() && (pathNavigation = this.getNavigation()) instanceof GroundPathNavigation) {
-            boolean bl = ((ServerLevel)this.level).isRaided(new BlockPos(this));
+            boolean bl = ((ServerLevel)this.level).isRaided(this.blockPosition());
             ((GroundPathNavigation)pathNavigation).setCanOpenDoors(bl);
         }
         super.customServerAiStep();

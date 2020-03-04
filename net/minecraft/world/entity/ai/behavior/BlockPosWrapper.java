@@ -15,7 +15,7 @@ implements PositionWrapper {
 
     public BlockPosWrapper(BlockPos blockPos) {
         this.pos = blockPos;
-        this.lookAt = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
+        this.lookAt = Vec3.atCenterOf(blockPos);
     }
 
     @Override

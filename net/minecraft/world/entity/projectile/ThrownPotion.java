@@ -11,9 +11,6 @@ import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -25,7 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.projectile.ItemSupplier;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -40,49 +38,29 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 @EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public class ThrownPotion
-extends ThrowableProjectile
+extends ThrowableItemProjectile
 implements ItemSupplier {
-    private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(ThrownPotion.class, EntityDataSerializers.ITEM_STACK);
-    private static final Logger LOGGER = LogManager.getLogger();
     public static final Predicate<LivingEntity> WATER_SENSITIVE = ThrownPotion::isWaterSensitiveEntity;
 
     public ThrownPotion(EntityType<? extends ThrownPotion> entityType, Level level) {
-        super((EntityType<? extends ThrowableProjectile>)entityType, level);
+        super((EntityType<? extends ThrowableItemProjectile>)entityType, level);
     }
 
     public ThrownPotion(Level level, LivingEntity livingEntity) {
-        super(EntityType.POTION, livingEntity, level);
+        super((EntityType<? extends ThrowableItemProjectile>)EntityType.POTION, livingEntity, level);
     }
 
     public ThrownPotion(Level level, double d, double e, double f) {
-        super(EntityType.POTION, d, e, f, level);
+        super((EntityType<? extends ThrowableItemProjectile>)EntityType.POTION, d, e, f, level);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
-    }
-
-    @Override
-    public ItemStack getItem() {
-        ItemStack itemStack = this.getEntityData().get(DATA_ITEM_STACK);
-        if (itemStack.getItem() != Items.SPLASH_POTION && itemStack.getItem() != Items.LINGERING_POTION) {
-            if (this.level != null) {
-                LOGGER.error("ThrownPotion entity {} has no item?!", (Object)this.getId());
-            }
-            return new ItemStack(Items.SPLASH_POTION);
-        }
-        return itemStack;
-    }
-
-    public void setItem(ItemStack itemStack) {
-        this.getEntityData().set(DATA_ITEM_STACK, itemStack.copy());
+    protected Item getDefaultItem() {
+        return Items.SPLASH_POTION;
     }
 
     @Override
@@ -91,8 +69,31 @@ implements ItemSupplier {
     }
 
     @Override
+    protected void onHitBlock(BlockHitResult blockHitResult) {
+        super.onHitBlock(blockHitResult);
+        if (this.level.isClientSide) {
+            return;
+        }
+        ItemStack itemStack = this.getItem();
+        Potion potion = PotionUtils.getPotion(itemStack);
+        List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
+        boolean bl = potion == Potions.WATER && list.isEmpty();
+        Direction direction = blockHitResult.getDirection();
+        BlockPos blockPos = blockHitResult.getBlockPos();
+        BlockPos blockPos2 = blockPos.relative(direction);
+        if (bl) {
+            this.dowseFire(blockPos2, direction);
+            this.dowseFire(blockPos2.relative(direction.getOpposite()), direction);
+            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+                this.dowseFire(blockPos2.relative(direction2), direction2);
+            }
+        }
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
         boolean bl;
+        super.onHit(hitResult);
         if (this.level.isClientSide) {
             return;
         }
@@ -100,21 +101,6 @@ implements ItemSupplier {
         Potion potion = PotionUtils.getPotion(itemStack);
         List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
         boolean bl2 = bl = potion == Potions.WATER && list.isEmpty();
-        if (hitResult.getType() == HitResult.Type.BLOCK) {
-            BlockHitResult blockHitResult = (BlockHitResult)hitResult;
-            Direction direction = blockHitResult.getDirection();
-            BlockPos blockPos = blockHitResult.getBlockPos();
-            BlockPos blockPos2 = blockPos.relative(direction);
-            BlockState blockState = this.level.getBlockState(blockPos);
-            blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
-            if (bl) {
-                this.dowseFire(blockPos2, direction);
-                this.dowseFire(blockPos2.relative(direction.getOpposite()), direction);
-                for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                    this.dowseFire(blockPos2.relative(direction2), direction2);
-                }
-            }
-        }
         if (bl) {
             this.applyWater();
         } else if (!list.isEmpty()) {
@@ -125,7 +111,7 @@ implements ItemSupplier {
             }
         }
         int i = potion.hasInstantEffects() ? 2007 : 2002;
-        this.level.levelEvent(i, new BlockPos(this), PotionUtils.getColor(itemStack));
+        this.level.levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
         this.remove();
     }
 
@@ -168,7 +154,10 @@ implements ItemSupplier {
 
     private void makeAreaOfEffectCloud(ItemStack itemStack, Potion potion) {
         AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level, this.getX(), this.getY(), this.getZ());
-        areaEffectCloud.setOwner(this.getOwner());
+        Entity entity = this.getOwner();
+        if (entity instanceof LivingEntity) {
+            areaEffectCloud.setOwner((LivingEntity)entity);
+        }
         areaEffectCloud.setRadius(3.0f);
         areaEffectCloud.setRadiusOnUse(-0.5f);
         areaEffectCloud.setWaitTime(10);
@@ -192,30 +181,10 @@ implements ItemSupplier {
         BlockState blockState = this.level.getBlockState(blockPos);
         Block block = blockState.getBlock();
         if (blockState.is(BlockTags.FIRE)) {
-            this.level.extinguishFire(null, blockPos.relative(direction), direction.getOpposite());
+            this.level.removeBlock(blockPos, false);
         } else if (block == Blocks.CAMPFIRE && blockState.getValue(CampfireBlock.LIT).booleanValue()) {
             this.level.levelEvent(null, 1009, blockPos, 0);
             this.level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, false));
-        }
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        ItemStack itemStack = ItemStack.of(compoundTag.getCompound("Potion"));
-        if (itemStack.isEmpty()) {
-            this.remove();
-        } else {
-            this.setItem(itemStack);
-        }
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-        ItemStack itemStack = this.getItem();
-        if (!itemStack.isEmpty()) {
-            compoundTag.put("Potion", itemStack.save(new CompoundTag()));
         }
     }
 

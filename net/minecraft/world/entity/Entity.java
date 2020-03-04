@@ -140,6 +140,8 @@ CommandSource {
     private double x;
     private double y;
     private double z;
+    private Vec3 position;
+    private BlockPos blockPosition;
     private Vec3 deltaMovement = Vec3.ZERO;
     public float yRot;
     public float xRot;
@@ -335,10 +337,6 @@ CommandSource {
         double f = entity.y - this.y;
         double g = entity.z - this.z;
         return e * e + f * f + g * g < d * d;
-    }
-
-    public BlockPos getBlockPos() {
-        return new BlockPos(this);
     }
 
     protected void setRot(float f, float g) {
@@ -589,13 +587,13 @@ CommandSource {
     }
 
     protected float getBlockJumpFactor() {
-        float f = this.level.getBlockState(new BlockPos(this)).getBlock().getJumpFactor();
+        float f = this.level.getBlockState(this.blockPosition()).getBlock().getJumpFactor();
         float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getJumpFactor();
         return (double)f == 1.0 ? g : f;
     }
 
     protected float getBlockSpeedFactor() {
-        Block block = this.level.getBlockState(new BlockPos(this)).getBlock();
+        Block block = this.level.getBlockState(this.blockPosition()).getBlock();
         float f = block.getSpeedFactor();
         if (block == Blocks.WATER || block == Blocks.BUBBLE_COLUMN) {
             return f;
@@ -757,25 +755,24 @@ CommandSource {
 
     protected void checkInsideBlocks() {
         AABB aABB = this.getBoundingBox();
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
-             BlockPos.PooledMutableBlockPos pooledMutableBlockPos2 = BlockPos.PooledMutableBlockPos.acquire(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
-             BlockPos.PooledMutableBlockPos pooledMutableBlockPos3 = BlockPos.PooledMutableBlockPos.acquire();){
-            if (this.level.hasChunksAt(pooledMutableBlockPos, pooledMutableBlockPos2)) {
-                for (int i = pooledMutableBlockPos.getX(); i <= pooledMutableBlockPos2.getX(); ++i) {
-                    for (int j = pooledMutableBlockPos.getY(); j <= pooledMutableBlockPos2.getY(); ++j) {
-                        for (int k = pooledMutableBlockPos.getZ(); k <= pooledMutableBlockPos2.getZ(); ++k) {
-                            pooledMutableBlockPos3.set(i, j, k);
-                            BlockState blockState = this.level.getBlockState(pooledMutableBlockPos3);
-                            try {
-                                blockState.entityInside(this.level, pooledMutableBlockPos3, this);
-                                this.onInsideBlock(blockState);
-                                continue;
-                            } catch (Throwable throwable) {
-                                CrashReport crashReport = CrashReport.forThrowable(throwable, "Colliding entity with block");
-                                CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
-                                CrashReportCategory.populateBlockDetails(crashReportCategory, pooledMutableBlockPos3, blockState);
-                                throw new ReportedException(crashReport);
-                            }
+        BlockPos blockPos = new BlockPos(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
+        BlockPos blockPos2 = new BlockPos(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        if (this.level.hasChunksAt(blockPos, blockPos2)) {
+            for (int i = blockPos.getX(); i <= blockPos2.getX(); ++i) {
+                for (int j = blockPos.getY(); j <= blockPos2.getY(); ++j) {
+                    for (int k = blockPos.getZ(); k <= blockPos2.getZ(); ++k) {
+                        mutableBlockPos.set(i, j, k);
+                        BlockState blockState = this.level.getBlockState(mutableBlockPos);
+                        try {
+                            blockState.entityInside(this.level, mutableBlockPos, this);
+                            this.onInsideBlock(blockState);
+                            continue;
+                        } catch (Throwable throwable) {
+                            CrashReport crashReport = CrashReport.forThrowable(throwable, "Colliding entity with block");
+                            CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
+                            CrashReportCategory.populateBlockDetails(crashReportCategory, mutableBlockPos, blockState);
+                            throw new ReportedException(crashReport);
                         }
                     }
                 }
@@ -849,7 +846,7 @@ CommandSource {
         return null;
     }
 
-    public final boolean fireImmune() {
+    public boolean fireImmune() {
         return this.getType().fireImmune();
     }
 
@@ -867,14 +864,12 @@ CommandSource {
     }
 
     private boolean isInRain() {
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire(this);){
-            boolean bl = this.level.isRainingAt(pooledMutableBlockPos) || this.level.isRainingAt(pooledMutableBlockPos.set(this.getX(), this.getY() + (double)this.dimensions.height, this.getZ()));
-            return bl;
-        }
+        BlockPos blockPos = this.blockPosition();
+        return this.level.isRainingAt(blockPos) || this.level.isRainingAt(blockPos.offset(0.0, this.dimensions.height, 0.0));
     }
 
     private boolean isInBubbleColumn() {
-        return this.level.getBlockState(new BlockPos(this)).getBlock() == Blocks.BUBBLE_COLUMN;
+        return this.level.getBlockState(this.blockPosition()).getBlock() == Blocks.BUBBLE_COLUMN;
     }
 
     public boolean isInWaterOrRain() {
@@ -1438,17 +1433,15 @@ CommandSource {
         if (this.noPhysics) {
             return false;
         }
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int i = 0; i < 8; ++i) {
-                int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5f) * 0.1f) + (double)this.eyeHeight);
-                int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5f) * this.dimensions.width * 0.8f));
-                int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * this.dimensions.width * 0.8f));
-                if (pooledMutableBlockPos.getX() == k && pooledMutableBlockPos.getY() == j && pooledMutableBlockPos.getZ() == l) continue;
-                pooledMutableBlockPos.set(k, j, l);
-                if (!this.level.getBlockState(pooledMutableBlockPos).isSuffocating(this.level, pooledMutableBlockPos)) continue;
-                boolean bl = true;
-                return bl;
-            }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 8; ++i) {
+            int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5f) * 0.1f) + (double)this.eyeHeight);
+            int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5f) * this.dimensions.width * 0.8f));
+            int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5f) * this.dimensions.width * 0.8f));
+            if (mutableBlockPos.getX() == k && mutableBlockPos.getY() == j && mutableBlockPos.getZ() == l) continue;
+            mutableBlockPos.set(k, j, l);
+            if (!this.level.getBlockState(mutableBlockPos).isSuffocating(this.level, mutableBlockPos)) continue;
+            return true;
         }
         return false;
     }
@@ -1849,7 +1842,7 @@ CommandSource {
         double g = Double.MAX_VALUE;
         for (Direction direction2 : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.UP}) {
             double i;
-            mutableBlockPos.set(blockPos).move(direction2);
+            mutableBlockPos.setWithOffset(blockPos, direction2);
             if (this.level.getBlockState(mutableBlockPos).isCollisionShapeFullBlock(this.level, mutableBlockPos)) continue;
             double h = vec3.get(direction2.getAxis());
             double d2 = i = direction2.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - h : h;
@@ -2230,14 +2223,6 @@ CommandSource {
     public void sendMessage(Component component) {
     }
 
-    public BlockPos getCommandSenderBlockPosition() {
-        return new BlockPos(this);
-    }
-
-    public Vec3 getCommandSenderWorldPosition() {
-        return this.position();
-    }
-
     public Level getCommandSenderWorld() {
         return this.level;
     }
@@ -2523,24 +2508,23 @@ CommandSource {
         boolean bl2 = false;
         Vec3 vec3 = Vec3.ZERO;
         int o = 0;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int p = i; p < j; ++p) {
-                for (int q = k; q < l; ++q) {
-                    for (int r = m; r < n; ++r) {
-                        double f;
-                        pooledMutableBlockPos.set(p, q, r);
-                        FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-                        if (!fluidState.is(tag) || !((f = (double)((float)q + fluidState.getHeight(this.level, pooledMutableBlockPos))) >= aABB.minY)) continue;
-                        bl2 = true;
-                        e = Math.max(f - aABB.minY, e);
-                        if (!bl) continue;
-                        Vec3 vec32 = fluidState.getFlow(this.level, pooledMutableBlockPos);
-                        if (e < 0.4) {
-                            vec32 = vec32.scale(e);
-                        }
-                        vec3 = vec3.add(vec32);
-                        ++o;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int p = i; p < j; ++p) {
+            for (int q = k; q < l; ++q) {
+                for (int r = m; r < n; ++r) {
+                    double f;
+                    mutableBlockPos.set(p, q, r);
+                    FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+                    if (!fluidState.is(tag) || !((f = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos))) >= aABB.minY)) continue;
+                    bl2 = true;
+                    e = Math.max(f - aABB.minY, e);
+                    if (!bl) continue;
+                    Vec3 vec32 = fluidState.getFlow(this.level, mutableBlockPos);
+                    if (e < 0.4) {
+                        vec32 = vec32.scale(e);
                     }
+                    vec3 = vec3.add(vec32);
+                    ++o;
                 }
             }
         }
@@ -2576,7 +2560,11 @@ CommandSource {
     }
 
     public Vec3 position() {
-        return new Vec3(this.x, this.y, this.z);
+        return this.position;
+    }
+
+    public BlockPos blockPosition() {
+        return this.blockPosition;
     }
 
     public Vec3 getDeltaMovement() {
@@ -2635,6 +2623,8 @@ CommandSource {
         this.x = d;
         this.y = e;
         this.z = f;
+        this.position = new Vec3(d, e, f);
+        this.blockPosition = new BlockPos(d, e, f);
     }
 
     public void checkDespawn() {

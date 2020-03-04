@@ -17,58 +17,26 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 public class MeleeAttack
 extends Behavior<Mob> {
     private final double attackRange;
-    private final int cooldown;
-    private int remainingCooldown = 0;
+    private final int cooldownBetweenAttacks;
 
     public MeleeAttack(double d, int i) {
-        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT));
+        super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryStatus.VALUE_ABSENT));
         this.attackRange = d;
-        this.cooldown = i;
+        this.cooldownBetweenAttacks = i;
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        if (this.remainingCooldown > 0) {
-            --this.remainingCooldown;
-            return false;
-        }
-        return !this.isHoldingProjectileWeapon(mob) && BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
-    }
-
-    private boolean isHoldingProjectileWeapon(Mob mob) {
-        return mob.isHolding(item -> item instanceof ProjectileWeaponItem);
-    }
-
-    @Override
-    protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
-        return BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
+        return !mob.isHolding(item -> item instanceof ProjectileWeaponItem) && BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
     }
 
     @Override
     protected void start(ServerLevel serverLevel, Mob mob, long l) {
-        LivingEntity livingEntity = MeleeAttack.getAttackTarget(mob);
+        LivingEntity livingEntity = mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
         BehaviorUtils.lookAtEntity(mob, livingEntity);
-        this.meleeAttack(mob, livingEntity);
-        this.remainingCooldown = this.cooldown;
-    }
-
-    private void meleeAttack(Mob mob, LivingEntity livingEntity) {
         mob.swing(InteractionHand.MAIN_HAND);
         mob.doHurtTarget(livingEntity);
-    }
-
-    private static LivingEntity getAttackTarget(LivingEntity livingEntity) {
-        return livingEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-    }
-
-    @Override
-    protected /* synthetic */ boolean canStillUse(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        return this.canStillUse(serverLevel, (Mob)livingEntity, l);
-    }
-
-    @Override
-    protected /* synthetic */ void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        this.start(serverLevel, (Mob)livingEntity, l);
+        mob.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, this.cooldownBetweenAttacks);
     }
 }
 

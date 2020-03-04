@@ -156,7 +156,7 @@ implements TickableBlockEntity {
             return;
         }
         for (Player player : list) {
-            if (!this.worldPosition.closerThan(new BlockPos(player), (double)j) || !player.isInWaterOrRain()) continue;
+            if (!this.worldPosition.closerThan(player.blockPosition(), (double)j) || !player.isInWaterOrRain()) continue;
             player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 260, 0, true, true));
         }
     }
@@ -174,7 +174,7 @@ implements TickableBlockEntity {
             if (!list.isEmpty()) {
                 this.destroyTarget = list.get(this.level.random.nextInt(list.size()));
             }
-        } else if (!this.destroyTarget.isAlive() || !this.worldPosition.closerThan(new BlockPos(this.destroyTarget), 8.0)) {
+        } else if (!this.destroyTarget.isAlive() || !this.worldPosition.closerThan(this.destroyTarget.blockPosition(), 8.0)) {
             this.destroyTarget = null;
         }
         if (this.destroyTarget != null) {

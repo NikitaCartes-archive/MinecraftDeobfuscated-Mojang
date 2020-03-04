@@ -195,7 +195,7 @@ public class StructureUtils {
     private static boolean doesStructureContain(BlockPos blockPos, BlockPos blockPos2, ServerLevel serverLevel) {
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
         AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
-        return aABB.contains(new Vec3(blockPos2));
+        return aABB.contains(Vec3.atLowerCornerOf(blockPos2));
     }
 }
 

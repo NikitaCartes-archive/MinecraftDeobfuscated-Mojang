@@ -15,6 +15,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -145,6 +146,24 @@ public final class NbtUtils {
         return tag.equals(tag2);
     }
 
+    public static IntArrayTag createUUIDArray(UUID uUID) {
+        long l = uUID.getMostSignificantBits();
+        long m = uUID.getLeastSignificantBits();
+        return new IntArrayTag(new int[]{(int)(l >> 32), (int)l, (int)(m >> 32), (int)m});
+    }
+
+    public static UUID loadUUIDArray(Tag tag) {
+        if (tag.getType() != IntArrayTag.TYPE) {
+            throw new IllegalArgumentException("Expected UUID-Tag to be of type " + IntArrayTag.TYPE.getName() + ", but found " + tag.getType().getName() + ".");
+        }
+        int[] is = ((IntArrayTag)tag).getAsIntArray();
+        if (is.length != 4) {
+            throw new IllegalArgumentException("Expected UUID-Array to be of length 4, but found " + is.length + ".");
+        }
+        return new UUID((long)is[0] << 32 | (long)is[1] & 0xFFFFFFFFL, (long)is[2] << 32 | (long)is[3] & 0xFFFFFFFFL);
+    }
+
+    @Deprecated
     public static CompoundTag createUUIDTag(UUID uUID) {
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.putLong("M", uUID.getMostSignificantBits());
@@ -152,6 +171,7 @@ public final class NbtUtils {
         return compoundTag;
     }
 
+    @Deprecated
     public static UUID loadUUIDTag(CompoundTag compoundTag) {
         return new UUID(compoundTag.getLong("M"), compoundTag.getLong("L"));
     }

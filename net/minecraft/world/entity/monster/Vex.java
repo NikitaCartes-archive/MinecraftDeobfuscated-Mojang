@@ -240,7 +240,7 @@ extends Monster {
         public void tick() {
             BlockPos blockPos = Vex.this.getBoundOrigin();
             if (blockPos == null) {
-                blockPos = new BlockPos(Vex.this);
+                blockPos = Vex.this.blockPosition();
             }
             for (int i = 0; i < 3; ++i) {
                 BlockPos blockPos2 = blockPos.offset(Vex.this.random.nextInt(15) - 7, Vex.this.random.nextInt(11) - 5, Vex.this.random.nextInt(15) - 7);

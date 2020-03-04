@@ -65,7 +65,7 @@ extends Behavior<Villager> {
             this.wantsToReapStuff = true;
             break;
         }
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(villager);
+        BlockPos.MutableBlockPos mutableBlockPos = villager.blockPosition().mutable();
         this.validFarmlandAroundVillager.clear();
         for (int k = -1; k <= 1; ++k) {
             for (int l = -1; l <= 1; ++l) {

@@ -9,9 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.realms.Realms;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsScreenProxy;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -21,13 +19,13 @@ extends RealmsScreen {
 
     public void switchToRealms(Screen screen) {
         this.previousScreen = screen;
-        Realms.setScreen(new RealmsMainScreen(this));
+        Minecraft.getInstance().setScreen(new RealmsMainScreen(this));
     }
 
     @Nullable
-    public RealmsScreenProxy getNotificationScreen(Screen screen) {
+    public RealmsScreen getNotificationScreen(Screen screen) {
         this.previousScreen = screen;
-        return new RealmsNotificationsScreen(this).getProxy();
+        return new RealmsNotificationsScreen();
     }
 
     @Override

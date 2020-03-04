@@ -89,7 +89,7 @@ extends SavedData {
         if (dimensionType == DimensionType.NETHER) {
             return null;
         }
-        BlockPos blockPos = new BlockPos(serverPlayer);
+        BlockPos blockPos = serverPlayer.blockPosition();
         List list = this.level.getPoiManager().getInRange(PoiType.ALL, blockPos, 64, PoiManager.Occupancy.IS_OCCUPIED).collect(Collectors.toList());
         int i = 0;
         Vec3 vec3 = Vec3.ZERO;

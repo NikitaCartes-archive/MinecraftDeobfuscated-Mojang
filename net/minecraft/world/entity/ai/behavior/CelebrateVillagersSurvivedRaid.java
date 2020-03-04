@@ -34,7 +34,7 @@ extends Behavior<Villager> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-        BlockPos blockPos = new BlockPos(villager);
+        BlockPos blockPos = villager.blockPosition();
         this.currentRaid = serverLevel.getRaidAt(blockPos);
         return this.currentRaid != null && this.currentRaid.isVictory() && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, blockPos);
     }
@@ -56,11 +56,11 @@ extends Behavior<Villager> {
         if (random.nextInt(100) == 0) {
             villager.playCelebrateSound();
         }
-        if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, new BlockPos(villager))) {
+        if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, villager.blockPosition())) {
             DyeColor dyeColor = DyeColor.values()[random.nextInt(DyeColor.values().length)];
             int i = random.nextInt(3);
             ItemStack itemStack = this.getFirework(dyeColor, i);
-            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(villager.level, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack);
+            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(villager.level, villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack);
             villager.level.addFreshEntity(fireworkRocketEntity);
         }
     }

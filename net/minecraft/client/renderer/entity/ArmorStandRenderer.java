@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,11 +73,6 @@ extends LivingEntityRenderer<ArmorStand, ArmorStandArmorModel> {
             return RenderType.entityCutoutNoCull(resourceLocation, false);
         }
         return null;
-    }
-
-    @Override
-    protected /* synthetic */ boolean shouldShowName(LivingEntity livingEntity) {
-        return this.shouldShowName((ArmorStand)livingEntity);
     }
 }
 

@@ -334,7 +334,6 @@ extends ChunkSource {
         if (!bl) {
             this.level.getProfiler().push("pollingChunks");
             int i = this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
-            BlockPos blockPos = this.level.getSharedSpawnPos();
             boolean bl3 = levelData.getGameTime() % 400L == 0L;
             this.level.getProfiler().push("naturalSpawnCount");
             int j = this.distanceManager.getNaturalSpawnChunkCount();
@@ -361,7 +360,7 @@ extends ChunkSource {
                         if (mobCategory == MobCategory.MISC || mobCategory.isFriendly() && !this.spawnFriendlies || !mobCategory.isFriendly() && !this.spawnEnemies || mobCategory.isPersistent() && !bl3) continue;
                         int k = mobCategory.getMaxInstancesPerChunk() * j / MAGIC_NUMBER;
                         if (object2IntMap.getInt((Object)mobCategory) > k) continue;
-                        NaturalSpawner.spawnCategoryForChunk(mobCategory, this.level, levelChunk, blockPos);
+                        NaturalSpawner.spawnCategoryForChunk(mobCategory, this.level, levelChunk);
                     }
                     this.level.getProfiler().pop();
                 }

@@ -34,7 +34,7 @@ extends AbstractHugeMushroomFeature {
                     boolean bl5 = bl || bl2;
                     boolean bl7 = bl6 = bl3 || bl4;
                     if (j < i && bl5 == bl6) continue;
-                    mutableBlockPos.set(blockPos).move(m, j, n);
+                    mutableBlockPos.setWithOffset(blockPos, m, j, n);
                     if (levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) continue;
                     this.setBlock(levelAccessor, mutableBlockPos, (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)hugeMushroomFeatureConfiguration.capProvider.getState(random, blockPos).setValue(HugeMushroomBlock.UP, j >= i - 1)).setValue(HugeMushroomBlock.WEST, m < -l)).setValue(HugeMushroomBlock.EAST, m > l)).setValue(HugeMushroomBlock.NORTH, n < -l)).setValue(HugeMushroomBlock.SOUTH, n > l));
                 }

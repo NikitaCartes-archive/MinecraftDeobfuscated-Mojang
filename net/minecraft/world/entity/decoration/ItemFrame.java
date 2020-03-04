@@ -19,6 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +45,7 @@ extends HangingEntity {
     private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.ITEM_STACK);
     private static final EntityDataAccessor<Integer> DATA_ROTATION = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.INT);
     private float dropChance = 1.0f;
+    private boolean fixed;
 
     public ItemFrame(EntityType<? extends ItemFrame> entityType, Level level) {
         super((EntityType<? extends HangingEntity>)entityType, level);
@@ -112,6 +115,9 @@ extends HangingEntity {
 
     @Override
     public boolean survives() {
+        if (this.fixed) {
+            return true;
+        }
         if (!this.level.noCollision(this)) {
             return false;
         }
@@ -120,6 +126,20 @@ extends HangingEntity {
             return false;
         }
         return this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty();
+    }
+
+    @Override
+    public void move(MoverType moverType, Vec3 vec3) {
+        if (!this.fixed) {
+            super.move(moverType, vec3);
+        }
+    }
+
+    @Override
+    public void push(double d, double e, double f) {
+        if (!this.fixed) {
+            super.push(d, e, f);
+        }
     }
 
     @Override
@@ -135,6 +155,9 @@ extends HangingEntity {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
+        if (this.fixed) {
+            return false;
+        }
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
@@ -277,6 +300,8 @@ extends HangingEntity {
             compoundTag.putFloat("ItemDropChance", this.dropChance);
         }
         compoundTag.putByte("Facing", (byte)this.direction.get3DDataValue());
+        compoundTag.putBoolean("Invisible", this.isInvisible());
+        compoundTag.putBoolean("Fixed", this.fixed);
     }
 
     @Override
@@ -299,6 +324,8 @@ extends HangingEntity {
             }
         }
         this.setDirection(Direction.from3DDataValue(compoundTag.getByte("Facing")));
+        this.setInvisible(compoundTag.getBoolean("Invisible"));
+        this.fixed = compoundTag.getBoolean("Fixed");
     }
 
     @Override
@@ -310,7 +337,7 @@ extends HangingEntity {
         if (this.level.isClientSide) {
             return bl || bl2;
         }
-        if (!bl) {
+        if (!this.fixed && !bl) {
             if (bl2 && !this.removed) {
                 this.setItem(itemStack);
                 if (!player.abilities.instabuild) {

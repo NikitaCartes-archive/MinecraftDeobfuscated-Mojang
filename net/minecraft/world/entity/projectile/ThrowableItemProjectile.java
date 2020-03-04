@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.projectile;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
@@ -51,7 +50,6 @@ implements ItemSupplier {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getItem() {
         ItemStack itemStack = this.getItemRaw();
         return itemStack.isEmpty() ? new ItemStack(this.getDefaultItem()) : itemStack;

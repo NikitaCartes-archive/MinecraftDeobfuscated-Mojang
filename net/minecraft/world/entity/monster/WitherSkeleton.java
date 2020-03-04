@@ -15,12 +15,15 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -34,6 +37,12 @@ extends AbstractSkeleton {
     public WitherSkeleton(EntityType<? extends WitherSkeleton> entityType, Level level) {
         super((EntityType<? extends AbstractSkeleton>)entityType, level);
         this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0f);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Piglin>((Mob)this, Piglin.class, true));
+        super.registerGoals();
     }
 
     @Override

@@ -3,13 +3,16 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.collect.Sets;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
-import com.mojang.realmsclient.gui.LongRunningTask;
-import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.util.task.LongRunningTask;
+import java.util.HashSet;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,10 +21,7 @@ import org.apache.logging.log4j.Logger;
 public class RealmsLongRunningMcoTaskScreen
 extends RealmsScreen {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final int BUTTON_CANCEL_ID = 666;
-    private final int BUTTON_BACK_ID = 667;
-    private final RealmsScreen lastScreen;
-    private final LongRunningTask taskThread;
+    private final Screen lastScreen;
     private volatile String title = "";
     private volatile boolean error;
     private volatile String errorMessage;
@@ -29,17 +29,13 @@ extends RealmsScreen {
     private int animTicks;
     private final LongRunningTask task;
     private final int buttonLength = 212;
-    public static final String[] symbols = new String[]{"\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _"};
+    public static final String[] SYMBOLS = new String[]{"\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588", "_ _ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587", "_ _ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586", "_ _ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585", "_ \u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584", "\u2583 \u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _ _", "\u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _ _", "\u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _ _", "\u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _ _", "\u2584 \u2585 \u2586 \u2587 \u2588 \u2587 \u2586 \u2585 \u2584 \u2583 _"};
 
-    public RealmsLongRunningMcoTaskScreen(RealmsScreen realmsScreen, LongRunningTask longRunningTask) {
-        this.lastScreen = realmsScreen;
+    public RealmsLongRunningMcoTaskScreen(Screen screen, LongRunningTask longRunningTask) {
+        this.lastScreen = screen;
         this.task = longRunningTask;
         longRunningTask.setScreen(this);
-        this.taskThread = longRunningTask;
-    }
-
-    public void start() {
-        Thread thread = new Thread((Runnable)this.taskThread, "Realms-long-running-task");
+        Thread thread = new Thread((Runnable)longRunningTask, "Realms-long-running-task");
         thread.setUncaughtExceptionHandler(new RealmsDefaultUncaughtExceptionHandler(LOGGER));
         thread.start();
     }
@@ -47,7 +43,7 @@ extends RealmsScreen {
     @Override
     public void tick() {
         super.tick();
-        Realms.narrateRepeatedly(this.title);
+        NarrationHelper.repeatedly(this.title);
         ++this.animTicks;
         this.task.tick();
     }
@@ -64,30 +60,24 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.task.init();
-        this.buttonsAdd(new RealmsButton(666, this.width() / 2 - 106, RealmsConstants.row(12), 212, 20, RealmsLongRunningMcoTaskScreen.getLocalizedString("gui.cancel")){
-
-            @Override
-            public void onPress() {
-                RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
-            }
-        });
+        this.addButton(new Button(this.width / 2 - 106, RealmsLongRunningMcoTaskScreen.row(12), 212, 20, I18n.get("gui.cancel", new Object[0]), button -> this.cancelOrBackButtonClicked()));
     }
 
     private void cancelOrBackButtonClicked() {
         this.aborted = true;
         this.task.abortTask();
-        Realms.setScreen(this.lastScreen);
+        this.minecraft.setScreen(this.lastScreen);
     }
 
     @Override
     public void render(int i, int j, float f) {
         this.renderBackground();
-        this.drawCenteredString(this.title, this.width() / 2, RealmsConstants.row(3), 0xFFFFFF);
+        this.drawCenteredString(this.font, this.title, this.width / 2, RealmsLongRunningMcoTaskScreen.row(3), 0xFFFFFF);
         if (!this.error) {
-            this.drawCenteredString(symbols[this.animTicks % symbols.length], this.width() / 2, RealmsConstants.row(8), 0x808080);
+            this.drawCenteredString(this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0x808080);
         }
         if (this.error) {
-            this.drawCenteredString(this.errorMessage, this.width() / 2, RealmsConstants.row(8), 0xFF0000);
+            this.drawCenteredString(this.font, this.errorMessage, this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0xFF0000);
         }
         super.render(i, j, f);
     }
@@ -95,15 +85,15 @@ extends RealmsScreen {
     public void error(String string) {
         this.error = true;
         this.errorMessage = string;
-        Realms.narrateNow(string);
+        NarrationHelper.now(string);
         this.buttonsClear();
-        this.buttonsAdd(new RealmsButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, RealmsLongRunningMcoTaskScreen.getLocalizedString("gui.back")){
+        this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, I18n.get("gui.back", new Object[0]), button -> this.cancelOrBackButtonClicked()));
+    }
 
-            @Override
-            public void onPress() {
-                RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
-            }
-        });
+    public void buttonsClear() {
+        HashSet set = Sets.newHashSet(this.buttons);
+        this.children.removeIf(set::contains);
+        this.buttons.clear();
     }
 
     public void setTitle(String string) {

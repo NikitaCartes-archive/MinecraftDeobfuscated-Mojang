@@ -26,23 +26,26 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsTextureManager {
-    private static final Map<String, RealmsTexture> textures = Maps.newHashMap();
-    private static final Map<String, Boolean> skinFetchStatus = Maps.newHashMap();
-    private static final Map<String, String> fetchedSkins = Maps.newHashMap();
+    private static final Map<String, RealmsTexture> TEXTURES = Maps.newHashMap();
+    private static final Map<String, Boolean> SKIN_FETCH_STATUS = Maps.newHashMap();
+    private static final Map<String, String> FETCHED_SKINS = Maps.newHashMap();
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final ResourceLocation TEMPLATE_ICON_LOCATION = new ResourceLocation("textures/gui/presets/isles.png");
 
-    public static void bindWorldTemplate(String string, String string2) {
+    public static void bindWorldTemplate(String string, @Nullable String string2) {
         if (string2 == null) {
-            RealmsScreen.bind("textures/gui/presets/isles.png");
+            Minecraft.getInstance().getTextureManager().bind(TEMPLATE_ICON_LOCATION);
             return;
         }
         int i = RealmsTextureManager.getTextureId(string, string2);
@@ -60,27 +63,27 @@ public class RealmsTextureManager {
     }
 
     private static void bindDefaultFace(UUID uUID) {
-        RealmsScreen.bind((uUID.hashCode() & 1) == 1 ? "minecraft:textures/entity/alex.png" : "minecraft:textures/entity/steve.png");
+        Minecraft.getInstance().getTextureManager().bind(DefaultPlayerSkin.getDefaultSkin(uUID));
     }
 
     private static void bindFace(final String string) {
         UUID uUID = UUIDTypeAdapter.fromString(string);
-        if (textures.containsKey(string)) {
-            RenderSystem.bindTexture(RealmsTextureManager.textures.get((Object)string).textureId);
+        if (TEXTURES.containsKey(string)) {
+            RenderSystem.bindTexture(TEXTURES.get(string).textureId);
             return;
         }
-        if (skinFetchStatus.containsKey(string)) {
-            if (!skinFetchStatus.get(string).booleanValue()) {
+        if (SKIN_FETCH_STATUS.containsKey(string)) {
+            if (!SKIN_FETCH_STATUS.get(string).booleanValue()) {
                 RealmsTextureManager.bindDefaultFace(uUID);
-            } else if (fetchedSkins.containsKey(string)) {
-                int i = RealmsTextureManager.getTextureId(string, fetchedSkins.get(string));
+            } else if (FETCHED_SKINS.containsKey(string)) {
+                int i = RealmsTextureManager.getTextureId(string, FETCHED_SKINS.get(string));
                 RenderSystem.bindTexture(i);
             } else {
                 RealmsTextureManager.bindDefaultFace(uUID);
             }
             return;
         }
-        skinFetchStatus.put(string, false);
+        SKIN_FETCH_STATUS.put(string, false);
         RealmsTextureManager.bindDefaultFace(uUID);
         Thread thread = new Thread("Realms Texture Downloader"){
 
@@ -100,18 +103,18 @@ public class RealmsTextureManager {
                         HttpURLConnection httpURLConnection = null;
                         LOGGER.debug("Downloading http texture from {}", (Object)string2);
                         try {
-                            httpURLConnection = (HttpURLConnection)new URL(string2).openConnection(Realms.getProxy());
+                            httpURLConnection = (HttpURLConnection)new URL(string2).openConnection(Minecraft.getInstance().getProxy());
                             httpURLConnection.setDoInput(true);
                             httpURLConnection.setDoOutput(false);
                             httpURLConnection.connect();
                             if (httpURLConnection.getResponseCode() / 100 != 2) {
-                                skinFetchStatus.remove(string);
+                                SKIN_FETCH_STATUS.remove(string);
                                 return;
                             }
                             try {
                                 bufferedImage = ImageIO.read(httpURLConnection.getInputStream());
                             } catch (Exception exception) {
-                                skinFetchStatus.remove(string);
+                                SKIN_FETCH_STATUS.remove(string);
                                 if (httpURLConnection != null) {
                                     httpURLConnection.disconnect();
                                 }
@@ -123,19 +126,18 @@ public class RealmsTextureManager {
                             byteArrayOutputStream = new ByteArrayOutputStream();
                         } catch (Exception exception2) {
                             LOGGER.error("Couldn't download http texture", (Throwable)exception2);
-                            skinFetchStatus.remove(string);
+                            SKIN_FETCH_STATUS.remove(string);
                         } finally {
                             if (httpURLConnection != null) {
                                 httpURLConnection.disconnect();
                             }
                         }
                         ImageIO.write((RenderedImage)bufferedImage, "png", byteArrayOutputStream);
-                        fetchedSkins.put(string, new Base64().encodeToString(byteArrayOutputStream.toByteArray()));
-                        skinFetchStatus.put(string, true);
+                        FETCHED_SKINS.put(string, new Base64().encodeToString(byteArrayOutputStream.toByteArray()));
+                        SKIN_FETCH_STATUS.put(string, true);
                         break block17;
                     }
-                    skinFetchStatus.put(string, true);
-                    return;
+                    SKIN_FETCH_STATUS.put(string, true);
                 }
             }
         };
@@ -148,8 +150,8 @@ public class RealmsTextureManager {
      */
     private static int getTextureId(String string, String string2) {
         int i;
-        if (textures.containsKey(string)) {
-            RealmsTexture realmsTexture = textures.get(string);
+        if (TEXTURES.containsKey(string)) {
+            RealmsTexture realmsTexture = TEXTURES.get(string);
             if (realmsTexture.image.equals(string2)) {
                 return realmsTexture.textureId;
             }
@@ -182,14 +184,14 @@ public class RealmsTextureManager {
         RenderSystem.activeTexture(33984);
         RenderSystem.bindTexture(i);
         TextureUtil.initTexture(intBuffer, j, k);
-        textures.put(string, new RealmsTexture(string2, i));
+        TEXTURES.put(string, new RealmsTexture(string2, i));
         return i;
     }
 
     @Environment(value=EnvType.CLIENT)
     public static class RealmsTexture {
-        String image;
-        int textureId;
+        private final String image;
+        private final int textureId;
 
         public RealmsTexture(String string, int i) {
             this.image = string;

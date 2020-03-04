@@ -333,7 +333,7 @@ implements ServerGamePacketListener {
             boolean bl2 = false;
             if (p > 0.0625) {
                 bl2 = true;
-                LOGGER.warn("{} moved wrongly!", (Object)entity.getName().getString());
+                LOGGER.warn("{} (vehicle of {}) moved wrongly! {}", (Object)entity.getName().getString(), (Object)this.player.getName().getString(), (Object)Math.sqrt(p));
             }
             entity.absMoveTo(g, h, i, j, k);
             boolean bl3 = serverLevel.noCollision(entity, entity.getBoundingBox().deflate(0.0625));

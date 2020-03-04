@@ -3,12 +3,12 @@
  */
 package net.minecraft.client.gui.components;
 
-import com.google.common.base.Predicates;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -47,7 +47,7 @@ GuiEventListener {
     private int textColorUneditable = 0x707070;
     private String suggestion;
     private Consumer<String> responder;
-    private Predicate<String> filter = Predicates.alwaysTrue();
+    private Predicate<String> filter = Objects::nonNull;
     private BiFunction<String, Integer, String> formatter = (string, integer) -> string;
 
     public EditBox(Font font, int i, int j, int k, int l, String string) {

@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +14,8 @@ import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
 public class TextRenderingUtils {
-    static List<String> lineBreak(String string) {
+    @VisibleForTesting
+    protected static List<String> lineBreak(String string) {
         return Arrays.asList(string.split("\\n"));
     }
 
@@ -33,7 +35,7 @@ public class TextRenderingUtils {
             ArrayList<LineSegment> list4 = Lists.newArrayList();
             List<String> list5 = TextRenderingUtils.split(string, "%link");
             for (String string2 : list5) {
-                if (string2.equals("%link")) {
+                if ("%link".equals(string2)) {
                     list4.add(list2.get(i++));
                     continue;
                 }
@@ -66,9 +68,9 @@ public class TextRenderingUtils {
 
     @Environment(value=EnvType.CLIENT)
     public static class LineSegment {
-        final String fullText;
-        final String linkTitle;
-        final String linkUrl;
+        private final String fullText;
+        private final String linkTitle;
+        private final String linkUrl;
 
         private LineSegment(String string) {
             this.fullText = string;
@@ -120,7 +122,8 @@ public class TextRenderingUtils {
             return new LineSegment(null, string, string2);
         }
 
-        static LineSegment text(String string) {
+        @VisibleForTesting
+        protected static LineSegment text(String string) {
             return new LineSegment(string);
         }
     }

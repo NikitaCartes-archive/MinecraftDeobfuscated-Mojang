@@ -468,7 +468,7 @@ implements Enemy {
                 this.dropExperience(Mth.floor((float)i * 0.08f));
             }
             if (this.dragonDeathTime == 1) {
-                this.level.globalLevelEvent(1028, new BlockPos(this), 0);
+                this.level.globalLevelEvent(1028, this.blockPosition(), 0);
             }
         }
         this.move(MoverType.SELF, new Vec3(0.0, 0.1f, 0.0));

@@ -60,7 +60,7 @@ implements SimpleWaterloggedBlock {
 
     private boolean canAttachTo(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
         BlockState blockState = blockGetter.getBlockState(blockPos);
-        return !blockState.isSignalSource() && blockState.isFaceSturdy(blockGetter, blockPos, direction);
+        return blockState.isFaceSturdy(blockGetter, blockPos, direction);
     }
 
     @Override

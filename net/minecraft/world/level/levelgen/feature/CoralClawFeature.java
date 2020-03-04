@@ -37,7 +37,7 @@ extends CoralFeature {
             int l;
             int k;
             Direction direction3;
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+            BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
             int j = random.nextInt(2) + 1;
             mutableBlockPos.move(direction2);
             if (direction2 == direction) {

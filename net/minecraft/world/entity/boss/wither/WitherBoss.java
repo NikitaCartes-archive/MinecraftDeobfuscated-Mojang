@@ -217,7 +217,7 @@ RangedAttackMob {
             if (i2 <= 0) {
                 Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
                 this.level.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0f, false, blockInteraction);
-                this.level.globalLevelEvent(1023, new BlockPos(this), 0);
+                this.level.globalLevelEvent(1023, this.blockPosition(), 0);
             }
             this.setInvulnerableTicks(i2);
             if (this.tickCount % 10 == 0) {
@@ -299,7 +299,7 @@ RangedAttackMob {
                     }
                 }
                 if (bl) {
-                    this.level.levelEvent(null, 1022, new BlockPos(this), 0);
+                    this.level.levelEvent(null, 1022, this.blockPosition(), 0);
                 }
             }
         }
@@ -375,7 +375,7 @@ RangedAttackMob {
     }
 
     private void performRangedAttack(int i, double d, double e, double f, boolean bl) {
-        this.level.levelEvent(null, 1024, new BlockPos(this), 0);
+        this.level.levelEvent(null, 1024, this.blockPosition(), 0);
         double g = this.getHeadX(i);
         double h = this.getHeadY(i);
         double j = this.getHeadZ(i);

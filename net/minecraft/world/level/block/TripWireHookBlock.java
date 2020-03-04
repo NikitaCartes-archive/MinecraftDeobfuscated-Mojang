@@ -69,7 +69,7 @@ extends Block {
         Direction direction = blockState.getValue(FACING);
         BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        return direction.getAxis().isHorizontal() && blockState2.isFaceSturdy(levelReader, blockPos2, direction) && !blockState2.isSignalSource();
+        return direction.getAxis().isHorizontal() && blockState2.isFaceSturdy(levelReader, blockPos2, direction);
     }
 
     @Override

@@ -257,7 +257,7 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        Biome biome = levelAccessor.getBiome(new BlockPos(this));
+        Biome biome = levelAccessor.getBiome(this.blockPosition());
         Type type = Type.byBiome(biome);
         boolean bl = false;
         if (spawnGroupData instanceof FoxGroupData) {
@@ -464,7 +464,7 @@ extends Animal {
                 this.setSitting(false);
             }
             if (this.isFaceplanted() && this.level.random.nextFloat() < 0.2f) {
-                BlockPos blockPos = new BlockPos(this);
+                BlockPos blockPos = this.blockPosition();
                 BlockState blockState = this.level.getBlockState(blockPos);
                 this.level.levelEvent(2001, blockPos, Block.getId(blockState));
             }
@@ -770,7 +770,7 @@ extends Animal {
             }
             if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0f) {
                 Fox.this.doHurtTarget(livingEntity);
-            } else if (Fox.this.xRot > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(new BlockPos(Fox.this)).getBlock() == Blocks.SNOW) {
+            } else if (Fox.this.xRot > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(Fox.this.blockPosition()).getBlock() == Blocks.SNOW) {
                 Fox.this.xRot = 60.0f;
                 Fox.this.setTarget(null);
                 Fox.this.setFaceplanted(true);
@@ -1121,7 +1121,7 @@ extends Animal {
                 return false;
             }
             this.interval = 100;
-            BlockPos blockPos = new BlockPos(this.mob);
+            BlockPos blockPos = this.mob.blockPosition();
             return Fox.this.level.isDay() && Fox.this.level.canSeeSky(blockPos) && !((ServerLevel)Fox.this.level).isVillage(blockPos) && this.setWantedPos();
         }
 

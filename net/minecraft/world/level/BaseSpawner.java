@@ -126,7 +126,7 @@ public abstract class BaseSpawner {
                     Mob mob = (Mob)entity2;
                     if (!mob.checkSpawnRules(level, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(level)) continue;
                     if (this.nextSpawnData.getTag().size() == 1 && this.nextSpawnData.getTag().contains("id", 8)) {
-                        ((Mob)entity2).finalizeSpawn(level, level.getCurrentDifficultyAt(new BlockPos(entity2)), MobSpawnType.SPAWNER, null, null);
+                        ((Mob)entity2).finalizeSpawn(level, level.getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.SPAWNER, null, null);
                     }
                 }
                 this.addWithPassengers(entity2);
@@ -221,7 +221,7 @@ public abstract class BaseSpawner {
         if (this.displayEntity == null) {
             this.displayEntity = EntityType.loadEntityRecursive(this.nextSpawnData.getTag(), this.getLevel(), Function.identity());
             if (this.nextSpawnData.getTag().size() == 1 && this.nextSpawnData.getTag().contains("id", 8) && this.displayEntity instanceof Mob) {
-                ((Mob)this.displayEntity).finalizeSpawn(this.getLevel(), this.getLevel().getCurrentDifficultyAt(new BlockPos(this.displayEntity)), MobSpawnType.SPAWNER, null, null);
+                ((Mob)this.displayEntity).finalizeSpawn(this.getLevel(), this.getLevel().getCurrentDifficultyAt(this.displayEntity.blockPosition()), MobSpawnType.SPAWNER, null, null);
             }
         }
         return this.displayEntity;

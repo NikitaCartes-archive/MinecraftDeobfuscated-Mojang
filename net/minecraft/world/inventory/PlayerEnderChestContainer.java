@@ -22,6 +22,7 @@ extends SimpleContainer {
         this.activeChest = enderChestBlockEntity;
     }
 
+    @Override
     public void fromTag(ListTag listTag) {
         int i;
         for (i = 0; i < this.getContainerSize(); ++i) {
@@ -35,6 +36,7 @@ extends SimpleContainer {
         }
     }
 
+    @Override
     public ListTag createTag() {
         ListTag listTag = new ListTag();
         for (int i = 0; i < this.getContainerSize(); ++i) {

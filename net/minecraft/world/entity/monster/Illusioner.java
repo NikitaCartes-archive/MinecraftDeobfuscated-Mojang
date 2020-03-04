@@ -5,7 +5,6 @@ package net.minecraft.world.entity.monster;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
@@ -235,7 +234,7 @@ implements RangedAttackMob {
             if (Illusioner.this.getTarget().getId() == this.lastTargetId) {
                 return false;
             }
-            return Illusioner.this.level.getCurrentDifficultyAt(new BlockPos(Illusioner.this)).isHarderThan(Difficulty.NORMAL.ordinal());
+            return Illusioner.this.level.getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan(Difficulty.NORMAL.ordinal());
         }
 
         @Override

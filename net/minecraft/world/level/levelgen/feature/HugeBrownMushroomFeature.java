@@ -32,7 +32,7 @@ extends AbstractHugeMushroomFeature {
                 boolean bl5 = bl || bl2;
                 boolean bl7 = bl6 = bl3 || bl4;
                 if (bl5 && bl6) continue;
-                mutableBlockPos.set(blockPos).move(k, i, l);
+                mutableBlockPos.setWithOffset(blockPos, k, i, l);
                 if (levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) continue;
                 boolean bl72 = bl || bl6 && k == 1 - j;
                 boolean bl8 = bl2 || bl6 && k == j - 1;

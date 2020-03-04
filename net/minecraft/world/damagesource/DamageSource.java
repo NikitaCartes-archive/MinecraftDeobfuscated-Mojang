@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,6 @@ public class DamageSource {
     public static final DamageSource ANVIL = new DamageSource("anvil");
     public static final DamageSource FALLING_BLOCK = new DamageSource("fallingBlock");
     public static final DamageSource DRAGON_BREATH = new DamageSource("dragonBreath").bypassArmor();
-    public static final DamageSource FIREWORKS = new DamageSource("fireworks").setExplosion();
     public static final DamageSource DRY_OUT = new DamageSource("dryout");
     public static final DamageSource SWEET_BERRY_BUSH = new DamageSource("sweetBerryBush");
     private boolean bypassArmor;
@@ -73,6 +73,10 @@ public class DamageSource {
 
     public static DamageSource trident(Entity entity, @Nullable Entity entity2) {
         return new IndirectEntityDamageSource("trident", entity, entity2).setProjectile();
+    }
+
+    public static DamageSource fireworks(FireworkRocketEntity fireworkRocketEntity, @Nullable Entity entity) {
+        return new IndirectEntityDamageSource("fireworks", fireworkRocketEntity, entity).setExplosion();
     }
 
     public static DamageSource fireball(AbstractHurtingProjectile abstractHurtingProjectile, @Nullable Entity entity) {

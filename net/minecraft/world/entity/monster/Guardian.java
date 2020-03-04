@@ -215,7 +215,7 @@ extends Monster {
                     if (vec3.y > 0.0 && this.clientSideTouchedGround && !this.isSilent()) {
                         this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getFlopSound(), this.getSoundSource(), 1.0f, 1.0f, false);
                     }
-                    this.clientSideTouchedGround = vec3.y < 0.0 && this.level.loadedAndEntityCanStandOn(new BlockPos(this).below(), this);
+                    this.clientSideTouchedGround = vec3.y < 0.0 && this.level.loadedAndEntityCanStandOn(this.blockPosition().below(), this);
                 } else {
                     this.clientSideTailAnimationSpeed = this.isMoving() ? (this.clientSideTailAnimationSpeed < 0.5f ? 4.0f : (this.clientSideTailAnimationSpeed += (0.5f - this.clientSideTailAnimationSpeed) * 0.1f)) : (this.clientSideTailAnimationSpeed += (0.125f - this.clientSideTailAnimationSpeed) * 0.2f);
                 }

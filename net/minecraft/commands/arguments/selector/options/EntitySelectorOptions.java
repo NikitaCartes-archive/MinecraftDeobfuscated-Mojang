@@ -25,7 +25,6 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -424,7 +423,7 @@ public class EntitySelectorOptions {
                 if (lootItemCondition == null) {
                     return false;
                 }
-                LootContext lootContext = new LootContext.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, new BlockPos((Entity)entity)).create(LootContextParamSets.SELECTOR);
+                LootContext lootContext = new LootContext.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, entity.blockPosition()).create(LootContextParamSets.SELECTOR);
                 return bl ^ lootItemCondition.test(lootContext);
             });
         }, entitySelectorParser -> true, new TranslatableComponent("argument.entity.options.predicate.description", new Object[0]));

@@ -265,7 +265,7 @@ implements EntityBlock {
         if (voxelShape.max(Direction.Axis.Y) > 0.4375) {
             return Optional.empty();
         }
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         while (mutableBlockPos.getY() >= 0 && blockPos.getY() - mutableBlockPos.getY() <= 2 && levelReader.getBlockState(mutableBlockPos).getCollisionShape(levelReader, mutableBlockPos).isEmpty()) {
             mutableBlockPos.move(Direction.DOWN);
         }

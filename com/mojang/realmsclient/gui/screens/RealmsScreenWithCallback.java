@@ -3,13 +3,15 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.realmsclient.dto.WorldTemplate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.realms.RealmsScreen;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public abstract class RealmsScreenWithCallback<T>
+public abstract class RealmsScreenWithCallback
 extends RealmsScreen {
-    abstract void callback(T var1);
+    protected abstract void callback(@Nullable WorldTemplate var1);
 }
 

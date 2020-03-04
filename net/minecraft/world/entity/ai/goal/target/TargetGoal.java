@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.ai.goal.target;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -98,7 +97,7 @@ extends Goal {
         if (!targetingConditions.test(this.mob, livingEntity)) {
             return false;
         }
-        if (!this.mob.isWithinRestriction(new BlockPos(livingEntity))) {
+        if (!this.mob.isWithinRestriction(livingEntity.blockPosition())) {
             return false;
         }
         if (this.mustReach) {

@@ -468,15 +468,13 @@ AutoCloseable {
         int l = Mth.ceil(aABB.maxY);
         int m = Mth.floor(aABB.minZ);
         int n = Mth.ceil(aABB.maxZ);
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int o = i; o < j; ++o) {
-                for (int p = k; p < l; ++p) {
-                    for (int q = m; q < n; ++q) {
-                        BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-                        if (blockState.isAir()) continue;
-                        boolean bl = true;
-                        return bl;
-                    }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int o = i; o < j; ++o) {
+            for (int p = k; p < l; ++p) {
+                for (int q = m; q < n; ++q) {
+                    BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
+                    if (blockState.isAir()) continue;
+                    return true;
                 }
             }
         }
@@ -491,15 +489,13 @@ AutoCloseable {
         int l = Mth.ceil(aABB.maxY);
         int m = Mth.floor(aABB.minZ);
         if (this.hasChunksAt(i, k, m, j, l, n = Mth.ceil(aABB.maxZ))) {
-            try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-                for (int o = i; o < j; ++o) {
-                    for (int p = k; p < l; ++p) {
-                        for (int q = m; q < n; ++q) {
-                            BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-                            if (!blockState.is(BlockTags.FIRE) && blockState.getBlock() != Blocks.LAVA) continue;
-                            boolean bl = true;
-                            return bl;
-                        }
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+            for (int o = i; o < j; ++o) {
+                for (int p = k; p < l; ++p) {
+                    for (int q = m; q < n; ++q) {
+                        BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
+                        if (!blockState.is(BlockTags.FIRE) && blockState.getBlock() != Blocks.LAVA) continue;
+                        return true;
                     }
                 }
             }
@@ -517,15 +513,13 @@ AutoCloseable {
         int l = Mth.ceil(aABB.maxY);
         int m = Mth.floor(aABB.minZ);
         if (this.hasChunksAt(i, k, m, j, l, n = Mth.ceil(aABB.maxZ))) {
-            try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-                for (int o = i; o < j; ++o) {
-                    for (int p = k; p < l; ++p) {
-                        for (int q = m; q < n; ++q) {
-                            BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-                            if (blockState.getBlock() != block) continue;
-                            BlockState blockState2 = blockState;
-                            return blockState2;
-                        }
+            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+            for (int o = i; o < j; ++o) {
+                for (int p = k; p < l; ++p) {
+                    for (int q = m; q < n; ++q) {
+                        BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
+                        if (blockState.getBlock() != block) continue;
+                        return blockState;
                     }
                 }
             }
@@ -560,15 +554,6 @@ AutoCloseable {
         explosion.explode();
         explosion.finalizeExplosion(true);
         return explosion;
-    }
-
-    public boolean extinguishFire(@Nullable Player player, BlockPos blockPos, Direction direction) {
-        if (this.getBlockState(blockPos = blockPos.relative(direction)).is(BlockTags.FIRE)) {
-            this.levelEvent(player, 1009, blockPos, 0);
-            this.removeBlock(blockPos, false);
-            return true;
-        }
-        return false;
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.BlockFinder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -18,29 +19,28 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.level.block.Blocks;
 
 public class HoglinSpecificSensor
 extends Sensor<Hoglin> {
     @Override
     public Set<MemoryModuleType<?>> requires() {
-        return ImmutableSet.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_WARPED_FUNGUS, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, new MemoryModuleType[0]);
+        return ImmutableSet.of(MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_REPELLENT, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, new MemoryModuleType[0]);
     }
 
     @Override
     protected void doTick(ServerLevel serverLevel, Hoglin hoglin) {
         Brain<Hoglin> brain = hoglin.getBrain();
-        brain.setMemory(MemoryModuleType.NEAREST_WARPED_FUNGUS, this.findNearestWarpedFungus(serverLevel, hoglin));
+        brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, this.findNearestRepellent(serverLevel, hoglin));
         Optional<Object> optional = Optional.empty();
         int i = 0;
         ArrayList<Hoglin> list = Lists.newArrayList();
         List list2 = brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList());
         for (LivingEntity livingEntity : list2) {
-            if (livingEntity instanceof Piglin && ((Piglin)livingEntity).isAdult()) {
+            if (livingEntity instanceof Piglin && !livingEntity.isBaby()) {
                 ++i;
-            }
-            if (!optional.isPresent() && livingEntity instanceof Piglin && !livingEntity.isBaby() && livingEntity.closerThan(hoglin, 15.0)) {
-                optional = Optional.of((Piglin)livingEntity);
+                if (!optional.isPresent()) {
+                    optional = Optional.of((Piglin)livingEntity);
+                }
             }
             if (!(livingEntity instanceof Hoglin) || livingEntity.isBaby()) continue;
             list.add((Hoglin)livingEntity);
@@ -51,8 +51,8 @@ extends Sensor<Hoglin> {
         brain.setMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, list.size());
     }
 
-    private Optional<BlockPos> findNearestWarpedFungus(ServerLevel serverLevel, Hoglin hoglin) {
-        return BlockFinder.findClosestMatchingBlockPos(hoglin.getBlockPos(), 8, 4, blockPos -> serverLevel.getBlockState((BlockPos)blockPos).getBlock() == Blocks.WARPED_FUNGUS);
+    private Optional<BlockPos> findNearestRepellent(ServerLevel serverLevel, Hoglin hoglin) {
+        return BlockFinder.findClosestMatchingBlockPos(hoglin.blockPosition(), 8, 4, blockPos -> serverLevel.getBlockState((BlockPos)blockPos).is(BlockTags.HOGLIN_REPELLENTS));
     }
 }
 

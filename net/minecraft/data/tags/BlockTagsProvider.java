@@ -39,8 +39,8 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.BIRCH_LOGS).add((Block[])new Block[]{Blocks.BIRCH_LOG, Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_BIRCH_WOOD});
         this.tag(BlockTags.JUNGLE_LOGS).add((Block[])new Block[]{Blocks.JUNGLE_LOG, Blocks.JUNGLE_WOOD, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD});
         this.tag(BlockTags.SPRUCE_LOGS).add((Block[])new Block[]{Blocks.SPRUCE_LOG, Blocks.SPRUCE_WOOD, Blocks.STRIPPED_SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_WOOD});
-        this.tag(BlockTags.CRIMSON_STEMS).add((Block[])new Block[]{Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM});
-        this.tag(BlockTags.WARPED_STEMS).add((Block[])new Block[]{Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM});
+        this.tag(BlockTags.CRIMSON_STEMS).add((Block[])new Block[]{Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE});
+        this.tag(BlockTags.WARPED_STEMS).add((Block[])new Block[]{Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE});
         this.tag(BlockTags.LOGS).addTag(BlockTags.DARK_OAK_LOGS).addTag(BlockTags.OAK_LOGS).addTag(BlockTags.ACACIA_LOGS).addTag(BlockTags.BIRCH_LOGS).addTag(BlockTags.JUNGLE_LOGS).addTag(BlockTags.SPRUCE_LOGS);
         this.tag(BlockTags.ANVIL).add((Block[])new Block[]{Blocks.ANVIL, Blocks.CHIPPED_ANVIL, Blocks.DAMAGED_ANVIL});
         this.tag(BlockTags.SMALL_FLOWERS).add((Block[])new Block[]{Blocks.DANDELION, Blocks.POPPY, Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.RED_TULIP, Blocks.ORANGE_TULIP, Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.WITHER_ROSE});
@@ -64,7 +64,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.WOODEN_TRAPDOORS).add((Block[])new Block[]{Blocks.ACACIA_TRAPDOOR, Blocks.BIRCH_TRAPDOOR, Blocks.DARK_OAK_TRAPDOOR, Blocks.JUNGLE_TRAPDOOR, Blocks.OAK_TRAPDOOR, Blocks.SPRUCE_TRAPDOOR, Blocks.CRIMSON_TRAPDOOR, Blocks.WARPED_TRAPDOOR});
         this.tag(BlockTags.TRAPDOORS).addTag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.IRON_TRAPDOOR);
         this.tag(BlockTags.UNDERWATER_BONEMEALS).add(Blocks.SEAGRASS).addTag(BlockTags.CORALS).addTag(BlockTags.WALL_CORALS);
-        this.tag(BlockTags.BAMBOO_PLANTABLE_ON).add(Blocks.BAMBOO).add(Blocks.BAMBOO_SAPLING).add(Blocks.GRAVEL).addTag(BlockTags.SAND).add(Blocks.DIRT).add(Blocks.GRASS_BLOCK).add(Blocks.PODZOL).add(Blocks.COARSE_DIRT).add(Blocks.MYCELIUM);
+        this.tag(BlockTags.BAMBOO_PLANTABLE_ON).addTag(BlockTags.SAND).add((Block[])new Block[]{Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.GRAVEL, Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT, Blocks.MYCELIUM});
         this.tag(BlockTags.STANDING_SIGNS).add((Block[])new Block[]{Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.BIRCH_SIGN, Blocks.ACACIA_SIGN, Blocks.JUNGLE_SIGN, Blocks.DARK_OAK_SIGN, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN});
         this.tag(BlockTags.WALL_SIGNS).add((Block[])new Block[]{Blocks.OAK_WALL_SIGN, Blocks.SPRUCE_WALL_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.WARPED_WALL_SIGN});
         this.tag(BlockTags.SIGNS).addTag(BlockTags.STANDING_SIGNS).addTag(BlockTags.WALL_SIGNS);
@@ -72,7 +72,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.FENCES).addTag(BlockTags.WOODEN_FENCES).add(Blocks.NETHER_BRICK_FENCE);
         this.tag(BlockTags.DRAGON_IMMUNE).add((Block[])new Block[]{Blocks.BARRIER, Blocks.BEDROCK, Blocks.END_PORTAL, Blocks.END_PORTAL_FRAME, Blocks.END_GATEWAY, Blocks.COMMAND_BLOCK, Blocks.REPEATING_COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.STRUCTURE_BLOCK, Blocks.JIGSAW, Blocks.MOVING_PISTON, Blocks.OBSIDIAN, Blocks.END_STONE, Blocks.IRON_BARS});
         this.tag(BlockTags.WITHER_IMMUNE).add((Block[])new Block[]{Blocks.BARRIER, Blocks.BEDROCK, Blocks.END_PORTAL, Blocks.END_PORTAL_FRAME, Blocks.END_GATEWAY, Blocks.COMMAND_BLOCK, Blocks.REPEATING_COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.STRUCTURE_BLOCK, Blocks.JIGSAW, Blocks.MOVING_PISTON});
-        this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add(Blocks.SOUL_SAND).add(Blocks.SOUL_SOIL);
+        this.tag(BlockTags.WITHER_SUMMON_BASE_BLOCKS).add((Block[])new Block[]{Blocks.SOUL_SAND, Blocks.SOUL_SOIL});
         this.tag(BlockTags.TALL_FLOWERS).add((Block[])new Block[]{Blocks.SUNFLOWER, Blocks.LILAC, Blocks.PEONY, Blocks.ROSE_BUSH});
         this.tag(BlockTags.FLOWERS).addTag(BlockTags.SMALL_FLOWERS).addTag(BlockTags.TALL_FLOWERS);
         this.tag(BlockTags.BEEHIVES).add((Block[])new Block[]{Blocks.BEE_NEST, Blocks.BEEHIVE});
@@ -84,8 +84,10 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.NYLIUM).add((Block[])new Block[]{Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM});
         this.tag(BlockTags.WART_BLOCKS).add((Block[])new Block[]{Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK});
         this.tag(BlockTags.BEACON_BASE_BLOCKS).add((Block[])new Block[]{Blocks.NETHERITE_BLOCK, Blocks.EMERALD_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK, Blocks.IRON_BLOCK});
-        this.tag(BlockTags.WALL_POST_OVERRIDE).add(Blocks.LANTERN).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.TORCH).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.REDSTONE_TORCH).add(Blocks.TRIPWIRE);
-        this.tag(BlockTags.CLIMBABLE).add(Blocks.LADDER).add(Blocks.VINE).add(Blocks.SCAFFOLDING).add(Blocks.WEEPING_VINES).add(Blocks.WEEPING_VINES_PLANT);
+        this.tag(BlockTags.WALL_POST_OVERRIDE).add((Block[])new Block[]{Blocks.LANTERN, Blocks.SOUL_FIRE_LANTERN, Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE});
+        this.tag(BlockTags.CLIMBABLE).add((Block[])new Block[]{Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT});
+        this.tag(BlockTags.PIGLIN_REPELLENTS).add(Blocks.SOUL_FIRE).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.SOUL_FIRE_WALL_TORCH);
+        this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS);
     }
 
     @Override

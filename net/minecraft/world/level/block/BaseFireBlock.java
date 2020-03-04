@@ -25,12 +25,17 @@ import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class BaseFireBlock
 extends Block {
     private final float fireDamage;
+    protected static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
+    protected static final VoxelShape DOWN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
+    protected static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);
+    protected static final VoxelShape EAST_AABB = Block.box(15.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+    protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
+    protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
 
     public BaseFireBlock(Block.Properties properties, float f) {
         super(properties);
@@ -53,7 +58,7 @@ extends Block {
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        return Shapes.empty();
+        return DOWN_AABB;
     }
 
     @Override
@@ -140,12 +145,18 @@ extends Block {
         if (blockState2.getBlock() == blockState.getBlock()) {
             return;
         }
-        if ((level.dimension.getType() == DimensionType.OVERWORLD || level.dimension.getType() == DimensionType.NETHER) && ((NetherPortalBlock)Blocks.NETHER_PORTAL).trySpawnPortal(level, blockPos)) {
+        if ((level.dimension.getType() == DimensionType.OVERWORLD || level.dimension.getType() == DimensionType.NETHER) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
             return;
         }
         if (!blockState.canSurvive(level, blockPos)) {
             level.removeBlock(blockPos, false);
         }
+    }
+
+    @Override
+    public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        super.onRemove(blockState, level, blockPos, blockState2, bl);
+        level.levelEvent(null, 1009, blockPos, 0);
     }
 }
 

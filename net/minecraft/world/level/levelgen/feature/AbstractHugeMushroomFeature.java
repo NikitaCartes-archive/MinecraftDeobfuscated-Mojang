@@ -52,7 +52,7 @@ extends Feature<HugeMushroomFeatureConfiguration> {
             int l = this.getTreeRadiusForHeight(-1, -1, hugeMushroomFeatureConfiguration.foliageRadius, k);
             for (int m = -l; m <= l; ++m) {
                 for (int n = -l; n <= l; ++n) {
-                    BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.set(blockPos).move(m, k, n));
+                    BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
                     if (blockState.isAir() || blockState.is(BlockTags.LEAVES)) continue;
                     return false;
                 }

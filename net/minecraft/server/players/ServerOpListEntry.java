@@ -33,6 +33,17 @@ extends StoredUserEntry<GameProfile> {
         return this.bypassesPlayerLimit;
     }
 
+    @Override
+    protected void serialize(JsonObject jsonObject) {
+        if (this.getUser() == null) {
+            return;
+        }
+        jsonObject.addProperty("uuid", ((GameProfile)this.getUser()).getId() == null ? "" : ((GameProfile)this.getUser()).getId().toString());
+        jsonObject.addProperty("name", ((GameProfile)this.getUser()).getName());
+        jsonObject.addProperty("level", this.level);
+        jsonObject.addProperty("bypassesPlayerLimit", this.bypassesPlayerLimit);
+    }
+
     private static GameProfile createGameProfile(JsonObject jsonObject) {
         UUID uUID;
         if (!jsonObject.has("uuid") || !jsonObject.has("name")) {

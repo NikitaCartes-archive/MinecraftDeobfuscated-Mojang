@@ -84,6 +84,7 @@ extends GuiEventListener {
 
     default public void setInitialFocus(@Nullable GuiEventListener guiEventListener) {
         this.setFocused(guiEventListener);
+        guiEventListener.changeFocus(true);
     }
 
     default public void magicalSpecialHackyFocus(@Nullable GuiEventListener guiEventListener) {

@@ -82,7 +82,7 @@ extends MoveToBlockGoal {
     public void tick() {
         super.tick();
         Level level = this.removerMob.level;
-        BlockPos blockPos = new BlockPos(this.removerMob);
+        BlockPos blockPos = this.removerMob.blockPosition();
         BlockPos blockPos2 = this.getPosWithBlock(blockPos, level);
         Random random = this.removerMob.getRandom();
         if (this.isReachedTarget() && blockPos2 != null) {

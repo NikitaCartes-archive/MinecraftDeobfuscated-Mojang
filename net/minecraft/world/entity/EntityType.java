@@ -159,7 +159,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f));
     public static final EntityType<CaveSpider> CAVE_SPIDER = EntityType.register("cave_spider", Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7f, 0.5f));
     public static final EntityType<Chicken> CHICKEN = EntityType.register("chicken", Builder.of(Chicken::new, MobCategory.CREATURE).sized(0.4f, 0.7f));
-    public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.3f));
+    public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.3f).instantDespawnDistance(64));
     public static final EntityType<Cow> COW = EntityType.register("cow", Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9f, 1.4f));
     public static final EntityType<Creeper> CREEPER = EntityType.register("creeper", Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6f, 1.7f));
     public static final EntityType<Donkey> DONKEY = EntityType.register("donkey", Builder.of(Donkey::new, MobCategory.CREATURE).sized(1.3964844f, 1.5f));
@@ -205,12 +205,12 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Panda> PANDA = EntityType.register("panda", Builder.of(Panda::new, MobCategory.CREATURE).sized(1.3f, 1.25f));
     public static final EntityType<Parrot> PARROT = EntityType.register("parrot", Builder.of(Parrot::new, MobCategory.CREATURE).sized(0.5f, 0.9f));
     public static final EntityType<Pig> PIG = EntityType.register("pig", Builder.of(Pig::new, MobCategory.CREATURE).sized(0.9f, 0.9f));
-    public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.7f));
+    public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.7f).instantDespawnDistance(64));
     public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = EntityType.register("zombified_piglin", Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.95f));
     public static final EntityType<PolarBear> POLAR_BEAR = EntityType.register("polar_bear", Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4f, 1.4f));
     public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f));
     public static final EntityType<Rabbit> RABBIT = EntityType.register("rabbit", Builder.of(Rabbit::new, MobCategory.CREATURE).sized(0.4f, 0.5f));
-    public static final EntityType<Salmon> SALMON = EntityType.register("salmon", Builder.of(Salmon::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.4f));
+    public static final EntityType<Salmon> SALMON = EntityType.register("salmon", Builder.of(Salmon::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.4f).instantDespawnDistance(64));
     public static final EntityType<Sheep> SHEEP = EntityType.register("sheep", Builder.of(Sheep::new, MobCategory.CREATURE).sized(0.9f, 1.3f));
     public static final EntityType<Shulker> SHULKER = EntityType.register("shulker", Builder.of(Shulker::new, MobCategory.MONSTER).fireImmune().canSpawnFarFromPlayer().sized(1.0f, 1.0f));
     public static final EntityType<ShulkerBullet> SHULKER_BULLET = EntityType.register("shulker_bullet", Builder.of(ShulkerBullet::new, MobCategory.MISC).sized(0.3125f, 0.3125f));
@@ -226,7 +226,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Squid> SQUID = EntityType.register("squid", Builder.of(Squid::new, MobCategory.WATER_CREATURE).sized(0.8f, 0.8f));
     public static final EntityType<Stray> STRAY = EntityType.register("stray", Builder.of(Stray::new, MobCategory.MONSTER).sized(0.6f, 1.99f));
     public static final EntityType<TraderLlama> TRADER_LLAMA = EntityType.register("trader_llama", Builder.of(TraderLlama::new, MobCategory.CREATURE).sized(0.9f, 1.87f));
-    public static final EntityType<TropicalFish> TROPICAL_FISH = EntityType.register("tropical_fish", Builder.of(TropicalFish::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.4f));
+    public static final EntityType<TropicalFish> TROPICAL_FISH = EntityType.register("tropical_fish", Builder.of(TropicalFish::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.4f).instantDespawnDistance(64));
     public static final EntityType<Turtle> TURTLE = EntityType.register("turtle", Builder.of(Turtle::new, MobCategory.CREATURE).sized(1.2f, 0.4f));
     public static final EntityType<ThrownEgg> EGG = EntityType.register("egg", Builder.of(ThrownEgg::new, MobCategory.MISC).sized(0.25f, 0.25f));
     public static final EntityType<ThrownEnderpearl> ENDER_PEARL = EntityType.register("ender_pearl", Builder.of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25f, 0.25f));
@@ -260,6 +260,8 @@ public class EntityType<T extends Entity> {
     private final boolean summon;
     private final boolean fireImmune;
     private final boolean canSpawnFarFromPlayer;
+    private final int instantDespawnDistance;
+    private final int noDespawnDistance;
     @Nullable
     private String descriptionId;
     @Nullable
@@ -280,10 +282,12 @@ public class EntityType<T extends Entity> {
         return Registry.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
-    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, EntityDimensions entityDimensions) {
+    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, int i, int j, EntityDimensions entityDimensions) {
         this.factory = entityFactory;
         this.category = mobCategory;
         this.canSpawnFarFromPlayer = bl4;
+        this.instantDespawnDistance = i;
+        this.noDespawnDistance = j;
         this.serialize = bl;
         this.summon = bl2;
         this.fireImmune = bl3;
@@ -320,7 +324,7 @@ public class EntityType<T extends Entity> {
             Mob mob = (Mob)entity;
             mob.yHeadRot = mob.yRot;
             mob.yBodyRot = mob.yRot;
-            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(new BlockPos(mob)), mobSpawnType, null, compoundTag);
+            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
             mob.playAmbientSound();
         }
         if (component != null && entity instanceof LivingEntity) {
@@ -371,6 +375,14 @@ public class EntityType<T extends Entity> {
 
     public boolean canSpawnFarFromPlayer() {
         return this.canSpawnFarFromPlayer;
+    }
+
+    public int getInstantDespawnDistance() {
+        return this.instantDespawnDistance;
+    }
+
+    public int getNoDespawnDistance() {
+        return this.noDespawnDistance;
     }
 
     public MobCategory getCategory() {
@@ -522,6 +534,8 @@ public class EntityType<T extends Entity> {
         private boolean summon = true;
         private boolean fireImmune;
         private boolean canSpawnFarFromPlayer;
+        private int instantDespawnDistance = 128;
+        private int noDespawnDistance = 32;
         private EntityDimensions dimensions = EntityDimensions.scalable(0.6f, 1.8f);
 
         private Builder(EntityFactory<T> entityFactory, MobCategory mobCategory) {
@@ -563,6 +577,11 @@ public class EntityType<T extends Entity> {
             return this;
         }
 
+        public Builder<T> instantDespawnDistance(int i) {
+            this.instantDespawnDistance = i;
+            return this;
+        }
+
         public EntityType<T> build(String string) {
             if (this.serialize) {
                 try {
@@ -574,7 +593,7 @@ public class EntityType<T extends Entity> {
                     LOGGER.warn("No data fixer registered for entity {}", (Object)string);
                 }
             }
-            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.dimensions);
+            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.instantDespawnDistance, this.noDespawnDistance, this.dimensions);
         }
     }
 }

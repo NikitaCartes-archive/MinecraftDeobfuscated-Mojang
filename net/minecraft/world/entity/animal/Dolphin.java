@@ -70,7 +70,7 @@ public class Dolphin
 extends WaterAnimal {
     private static final EntityDataAccessor<BlockPos> TREASURE_POS = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.BLOCK_POS);
     private static final EntityDataAccessor<Boolean> GOT_FISH = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Integer> MOISNTESS_LEVEL = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> MOISTNESS_LEVEL = SynchedEntityData.defineId(Dolphin.class, EntityDataSerializers.INT);
     private static final TargetingConditions SWIM_WITH_PLAYER_TARGETING = new TargetingConditions().range(10.0).allowSameTeam().allowInvulnerable().allowUnseeable();
     public static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay() && itemEntity.isAlive() && itemEntity.isInWater();
 
@@ -115,11 +115,11 @@ extends WaterAnimal {
     }
 
     public int getMoistnessLevel() {
-        return this.entityData.get(MOISNTESS_LEVEL);
+        return this.entityData.get(MOISTNESS_LEVEL);
     }
 
     public void setMoisntessLevel(int i) {
-        this.entityData.set(MOISNTESS_LEVEL, i);
+        this.entityData.set(MOISTNESS_LEVEL, i);
     }
 
     @Override
@@ -127,7 +127,7 @@ extends WaterAnimal {
         super.defineSynchedData();
         this.entityData.define(TREASURE_POS, BlockPos.ZERO);
         this.entityData.define(GOT_FISH, false);
-        this.entityData.define(MOISNTESS_LEVEL, 2400);
+        this.entityData.define(MOISTNESS_LEVEL, 2400);
     }
 
     @Override
@@ -405,7 +405,7 @@ extends WaterAnimal {
             ServerLevel serverLevel = (ServerLevel)this.dolphin.level;
             this.stuck = false;
             this.dolphin.getNavigation().stop();
-            BlockPos blockPos = new BlockPos(this.dolphin);
+            BlockPos blockPos = this.dolphin.blockPosition();
             String string = (double)serverLevel.random.nextFloat() >= 0.5 ? "Ocean_Ruin" : "Shipwreck";
             BlockPos blockPos2 = serverLevel.findNearestMapFeature(string, blockPos, 50, false);
             if (blockPos2 == null) {
@@ -434,7 +434,7 @@ extends WaterAnimal {
             Level level = this.dolphin.level;
             if (this.dolphin.closeToNextPos() || this.dolphin.getNavigation().isDone()) {
                 BlockPos blockPos;
-                Vec3 vec3 = new Vec3(this.dolphin.getTreasurePos());
+                Vec3 vec3 = Vec3.atCenterOf(this.dolphin.getTreasurePos());
                 Vec3 vec32 = RandomPos.getPosTowards(this.dolphin, 16, 1, vec3, 0.3926991f);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.dolphin, 8, 4, vec3);
@@ -473,7 +473,7 @@ extends WaterAnimal {
             if (this.player == null) {
                 return false;
             }
-            return this.player.isSwimming();
+            return this.player.isSwimming() && this.dolphin.getTarget() != this.player;
         }
 
         @Override

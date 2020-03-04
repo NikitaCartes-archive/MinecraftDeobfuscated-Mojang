@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import net.minecraft.Util;
 import net.minecraft.server.players.StoredUserEntry;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
@@ -111,9 +112,10 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
     }
 
     public void save() throws IOException {
-        Collection<V> collection = this.map.values();
+        JsonArray jsonArray = new JsonArray();
+        this.map.values().stream().map(storedUserEntry -> Util.make(new JsonObject(), storedUserEntry::serialize)).forEach(jsonArray::add);
         try (BufferedWriter bufferedWriter = Files.newWriter(this.file, StandardCharsets.UTF_8);){
-            GSON.toJson(collection, (Appendable)bufferedWriter);
+            GSON.toJson((JsonElement)jsonArray, (Appendable)bufferedWriter);
         }
     }
 

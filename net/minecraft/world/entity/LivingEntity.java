@@ -321,7 +321,7 @@ extends Entity {
             } else if (this.getAirSupply() < this.getMaxAirSupply()) {
                 this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
             }
-            if (!this.level.isClientSide && !Objects.equal(this.lastPos, blockPos = new BlockPos(this))) {
+            if (!this.level.isClientSide && !Objects.equal(this.lastPos, blockPos = this.blockPosition())) {
                 this.lastPos = blockPos;
                 this.onChangedBlock(blockPos);
             }
@@ -979,7 +979,7 @@ extends Entity {
         boolean bl = false;
         if (livingEntity instanceof WitherBoss) {
             if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-                BlockPos blockPos = new BlockPos(this);
+                BlockPos blockPos = this.blockPosition();
                 BlockState blockState = Blocks.WITHER_ROSE.defaultBlockState();
                 if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
                     this.level.setBlock(blockPos, blockState, 3);
@@ -1034,7 +1034,7 @@ extends Entity {
     }
 
     protected LootContext.Builder createLootContext(boolean bl, DamageSource damageSource) {
-        LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withRandom(this.random).withParameter(LootContextParams.THIS_ENTITY, this).withParameter(LootContextParams.BLOCK_POS, new BlockPos(this)).withParameter(LootContextParams.DAMAGE_SOURCE, damageSource).withOptionalParameter(LootContextParams.KILLER_ENTITY, damageSource.getEntity()).withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, damageSource.getDirectEntity());
+        LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withRandom(this.random).withParameter(LootContextParams.THIS_ENTITY, this).withParameter(LootContextParams.BLOCK_POS, this.blockPosition()).withParameter(LootContextParams.DAMAGE_SOURCE, damageSource).withOptionalParameter(LootContextParams.KILLER_ENTITY, damageSource.getEntity()).withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, damageSource.getDirectEntity());
         if (bl && this.lastHurtByPlayer != null) {
             builder = builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, this.lastHurtByPlayer).withLuck(this.lastHurtByPlayer.getLuck());
         }
@@ -1092,7 +1092,7 @@ extends Entity {
         if (this.isSpectator()) {
             return false;
         }
-        BlockPos blockPos = this.getBlockPos();
+        BlockPos blockPos = this.blockPosition();
         BlockState blockState = this.getFeetBlockState();
         Block block = blockState.getBlock();
         if (block.is(BlockTags.CLIMBABLE)) {
@@ -1107,7 +1107,7 @@ extends Entity {
     }
 
     public BlockState getFeetBlockState() {
-        return this.level.getBlockState(new BlockPos(this));
+        return this.level.getBlockState(this.blockPosition());
     }
 
     private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
@@ -1519,7 +1519,7 @@ extends Entity {
     }
 
     private void dismountVehicle(Entity entity) {
-        Vec3 vec3 = this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
+        Vec3 vec3 = this.level.getBlockState(entity.blockPosition()).getBlock().is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
         this.setPos(vec3.x, vec3.y, vec3.z);
     }
 

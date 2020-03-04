@@ -13,7 +13,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -35,18 +35,13 @@ extends Block {
     }
 
     @Override
-    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-        int i = TargetBlock.updateRedstoneOutput(level, blockState, blockHitResult, entity);
-        Entity entity2 = null;
-        if (entity instanceof AbstractArrow) {
-            entity2 = ((AbstractArrow)entity).getOwner();
-        } else if (entity instanceof ThrowableProjectile) {
-            entity2 = ((ThrowableProjectile)entity).getOwner();
-        }
-        if (entity2 instanceof ServerPlayer) {
-            ServerPlayer serverPlayer = (ServerPlayer)entity2;
+    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+        int i = TargetBlock.updateRedstoneOutput(level, blockState, blockHitResult, projectile);
+        Entity entity = projectile.getOwner();
+        if (entity instanceof ServerPlayer) {
+            ServerPlayer serverPlayer = (ServerPlayer)entity;
             serverPlayer.awardStat(Stats.TARGET_HIT);
-            CriteriaTriggers.TARGET_BLOCK_HIT.trigger(serverPlayer, i);
+            CriteriaTriggers.TARGET_BLOCK_HIT.trigger(serverPlayer, projectile, blockHitResult.getLocation(), i);
         }
     }
 
@@ -95,6 +90,16 @@ extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(OUTPUT_POWER);
+    }
+
+    @Override
+    public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        if (level.isClientSide() || blockState.getBlock() == blockState2.getBlock()) {
+            return;
+        }
+        if (blockState.getValue(OUTPUT_POWER) > 0 && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
+            level.setBlock(blockPos, (BlockState)blockState.setValue(OUTPUT_POWER, 0), 18);
+        }
     }
 }
 

@@ -36,7 +36,7 @@ extends Feature<OreConfiguration> {
         int j = this.getRandomPlacementInOneAxisRelativeToOrigin(random, i);
         int k = this.getRandomPlacementInOneAxisRelativeToOrigin(random, i);
         int l = this.getRandomPlacementInOneAxisRelativeToOrigin(random, i);
-        mutableBlockPos.set(blockPos).move(j, k, l);
+        mutableBlockPos.setWithOffset(blockPos, j, k, l);
     }
 
     private int getRandomPlacementInOneAxisRelativeToOrigin(Random random, int i) {
@@ -46,7 +46,7 @@ extends Feature<OreConfiguration> {
     private boolean isFacingAir(LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutableBlockPos.set(blockPos).move(direction);
+            mutableBlockPos.setWithOffset(blockPos, direction);
             if (!levelAccessor.getBlockState(mutableBlockPos).isAir()) continue;
             return true;
         }

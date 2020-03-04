@@ -24,6 +24,7 @@ import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
+import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.inventory.SmokerMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
 
@@ -48,6 +49,7 @@ public class MenuType<T extends AbstractContainerMenu> {
     public static final MenuType<LoomMenu> LOOM = MenuType.register("loom", LoomMenu::new);
     public static final MenuType<MerchantMenu> MERCHANT = MenuType.register("merchant", MerchantMenu::new);
     public static final MenuType<ShulkerBoxMenu> SHULKER_BOX = MenuType.register("shulker_box", ShulkerBoxMenu::new);
+    public static final MenuType<SmithingMenu> SMITHING = MenuType.register("smithing", SmithingMenu::new);
     public static final MenuType<SmokerMenu> SMOKER = MenuType.register("smoker", SmokerMenu::new);
     public static final MenuType<CartographyTableMenu> CARTOGRAPHY_TABLE = MenuType.register("cartography_table", CartographyTableMenu::new);
     public static final MenuType<StonecutterMenu> STONECUTTER = MenuType.register("stonecutter", StonecutterMenu::new);

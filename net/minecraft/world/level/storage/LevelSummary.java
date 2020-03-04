@@ -53,10 +53,6 @@ implements Comparable<LevelSummary> {
         return this.levelName;
     }
 
-    public long getSizeOnDisk() {
-        return this.sizeOnDisk;
-    }
-
     public boolean isRequiresConversion() {
         return this.requiresConversion;
     }

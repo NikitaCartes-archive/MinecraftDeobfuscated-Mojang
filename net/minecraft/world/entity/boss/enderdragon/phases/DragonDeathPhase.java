@@ -38,7 +38,7 @@ extends AbstractDragonPhaseInstance {
         ++this.time;
         if (this.targetLocation == null) {
             BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION);
-            this.targetLocation = new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+            this.targetLocation = Vec3.atBottomCenterOf(blockPos);
         }
         if ((d = this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ())) < 100.0 || d > 22500.0 || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
             this.dragon.setHealth(0.0f);

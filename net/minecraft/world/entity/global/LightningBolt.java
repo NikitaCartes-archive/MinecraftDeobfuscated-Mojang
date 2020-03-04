@@ -94,7 +94,7 @@ extends Entity {
         if (this.visualOnly || this.level.isClientSide || !this.level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             return;
         }
-        BlockPos blockPos = new BlockPos(this);
+        BlockPos blockPos = this.blockPosition();
         BlockState blockState = BaseFireBlock.getState(this.level, blockPos);
         if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
             this.level.setBlockAndUpdate(blockPos, blockState);

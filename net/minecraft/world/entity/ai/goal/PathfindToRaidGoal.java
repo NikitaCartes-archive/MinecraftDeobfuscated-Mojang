@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -30,12 +29,12 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        return ((Mob)this.mob).getTarget() == null && !((Entity)this.mob).isVehicle() && ((Raider)this.mob).hasActiveRaid() && !((Raider)this.mob).getCurrentRaid().isOver() && !((ServerLevel)((Raider)this.mob).level).isVillage(new BlockPos((Entity)this.mob));
+        return ((Mob)this.mob).getTarget() == null && !((Entity)this.mob).isVehicle() && ((Raider)this.mob).hasActiveRaid() && !((Raider)this.mob).getCurrentRaid().isOver() && !((ServerLevel)((Raider)this.mob).level).isVillage(((Entity)this.mob).blockPosition());
     }
 
     @Override
     public boolean canContinueToUse() {
-        return ((Raider)this.mob).hasActiveRaid() && !((Raider)this.mob).getCurrentRaid().isOver() && ((Raider)this.mob).level instanceof ServerLevel && !((ServerLevel)((Raider)this.mob).level).isVillage(new BlockPos((Entity)this.mob));
+        return ((Raider)this.mob).hasActiveRaid() && !((Raider)this.mob).getCurrentRaid().isOver() && ((Raider)this.mob).level instanceof ServerLevel && !((ServerLevel)((Raider)this.mob).level).isVillage(((Entity)this.mob).blockPosition());
     }
 
     @Override
@@ -46,7 +45,7 @@ extends Goal {
             if (((Raider)this.mob).tickCount % 20 == 0) {
                 this.recruitNearby(raid);
             }
-            if (!((PathfinderMob)this.mob).isPathFinding() && (vec3 = RandomPos.getPosTowards(this.mob, 15, 4, new Vec3(raid.getCenter()))) != null) {
+            if (!((PathfinderMob)this.mob).isPathFinding() && (vec3 = RandomPos.getPosTowards(this.mob, 15, 4, Vec3.atBottomCenterOf(raid.getCenter()))) != null) {
                 ((Mob)this.mob).getNavigation().moveTo(vec3.x, vec3.y, vec3.z, 1.0);
             }
         }

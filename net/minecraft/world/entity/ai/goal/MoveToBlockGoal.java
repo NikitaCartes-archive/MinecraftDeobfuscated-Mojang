@@ -94,7 +94,7 @@ extends Goal {
     protected boolean findNearestBlock() {
         int i = this.searchRange;
         int j = this.verticalSearchRange;
-        BlockPos blockPos = new BlockPos(this.mob);
+        BlockPos blockPos = this.mob.blockPosition();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int k = this.verticalSearchStart;
         while (k <= j) {
@@ -104,7 +104,7 @@ extends Goal {
                     int n;
                     int n2 = n = m < l && m > -l ? l : 0;
                     while (n <= l) {
-                        mutableBlockPos.set(blockPos).move(m, k - 1, n);
+                        mutableBlockPos.setWithOffset(blockPos, m, k - 1, n);
                         if (this.mob.isWithinRestriction(mutableBlockPos) && this.isValidTarget(this.mob.level, mutableBlockPos)) {
                             this.blockPos = mutableBlockPos;
                             return true;

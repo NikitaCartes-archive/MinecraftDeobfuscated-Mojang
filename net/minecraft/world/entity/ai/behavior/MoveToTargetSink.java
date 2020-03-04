@@ -111,7 +111,7 @@ extends Behavior<Mob> {
             if (this.path != null) {
                 return true;
             }
-            Vec3 vec3 = RandomPos.getPosTowards((PathfinderMob)mob, 10, 7, new Vec3(blockPos));
+            Vec3 vec3 = RandomPos.getPosTowards((PathfinderMob)mob, 10, 7, Vec3.atBottomCenterOf(blockPos));
             if (vec3 != null) {
                 this.path = mob.getNavigation().createPath(vec3.x, vec3.y, vec3.z, 0);
                 return this.path != null;
@@ -121,7 +121,7 @@ extends Behavior<Mob> {
     }
 
     private boolean reachedTarget(Mob mob, WalkTarget walkTarget) {
-        return walkTarget.getTarget().getPos().distManhattan(new BlockPos(mob)) <= walkTarget.getCloseEnoughDist();
+        return walkTarget.getTarget().getPos().distManhattan(mob.blockPosition()) <= walkTarget.getCloseEnoughDist();
     }
 
     @Override

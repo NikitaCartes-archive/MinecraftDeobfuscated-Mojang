@@ -37,7 +37,7 @@ extends Behavior<E> {
     @Override
     protected void start(ServerLevel serverLevel, E mob, long l) {
         Brain<?> brain = ((LivingEntity)mob).getBrain();
-        brain.setMemoryWithExpiry(this.targetMemory, brain.getMemory(this.sourceMemory).get(), l, this.durationOfCopy.randomValue(serverLevel.random));
+        brain.setMemoryWithExpiry(this.targetMemory, brain.getMemory(this.sourceMemory).get(), this.durationOfCopy.randomValue(serverLevel.random));
     }
 }
 

@@ -78,7 +78,7 @@ extends Feature<HugeFungusConfiguration> {
             for (int l = -j; l <= j; ++l) {
                 boolean bl2 = bl && Mth.abs(k) == j && Mth.abs(l) == j;
                 for (int m = 0; m < i; ++m) {
-                    mutableBlockPos.set(blockPos).move(k, m, l);
+                    mutableBlockPos.setWithOffset(blockPos, k, m, l);
                     if (!HugeFungusFeature.isReplaceable(levelAccessor, mutableBlockPos)) continue;
                     if (hugeFungusConfiguration.planted) {
                         if (!levelAccessor.getBlockState((BlockPos)mutableBlockPos.below()).isAir()) {
@@ -119,7 +119,7 @@ extends Feature<HugeFungusConfiguration> {
                     boolean bl5 = !bl3 && !bl4 && l != i;
                     boolean bl6 = bl3 && bl4;
                     boolean bl7 = l < k + 3;
-                    mutableBlockPos.set(blockPos).move(n2, l, o);
+                    mutableBlockPos.setWithOffset(blockPos, n2, l, o);
                     if (!HugeFungusFeature.isReplaceable(levelAccessor, mutableBlockPos)) continue;
                     if (hugeFungusConfiguration.planted && !levelAccessor.getBlockState((BlockPos)mutableBlockPos.below()).isAir()) {
                         levelAccessor.destroyBlock(mutableBlockPos, true);
@@ -167,7 +167,7 @@ extends Feature<HugeFungusConfiguration> {
 
     @Nullable
     private static BlockPos.MutableBlockPos findOnNyliumPosition(LevelAccessor levelAccessor, BlockPos blockPos, Block block) {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (int i = blockPos.getY(); i >= 1; --i) {
             mutableBlockPos.setY(i);
             Block block2 = levelAccessor.getBlockState((BlockPos)mutableBlockPos.below()).getBlock();
@@ -178,7 +178,7 @@ extends Feature<HugeFungusConfiguration> {
     }
 
     private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, Random random) {
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(Direction.DOWN);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
         if (!levelAccessor.isEmptyBlock(mutableBlockPos)) {
             return;
         }

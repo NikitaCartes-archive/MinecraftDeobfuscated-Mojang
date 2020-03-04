@@ -1857,7 +1857,7 @@ WindowEventHandler {
                 }
                 return MusicManager.Music.END;
             }
-            Biome.BiomeCategory biomeCategory = this.player.level.getBiome(new BlockPos(this.player)).getBiomeCategory();
+            Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
             if (this.musicManager.isPlayingMusic(MusicManager.Music.UNDER_WATER) || this.player.isUnderWater() && !this.musicManager.isPlayingMusic(MusicManager.Music.GAME) && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
                 return MusicManager.Music.UNDER_WATER;
             }

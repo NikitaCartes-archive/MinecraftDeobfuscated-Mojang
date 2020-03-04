@@ -21,7 +21,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -119,11 +118,6 @@ extends ObjectSelectionList<Entry> {
     @Override
     protected boolean isFocused() {
         return this.screen.getFocused() == this;
-    }
-
-    @Override
-    public /* synthetic */ void setSelected(AbstractSelectionList.Entry entry) {
-        this.setSelected((Entry)entry);
     }
 
     @Environment(value=EnvType.CLIENT)

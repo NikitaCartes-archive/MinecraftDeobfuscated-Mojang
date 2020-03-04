@@ -500,7 +500,7 @@ PlayerRideableJumping {
             this.heal(1.0f);
         }
         if (this.canEatGrass()) {
-            if (!this.isEating() && !this.isVehicle() && this.random.nextInt(300) == 0 && this.level.getBlockState(new BlockPos(this).below()).getBlock() == Blocks.GRASS_BLOCK) {
+            if (!this.isEating() && !this.isVehicle() && this.random.nextInt(300) == 0 && this.level.getBlockState(this.blockPosition().below()).getBlock() == Blocks.GRASS_BLOCK) {
                 this.setEating(true);
             }
             if (this.isEating() && ++this.eatingCounter > 50) {

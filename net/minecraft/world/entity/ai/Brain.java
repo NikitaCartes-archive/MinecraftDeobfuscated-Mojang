@@ -82,9 +82,8 @@ implements Serializable {
         this.setMemory(memoryModuleType, Optional.ofNullable(object));
     }
 
-    public <U> void setMemoryWithExpiry(MemoryModuleType<U> memoryModuleType, U object, long l, long m) {
-        long n = l + m;
-        this.setMemoryInternal(memoryModuleType, Optional.of(ExpirableValue.of(object, n)));
+    public <U> void setMemoryWithExpiry(MemoryModuleType<U> memoryModuleType, U object, long l) {
+        this.setMemoryInternal(memoryModuleType, Optional.of(ExpirableValue.of(object, l)));
     }
 
     public <U> void setMemory(MemoryModuleType<U> memoryModuleType, Optional<U> optional) {
@@ -215,8 +214,8 @@ implements Serializable {
     }
 
     public void tick(ServerLevel serverLevel, E livingEntity) {
-        this.expireMemories(serverLevel);
-        this.tickEachSensor(serverLevel, livingEntity);
+        this.memories.forEach(this::tickMemoryAndRemoveIfExpired);
+        this.sensors.values().forEach(sensor -> sensor.tick(serverLevel, livingEntity));
         this.startEachNonRunningBehavior(serverLevel, livingEntity);
         this.tickEachRunningBehavior(serverLevel, livingEntity);
     }
@@ -232,10 +231,6 @@ implements Serializable {
         return (T)dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("memories"), object));
     }
 
-    private void tickEachSensor(ServerLevel serverLevel, E livingEntity) {
-        this.sensors.values().forEach(sensor -> sensor.tick(serverLevel, livingEntity));
-    }
-
     private void startEachNonRunningBehavior(ServerLevel serverLevel, E livingEntity) {
         long l = serverLevel.getGameTime();
         this.availableBehaviorsByPriority.values().stream().flatMap(map -> map.entrySet().stream()).filter(entry -> this.activeActivities.contains(entry.getKey())).map(Map.Entry::getValue).flatMap(Collection::stream).filter(behavior -> behavior.getStatus() == Behavior.Status.STOPPED).forEach(behavior -> behavior.tryStart(serverLevel, livingEntity, l));
@@ -246,10 +241,11 @@ implements Serializable {
         this.getRunningBehaviorsStream().forEach(behavior -> behavior.tickOrStop(serverLevel, livingEntity, l));
     }
 
-    private void expireMemories(ServerLevel serverLevel) {
-        this.memories.forEach((memoryModuleType, optional) -> {
-            if (optional.isPresent() && ((ExpirableValue)optional.get()).hasExpired(serverLevel.getGameTime())) {
-                this.eraseMemory((MemoryModuleType)memoryModuleType);
+    private void tickMemoryAndRemoveIfExpired(MemoryModuleType<?> memoryModuleType, Optional<? extends ExpirableValue<?>> optional) {
+        optional.ifPresent(expirableValue -> {
+            expirableValue.tick();
+            if (expirableValue.hasExpired()) {
+                this.eraseMemory(memoryModuleType);
             }
         });
     }

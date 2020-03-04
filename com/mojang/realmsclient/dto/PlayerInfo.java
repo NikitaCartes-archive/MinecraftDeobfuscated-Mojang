@@ -3,17 +3,25 @@
  */
 package com.mojang.realmsclient.dto;
 
+import com.google.gson.annotations.SerializedName;
+import com.mojang.realmsclient.dto.ReflectionBasedSerialization;
 import com.mojang.realmsclient.dto.ValueObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
 public class PlayerInfo
-extends ValueObject {
+extends ValueObject
+implements ReflectionBasedSerialization {
+    @SerializedName(value="name")
     private String name;
+    @SerializedName(value="uuid")
     private String uuid;
+    @SerializedName(value="operator")
     private boolean operator;
+    @SerializedName(value="accepted")
     private boolean accepted;
+    @SerializedName(value="online")
     private boolean online;
 
     public String getName() {

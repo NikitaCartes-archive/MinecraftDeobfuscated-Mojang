@@ -65,8 +65,8 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class GameRenderer
-implements AutoCloseable,
-ResourceManagerReloadListener {
+implements ResourceManagerReloadListener,
+AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Minecraft minecraft;
     private final ResourceManager resourceManager;

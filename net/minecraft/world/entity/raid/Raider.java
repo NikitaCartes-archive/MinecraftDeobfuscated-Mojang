@@ -96,7 +96,7 @@ extends PatrollingMonster {
             if (this.canJoinRaid()) {
                 if (raid == null) {
                     Raid raid2;
-                    if (this.level.getGameTime() % 20L == 0L && (raid2 = ((ServerLevel)this.level).getRaidAt(new BlockPos(this))) != null && Raids.canJoinRaid(this, raid2)) {
+                    if (this.level.getGameTime() % 20L == 0L && (raid2 = ((ServerLevel)this.level).getRaidAt(this.blockPosition())) != null && Raids.canJoinRaid(this, raid2)) {
                         raid2.joinRaid(raid2.getGroupsSpawned(), this, null, true);
                     }
                 } else {
@@ -129,7 +129,7 @@ extends PatrollingMonster {
                 }
                 raid.removeFromRaid(this, false);
             }
-            if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level).getRaidAt(new BlockPos(this)) == null) {
+            if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level).getRaidAt(this.blockPosition()) == null) {
                 ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
                 Player player = null;
                 Entity entity2 = entity;
@@ -313,7 +313,7 @@ extends PatrollingMonster {
 
         private boolean hasSuitablePoi() {
             ServerLevel serverLevel = (ServerLevel)this.raider.level;
-            BlockPos blockPos = new BlockPos(this.raider);
+            BlockPos blockPos = this.raider.blockPosition();
             Optional<BlockPos> optional = serverLevel.getPoiManager().getRandom(poiType -> poiType == PoiType.HOME, this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);
             if (!optional.isPresent()) {
                 return false;
@@ -348,7 +348,7 @@ extends PatrollingMonster {
         @Override
         public void tick() {
             if (this.raider.getNavigation().isDone()) {
-                Vec3 vec3 = new Vec3(this.poiPos);
+                Vec3 vec3 = Vec3.atBottomCenterOf(this.poiPos);
                 Vec3 vec32 = RandomPos.getPosTowards(this.raider, 16, 7, vec3, 0.3141592741012573);
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.raider, 8, 7, vec3);

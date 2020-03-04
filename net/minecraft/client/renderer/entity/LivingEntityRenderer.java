@@ -168,10 +168,17 @@ implements RenderLayerParent<T, M> {
         return 0.0f;
     }
 
+    protected boolean isShaking(T livingEntity) {
+        return false;
+    }
+
     protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
         String string;
-        Pose pose = ((Entity)livingEntity).getPose();
-        if (pose != Pose.SLEEPING) {
+        Pose pose;
+        if (this.isShaking(livingEntity)) {
+            g += (float)(Math.cos((double)((LivingEntity)livingEntity).tickCount * 3.25) * Math.PI * (double)0.4f);
+        }
+        if ((pose = ((Entity)livingEntity).getPose()) != Pose.SLEEPING) {
             poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0f - g));
         }
         if (((LivingEntity)livingEntity).deathTime > 0) {
@@ -249,11 +256,6 @@ implements RenderLayerParent<T, M> {
             }
         }
         return Minecraft.renderNames() && livingEntity != minecraft.getCameraEntity() && bl && !((Entity)livingEntity).isVehicle();
-    }
-
-    @Override
-    protected /* synthetic */ boolean shouldShowName(Entity entity) {
-        return this.shouldShowName((T)((LivingEntity)entity));
     }
 }
 

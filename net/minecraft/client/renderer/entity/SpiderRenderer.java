@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.SpiderEyesLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Spider;
 
 @Environment(value=EnvType.CLIENT)
@@ -30,6 +31,11 @@ extends MobRenderer<T, SpiderModel<T>> {
     @Override
     public ResourceLocation getTextureLocation(T spider) {
         return SPIDER_LOCATION;
+    }
+
+    @Override
+    protected /* synthetic */ float getFlipDegrees(LivingEntity livingEntity) {
+        return this.getFlipDegrees((T)((Spider)livingEntity));
     }
 }
 

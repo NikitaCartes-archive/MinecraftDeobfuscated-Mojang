@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.effect;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -64,7 +63,7 @@ public class MobEffects {
                 if (serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
                     return;
                 }
-                if (serverLevel.isVillage(new BlockPos(livingEntity))) {
+                if (serverLevel.isVillage(livingEntity.blockPosition())) {
                     serverLevel.getRaids().createOrExtendRaid(serverPlayer);
                 }
             }

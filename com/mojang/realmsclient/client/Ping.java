@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 
 @Environment(value=EnvType.CLIENT)
 public class Ping {
@@ -64,7 +65,7 @@ public class Ping {
     }
 
     private static long now() {
-        return System.currentTimeMillis();
+        return Util.getMillis();
     }
 
     public static List<RegionPingResult> pingAllRegions() {

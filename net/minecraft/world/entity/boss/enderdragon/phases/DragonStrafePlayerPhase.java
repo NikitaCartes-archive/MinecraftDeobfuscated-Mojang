@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -71,7 +70,7 @@ extends AbstractDragonPhaseInstance {
                     double o = this.attackTarget.getX() - l;
                     double p = this.attackTarget.getY(0.5) - m;
                     double q = this.attackTarget.getZ() - n;
-                    this.dragon.level.levelEvent(null, 1017, new BlockPos(this.dragon), 0);
+                    this.dragon.level.levelEvent(null, 1017, this.dragon.blockPosition(), 0);
                     DragonFireball dragonFireball = new DragonFireball(this.dragon.level, this.dragon, o, p, q);
                     dragonFireball.moveTo(l, m, n, 0.0f, 0.0f);
                     this.dragon.level.addFreshEntity(dragonFireball);

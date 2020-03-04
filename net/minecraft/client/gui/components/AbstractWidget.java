@@ -28,8 +28,6 @@ extends GuiComponent
 implements Widget,
 GuiEventListener {
     public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-    private static final int NARRATE_DELAY_MOUSE = 750;
-    private static final int NARRATE_DELAY_FOCUS = 200;
     protected int width;
     protected int height;
     public int x;
@@ -43,16 +41,16 @@ GuiEventListener {
     protected long nextNarration = Long.MAX_VALUE;
     private boolean focused;
 
-    public AbstractWidget(int i, int j, String string) {
-        this(i, j, 200, 20, string);
-    }
-
     public AbstractWidget(int i, int j, int k, int l, String string) {
         this.x = i;
         this.y = j;
         this.width = k;
         this.height = l;
         this.message = string;
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 
     protected int getYImage(boolean bl) {

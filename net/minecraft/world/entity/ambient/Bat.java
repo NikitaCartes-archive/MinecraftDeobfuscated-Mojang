@@ -121,7 +121,7 @@ extends AmbientCreature {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        BlockPos blockPos = new BlockPos(this);
+        BlockPos blockPos = this.blockPosition();
         BlockPos blockPos2 = blockPos.above();
         if (this.isResting()) {
             if (this.level.getBlockState(blockPos2).isRedstoneConductor(this.level, blockPos)) {

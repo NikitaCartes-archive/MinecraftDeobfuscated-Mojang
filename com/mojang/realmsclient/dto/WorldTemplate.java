@@ -10,20 +10,22 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldTemplate
 extends ValueObject {
     private static final Logger LOGGER = LogManager.getLogger();
-    public String id;
-    public String name;
-    public String version;
-    public String author;
-    public String link;
+    public String id = "";
+    public String name = "";
+    public String version = "";
+    public String author = "";
+    public String link = "";
+    @Nullable
     public String image;
-    public String trailer;
-    public String recommendedPlayers;
-    public WorldTemplateType type;
+    public String trailer = "";
+    public String recommendedPlayers = "";
+    public WorldTemplateType type = WorldTemplateType.WORLD_TEMPLATE;
 
     public static WorldTemplate parse(JsonObject jsonObject) {
         WorldTemplate worldTemplate = new WorldTemplate();

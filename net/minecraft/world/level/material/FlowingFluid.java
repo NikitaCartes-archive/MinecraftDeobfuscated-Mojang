@@ -62,38 +62,36 @@ extends Fluid {
     public Vec3 getFlow(BlockGetter blockGetter, BlockPos blockPos, FluidState fluidState) {
         double d = 0.0;
         double e = 0.0;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
-                pooledMutableBlockPos.set(blockPos).move(direction);
-                FluidState fluidState2 = blockGetter.getFluidState(pooledMutableBlockPos);
-                if (!this.affectsFlow(fluidState2)) continue;
-                float f = fluidState2.getOwnHeight();
-                float g = 0.0f;
-                if (f == 0.0f) {
-                    Vec3i blockPos2;
-                    FluidState fluidState3;
-                    if (!blockGetter.getBlockState(pooledMutableBlockPos).getMaterial().blocksMotion() && this.affectsFlow(fluidState3 = blockGetter.getFluidState((BlockPos)(blockPos2 = pooledMutableBlockPos.below()))) && (f = fluidState3.getOwnHeight()) > 0.0f) {
-                        g = fluidState.getOwnHeight() - (f - 0.8888889f);
-                    }
-                } else if (f > 0.0f) {
-                    g = fluidState.getOwnHeight() - f;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            mutableBlockPos.setWithOffset(blockPos, direction);
+            FluidState fluidState2 = blockGetter.getFluidState(mutableBlockPos);
+            if (!this.affectsFlow(fluidState2)) continue;
+            float f = fluidState2.getOwnHeight();
+            float g = 0.0f;
+            if (f == 0.0f) {
+                Vec3i blockPos2;
+                FluidState fluidState3;
+                if (!blockGetter.getBlockState(mutableBlockPos).getMaterial().blocksMotion() && this.affectsFlow(fluidState3 = blockGetter.getFluidState((BlockPos)(blockPos2 = mutableBlockPos.below()))) && (f = fluidState3.getOwnHeight()) > 0.0f) {
+                    g = fluidState.getOwnHeight() - (f - 0.8888889f);
                 }
-                if (g == 0.0f) continue;
-                d += (double)((float)direction.getStepX() * g);
-                e += (double)((float)direction.getStepZ() * g);
+            } else if (f > 0.0f) {
+                g = fluidState.getOwnHeight() - f;
             }
-            Vec3 vec3 = new Vec3(d, 0.0, e);
-            if (fluidState.getValue(FALLING).booleanValue()) {
-                for (Direction direction2 : Direction.Plane.HORIZONTAL) {
-                    pooledMutableBlockPos.set(blockPos).move(direction2);
-                    if (!this.isSolidFace(blockGetter, pooledMutableBlockPos, direction2) && !this.isSolidFace(blockGetter, pooledMutableBlockPos.above(), direction2)) continue;
-                    vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
-                    break;
-                }
-            }
-            Vec3 vec32 = vec3.normalize();
-            return vec32;
+            if (g == 0.0f) continue;
+            d += (double)((float)direction.getStepX() * g);
+            e += (double)((float)direction.getStepZ() * g);
         }
+        Vec3 vec3 = new Vec3(d, 0.0, e);
+        if (fluidState.getValue(FALLING).booleanValue()) {
+            for (Direction direction2 : Direction.Plane.HORIZONTAL) {
+                mutableBlockPos.setWithOffset(blockPos, direction2);
+                if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, mutableBlockPos.above(), direction2)) continue;
+                vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
+                break;
+            }
+        }
+        return vec3.normalize();
     }
 
     private boolean affectsFlow(FluidState fluidState) {

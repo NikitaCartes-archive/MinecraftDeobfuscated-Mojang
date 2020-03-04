@@ -69,7 +69,7 @@ extends Entity {
         this.xo = d;
         this.yo = e;
         this.zo = f;
-        this.setStartPos(new BlockPos(this));
+        this.setStartPos(this.blockPosition());
     }
 
     @Override
@@ -110,7 +110,7 @@ extends Entity {
         }
         Block block = this.blockState.getBlock();
         if (this.time++ == 0) {
-            blockPos = new BlockPos(this);
+            blockPos = this.blockPosition();
             if (this.level.getBlockState(blockPos).getBlock() == block) {
                 this.level.removeBlock(blockPos, false);
             } else if (!this.level.isClientSide) {
@@ -124,7 +124,7 @@ extends Entity {
         this.move(MoverType.SELF, this.getDeltaMovement());
         if (!this.level.isClientSide) {
             BlockHitResult blockHitResult;
-            blockPos = new BlockPos(this);
+            blockPos = this.blockPosition();
             boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
             boolean bl2 = bl && this.level.getFluidState(blockPos).is(FluidTags.WATER);
             double d = this.getDeltaMovement().lengthSqr();

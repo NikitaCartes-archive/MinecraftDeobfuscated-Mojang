@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
@@ -171,11 +170,6 @@ extends Screen {
             if (i >= 0 && i < list.size()) {
                 this.setSelected((Entry)list.get(i));
             }
-        }
-
-        @Override
-        public /* synthetic */ void setSelected(@Nullable AbstractSelectionList.Entry entry) {
-            this.setSelected((Entry)entry);
         }
 
         @Environment(value=EnvType.CLIENT)

@@ -7,7 +7,6 @@ import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -22,7 +21,7 @@ extends DefaultDispenseItemBehavior {
         Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
         Projectile projectile = this.getProjectile(level, position, itemStack);
         projectile.shoot(direction.getStepX(), (float)direction.getStepY() + 0.1f, direction.getStepZ(), this.getPower(), this.getUncertainty());
-        level.addFreshEntity((Entity)((Object)projectile));
+        level.addFreshEntity(projectile);
         itemStack.shrink(1);
         return itemStack;
     }

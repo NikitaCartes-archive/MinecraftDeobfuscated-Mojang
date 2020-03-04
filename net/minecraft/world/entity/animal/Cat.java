@@ -368,7 +368,7 @@ extends TamableAnimal {
         } else {
             this.setCatType(this.random.nextInt(10));
         }
-        if (Feature.SWAMP_HUT.isInsideFeature(levelAccessor, new BlockPos(this))) {
+        if (Feature.SWAMP_HUT.isInsideFeature(levelAccessor, this.blockPosition())) {
             this.setCatType(10);
             this.setPersistenceRequired();
         }
@@ -495,7 +495,7 @@ extends TamableAnimal {
                 if (this.cat.distanceToSqr(this.ownerPlayer) > 100.0) {
                     return false;
                 }
-                BlockPos blockPos = new BlockPos(this.ownerPlayer);
+                BlockPos blockPos = this.ownerPlayer.blockPosition();
                 BlockState blockState = this.cat.level.getBlockState(blockPos);
                 if (blockState.getBlock().is(BlockTags.BEDS)) {
                     Direction direction = blockState.getValue(BedBlock.FACING);
@@ -543,9 +543,9 @@ extends TamableAnimal {
         private void giveMorningGift() {
             Random random = this.cat.getRandom();
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-            mutableBlockPos.set(this.cat);
+            mutableBlockPos.set(this.cat.blockPosition());
             this.cat.randomTeleport(mutableBlockPos.getX() + random.nextInt(11) - 5, mutableBlockPos.getY() + random.nextInt(5) - 2, mutableBlockPos.getZ() + random.nextInt(11) - 5, false);
-            mutableBlockPos.set(this.cat);
+            mutableBlockPos.set(this.cat.blockPosition());
             LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
             LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.BLOCK_POS, mutableBlockPos).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(random);
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));

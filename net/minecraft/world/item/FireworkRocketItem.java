@@ -44,7 +44,7 @@ extends Item {
             ItemStack itemStack = useOnContext.getItemInHand();
             Vec3 vec3 = useOnContext.getClickLocation();
             Direction direction = useOnContext.getClickedFace();
-            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, vec3.x + (double)direction.getStepX() * 0.15, vec3.y + (double)direction.getStepY() * 0.15, vec3.z + (double)direction.getStepZ() * 0.15, itemStack);
+            FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, useOnContext.getPlayer(), vec3.x + (double)direction.getStepX() * 0.15, vec3.y + (double)direction.getStepY() * 0.15, vec3.z + (double)direction.getStepZ() * 0.15, itemStack);
             level.addFreshEntity(fireworkRocketEntity);
             itemStack.shrink(1);
         }

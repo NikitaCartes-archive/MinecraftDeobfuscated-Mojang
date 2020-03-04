@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ZombieModel;
@@ -11,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Zombie;
 
 @Environment(value=EnvType.CLIENT)
@@ -29,11 +29,13 @@ extends HumanoidMobRenderer<T, M> {
     }
 
     @Override
-    protected void setupRotations(T zombie, PoseStack poseStack, float f, float g, float h) {
-        if (((Zombie)zombie).isUnderWaterConverting()) {
-            g += (float)(Math.cos((double)((Zombie)zombie).tickCount * 3.25) * Math.PI * 0.25);
-        }
-        super.setupRotations(zombie, poseStack, f, g, h);
+    protected boolean isShaking(T zombie) {
+        return ((Zombie)zombie).isUnderWaterConverting();
+    }
+
+    @Override
+    protected /* synthetic */ boolean isShaking(LivingEntity livingEntity) {
+        return this.isShaking((T)((Zombie)livingEntity));
     }
 }
 

@@ -104,24 +104,21 @@ public abstract class Request<T extends Request<T>> {
     private void dispose() {
         byte[] bs = new byte[1024];
         try {
-            int i = 0;
             InputStream inputStream = this.connection.getInputStream();
-            while ((i = inputStream.read(bs)) > 0) {
+            while (inputStream.read(bs) > 0) {
             }
             inputStream.close();
         } catch (Exception exception) {
-            int j;
-            InputStream inputStream;
+            InputStream inputStream2;
             block13: {
-                inputStream = this.connection.getErrorStream();
-                j = 0;
-                if (inputStream != null) break block13;
+                inputStream2 = this.connection.getErrorStream();
+                if (inputStream2 != null) break block13;
                 return;
             }
             try {
-                while ((j = inputStream.read(bs)) > 0) {
+                while (inputStream2.read(bs) > 0) {
                 }
-                inputStream.close();
+                inputStream2.close();
             } catch (IOException iOException) {
                 // empty catch block
             }

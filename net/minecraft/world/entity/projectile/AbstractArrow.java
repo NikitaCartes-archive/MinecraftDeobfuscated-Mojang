@@ -24,7 +24,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -53,8 +52,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractArrow
-extends Entity
-implements Projectile {
+extends Projectile {
     private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
     protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Byte> PIERCE_LEVEL = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
@@ -64,7 +62,6 @@ implements Projectile {
     protected int inGroundTime;
     public Pickup pickup = Pickup.DISALLOWED;
     public int shakeTime;
-    public UUID ownerUUID;
     private int life;
     private int flightTime;
     private double baseDamage = 2.0;
@@ -74,7 +71,7 @@ implements Projectile {
     private List<Entity> piercedAndKilledEntities;
 
     protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level) {
-        super(entityType, level);
+        super((EntityType<? extends Projectile>)entityType, level);
     }
 
     protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level) {
@@ -111,23 +108,9 @@ implements Projectile {
         this.entityData.define(PIERCE_LEVEL, (byte)0);
     }
 
-    public void shootFromRotation(Entity entity, float f, float g, float h, float i, float j) {
-        float k = -Mth.sin(g * ((float)Math.PI / 180)) * Mth.cos(f * ((float)Math.PI / 180));
-        float l = -Mth.sin(f * ((float)Math.PI / 180));
-        float m = Mth.cos(g * ((float)Math.PI / 180)) * Mth.cos(f * ((float)Math.PI / 180));
-        this.shoot(k, l, m, i, j);
-        this.setDeltaMovement(this.getDeltaMovement().add(entity.getDeltaMovement().x, entity.isOnGround() ? 0.0 : entity.getDeltaMovement().y, entity.getDeltaMovement().z));
-    }
-
     @Override
     public void shoot(double d, double e, double f, float g, float h) {
-        Vec3 vec3 = new Vec3(d, e, f).normalize().add(this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h, this.random.nextGaussian() * (double)0.0075f * (double)h).scale(g);
-        this.setDeltaMovement(vec3);
-        float i = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
-        this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, i) * 57.2957763671875);
-        this.yRotO = this.yRot;
-        this.xRotO = this.xRot;
+        super.shoot(d, e, f, g, h);
         this.life = 0;
     }
 
@@ -141,16 +124,8 @@ implements Projectile {
     @Override
     @Environment(value=EnvType.CLIENT)
     public void lerpMotion(double d, double e, double f) {
-        this.setDeltaMovement(d, e, f);
-        if (this.xRotO == 0.0f && this.yRotO == 0.0f) {
-            float g = Mth.sqrt(d * d + f * f);
-            this.xRot = (float)(Mth.atan2(e, g) * 57.2957763671875);
-            this.yRot = (float)(Mth.atan2(d, f) * 57.2957763671875);
-            this.xRotO = this.xRot;
-            this.yRotO = this.yRot;
-            this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-            this.life = 0;
-        }
+        super.lerpMotion(d, e, f);
+        this.life = 0;
     }
 
     @Override
@@ -169,7 +144,7 @@ implements Projectile {
             this.yRotO = this.yRot;
             this.xRotO = this.xRot;
         }
-        if (!((blockState = this.level.getBlockState(blockPos = new BlockPos(this))).isAir() || bl || (voxelShape = blockState.getCollisionShape(this.level, blockPos)).isEmpty())) {
+        if (!((blockState = this.level.getBlockState(blockPos = this.blockPosition())).isAir() || bl || (voxelShape = blockState.getCollisionShape(this.level, blockPos)).isEmpty())) {
             vec32 = this.position();
             for (AABB aABB : voxelShape.toAabbs()) {
                 if (!aABB.move(blockPos).contains(vec32)) continue;
@@ -276,30 +251,6 @@ implements Projectile {
         }
     }
 
-    protected void onHit(HitResult hitResult) {
-        HitResult.Type type = hitResult.getType();
-        if (type == HitResult.Type.ENTITY) {
-            this.onHitEntity((EntityHitResult)hitResult);
-        } else if (type == HitResult.Type.BLOCK) {
-            BlockState blockState;
-            BlockHitResult blockHitResult = (BlockHitResult)hitResult;
-            this.lastState = blockState = this.level.getBlockState(blockHitResult.getBlockPos());
-            Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
-            this.setDeltaMovement(vec3);
-            Vec3 vec32 = vec3.normalize().scale(0.05f);
-            this.setPosRaw(this.getX() - vec32.x, this.getY() - vec32.y, this.getZ() - vec32.z);
-            this.playSound(this.getHitGroundSoundEvent(), 1.0f, 1.2f / (this.random.nextFloat() * 0.2f + 0.9f));
-            this.inGround = true;
-            this.shakeTime = 7;
-            this.setCritArrow(false);
-            this.setPierceLevel((byte)0);
-            this.setSoundEvent(SoundEvents.ARROW_HIT);
-            this.setShotFromCrossbow(false);
-            this.resetPiercedEntities();
-            blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
-        }
-    }
-
     private void resetPiercedEntities() {
         if (this.piercedAndKilledEntities != null) {
             this.piercedAndKilledEntities.clear();
@@ -309,9 +260,11 @@ implements Projectile {
         }
     }
 
+    @Override
     protected void onHitEntity(EntityHitResult entityHitResult) {
         DamageSource damageSource;
         Entity entity2;
+        super.onHitEntity(entityHitResult);
         Entity entity = entityHitResult.getEntity();
         float f = (float)this.getDeltaMovement().length();
         int i = Mth.ceil(Math.max((double)f * this.baseDamage, 0.0));
@@ -397,6 +350,24 @@ implements Projectile {
         }
     }
 
+    @Override
+    protected void onHitBlock(BlockHitResult blockHitResult) {
+        super.onHitBlock(blockHitResult);
+        this.lastState = this.level.getBlockState(blockHitResult.getBlockPos());
+        Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
+        this.setDeltaMovement(vec3);
+        Vec3 vec32 = vec3.normalize().scale(0.05f);
+        this.setPosRaw(this.getX() - vec32.x, this.getY() - vec32.y, this.getZ() - vec32.z);
+        this.playSound(this.getHitGroundSoundEvent(), 1.0f, 1.2f / (this.random.nextFloat() * 0.2f + 0.9f));
+        this.inGround = true;
+        this.shakeTime = 7;
+        this.setCritArrow(false);
+        this.setPierceLevel((byte)0);
+        this.setSoundEvent(SoundEvents.ARROW_HIT);
+        this.setShotFromCrossbow(false);
+        this.resetPiercedEntities();
+    }
+
     protected SoundEvent getDefaultHitGroundSoundEvent() {
         return SoundEvents.ARROW_HIT;
     }
@@ -415,6 +386,7 @@ implements Projectile {
 
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
+        super.addAdditionalSaveData(compoundTag);
         compoundTag.putShort("life", (short)this.life);
         if (this.lastState != null) {
             compoundTag.put("inBlockState", NbtUtils.writeBlockState(this.lastState));
@@ -425,15 +397,13 @@ implements Projectile {
         compoundTag.putDouble("damage", this.baseDamage);
         compoundTag.putBoolean("crit", this.isCritArrow());
         compoundTag.putByte("PierceLevel", this.getPierceLevel());
-        if (this.ownerUUID != null) {
-            compoundTag.putUUID("OwnerUUID", this.ownerUUID);
-        }
         compoundTag.putString("SoundEvent", Registry.SOUND_EVENT.getKey(this.soundEvent).toString());
         compoundTag.putBoolean("ShotFromCrossbow", this.shotFromCrossbow());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
+        super.readAdditionalSaveData(compoundTag);
         this.life = compoundTag.getShort("life");
         if (compoundTag.contains("inBlockState", 10)) {
             this.lastState = NbtUtils.readBlockState(compoundTag.getCompound("inBlockState"));
@@ -450,28 +420,18 @@ implements Projectile {
         }
         this.setCritArrow(compoundTag.getBoolean("crit"));
         this.setPierceLevel(compoundTag.getByte("PierceLevel"));
-        if (compoundTag.hasUUID("OwnerUUID")) {
-            this.ownerUUID = compoundTag.getUUID("OwnerUUID");
-        }
         if (compoundTag.contains("SoundEvent", 8)) {
             this.soundEvent = Registry.SOUND_EVENT.getOptional(new ResourceLocation(compoundTag.getString("SoundEvent"))).orElse(this.getDefaultHitGroundSoundEvent());
         }
         this.setShotFromCrossbow(compoundTag.getBoolean("ShotFromCrossbow"));
     }
 
+    @Override
     public void setOwner(@Nullable Entity entity) {
-        UUID uUID = this.ownerUUID = entity == null ? null : entity.getUUID();
+        super.setOwner(entity);
         if (entity instanceof Player) {
             this.pickup = ((Player)entity).abilities.instabuild ? Pickup.CREATIVE_ONLY : Pickup.ALLOWED;
         }
-    }
-
-    @Nullable
-    public Entity getOwner() {
-        if (this.ownerUUID != null && this.level instanceof ServerLevel) {
-            return ((ServerLevel)this.level).getEntity(this.ownerUUID);
-        }
-        return null;
     }
 
     @Override

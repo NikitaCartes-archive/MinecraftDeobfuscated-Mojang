@@ -60,7 +60,7 @@ public class SummonCommand {
             throw ERROR_FAILED.create();
         }
         if (bl && entity2 instanceof Mob) {
-            ((Mob)entity2).finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(entity2)), MobSpawnType.COMMAND, null, null);
+            ((Mob)entity2).finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.COMMAND, null, null);
         }
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", entity2.getDisplayName()), true);
         return 1;

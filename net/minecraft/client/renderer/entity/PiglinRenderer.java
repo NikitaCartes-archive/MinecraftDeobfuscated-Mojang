@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -12,6 +11,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.PiglinArmorLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 
@@ -47,11 +47,13 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
     }
 
     @Override
-    protected void setupRotations(Mob mob, PoseStack poseStack, float f, float g, float h) {
-        if (mob instanceof Piglin && ((Piglin)mob).isConverting()) {
-            g += (float)(Math.cos((double)mob.tickCount * 3.25) * Math.PI * 0.5);
-        }
-        super.setupRotations(mob, poseStack, f, g, h);
+    protected boolean isShaking(Mob mob) {
+        return mob instanceof Piglin && ((Piglin)mob).isConverting();
+    }
+
+    @Override
+    protected /* synthetic */ boolean isShaking(LivingEntity livingEntity) {
+        return this.isShaking((Mob)livingEntity);
     }
 }
 

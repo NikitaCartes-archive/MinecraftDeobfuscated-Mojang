@@ -116,7 +116,7 @@ extends Entity {
         boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
         int n = i = bl ? 2 : 40;
         if (this.tickCount % i == 0) {
-            if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
+            if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA) && !this.fireImmune()) {
                 this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
             }
             if (!this.level.isClientSide && this.isMergable()) {
@@ -209,6 +209,11 @@ extends Entity {
         if (itemStack2.isEmpty()) {
             itemEntity2.remove();
         }
+    }
+
+    @Override
+    public boolean fireImmune() {
+        return this.getItem().getItem().isFireResistant() || super.fireImmune();
     }
 
     @Override

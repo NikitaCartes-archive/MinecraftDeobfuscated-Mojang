@@ -39,6 +39,14 @@ extends AbstractSoundInstance {
         return new SimpleSoundInstance(soundEvent.getLocation(), SoundSource.AMBIENT, g, f, false, 0, SoundInstance.Attenuation.NONE, 0.0f, 0.0f, 0.0f, true);
     }
 
+    public static SimpleSoundInstance forAmbientAddition(SoundEvent soundEvent) {
+        return SimpleSoundInstance.forLocalAmbience(soundEvent, 1.0f, 1.0f);
+    }
+
+    public static SimpleSoundInstance forAmbientMood(SoundEvent soundEvent, float f, float g, float h) {
+        return new SimpleSoundInstance(soundEvent, SoundSource.AMBIENT, 1.0f, 1.0f, false, 0, SoundInstance.Attenuation.LINEAR, f, g, h);
+    }
+
     public SimpleSoundInstance(SoundEvent soundEvent, SoundSource soundSource, float f, float g, float h, float i, float j) {
         this(soundEvent, soundSource, f, g, false, 0, SoundInstance.Attenuation.LINEAR, h, i, j);
     }

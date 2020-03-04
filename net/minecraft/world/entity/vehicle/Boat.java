@@ -404,26 +404,23 @@ extends Entity {
         int l = Mth.ceil(aABB.maxY - this.lastYd);
         int m = Mth.floor(aABB.minZ);
         int n = Mth.ceil(aABB.maxZ);
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            block12: for (int o = k; o < l; ++o) {
-                float f = 0.0f;
-                for (int p = i; p < j; ++p) {
-                    for (int q = m; q < n; ++q) {
-                        pooledMutableBlockPos.set(p, o, q);
-                        FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-                        if (fluidState.is(FluidTags.WATER)) {
-                            f = Math.max(f, fluidState.getHeight(this.level, pooledMutableBlockPos));
-                        }
-                        if (f >= 1.0f) continue block12;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        block0: for (int o = k; o < l; ++o) {
+            float f = 0.0f;
+            for (int p = i; p < j; ++p) {
+                for (int q = m; q < n; ++q) {
+                    mutableBlockPos.set(p, o, q);
+                    FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+                    if (fluidState.is(FluidTags.WATER)) {
+                        f = Math.max(f, fluidState.getHeight(this.level, mutableBlockPos));
                     }
+                    if (f >= 1.0f) continue block0;
                 }
-                if (!(f < 1.0f)) continue;
-                float f2 = (float)pooledMutableBlockPos.getY() + f;
-                return f2;
             }
-            float f = l + 1;
-            return f;
+            if (!(f < 1.0f)) continue;
+            return (float)mutableBlockPos.getY() + f;
         }
+        return l + 1;
     }
 
     public float getGroundFriction() {
@@ -438,19 +435,18 @@ extends Entity {
         VoxelShape voxelShape = Shapes.create(aABB2);
         float f = 0.0f;
         int o = 0;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int p = i; p < j; ++p) {
-                for (int q = m; q < n; ++q) {
-                    int r = (p == i || p == j - 1 ? 1 : 0) + (q == m || q == n - 1 ? 1 : 0);
-                    if (r == 2) continue;
-                    for (int s = k; s < l; ++s) {
-                        if (r > 0 && (s == k || s == l - 1)) continue;
-                        pooledMutableBlockPos.set(p, s, q);
-                        BlockState blockState = this.level.getBlockState(pooledMutableBlockPos);
-                        if (blockState.getBlock() instanceof WaterlilyBlock || !Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, pooledMutableBlockPos).move(p, s, q), voxelShape, BooleanOp.AND)) continue;
-                        f += blockState.getBlock().getFriction();
-                        ++o;
-                    }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int p = i; p < j; ++p) {
+            for (int q = m; q < n; ++q) {
+                int r = (p == i || p == j - 1 ? 1 : 0) + (q == m || q == n - 1 ? 1 : 0);
+                if (r == 2) continue;
+                for (int s = k; s < l; ++s) {
+                    if (r > 0 && (s == k || s == l - 1)) continue;
+                    mutableBlockPos.set(p, s, q);
+                    BlockState blockState = this.level.getBlockState(mutableBlockPos);
+                    if (blockState.getBlock() instanceof WaterlilyBlock || !Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, mutableBlockPos).move(p, s, q), voxelShape, BooleanOp.AND)) continue;
+                    f += blockState.getBlock().getFriction();
+                    ++o;
                 }
             }
         }
@@ -467,17 +463,16 @@ extends Entity {
         int n = Mth.ceil(aABB.maxZ);
         boolean bl = false;
         this.waterLevel = Double.MIN_VALUE;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int o = i; o < j; ++o) {
-                for (int p = k; p < l; ++p) {
-                    for (int q = m; q < n; ++q) {
-                        pooledMutableBlockPos.set(o, p, q);
-                        FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-                        if (!fluidState.is(FluidTags.WATER)) continue;
-                        float f = (float)p + fluidState.getHeight(this.level, pooledMutableBlockPos);
-                        this.waterLevel = Math.max((double)f, this.waterLevel);
-                        bl |= aABB.minY < (double)f;
-                    }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int o = i; o < j; ++o) {
+            for (int p = k; p < l; ++p) {
+                for (int q = m; q < n; ++q) {
+                    mutableBlockPos.set(o, p, q);
+                    FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+                    if (!fluidState.is(FluidTags.WATER)) continue;
+                    float f = (float)p + fluidState.getHeight(this.level, mutableBlockPos);
+                    this.waterLevel = Math.max((double)f, this.waterLevel);
+                    bl |= aABB.minY < (double)f;
                 }
             }
         }
@@ -495,20 +490,18 @@ extends Entity {
         int m = Mth.floor(aABB.minZ);
         int n = Mth.ceil(aABB.maxZ);
         boolean bl = false;
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int o = i; o < j; ++o) {
-                for (int p = k; p < l; ++p) {
-                    for (int q = m; q < n; ++q) {
-                        pooledMutableBlockPos.set(o, p, q);
-                        FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-                        if (!fluidState.is(FluidTags.WATER) || !(d < (double)((float)pooledMutableBlockPos.getY() + fluidState.getHeight(this.level, pooledMutableBlockPos)))) continue;
-                        if (fluidState.isSource()) {
-                            bl = true;
-                            continue;
-                        }
-                        Status status = Status.UNDER_FLOWING_WATER;
-                        return status;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int o = i; o < j; ++o) {
+            for (int p = k; p < l; ++p) {
+                for (int q = m; q < n; ++q) {
+                    mutableBlockPos.set(o, p, q);
+                    FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+                    if (!fluidState.is(FluidTags.WATER) || !(d < (double)((float)mutableBlockPos.getY() + fluidState.getHeight(this.level, mutableBlockPos)))) continue;
+                    if (fluidState.isSource()) {
+                        bl = true;
+                        continue;
                     }
+                    return Status.UNDER_FLOWING_WATER;
                 }
             }
         }
@@ -696,7 +689,7 @@ extends Entity {
                 }
             }
             this.fallDistance = 0.0f;
-        } else if (!this.level.getFluidState(new BlockPos(this).below()).is(FluidTags.WATER) && d < 0.0) {
+        } else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
             this.fallDistance = (float)((double)this.fallDistance - d);
         }
     }

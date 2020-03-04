@@ -38,14 +38,23 @@ extends Fireball {
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
-            if (hitResult.getType() == HitResult.Type.ENTITY) {
-                Entity entity = ((EntityHitResult)hitResult).getEntity();
-                entity.hurt(DamageSource.fireball(this, this.owner), 6.0f);
-                this.doEnchantDamageEffects(this.owner, entity);
-            }
             boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
             this.level.explode(null, this.getX(), this.getY(), this.getZ(), this.explosionPower, bl, bl ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE);
             this.remove();
+        }
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
+        if (this.level.isClientSide) {
+            return;
+        }
+        Entity entity = entityHitResult.getEntity();
+        Entity entity2 = this.getOwner();
+        entity.hurt(DamageSource.fireball(this, entity2), 6.0f);
+        if (entity2 instanceof LivingEntity) {
+            this.doEnchantDamageEffects((LivingEntity)entity2, entity);
         }
     }
 

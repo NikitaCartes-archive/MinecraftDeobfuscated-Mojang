@@ -7,13 +7,13 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.HeadedModel;
 import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.AbstractIllager;
 
@@ -30,7 +30,6 @@ HeadedModel {
     private final ModelPart rightLeg;
     private final ModelPart rightArm;
     private final ModelPart leftArm;
-    private float itemUseTicks;
 
     public IllagerModel(float f, float g, int i, int j) {
         this.head = new ModelPart(this).setTexSize(i, j);
@@ -80,7 +79,6 @@ HeadedModel {
     @Override
     public void setupAnim(T abstractIllager, float f, float g, float h, float i, float j) {
         boolean bl;
-        float k;
         this.head.yRot = i * ((float)Math.PI / 180);
         this.head.xRot = j * ((float)Math.PI / 180);
         this.arms.y = 3.0f;
@@ -115,7 +113,7 @@ HeadedModel {
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-            k = Mth.sin(this.attackTime * (float)Math.PI);
+            float k = Mth.sin(this.attackTime * (float)Math.PI);
             float l = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
             this.rightArm.zRot = 0.0f;
             this.leftArm.zRot = 0.0f;
@@ -154,17 +152,9 @@ HeadedModel {
             this.leftArm.yRot = this.head.yRot - 0.4f;
             this.leftArm.zRot = 1.5707964f;
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.CROSSBOW_HOLD) {
-            this.rightArm.yRot = -0.3f + this.head.yRot;
-            this.leftArm.yRot = 0.6f + this.head.yRot;
-            this.rightArm.xRot = -1.5707964f + this.head.xRot + 0.1f;
-            this.leftArm.xRot = -1.5f + this.head.xRot;
+            AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.CROSSBOW_CHARGE) {
-            this.rightArm.yRot = -0.8f;
-            this.rightArm.xRot = -0.97079635f;
-            this.leftArm.xRot = -0.97079635f;
-            k = Mth.clamp(this.itemUseTicks, 0.0f, 25.0f);
-            this.leftArm.yRot = Mth.lerp(k / 25.0f, 0.4f, 0.85f);
-            this.leftArm.xRot = Mth.lerp(k / 25.0f, this.leftArm.xRot, -1.5707964f);
+            AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, abstractIllager, true);
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.CELEBRATING) {
             this.rightArm.z = 0.0f;
             this.rightArm.x = -5.0f;
@@ -180,12 +170,6 @@ HeadedModel {
         this.arms.visible = bl = illagerArmPose == AbstractIllager.IllagerArmPose.CROSSED;
         this.leftArm.visible = !bl;
         this.rightArm.visible = !bl;
-    }
-
-    @Override
-    public void prepareMobModel(T abstractIllager, float f, float g, float h) {
-        this.itemUseTicks = ((LivingEntity)abstractIllager).getTicksUsingItem();
-        super.prepareMobModel(abstractIllager, f, g, h);
     }
 
     private ModelPart getArm(HumanoidArm humanoidArm) {

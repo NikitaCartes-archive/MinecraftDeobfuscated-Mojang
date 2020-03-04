@@ -52,53 +52,62 @@ extends ThrowableItemProjectile {
     }
 
     @Override
-    protected void onHit(HitResult hitResult) {
-        BlockPos blockPos;
-        BlockEntity blockEntity;
-        LivingEntity livingEntity = this.getOwner();
-        if (hitResult.getType() == HitResult.Type.ENTITY) {
-            Entity entity = ((EntityHitResult)hitResult).getEntity();
-            if (entity == this.originalOwner) {
-                return;
-            }
-            entity.hurt(DamageSource.thrown(this, livingEntity), 0.0f);
-        }
-        if (hitResult.getType() == HitResult.Type.BLOCK && (blockEntity = this.level.getBlockEntity(blockPos = ((BlockHitResult)hitResult).getBlockPos())) instanceof TheEndGatewayBlockEntity) {
-            TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)blockEntity;
-            if (livingEntity != null) {
-                if (livingEntity instanceof ServerPlayer) {
-                    CriteriaTriggers.ENTER_BLOCK.trigger((ServerPlayer)livingEntity, this.level.getBlockState(blockPos));
-                }
-                theEndGatewayBlockEntity.teleportEntity(livingEntity);
-                this.remove();
-                return;
-            }
-            theEndGatewayBlockEntity.teleportEntity(this);
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
+        Entity entity = entityHitResult.getEntity();
+        if (entity == this.originalOwner) {
             return;
         }
+        entity.hurt(DamageSource.thrown(this, this.getOwner()), 0.0f);
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult blockHitResult) {
+        super.onHitBlock(blockHitResult);
+        Entity entity = this.getOwner();
+        BlockPos blockPos = blockHitResult.getBlockPos();
+        BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
+        if (blockEntity instanceof TheEndGatewayBlockEntity) {
+            TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)blockEntity;
+            if (entity != null) {
+                if (entity instanceof ServerPlayer) {
+                    CriteriaTriggers.ENTER_BLOCK.trigger((ServerPlayer)entity, this.level.getBlockState(blockPos));
+                }
+                theEndGatewayBlockEntity.teleportEntity(entity);
+                this.remove();
+            } else {
+                theEndGatewayBlockEntity.teleportEntity(this);
+            }
+        }
+    }
+
+    @Override
+    protected void onHit(HitResult hitResult) {
+        super.onHit(hitResult);
+        Entity entity = this.getOwner();
         for (int i = 0; i < 32; ++i) {
             this.level.addParticle(ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0, this.getZ(), this.random.nextGaussian(), 0.0, this.random.nextGaussian());
         }
         if (!this.level.isClientSide) {
-            if (livingEntity instanceof ServerPlayer) {
-                ServerPlayer serverPlayer = (ServerPlayer)livingEntity;
+            if (entity instanceof ServerPlayer) {
+                ServerPlayer serverPlayer = (ServerPlayer)entity;
                 if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {
                     if (this.random.nextFloat() < 0.05f && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
                         Endermite endermite = EntityType.ENDERMITE.create(this.level);
                         endermite.setPlayerSpawned(true);
-                        endermite.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
+                        endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.yRot, entity.xRot);
                         this.level.addFreshEntity(endermite);
                     }
-                    if (livingEntity.isPassenger()) {
-                        livingEntity.stopRiding();
+                    if (entity.isPassenger()) {
+                        entity.stopRiding();
                     }
-                    livingEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-                    livingEntity.fallDistance = 0.0f;
-                    livingEntity.hurt(DamageSource.FALL, 5.0f);
+                    entity.teleportTo(this.getX(), this.getY(), this.getZ());
+                    entity.fallDistance = 0.0f;
+                    entity.hurt(DamageSource.FALL, 5.0f);
                 }
-            } else if (livingEntity != null) {
-                livingEntity.teleportTo(this.getX(), this.getY(), this.getZ());
-                livingEntity.fallDistance = 0.0f;
+            } else if (entity != null) {
+                entity.teleportTo(this.getX(), this.getY(), this.getZ());
+                entity.fallDistance = 0.0f;
             }
             this.remove();
         }
@@ -106,8 +115,8 @@ extends ThrowableItemProjectile {
 
     @Override
     public void tick() {
-        LivingEntity livingEntity = this.getOwner();
-        if (livingEntity != null && livingEntity instanceof Player && !livingEntity.isAlive()) {
+        Entity entity = this.getOwner();
+        if (entity != null && entity instanceof Player && !entity.isAlive()) {
             this.remove();
         } else {
             super.tick();
@@ -117,8 +126,9 @@ extends ThrowableItemProjectile {
     @Override
     @Nullable
     public Entity changeDimension(DimensionType dimensionType) {
-        if (this.owner.dimension != dimensionType) {
-            this.owner = null;
+        Entity entity = this.getOwner();
+        if (entity.dimension != dimensionType) {
+            this.setOwner(null);
         }
         return super.changeDimension(dimensionType);
     }

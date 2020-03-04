@@ -3,56 +3,41 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.realmsclient.gui.RealmsConstants;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.AbstractRealmsButton;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsConfirmScreen
 extends RealmsScreen {
-    protected RealmsScreen parent;
+    protected BooleanConsumer callback;
     protected String title1;
     private final String title2;
-    protected String yesButton;
-    protected String noButton;
-    protected int id;
+    protected String yesButton = I18n.get("gui.yes", new Object[0]);
+    protected String noButton = I18n.get("gui.no", new Object[0]);
     private int delayTicker;
 
-    public RealmsConfirmScreen(RealmsScreen realmsScreen, String string, String string2, int i) {
-        this.parent = realmsScreen;
+    public RealmsConfirmScreen(BooleanConsumer booleanConsumer, String string, String string2) {
+        this.callback = booleanConsumer;
         this.title1 = string;
         this.title2 = string2;
-        this.id = i;
-        this.yesButton = RealmsConfirmScreen.getLocalizedString("gui.yes");
-        this.noButton = RealmsConfirmScreen.getLocalizedString("gui.no");
     }
 
     @Override
     public void init() {
-        this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, RealmsConstants.row(9), 100, 20, this.yesButton){
-
-            @Override
-            public void onPress() {
-                RealmsConfirmScreen.this.parent.confirmResult(true, RealmsConfirmScreen.this.id);
-            }
-        });
-        this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(9), 100, 20, this.noButton){
-
-            @Override
-            public void onPress() {
-                RealmsConfirmScreen.this.parent.confirmResult(false, RealmsConfirmScreen.this.id);
-            }
-        });
+        this.addButton(new Button(this.width / 2 - 105, RealmsConfirmScreen.row(9), 100, 20, this.yesButton, button -> this.callback.accept(true)));
+        this.addButton(new Button(this.width / 2 + 5, RealmsConfirmScreen.row(9), 100, 20, this.noButton, button -> this.callback.accept(false)));
     }
 
     @Override
     public void render(int i, int j, float f) {
         this.renderBackground();
-        this.drawCenteredString(this.title1, this.width() / 2, RealmsConstants.row(3), 0xFFFFFF);
-        this.drawCenteredString(this.title2, this.width() / 2, RealmsConstants.row(5), 0xFFFFFF);
+        this.drawCenteredString(this.font, this.title1, this.width / 2, RealmsConfirmScreen.row(3), 0xFFFFFF);
+        this.drawCenteredString(this.font, this.title2, this.width / 2, RealmsConfirmScreen.row(5), 0xFFFFFF);
         super.render(i, j, f);
     }
 
@@ -60,8 +45,8 @@ extends RealmsScreen {
     public void tick() {
         super.tick();
         if (--this.delayTicker == 0) {
-            for (AbstractRealmsButton<?> abstractRealmsButton : this.buttons()) {
-                abstractRealmsButton.active(true);
+            for (AbstractWidget abstractWidget : this.buttons) {
+                abstractWidget.active = true;
             }
         }
     }

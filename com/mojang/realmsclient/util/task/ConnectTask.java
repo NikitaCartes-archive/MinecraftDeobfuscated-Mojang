@@ -1,0 +1,44 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package com.mojang.realmsclient.util.task;
+
+import com.mojang.realmsclient.dto.RealmsServerAddress;
+import com.mojang.realmsclient.util.task.LongRunningTask;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.realms.RealmsConnect;
+
+@Environment(value=EnvType.CLIENT)
+public class ConnectTask
+extends LongRunningTask {
+    private final RealmsConnect realmsConnect;
+    private final RealmsServerAddress address;
+
+    public ConnectTask(Screen screen, RealmsServerAddress realmsServerAddress) {
+        this.address = realmsServerAddress;
+        this.realmsConnect = new RealmsConnect(screen);
+    }
+
+    @Override
+    public void run() {
+        this.setTitle(I18n.get("mco.connect.connecting", new Object[0]));
+        net.minecraft.realms.RealmsServerAddress realmsServerAddress = net.minecraft.realms.RealmsServerAddress.parseString(this.address.address);
+        this.realmsConnect.connect(realmsServerAddress.getHost(), realmsServerAddress.getPort());
+    }
+
+    @Override
+    public void abortTask() {
+        this.realmsConnect.abort();
+        Minecraft.getInstance().getClientPackSource().clearServerPack();
+    }
+
+    @Override
+    public void tick() {
+        this.realmsConnect.tick();
+    }
+}
+

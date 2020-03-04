@@ -139,7 +139,7 @@ extends BlockEntity {
     public CommandSourceStack createCommandSourceStack(@Nullable ServerPlayer serverPlayer) {
         String string = serverPlayer == null ? "Sign" : serverPlayer.getName().getString();
         Component component = serverPlayer == null ? new TextComponent("Sign") : serverPlayer.getDisplayName();
-        return new CommandSourceStack(CommandSource.NULL, new Vec3((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5), Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), serverPlayer);
+        return new CommandSourceStack(CommandSource.NULL, Vec3.atCenterOf(this.worldPosition), Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), serverPlayer);
     }
 
     public DyeColor getColor() {

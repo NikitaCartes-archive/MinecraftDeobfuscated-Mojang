@@ -128,7 +128,7 @@ extends Monster {
     }
 
     public void findPatrolTarget() {
-        this.patrolTarget = new BlockPos(this).offset(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
+        this.patrolTarget = this.blockPosition().offset(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
         this.patrolling = true;
     }
 
@@ -178,7 +178,7 @@ extends Monster {
                 if (((PatrollingMonster)this.mob).isPatrolling() && list.isEmpty()) {
                     ((PatrollingMonster)this.mob).setPatrolling(false);
                 } else if (!bl || !((PatrollingMonster)this.mob).getPatrolTarget().closerThan(((Entity)this.mob).position(), 10.0)) {
-                    Vec3 vec3 = new Vec3(((PatrollingMonster)this.mob).getPatrolTarget());
+                    Vec3 vec3 = Vec3.atBottomCenterOf(((PatrollingMonster)this.mob).getPatrolTarget());
                     Vec3 vec32 = ((Entity)this.mob).position();
                     Vec3 vec33 = vec32.subtract(vec3);
                     vec3 = vec33.yRot(90.0f).scale(0.4).add(vec3);
@@ -204,7 +204,7 @@ extends Monster {
 
         private boolean moveRandomly() {
             Random random = ((LivingEntity)this.mob).getRandom();
-            BlockPos blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos((Entity)this.mob).offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
+            BlockPos blockPos = ((PatrollingMonster)this.mob).level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, ((Entity)this.mob).blockPosition().offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
             return ((Mob)this.mob).getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), this.speedModifier);
         }
     }

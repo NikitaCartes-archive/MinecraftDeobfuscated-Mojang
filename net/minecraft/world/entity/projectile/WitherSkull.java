@@ -63,34 +63,42 @@ extends AbstractHurtingProjectile {
     }
 
     @Override
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
+        if (this.level.isClientSide) {
+            return;
+        }
+        Entity entity = entityHitResult.getEntity();
+        Entity entity2 = this.getOwner();
+        if (entity2 instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity)entity2;
+            if (entity.hurt(DamageSource.mobAttack(livingEntity), 8.0f)) {
+                if (entity.isAlive()) {
+                    this.doEnchantDamageEffects(livingEntity, entity);
+                } else {
+                    livingEntity.heal(5.0f);
+                }
+            }
+        } else {
+            entity.hurt(DamageSource.MAGIC, 5.0f);
+        }
+        if (entity instanceof LivingEntity) {
+            int i = 0;
+            if (this.level.getDifficulty() == Difficulty.NORMAL) {
+                i = 10;
+            } else if (this.level.getDifficulty() == Difficulty.HARD) {
+                i = 40;
+            }
+            if (i > 0) {
+                ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * i, 1));
+            }
+        }
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
-            if (hitResult.getType() == HitResult.Type.ENTITY) {
-                Entity entity = ((EntityHitResult)hitResult).getEntity();
-                if (this.owner != null) {
-                    if (entity.hurt(DamageSource.mobAttack(this.owner), 8.0f)) {
-                        if (entity.isAlive()) {
-                            this.doEnchantDamageEffects(this.owner, entity);
-                        } else {
-                            this.owner.heal(5.0f);
-                        }
-                    }
-                } else {
-                    entity.hurt(DamageSource.MAGIC, 5.0f);
-                }
-                if (entity instanceof LivingEntity) {
-                    int i = 0;
-                    if (this.level.getDifficulty() == Difficulty.NORMAL) {
-                        i = 10;
-                    } else if (this.level.getDifficulty() == Difficulty.HARD) {
-                        i = 40;
-                    }
-                    if (i > 0) {
-                        ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * i, 1));
-                    }
-                }
-            }
             Explosion.BlockInteraction blockInteraction = this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
             this.level.explode(this, this.getX(), this.getY(), this.getZ(), 1.0f, false, blockInteraction);
             this.remove();

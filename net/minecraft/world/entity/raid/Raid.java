@@ -160,7 +160,7 @@ public class Raid {
 
     private Predicate<ServerPlayer> validPlayer() {
         return serverPlayer -> {
-            BlockPos blockPos = new BlockPos((Entity)serverPlayer);
+            BlockPos blockPos = serverPlayer.blockPosition();
             return serverPlayer.isAlive() && this.level.getRaidAt(blockPos) == this;
         };
     }
@@ -374,7 +374,7 @@ public class Raid {
         while (iterator.hasNext()) {
             Set<Raider> set2 = iterator.next();
             for (Raider raider : set2) {
-                BlockPos blockPos = new BlockPos(raider);
+                BlockPos blockPos = raider.blockPosition();
                 if (raider.removed || raider.dimension != this.level.getDimension().getType() || this.center.distSqr(blockPos) >= 12544.0) {
                     set.add(raider);
                     continue;
@@ -401,7 +401,7 @@ public class Raid {
         Collection<ServerPlayer> collection = this.raidEvent.getPlayers();
         for (ServerPlayer serverPlayer : this.level.players()) {
             Vec3 vec3 = serverPlayer.position();
-            Vec3 vec32 = new Vec3(blockPos);
+            Vec3 vec32 = Vec3.atCenterOf(blockPos);
             float g = Mth.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
             double d = vec3.x + (double)(13.0f / g) * (vec32.x - vec3.x);
             double e = vec3.z + (double)(13.0f / g) * (vec32.z - vec3.z);

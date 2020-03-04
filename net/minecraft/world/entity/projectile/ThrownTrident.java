@@ -122,6 +122,7 @@ extends AbstractArrow {
     protected void onHitEntity(EntityHitResult entityHitResult) {
         BlockPos blockPos;
         Entity entity2;
+        super.onHitEntity(entityHitResult);
         Entity entity = entityHitResult.getEntity();
         float f = 8.0f;
         if (entity instanceof LivingEntity) {
@@ -146,7 +147,7 @@ extends AbstractArrow {
         }
         this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
         float g = 1.0f;
-        if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem) && this.level.canSeeSky(blockPos = entity.getCommandSenderBlockPosition())) {
+        if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem) && this.level.canSeeSky(blockPos = entity.blockPosition())) {
             LightningBolt lightningBolt = new LightningBolt(this.level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, false);
             lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
             ((ServerLevel)this.level).addGlobalEntity(lightningBolt);

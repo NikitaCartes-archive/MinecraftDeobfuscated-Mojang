@@ -33,8 +33,8 @@ extends Feature<ProbabilityFeatureConfiguration> {
     @Override
     public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {
         int i = 0;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
-        BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
         if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
             if (Blocks.BAMBOO.defaultBlockState().canSurvive(levelAccessor, mutableBlockPos)) {
                 int k;

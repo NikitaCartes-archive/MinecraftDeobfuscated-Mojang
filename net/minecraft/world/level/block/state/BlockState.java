@@ -26,6 +26,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -356,8 +357,8 @@ implements StateHolder<BlockState> {
         return this.getBlock().getSoundType(this);
     }
 
-    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-        this.getBlock().onProjectileHit(level, blockState, blockHitResult, entity);
+    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+        this.getBlock().onProjectileHit(level, blockState, blockHitResult, projectile);
     }
 
     public boolean isFaceSturdy(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {

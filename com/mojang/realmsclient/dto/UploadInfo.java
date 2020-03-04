@@ -5,7 +5,6 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.annotations.Expose;
 import com.mojang.realmsclient.dto.ValueObject;
 import com.mojang.realmsclient.util.JsonUtils;
 import net.fabricmc.api.EnvType;
@@ -17,11 +16,8 @@ import org.apache.logging.log4j.Logger;
 public class UploadInfo
 extends ValueObject {
     private static final Logger LOGGER = LogManager.getLogger();
-    @Expose
     private boolean worldClosed;
-    @Expose
     private String token = "";
-    @Expose
     private String uploadEndpoint = "";
     private int port;
 

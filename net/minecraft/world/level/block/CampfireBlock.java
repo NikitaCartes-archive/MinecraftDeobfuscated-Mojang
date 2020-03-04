@@ -23,6 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -185,26 +186,15 @@ implements SimpleWaterloggedBlock {
         return false;
     }
 
-    @Nullable
-    private Entity getShooter(Entity entity) {
-        if (entity instanceof Fireball) {
-            return ((Fireball)entity).owner;
-        }
-        if (entity instanceof AbstractArrow) {
-            return ((AbstractArrow)entity).getOwner();
-        }
-        return null;
-    }
-
     @Override
-    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
+    public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
         if (!level.isClientSide) {
             boolean bl;
-            boolean bl2 = bl = entity instanceof Fireball || entity instanceof AbstractArrow && entity.isOnFire();
+            boolean bl2 = bl = projectile instanceof Fireball || projectile instanceof AbstractArrow && projectile.isOnFire();
             if (bl) {
                 boolean bl22;
-                Entity entity2 = this.getShooter(entity);
-                boolean bl3 = bl22 = entity2 == null || entity2 instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+                Entity entity = projectile.getOwner();
+                boolean bl3 = bl22 = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
                 if (bl22 && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
                     BlockPos blockPos = blockHitResult.getBlockPos();
                     level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);

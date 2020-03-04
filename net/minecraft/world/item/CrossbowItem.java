@@ -27,7 +27,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -193,14 +192,14 @@ extends ProjectileWeaponItem {
     }
 
     private static void shootProjectile(Level level, LivingEntity livingEntity2, InteractionHand interactionHand, ItemStack itemStack, ItemStack itemStack2, float f, boolean bl, float g, float h, float i) {
-        Entity projectile;
+        Projectile projectile;
         boolean bl2;
         if (level.isClientSide) {
             return;
         }
         boolean bl3 = bl2 = itemStack2.getItem() == Items.FIREWORK_ROCKET;
         if (bl2) {
-            projectile = new FireworkRocketEntity(level, itemStack2, livingEntity2.getX(), livingEntity2.getEyeY() - (double)0.15f, livingEntity2.getZ(), true);
+            projectile = new FireworkRocketEntity(level, itemStack2, livingEntity2, livingEntity2.getX(), livingEntity2.getEyeY() - (double)0.15f, livingEntity2.getZ(), true);
         } else {
             projectile = CrossbowItem.getArrow(level, livingEntity2, itemStack, itemStack2);
             if (bl || i != 0.0f) {
@@ -209,7 +208,7 @@ extends ProjectileWeaponItem {
         }
         if (livingEntity2 instanceof CrossbowAttackMob) {
             CrossbowAttackMob crossbowAttackMob = (CrossbowAttackMob)((Object)livingEntity2);
-            crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, (Projectile)((Object)projectile), i);
+            crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
         } else {
             Vec3 vec3 = livingEntity2.getUpVector(1.0f);
             Quaternion quaternion = new Quaternion(new Vector3f(vec3), i, true);

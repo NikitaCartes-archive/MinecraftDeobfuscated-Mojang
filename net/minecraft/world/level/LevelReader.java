@@ -131,15 +131,13 @@ BiomeManager.NoiseBiomeSource {
         int l = Mth.ceil(aABB.maxY);
         int m = Mth.floor(aABB.minZ);
         int n = Mth.ceil(aABB.maxZ);
-        try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire();){
-            for (int o = i; o < j; ++o) {
-                for (int p = k; p < l; ++p) {
-                    for (int q = m; q < n; ++q) {
-                        BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-                        if (blockState.getFluidState().isEmpty()) continue;
-                        boolean bl = true;
-                        return bl;
-                    }
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int o = i; o < j; ++o) {
+            for (int p = k; p < l; ++p) {
+                for (int q = m; q < n; ++q) {
+                    BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
+                    if (blockState.getFluidState().isEmpty()) continue;
+                    return true;
                 }
             }
         }

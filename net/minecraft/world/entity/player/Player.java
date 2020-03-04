@@ -1151,7 +1151,7 @@ extends LivingEntity {
             if (!this.isCreative()) {
                 double d = 8.0;
                 double e = 5.0;
-                Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
+                Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
                 List<Monster> list = this.level.getEntitiesOfClass(Monster.class, new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0), monster -> monster.isPreventingPlayerRest(this));
                 if (!list.isEmpty()) {
                     return Either.left(BedSleepingProblem.NOT_SAFE);
@@ -1178,7 +1178,7 @@ extends LivingEntity {
     }
 
     private boolean isReachableBedBlock(BlockPos blockPos) {
-        Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
+        Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
         return Math.abs(this.getX() - vec3.x()) <= 3.0 && Math.abs(this.getY() - vec3.y()) <= 2.0 && Math.abs(this.getZ() - vec3.z()) <= 3.0;
     }
 

@@ -58,6 +58,7 @@ import net.minecraft.util.datafix.fixes.EntityItemFrameDirectionFix;
 import net.minecraft.util.datafix.fixes.EntityMinecartIdentifiersFix;
 import net.minecraft.util.datafix.fixes.EntityPaintingItemFrameDirectionFix;
 import net.minecraft.util.datafix.fixes.EntityPaintingMotiveFix;
+import net.minecraft.util.datafix.fixes.EntityProjectileOwnerFix;
 import net.minecraft.util.datafix.fixes.EntityPufferfishRenameFix;
 import net.minecraft.util.datafix.fixes.EntityRavagerRenameFix;
 import net.minecraft.util.datafix.fixes.EntityRedundantChanceTagsFix;
@@ -459,6 +460,8 @@ public class DataFixers {
         Schema schema106 = dataFixerBuilder.addSchema(2509, V2509::new);
         dataFixerBuilder.addFixer(new EntityZombifiedPiglinRenameFix(schema106));
         dataFixerBuilder.addFixer(ItemRenameFix.create(schema106, "Rename zombie pigman egg item", string -> EntityZombifiedPiglinRenameFix.RENAMED_IDS.getOrDefault(string, (String)string)));
+        Schema schema107 = dataFixerBuilder.addSchema(2511, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new EntityProjectileOwnerFix(schema107));
     }
 }
 

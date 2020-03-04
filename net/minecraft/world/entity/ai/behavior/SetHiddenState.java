@@ -40,7 +40,7 @@ extends Behavior<LivingEntity> {
             return;
         }
         BlockPos blockPos = brain.getMemory(MemoryModuleType.HIDING_PLACE).get().pos();
-        if (blockPos.closerThan(new BlockPos(livingEntity), (double)this.closeEnoughDist)) {
+        if (blockPos.closerThan(livingEntity.blockPosition(), (double)this.closeEnoughDist)) {
             ++this.ticksHidden;
         }
     }

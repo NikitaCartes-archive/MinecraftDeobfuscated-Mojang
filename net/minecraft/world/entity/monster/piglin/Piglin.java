@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -19,7 +18,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -76,7 +74,7 @@ implements CrossbowAttackMob {
     private static int killedByHoglinCounter = 0;
     private static int removeCounter = 0;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.INTERACTABLE_DOORS, SensorType.PIGLIN_SPECIFIC_SENSOR);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.WALK_TARGET, new MemoryModuleType[]{MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.PATH, MemoryModuleType.ANGRY_AT, MemoryModuleType.AVOID_TARGET, MemoryModuleType.ADMIRING_ITEM, MemoryModuleType.WAS_HIT_BY_PLAYER, MemoryModuleType.CELEBRATE_LOCATION, MemoryModuleType.HUNTED_RECENTLY, MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN, MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN, MemoryModuleType.RIDE_TARGET, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.NEAREST_SOUL_FIRE});
+    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.WALK_TARGET, new MemoryModuleType[]{MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.PATH, MemoryModuleType.ANGRY_AT, MemoryModuleType.AVOID_TARGET, MemoryModuleType.ADMIRING_ITEM, MemoryModuleType.ADMIRING_DISABLED, MemoryModuleType.CELEBRATE_LOCATION, MemoryModuleType.HUNTED_RECENTLY, MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN, MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN, MemoryModuleType.RIDE_TARGET, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.NEAREST_REPELLENT});
 
     public Piglin(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
@@ -104,7 +102,8 @@ implements CrossbowAttackMob {
         if (this.isImmuneToZombification()) {
             compoundTag.putBoolean("IsImmuneToZombification", true);
         }
-        compoundTag.put("Inventory", Piglin.createInventoryTag(this.inventory));
+        compoundTag.putInt("TimeInOverworld", this.timeInOverworld);
+        compoundTag.put("Inventory", this.inventory.createTag());
     }
 
     @Override
@@ -112,25 +111,8 @@ implements CrossbowAttackMob {
         super.readAdditionalSaveData(compoundTag);
         this.setBaby(compoundTag.getBoolean("IsBaby"));
         this.setImmuneToZombification(compoundTag.getBoolean("IsImmuneToZombification"));
-        Piglin.updateInventoryFromTag(this.inventory, compoundTag.getList("Inventory", 10));
-    }
-
-    private static ListTag createInventoryTag(Container container) {
-        ListTag listTag = new ListTag();
-        for (int i = 0; i < container.getContainerSize(); ++i) {
-            ItemStack itemStack = container.getItem(i);
-            if (itemStack.isEmpty()) continue;
-            listTag.add(itemStack.save(new CompoundTag()));
-        }
-        return listTag;
-    }
-
-    private static void updateInventoryFromTag(SimpleContainer simpleContainer, ListTag listTag) {
-        for (int i = 0; i < listTag.size(); ++i) {
-            ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
-            if (itemStack.isEmpty()) continue;
-            simpleContainer.addItem(itemStack);
-        }
+        this.timeInOverworld = compoundTag.getInt("TimeInOverworld");
+        this.inventory.fromTag(compoundTag.getList("Inventory", 10));
     }
 
     @Override
@@ -177,8 +159,14 @@ implements CrossbowAttackMob {
         if (levelAccessor.getRandom().nextFloat() < 0.2f) {
             this.setBaby(true);
         }
+        PiglinAi.initMemories(this);
         this.populateDefaultEquipmentSlots(difficultyInstance);
-        return spawnGroupData;
+        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    @Override
+    public boolean isLeftHanded() {
+        return false;
     }
 
     @Override
@@ -263,7 +251,7 @@ implements CrossbowAttackMob {
     }
 
     public boolean isConverting() {
-        return this.level.getDimension().getType() == DimensionType.OVERWORLD && !this.isImmuneToZombification();
+        return this.level.getDimension().getType() == DimensionType.OVERWORLD && !this.isImmuneToZombification() && !this.isNoAi();
     }
 
     @Override
@@ -287,8 +275,11 @@ implements CrossbowAttackMob {
 
     private void finishConversion(ServerLevel serverLevel) {
         ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevel);
+        if (zombifiedPiglin == null) {
+            return;
+        }
         zombifiedPiglin.copyPosition(this);
-        zombifiedPiglin.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(new BlockPos(zombifiedPiglin)), MobSpawnType.CONVERSION, null, null);
+        zombifiedPiglin.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombifiedPiglin.blockPosition()), MobSpawnType.CONVERSION, null, null);
         zombifiedPiglin.setBaby(this.isBaby());
         this.remove();
         zombifiedPiglin.setNoAi(this.isNoAi());
@@ -409,10 +400,6 @@ implements CrossbowAttackMob {
         PiglinAi.pickUpItem(this, itemEntity);
     }
 
-    public boolean isRiding() {
-        return this.getVehicle() != null;
-    }
-
     protected float getMovementSpeed() {
         return (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
     }
@@ -437,7 +424,7 @@ implements CrossbowAttackMob {
         this.playSound(SoundEvents.PIGLIN_STEP, 0.15f, 1.0f);
     }
 
-    void playAdmiringSound() {
+    protected void playAdmiringSound() {
         this.playSound(SoundEvents.PIGLIN_ADMIRING_ITEM, 1.0f, this.getVoicePitch());
     }
 
@@ -448,23 +435,23 @@ implements CrossbowAttackMob {
         }
     }
 
-    void playAngrySound() {
+    protected void playAngrySound() {
         this.playSound(SoundEvents.PIGLIN_ANGRY, 1.0f, this.getVoicePitch());
     }
 
-    void playCelebrateSound() {
+    protected void playCelebrateSound() {
         this.playSound(SoundEvents.PIGLIN_CELEBRATE, 1.0f, this.getVoicePitch());
     }
 
-    void playRetreatSound() {
+    protected void playRetreatSound() {
         this.playSound(SoundEvents.PIGLIN_RETREAT, 1.0f, this.getVoicePitch());
     }
 
-    void playJealousSound() {
+    protected void playJealousSound() {
         this.playSound(SoundEvents.PIGLIN_JEALOUS, 1.0f, this.getVoicePitch());
     }
 
-    void playConvertedSound() {
+    private void playConvertedSound() {
         this.playSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED, 1.0f, this.getVoicePitch());
     }
 

@@ -36,15 +36,15 @@ extends WaterAvoidingRandomStrollGoal {
 
     @Nullable
     private Vec3 getTreePos() {
-        BlockPos blockPos = new BlockPos(this.mob);
+        BlockPos blockPos = this.mob.blockPosition();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
         Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.floor(this.mob.getX() - 3.0), Mth.floor(this.mob.getY() - 6.0), Mth.floor(this.mob.getZ() - 3.0), Mth.floor(this.mob.getX() + 3.0), Mth.floor(this.mob.getY() + 6.0), Mth.floor(this.mob.getZ() + 3.0));
         for (BlockPos blockPos2 : iterable) {
             Block block;
             boolean bl;
-            if (blockPos.equals(blockPos2) || !(bl = (block = this.mob.level.getBlockState(mutableBlockPos2.set(blockPos2).move(Direction.DOWN)).getBlock()) instanceof LeavesBlock || block.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.set(blockPos2).move(Direction.UP))) continue;
-            return new Vec3(blockPos2);
+            if (blockPos.equals(blockPos2) || !(bl = (block = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset(blockPos2, Direction.DOWN)).getBlock()) instanceof LeavesBlock || block.is(BlockTags.LOGS)) || !this.mob.level.isEmptyBlock(blockPos2) || !this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset(blockPos2, Direction.UP))) continue;
+            return Vec3.atBottomCenterOf(blockPos2);
         }
         return null;
     }

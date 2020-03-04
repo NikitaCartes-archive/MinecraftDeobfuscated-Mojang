@@ -49,11 +49,11 @@ extends FallingBlock {
 
     private static boolean touchesLiquid(BlockGetter blockGetter, BlockPos blockPos) {
         boolean bl = false;
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
         for (Direction direction : Direction.values()) {
             BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
             if (direction == Direction.DOWN && !ConcretePowderBlock.canSolidify(blockState)) continue;
-            mutableBlockPos.set(blockPos).move(direction);
+            mutableBlockPos.setWithOffset(blockPos, direction);
             blockState = blockGetter.getBlockState(mutableBlockPos);
             if (!ConcretePowderBlock.canSolidify(blockState) || blockState.isFaceSturdy(blockGetter, blockPos, direction.getOpposite())) continue;
             bl = true;

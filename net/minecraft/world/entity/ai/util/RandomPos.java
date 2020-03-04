@@ -79,7 +79,7 @@ public class RandomPos {
         boolean bl4 = pathfinderMob.hasRestriction() ? pathfinderMob.getRestrictCenter().closerThan(pathfinderMob.position(), (double)(pathfinderMob.getRestrictRadius() + (float)i) + 1.0) : false;
         boolean bl5 = false;
         double e = Double.NEGATIVE_INFINITY;
-        BlockPos blockPos2 = new BlockPos(pathfinderMob);
+        BlockPos blockPos2 = pathfinderMob.blockPosition();
         for (int n = 0; n < 10; ++n) {
             double f;
             BlockPathTypes blockPathTypes;
@@ -104,7 +104,7 @@ public class RandomPos {
             bl5 = true;
         }
         if (bl5) {
-            return new Vec3(blockPos2);
+            return Vec3.atBottomCenterOf(blockPos2);
         }
         return null;
     }

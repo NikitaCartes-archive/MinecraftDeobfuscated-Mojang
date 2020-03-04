@@ -203,7 +203,7 @@ VillagerDataHolder {
             this.level.broadcastEntityEvent(this, (byte)14);
             this.lastTradedPlayer = null;
         }
-        if (!this.isNoAi() && this.random.nextInt(100) == 0 && (raid = ((ServerLevel)this.level).getRaidAt(new BlockPos(this))) != null && raid.isActive() && !raid.isOver()) {
+        if (!this.isNoAi() && this.random.nextInt(100) == 0 && (raid = ((ServerLevel)this.level).getRaidAt(this.blockPosition())) != null && raid.isActive() && !raid.isOver()) {
             this.level.broadcastEntityEvent(this, (byte)42);
         }
         if (this.getVillagerData().getProfession() == VillagerProfession.NONE && this.isTrading()) {
@@ -611,7 +611,7 @@ VillagerDataHolder {
             this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
         }
         if (mobSpawnType == MobSpawnType.COMMAND || mobSpawnType == MobSpawnType.SPAWN_EGG || mobSpawnType == MobSpawnType.SPAWNER || mobSpawnType == MobSpawnType.DISPENSER) {
-            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(new BlockPos(this)))));
+            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(this.blockPosition()))));
         }
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -619,9 +619,9 @@ VillagerDataHolder {
     @Override
     public Villager getBreedOffspring(AgableMob agableMob) {
         double d = this.random.nextDouble();
-        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(this.level.getBiome(new BlockPos(this))) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
+        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(this.level.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
         Villager villager = new Villager(EntityType.VILLAGER, this.level, villagerType);
-        villager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(new BlockPos(villager)), MobSpawnType.BREEDING, null, null);
+        villager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
         return villager;
     }
 
@@ -629,7 +629,7 @@ VillagerDataHolder {
     public void thunderHit(LightningBolt lightningBolt) {
         Witch witch = EntityType.WITCH.create(this.level);
         witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-        witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(new BlockPos(witch)), MobSpawnType.CONVERSION, null, null);
+        witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
         witch.setNoAi(this.isNoAi());
         if (this.hasCustomName()) {
             witch.setCustomName(this.getCustomName());
@@ -794,7 +794,7 @@ VillagerDataHolder {
 
     @Nullable
     private IronGolem trySpawnGolem() {
-        BlockPos blockPos = new BlockPos(this);
+        BlockPos blockPos = this.blockPosition();
         for (int i = 0; i < 10; ++i) {
             BlockPos blockPos3;
             IronGolem ironGolem;

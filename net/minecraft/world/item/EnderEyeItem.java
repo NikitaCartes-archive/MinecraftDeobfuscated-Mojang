@@ -73,7 +73,7 @@ extends Item {
             return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);
-        if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false)) != null) {
+        if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", player.blockPosition(), 100, false)) != null) {
             EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
             eyeOfEnder.setItem(itemStack);
             eyeOfEnder.signalTo(blockPos);
@@ -82,7 +82,7 @@ extends Item {
                 CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayer)player, blockPos);
             }
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5f, 0.4f / (random.nextFloat() * 0.4f + 0.8f));
-            level.levelEvent(null, 1003, new BlockPos(player), 0);
+            level.levelEvent(null, 1003, player.blockPosition(), 0);
             if (!player.abilities.instabuild) {
                 itemStack.shrink(1);
             }

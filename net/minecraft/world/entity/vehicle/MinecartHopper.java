@@ -99,7 +99,7 @@ implements Hopper {
     public void tick() {
         super.tick();
         if (!this.level.isClientSide && this.isAlive() && this.isEnabled()) {
-            BlockPos blockPos = new BlockPos(this);
+            BlockPos blockPos = this.blockPosition();
             if (blockPos.equals(this.lastPosition)) {
                 --this.cooldownTime;
             } else {

@@ -149,7 +149,7 @@ implements Enemy {
 
     @Override
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.anchorPoint = new BlockPos(this).above(5);
+        this.anchorPoint = this.blockPosition().above(5);
         this.setPhantomSize(0);
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -300,7 +300,7 @@ implements Enemy {
         }
 
         private void setAnchorAboveTarget() {
-            Phantom.this.anchorPoint = new BlockPos(Phantom.this.getTarget()).above(20 + Phantom.this.random.nextInt(20));
+            Phantom.this.anchorPoint = Phantom.this.getTarget().blockPosition().above(20 + Phantom.this.random.nextInt(20));
             if (Phantom.this.anchorPoint.getY() < Phantom.this.level.getSeaLevel()) {
                 Phantom.this.anchorPoint = new BlockPos(Phantom.this.anchorPoint.getX(), Phantom.this.level.getSeaLevel() + 1, Phantom.this.anchorPoint.getZ());
             }
@@ -359,7 +359,7 @@ implements Enemy {
             if (Phantom.this.getBoundingBox().inflate(0.2f).intersects(livingEntity.getBoundingBox())) {
                 Phantom.this.doHurtTarget(livingEntity);
                 Phantom.this.attackPhase = AttackPhase.CIRCLE;
-                Phantom.this.level.levelEvent(1039, new BlockPos(Phantom.this), 0);
+                Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
             } else if (Phantom.this.horizontalCollision || Phantom.this.hurtTime > 0) {
                 Phantom.this.attackPhase = AttackPhase.CIRCLE;
             }
@@ -408,11 +408,11 @@ implements Enemy {
             if (this.touchingTarget()) {
                 this.selectNext();
             }
-            if (((Phantom)Phantom.this).moveTargetPoint.y < Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).below(1))) {
+            if (((Phantom)Phantom.this).moveTargetPoint.y < Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(Phantom.this.blockPosition().below(1))) {
                 this.height = Math.max(1.0f, this.height);
                 this.selectNext();
             }
-            if (((Phantom)Phantom.this).moveTargetPoint.y > Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(new BlockPos(Phantom.this).above(1))) {
+            if (((Phantom)Phantom.this).moveTargetPoint.y > Phantom.this.getY() && !Phantom.this.level.isEmptyBlock(Phantom.this.blockPosition().above(1))) {
                 this.height = Math.min(-1.0f, this.height);
                 this.selectNext();
             }
@@ -420,10 +420,10 @@ implements Enemy {
 
         private void selectNext() {
             if (BlockPos.ZERO.equals(Phantom.this.anchorPoint)) {
-                Phantom.this.anchorPoint = new BlockPos(Phantom.this);
+                Phantom.this.anchorPoint = Phantom.this.blockPosition();
             }
             this.angle += this.clockwise * 15.0f * ((float)Math.PI / 180);
-            Phantom.this.moveTargetPoint = new Vec3(Phantom.this.anchorPoint).add(this.distance * Mth.cos(this.angle), -4.0f + this.height, this.distance * Mth.sin(this.angle));
+            Phantom.this.moveTargetPoint = Vec3.atLowerCornerOf(Phantom.this.anchorPoint).add(this.distance * Mth.cos(this.angle), -4.0f + this.height, this.distance * Mth.sin(this.angle));
         }
     }
 

@@ -255,7 +255,7 @@ extends Animal {
     @Override
     public boolean checkSpawnObstruction(LevelReader levelReader) {
         if (levelReader.isUnobstructed(this) && !levelReader.containsAnyLiquid(this.getBoundingBox())) {
-            BlockPos blockPos = new BlockPos(this);
+            BlockPos blockPos = this.blockPosition();
             if (blockPos.getY() < levelReader.getSeaLevel()) {
                 return false;
             }

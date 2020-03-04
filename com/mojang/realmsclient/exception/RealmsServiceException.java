@@ -6,7 +6,7 @@ package com.mojang.realmsclient.exception;
 import com.mojang.realmsclient.client.RealmsError;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.RealmsScreen;
+import net.minecraft.client.resources.language.I18n;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsServiceException
@@ -38,7 +38,7 @@ extends Exception {
             return "Realms (" + this.httpResultCode + ") " + this.httpResponseContent;
         }
         String string = "mco.errorMessage." + this.errorCode;
-        String string2 = RealmsScreen.getLocalizedString(string);
+        String string2 = I18n.get(string, new Object[0]);
         return (string2.equals(string) ? this.errorMsg : string2) + " - " + this.errorCode;
     }
 }

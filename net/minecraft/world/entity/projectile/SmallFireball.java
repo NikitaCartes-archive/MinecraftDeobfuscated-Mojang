@@ -32,26 +32,43 @@ extends Fireball {
     }
 
     @Override
+    protected void onHitEntity(EntityHitResult entityHitResult) {
+        super.onHitEntity(entityHitResult);
+        if (this.level.isClientSide) {
+            return;
+        }
+        Entity entity = entityHitResult.getEntity();
+        if (!entity.fireImmune()) {
+            Entity entity2 = this.getOwner();
+            int i = entity.getRemainingFireTicks();
+            entity.setSecondsOnFire(5);
+            boolean bl = entity.hurt(DamageSource.fireball(this, entity2), 5.0f);
+            if (!bl) {
+                entity.setRemainingFireTicks(i);
+            } else if (entity2 instanceof LivingEntity) {
+                this.doEnchantDamageEffects((LivingEntity)entity2, entity);
+            }
+        }
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult blockHitResult) {
+        BlockHitResult blockHitResult2;
+        BlockPos blockPos;
+        super.onHitBlock(blockHitResult);
+        if (this.level.isClientSide) {
+            return;
+        }
+        Entity entity = this.getOwner();
+        if ((entity == null || !(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && this.level.isEmptyBlock(blockPos = (blockHitResult2 = blockHitResult).getBlockPos().relative(blockHitResult2.getDirection()))) {
+            this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
+        }
+    }
+
+    @Override
     protected void onHit(HitResult hitResult) {
         super.onHit(hitResult);
         if (!this.level.isClientSide) {
-            BlockHitResult blockHitResult;
-            BlockPos blockPos;
-            if (hitResult.getType() == HitResult.Type.ENTITY) {
-                Entity entity = ((EntityHitResult)hitResult).getEntity();
-                if (!entity.fireImmune()) {
-                    int i = entity.getRemainingFireTicks();
-                    entity.setSecondsOnFire(5);
-                    boolean bl = entity.hurt(DamageSource.fireball(this, this.owner), 5.0f);
-                    if (bl) {
-                        this.doEnchantDamageEffects(this.owner, entity);
-                    } else {
-                        entity.setRemainingFireTicks(i);
-                    }
-                }
-            } else if ((this.owner == null || !(this.owner instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) && this.level.isEmptyBlock(blockPos = (blockHitResult = (BlockHitResult)hitResult).getBlockPos().relative(blockHitResult.getDirection()))) {
-                this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
-            }
             this.remove();
         }
     }

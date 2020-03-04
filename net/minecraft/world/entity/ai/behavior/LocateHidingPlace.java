@@ -33,7 +33,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        Optional<BlockPos> optional = serverLevel.getPoiManager().find(poiType -> poiType == PoiType.HOME, blockPos -> true, new BlockPos(livingEntity), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
+        Optional<BlockPos> optional = serverLevel.getPoiManager().find(poiType -> poiType == PoiType.HOME, blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
         this.currentPos = optional.isPresent() && optional.get().closerThan(livingEntity.position(), (double)this.closeEnoughDist) ? optional : Optional.empty();
         return true;
     }
@@ -43,7 +43,7 @@ extends Behavior<LivingEntity> {
         Optional<GlobalPos> optional2;
         Brain<?> brain = livingEntity.getBrain();
         Optional<BlockPos> optional = this.currentPos;
-        if (!optional.isPresent() && !(optional = serverLevel.getPoiManager().getRandom(poiType -> poiType == PoiType.HOME, blockPos -> true, PoiManager.Occupancy.ANY, new BlockPos(livingEntity), this.radius, livingEntity.getRandom())).isPresent() && (optional2 = brain.getMemory(MemoryModuleType.HOME)).isPresent()) {
+        if (!optional.isPresent() && !(optional = serverLevel.getPoiManager().getRandom(poiType -> poiType == PoiType.HOME, blockPos -> true, PoiManager.Occupancy.ANY, livingEntity.blockPosition(), this.radius, livingEntity.getRandom())).isPresent() && (optional2 = brain.getMemory(MemoryModuleType.HOME)).isPresent()) {
             optional = Optional.of(optional2.get().pos());
         }
         if (optional.isPresent()) {

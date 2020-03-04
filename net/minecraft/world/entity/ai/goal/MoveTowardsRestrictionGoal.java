@@ -28,7 +28,7 @@ extends Goal {
         if (this.mob.isWithinRestriction()) {
             return false;
         }
-        Vec3 vec3 = RandomPos.getPosTowards(this.mob, 16, 7, new Vec3(this.mob.getRestrictCenter()));
+        Vec3 vec3 = RandomPos.getPosTowards(this.mob, 16, 7, Vec3.atBottomCenterOf(this.mob.getRestrictCenter()));
         if (vec3 == null) {
             return false;
         }

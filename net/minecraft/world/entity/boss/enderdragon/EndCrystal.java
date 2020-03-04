@@ -57,7 +57,7 @@ extends Entity {
     public void tick() {
         ++this.time;
         if (!this.level.isClientSide) {
-            BlockPos blockPos = new BlockPos(this);
+            BlockPos blockPos = this.blockPosition();
             if (this.level.dimension instanceof TheEndDimension && this.level.getBlockState(blockPos).isAir()) {
                 this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
             }

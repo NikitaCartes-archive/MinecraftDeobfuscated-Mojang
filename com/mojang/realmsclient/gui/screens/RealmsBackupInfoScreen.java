@@ -4,31 +4,37 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.realmsclient.dto.Backup;
+import com.mojang.realmsclient.gui.screens.RealmsSlotOptionsScreen;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ScrolledSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsSimpleScrolledSelectionList;
-import net.minecraft.realms.Tezzelator;
+import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsBackupInfoScreen
 extends RealmsScreen {
-    private final RealmsScreen lastScreen;
-    private final int BUTTON_BACK_ID = 0;
+    private final Screen lastScreen;
     private final Backup backup;
     private final List<String> keys = Lists.newArrayList();
     private BackupInfoList backupInfoList;
-    String[] difficulties = new String[]{RealmsBackupInfoScreen.getLocalizedString("options.difficulty.peaceful"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.easy"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.normal"), RealmsBackupInfoScreen.getLocalizedString("options.difficulty.hard")};
-    String[] gameModes = new String[]{RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.survival"), RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.creative"), RealmsBackupInfoScreen.getLocalizedString("selectWorld.gameMode.adventure")};
 
-    public RealmsBackupInfoScreen(RealmsScreen realmsScreen, Backup backup) {
-        this.lastScreen = realmsScreen;
+    public RealmsBackupInfoScreen(Screen screen, Backup backup) {
+        this.lastScreen = screen;
         this.backup = backup;
         if (backup.changeList != null) {
             for (Map.Entry<String, String> entry : backup.changeList.entrySet()) {
@@ -43,28 +49,22 @@ extends RealmsScreen {
 
     @Override
     public void init() {
-        this.setKeyboardHandlerSendRepeatsToGui(true);
-        this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, RealmsBackupInfoScreen.getLocalizedString("gui.back")){
-
-            @Override
-            public void onPress() {
-                Realms.setScreen(RealmsBackupInfoScreen.this.lastScreen);
-            }
-        });
-        this.backupInfoList = new BackupInfoList();
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, I18n.get("gui.back", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.backupInfoList = new BackupInfoList(this.minecraft);
         this.addWidget(this.backupInfoList);
-        this.focusOn(this.backupInfoList);
+        this.magicalSpecialHackyFocus(this.backupInfoList);
     }
 
     @Override
     public void removed() {
-        this.setKeyboardHandlerSendRepeatsToGui(false);
+        this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
         if (i == 256) {
-            Realms.setScreen(this.lastScreen);
+            this.minecraft.setScreen(this.lastScreen);
             return true;
         }
         return super.keyPressed(i, j, k);
@@ -73,7 +73,7 @@ extends RealmsScreen {
     @Override
     public void render(int i, int j, float f) {
         this.renderBackground();
-        this.drawCenteredString("Changes from last backup", this.width() / 2, 10, 0xFFFFFF);
+        this.drawCenteredString(this.font, "Changes from last backup", this.width / 2, 10, 0xFFFFFF);
         this.backupInfoList.render(i, j, f);
         super.render(i, j, f);
     }
@@ -91,7 +91,7 @@ extends RealmsScreen {
 
     private String gameDifficultyMetadata(String string) {
         try {
-            return this.difficulties[Integer.parseInt(string)];
+            return I18n.get(RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)], new Object[0]);
         } catch (Exception exception) {
             return "UNKNOWN";
         }
@@ -99,7 +99,7 @@ extends RealmsScreen {
 
     private String gameModeMetadata(String string) {
         try {
-            return this.gameModes[Integer.parseInt(string)];
+            return I18n.get(RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)], new Object[0]);
         } catch (Exception exception) {
             return "UNKNOWN";
         }
@@ -107,9 +107,9 @@ extends RealmsScreen {
 
     @Environment(value=EnvType.CLIENT)
     class BackupInfoList
-    extends RealmsSimpleScrolledSelectionList {
-        public BackupInfoList() {
-            super(RealmsBackupInfoScreen.this.width(), RealmsBackupInfoScreen.this.height(), 32, RealmsBackupInfoScreen.this.height() - 64, 36);
+    extends ScrolledSelectionList {
+        public BackupInfoList(Minecraft minecraft) {
+            super(minecraft, RealmsBackupInfoScreen.this.width, RealmsBackupInfoScreen.this.height, 32, RealmsBackupInfoScreen.this.height - 64, 36);
         }
 
         @Override
@@ -118,13 +118,17 @@ extends RealmsScreen {
         }
 
         @Override
-        public boolean isSelectedItem(int i) {
-            return false;
+        protected void renderItem(int i, int j, int k, int l, int m, int n, float f) {
+            String string = (String)RealmsBackupInfoScreen.this.keys.get(i);
+            Font font = this.minecraft.font;
+            this.drawString(font, string, this.width / 2 - 40, k, 0xA0A0A0);
+            String string2 = ((RealmsBackupInfoScreen)RealmsBackupInfoScreen.this).backup.changeList.get(string);
+            this.drawString(font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(string, string2), this.width / 2 - 40, k + 12, 0xFFFFFF);
         }
 
         @Override
-        public int getMaxPosition() {
-            return this.getItemCount() * 36;
+        public boolean isSelectedItem(int i) {
+            return false;
         }
 
         @Override
@@ -132,11 +136,62 @@ extends RealmsScreen {
         }
 
         @Override
-        public void renderItem(int i, int j, int k, int l, Tezzelator tezzelator, int m, int n) {
-            String string = (String)RealmsBackupInfoScreen.this.keys.get(i);
-            RealmsBackupInfoScreen.this.drawString(string, this.width() / 2 - 40, k, 0xA0A0A0);
-            String string2 = ((RealmsBackupInfoScreen)RealmsBackupInfoScreen.this).backup.changeList.get(string);
-            RealmsBackupInfoScreen.this.drawString(RealmsBackupInfoScreen.this.checkForSpecificMetadata(string, string2), this.width() / 2 - 40, k + 12, 0xFFFFFF);
+        public void render(int i, int j, float f) {
+            if (!this.visible) {
+                return;
+            }
+            this.renderBackground();
+            int k = this.getScrollbarPosition();
+            int l = k + 6;
+            this.capYPosition();
+            RenderSystem.disableFog();
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder bufferBuilder = tesselator.getBuilder();
+            int m = this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
+            int n = this.y0 + 4 - (int)this.yo;
+            if (this.renderHeader) {
+                this.renderHeader(m, n, tesselator);
+            }
+            this.renderList(m, n, i, j, f);
+            RenderSystem.disableDepthTest();
+            this.renderHoleBackground(0, this.y0, 255, 255);
+            this.renderHoleBackground(this.y1, this.height, 255, 255);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+            RenderSystem.disableAlphaTest();
+            RenderSystem.shadeModel(7425);
+            RenderSystem.disableTexture();
+            int o = this.getMaxScroll();
+            if (o > 0) {
+                int p = (this.y1 - this.y0) * (this.y1 - this.y0) / this.getMaxPosition();
+                int q = (int)this.yo * (this.y1 - this.y0 - (p = Mth.clamp(p, 32, this.y1 - this.y0 - 8))) / o + this.y0;
+                if (q < this.y0) {
+                    q = this.y0;
+                }
+                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bufferBuilder.vertex(k, this.y1, 0.0).uv(0.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+                bufferBuilder.vertex(l, this.y1, 0.0).uv(1.0f, 1.0f).color(0, 0, 0, 255).endVertex();
+                bufferBuilder.vertex(l, this.y0, 0.0).uv(1.0f, 0.0f).color(0, 0, 0, 255).endVertex();
+                bufferBuilder.vertex(k, this.y0, 0.0).uv(0.0f, 0.0f).color(0, 0, 0, 255).endVertex();
+                tesselator.end();
+                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bufferBuilder.vertex(k, q + p, 0.0).uv(0.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+                bufferBuilder.vertex(l, q + p, 0.0).uv(1.0f, 1.0f).color(128, 128, 128, 255).endVertex();
+                bufferBuilder.vertex(l, q, 0.0).uv(1.0f, 0.0f).color(128, 128, 128, 255).endVertex();
+                bufferBuilder.vertex(k, q, 0.0).uv(0.0f, 0.0f).color(128, 128, 128, 255).endVertex();
+                tesselator.end();
+                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                bufferBuilder.vertex(k, q + p - 1, 0.0).uv(0.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+                bufferBuilder.vertex(l - 1, q + p - 1, 0.0).uv(1.0f, 1.0f).color(192, 192, 192, 255).endVertex();
+                bufferBuilder.vertex(l - 1, q, 0.0).uv(1.0f, 0.0f).color(192, 192, 192, 255).endVertex();
+                bufferBuilder.vertex(k, q, 0.0).uv(0.0f, 0.0f).color(192, 192, 192, 255).endVertex();
+                tesselator.end();
+            }
+            this.renderDecorations(i, j);
+            RenderSystem.enableTexture();
+            RenderSystem.shadeModel(7424);
+            RenderSystem.enableAlphaTest();
+            RenderSystem.disableBlend();
         }
     }
 }

@@ -36,7 +36,7 @@ extends Behavior<PathfinderMob> {
 
     @Override
     protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-        BlockPos blockPos = new BlockPos(pathfinderMob);
+        BlockPos blockPos = pathfinderMob.blockPosition();
         if (serverLevel.isVillage(blockPos)) {
             this.setRandomPos(pathfinderMob);
         } else {
@@ -51,7 +51,7 @@ extends Behavior<PathfinderMob> {
     }
 
     private void setTargetedPos(PathfinderMob pathfinderMob, SectionPos sectionPos) {
-        Optional<Vec3> optional = Optional.ofNullable(RandomPos.getPosTowards(pathfinderMob, this.maxXyDist, this.maxYDist, new Vec3(sectionPos.center())));
+        Optional<Vec3> optional = Optional.ofNullable(RandomPos.getPosTowards(pathfinderMob, this.maxXyDist, this.maxYDist, Vec3.atBottomCenterOf(sectionPos.center())));
         pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget((Vec3)vec3, this.speed, 0)));
     }
 

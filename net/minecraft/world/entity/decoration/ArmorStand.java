@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -497,7 +496,7 @@ extends LivingEntity {
     }
 
     private void brokenByPlayer(DamageSource damageSource) {
-        Block.popResource(this.level, new BlockPos(this), new ItemStack(Items.ARMOR_STAND));
+        Block.popResource(this.level, this.blockPosition(), new ItemStack(Items.ARMOR_STAND));
         this.brokenByAnything(damageSource);
     }
 
@@ -509,13 +508,13 @@ extends LivingEntity {
         for (i = 0; i < this.handItems.size(); ++i) {
             itemStack = this.handItems.get(i);
             if (itemStack.isEmpty()) continue;
-            Block.popResource(this.level, new BlockPos(this).above(), itemStack);
+            Block.popResource(this.level, this.blockPosition().above(), itemStack);
             this.handItems.set(i, ItemStack.EMPTY);
         }
         for (i = 0; i < this.armorItems.size(); ++i) {
             itemStack = this.armorItems.get(i);
             if (itemStack.isEmpty()) continue;
-            Block.popResource(this.level, new BlockPos(this).above(), itemStack);
+            Block.popResource(this.level, this.blockPosition().above(), itemStack);
             this.armorItems.set(i, ItemStack.EMPTY);
         }
     }
@@ -726,7 +725,7 @@ extends LivingEntity {
 
     @Override
     public boolean skipAttackInteraction(Entity entity) {
-        return entity instanceof Player && !this.level.mayInteract((Player)entity, new BlockPos(this));
+        return entity instanceof Player && !this.level.mayInteract((Player)entity, this.blockPosition());
     }
 
     @Override

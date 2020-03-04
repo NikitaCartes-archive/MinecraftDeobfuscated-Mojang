@@ -26,6 +26,7 @@ import net.minecraft.client.gui.screens.inventory.LoomScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.SmokerScreen;
 import net.minecraft.client.gui.screens.inventory.StonecutterScreen;
 import net.minecraft.core.Registry;
@@ -98,6 +99,7 @@ public class MenuScreens {
         MenuScreens.register(MenuType.LOOM, LoomScreen::new);
         MenuScreens.register(MenuType.MERCHANT, MerchantScreen::new);
         MenuScreens.register(MenuType.SHULKER_BOX, ShulkerBoxScreen::new);
+        MenuScreens.register(MenuType.SMITHING, SmithingScreen::new);
         MenuScreens.register(MenuType.SMOKER, SmokerScreen::new);
         MenuScreens.register(MenuType.CARTOGRAPHY_TABLE, CartographyTableScreen::new);
         MenuScreens.register(MenuType.STONECUTTER, StonecutterScreen::new);

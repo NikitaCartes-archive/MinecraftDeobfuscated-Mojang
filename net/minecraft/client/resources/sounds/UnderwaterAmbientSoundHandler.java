@@ -16,7 +16,7 @@ public class UnderwaterAmbientSoundHandler
 implements AmbientSoundHandler {
     private final LocalPlayer player;
     private final SoundManager soundManager;
-    private int tick_delay = 0;
+    private int tickDelay = 0;
 
     public UnderwaterAmbientSoundHandler(LocalPlayer localPlayer, SoundManager soundManager) {
         this.player = localPlayer;
@@ -25,17 +25,17 @@ implements AmbientSoundHandler {
 
     @Override
     public void tick() {
-        --this.tick_delay;
-        if (this.tick_delay <= 0 && this.player.isUnderWater()) {
+        --this.tickDelay;
+        if (this.tickDelay <= 0 && this.player.isUnderWater()) {
             float f = this.player.level.random.nextFloat();
             if (f < 1.0E-4f) {
-                this.tick_delay = 0;
+                this.tickDelay = 0;
                 this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_ULTRA_RARE));
             } else if (f < 0.001f) {
-                this.tick_delay = 0;
+                this.tickDelay = 0;
                 this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS_RARE));
             } else if (f < 0.01f) {
-                this.tick_delay = 0;
+                this.tickDelay = 0;
                 this.soundManager.play(new UnderwaterAmbientSoundInstances.SubSound(this.player, SoundEvents.AMBIENT_UNDERWATER_LOOP_ADDITIONS));
             }
         }

@@ -33,6 +33,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
@@ -141,19 +142,36 @@ implements Tag {
         this.tags.put(string, LongTag.valueOf(l));
     }
 
+    public void putUUIDAsArray(String string, UUID uUID) {
+        this.tags.put(string, NbtUtils.createUUIDArray(uUID));
+    }
+
+    public UUID getUUIDFromArray(String string) {
+        return NbtUtils.loadUUIDArray(this.get(string));
+    }
+
+    public boolean hasUUIDArray(String string) {
+        Tag tag = this.get(string);
+        return tag != null && tag.getType() == IntArrayTag.TYPE && ((IntArrayTag)tag).getAsIntArray().length == 4;
+    }
+
+    @Deprecated
     public void putUUID(String string, UUID uUID) {
         this.putLong(string + "Most", uUID.getMostSignificantBits());
         this.putLong(string + "Least", uUID.getLeastSignificantBits());
     }
 
+    @Deprecated
     public UUID getUUID(String string) {
         return new UUID(this.getLong(string + "Most"), this.getLong(string + "Least"));
     }
 
+    @Deprecated
     public boolean hasUUID(String string) {
         return this.contains(string + "Most", 99) && this.contains(string + "Least", 99);
     }
 
+    @Deprecated
     public void removeUUID(String string) {
         this.remove(string + "Most");
         this.remove(string + "Least");

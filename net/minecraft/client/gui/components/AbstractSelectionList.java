@@ -27,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractSelectionList<E extends Entry<E>>
 extends AbstractContainerEventHandler
 implements Widget {
-    protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft minecraft;
     protected final int itemHeight;
     private final List<E> children = new TrackedList();
@@ -55,10 +54,6 @@ implements Widget {
         this.itemHeight = m;
         this.x0 = 0;
         this.x1 = i;
-    }
-
-    public void setRenderSelection(boolean bl) {
-        this.renderSelection = bl;
     }
 
     protected void setRenderHeader(boolean bl, int i) {
@@ -271,10 +266,6 @@ implements Widget {
         return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
     }
 
-    public int getScrollBottom() {
-        return (int)this.getScrollAmount() - this.height - this.headerHeight;
-    }
-
     protected void updateScrollingState(double d, double e, int i) {
         this.scrolling = i == 0 && d >= (double)this.getScrollbarPosition() && d < (double)(this.getScrollbarPosition() + 6);
     }
@@ -453,6 +444,12 @@ implements Widget {
             this.setSelected(null);
         }
         return bl;
+    }
+
+    @Override
+    @Nullable
+    public /* synthetic */ GuiEventListener getFocused() {
+        return this.getFocused();
     }
 
     @Environment(value=EnvType.CLIENT)

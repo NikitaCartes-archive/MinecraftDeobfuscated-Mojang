@@ -23,8 +23,6 @@ import net.minecraft.util.Mth;
 public abstract class ScrolledSelectionList
 extends AbstractContainerEventHandler
 implements Widget {
-    protected static final int NO_DRAG = -1;
-    protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft minecraft;
     protected int width;
     protected int height;
@@ -51,31 +49,6 @@ implements Widget {
         this.itemHeight = m;
         this.x0 = 0;
         this.x1 = i;
-    }
-
-    public void updateSize(int i, int j, int k, int l) {
-        this.width = i;
-        this.height = j;
-        this.y0 = k;
-        this.y1 = l;
-        this.x0 = 0;
-        this.x1 = i;
-    }
-
-    public void setRenderSelection(boolean bl) {
-        this.renderSelection = bl;
-    }
-
-    protected void setRenderHeader(boolean bl, int i) {
-        this.renderHeader = bl;
-        this.headerHeight = i;
-        if (!bl) {
-            this.headerHeight = 0;
-        }
-    }
-
-    public void setVisible(boolean bl) {
-        this.visible = bl;
     }
 
     public boolean isVisible() {
@@ -134,27 +107,8 @@ implements Widget {
         return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
     }
 
-    public void centerScrollOn(int i) {
-        this.yo = i * this.itemHeight + this.itemHeight / 2 - (this.y1 - this.y0) / 2;
-        this.capYPosition();
-    }
-
-    public int getScroll() {
-        return (int)this.yo;
-    }
-
     public boolean isMouseInList(double d, double e) {
         return e >= (double)this.y0 && e <= (double)this.y1 && d >= (double)this.x0 && d <= (double)this.x1;
-    }
-
-    public int getScrollBottom() {
-        return (int)this.yo - this.height - this.headerHeight;
-    }
-
-    public void scroll(int i) {
-        this.yo += (double)i;
-        this.capYPosition();
-        this.yDrag = -2;
     }
 
     @Override
@@ -401,15 +355,6 @@ implements Widget {
         bufferBuilder.vertex(this.x0 + this.width, i, 0.0).uv((float)this.width / 32.0f, (float)i / 32.0f).color(64, 64, 64, k).endVertex();
         bufferBuilder.vertex(this.x0, i, 0.0).uv(0.0f, (float)i / 32.0f).color(64, 64, 64, k).endVertex();
         tesselator.end();
-    }
-
-    public void setLeftPos(int i) {
-        this.x0 = i;
-        this.x1 = i + this.width;
-    }
-
-    public int getItemHeight() {
-        return this.itemHeight;
     }
 }
 
