@@ -21,7 +21,6 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -497,7 +496,7 @@ public class EntitySelectorOptions {
 								} else {
 									LootContext lootContext = new LootContext.Builder(serverLevel)
 										.withParameter(LootContextParams.THIS_ENTITY, entity)
-										.withParameter(LootContextParams.BLOCK_POS, new BlockPos(entity))
+										.withParameter(LootContextParams.BLOCK_POS, entity.blockPosition())
 										.create(LootContextParamSets.SELECTOR);
 									return bl ^ lootItemCondition.test(lootContext);
 								}

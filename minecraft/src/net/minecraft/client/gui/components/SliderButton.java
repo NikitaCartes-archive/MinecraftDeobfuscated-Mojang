@@ -6,7 +6,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.ProgressOption;
 
 @Environment(EnvType.CLIENT)
-public class SliderButton extends AbstractSliderButton {
+public class SliderButton extends AbstractOptionSliderButton {
 	private final ProgressOption option;
 
 	public SliderButton(Options options, int i, int j, int k, int l, ProgressOption progressOption) {

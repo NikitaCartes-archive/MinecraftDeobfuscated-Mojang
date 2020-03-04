@@ -804,14 +804,14 @@ public class Panda extends Animal {
 		}
 
 		private boolean canFindBamboo() {
-			BlockPos blockPos = new BlockPos(this.panda);
+			BlockPos blockPos = this.panda.blockPosition();
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 8; j++) {
 					for (int k = 0; k <= j; k = k > 0 ? -k : 1 - k) {
 						for (int l = k < j && k > -j ? j : 0; l <= j; l = l > 0 ? -l : 1 - l) {
-							mutableBlockPos.set(blockPos).move(k, i, l);
+							mutableBlockPos.setWithOffset(blockPos, k, i, l);
 							if (this.level.getBlockState(mutableBlockPos).getBlock() == Blocks.BAMBOO) {
 								return true;
 							}
@@ -1012,7 +1012,7 @@ public class Panda extends Animal {
 						j = (int)((float)j + h / Math.abs(h));
 					}
 
-					if (this.panda.level.getBlockState(new BlockPos(this.panda).offset(i, -1, j)).isAir()) {
+					if (this.panda.level.getBlockState(this.panda.blockPosition().offset(i, -1, j)).isAir()) {
 						return true;
 					} else {
 						return this.panda.isPlayful() && this.panda.random.nextInt(60) == 1 ? true : this.panda.random.nextInt(500) == 1;

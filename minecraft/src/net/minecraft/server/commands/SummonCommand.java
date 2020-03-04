@@ -94,7 +94,7 @@ public class SummonCommand {
 					if (bl && entity instanceof Mob) {
 						((Mob)entity)
 							.finalizeSpawn(
-								commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(new BlockPos(entity)), MobSpawnType.COMMAND, null, null
+								commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null
 							);
 					}
 

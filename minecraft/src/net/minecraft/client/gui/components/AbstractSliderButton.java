@@ -4,23 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSliderButton extends AbstractWidget {
-	protected final Options options;
 	protected double value;
 
-	protected AbstractSliderButton(int i, int j, int k, int l, double d) {
-		this(Minecraft.getInstance().options, i, j, k, l, d);
-	}
-
-	protected AbstractSliderButton(Options options, int i, int j, int k, int l, double d) {
-		super(i, j, k, l, "");
-		this.options = options;
+	public AbstractSliderButton(int i, int j, int k, int l, String string, double d) {
+		super(i, j, k, l, string);
 		this.value = d;
 	}
 

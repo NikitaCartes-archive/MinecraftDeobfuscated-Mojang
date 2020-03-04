@@ -18,6 +18,7 @@ public class PlayerEnderChestContainer extends SimpleContainer {
 		this.activeChest = enderChestBlockEntity;
 	}
 
+	@Override
 	public void fromTag(ListTag listTag) {
 		for (int i = 0; i < this.getContainerSize(); i++) {
 			this.setItem(i, ItemStack.EMPTY);
@@ -32,6 +33,7 @@ public class PlayerEnderChestContainer extends SimpleContainer {
 		}
 	}
 
+	@Override
 	public ListTag createTag() {
 		ListTag listTag = new ListTag();
 

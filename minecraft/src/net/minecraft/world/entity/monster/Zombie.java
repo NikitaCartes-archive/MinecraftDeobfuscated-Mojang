@@ -245,7 +245,7 @@ public class Zombie extends Monster {
 
 	protected void doUnderWaterConversion() {
 		this.convertTo(EntityType.DROWNED);
-		this.level.levelEvent(null, 1040, new BlockPos(this), 0);
+		this.level.levelEvent(null, 1040, this.blockPosition(), 0);
 	}
 
 	protected void convertTo(EntityType<? extends Zombie> entityType) {
@@ -254,7 +254,7 @@ public class Zombie extends Monster {
 			zombie.copyPosition(this);
 			zombie.setCanPickUpLoot(this.canPickUpLoot());
 			zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
-			zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(new BlockPos(zombie)).getSpecialMultiplier());
+			zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
 			zombie.setBaby(this.isBaby());
 			zombie.setNoAi(this.isNoAi());
 
@@ -316,7 +316,7 @@ public class Zombie extends Monster {
 							&& !this.level.containsAnyLiquid(zombie.getBoundingBox())) {
 							this.level.addFreshEntity(zombie);
 							zombie.setTarget(livingEntity);
-							zombie.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(new BlockPos(zombie)), MobSpawnType.REINFORCEMENT, null, null);
+							zombie.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
 							this.getAttribute(SPAWN_REINFORCEMENTS_CHANCE)
 								.addModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05F, AttributeModifier.Operation.ADDITION));
 							zombie.getAttribute(SPAWN_REINFORCEMENTS_CHANCE)
@@ -337,7 +337,7 @@ public class Zombie extends Monster {
 	public boolean doHurtTarget(Entity entity) {
 		boolean bl = super.doHurtTarget(entity);
 		if (bl) {
-			float f = this.level.getCurrentDifficultyAt(new BlockPos(this)).getEffectiveDifficulty();
+			float f = this.level.getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			if (this.getMainHandItem().isEmpty() && this.isOnFire() && this.random.nextFloat() < f * 0.3F) {
 				entity.setSecondsOnFire(2 * (int)f);
 			}
@@ -427,7 +427,7 @@ public class Zombie extends Monster {
 			zombieVillager.copyPosition(villager);
 			villager.remove();
 			zombieVillager.finalizeSpawn(
-				this.level, this.level.getCurrentDifficultyAt(new BlockPos(zombieVillager)), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false), null
+				this.level, this.level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false), null
 			);
 			zombieVillager.setVillagerData(villager.getVillagerData());
 			zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
@@ -446,7 +446,7 @@ public class Zombie extends Monster {
 
 			zombieVillager.setInvulnerable(this.isInvulnerable());
 			this.level.addFreshEntity(zombieVillager);
-			this.level.levelEvent(null, 1026, new BlockPos(this), 0);
+			this.level.levelEvent(null, 1026, this.blockPosition(), 0);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
@@ -28,7 +29,16 @@ public final class NetherWastesBiome extends Biome {
 				.scale(0.2F)
 				.temperature(2.0F)
 				.downfall(0.0F)
-				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(3344392).build())
+				.specialEffects(
+					new BiomeSpecialEffects.Builder()
+						.waterColor(4159204)
+						.waterFogColor(329011)
+						.fogColor(3344392)
+						.ambientLoopSound(SoundEvents.AMBIENT_NETHER_WASTES_LOOP)
+						.ambientMoodSound(SoundEvents.AMBIENT_NETHER_WASTES_MOOD)
+						.ambientAdditionsSound(SoundEvents.AMBIENT_NETHER_WASTES_ADDITIONS)
+						.build()
+				)
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, 0.0F, -0.5F, 1.0F)))
 		);

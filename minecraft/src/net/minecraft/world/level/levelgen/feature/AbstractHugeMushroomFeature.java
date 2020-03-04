@@ -61,7 +61,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 
 					for (int m = -l; m <= l; m++) {
 						for (int n = -l; n <= l; n++) {
-							BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.set(blockPos).move(m, k, n));
+							BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
 							if (!blockState.isAir() && !blockState.is(BlockTags.LEAVES)) {
 								return false;
 							}

@@ -27,6 +27,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,7 +35,7 @@ import net.minecraft.world.phys.Vec3;
 		value = EnvType.CLIENT,
 		itf = ItemSupplier.class
 	)})
-public class FireworkRocketEntity extends Entity implements ItemSupplier, Projectile {
+public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ID_FIREWORKS_ITEM = SynchedEntityData.defineId(
 		FireworkRocketEntity.class, EntityDataSerializers.ITEM_STACK
 	);
@@ -48,6 +49,41 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 
 	public FireworkRocketEntity(EntityType<? extends FireworkRocketEntity> entityType, Level level) {
 		super(entityType, level);
+	}
+
+	public FireworkRocketEntity(Level level, double d, double e, double f, ItemStack itemStack) {
+		super(EntityType.FIREWORK_ROCKET, level);
+		this.life = 0;
+		this.setPos(d, e, f);
+		int i = 1;
+		if (!itemStack.isEmpty() && itemStack.hasTag()) {
+			this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack.copy());
+			i += itemStack.getOrCreateTagElement("Fireworks").getByte("Flight");
+		}
+
+		this.setDeltaMovement(this.random.nextGaussian() * 0.001, 0.05, this.random.nextGaussian() * 0.001);
+		this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
+	}
+
+	public FireworkRocketEntity(Level level, Entity entity, double d, double e, double f, ItemStack itemStack) {
+		this(level, d, e, f, itemStack);
+		this.setOwner(entity);
+	}
+
+	public FireworkRocketEntity(Level level, ItemStack itemStack, LivingEntity livingEntity) {
+		this(level, livingEntity, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), itemStack);
+		this.entityData.set(DATA_ATTACHED_TO_TARGET, OptionalInt.of(livingEntity.getId()));
+		this.attachedToEntity = livingEntity;
+	}
+
+	public FireworkRocketEntity(Level level, ItemStack itemStack, double d, double e, double f, boolean bl) {
+		this(level, d, e, f, itemStack);
+		this.entityData.set(DATA_SHOT_AT_ANGLE, bl);
+	}
+
+	public FireworkRocketEntity(Level level, ItemStack itemStack, Entity entity, double d, double e, double f, boolean bl) {
+		this(level, itemStack, d, e, f, bl);
+		this.setOwner(entity);
 	}
 
 	@Override
@@ -67,44 +103,6 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 	@Override
 	public boolean shouldRender(double d, double e, double f) {
 		return super.shouldRender(d, e, f) && !this.isAttachedToEntity();
-	}
-
-	public FireworkRocketEntity(Level level, double d, double e, double f, ItemStack itemStack) {
-		super(EntityType.FIREWORK_ROCKET, level);
-		this.life = 0;
-		this.setPos(d, e, f);
-		int i = 1;
-		if (!itemStack.isEmpty() && itemStack.hasTag()) {
-			this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack.copy());
-			i += itemStack.getOrCreateTagElement("Fireworks").getByte("Flight");
-		}
-
-		this.setDeltaMovement(this.random.nextGaussian() * 0.001, 0.05, this.random.nextGaussian() * 0.001);
-		this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
-	}
-
-	public FireworkRocketEntity(Level level, ItemStack itemStack, LivingEntity livingEntity) {
-		this(level, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), itemStack);
-		this.entityData.set(DATA_ATTACHED_TO_TARGET, OptionalInt.of(livingEntity.getId()));
-		this.attachedToEntity = livingEntity;
-	}
-
-	public FireworkRocketEntity(Level level, ItemStack itemStack, double d, double e, double f, boolean bl) {
-		this(level, d, e, f, itemStack);
-		this.entityData.set(DATA_SHOT_AT_ANGLE, bl);
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void lerpMotion(double d, double e, double f) {
-		this.setDeltaMovement(d, e, f);
-		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-			float g = Mth.sqrt(d * d + f * f);
-			this.yRot = (float)(Mth.atan2(d, f) * 180.0F / (float)Math.PI);
-			this.xRot = (float)(Mth.atan2(e, (double)g) * 180.0F / (float)Math.PI);
-			this.yRotO = this.yRot;
-			this.xRotO = this.xRot;
-		}
 	}
 
 	@Override
@@ -152,7 +150,7 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 			true
 		);
 		if (!this.noPhysics) {
-			this.performHitChecks(hitResult);
+			this.onHit(hitResult);
 			this.hasImpulse = true;
 		}
 
@@ -207,17 +205,19 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 		this.remove();
 	}
 
-	protected void performHitChecks(HitResult hitResult) {
-		if (hitResult.getType() == HitResult.Type.ENTITY && !this.level.isClientSide) {
+	@Override
+	protected void onHitEntity(EntityHitResult entityHitResult) {
+		super.onHitEntity(entityHitResult);
+		if (!this.level.isClientSide) {
 			this.explode();
-		} else if (this.collision) {
-			BlockPos blockPos;
-			if (hitResult.getType() == HitResult.Type.BLOCK) {
-				blockPos = new BlockPos(((BlockHitResult)hitResult).getBlockPos());
-			} else {
-				blockPos = new BlockPos(this);
-			}
+		}
+	}
 
+	@Override
+	protected void onHitBlock(BlockHitResult blockHitResult) {
+		super.onHitBlock(blockHitResult);
+		if (this.collision) {
+			BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
 			this.level.getBlockState(blockPos).entityInside(this.level, blockPos, this);
 			if (this.hasExplosion()) {
 				this.explode();
@@ -243,7 +243,7 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 
 		if (f > 0.0F) {
 			if (this.attachedToEntity != null) {
-				this.attachedToEntity.hurt(DamageSource.FIREWORKS, 5.0F + (float)(listTag.size() * 2));
+				this.attachedToEntity.hurt(DamageSource.fireworks(this, this.getOwner()), 5.0F + (float)(listTag.size() * 2));
 			}
 
 			double d = 5.0;
@@ -264,7 +264,7 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 
 					if (bl) {
 						float g = f * (float)Math.sqrt((5.0 - (double)this.distanceTo(livingEntity)) / 5.0);
-						livingEntity.hurt(DamageSource.FIREWORKS, g);
+						livingEntity.hurt(DamageSource.fireworks(this, this.getOwner()), g);
 					}
 				}
 			}
@@ -301,6 +301,7 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
+		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("Life", this.life);
 		compoundTag.putInt("LifeTime", this.lifetime);
 		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
@@ -313,6 +314,7 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
 		this.life = compoundTag.getInt("Life");
 		this.lifetime = compoundTag.getInt("LifeTime");
 		ItemStack itemStack = ItemStack.of(compoundTag.getCompound("FireworksItem"));
@@ -340,20 +342,5 @@ public class FireworkRocketEntity extends Entity implements ItemSupplier, Projec
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this);
-	}
-
-	@Override
-	public void shoot(double d, double e, double f, float g, float h) {
-		float i = Mth.sqrt(d * d + e * e + f * f);
-		d /= (double)i;
-		e /= (double)i;
-		f /= (double)i;
-		d += this.random.nextGaussian() * 0.0075F * (double)h;
-		e += this.random.nextGaussian() * 0.0075F * (double)h;
-		f += this.random.nextGaussian() * 0.0075F * (double)h;
-		d *= (double)g;
-		e *= (double)g;
-		f *= (double)g;
-		this.setDeltaMovement(d, e, f);
 	}
 }

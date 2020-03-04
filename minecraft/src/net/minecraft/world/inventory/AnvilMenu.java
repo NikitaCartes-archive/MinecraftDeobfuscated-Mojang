@@ -5,8 +5,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -20,104 +18,72 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AnvilMenu extends AbstractContainerMenu {
+public class AnvilMenu extends ItemCombinerMenu {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final Container resultSlots = new ResultContainer();
-	private final Container repairSlots = new SimpleContainer(2) {
-		@Override
-		public void setChanged() {
-			super.setChanged();
-			AnvilMenu.this.slotsChanged(this);
-		}
-	};
-	private final DataSlot cost = DataSlot.standalone();
-	private final ContainerLevelAccess access;
 	private int repairItemCountCost;
 	private String itemName;
-	private final Player player;
+	private final DataSlot cost = DataSlot.standalone();
 
 	public AnvilMenu(int i, Inventory inventory) {
 		this(i, inventory, ContainerLevelAccess.NULL);
 	}
 
 	public AnvilMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
-		super(MenuType.ANVIL, i);
-		this.access = containerLevelAccess;
-		this.player = inventory.player;
+		super(MenuType.ANVIL, i, inventory, containerLevelAccess);
 		this.addDataSlot(this.cost);
-		this.addSlot(new Slot(this.repairSlots, 0, 27, 47));
-		this.addSlot(new Slot(this.repairSlots, 1, 76, 47));
-		this.addSlot(new Slot(this.resultSlots, 2, 134, 47) {
-			@Override
-			public boolean mayPlace(ItemStack itemStack) {
-				return false;
-			}
-
-			@Override
-			public boolean mayPickup(Player player) {
-				return (player.abilities.instabuild || player.experienceLevel >= AnvilMenu.this.cost.get()) && AnvilMenu.this.cost.get() > 0 && this.hasItem();
-			}
-
-			@Override
-			public ItemStack onTake(Player player, ItemStack itemStack) {
-				if (!player.abilities.instabuild) {
-					player.giveExperienceLevels(-AnvilMenu.this.cost.get());
-				}
-
-				AnvilMenu.this.repairSlots.setItem(0, ItemStack.EMPTY);
-				if (AnvilMenu.this.repairItemCountCost > 0) {
-					ItemStack itemStack2 = AnvilMenu.this.repairSlots.getItem(1);
-					if (!itemStack2.isEmpty() && itemStack2.getCount() > AnvilMenu.this.repairItemCountCost) {
-						itemStack2.shrink(AnvilMenu.this.repairItemCountCost);
-						AnvilMenu.this.repairSlots.setItem(1, itemStack2);
-					} else {
-						AnvilMenu.this.repairSlots.setItem(1, ItemStack.EMPTY);
-					}
-				} else {
-					AnvilMenu.this.repairSlots.setItem(1, ItemStack.EMPTY);
-				}
-
-				AnvilMenu.this.cost.set(0);
-				containerLevelAccess.execute((level, blockPos) -> {
-					BlockState blockState = level.getBlockState(blockPos);
-					if (!player.abilities.instabuild && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
-						BlockState blockState2 = AnvilBlock.damage(blockState);
-						if (blockState2 == null) {
-							level.removeBlock(blockPos, false);
-							level.levelEvent(1029, blockPos, 0);
-						} else {
-							level.setBlock(blockPos, blockState2, 2);
-							level.levelEvent(1030, blockPos, 0);
-						}
-					} else {
-						level.levelEvent(1030, blockPos, 0);
-					}
-				});
-				return itemStack;
-			}
-		});
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
-		}
 	}
 
 	@Override
-	public void slotsChanged(Container container) {
-		super.slotsChanged(container);
-		if (container == this.repairSlots) {
-			this.createResult();
-		}
+	protected boolean isValidBlock(BlockState blockState) {
+		return blockState.is(BlockTags.ANVIL);
 	}
 
+	@Override
+	protected boolean mayPickup(Player player, boolean bl) {
+		return (player.abilities.instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() > 0;
+	}
+
+	@Override
+	protected ItemStack onTake(Player player, ItemStack itemStack) {
+		if (!player.abilities.instabuild) {
+			player.giveExperienceLevels(-this.cost.get());
+		}
+
+		this.inputSlots.setItem(0, ItemStack.EMPTY);
+		if (this.repairItemCountCost > 0) {
+			ItemStack itemStack2 = this.inputSlots.getItem(1);
+			if (!itemStack2.isEmpty() && itemStack2.getCount() > this.repairItemCountCost) {
+				itemStack2.shrink(this.repairItemCountCost);
+				this.inputSlots.setItem(1, itemStack2);
+			} else {
+				this.inputSlots.setItem(1, ItemStack.EMPTY);
+			}
+		} else {
+			this.inputSlots.setItem(1, ItemStack.EMPTY);
+		}
+
+		this.cost.set(0);
+		this.access.execute((level, blockPos) -> {
+			BlockState blockState = level.getBlockState(blockPos);
+			if (!player.abilities.instabuild && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
+				BlockState blockState2 = AnvilBlock.damage(blockState);
+				if (blockState2 == null) {
+					level.removeBlock(blockPos, false);
+					level.levelEvent(1029, blockPos, 0);
+				} else {
+					level.setBlock(blockPos, blockState2, 2);
+					level.levelEvent(1030, blockPos, 0);
+				}
+			} else {
+				level.levelEvent(1030, blockPos, 0);
+			}
+		});
+		return itemStack;
+	}
+
+	@Override
 	public void createResult() {
-		ItemStack itemStack = this.repairSlots.getItem(0);
+		ItemStack itemStack = this.inputSlots.getItem(0);
 		this.cost.set(1);
 		int i = 0;
 		int j = 0;
@@ -127,7 +93,7 @@ public class AnvilMenu extends AbstractContainerMenu {
 			this.cost.set(0);
 		} else {
 			ItemStack itemStack2 = itemStack.copy();
-			ItemStack itemStack3 = this.repairSlots.getItem(1);
+			ItemStack itemStack3 = this.inputSlots.getItem(1);
 			Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack2);
 			j += itemStack.getBaseRepairCost() + (itemStack3.isEmpty() ? 0 : itemStack3.getBaseRepairCost());
 			this.repairItemCountCost = 0;
@@ -284,60 +250,6 @@ public class AnvilMenu extends AbstractContainerMenu {
 
 	public static int calculateIncreasedRepairCost(int i) {
 		return i * 2 + 1;
-	}
-
-	@Override
-	public void removed(Player player) {
-		super.removed(player);
-		this.access.execute((level, blockPos) -> this.clearContainer(player, level, this.repairSlots));
-	}
-
-	@Override
-	public boolean stillValid(Player player) {
-		return this.access
-			.evaluate(
-				(level, blockPos) -> !level.getBlockState(blockPos).is(BlockTags.ANVIL)
-						? false
-						: player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) <= 64.0,
-				true
-			);
-	}
-
-	@Override
-	public ItemStack quickMoveStack(Player player, int i) {
-		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot)this.slots.get(i);
-		if (slot != null && slot.hasItem()) {
-			ItemStack itemStack2 = slot.getItem();
-			itemStack = itemStack2.copy();
-			if (i == 2) {
-				if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
-					return ItemStack.EMPTY;
-				}
-
-				slot.onQuickCraft(itemStack2, itemStack);
-			} else if (i != 0 && i != 1) {
-				if (i >= 3 && i < 39 && !this.moveItemStackTo(itemStack2, 0, 2, false)) {
-					return ItemStack.EMPTY;
-				}
-			} else if (!this.moveItemStackTo(itemStack2, 3, 39, false)) {
-				return ItemStack.EMPTY;
-			}
-
-			if (itemStack2.isEmpty()) {
-				slot.set(ItemStack.EMPTY);
-			} else {
-				slot.setChanged();
-			}
-
-			if (itemStack2.getCount() == itemStack.getCount()) {
-				return ItemStack.EMPTY;
-			}
-
-			slot.onTake(player, itemStack2);
-		}
-
-		return itemStack;
 	}
 
 	public void setItemName(String string) {

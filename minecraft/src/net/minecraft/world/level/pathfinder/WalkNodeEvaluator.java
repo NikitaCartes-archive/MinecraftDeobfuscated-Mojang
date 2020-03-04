@@ -58,7 +58,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		} else if (this.mob.isOnGround()) {
 			i = Mth.floor(this.mob.getY() + 0.5);
 		} else {
-			BlockPos blockPos = new BlockPos(this.mob);
+			BlockPos blockPos = this.mob.blockPosition();
 
 			while (
 				(this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND))
@@ -70,7 +70,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			i = blockPos.above().getY();
 		}
 
-		BlockPos blockPos = new BlockPos(this.mob);
+		BlockPos blockPos = this.mob.blockPosition();
 		BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos.getX(), i, blockPos.getZ());
 		if (this.mob.getPathfindingMalus(blockPathTypes) < 0.0F) {
 			Set<BlockPos> set = Sets.<BlockPos>newHashSet();
@@ -290,7 +290,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
 		BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
 		double d = (double)mob.getBbWidth() / 2.0;
-		BlockPos blockPos = new BlockPos(mob);
+		BlockPos blockPos = mob.blockPosition();
 		blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
 		if (enumSet.contains(BlockPathTypes.FENCE)) {
 			return BlockPathTypes.FENCE;
@@ -416,19 +416,19 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	public static BlockPathTypes checkNeighbourBlocks(BlockGetter blockGetter, int i, int j, int k, BlockPathTypes blockPathTypes) {
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int l = -1; l <= 1; l++) {
-				for (int m = -1; m <= 1; m++) {
-					for (int n = -1; n <= 1; n++) {
-						if (l != 0 || n != 0) {
-							Block block = blockGetter.getBlockState(pooledMutableBlockPos.set(l + i, m + j, n + k)).getBlock();
-							if (block == Blocks.CACTUS) {
-								blockPathTypes = BlockPathTypes.DANGER_CACTUS;
-							} else if (block.is(BlockTags.FIRE) || block == Blocks.LAVA) {
-								blockPathTypes = BlockPathTypes.DANGER_FIRE;
-							} else if (block == Blocks.SWEET_BERRY_BUSH) {
-								blockPathTypes = BlockPathTypes.DANGER_OTHER;
-							}
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (int l = -1; l <= 1; l++) {
+			for (int m = -1; m <= 1; m++) {
+				for (int n = -1; n <= 1; n++) {
+					if (l != 0 || n != 0) {
+						Block block = blockGetter.getBlockState(mutableBlockPos.set(l + i, m + j, n + k)).getBlock();
+						if (block == Blocks.CACTUS) {
+							blockPathTypes = BlockPathTypes.DANGER_CACTUS;
+						} else if (block.is(BlockTags.FIRE) || block == Blocks.LAVA) {
+							blockPathTypes = BlockPathTypes.DANGER_FIRE;
+						} else if (block == Blocks.SWEET_BERRY_BUSH) {
+							blockPathTypes = BlockPathTypes.DANGER_OTHER;
 						}
 					}
 				}

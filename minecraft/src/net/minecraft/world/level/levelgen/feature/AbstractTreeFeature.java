@@ -168,69 +168,61 @@ public abstract class AbstractTreeFeature<T extends TreeConfiguration> extends F
 			list.add(Sets.newHashSet());
 		}
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (BlockPos blockPos : Lists.newArrayList(set2)) {
-				if (boundingBox.isInside(blockPos)) {
-					discreteVoxelShape.setFull(blockPos.getX() - boundingBox.x0, blockPos.getY() - boundingBox.y0, blockPos.getZ() - boundingBox.z0, true, true);
-				}
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (BlockPos blockPos : Lists.newArrayList(set2)) {
+			if (boundingBox.isInside(blockPos)) {
+				discreteVoxelShape.setFull(blockPos.getX() - boundingBox.x0, blockPos.getY() - boundingBox.y0, blockPos.getZ() - boundingBox.z0, true, true);
+			}
+		}
+
+		for (BlockPos blockPosx : Lists.newArrayList(set)) {
+			if (boundingBox.isInside(blockPosx)) {
+				discreteVoxelShape.setFull(blockPosx.getX() - boundingBox.x0, blockPosx.getY() - boundingBox.y0, blockPosx.getZ() - boundingBox.z0, true, true);
 			}
 
-			for (BlockPos blockPosx : Lists.newArrayList(set)) {
-				if (boundingBox.isInside(blockPosx)) {
-					discreteVoxelShape.setFull(blockPosx.getX() - boundingBox.x0, blockPosx.getY() - boundingBox.y0, blockPosx.getZ() - boundingBox.z0, true, true);
-				}
-
-				for (Direction direction : Direction.values()) {
-					pooledMutableBlockPos.set(blockPosx).move(direction);
-					if (!set.contains(pooledMutableBlockPos)) {
-						BlockState blockState = levelAccessor.getBlockState(pooledMutableBlockPos);
-						if (blockState.hasProperty(BlockStateProperties.DISTANCE)) {
-							((Set)list.get(0)).add(pooledMutableBlockPos.immutable());
-							this.setBlockKnownShape(levelAccessor, pooledMutableBlockPos, blockState.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(1)));
-							if (boundingBox.isInside(pooledMutableBlockPos)) {
-								discreteVoxelShape.setFull(
-									pooledMutableBlockPos.getX() - boundingBox.x0,
-									pooledMutableBlockPos.getY() - boundingBox.y0,
-									pooledMutableBlockPos.getZ() - boundingBox.z0,
-									true,
-									true
-								);
-							}
+			for (Direction direction : Direction.values()) {
+				mutableBlockPos.setWithOffset(blockPosx, direction);
+				if (!set.contains(mutableBlockPos)) {
+					BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
+					if (blockState.hasProperty(BlockStateProperties.DISTANCE)) {
+						((Set)list.get(0)).add(mutableBlockPos.immutable());
+						this.setBlockKnownShape(levelAccessor, mutableBlockPos, blockState.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(1)));
+						if (boundingBox.isInside(mutableBlockPos)) {
+							discreteVoxelShape.setFull(
+								mutableBlockPos.getX() - boundingBox.x0, mutableBlockPos.getY() - boundingBox.y0, mutableBlockPos.getZ() - boundingBox.z0, true, true
+							);
 						}
 					}
 				}
 			}
+		}
 
-			for (int k = 1; k < 6; k++) {
-				Set<BlockPos> set3 = (Set<BlockPos>)list.get(k - 1);
-				Set<BlockPos> set4 = (Set<BlockPos>)list.get(k);
+		for (int k = 1; k < 6; k++) {
+			Set<BlockPos> set3 = (Set<BlockPos>)list.get(k - 1);
+			Set<BlockPos> set4 = (Set<BlockPos>)list.get(k);
 
-				for (BlockPos blockPos2 : set3) {
-					if (boundingBox.isInside(blockPos2)) {
-						discreteVoxelShape.setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
-					}
+			for (BlockPos blockPos2 : set3) {
+				if (boundingBox.isInside(blockPos2)) {
+					discreteVoxelShape.setFull(blockPos2.getX() - boundingBox.x0, blockPos2.getY() - boundingBox.y0, blockPos2.getZ() - boundingBox.z0, true, true);
+				}
 
-					for (Direction direction2 : Direction.values()) {
-						pooledMutableBlockPos.set(blockPos2).move(direction2);
-						if (!set3.contains(pooledMutableBlockPos) && !set4.contains(pooledMutableBlockPos)) {
-							BlockState blockState2 = levelAccessor.getBlockState(pooledMutableBlockPos);
-							if (blockState2.hasProperty(BlockStateProperties.DISTANCE)) {
-								int l = (Integer)blockState2.getValue(BlockStateProperties.DISTANCE);
-								if (l > k + 1) {
-									BlockState blockState3 = blockState2.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(k + 1));
-									this.setBlockKnownShape(levelAccessor, pooledMutableBlockPos, blockState3);
-									if (boundingBox.isInside(pooledMutableBlockPos)) {
-										discreteVoxelShape.setFull(
-											pooledMutableBlockPos.getX() - boundingBox.x0,
-											pooledMutableBlockPos.getY() - boundingBox.y0,
-											pooledMutableBlockPos.getZ() - boundingBox.z0,
-											true,
-											true
-										);
-									}
-
-									set4.add(pooledMutableBlockPos.immutable());
+				for (Direction direction2 : Direction.values()) {
+					mutableBlockPos.setWithOffset(blockPos2, direction2);
+					if (!set3.contains(mutableBlockPos) && !set4.contains(mutableBlockPos)) {
+						BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
+						if (blockState2.hasProperty(BlockStateProperties.DISTANCE)) {
+							int l = (Integer)blockState2.getValue(BlockStateProperties.DISTANCE);
+							if (l > k + 1) {
+								BlockState blockState3 = blockState2.setValue(BlockStateProperties.DISTANCE, Integer.valueOf(k + 1));
+								this.setBlockKnownShape(levelAccessor, mutableBlockPos, blockState3);
+								if (boundingBox.isInside(mutableBlockPos)) {
+									discreteVoxelShape.setFull(
+										mutableBlockPos.getX() - boundingBox.x0, mutableBlockPos.getY() - boundingBox.y0, mutableBlockPos.getZ() - boundingBox.z0, true, true
+									);
 								}
+
+								set4.add(mutableBlockPos.immutable());
 							}
 						}
 					}

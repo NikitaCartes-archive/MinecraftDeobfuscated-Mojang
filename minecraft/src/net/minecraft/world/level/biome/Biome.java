@@ -24,6 +24,7 @@ import net.minecraft.core.IdMapper;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.WeighedRandom;
 import net.minecraft.world.entity.EntityType;
@@ -337,6 +338,21 @@ public abstract class Biome {
 		} else {
 			return (double)this.getTemperature() < 1.0 ? Biome.BiomeTempCategory.MEDIUM : Biome.BiomeTempCategory.WARM;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Optional<SoundEvent> getAmbientLoopSoundEvent() {
+		return this.specialEffects.getAmbientLoopSoundEvent();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Optional<SoundEvent> getAmbientMoodSoundEvent() {
+		return this.specialEffects.getAmbientMoodSoundEvent();
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Optional<SoundEvent> getAmbientAdditionsSoundEvent() {
+		return this.specialEffects.getAmbientAdditionsSoundEvent();
 	}
 
 	public final float getDepth() {

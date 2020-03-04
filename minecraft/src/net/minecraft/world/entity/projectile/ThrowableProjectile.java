@@ -1,16 +1,12 @@
 package net.minecraft.world.entity.projectile;
 
-import java.util.UUID;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -23,14 +19,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class ThrowableProjectile extends Entity implements Projectile {
+public abstract class ThrowableProjectile extends Projectile {
 	private int xBlock = -1;
 	private int yBlock = -1;
 	private int zBlock = -1;
 	protected boolean inGround;
-	public int shakeTime;
-	protected LivingEntity owner;
-	private UUID ownerId;
+	private int shakeTime;
 	private boolean leftOwner;
 
 	protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, Level level) {
@@ -44,8 +38,7 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 
 	protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, LivingEntity livingEntity, Level level) {
 		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level);
-		this.owner = livingEntity;
-		this.ownerId = livingEntity.getUUID();
+		this.setOwner(livingEntity);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -58,42 +51,6 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 
 		e *= 64.0;
 		return d < e * e;
-	}
-
-	public void shootFromRotation(Entity entity, float f, float g, float h, float i, float j) {
-		float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
-		float l = -Mth.sin((f + h) * (float) (Math.PI / 180.0));
-		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
-		this.shoot((double)k, (double)l, (double)m, i, j);
-		Vec3 vec3 = entity.getDeltaMovement();
-		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.isOnGround() ? 0.0 : vec3.y, vec3.z));
-	}
-
-	@Override
-	public void shoot(double d, double e, double f, float g, float h) {
-		Vec3 vec3 = new Vec3(d, e, f)
-			.normalize()
-			.add(this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h, this.random.nextGaussian() * 0.0075F * (double)h)
-			.scale((double)g);
-		this.setDeltaMovement(vec3);
-		float i = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)i) * 180.0F / (float)Math.PI);
-		this.yRotO = this.yRot;
-		this.xRotO = this.xRot;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void lerpMotion(double d, double e, double f) {
-		this.setDeltaMovement(d, e, f);
-		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-			float g = Mth.sqrt(d * d + f * f);
-			this.yRot = (float)(Mth.atan2(d, f) * 180.0F / (float)Math.PI);
-			this.xRot = (float)(Mth.atan2(e, (double)g) * 180.0F / (float)Math.PI);
-			this.yRotO = this.yRot;
-			this.xRotO = this.xRot;
-		}
 	}
 
 	@Override
@@ -112,13 +69,14 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		}
 
 		AABB aABB = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0);
-		if (this.owner == null) {
+		Entity entity = this.getOwner();
+		if (entity == null) {
 			this.leftOwner = true;
 		} else if (!this.leftOwner) {
 			boolean bl = false;
 
-			for (Entity entity : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
-				if (this.isEntityOrVehicle(entity, this.owner)) {
+			for (Entity entity2 : this.level.getEntities(this, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable())) {
+				if (this.isEntityOrVehicle(entity2, entity)) {
 					bl = true;
 					break;
 				}
@@ -129,7 +87,7 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 			}
 		}
 
-		Predicate<Entity> predicate = entityx -> !entityx.isSpectator() && entityx.isPickable() && (this.leftOwner || !this.isEntityOrVehicle(entityx, this.owner));
+		Predicate<Entity> predicate = entity2x -> !entity2x.isSpectator() && entity2x.isPickable() && (this.leftOwner || !this.isEntityOrVehicle(entity2x, entity));
 		HitResult hitResult = ProjectileUtil.getHitResult(this, aABB, predicate, ClipContext.Block.OUTLINE, true);
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			if (hitResult.getType() == HitResult.Type.BLOCK && this.level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.NETHER_PORTAL) {
@@ -194,45 +152,24 @@ public abstract class ThrowableProjectile extends Entity implements Projectile {
 		return 0.03F;
 	}
 
-	protected abstract void onHit(HitResult hitResult);
-
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
+		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("xTile", this.xBlock);
 		compoundTag.putInt("yTile", this.yBlock);
 		compoundTag.putInt("zTile", this.zBlock);
 		compoundTag.putByte("shake", (byte)this.shakeTime);
 		compoundTag.putBoolean("inGround", this.inGround);
-		if (this.ownerId != null) {
-			compoundTag.put("owner", NbtUtils.createUUIDTag(this.ownerId));
-		}
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
 		this.xBlock = compoundTag.getInt("xTile");
 		this.yBlock = compoundTag.getInt("yTile");
 		this.zBlock = compoundTag.getInt("zTile");
 		this.shakeTime = compoundTag.getByte("shake") & 255;
 		this.inGround = compoundTag.getBoolean("inGround");
-		this.owner = null;
-		if (compoundTag.contains("owner", 10)) {
-			this.ownerId = NbtUtils.loadUUIDTag(compoundTag.getCompound("owner"));
-		}
-	}
-
-	@Nullable
-	public LivingEntity getOwner() {
-		if ((this.owner == null || this.owner.removed) && this.ownerId != null && this.level instanceof ServerLevel) {
-			Entity entity = ((ServerLevel)this.level).getEntity(this.ownerId);
-			if (entity instanceof LivingEntity) {
-				this.owner = (LivingEntity)entity;
-			} else {
-				this.owner = null;
-			}
-		}
-
-		return this.owner;
 	}
 
 	@Override

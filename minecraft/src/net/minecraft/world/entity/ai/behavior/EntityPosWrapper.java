@@ -17,7 +17,7 @@ public class EntityPosWrapper implements PositionWrapper {
 
 	@Override
 	public BlockPos getPos() {
-		return new BlockPos(this.entity);
+		return this.entity.blockPosition();
 	}
 
 	@Override

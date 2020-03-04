@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.BlockFinder;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,8 +19,6 @@ import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 
 public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 	@Override
@@ -34,14 +33,14 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 			MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS,
 			MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT,
 			MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT,
-			MemoryModuleType.NEAREST_SOUL_FIRE
+			MemoryModuleType.NEAREST_REPELLENT
 		);
 	}
 
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Brain<?> brain = livingEntity.getBrain();
-		brain.setMemory(MemoryModuleType.NEAREST_SOUL_FIRE, findNearestSoulFire(serverLevel, livingEntity));
+		brain.setMemory(MemoryModuleType.NEAREST_REPELLENT, findNearestRepellent(serverLevel, livingEntity));
 		Optional<WitherSkeleton> optional = Optional.empty();
 		Optional<Hoglin> optional2 = Optional.empty();
 		Optional<Hoglin> optional3 = Optional.empty();
@@ -53,27 +52,24 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 		List<Piglin> list = Lists.<Piglin>newArrayList();
 
 		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(Lists.newArrayList())) {
-			if (livingEntity2 instanceof Hoglin && ((Hoglin)livingEntity2).isAdult()) {
-				i++;
-			}
-
-			if (!optional.isPresent() && livingEntity2 instanceof WitherSkeleton) {
-				optional = Optional.of((WitherSkeleton)livingEntity2);
-			} else if (!optional3.isPresent() && livingEntity2 instanceof Hoglin && livingEntity2.isBaby()) {
-				optional3 = Optional.of((Hoglin)livingEntity2);
-			} else if (!optional4.isPresent() && livingEntity2 instanceof Piglin && livingEntity2.isBaby()) {
-				optional4 = Optional.of((Piglin)livingEntity2);
-			} else if (!optional2.isPresent() && livingEntity2 instanceof Hoglin && !livingEntity2.isBaby()) {
-				optional2 = Optional.of((Hoglin)livingEntity2);
-			} else if (!optional5.isPresent() && livingEntity2 instanceof ZombifiedPiglin) {
-				optional5 = Optional.of((ZombifiedPiglin)livingEntity2);
-			}
-
-			if (livingEntity2 instanceof Piglin && !livingEntity2.isBaby()) {
-				list.add((Piglin)livingEntity2);
-			}
-
-			if (livingEntity2 instanceof Player) {
+			if (livingEntity2 instanceof Hoglin) {
+				Hoglin hoglin = (Hoglin)livingEntity2;
+				if (hoglin.isBaby() && !optional3.isPresent()) {
+					optional3 = Optional.of(hoglin);
+				} else if (hoglin.isAdult()) {
+					i++;
+					if (!optional2.isPresent()) {
+						optional2 = Optional.of(hoglin);
+					}
+				}
+			} else if (livingEntity2 instanceof Piglin) {
+				Piglin piglin = (Piglin)livingEntity2;
+				if (piglin.isBaby() && !optional4.isPresent()) {
+					optional4 = Optional.of(piglin);
+				} else if (piglin.isAdult()) {
+					list.add(piglin);
+				}
+			} else if (livingEntity2 instanceof Player) {
 				Player player = (Player)livingEntity2;
 				if (!optional6.isPresent() && EntitySelector.ATTACK_ALLOWED.test(livingEntity2) && !PiglinAi.isWearingGold(player)) {
 					optional6 = Optional.of(player);
@@ -82,6 +78,10 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 				if (!optional7.isPresent() && !player.isSpectator() && PiglinAi.isPlayerHoldingLovedItem(player)) {
 					optional7 = Optional.of(player);
 				}
+			} else if (!optional.isPresent() && livingEntity2 instanceof WitherSkeleton) {
+				optional = Optional.of((WitherSkeleton)livingEntity2);
+			} else if (!optional5.isPresent() && livingEntity2 instanceof ZombifiedPiglin) {
+				optional5 = Optional.of((ZombifiedPiglin)livingEntity2);
 			}
 		}
 
@@ -97,12 +97,9 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 		brain.setMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, i);
 	}
 
-	private static Optional<BlockPos> findNearestSoulFire(ServerLevel serverLevel, LivingEntity livingEntity) {
-		return BlockFinder.findClosestMatchingBlockPos(livingEntity.getBlockPos(), 8, 4, blockPos -> containsSoulFire(serverLevel, blockPos));
-	}
-
-	private static boolean containsSoulFire(ServerLevel serverLevel, BlockPos blockPos) {
-		Block block = serverLevel.getBlockState(blockPos).getBlock();
-		return block == Blocks.SOUL_FIRE || block == Blocks.SOUL_FIRE_TORCH || block == Blocks.SOUL_FIRE_WALL_TORCH || block == Blocks.SOUL_FIRE_LANTERN;
+	private static Optional<BlockPos> findNearestRepellent(ServerLevel serverLevel, LivingEntity livingEntity) {
+		return BlockFinder.findClosestMatchingBlockPos(
+			livingEntity.blockPosition(), 8, 4, blockPos -> serverLevel.getBlockState(blockPos).is(BlockTags.PIGLIN_REPELLENTS)
+		);
 	}
 }

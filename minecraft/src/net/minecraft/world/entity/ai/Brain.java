@@ -83,9 +83,8 @@ public class Brain<E extends LivingEntity> implements Serializable {
 		this.setMemory(memoryModuleType, Optional.ofNullable(object));
 	}
 
-	public <U> void setMemoryWithExpiry(MemoryModuleType<U> memoryModuleType, U object, long l, long m) {
-		long n = l + m;
-		this.setMemoryInternal(memoryModuleType, Optional.of(ExpirableValue.of(object, n)));
+	public <U> void setMemoryWithExpiry(MemoryModuleType<U> memoryModuleType, U object, long l) {
+		this.setMemoryInternal(memoryModuleType, Optional.of(ExpirableValue.of(object, l)));
 	}
 
 	public <U> void setMemory(MemoryModuleType<U> memoryModuleType, Optional<U> optional) {
@@ -243,8 +242,8 @@ public class Brain<E extends LivingEntity> implements Serializable {
 	}
 
 	public void tick(ServerLevel serverLevel, E livingEntity) {
-		this.expireMemories(serverLevel);
-		this.tickEachSensor(serverLevel, livingEntity);
+		this.memories.forEach(this::tickMemoryAndRemoveIfExpired);
+		this.sensors.values().forEach(sensor -> sensor.tick(serverLevel, livingEntity));
 		this.startEachNonRunningBehavior(serverLevel, livingEntity);
 		this.tickEachRunningBehavior(serverLevel, livingEntity);
 	}
@@ -272,10 +271,6 @@ public class Brain<E extends LivingEntity> implements Serializable {
 		return dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("memories"), object));
 	}
 
-	private void tickEachSensor(ServerLevel serverLevel, E livingEntity) {
-		this.sensors.values().forEach(sensor -> sensor.tick(serverLevel, livingEntity));
-	}
-
 	private void startEachNonRunningBehavior(ServerLevel serverLevel, E livingEntity) {
 		long l = serverLevel.getGameTime();
 		this.availableBehaviorsByPriority
@@ -294,9 +289,10 @@ public class Brain<E extends LivingEntity> implements Serializable {
 		this.getRunningBehaviorsStream().forEach(behavior -> behavior.tickOrStop(serverLevel, livingEntity, l));
 	}
 
-	private void expireMemories(ServerLevel serverLevel) {
-		this.memories.forEach((memoryModuleType, optional) -> {
-			if (optional.isPresent() && ((ExpirableValue)optional.get()).hasExpired(serverLevel.getGameTime())) {
+	private void tickMemoryAndRemoveIfExpired(MemoryModuleType<?> memoryModuleType, Optional<? extends ExpirableValue<?>> optional) {
+		optional.ifPresent(expirableValue -> {
+			expirableValue.tick();
+			if (expirableValue.hasExpired()) {
 				this.eraseMemory(memoryModuleType);
 			}
 		});

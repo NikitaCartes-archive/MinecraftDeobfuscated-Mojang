@@ -28,7 +28,7 @@ import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
-import net.minecraft.realms.RealmsScreenProxy;
+import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.HttpUtil;
 import org.apache.logging.log4j.LogManager;
@@ -102,8 +102,8 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 	@Override
 	public void onDisconnect(Component component) {
-		if (this.parent != null && this.parent instanceof RealmsScreenProxy) {
-			this.minecraft.setScreen(new DisconnectedRealmsScreen(((RealmsScreenProxy)this.parent).getScreen(), "connect.failed", component).getProxy());
+		if (this.parent != null && this.parent instanceof RealmsScreen) {
+			this.minecraft.setScreen(new DisconnectedRealmsScreen(this.parent, "connect.failed", component));
 		} else {
 			this.minecraft.setScreen(new DisconnectedScreen(this.parent, "connect.failed", component));
 		}

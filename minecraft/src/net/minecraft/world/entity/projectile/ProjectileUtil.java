@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -55,7 +54,7 @@ public final class ProjectileUtil {
 		Level level = entity.level;
 		Vec3 vec32 = entity.position();
 		if (bl3 && !level.noCollision(entity, entity.getBoundingBox(), (Set<Entity>)(!bl2 && entity2 != null ? getIgnoredEntities(entity2) : ImmutableSet.of()))) {
-			return new BlockHitResult(vec32, Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(entity), false);
+			return new BlockHitResult(vec32, Direction.getNearest(vec3.x, vec3.y, vec3.z), entity.blockPosition(), false);
 		} else {
 			Vec3 vec33 = vec32.add(vec3);
 			HitResult hitResult = level.clip(new ClipContext(vec32, vec33, block, ClipContext.Fluid.NONE, entity));

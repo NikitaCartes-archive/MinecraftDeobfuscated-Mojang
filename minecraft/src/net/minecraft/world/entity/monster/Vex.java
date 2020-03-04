@@ -321,7 +321,7 @@ public class Vex extends Monster {
 		public void tick() {
 			BlockPos blockPos = Vex.this.getBoundOrigin();
 			if (blockPos == null) {
-				blockPos = new BlockPos(Vex.this);
+				blockPos = Vex.this.blockPosition();
 			}
 
 			for (int i = 0; i < 3; i++) {

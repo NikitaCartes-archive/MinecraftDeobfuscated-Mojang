@@ -12,7 +12,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.CrossbowItem;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> implements ArmedModel, HeadedModel {
@@ -27,7 +26,6 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 	public HumanoidModel.ArmPose rightArmPose = HumanoidModel.ArmPose.EMPTY;
 	public boolean crouching;
 	public float swimAmount;
-	private float itemUseTicks;
 
 	public HumanoidModel(float f) {
 		this(RenderType::entityCutoutNoCull, f, 0.0F, 64, 32);
@@ -78,7 +76,6 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 	public void prepareMobModel(T livingEntity, float f, float g, float h) {
 		this.swimAmount = livingEntity.getSwimAmount(h);
-		this.itemUseTicks = (float)livingEntity.getTicksUsingItem();
 		super.prepareMobModel(livingEntity, f, g, h);
 	}
 
@@ -244,67 +241,50 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			this.leftArm.xRot = (float) (-Math.PI / 2) + this.head.xRot;
 		}
 
-		float o = (float)CrossbowItem.getChargeDuration(livingEntity.getUseItem());
 		if (this.rightArmPose == HumanoidModel.ArmPose.CROSSBOW_CHARGE) {
-			this.rightArm.yRot = -0.8F;
-			this.rightArm.xRot = -0.97079635F;
-			this.leftArm.xRot = -0.97079635F;
-			float p = Mth.clamp(this.itemUseTicks, 0.0F, o);
-			this.leftArm.yRot = Mth.lerp(p / o, 0.4F, 0.85F);
-			this.leftArm.xRot = Mth.lerp(p / o, this.leftArm.xRot, (float) (-Math.PI / 2));
+			AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, true);
 		} else if (this.leftArmPose == HumanoidModel.ArmPose.CROSSBOW_CHARGE) {
-			this.leftArm.yRot = 0.8F;
-			this.rightArm.xRot = -0.97079635F;
-			this.leftArm.xRot = -0.97079635F;
-			float p = Mth.clamp(this.itemUseTicks, 0.0F, o);
-			this.rightArm.yRot = Mth.lerp(p / o, -0.4F, -0.85F);
-			this.rightArm.xRot = Mth.lerp(p / o, this.rightArm.xRot, (float) (-Math.PI / 2));
+			AnimationUtils.animateCrossbowCharge(this.leftArm, this.rightArm, livingEntity, false);
 		}
 
 		if (this.rightArmPose == HumanoidModel.ArmPose.CROSSBOW_HOLD && this.attackTime <= 0.0F) {
-			this.rightArm.yRot = -0.3F + this.head.yRot;
-			this.leftArm.yRot = 0.6F + this.head.yRot;
-			this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
-			this.leftArm.xRot = -1.5F + this.head.xRot;
+			AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
 		} else if (this.leftArmPose == HumanoidModel.ArmPose.CROSSBOW_HOLD) {
-			this.rightArm.yRot = -0.6F + this.head.yRot;
-			this.leftArm.yRot = 0.3F + this.head.yRot;
-			this.rightArm.xRot = -1.5F + this.head.xRot;
-			this.leftArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
+			AnimationUtils.animateCrossbowHold(this.leftArm, this.rightArm, this.head, false);
 		}
 
 		if (this.swimAmount > 0.0F) {
-			float p = f % 26.0F;
-			float l = this.attackTime > 0.0F ? 0.0F : this.swimAmount;
-			if (p < 14.0F) {
+			float o = f % 26.0F;
+			float p = this.attackTime > 0.0F ? 0.0F : this.swimAmount;
+			if (o < 14.0F) {
 				this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 0.0F, this.swimAmount);
-				this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, 0.0F);
+				this.rightArm.xRot = Mth.lerp(p, this.rightArm.xRot, 0.0F);
 				this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float) Math.PI, this.swimAmount);
-				this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float) Math.PI);
+				this.rightArm.yRot = Mth.lerp(p, this.rightArm.yRot, (float) Math.PI);
 				this.leftArm.zRot = this.rotlerpRad(
-					this.leftArm.zRot, (float) Math.PI + 1.8707964F * this.quadraticArmUpdate(p) / this.quadraticArmUpdate(14.0F), this.swimAmount
+					this.leftArm.zRot, (float) Math.PI + 1.8707964F * this.quadraticArmUpdate(o) / this.quadraticArmUpdate(14.0F), this.swimAmount
 				);
-				this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, (float) Math.PI - 1.8707964F * this.quadraticArmUpdate(p) / this.quadraticArmUpdate(14.0F));
-			} else if (p >= 14.0F && p < 22.0F) {
-				float m = (p - 14.0F) / 8.0F;
-				this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, (float) (Math.PI / 2) * m, this.swimAmount);
-				this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, (float) (Math.PI / 2) * m);
+				this.rightArm.zRot = Mth.lerp(p, this.rightArm.zRot, (float) Math.PI - 1.8707964F * this.quadraticArmUpdate(o) / this.quadraticArmUpdate(14.0F));
+			} else if (o >= 14.0F && o < 22.0F) {
+				float l = (o - 14.0F) / 8.0F;
+				this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, (float) (Math.PI / 2) * l, this.swimAmount);
+				this.rightArm.xRot = Mth.lerp(p, this.rightArm.xRot, (float) (Math.PI / 2) * l);
 				this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float) Math.PI, this.swimAmount);
-				this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float) Math.PI);
-				this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 5.012389F - 1.8707964F * m, this.swimAmount);
-				this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, 1.2707963F + 1.8707964F * m);
-			} else if (p >= 22.0F && p < 26.0F) {
-				float m = (p - 22.0F) / 4.0F;
-				this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * m, this.swimAmount);
-				this.rightArm.xRot = Mth.lerp(l, this.rightArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * m);
+				this.rightArm.yRot = Mth.lerp(p, this.rightArm.yRot, (float) Math.PI);
+				this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 5.012389F - 1.8707964F * l, this.swimAmount);
+				this.rightArm.zRot = Mth.lerp(p, this.rightArm.zRot, 1.2707963F + 1.8707964F * l);
+			} else if (o >= 22.0F && o < 26.0F) {
+				float l = (o - 22.0F) / 4.0F;
+				this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * l, this.swimAmount);
+				this.rightArm.xRot = Mth.lerp(p, this.rightArm.xRot, (float) (Math.PI / 2) - (float) (Math.PI / 2) * l);
 				this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float) Math.PI, this.swimAmount);
-				this.rightArm.yRot = Mth.lerp(l, this.rightArm.yRot, (float) Math.PI);
+				this.rightArm.yRot = Mth.lerp(p, this.rightArm.yRot, (float) Math.PI);
 				this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float) Math.PI, this.swimAmount);
-				this.rightArm.zRot = Mth.lerp(l, this.rightArm.zRot, (float) Math.PI);
+				this.rightArm.zRot = Mth.lerp(p, this.rightArm.zRot, (float) Math.PI);
 			}
 
-			float m = 0.3F;
-			float n = 0.33333334F;
+			float l = 0.3F;
+			float m = 0.33333334F;
 			this.leftLeg.xRot = Mth.lerp(this.swimAmount, this.leftLeg.xRot, 0.3F * Mth.cos(f * 0.33333334F + (float) Math.PI));
 			this.rightLeg.xRot = Mth.lerp(this.swimAmount, this.rightLeg.xRot, 0.3F * Mth.cos(f * 0.33333334F));
 		}

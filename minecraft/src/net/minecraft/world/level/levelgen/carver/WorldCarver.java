@@ -166,7 +166,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			bitSet.set(q);
 			mutableBlockPos.set(l, o, m);
 			BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-			BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.set(mutableBlockPos).move(Direction.UP));
+			BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
 			if (blockState.getBlock() == Blocks.GRASS_BLOCK || blockState.getBlock() == Blocks.MYCELIUM) {
 				atomicBoolean.set(true);
 			}
@@ -179,7 +179,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 				} else {
 					chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);
 					if (atomicBoolean.get()) {
-						mutableBlockPos3.set(mutableBlockPos).move(Direction.DOWN);
+						mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
 						if (chunkAccess.getBlockState(mutableBlockPos3).getBlock() == Blocks.DIRT) {
 							chunkAccess.setBlockState(mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getSurfaceBuilderConfig().getTopMaterial(), false);
 						}

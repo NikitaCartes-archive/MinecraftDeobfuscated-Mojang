@@ -50,7 +50,7 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 				return true;
 			}
 		};
-		Stream<BlockPos> stream = poiManager.findAll(this.poiType.getPredicate(), predicate, new BlockPos(pathfinderMob), 48, PoiManager.Occupancy.HAS_SPACE);
+		Stream<BlockPos> stream = poiManager.findAll(this.poiType.getPredicate(), predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE);
 		Path path = pathfinderMob.getNavigation().createPath(stream, this.poiType.getValidRange());
 		if (path != null && path.canReach()) {
 			BlockPos blockPos = path.getTarget();

@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.User;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -48,14 +49,14 @@ public class FileUpload {
 		.setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L))
 		.build();
 
-	public FileUpload(File file, long l, int i, UploadInfo uploadInfo, String string, String string2, String string3, UploadStatus uploadStatus) {
+	public FileUpload(File file, long l, int i, UploadInfo uploadInfo, User user, String string, UploadStatus uploadStatus) {
 		this.file = file;
 		this.worldId = l;
 		this.slotId = i;
 		this.uploadInfo = uploadInfo;
-		this.sessionId = string;
-		this.username = string2;
-		this.clientVersion = string3;
+		this.sessionId = user.getSessionId();
+		this.username = user.getName();
+		this.clientVersion = string;
 		this.uploadStatus = uploadStatus;
 	}
 

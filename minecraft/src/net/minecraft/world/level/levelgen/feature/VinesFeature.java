@@ -26,7 +26,7 @@ public class VinesFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int i = blockPos.getY(); i < 256; i++) {
 			mutableBlockPos.set(blockPos);

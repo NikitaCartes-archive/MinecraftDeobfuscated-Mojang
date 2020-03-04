@@ -28,7 +28,7 @@ public class CoralClawFeature extends CoralFeature {
 			Collections.shuffle(list, random);
 
 			for (Direction direction2 : list.subList(0, i)) {
-				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+				BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 				int j = random.nextInt(2) + 1;
 				mutableBlockPos.move(direction2);
 				int k;

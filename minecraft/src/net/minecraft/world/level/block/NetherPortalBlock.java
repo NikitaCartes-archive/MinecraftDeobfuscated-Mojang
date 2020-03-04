@@ -68,8 +68,8 @@ public class NetherPortalBlock extends Block {
 		}
 	}
 
-	public boolean trySpawnPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
-		NetherPortalBlock.PortalShape portalShape = this.isPortal(levelAccessor, blockPos);
+	public static boolean trySpawnPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
+		NetherPortalBlock.PortalShape portalShape = isPortal(levelAccessor, blockPos);
 		if (portalShape != null) {
 			portalShape.createPortalBlocks();
 			return true;
@@ -79,7 +79,7 @@ public class NetherPortalBlock extends Block {
 	}
 
 	@Nullable
-	public NetherPortalBlock.PortalShape isPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
+	public static NetherPortalBlock.PortalShape isPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
 		NetherPortalBlock.PortalShape portalShape = new NetherPortalBlock.PortalShape(levelAccessor, blockPos, Direction.Axis.X);
 		if (portalShape.isValid() && portalShape.numPortalBlocks == 0) {
 			return portalShape;

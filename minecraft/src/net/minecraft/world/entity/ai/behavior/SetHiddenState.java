@@ -29,7 +29,7 @@ public class SetHiddenState extends Behavior<LivingEntity> {
 		boolean bl = (Long)optional.get() + 300L <= l;
 		if (this.ticksHidden <= this.stayHiddenTicks && !bl) {
 			BlockPos blockPos = ((GlobalPos)brain.getMemory(MemoryModuleType.HIDING_PLACE).get()).pos();
-			if (blockPos.closerThan(new BlockPos(livingEntity), (double)this.closeEnoughDist)) {
+			if (blockPos.closerThan(livingEntity.blockPosition(), (double)this.closeEnoughDist)) {
 				this.ticksHidden++;
 			}
 		} else {

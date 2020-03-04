@@ -91,7 +91,7 @@ public abstract class Raider extends PatrollingMonster {
 			if (this.canJoinRaid()) {
 				if (raid == null) {
 					if (this.level.getGameTime() % 20L == 0L) {
-						Raid raid2 = ((ServerLevel)this.level).getRaidAt(new BlockPos(this));
+						Raid raid2 = ((ServerLevel)this.level).getRaidAt(this.blockPosition());
 						if (raid2 != null && Raids.canJoinRaid(this, raid2)) {
 							raid2.joinRaid(raid2.getGroupsSpawned(), this, null, true);
 						}
@@ -130,7 +130,7 @@ public abstract class Raider extends PatrollingMonster {
 				raid.removeFromRaid(this, false);
 			}
 
-			if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level).getRaidAt(new BlockPos(this)) == null) {
+			if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level).getRaidAt(this.blockPosition()) == null) {
 				ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 				Player player = null;
 				if (entity instanceof Player) {
@@ -469,7 +469,7 @@ public abstract class Raider extends PatrollingMonster {
 
 		private boolean hasSuitablePoi() {
 			ServerLevel serverLevel = (ServerLevel)this.raider.level;
-			BlockPos blockPos = new BlockPos(this.raider);
+			BlockPos blockPos = this.raider.blockPosition();
 			Optional<BlockPos> optional = serverLevel.getPoiManager()
 				.getRandom(poiType -> poiType == PoiType.HOME, this::hasNotVisited, PoiManager.Occupancy.ANY, blockPos, 48, this.raider.random);
 			if (!optional.isPresent()) {
@@ -507,7 +507,7 @@ public abstract class Raider extends PatrollingMonster {
 		@Override
 		public void tick() {
 			if (this.raider.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(this.poiPos);
+				Vec3 vec3 = Vec3.atBottomCenterOf(this.poiPos);
 				Vec3 vec32 = RandomPos.getPosTowards(this.raider, 16, 7, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
 					vec32 = RandomPos.getPosTowards(this.raider, 8, 7, vec3);

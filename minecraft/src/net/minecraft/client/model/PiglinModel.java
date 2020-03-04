@@ -30,7 +30,6 @@ public class PiglinModel<T extends Mob> extends HumanoidModel<T> {
 		this.head.addChild(this.earLeft);
 		this.earLeft.texOffs(57, 22).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
 		this.hat = new ModelPart(this);
-		this.hat.setPos(0.0F, 0.0F, 0.0F);
 		this.rightArm = new ModelPart(this);
 		this.rightArm.setPos(-5.0F, 2.0F, 0.0F);
 		this.rightArm.texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
@@ -56,18 +55,9 @@ public class PiglinModel<T extends Mob> extends HumanoidModel<T> {
 			Piglin piglin = (Piglin)mob;
 			Piglin.PiglinArmPose piglinArmPose = piglin.getArmPose();
 			if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
-				this.rightArm.yRot = -0.3F + this.head.yRot;
-				this.leftArm.yRot = 0.6F + this.head.yRot;
-				this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
-				this.leftArm.xRot = -1.5F + this.head.xRot;
+				AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
 			} else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_CHARGE) {
-				this.rightArm.yRot = -0.8F;
-				this.rightArm.xRot = -0.97079635F;
-				this.leftArm.xRot = -0.97079635F;
-				float n = (float)Mth.clamp(piglin.getTicksUsingItem(), 0, 25);
-				float o = n / 25.0F;
-				this.leftArm.yRot = Mth.lerp(o, 0.4F, 0.85F);
-				this.leftArm.xRot = Mth.lerp(o, this.leftArm.xRot, (float) (-Math.PI / 2));
+				AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, mob, true);
 			} else if (piglinArmPose == Piglin.PiglinArmPose.ADMIRING_ITEM) {
 				this.leftArm.yRot = 0.5F;
 				this.leftArm.xRot = -0.9F;

@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -505,7 +504,7 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	private void brokenByPlayer(DamageSource damageSource) {
-		Block.popResource(this.level, new BlockPos(this), new ItemStack(Items.ARMOR_STAND));
+		Block.popResource(this.level, this.blockPosition(), new ItemStack(Items.ARMOR_STAND));
 		this.brokenByAnything(damageSource);
 	}
 
@@ -516,7 +515,7 @@ public class ArmorStand extends LivingEntity {
 		for (int i = 0; i < this.handItems.size(); i++) {
 			ItemStack itemStack = this.handItems.get(i);
 			if (!itemStack.isEmpty()) {
-				Block.popResource(this.level, new BlockPos(this).above(), itemStack);
+				Block.popResource(this.level, this.blockPosition().above(), itemStack);
 				this.handItems.set(i, ItemStack.EMPTY);
 			}
 		}
@@ -524,7 +523,7 @@ public class ArmorStand extends LivingEntity {
 		for (int ix = 0; ix < this.armorItems.size(); ix++) {
 			ItemStack itemStack = this.armorItems.get(ix);
 			if (!itemStack.isEmpty()) {
-				Block.popResource(this.level, new BlockPos(this).above(), itemStack);
+				Block.popResource(this.level, this.blockPosition().above(), itemStack);
 				this.armorItems.set(ix, ItemStack.EMPTY);
 			}
 		}
@@ -742,7 +741,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean skipAttackInteraction(Entity entity) {
-		return entity instanceof Player && !this.level.mayInteract((Player)entity, new BlockPos(this));
+		return entity instanceof Player && !this.level.mayInteract((Player)entity, this.blockPosition());
 	}
 
 	@Override

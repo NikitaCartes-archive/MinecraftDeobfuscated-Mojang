@@ -248,7 +248,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 					? Explosion.BlockInteraction.DESTROY
 					: Explosion.BlockInteraction.NONE;
 				this.level.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, blockInteraction);
-				this.level.globalLevelEvent(1023, new BlockPos(this), 0);
+				this.level.globalLevelEvent(1023, this.blockPosition(), 0);
 			}
 
 			this.setInvulnerableTicks(i);
@@ -335,7 +335,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 					}
 
 					if (bl) {
-						this.level.levelEvent(null, 1022, new BlockPos(this), 0);
+						this.level.levelEvent(null, 1022, this.blockPosition(), 0);
 					}
 				}
 			}
@@ -417,7 +417,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	private void performRangedAttack(int i, double d, double e, double f, boolean bl) {
-		this.level.levelEvent(null, 1024, new BlockPos(this), 0);
+		this.level.levelEvent(null, 1024, this.blockPosition(), 0);
 		double g = this.getHeadX(i);
 		double h = this.getHeadY(i);
 		double j = this.getHeadZ(i);

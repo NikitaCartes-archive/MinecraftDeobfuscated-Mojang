@@ -1720,7 +1720,7 @@ public class Blocks {
 		"kelp", new KelpBlock(Block.Properties.of(Material.WATER_PLANT).noCollission().randomTicks().instabreak().sound(SoundType.WET_GRASS))
 	);
 	public static final Block KELP_PLANT = register(
-		"kelp_plant", new KelpPlantBlock((KelpBlock)KELP, Block.Properties.of(Material.WATER_PLANT).noCollission().instabreak().sound(SoundType.WET_GRASS))
+		"kelp_plant", new KelpPlantBlock(Block.Properties.of(Material.WATER_PLANT).noCollission().instabreak().sound(SoundType.WET_GRASS))
 	);
 	public static final Block DRIED_KELP_BLOCK = register(
 		"dried_kelp_block", new Block(Block.Properties.of(Material.GRASS, MaterialColor.COLOR_GREEN).strength(0.5F, 2.5F).sound(SoundType.GRASS))
@@ -2035,6 +2035,12 @@ public class Blocks {
 		"stripped_warped_stem",
 		new LogBlock(MaterialColor.COLOR_CYAN, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.STEM))
 	);
+	public static final Block WARPED_HYPHAE = register(
+		"warped_hyphae", new RotatedPillarBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(2.0F).sound(SoundType.STEM))
+	);
+	public static final Block STRIPPED_WARPED_HYPHAE = register(
+		"stripped_warped_hyphae", new RotatedPillarBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_CYAN).strength(2.0F).sound(SoundType.STEM))
+	);
 	public static final Block WARPED_NYLIUM = register(
 		"warped_nylium", new NyliumBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_CYAN).strength(1.0F).sound(SoundType.NYLIUM).randomTicks())
 	);
@@ -2062,6 +2068,12 @@ public class Blocks {
 		"stripped_crimson_stem",
 		new LogBlock(MaterialColor.COLOR_RED, Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.STEM))
 	);
+	public static final Block CRIMSON_HYPHAE = register(
+		"crimson_hyphae", new RotatedPillarBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(2.0F).sound(SoundType.STEM))
+	);
+	public static final Block STRIPPED_CRIMSON_HYPHAE = register(
+		"stripped_crimson_hyphae", new RotatedPillarBlock(Block.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(2.0F).sound(SoundType.STEM))
+	);
 	public static final Block CRIMSON_NYLIUM = register(
 		"crimson_nylium", new NyliumBlock(Block.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(1.0F).sound(SoundType.NYLIUM).randomTicks())
 	);
@@ -2079,8 +2091,7 @@ public class Blocks {
 		"weeping_vines", new WeepingVines(Block.Properties.of(Material.REPLACEABLE_PLANT).randomTicks().noCollission().instabreak().sound(SoundType.WEEPING_VINES))
 	);
 	public static final Block WEEPING_VINES_PLANT = register(
-		"weeping_vines_plant",
-		new WeepingVinesPlant((WeepingVines)WEEPING_VINES, Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+		"weeping_vines_plant", new WeepingVinesPlant(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
 	);
 	public static final Block CRIMSON_ROOTS = register(
 		"crimson_roots", new RootsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))

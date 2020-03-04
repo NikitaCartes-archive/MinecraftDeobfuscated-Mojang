@@ -35,7 +35,7 @@ public class FlyingPathNavigation extends PathNavigation {
 
 	@Override
 	public Path createPath(Entity entity, int i) {
-		return this.createPath(new BlockPos(entity), i);
+		return this.createPath(entity.blockPosition(), i);
 	}
 
 	@Override

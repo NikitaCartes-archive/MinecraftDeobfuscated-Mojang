@@ -7,7 +7,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.sounds.SoundSource;
 
 @Environment(EnvType.CLIENT)
-public class VolumeSlider extends AbstractSliderButton {
+public class VolumeSlider extends AbstractOptionSliderButton {
 	private final SoundSource source;
 
 	public VolumeSlider(Minecraft minecraft, int i, int j, SoundSource soundSource, int k) {

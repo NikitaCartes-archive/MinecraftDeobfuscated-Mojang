@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -22,7 +23,9 @@ public class DeepWarmOceanBiome extends Biome {
 				.scale(0.1F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4445678).waterFogColor(270131).fogColor(12638463).build())
+				.specialEffects(
+					new BiomeSpecialEffects.Builder().waterColor(4445678).waterFogColor(270131).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+				)
 				.parent(null)
 		);
 		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F)));

@@ -40,7 +40,7 @@ public class PhantomSpawner {
 
 					for (Player player : serverLevel.players()) {
 						if (!player.isSpectator()) {
-							BlockPos blockPos = new BlockPos(player);
+							BlockPos blockPos = player.blockPosition();
 							if (!serverLevel.dimension.isHasSkyLight() || blockPos.getY() >= serverLevel.getSeaLevel() && serverLevel.canSeeSky(blockPos)) {
 								DifficultyInstance difficultyInstance = serverLevel.getCurrentDifficultyAt(blockPos);
 								if (difficultyInstance.isHarderThan(random.nextFloat() * 3.0F)) {

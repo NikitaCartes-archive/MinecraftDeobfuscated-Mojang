@@ -364,7 +364,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	public void doTick() {
 		try {
-			if (!this.isSpectator() || this.level.hasChunkAt(new BlockPos(this))) {
+			if (!this.isSpectator() || this.level.hasChunkAt(this.blockPosition())) {
 				super.tick();
 			}
 

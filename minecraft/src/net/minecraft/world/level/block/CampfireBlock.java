@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -216,22 +217,13 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		}
 	}
 
-	@Nullable
-	private Entity getShooter(Entity entity) {
-		if (entity instanceof Fireball) {
-			return ((Fireball)entity).owner;
-		} else {
-			return entity instanceof AbstractArrow ? ((AbstractArrow)entity).getOwner() : null;
-		}
-	}
-
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		if (!level.isClientSide) {
-			boolean bl = entity instanceof Fireball || entity instanceof AbstractArrow && entity.isOnFire();
+			boolean bl = projectile instanceof Fireball || projectile instanceof AbstractArrow && projectile.isOnFire();
 			if (bl) {
-				Entity entity2 = this.getShooter(entity);
-				boolean bl2 = entity2 == null || entity2 instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+				Entity entity = projectile.getOwner();
+				boolean bl2 = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 				if (bl2 && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
 					BlockPos blockPos = blockHitResult.getBlockPos();
 					level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);

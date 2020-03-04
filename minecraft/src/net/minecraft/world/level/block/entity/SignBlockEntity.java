@@ -142,15 +142,7 @@ public class SignBlockEntity extends BlockEntity {
 		String string = serverPlayer == null ? "Sign" : serverPlayer.getName().getString();
 		Component component = (Component)(serverPlayer == null ? new TextComponent("Sign") : serverPlayer.getDisplayName());
 		return new CommandSourceStack(
-			CommandSource.NULL,
-			new Vec3((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5),
-			Vec2.ZERO,
-			(ServerLevel)this.level,
-			2,
-			string,
-			component,
-			this.level.getServer(),
-			serverPlayer
+			CommandSource.NULL, Vec3.atCenterOf(this.worldPosition), Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), serverPlayer
 		);
 	}
 

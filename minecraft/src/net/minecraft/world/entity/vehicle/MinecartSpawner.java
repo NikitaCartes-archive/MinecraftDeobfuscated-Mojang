@@ -24,7 +24,7 @@ public class MinecartSpawner extends AbstractMinecart {
 
 		@Override
 		public BlockPos getPos() {
-			return new BlockPos(MinecartSpawner.this);
+			return MinecartSpawner.this.blockPosition();
 		}
 	};
 

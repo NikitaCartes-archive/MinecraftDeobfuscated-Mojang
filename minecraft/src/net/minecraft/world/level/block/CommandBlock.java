@@ -184,7 +184,7 @@ public class CommandBlock extends BaseEntityBlock {
 	}
 
 	private static void executeChain(Level level, BlockPos blockPos, Direction direction) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		GameRules gameRules = level.getGameRules();
 		int i = gameRules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
 

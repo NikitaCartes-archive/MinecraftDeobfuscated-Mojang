@@ -21,7 +21,6 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entry<E>> extends AbstractContainerEventHandler implements Widget {
-	protected static final int DRAG_OUTSIDE = -2;
 	protected final Minecraft minecraft;
 	protected final int itemHeight;
 	private final List<E> children = new AbstractSelectionList.TrackedList();
@@ -49,10 +48,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.itemHeight = m;
 		this.x0 = 0;
 		this.x1 = i;
-	}
-
-	public void setRenderSelection(boolean bl) {
-		this.renderSelection = bl;
 	}
 
 	protected void setRenderHeader(boolean bl, int i) {
@@ -281,10 +276,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	private int getMaxScroll() {
 		return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
-	}
-
-	public int getScrollBottom() {
-		return (int)this.getScrollAmount() - this.height - this.headerHeight;
 	}
 
 	protected void updateScrollingState(double d, double e, int i) {

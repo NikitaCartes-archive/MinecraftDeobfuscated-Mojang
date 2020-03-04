@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
@@ -236,7 +235,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 			} else {
 				return Illusioner.this.getTarget().getId() == this.lastTargetId
 					? false
-					: Illusioner.this.level.getCurrentDifficultyAt(new BlockPos(Illusioner.this)).isHarderThan((float)Difficulty.NORMAL.ordinal());
+					: Illusioner.this.level.getCurrentDifficultyAt(Illusioner.this.blockPosition()).isHarderThan((float)Difficulty.NORMAL.ordinal());
 			}
 		}
 

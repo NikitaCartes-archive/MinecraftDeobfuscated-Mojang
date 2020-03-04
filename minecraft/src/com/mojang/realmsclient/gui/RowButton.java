@@ -3,7 +3,7 @@ package com.mojang.realmsclient.gui;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.RealmListEntry;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.realms.RealmsObjectSelectionList;
 
 @Environment(EnvType.CLIENT)
@@ -43,7 +43,7 @@ public abstract class RowButton {
 
 	public abstract void onClick(int i);
 
-	public static void drawButtonsInRow(List<RowButton> list, RealmsObjectSelectionList realmsObjectSelectionList, int i, int j, int k, int l) {
+	public static void drawButtonsInRow(List<RowButton> list, RealmsObjectSelectionList<?> realmsObjectSelectionList, int i, int j, int k, int l) {
 		for (RowButton rowButton : list) {
 			if (realmsObjectSelectionList.getRowWidth() > rowButton.getRight()) {
 				rowButton.drawForRowAt(i, j, k, l);
@@ -52,10 +52,10 @@ public abstract class RowButton {
 	}
 
 	public static void rowButtonMouseClicked(
-		RealmsObjectSelectionList realmsObjectSelectionList, RealmListEntry realmListEntry, List<RowButton> list, int i, double d, double e
+		RealmsObjectSelectionList<?> realmsObjectSelectionList, ObjectSelectionList.Entry<?> entry, List<RowButton> list, int i, double d, double e
 	) {
 		if (i == 0) {
-			int j = realmsObjectSelectionList.children().indexOf(realmListEntry);
+			int j = realmsObjectSelectionList.children().indexOf(entry);
 			if (j > -1) {
 				realmsObjectSelectionList.selectItem(j);
 				int k = realmsObjectSelectionList.getRowLeft();

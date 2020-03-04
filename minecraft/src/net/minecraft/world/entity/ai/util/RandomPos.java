@@ -95,7 +95,7 @@ public class RandomPos {
 
 		boolean bl5 = false;
 		double e = Double.NEGATIVE_INFINITY;
-		BlockPos blockPos = new BlockPos(pathfinderMob);
+		BlockPos blockPos = pathfinderMob.blockPosition();
 
 		for (int n = 0; n < 10; n++) {
 			BlockPos blockPos2 = getRandomDelta(random, i, j, k, vec3, d);
@@ -147,7 +147,7 @@ public class RandomPos {
 			}
 		}
 
-		return bl5 ? new Vec3(blockPos) : null;
+		return bl5 ? Vec3.atBottomCenterOf(blockPos) : null;
 	}
 
 	@Nullable

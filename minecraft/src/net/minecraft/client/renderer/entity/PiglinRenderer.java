@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -41,11 +40,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 		return mob instanceof Piglin ? PIGLIN_LOCATION : ZOMBIFIED_PIGLIN_LOCATION;
 	}
 
-	protected void setupRotations(Mob mob, PoseStack poseStack, float f, float g, float h) {
-		if (mob instanceof Piglin && ((Piglin)mob).isConverting()) {
-			g += (float)(Math.cos((double)mob.tickCount * 3.25) * Math.PI * 0.5);
-		}
-
-		super.setupRotations(mob, poseStack, f, g, h);
+	protected boolean isShaking(Mob mob) {
+		return mob instanceof Piglin && ((Piglin)mob).isConverting();
 	}
 }

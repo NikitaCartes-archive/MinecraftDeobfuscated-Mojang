@@ -44,31 +44,40 @@ public class ItemFrameRenderer extends EntityRenderer<ItemFrame> {
 		poseStack.translate((double)direction.getStepX() * 0.46875, (double)direction.getStepY() * 0.46875, (double)direction.getStepZ() * 0.46875);
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(itemFrame.xRot));
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - itemFrame.yRot));
-		BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
-		ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
-		ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
-		poseStack.pushPose();
-		poseStack.translate(-0.5, -0.5, -0.5);
-		blockRenderDispatcher.getModelRenderer()
-			.renderModel(
-				poseStack.last(),
-				multiBufferSource.getBuffer(Sheets.solidBlockSheet()),
-				null,
-				modelManager.getModel(modelResourceLocation),
-				1.0F,
-				1.0F,
-				1.0F,
-				i,
-				OverlayTexture.NO_OVERLAY
-			);
-		poseStack.popPose();
+		boolean bl = itemFrame.isInvisible();
+		if (!bl) {
+			BlockRenderDispatcher blockRenderDispatcher = this.minecraft.getBlockRenderer();
+			ModelManager modelManager = blockRenderDispatcher.getBlockModelShaper().getModelManager();
+			ModelResourceLocation modelResourceLocation = itemFrame.getItem().getItem() == Items.FILLED_MAP ? MAP_FRAME_LOCATION : FRAME_LOCATION;
+			poseStack.pushPose();
+			poseStack.translate(-0.5, -0.5, -0.5);
+			blockRenderDispatcher.getModelRenderer()
+				.renderModel(
+					poseStack.last(),
+					multiBufferSource.getBuffer(Sheets.solidBlockSheet()),
+					null,
+					modelManager.getModel(modelResourceLocation),
+					1.0F,
+					1.0F,
+					1.0F,
+					i,
+					OverlayTexture.NO_OVERLAY
+				);
+			poseStack.popPose();
+		}
+
 		ItemStack itemStack = itemFrame.getItem();
 		if (!itemStack.isEmpty()) {
-			boolean bl = itemStack.getItem() == Items.FILLED_MAP;
-			poseStack.translate(0.0, 0.0, 0.4375);
-			int j = bl ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
+			boolean bl2 = itemStack.getItem() == Items.FILLED_MAP;
 			if (bl) {
+				poseStack.translate(0.0, 0.0, 0.5);
+			} else {
+				poseStack.translate(0.0, 0.0, 0.4375);
+			}
+
+			int j = bl2 ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+			poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
+			if (bl2) {
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);

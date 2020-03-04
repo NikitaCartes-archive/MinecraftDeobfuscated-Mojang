@@ -9,12 +9,9 @@ import net.minecraft.util.Mth;
 @Immutable
 public class Vec3i implements Comparable<Vec3i> {
 	public static final Vec3i ZERO = new Vec3i(0, 0, 0);
-	@Deprecated
-	private final int x;
-	@Deprecated
-	private final int y;
-	@Deprecated
-	private final int z;
+	private int x;
+	private int y;
+	private int z;
 
 	public Vec3i(int i, int j, int k) {
 		this.x = i;
@@ -63,6 +60,18 @@ public class Vec3i implements Comparable<Vec3i> {
 
 	public int getZ() {
 		return this.z;
+	}
+
+	protected void setX(int i) {
+		this.x = i;
+	}
+
+	protected void setY(int i) {
+		this.y = i;
+	}
+
+	protected void setZ(int i) {
+		this.z = i;
 	}
 
 	public Vec3i below() {

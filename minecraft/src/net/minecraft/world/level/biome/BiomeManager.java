@@ -3,6 +3,7 @@ package net.minecraft.world.level.biome;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 
 public class BiomeManager {
 	private final BiomeManager.NoiseBiomeSource noiseBiomeSource;
@@ -24,7 +25,15 @@ public class BiomeManager {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Biome getNoiseBiome(int i, int j, int k) {
+	public Biome getNoiseBiomeAtPosition(double d, double e, double f) {
+		int i = Mth.floor(d) >> 2;
+		int j = Mth.floor(e) >> 2;
+		int k = Mth.floor(f) >> 2;
+		return this.getNoiseBiomeAtQuart(i, j, k);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Biome getNoiseBiomeAtQuart(int i, int j, int k) {
 		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}
 

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.CreativeModeTab;
@@ -184,13 +185,13 @@ public class Block implements ItemLike {
 
 	@Deprecated
 	public void updateNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (Direction direction : UPDATE_SHAPE_ORDER) {
-				pooledMutableBlockPos.set(blockPos).move(direction);
-				BlockState blockState2 = levelAccessor.getBlockState(pooledMutableBlockPos);
-				BlockState blockState3 = blockState2.updateShape(direction.getOpposite(), blockState, levelAccessor, pooledMutableBlockPos, blockPos);
-				updateOrDestroy(blockState2, blockState3, levelAccessor, pooledMutableBlockPos, i);
-			}
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (Direction direction : UPDATE_SHAPE_ORDER) {
+			mutableBlockPos.setWithOffset(blockPos, direction);
+			BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
+			BlockState blockState3 = blockState2.updateShape(direction.getOpposite(), blockState, levelAccessor, mutableBlockPos, blockPos);
+			updateOrDestroy(blockState2, blockState3, levelAccessor, mutableBlockPos, i);
 		}
 	}
 
@@ -203,7 +204,7 @@ public class Block implements ItemLike {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (Direction direction : UPDATE_SHAPE_ORDER) {
-			mutableBlockPos.set(blockPos).move(direction);
+			mutableBlockPos.setWithOffset(blockPos, direction);
 			blockState2 = blockState2.updateShape(direction, levelAccessor.getBlockState(mutableBlockPos), levelAccessor, blockPos, mutableBlockPos);
 		}
 
@@ -728,7 +729,7 @@ public class Block implements ItemLike {
 		return Mth.getSeed(blockPos);
 	}
 
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 	}
 
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {

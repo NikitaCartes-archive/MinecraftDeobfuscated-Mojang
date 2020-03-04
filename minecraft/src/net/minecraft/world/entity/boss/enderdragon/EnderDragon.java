@@ -521,7 +521,7 @@ public class EnderDragon extends Mob implements Enemy {
 			}
 
 			if (this.dragonDeathTime == 1) {
-				this.level.globalLevelEvent(1028, new BlockPos(this), 0);
+				this.level.globalLevelEvent(1028, this.blockPosition(), 0);
 			}
 		}
 

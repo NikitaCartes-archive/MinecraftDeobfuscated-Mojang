@@ -130,6 +130,8 @@ public abstract class Entity implements Nameable, CommandSource {
 	private double x;
 	private double y;
 	private double z;
+	private Vec3 position;
+	private BlockPos blockPosition;
 	private Vec3 deltaMovement = Vec3.ZERO;
 	public float yRot;
 	public float xRot;
@@ -322,10 +324,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		double f = entity.y - this.y;
 		double g = entity.z - this.z;
 		return e * e + f * f + g * g < d * d;
-	}
-
-	public BlockPos getBlockPos() {
-		return new BlockPos(this);
 	}
 
 	protected void setRot(float f, float g) {
@@ -604,13 +602,13 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	protected float getBlockJumpFactor() {
-		float f = this.level.getBlockState(new BlockPos(this)).getBlock().getJumpFactor();
+		float f = this.level.getBlockState(this.blockPosition()).getBlock().getJumpFactor();
 		float g = this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getJumpFactor();
 		return (double)f == 1.0 ? g : f;
 	}
 
 	protected float getBlockSpeedFactor() {
-		Block block = this.level.getBlockState(new BlockPos(this)).getBlock();
+		Block block = this.level.getBlockState(this.blockPosition()).getBlock();
 		float f = block.getSpeedFactor();
 		if (block != Blocks.WATER && block != Blocks.BUBBLE_COLUMN) {
 			return (double)f == 1.0 ? this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getSpeedFactor() : f;
@@ -806,28 +804,24 @@ public abstract class Entity implements Nameable, CommandSource {
 
 	protected void checkInsideBlocks() {
 		AABB aABB = this.getBoundingBox();
+		BlockPos blockPos = new BlockPos(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
+		BlockPos blockPos2 = new BlockPos(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		if (this.level.hasChunksAt(blockPos, blockPos2)) {
+			for (int i = blockPos.getX(); i <= blockPos2.getX(); i++) {
+				for (int j = blockPos.getY(); j <= blockPos2.getY(); j++) {
+					for (int k = blockPos.getZ(); k <= blockPos2.getZ(); k++) {
+						mutableBlockPos.set(i, j, k);
+						BlockState blockState = this.level.getBlockState(mutableBlockPos);
 
-		try (
-			BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire(aABB.minX + 0.001, aABB.minY + 0.001, aABB.minZ + 0.001);
-			BlockPos.PooledMutableBlockPos pooledMutableBlockPos2 = BlockPos.PooledMutableBlockPos.acquire(aABB.maxX - 0.001, aABB.maxY - 0.001, aABB.maxZ - 0.001);
-			BlockPos.PooledMutableBlockPos pooledMutableBlockPos3 = BlockPos.PooledMutableBlockPos.acquire();
-		) {
-			if (this.level.hasChunksAt(pooledMutableBlockPos, pooledMutableBlockPos2)) {
-				for (int i = pooledMutableBlockPos.getX(); i <= pooledMutableBlockPos2.getX(); i++) {
-					for (int j = pooledMutableBlockPos.getY(); j <= pooledMutableBlockPos2.getY(); j++) {
-						for (int k = pooledMutableBlockPos.getZ(); k <= pooledMutableBlockPos2.getZ(); k++) {
-							pooledMutableBlockPos3.set(i, j, k);
-							BlockState blockState = this.level.getBlockState(pooledMutableBlockPos3);
-
-							try {
-								blockState.entityInside(this.level, pooledMutableBlockPos3, this);
-								this.onInsideBlock(blockState);
-							} catch (Throwable var60) {
-								CrashReport crashReport = CrashReport.forThrowable(var60, "Colliding entity with block");
-								CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
-								CrashReportCategory.populateBlockDetails(crashReportCategory, pooledMutableBlockPos3, blockState);
-								throw new ReportedException(crashReport);
-							}
+						try {
+							blockState.entityInside(this.level, mutableBlockPos, this);
+							this.onInsideBlock(blockState);
+						} catch (Throwable var12) {
+							CrashReport crashReport = CrashReport.forThrowable(var12, "Colliding entity with block");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
+							CrashReportCategory.populateBlockDetails(crashReportCategory, mutableBlockPos, blockState);
+							throw new ReportedException(crashReport);
 						}
 					}
 				}
@@ -901,7 +895,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		return null;
 	}
 
-	public final boolean fireImmune() {
+	public boolean fireImmune() {
 		return this.getType().fireImmune();
 	}
 
@@ -920,17 +914,12 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	private boolean isInRain() {
-		boolean var3;
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire(this)) {
-			var3 = this.level.isRainingAt(pooledMutableBlockPos)
-				|| this.level.isRainingAt(pooledMutableBlockPos.set(this.getX(), this.getY() + (double)this.dimensions.height, this.getZ()));
-		}
-
-		return var3;
+		BlockPos blockPos = this.blockPosition();
+		return this.level.isRainingAt(blockPos) || this.level.isRainingAt(blockPos.offset(0.0, (double)this.dimensions.height, 0.0));
 	}
 
 	private boolean isInBubbleColumn() {
-		return this.level.getBlockState(new BlockPos(this)).getBlock() == Blocks.BUBBLE_COLUMN;
+		return this.level.getBlockState(this.blockPosition()).getBlock() == Blocks.BUBBLE_COLUMN;
 	}
 
 	public boolean isInWaterOrRain() {
@@ -1532,21 +1521,21 @@ public abstract class Entity implements Nameable, CommandSource {
 		if (this.noPhysics) {
 			return false;
 		} else {
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (int i = 0; i < 8; i++) {
-					int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5F) * 0.1F) + (double)this.eyeHeight);
-					int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5F) * this.dimensions.width * 0.8F));
-					int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * this.dimensions.width * 0.8F));
-					if (pooledMutableBlockPos.getX() != k || pooledMutableBlockPos.getY() != j || pooledMutableBlockPos.getZ() != l) {
-						pooledMutableBlockPos.set(k, j, l);
-						if (this.level.getBlockState(pooledMutableBlockPos).isSuffocating(this.level, pooledMutableBlockPos)) {
-							return true;
-						}
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			for (int i = 0; i < 8; i++) {
+				int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5F) * 0.1F) + (double)this.eyeHeight);
+				int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5F) * this.dimensions.width * 0.8F));
+				int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * this.dimensions.width * 0.8F));
+				if (mutableBlockPos.getX() != k || mutableBlockPos.getY() != j || mutableBlockPos.getZ() != l) {
+					mutableBlockPos.set(k, j, l);
+					if (this.level.getBlockState(mutableBlockPos).isSuffocating(this.level, mutableBlockPos)) {
+						return true;
 					}
 				}
-
-				return false;
 			}
+
+			return false;
 		}
 	}
 
@@ -1969,7 +1958,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		double g = Double.MAX_VALUE;
 
 		for (Direction direction2 : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.UP}) {
-			mutableBlockPos.set(blockPos).move(direction2);
+			mutableBlockPos.setWithOffset(blockPos, direction2);
 			if (!this.level.getBlockState(mutableBlockPos).isCollisionShapeFullBlock(this.level, mutableBlockPos)) {
 				double h = vec3.get(direction2.getAxis());
 				double i = direction2.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - h : h;
@@ -2387,14 +2376,6 @@ public abstract class Entity implements Nameable, CommandSource {
 	public void sendMessage(Component component) {
 	}
 
-	public BlockPos getCommandSenderBlockPosition() {
-		return new BlockPos(this);
-	}
-
-	public Vec3 getCommandSenderWorldPosition() {
-		return this.position();
-	}
-
 	public Level getCommandSenderWorld() {
 		return this.level;
 	}
@@ -2710,27 +2691,26 @@ public abstract class Entity implements Nameable, CommandSource {
 			boolean bl2 = false;
 			Vec3 vec3 = Vec3.ZERO;
 			int o = 0;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (int p = i; p < j; p++) {
-					for (int q = k; q < l; q++) {
-						for (int r = m; r < n; r++) {
-							pooledMutableBlockPos.set(p, q, r);
-							FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-							if (fluidState.is(tag)) {
-								double f = (double)((float)q + fluidState.getHeight(this.level, pooledMutableBlockPos));
-								if (f >= aABB.minY) {
-									bl2 = true;
-									e = Math.max(f - aABB.minY, e);
-									if (bl) {
-										Vec3 vec32 = fluidState.getFlow(this.level, pooledMutableBlockPos);
-										if (e < 0.4) {
-											vec32 = vec32.scale(e);
-										}
-
-										vec3 = vec3.add(vec32);
-										o++;
+			for (int p = i; p < j; p++) {
+				for (int q = k; q < l; q++) {
+					for (int r = m; r < n; r++) {
+						mutableBlockPos.set(p, q, r);
+						FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+						if (fluidState.is(tag)) {
+							double f = (double)((float)q + fluidState.getHeight(this.level, mutableBlockPos));
+							if (f >= aABB.minY) {
+								bl2 = true;
+								e = Math.max(f - aABB.minY, e);
+								if (bl) {
+									Vec3 vec32 = fluidState.getFlow(this.level, mutableBlockPos);
+									if (e < 0.4) {
+										vec32 = vec32.scale(e);
 									}
+
+									vec3 = vec3.add(vec32);
+									o++;
 								}
 							}
 						}
@@ -2774,7 +2754,11 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public Vec3 position() {
-		return new Vec3(this.x, this.y, this.z);
+		return this.position;
+	}
+
+	public BlockPos blockPosition() {
+		return this.blockPosition;
 	}
 
 	public Vec3 getDeltaMovement() {
@@ -2833,6 +2817,8 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.x = d;
 		this.y = e;
 		this.z = f;
+		this.position = new Vec3(d, e, f);
+		this.blockPosition = new BlockPos(d, e, f);
 	}
 
 	public void checkDespawn() {

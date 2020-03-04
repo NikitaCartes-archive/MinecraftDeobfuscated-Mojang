@@ -39,7 +39,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
@@ -57,7 +56,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -83,7 +81,6 @@ public class ClientLevel extends Level {
 	private final LevelRenderer levelRenderer;
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
-	private int delayUntilNextMoodSound = this.random.nextInt(12000);
 	private Scoreboard scoreboard = new Scoreboard();
 	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
 	private int skyFlashTime;
@@ -114,7 +111,6 @@ public class ClientLevel extends Level {
 		this.tickTime();
 		this.getProfiler().push("blocks");
 		this.chunkSource.tick(booleanSupplier);
-		this.playMoodSounds();
 		this.getProfiler().pop();
 	}
 
@@ -244,34 +240,6 @@ public class ClientLevel extends Level {
 	@Override
 	public boolean hasChunk(int i, int j) {
 		return true;
-	}
-
-	private void playMoodSounds() {
-		if (this.minecraft.player != null) {
-			if (this.delayUntilNextMoodSound > 0) {
-				this.delayUntilNextMoodSound--;
-			} else {
-				BlockPos blockPos = new BlockPos(this.minecraft.player);
-				BlockPos blockPos2 = blockPos.offset(4 * (this.random.nextInt(3) - 1), 4 * (this.random.nextInt(3) - 1), 4 * (this.random.nextInt(3) - 1));
-				double d = blockPos.distSqr(blockPos2);
-				if (d >= 4.0 && d <= 256.0) {
-					BlockState blockState = this.getBlockState(blockPos2);
-					if (blockState.isAir() && this.getRawBrightness(blockPos2, 0) <= this.random.nextInt(8) && this.getBrightness(LightLayer.SKY, blockPos2) <= 0) {
-						this.playLocalSound(
-							(double)blockPos2.getX() + 0.5,
-							(double)blockPos2.getY() + 0.5,
-							(double)blockPos2.getZ() + 0.5,
-							SoundEvents.AMBIENT_CAVE,
-							SoundSource.AMBIENT,
-							0.7F,
-							0.8F + this.random.nextFloat() * 0.2F,
-							false
-						);
-						this.delayUntilNextMoodSound = this.random.nextInt(12000) + 6000;
-					}
-				}
-			}
-		}
 	}
 
 	public int getEntityCount() {

@@ -58,6 +58,7 @@ public class AxeItem extends DiggerItem {
 		Blocks.ACACIA_PRESSURE_PLATE,
 		Blocks.CRIMSON_PLANKS,
 		Blocks.CRIMSON_STEM,
+		Blocks.CRIMSON_HYPHAE,
 		Blocks.CRIMSON_BUTTON,
 		Blocks.CRIMSON_PRESSURE_PLATE,
 		Blocks.CRIMSON_FENCE,
@@ -69,6 +70,7 @@ public class AxeItem extends DiggerItem {
 		Blocks.CRIMSON_SLAB,
 		Blocks.WARPED_PLANKS,
 		Blocks.WARPED_STEM,
+		Blocks.WARPED_HYPHAE,
 		Blocks.WARPED_BUTTON,
 		Blocks.WARPED_PRESSURE_PLATE,
 		Blocks.WARPED_FENCE,
@@ -93,7 +95,9 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.SPRUCE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD)
 		.put(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG)
 		.put(Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM)
+		.put(Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE)
 		.put(Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM)
+		.put(Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE)
 		.build();
 
 	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {

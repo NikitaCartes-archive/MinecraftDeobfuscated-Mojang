@@ -27,29 +27,42 @@ public class SmallFireball extends Fireball {
 	}
 
 	@Override
-	protected void onHit(HitResult hitResult) {
-		super.onHit(hitResult);
+	protected void onHitEntity(EntityHitResult entityHitResult) {
+		super.onHitEntity(entityHitResult);
 		if (!this.level.isClientSide) {
-			if (hitResult.getType() == HitResult.Type.ENTITY) {
-				Entity entity = ((EntityHitResult)hitResult).getEntity();
-				if (!entity.fireImmune()) {
-					int i = entity.getRemainingFireTicks();
-					entity.setSecondsOnFire(5);
-					boolean bl = entity.hurt(DamageSource.fireball(this, this.owner), 5.0F);
-					if (bl) {
-						this.doEnchantDamageEffects(this.owner, entity);
-					} else {
-						entity.setRemainingFireTicks(i);
-					}
+			Entity entity = entityHitResult.getEntity();
+			if (!entity.fireImmune()) {
+				Entity entity2 = this.getOwner();
+				int i = entity.getRemainingFireTicks();
+				entity.setSecondsOnFire(5);
+				boolean bl = entity.hurt(DamageSource.fireball(this, entity2), 5.0F);
+				if (!bl) {
+					entity.setRemainingFireTicks(i);
+				} else if (entity2 instanceof LivingEntity) {
+					this.doEnchantDamageEffects((LivingEntity)entity2, entity);
 				}
-			} else if (this.owner == null || !(this.owner instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-				BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+			}
+		}
+	}
+
+	@Override
+	protected void onHitBlock(BlockHitResult blockHitResult) {
+		super.onHitBlock(blockHitResult);
+		if (!this.level.isClientSide) {
+			Entity entity = this.getOwner();
+			if (entity == null || !(entity instanceof Mob) || this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
 				if (this.level.isEmptyBlock(blockPos)) {
 					this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
 				}
 			}
+		}
+	}
 
+	@Override
+	protected void onHit(HitResult hitResult) {
+		super.onHit(hitResult);
+		if (!this.level.isClientSide) {
 			this.remove();
 		}
 	}

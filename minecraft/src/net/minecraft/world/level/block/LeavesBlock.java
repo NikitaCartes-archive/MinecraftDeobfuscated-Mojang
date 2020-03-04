@@ -65,14 +65,13 @@ public class LeavesBlock extends Block {
 
 	private static BlockState updateDistance(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		int i = 7;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (Direction direction : Direction.values()) {
-				pooledMutableBlockPos.set(blockPos).move(direction);
-				i = Math.min(i, getDistanceAt(levelAccessor.getBlockState(pooledMutableBlockPos)) + 1);
-				if (i == 1) {
-					break;
-				}
+		for (Direction direction : Direction.values()) {
+			mutableBlockPos.setWithOffset(blockPos, direction);
+			i = Math.min(i, getDistanceAt(levelAccessor.getBlockState(mutableBlockPos)) + 1);
+			if (i == 1) {
+				break;
 			}
 		}
 

@@ -993,7 +993,7 @@ public class VillagerTrades {
 				return null;
 			} else {
 				ServerLevel serverLevel = (ServerLevel)entity.level;
-				BlockPos blockPos = serverLevel.findNearestMapFeature(this.destination, new BlockPos(entity), 100, true);
+				BlockPos blockPos = serverLevel.findNearestMapFeature(this.destination, entity.blockPosition(), 100, true);
 				if (blockPos != null) {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack);

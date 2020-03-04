@@ -125,12 +125,7 @@ public class ServerPlayerGameMode {
 				}
 
 				if (this.isCreative()) {
-					if (!this.level.extinguishFire(null, blockPos, direction)) {
-						this.destroyAndAck(blockPos, action, "creative destroy");
-					} else {
-						this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, true, "fire put out"));
-					}
-
+					this.destroyAndAck(blockPos, action, "creative destroy");
 					return;
 				}
 
@@ -139,7 +134,6 @@ public class ServerPlayerGameMode {
 					return;
 				}
 
-				this.level.extinguishFire(null, blockPos, direction);
 				this.destroyProgressStart = this.gameTicks;
 				float h = 1.0F;
 				BlockState blockState = this.level.getBlockState(blockPos);

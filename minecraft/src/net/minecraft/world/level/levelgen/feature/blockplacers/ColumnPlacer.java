@@ -26,7 +26,7 @@ public class ColumnPlacer extends BlockPlacer {
 
 	@Override
 	public void place(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		int i = this.minSize + random.nextInt(random.nextInt(this.extraSize + 1) + 1);
 
 		for (int j = 0; j < i; j++) {

@@ -65,7 +65,7 @@ public class FallingBlockEntity extends Entity {
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
-		this.setStartPos(new BlockPos(this));
+		this.setStartPos(this.blockPosition());
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class FallingBlockEntity extends Entity {
 		} else {
 			Block block = this.blockState.getBlock();
 			if (this.time++ == 0) {
-				BlockPos blockPos = new BlockPos(this);
+				BlockPos blockPos = this.blockPosition();
 				if (this.level.getBlockState(blockPos).getBlock() == block) {
 					this.level.removeBlock(blockPos, false);
 				} else if (!this.level.isClientSide) {
@@ -119,7 +119,7 @@ public class FallingBlockEntity extends Entity {
 
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			if (!this.level.isClientSide) {
-				BlockPos blockPos = new BlockPos(this);
+				BlockPos blockPos = this.blockPosition();
 				boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
 				boolean bl2 = bl && this.level.getFluidState(blockPos).is(FluidTags.WATER);
 				double d = this.getDeltaMovement().lengthSqr();

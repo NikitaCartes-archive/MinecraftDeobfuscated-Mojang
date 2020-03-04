@@ -10,22 +10,25 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.util.UUIDTypeAdapter;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
+import net.minecraft.client.Minecraft;
 
 @Environment(EnvType.CLIENT)
 public class RealmsUtil {
-	private static final YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(Realms.getProxy(), UUID.randomUUID().toString());
-	private static final MinecraftSessionService sessionService = authenticationService.createMinecraftSessionService();
+	private static final YggdrasilAuthenticationService AUTHENTICATION_SERVICE = new YggdrasilAuthenticationService(
+		Minecraft.getInstance().getProxy(), UUID.randomUUID().toString()
+	);
+	private static final MinecraftSessionService SESSION_SERVICE = AUTHENTICATION_SERVICE.createMinecraftSessionService();
 	public static LoadingCache<String, GameProfile> gameProfileCache = CacheBuilder.newBuilder()
 		.expireAfterWrite(60L, TimeUnit.MINUTES)
 		.build(new CacheLoader<String, GameProfile>() {
 			public GameProfile load(String string) throws Exception {
-				GameProfile gameProfile = RealmsUtil.sessionService.fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(string), null), false);
+				GameProfile gameProfile = RealmsUtil.SESSION_SERVICE.fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(string), null), false);
 				if (gameProfile == null) {
 					throw new Exception("Couldn't get profile");
 				} else {
@@ -42,33 +45,33 @@ public class RealmsUtil {
 	public static Map<Type, MinecraftProfileTexture> getTextures(String string) {
 		try {
 			GameProfile gameProfile = gameProfileCache.get(string);
-			return sessionService.getTextures(gameProfile, false);
+			return SESSION_SERVICE.getTextures(gameProfile, false);
 		} catch (Exception var2) {
 			return Maps.<Type, MinecraftProfileTexture>newHashMap();
 		}
 	}
 
-	public static void browseTo(String string) {
-		Realms.openUri(string);
-	}
-
-	public static String convertToAgePresentation(Long long_) {
-		if (long_ < 0L) {
+	public static String convertToAgePresentation(long l) {
+		if (l < 0L) {
 			return "right now";
 		} else {
-			long l = long_ / 1000L;
-			if (l < 60L) {
-				return (l == 1L ? "1 second" : l + " seconds") + " ago";
-			} else if (l < 3600L) {
-				long m = l / 60L;
-				return (m == 1L ? "1 minute" : m + " minutes") + " ago";
-			} else if (l < 86400L) {
-				long m = l / 3600L;
-				return (m == 1L ? "1 hour" : m + " hours") + " ago";
+			long m = l / 1000L;
+			if (m < 60L) {
+				return (m == 1L ? "1 second" : m + " seconds") + " ago";
+			} else if (m < 3600L) {
+				long n = m / 60L;
+				return (n == 1L ? "1 minute" : n + " minutes") + " ago";
+			} else if (m < 86400L) {
+				long n = m / 3600L;
+				return (n == 1L ? "1 hour" : n + " hours") + " ago";
 			} else {
-				long m = l / 86400L;
-				return (m == 1L ? "1 day" : m + " days") + " ago";
+				long n = m / 86400L;
+				return (n == 1L ? "1 day" : n + " days") + " ago";
 			}
 		}
+	}
+
+	public static String convertToAgePresentationFromInstant(Date date) {
+		return convertToAgePresentation(System.currentTimeMillis() - date.getTime());
 	}
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.raid.Raid;
@@ -26,7 +25,7 @@ public class PathfindToRaidGoal<T extends Raider> extends Goal {
 			&& !this.mob.isVehicle()
 			&& this.mob.hasActiveRaid()
 			&& !this.mob.getCurrentRaid().isOver()
-			&& !((ServerLevel)this.mob.level).isVillage(new BlockPos(this.mob));
+			&& !((ServerLevel)this.mob.level).isVillage(this.mob.blockPosition());
 	}
 
 	@Override
@@ -34,7 +33,7 @@ public class PathfindToRaidGoal<T extends Raider> extends Goal {
 		return this.mob.hasActiveRaid()
 			&& !this.mob.getCurrentRaid().isOver()
 			&& this.mob.level instanceof ServerLevel
-			&& !((ServerLevel)this.mob.level).isVillage(new BlockPos(this.mob));
+			&& !((ServerLevel)this.mob.level).isVillage(this.mob.blockPosition());
 	}
 
 	@Override
@@ -46,7 +45,7 @@ public class PathfindToRaidGoal<T extends Raider> extends Goal {
 			}
 
 			if (!this.mob.isPathFinding()) {
-				Vec3 vec3 = RandomPos.getPosTowards(this.mob, 15, 4, new Vec3(raid.getCenter()));
+				Vec3 vec3 = RandomPos.getPosTowards(this.mob, 15, 4, Vec3.atBottomCenterOf(raid.getCenter()));
 				if (vec3 != null) {
 					this.mob.getNavigation().moveTo(vec3.x, vec3.y, vec3.z, 1.0);
 				}

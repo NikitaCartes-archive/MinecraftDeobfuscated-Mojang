@@ -108,7 +108,7 @@ public abstract class PathNavigation {
 
 	@Nullable
 	public Path createPath(Entity entity, int i) {
-		return this.createPath(ImmutableSet.of(new BlockPos(entity)), 16, true, i);
+		return this.createPath(ImmutableSet.of(entity.blockPosition()), 16, true, i);
 	}
 
 	@Nullable
@@ -124,7 +124,7 @@ public abstract class PathNavigation {
 		} else {
 			this.level.getProfiler().push("pathfind");
 			float f = (float)this.followRange.getValue();
-			BlockPos blockPos = bl ? new BlockPos(this.mob).above() : new BlockPos(this.mob);
+			BlockPos blockPos = bl ? this.mob.blockPosition().above() : this.mob.blockPosition();
 			int k = (int)(f + (float)i);
 			PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
 			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j, this.maxVisitedNodesMultiplier);

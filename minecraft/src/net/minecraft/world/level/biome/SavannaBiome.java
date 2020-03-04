@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -20,7 +21,9 @@ public final class SavannaBiome extends Biome {
 				.scale(0.05F)
 				.temperature(1.2F)
 				.downfall(0.0F)
-				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).build())
+				.specialEffects(
+					new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+				)
 				.parent(null)
 		);
 		this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/savanna/town_centers", 6)));

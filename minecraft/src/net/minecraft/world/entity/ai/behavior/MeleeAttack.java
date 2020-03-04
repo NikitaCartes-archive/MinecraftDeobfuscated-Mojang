@@ -11,45 +11,32 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 
 public class MeleeAttack extends Behavior<Mob> {
 	private final double attackRange;
-	private final int cooldown;
-	private int remainingCooldown = 0;
+	private final int cooldownBetweenAttacks;
 
 	public MeleeAttack(double d, int i) {
-		super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT));
+		super(
+			ImmutableMap.of(
+				MemoryModuleType.LOOK_TARGET,
+				MemoryStatus.REGISTERED,
+				MemoryModuleType.ATTACK_TARGET,
+				MemoryStatus.VALUE_PRESENT,
+				MemoryModuleType.ATTACK_COOLING_DOWN,
+				MemoryStatus.VALUE_ABSENT
+			)
+		);
 		this.attackRange = d;
-		this.cooldown = i;
+		this.cooldownBetweenAttacks = i;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		if (this.remainingCooldown > 0) {
-			this.remainingCooldown--;
-			return false;
-		} else {
-			return !this.isHoldingProjectileWeapon(mob) && BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
-		}
-	}
-
-	private boolean isHoldingProjectileWeapon(Mob mob) {
-		return mob.isHolding(item -> item instanceof ProjectileWeaponItem);
-	}
-
-	protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
-		return BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
+		return !mob.isHolding(item -> item instanceof ProjectileWeaponItem) && BehaviorUtils.isAttackTargetVisibleAndInRange(mob, this.attackRange);
 	}
 
 	protected void start(ServerLevel serverLevel, Mob mob, long l) {
-		LivingEntity livingEntity = getAttackTarget(mob);
+		LivingEntity livingEntity = (LivingEntity)mob.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
 		BehaviorUtils.lookAtEntity(mob, livingEntity);
-		this.meleeAttack(mob, livingEntity);
-		this.remainingCooldown = this.cooldown;
-	}
-
-	private void meleeAttack(Mob mob, LivingEntity livingEntity) {
 		mob.swing(InteractionHand.MAIN_HAND);
 		mob.doHurtTarget(livingEntity);
-	}
-
-	private static LivingEntity getAttackTarget(LivingEntity livingEntity) {
-		return (LivingEntity)livingEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
+		mob.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, (long)this.cooldownBetweenAttacks);
 	}
 }

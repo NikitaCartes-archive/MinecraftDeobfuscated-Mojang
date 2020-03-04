@@ -1,10 +1,8 @@
 package net.minecraft.core;
 
 import com.google.common.collect.AbstractIterator;
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
-import java.util.List;
 import java.util.Spliterator.OfInt;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
@@ -14,7 +12,6 @@ import java.util.stream.StreamSupport;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Serializable;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
@@ -40,10 +37,6 @@ public class BlockPos extends Vec3i implements Serializable {
 
 	public BlockPos(double d, double e, double f) {
 		super(d, e, f);
-	}
-
-	public BlockPos(Entity entity) {
-		this(entity.getX(), entity.getY(), entity.getZ());
 	}
 
 	public BlockPos(Vec3 vec3) {
@@ -210,6 +203,10 @@ public class BlockPos extends Vec3i implements Serializable {
 		return this;
 	}
 
+	public BlockPos.MutableBlockPos mutable() {
+		return new BlockPos.MutableBlockPos(this.getX(), this.getY(), this.getZ());
+	}
+
 	public static Iterable<BlockPos> betweenClosed(BlockPos blockPos, BlockPos blockPos2) {
 		return betweenClosed(
 			Math.min(blockPos.getX(), blockPos2.getX()),
@@ -271,31 +268,16 @@ public class BlockPos extends Vec3i implements Serializable {
 	}
 
 	public static class MutableBlockPos extends BlockPos {
-		protected int x;
-		protected int y;
-		protected int z;
-
 		public MutableBlockPos() {
 			this(0, 0, 0);
 		}
 
-		public MutableBlockPos(BlockPos blockPos) {
-			this(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-		}
-
 		public MutableBlockPos(int i, int j, int k) {
-			super(0, 0, 0);
-			this.x = i;
-			this.y = j;
-			this.z = k;
+			super(i, j, k);
 		}
 
 		public MutableBlockPos(double d, double e, double f) {
 			this(Mth.floor(d), Mth.floor(e), Mth.floor(f));
-		}
-
-		public MutableBlockPos(Entity entity) {
-			this(entity.getX(), entity.getY(), entity.getZ());
 		}
 
 		@Override
@@ -318,30 +300,11 @@ public class BlockPos extends Vec3i implements Serializable {
 			return super.rotate(rotation).immutable();
 		}
 
-		@Override
-		public int getX() {
-			return this.x;
-		}
-
-		@Override
-		public int getY() {
-			return this.y;
-		}
-
-		@Override
-		public int getZ() {
-			return this.z;
-		}
-
 		public BlockPos.MutableBlockPos set(int i, int j, int k) {
-			this.x = i;
-			this.y = j;
-			this.z = k;
+			this.setX(i);
+			this.setY(j);
+			this.setZ(k);
 			return this;
-		}
-
-		public BlockPos.MutableBlockPos set(Entity entity) {
-			return this.set(entity.getX(), entity.getY(), entity.getZ());
 		}
 
 		public BlockPos.MutableBlockPos set(double d, double e, double f) {
@@ -360,107 +323,44 @@ public class BlockPos extends Vec3i implements Serializable {
 			return this.set(axisCycle.cycle(i, j, k, Direction.Axis.X), axisCycle.cycle(i, j, k, Direction.Axis.Y), axisCycle.cycle(i, j, k, Direction.Axis.Z));
 		}
 
+		public BlockPos.MutableBlockPos setWithOffset(Vec3i vec3i, Direction direction) {
+			return this.set(vec3i.getX() + direction.getStepX(), vec3i.getY() + direction.getStepY(), vec3i.getZ() + direction.getStepZ());
+		}
+
+		public BlockPos.MutableBlockPos setWithOffset(Vec3i vec3i, int i, int j, int k) {
+			return this.set(vec3i.getX() + i, vec3i.getY() + j, vec3i.getZ() + k);
+		}
+
 		public BlockPos.MutableBlockPos move(Direction direction) {
 			return this.move(direction, 1);
 		}
 
 		public BlockPos.MutableBlockPos move(Direction direction, int i) {
-			return this.set(this.x + direction.getStepX() * i, this.y + direction.getStepY() * i, this.z + direction.getStepZ() * i);
+			return this.set(this.getX() + direction.getStepX() * i, this.getY() + direction.getStepY() * i, this.getZ() + direction.getStepZ() * i);
 		}
 
 		public BlockPos.MutableBlockPos move(int i, int j, int k) {
-			return this.set(this.x + i, this.y + j, this.z + k);
+			return this.set(this.getX() + i, this.getY() + j, this.getZ() + k);
 		}
 
+		@Override
 		public void setX(int i) {
-			this.x = i;
+			super.setX(i);
 		}
 
+		@Override
 		public void setY(int i) {
-			this.y = i;
+			super.setY(i);
 		}
 
+		@Override
 		public void setZ(int i) {
-			this.z = i;
+			super.setZ(i);
 		}
 
 		@Override
 		public BlockPos immutable() {
 			return new BlockPos(this);
-		}
-	}
-
-	public static final class PooledMutableBlockPos extends BlockPos.MutableBlockPos implements AutoCloseable {
-		private boolean free;
-		private static final List<BlockPos.PooledMutableBlockPos> POOL = Lists.<BlockPos.PooledMutableBlockPos>newArrayList();
-
-		private PooledMutableBlockPos(int i, int j, int k) {
-			super(i, j, k);
-		}
-
-		public static BlockPos.PooledMutableBlockPos acquire() {
-			return acquire(0, 0, 0);
-		}
-
-		public static BlockPos.PooledMutableBlockPos acquire(Entity entity) {
-			return acquire(entity.getX(), entity.getY(), entity.getZ());
-		}
-
-		public static BlockPos.PooledMutableBlockPos acquire(double d, double e, double f) {
-			return acquire(Mth.floor(d), Mth.floor(e), Mth.floor(f));
-		}
-
-		public static BlockPos.PooledMutableBlockPos acquire(int i, int j, int k) {
-			synchronized (POOL) {
-				if (!POOL.isEmpty()) {
-					BlockPos.PooledMutableBlockPos pooledMutableBlockPos = (BlockPos.PooledMutableBlockPos)POOL.remove(POOL.size() - 1);
-					if (pooledMutableBlockPos != null && pooledMutableBlockPos.free) {
-						pooledMutableBlockPos.free = false;
-						pooledMutableBlockPos.set(i, j, k);
-						return pooledMutableBlockPos;
-					}
-				}
-			}
-
-			return new BlockPos.PooledMutableBlockPos(i, j, k);
-		}
-
-		public BlockPos.PooledMutableBlockPos set(int i, int j, int k) {
-			return (BlockPos.PooledMutableBlockPos)super.set(i, j, k);
-		}
-
-		public BlockPos.PooledMutableBlockPos set(Entity entity) {
-			return (BlockPos.PooledMutableBlockPos)super.set(entity);
-		}
-
-		public BlockPos.PooledMutableBlockPos set(double d, double e, double f) {
-			return (BlockPos.PooledMutableBlockPos)super.set(d, e, f);
-		}
-
-		public BlockPos.PooledMutableBlockPos set(Vec3i vec3i) {
-			return (BlockPos.PooledMutableBlockPos)super.set(vec3i);
-		}
-
-		public BlockPos.PooledMutableBlockPos move(Direction direction) {
-			return (BlockPos.PooledMutableBlockPos)super.move(direction);
-		}
-
-		public BlockPos.PooledMutableBlockPos move(Direction direction, int i) {
-			return (BlockPos.PooledMutableBlockPos)super.move(direction, i);
-		}
-
-		public BlockPos.PooledMutableBlockPos move(int i, int j, int k) {
-			return (BlockPos.PooledMutableBlockPos)super.move(i, j, k);
-		}
-
-		public void close() {
-			synchronized (POOL) {
-				if (POOL.size() < 100) {
-					POOL.add(this);
-				}
-
-				this.free = true;
-			}
 		}
 	}
 }

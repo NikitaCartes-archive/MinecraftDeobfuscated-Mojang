@@ -69,7 +69,7 @@ public class HarvestFarmland extends Behavior<Villager> {
 				}
 			}
 
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(villager);
+			BlockPos.MutableBlockPos mutableBlockPos = villager.blockPosition().mutable();
 			this.validFarmlandAroundVillager.clear();
 
 			for (int k = -1; k <= 1; k++) {

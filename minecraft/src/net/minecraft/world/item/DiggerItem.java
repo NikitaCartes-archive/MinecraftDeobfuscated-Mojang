@@ -14,15 +14,15 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DiggerItem extends TieredItem {
 	private final Set<Block> blocks;
 	protected final float speed;
-	protected final float attackDamage;
-	protected final float attackSpeed;
+	protected final float attackDamageBaseline;
+	protected final float attackSpeedBaseline;
 
 	protected DiggerItem(float f, float g, Tier tier, Set<Block> set, Item.Properties properties) {
 		super(tier, properties);
 		this.blocks = set;
 		this.speed = tier.getSpeed();
-		this.attackDamage = f + tier.getAttackDamageBonus();
-		this.attackSpeed = g;
+		this.attackDamageBaseline = f + tier.getAttackDamageBonus();
+		this.attackSpeedBaseline = g;
 	}
 
 	@Override
@@ -51,11 +51,11 @@ public class DiggerItem extends TieredItem {
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
 			multimap.put(
 				SharedMonsterAttributes.ATTACK_DAMAGE.getName(),
-				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
+				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)this.attackDamageBaseline, AttributeModifier.Operation.ADDITION)
 			);
 			multimap.put(
 				SharedMonsterAttributes.ATTACK_SPEED.getName(),
-				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", (double)this.attackSpeed, AttributeModifier.Operation.ADDITION)
+				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", (double)this.attackSpeedBaseline, AttributeModifier.Operation.ADDITION)
 			);
 		}
 

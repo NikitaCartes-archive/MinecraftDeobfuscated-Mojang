@@ -37,7 +37,7 @@ public class ScaffoldingBlockItem extends BlockItem {
 			}
 
 			int i = 0;
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(direction);
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(direction);
 
 			while (i < 7) {
 				if (!level.isClientSide && !Level.isInWorldBounds(mutableBlockPos)) {

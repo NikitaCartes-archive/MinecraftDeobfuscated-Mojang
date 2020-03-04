@@ -102,7 +102,7 @@ public class MoveControl {
 			float n = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
 			this.mob.yRot = this.rotlerp(this.mob.yRot, n, 90.0F);
 			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
-			BlockPos blockPos = new BlockPos(this.mob);
+			BlockPos blockPos = this.mob.blockPosition();
 			BlockState blockState = this.mob.level.getBlockState(blockPos);
 			Block block = blockState.getBlock();
 			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);

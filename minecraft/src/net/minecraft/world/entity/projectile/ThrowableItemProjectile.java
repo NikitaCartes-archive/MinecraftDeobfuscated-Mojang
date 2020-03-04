@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
 import net.fabricmc.api.EnvironmentInterfaces;
 import net.minecraft.Util;
@@ -48,7 +47,6 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
 		return this.getEntityData().get(DATA_ITEM_STACK);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getItem() {
 		ItemStack itemStack = this.getItemRaw();

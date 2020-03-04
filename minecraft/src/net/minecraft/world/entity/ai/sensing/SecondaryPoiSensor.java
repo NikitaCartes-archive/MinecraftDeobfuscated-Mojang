@@ -19,7 +19,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
 
 	protected void doTick(ServerLevel serverLevel, Villager villager) {
 		DimensionType dimensionType = serverLevel.getDimension().getType();
-		BlockPos blockPos = new BlockPos(villager);
+		BlockPos blockPos = villager.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 		int i = 4;
 

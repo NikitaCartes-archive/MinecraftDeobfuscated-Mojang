@@ -71,7 +71,7 @@ public class WanderingTraderSpawner {
 		} else if (this.random.nextInt(10) != 0) {
 			return false;
 		} else {
-			BlockPos blockPos = player.getCommandSenderBlockPosition();
+			BlockPos blockPos = player.blockPosition();
 			int i = 48;
 			PoiManager poiManager = this.level.getPoiManager();
 			Optional<BlockPos> optional = poiManager.find(PoiType.MEETING.getPredicate(), blockPosx -> true, blockPos, 48, PoiManager.Occupancy.ANY);
@@ -101,7 +101,7 @@ public class WanderingTraderSpawner {
 	}
 
 	private void tryToSpawnLlamaFor(WanderingTrader wanderingTrader, int i) {
-		BlockPos blockPos = this.findSpawnPositionNear(new BlockPos(wanderingTrader), i);
+		BlockPos blockPos = this.findSpawnPositionNear(wanderingTrader.blockPosition(), i);
 		if (blockPos != null) {
 			TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(this.level, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
 			if (traderLlama != null) {

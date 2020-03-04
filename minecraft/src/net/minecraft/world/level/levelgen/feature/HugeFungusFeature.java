@@ -82,7 +82,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 				boolean bl2 = bl && Mth.abs(k) == j && Mth.abs(l) == j;
 
 				for (int m = 0; m < i; m++) {
-					mutableBlockPos.set(blockPos).move(k, m, l);
+					mutableBlockPos.setWithOffset(blockPos, k, m, l);
 					if (isReplaceable(levelAccessor, mutableBlockPos)) {
 						if (hugeFungusConfiguration.planted) {
 							if (!levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
@@ -126,7 +126,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 					boolean bl5 = !bl3 && !bl4 && l != i;
 					boolean bl6 = bl3 && bl4;
 					boolean bl7 = l < k + 3;
-					mutableBlockPos.set(blockPos).move(n, l, o);
+					mutableBlockPos.setWithOffset(blockPos, n, l, o);
 					if (isReplaceable(levelAccessor, mutableBlockPos)) {
 						if (hugeFungusConfiguration.planted && !levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
 							levelAccessor.destroyBlock(mutableBlockPos, true);
@@ -181,7 +181,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 	@Nullable
 	private static BlockPos.MutableBlockPos findOnNyliumPosition(LevelAccessor levelAccessor, BlockPos blockPos, Block block) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (int i = blockPos.getY(); i >= 1; i--) {
 			mutableBlockPos.setY(i);
@@ -195,7 +195,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	}
 
 	private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, Random random) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(Direction.DOWN);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
 		if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
 			int i = Mth.nextInt(random, 1, 5);
 			if (random.nextInt(7) == 0) {

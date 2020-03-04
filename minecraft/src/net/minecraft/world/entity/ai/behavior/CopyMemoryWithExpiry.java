@@ -29,6 +29,6 @@ public class CopyMemoryWithExpiry<E extends Mob, T> extends Behavior<E> {
 
 	protected void start(ServerLevel serverLevel, E mob, long l) {
 		Brain<?> brain = mob.getBrain();
-		brain.setMemoryWithExpiry(this.targetMemory, (T)brain.getMemory(this.sourceMemory).get(), l, (long)this.durationOfCopy.randomValue(serverLevel.random));
+		brain.setMemoryWithExpiry(this.targetMemory, (T)brain.getMemory(this.sourceMemory).get(), (long)this.durationOfCopy.randomValue(serverLevel.random));
 	}
 }

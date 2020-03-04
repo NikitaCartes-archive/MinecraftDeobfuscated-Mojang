@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,7 +78,7 @@ public class ElderGuardian extends Guardian {
 		}
 
 		if (!this.hasRestriction()) {
-			this.restrictTo(new BlockPos(this), 16);
+			this.restrictTo(this.blockPosition(), 16);
 		}
 	}
 }

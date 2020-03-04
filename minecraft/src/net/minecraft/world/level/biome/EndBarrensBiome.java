@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -17,7 +18,9 @@ public class EndBarrensBiome extends Biome {
 				.scale(0.2F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(10518688).build())
+				.specialEffects(
+					new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(10518688).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+				)
 				.parent(null)
 		);
 		BiomeDefaultFeatures.addEndCity(this);

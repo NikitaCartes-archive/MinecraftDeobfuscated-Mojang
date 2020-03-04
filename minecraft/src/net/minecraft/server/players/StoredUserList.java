@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,12 +112,13 @@ public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
 	}
 
 	public void save() throws IOException {
-		Collection<V> collection = this.map.values();
+		JsonArray jsonArray = new JsonArray();
+		this.map.values().stream().map(storedUserEntry -> Util.make(new JsonObject(), storedUserEntry::serialize)).forEach(jsonArray::add);
 		BufferedWriter bufferedWriter = Files.newWriter(this.file, StandardCharsets.UTF_8);
 		Throwable var3 = null;
 
 		try {
-			GSON.toJson(collection, bufferedWriter);
+			GSON.toJson(jsonArray, bufferedWriter);
 		} catch (Throwable var12) {
 			var3 = var12;
 			throw var12;

@@ -79,7 +79,7 @@ public class FogRenderer {
 			Dimension dimension = clientLevel.getDimension();
 			Vec3 vec32 = camera.getPosition().subtract(2.0, 2.0, 2.0).scale(0.25);
 			Vec3 vec33 = CubicSampler.gaussianSampleVec3(
-				vec32, (ix, jx, k) -> dimension.getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiome(ix, jx, k).getFogColor()), y)
+				vec32, (ix, jx, k) -> dimension.getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, k).getFogColor()), y)
 			);
 			fogRed = (float)vec33.x();
 			fogGreen = (float)vec33.y();
@@ -191,7 +191,7 @@ public class FogRenderer {
 				if (entity instanceof LocalPlayer) {
 					LocalPlayer localPlayer = (LocalPlayer)entity;
 					g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03F;
-					Biome biome = localPlayer.level.getBiome(new BlockPos(localPlayer));
+					Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
 					if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
 						g += 0.005F;
 					}

@@ -95,24 +95,6 @@ public interface EntityGetter {
 		return this.getNearestPlayer(d, e, f, g, predicate);
 	}
 
-	@Nullable
-	default Player getNearestPlayerIgnoreY(double d, double e, double f) {
-		double g = -1.0;
-		Player player = null;
-
-		for (Player player2 : this.players()) {
-			if (EntitySelector.NO_SPECTATORS.test(player2)) {
-				double h = player2.distanceToSqr(d, player2.getY(), e);
-				if ((f < 0.0 || h < f * f) && (g == -1.0 || h < g)) {
-					g = h;
-					player = player2;
-				}
-			}
-		}
-
-		return player;
-	}
-
 	default boolean hasNearbyAlivePlayer(double d, double e, double f, double g) {
 		for (Player player : this.players()) {
 			if (EntitySelector.NO_SPECTATORS.test(player) && EntitySelector.LIVING_ENTITY_STILL_ALIVE.test(player)) {

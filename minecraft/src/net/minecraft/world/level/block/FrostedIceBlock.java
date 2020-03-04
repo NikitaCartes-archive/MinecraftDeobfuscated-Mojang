@@ -28,13 +28,13 @@ public class FrostedIceBlock extends IceBlock {
 		if ((random.nextInt(3) == 0 || this.fewerNeigboursThan(serverLevel, blockPos, 4))
 			&& serverLevel.getMaxLocalRawBrightness(blockPos) > 11 - (Integer)blockState.getValue(AGE) - blockState.getLightBlock(serverLevel, blockPos)
 			&& this.slightlyMelt(blockState, serverLevel, blockPos)) {
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (Direction direction : Direction.values()) {
-					pooledMutableBlockPos.set(blockPos).move(direction);
-					BlockState blockState2 = serverLevel.getBlockState(pooledMutableBlockPos);
-					if (blockState2.getBlock() == this && !this.slightlyMelt(blockState2, serverLevel, pooledMutableBlockPos)) {
-						serverLevel.getBlockTicks().scheduleTick(pooledMutableBlockPos, this, Mth.nextInt(random, 20, 40));
-					}
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			for (Direction direction : Direction.values()) {
+				mutableBlockPos.setWithOffset(blockPos, direction);
+				BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
+				if (blockState2.getBlock() == this && !this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) {
+					serverLevel.getBlockTicks().scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
 				}
 			}
 		} else {
@@ -64,19 +64,18 @@ public class FrostedIceBlock extends IceBlock {
 
 	private boolean fewerNeigboursThan(BlockGetter blockGetter, BlockPos blockPos, int i) {
 		int j = 0;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (Direction direction : Direction.values()) {
-				pooledMutableBlockPos.set(blockPos).move(direction);
-				if (blockGetter.getBlockState(pooledMutableBlockPos).getBlock() == this) {
-					if (++j >= i) {
-						return false;
-					}
+		for (Direction direction : Direction.values()) {
+			mutableBlockPos.setWithOffset(blockPos, direction);
+			if (blockGetter.getBlockState(mutableBlockPos).getBlock() == this) {
+				if (++j >= i) {
+					return false;
 				}
 			}
-
-			return true;
 		}
+
+		return true;
 	}
 
 	@Override

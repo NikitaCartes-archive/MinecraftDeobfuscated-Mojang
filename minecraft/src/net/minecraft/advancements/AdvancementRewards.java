@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandFunction;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +47,7 @@ public class AdvancementRewards {
 		serverPlayer.giveExperiencePoints(this.experience);
 		LootContext lootContext = new LootContext.Builder(serverPlayer.getLevel())
 			.withParameter(LootContextParams.THIS_ENTITY, serverPlayer)
-			.withParameter(LootContextParams.BLOCK_POS, new BlockPos(serverPlayer))
+			.withParameter(LootContextParams.BLOCK_POS, serverPlayer.blockPosition())
 			.withRandom(serverPlayer.getRandom())
 			.create(LootContextParamSets.ADVANCEMENT_REWARD);
 		boolean bl = false;

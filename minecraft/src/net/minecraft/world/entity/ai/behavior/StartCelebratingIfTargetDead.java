@@ -31,10 +31,10 @@ public class StartCelebratingIfTargetDead extends Behavior<LivingEntity> {
 
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-		BlockPos blockPos = this.getAttackTarget(livingEntity).getBlockPos();
+		BlockPos blockPos = this.getAttackTarget(livingEntity).blockPosition();
 		livingEntity.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
 		livingEntity.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
-		livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.CELEBRATE_LOCATION, blockPos, l, (long)this.celebrateDuration);
+		livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.CELEBRATE_LOCATION, blockPos, (long)this.celebrateDuration);
 	}
 
 	private LivingEntity getAttackTarget(LivingEntity livingEntity) {

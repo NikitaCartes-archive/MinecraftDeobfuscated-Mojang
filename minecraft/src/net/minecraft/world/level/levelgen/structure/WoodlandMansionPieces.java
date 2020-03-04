@@ -1184,7 +1184,7 @@ public class WoodlandMansionPieces {
 
 				abstractIllager.setPersistenceRequired();
 				abstractIllager.moveTo(blockPos, 0.0F, 0.0F);
-				abstractIllager.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(new BlockPos(abstractIllager)), MobSpawnType.STRUCTURE, null, null);
+				abstractIllager.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(abstractIllager.blockPosition()), MobSpawnType.STRUCTURE, null, null);
 				levelAccessor.addFreshEntity(abstractIllager);
 				levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 			}

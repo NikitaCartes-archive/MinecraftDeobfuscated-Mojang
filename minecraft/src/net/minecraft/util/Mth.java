@@ -60,11 +60,6 @@ public class Mth {
 		return d < (double)l ? l - 1L : l;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static int absFloor(double d) {
-		return (int)(d >= 0.0 ? d : -d + 1.0);
-	}
-
 	public static float abs(float f) {
 		return Math.abs(f);
 	}
@@ -257,20 +252,6 @@ public class Mth {
 	@Environment(EnvType.CLIENT)
 	public static int getInt(String string, int i, int j) {
 		return Math.max(j, getInt(string, i));
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static double getDouble(String string, double d) {
-		try {
-			return Double.parseDouble(string);
-		} catch (Throwable var4) {
-			return d;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static double getDouble(String string, double d, double e) {
-		return Math.max(e, getDouble(string, d));
 	}
 
 	public static int smallestEncompassingPowerOfTwo(int i) {

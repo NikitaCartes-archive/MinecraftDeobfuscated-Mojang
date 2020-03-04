@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -104,13 +105,12 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (!level.isClientSide && entity instanceof AbstractArrow) {
-			AbstractArrow abstractArrow = (AbstractArrow)entity;
-			Entity entity2 = abstractArrow.getOwner();
-			if (abstractArrow.isOnFire()) {
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		if (!level.isClientSide && projectile instanceof AbstractArrow) {
+			Entity entity = projectile.getOwner();
+			if (projectile.isOnFire()) {
 				BlockPos blockPos = blockHitResult.getBlockPos();
-				explode(level, blockPos, entity2 instanceof LivingEntity ? (LivingEntity)entity2 : null);
+				explode(level, blockPos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
 				level.removeBlock(blockPos, false);
 			}
 		}

@@ -17,6 +17,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +40,7 @@ public class ItemFrame extends HangingEntity {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Integer> DATA_ROTATION = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.INT);
 	private float dropChance = 1.0F;
+	private boolean fixed;
 
 	public ItemFrame(EntityType<? extends ItemFrame> entityType, Level level) {
 		super(entityType, level);
@@ -108,13 +111,29 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public boolean survives() {
-		if (!this.level.noCollision(this)) {
+		if (this.fixed) {
+			return true;
+		} else if (!this.level.noCollision(this)) {
 			return false;
 		} else {
 			BlockState blockState = this.level.getBlockState(this.pos.relative(this.direction.getOpposite()));
 			return blockState.getMaterial().isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(blockState)
 				? this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty()
 				: false;
+		}
+	}
+
+	@Override
+	public void move(MoverType moverType, Vec3 vec3) {
+		if (!this.fixed) {
+			super.move(moverType, vec3);
+		}
+	}
+
+	@Override
+	public void push(double d, double e, double f) {
+		if (!this.fixed) {
+			super.push(d, e, f);
 		}
 	}
 
@@ -131,7 +150,9 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+		if (this.fixed) {
+			return false;
+		} else if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!damageSource.isExplosion() && !this.getItem().isEmpty()) {
 			if (!this.level.isClientSide) {
@@ -284,6 +305,8 @@ public class ItemFrame extends HangingEntity {
 		}
 
 		compoundTag.putByte("Facing", (byte)this.direction.get3DDataValue());
+		compoundTag.putBoolean("Invisible", this.isInvisible());
+		compoundTag.putBoolean("Fixed", this.fixed);
 	}
 
 	@Override
@@ -309,6 +332,8 @@ public class ItemFrame extends HangingEntity {
 		}
 
 		this.setDirection(Direction.from3DDataValue(compoundTag.getByte("Facing")));
+		this.setInvisible(compoundTag.getBoolean("Invisible"));
+		this.fixed = compoundTag.getBoolean("Fixed");
 	}
 
 	@Override
@@ -316,22 +341,20 @@ public class ItemFrame extends HangingEntity {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		boolean bl = !this.getItem().isEmpty();
 		boolean bl2 = !itemStack.isEmpty();
-		if (!this.level.isClientSide) {
-			if (!bl) {
-				if (bl2 && !this.removed) {
-					this.setItem(itemStack);
-					if (!player.abilities.instabuild) {
-						itemStack.shrink(1);
-					}
-				}
-			} else {
+		if (this.level.isClientSide) {
+			return bl || bl2;
+		} else {
+			if (this.fixed || bl) {
 				this.playSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1.0F, 1.0F);
 				this.setRotation(this.getRotation() + 1);
+			} else if (bl2 && !this.removed) {
+				this.setItem(itemStack);
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
+				}
 			}
 
 			return true;
-		} else {
-			return bl || bl2;
 		}
 	}
 

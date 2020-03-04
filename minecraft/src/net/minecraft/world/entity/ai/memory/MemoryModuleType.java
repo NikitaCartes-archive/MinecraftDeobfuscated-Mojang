@@ -8,6 +8,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SerializableBoolean;
 import net.minecraft.core.SerializableLong;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.resources.ResourceLocation;
@@ -40,6 +41,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<WalkTarget> WALK_TARGET = register("walk_target");
 	public static final MemoryModuleType<PositionWrapper> LOOK_TARGET = register("look_target");
 	public static final MemoryModuleType<LivingEntity> ATTACK_TARGET = register("attack_target");
+	public static final MemoryModuleType<Boolean> ATTACK_COOLING_DOWN = register("attack_cooling_down");
 	public static final MemoryModuleType<LivingEntity> INTERACTION_TARGET = register("interaction_target");
 	public static final MemoryModuleType<AgableMob> BREED_TARGET = register("breed_target");
 	public static final MemoryModuleType<Entity> RIDE_TARGET = register("ride_target");
@@ -60,9 +62,9 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<SerializableLong> LAST_WORKED_AT_POI = register("last_worked_at_poi", Optional.of(SerializableLong::of));
 	public static final MemoryModuleType<ItemEntity> NEAREST_VISIBLE_WANTED_ITEM = register("nearest_visible_wanted_item");
 	public static final MemoryModuleType<SerializableUUID> ANGRY_AT = register("angry_at", Optional.of(SerializableUUID::of));
-	public static final MemoryModuleType<Boolean> ADMIRING_ITEM = register("admiring_item");
-	public static final MemoryModuleType<Player> WAS_HIT_BY_PLAYER = register("was_hit_by_player");
-	public static final MemoryModuleType<Boolean> HUNTED_RECENTLY = register("hunted_recently");
+	public static final MemoryModuleType<SerializableBoolean> ADMIRING_ITEM = register("admiring_item", Optional.of(SerializableBoolean::of));
+	public static final MemoryModuleType<SerializableBoolean> ADMIRING_DISABLED = register("admiring_disabled", Optional.of(SerializableBoolean::of));
+	public static final MemoryModuleType<SerializableBoolean> HUNTED_RECENTLY = register("hunted_recently", Optional.of(SerializableBoolean::of));
 	public static final MemoryModuleType<BlockPos> CELEBRATE_LOCATION = register("celebrate_location");
 	public static final MemoryModuleType<WitherSkeleton> NEAREST_VISIBLE_WITHER_SKELETON = register("nearest_visible_wither_skeleton");
 	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_ADULT_HOGLIN = register("nearest_visible_adult_hoglin");
@@ -77,8 +79,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Integer> VISIBLE_ADULT_HOGLIN_COUNT = register("visible_adult_hoglin_count");
 	public static final MemoryModuleType<Player> NEAREST_PLAYER_HOLDING_WANTED_ITEM = register("nearest_player_holding_wanted_item");
 	public static final MemoryModuleType<Boolean> ATE_RECENTLY = register("ate_recently");
-	public static final MemoryModuleType<BlockPos> NEAREST_WARPED_FUNGUS = register("nearest_visible_warped_fungus");
-	public static final MemoryModuleType<BlockPos> NEAREST_SOUL_FIRE = register("nearest_visible_soul_fire_item");
+	public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = register("nearest_repellent");
 	public static final MemoryModuleType<Boolean> PACIFIED = register("pacified");
 	private final Optional<Function<Dynamic<?>, U>> deserializer;
 

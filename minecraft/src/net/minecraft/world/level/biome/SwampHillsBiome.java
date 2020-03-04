@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -20,7 +21,9 @@ public final class SwampHillsBiome extends Biome {
 				.scale(0.3F)
 				.temperature(0.8F)
 				.downfall(0.9F)
-				.specialEffects(new BiomeSpecialEffects.Builder().waterColor(6388580).waterFogColor(2302743).fogColor(12638463).build())
+				.specialEffects(
+					new BiomeSpecialEffects.Builder().waterColor(6388580).waterFogColor(2302743).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+				)
 				.parent("swamp")
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

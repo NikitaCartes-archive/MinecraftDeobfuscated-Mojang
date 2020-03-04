@@ -214,7 +214,7 @@ public class Silverfish extends Monster {
 			if (this.lookForFriends <= 0) {
 				Level level = this.silverfish.level;
 				Random random = this.silverfish.getRandom();
-				BlockPos blockPos = new BlockPos(this.silverfish);
+				BlockPos blockPos = this.silverfish.blockPosition();
 
 				for (int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i) {
 					for (int j = 0; j <= 10 && j >= -10; j = (j <= 0 ? 1 : 0) - j) {

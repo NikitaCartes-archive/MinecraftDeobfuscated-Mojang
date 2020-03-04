@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -78,7 +77,7 @@ public class Vindicator extends AbstractIllager {
 		if (!this.isNoAi()) {
 			PathNavigation pathNavigation = this.getNavigation();
 			if (pathNavigation instanceof GroundPathNavigation) {
-				boolean bl = ((ServerLevel)this.level).isRaided(new BlockPos(this));
+				boolean bl = ((ServerLevel)this.level).isRaided(this.blockPosition());
 				((GroundPathNavigation)pathNavigation).setCanOpenDoors(bl);
 			}
 		}

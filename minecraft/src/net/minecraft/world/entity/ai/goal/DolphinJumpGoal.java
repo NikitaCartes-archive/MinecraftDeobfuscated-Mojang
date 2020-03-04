@@ -29,7 +29,7 @@ public class DolphinJumpGoal extends JumpGoal {
 			Direction direction = this.dolphin.getMotionDirection();
 			int i = direction.getStepX();
 			int j = direction.getStepZ();
-			BlockPos blockPos = new BlockPos(this.dolphin);
+			BlockPos blockPos = this.dolphin.blockPosition();
 
 			for (int k : STEPS_TO_CHECK) {
 				if (!this.waterIsClear(blockPos, i, j, k) || !this.surfaceIsClear(blockPos, i, j, k)) {
@@ -78,7 +78,7 @@ public class DolphinJumpGoal extends JumpGoal {
 	public void tick() {
 		boolean bl = this.breached;
 		if (!bl) {
-			FluidState fluidState = this.dolphin.level.getFluidState(new BlockPos(this.dolphin));
+			FluidState fluidState = this.dolphin.level.getFluidState(this.dolphin.blockPosition());
 			this.breached = fluidState.is(FluidTags.WATER);
 		}
 

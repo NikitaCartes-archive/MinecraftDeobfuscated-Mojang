@@ -25,8 +25,8 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
 		if (levelAccessor.isEmptyBlock(blockPos) && !levelAccessor.isEmptyBlock(blockPos.above())) {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
-			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos(blockPos);
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+			BlockPos.MutableBlockPos mutableBlockPos2 = blockPos.mutable();
 			boolean bl = true;
 			boolean bl2 = true;
 			boolean bl3 = true;
@@ -34,18 +34,18 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
 
 			while (levelAccessor.isEmptyBlock(mutableBlockPos)) {
 				levelAccessor.setBlock(mutableBlockPos, Blocks.BASALT.defaultBlockState(), 2);
-				bl = bl && this.placeHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.NORTH));
-				bl2 = bl2 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.SOUTH));
-				bl3 = bl3 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.WEST));
-				bl4 = bl4 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.EAST));
+				bl = bl && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
+				bl2 = bl2 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
+				bl3 = bl3 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
+				bl4 = bl4 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
 				mutableBlockPos.move(Direction.DOWN);
 			}
 
 			mutableBlockPos.move(Direction.UP);
-			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.NORTH));
-			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.SOUTH));
-			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.WEST));
-			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.set(mutableBlockPos).move(Direction.EAST));
+			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
+			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
+			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
+			this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
 			BlockPos.MutableBlockPos mutableBlockPos3 = new BlockPos.MutableBlockPos();
 
 			for (int i = -3; i < 4; i++) {
@@ -55,14 +55,14 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
 						mutableBlockPos3.set(mutableBlockPos.offset(i, 0, j));
 						int l = 3;
 
-						while (levelAccessor.isEmptyBlock(mutableBlockPos2.set(mutableBlockPos3).move(Direction.DOWN))) {
+						while (levelAccessor.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) {
 							mutableBlockPos3.move(Direction.DOWN);
 							if (--l <= 0) {
 								break;
 							}
 						}
 
-						if (!levelAccessor.isEmptyBlock(mutableBlockPos2.set(mutableBlockPos3).move(Direction.DOWN))) {
+						if (!levelAccessor.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) {
 							levelAccessor.setBlock(mutableBlockPos3, Blocks.BASALT.defaultBlockState(), 2);
 						}
 					}

@@ -36,12 +36,12 @@ public class RandomPatchFeature extends Feature<RandomPatchConfiguration> {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int j = 0; j < randomPatchConfiguration.tries; j++) {
-			mutableBlockPos.set(blockPos2)
-				.move(
-					random.nextInt(randomPatchConfiguration.xspread + 1) - random.nextInt(randomPatchConfiguration.xspread + 1),
-					random.nextInt(randomPatchConfiguration.yspread + 1) - random.nextInt(randomPatchConfiguration.yspread + 1),
-					random.nextInt(randomPatchConfiguration.zspread + 1) - random.nextInt(randomPatchConfiguration.zspread + 1)
-				);
+			mutableBlockPos.setWithOffset(
+				blockPos2,
+				random.nextInt(randomPatchConfiguration.xspread + 1) - random.nextInt(randomPatchConfiguration.xspread + 1),
+				random.nextInt(randomPatchConfiguration.yspread + 1) - random.nextInt(randomPatchConfiguration.yspread + 1),
+				random.nextInt(randomPatchConfiguration.zspread + 1) - random.nextInt(randomPatchConfiguration.zspread + 1)
+			);
 			BlockPos blockPos3 = mutableBlockPos.below();
 			BlockState blockState2 = levelAccessor.getBlockState(blockPos3);
 			if ((

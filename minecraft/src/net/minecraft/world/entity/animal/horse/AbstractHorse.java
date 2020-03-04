@@ -527,7 +527,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				if (!this.isEating()
 					&& !this.isVehicle()
 					&& this.random.nextInt(300) == 0
-					&& this.level.getBlockState(new BlockPos(this).below()).getBlock() == Blocks.GRASS_BLOCK) {
+					&& this.level.getBlockState(this.blockPosition().below()).getBlock() == Blocks.GRASS_BLOCK) {
 					this.setEating(true);
 				}
 

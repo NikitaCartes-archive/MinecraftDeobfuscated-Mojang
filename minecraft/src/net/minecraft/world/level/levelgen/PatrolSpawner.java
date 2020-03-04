@@ -41,12 +41,12 @@ public class PatrolSpawner {
 						Player player = (Player)serverLevel.players().get(random.nextInt(i));
 						if (player.isSpectator()) {
 							return 0;
-						} else if (serverLevel.closeToVillage(player.getCommandSenderBlockPosition(), 2)) {
+						} else if (serverLevel.closeToVillage(player.blockPosition(), 2)) {
 							return 0;
 						} else {
 							int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
 							int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-							BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(player).move(j, 0, k);
+							BlockPos.MutableBlockPos mutableBlockPos = player.blockPosition().mutable().move(j, 0, k);
 							if (!serverLevel.hasChunksAt(
 								mutableBlockPos.getX() - 10,
 								mutableBlockPos.getY() - 10,

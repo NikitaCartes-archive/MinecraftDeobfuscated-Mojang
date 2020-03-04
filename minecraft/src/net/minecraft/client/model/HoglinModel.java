@@ -81,18 +81,9 @@ public class HoglinModel extends AgeableListModel<Hoglin> {
 		this.rightEar.zRot = (float) (-Math.PI * 2.0 / 9.0) - g * Mth.sin(f);
 		this.leftEar.zRot = (float) (Math.PI * 2.0 / 9.0) + g * Mth.sin(f);
 		this.head.yRot = i * (float) (Math.PI / 180.0);
-		int k = hoglin.getAttackAnimationRemainingTicks();
-		if (k > 0) {
-			int l = 10 - k;
-			float m = Mth.triangleWave((float)l, 10.0F);
-			float n = (-m + 1.0F) / 2.0F;
-			float o = -1.2217305F * n;
-			this.head.xRot = 0.87266463F + o;
-		} else {
-			this.head.xRot = 0.87266463F;
-		}
-
-		float p = 1.2F;
+		float k = 1.0F - (float)Mth.abs(10 - 2 * hoglin.getAttackAnimationRemainingTicks()) / 10.0F;
+		this.head.xRot = Mth.lerp(k, 0.87266463F, (float) (-Math.PI / 9));
+		float l = 1.2F;
 		this.frontRightLeg.xRot = Mth.cos(f) * 1.2F * g;
 		this.frontLeftLeg.xRot = Mth.cos(f + (float) Math.PI) * 1.2F * g;
 		this.backRightLeg.xRot = this.frontLeftLeg.xRot;

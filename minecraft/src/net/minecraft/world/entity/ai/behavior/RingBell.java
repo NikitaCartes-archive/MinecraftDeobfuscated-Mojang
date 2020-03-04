@@ -26,7 +26,7 @@ public class RingBell extends Behavior<LivingEntity> {
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Brain<?> brain = livingEntity.getBrain();
 		BlockPos blockPos = ((GlobalPos)brain.getMemory(MemoryModuleType.MEETING_POINT).get()).pos();
-		if (blockPos.closerThan(new BlockPos(livingEntity), 3.0)) {
+		if (blockPos.closerThan(livingEntity.blockPosition(), 3.0)) {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
 			if (blockState.getBlock() == Blocks.BELL) {
 				BellBlock bellBlock = (BellBlock)blockState.getBlock();

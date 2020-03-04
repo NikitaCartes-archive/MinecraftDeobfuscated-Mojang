@@ -185,7 +185,7 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 				if (this.surviveAfterDeath) {
 					this.level.addFreshEntity(new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), this.getItem()));
 				} else {
-					this.level.levelEvent(2003, new BlockPos(this), 0);
+					this.level.levelEvent(2003, this.blockPosition(), 0);
 				}
 			}
 		} else {

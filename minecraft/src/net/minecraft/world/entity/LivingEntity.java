@@ -327,7 +327,7 @@ public abstract class LivingEntity extends Entity {
 			}
 
 			if (!this.level.isClientSide) {
-				BlockPos blockPos = new BlockPos(this);
+				BlockPos blockPos = this.blockPosition();
 				if (!Objects.equal(this.lastPos, blockPos)) {
 					this.lastPos = blockPos;
 					this.onChangedBlock(blockPos);
@@ -1091,7 +1091,7 @@ public abstract class LivingEntity extends Entity {
 			boolean bl = false;
 			if (livingEntity instanceof WitherBoss) {
 				if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-					BlockPos blockPos = new BlockPos(this);
+					BlockPos blockPos = this.blockPosition();
 					BlockState blockState = Blocks.WITHER_ROSE.defaultBlockState();
 					if (this.level.getBlockState(blockPos).isAir() && blockState.canSurvive(this.level, blockPos)) {
 						this.level.setBlock(blockPos, blockState, 3);
@@ -1163,7 +1163,7 @@ public abstract class LivingEntity extends Entity {
 		LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
 			.withRandom(this.random)
 			.withParameter(LootContextParams.THIS_ENTITY, this)
-			.withParameter(LootContextParams.BLOCK_POS, new BlockPos(this))
+			.withParameter(LootContextParams.BLOCK_POS, this.blockPosition())
 			.withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)
 			.withOptionalParameter(LootContextParams.KILLER_ENTITY, damageSource.getEntity())
 			.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, damageSource.getDirectEntity());
@@ -1222,7 +1222,7 @@ public abstract class LivingEntity extends Entity {
 		if (this.isSpectator()) {
 			return false;
 		} else {
-			BlockPos blockPos = this.getBlockPos();
+			BlockPos blockPos = this.blockPosition();
 			BlockState blockState = this.getFeetBlockState();
 			Block block = blockState.getBlock();
 			if (block.is(BlockTags.CLIMBABLE)) {
@@ -1238,7 +1238,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public BlockState getFeetBlockState() {
-		return this.level.getBlockState(new BlockPos(this));
+		return this.level.getBlockState(this.blockPosition());
 	}
 
 	private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
@@ -1705,7 +1705,7 @@ public abstract class LivingEntity extends Entity {
 
 	private void dismountVehicle(Entity entity) {
 		Vec3 vec3;
-		if (this.level.getBlockState(new BlockPos(entity)).getBlock().is(BlockTags.PORTALS)) {
+		if (this.level.getBlockState(entity.blockPosition()).getBlock().is(BlockTags.PORTALS)) {
 			vec3 = new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ());
 		} else {
 			vec3 = entity.getDismountLocationForPassenger(this);

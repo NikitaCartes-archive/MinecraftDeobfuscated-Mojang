@@ -430,39 +430,32 @@ public class Boat extends Entity {
 		int l = Mth.ceil(aABB.maxY - this.lastYd);
 		int m = Mth.floor(aABB.minZ);
 		int n = Mth.ceil(aABB.maxZ);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			label136:
-			for (int o = k; o < l; o++) {
-				float f = 0.0F;
-				int p = i;
+		label39:
+		for (int o = k; o < l; o++) {
+			float f = 0.0F;
 
-				while (true) {
-					if (p < j) {
-						for (int q = m; q < n; q++) {
-							pooledMutableBlockPos.set(p, o, q);
-							FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-							if (fluidState.is(FluidTags.WATER)) {
-								f = Math.max(f, fluidState.getHeight(this.level, pooledMutableBlockPos));
-							}
+			for (int p = i; p < j; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(p, o, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER)) {
+						f = Math.max(f, fluidState.getHeight(this.level, mutableBlockPos));
+					}
 
-							if (f >= 1.0F) {
-								continue label136;
-							}
-						}
-
-						p++;
-					} else {
-						if (f < 1.0F) {
-							return (float)pooledMutableBlockPos.getY() + f;
-						}
-						break;
+					if (f >= 1.0F) {
+						continue label39;
 					}
 				}
 			}
 
-			return (float)(l + 1);
+			if (f < 1.0F) {
+				return (float)mutableBlockPos.getY() + f;
+			}
 		}
+
+		return (float)(l + 1);
 	}
 
 	public float getGroundFriction() {
@@ -477,23 +470,20 @@ public class Boat extends Entity {
 		VoxelShape voxelShape = Shapes.create(aABB2);
 		float f = 0.0F;
 		int o = 0;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int p = i; p < j; p++) {
-				for (int q = m; q < n; q++) {
-					int r = (p != i && p != j - 1 ? 0 : 1) + (q != m && q != n - 1 ? 0 : 1);
-					if (r != 2) {
-						for (int s = k; s < l; s++) {
-							if (r <= 0 || s != k && s != l - 1) {
-								pooledMutableBlockPos.set(p, s, q);
-								BlockState blockState = this.level.getBlockState(pooledMutableBlockPos);
-								if (!(blockState.getBlock() instanceof WaterlilyBlock)
-									&& Shapes.joinIsNotEmpty(
-										blockState.getCollisionShape(this.level, pooledMutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND
-									)) {
-									f += blockState.getBlock().getFriction();
-									o++;
-								}
+		for (int p = i; p < j; p++) {
+			for (int q = m; q < n; q++) {
+				int r = (p != i && p != j - 1 ? 0 : 1) + (q != m && q != n - 1 ? 0 : 1);
+				if (r != 2) {
+					for (int s = k; s < l; s++) {
+						if (r <= 0 || s != k && s != l - 1) {
+							mutableBlockPos.set(p, s, q);
+							BlockState blockState = this.level.getBlockState(mutableBlockPos);
+							if (!(blockState.getBlock() instanceof WaterlilyBlock)
+								&& Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, mutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND)) {
+								f += blockState.getBlock().getFriction();
+								o++;
 							}
 						}
 					}
@@ -514,18 +504,17 @@ public class Boat extends Entity {
 		int n = Mth.ceil(aABB.maxZ);
 		boolean bl = false;
 		this.waterLevel = Double.MIN_VALUE;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						pooledMutableBlockPos.set(o, p, q);
-						FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-						if (fluidState.is(FluidTags.WATER)) {
-							float f = (float)p + fluidState.getHeight(this.level, pooledMutableBlockPos);
-							this.waterLevel = Math.max((double)f, this.waterLevel);
-							bl |= aABB.minY < (double)f;
-						}
+		for (int o = i; o < j; o++) {
+			for (int p = k; p < l; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(o, p, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER)) {
+						float f = (float)p + fluidState.getHeight(this.level, mutableBlockPos);
+						this.waterLevel = Math.max((double)f, this.waterLevel);
+						bl |= aABB.minY < (double)f;
 					}
 				}
 			}
@@ -545,20 +534,19 @@ public class Boat extends Entity {
 		int m = Mth.floor(aABB.minZ);
 		int n = Mth.ceil(aABB.maxZ);
 		boolean bl = false;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						pooledMutableBlockPos.set(o, p, q);
-						FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-						if (fluidState.is(FluidTags.WATER) && d < (double)((float)pooledMutableBlockPos.getY() + fluidState.getHeight(this.level, pooledMutableBlockPos))) {
-							if (!fluidState.isSource()) {
-								return Boat.Status.UNDER_FLOWING_WATER;
-							}
-
-							bl = true;
+		for (int o = i; o < j; o++) {
+			for (int p = k; p < l; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(o, p, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER) && d < (double)((float)mutableBlockPos.getY() + fluidState.getHeight(this.level, mutableBlockPos))) {
+						if (!fluidState.isSource()) {
+							return Boat.Status.UNDER_FLOWING_WATER;
 						}
+
+						bl = true;
 					}
 				}
 			}
@@ -764,7 +752,7 @@ public class Boat extends Entity {
 				}
 
 				this.fallDistance = 0.0F;
-			} else if (!this.level.getFluidState(new BlockPos(this).below()).is(FluidTags.WATER) && d < 0.0) {
+			} else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
 				this.fallDistance = (float)((double)this.fallDistance - d);
 			}
 		}

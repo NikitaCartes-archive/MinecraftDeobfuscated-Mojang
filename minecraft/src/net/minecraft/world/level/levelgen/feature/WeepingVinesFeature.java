@@ -48,12 +48,12 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
 		for (int i = 0; i < 200; i++) {
-			mutableBlockPos.set(blockPos).move(random.nextInt(6) - random.nextInt(6), random.nextInt(2) - random.nextInt(5), random.nextInt(6) - random.nextInt(6));
+			mutableBlockPos.setWithOffset(blockPos, random.nextInt(6) - random.nextInt(6), random.nextInt(2) - random.nextInt(5), random.nextInt(6) - random.nextInt(6));
 			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
 				int j = 0;
 
 				for (Direction direction : DIRECTIONS) {
-					Block block = levelAccessor.getBlockState(mutableBlockPos2.set(mutableBlockPos).move(direction)).getBlock();
+					Block block = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction)).getBlock();
 					if (block == Blocks.NETHERRACK || block == Blocks.NETHER_WART_BLOCK) {
 						j++;
 					}
@@ -74,7 +74,7 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int i = 0; i < 100; i++) {
-			mutableBlockPos.set(blockPos).move(random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
+			mutableBlockPos.setWithOffset(blockPos, random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
 			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
 				Block block = levelAccessor.getBlockState(mutableBlockPos.above()).getBlock();
 				if (block == Blocks.NETHERRACK || block == Blocks.NETHER_WART_BLOCK) {

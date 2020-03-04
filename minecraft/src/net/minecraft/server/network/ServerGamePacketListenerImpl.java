@@ -352,7 +352,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 				boolean bl2 = false;
 				if (p > 0.0625) {
 					bl2 = true;
-					LOGGER.warn("{} moved wrongly!", entity.getName().getString());
+					LOGGER.warn("{} (vehicle of {}) moved wrongly! {}", entity.getName().getString(), this.player.getName().getString(), Math.sqrt(p));
 				}
 
 				entity.absMoveTo(g, h, i, j, k);

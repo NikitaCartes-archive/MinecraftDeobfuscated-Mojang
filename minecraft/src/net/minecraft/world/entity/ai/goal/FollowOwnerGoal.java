@@ -95,7 +95,7 @@ public class FollowOwnerGoal extends Goal {
 	}
 
 	private void teleportToOwner() {
-		BlockPos blockPos = new BlockPos(this.owner);
+		BlockPos blockPos = this.owner.blockPosition();
 
 		for (int i = 0; i < 10; i++) {
 			int j = this.randomIntInclusive(-3, 3);
@@ -129,7 +129,7 @@ public class FollowOwnerGoal extends Goal {
 			if (!this.canFly && blockState.getBlock() instanceof LeavesBlock) {
 				return false;
 			} else {
-				BlockPos blockPos2 = blockPos.subtract(new BlockPos(this.tamable));
+				BlockPos blockPos2 = blockPos.subtract(this.tamable.blockPosition());
 				return this.level.noCollision(this.tamable, this.tamable.getBoundingBox().move(blockPos2));
 			}
 		}

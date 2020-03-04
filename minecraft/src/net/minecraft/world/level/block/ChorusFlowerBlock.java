@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -217,10 +217,10 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (entity.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		if (projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
 			BlockPos blockPos = blockHitResult.getBlockPos();
-			level.destroyBlock(blockPos, true, entity);
+			level.destroyBlock(blockPos, true, projectile);
 		}
 	}
 }

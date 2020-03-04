@@ -144,7 +144,7 @@ public class FishingHook extends Entity {
 			}
 
 			float f = 0.0F;
-			BlockPos blockPos = new BlockPos(this);
+			BlockPos blockPos = this.blockPosition();
 			FluidState fluidState = this.level.getFluidState(blockPos);
 			if (fluidState.is(FluidTags.WATER)) {
 				f = fluidState.getHeight(this.level, blockPos);
@@ -397,7 +397,7 @@ public class FishingHook extends Entity {
 				i = this.hookedIn instanceof ItemEntity ? 3 : 5;
 			} else if (this.nibble > 0) {
 				LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-					.withParameter(LootContextParams.BLOCK_POS, new BlockPos(this))
+					.withParameter(LootContextParams.BLOCK_POS, this.blockPosition())
 					.withParameter(LootContextParams.TOOL, itemStack)
 					.withRandom(this.random)
 					.withLuck((float)this.luck + this.owner.getLuck());

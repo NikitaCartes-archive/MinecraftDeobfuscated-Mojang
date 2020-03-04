@@ -358,7 +358,6 @@ public class ServerChunkCache extends ChunkSource {
 		if (!bl) {
 			this.level.getProfiler().push("pollingChunks");
 			int i = this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
-			BlockPos blockPos = this.level.getSharedSpawnPos();
 			boolean bl3 = levelData.getGameTime() % 400L == 0L;
 			this.level.getProfiler().push("naturalSpawnCount");
 			int j = this.distanceManager.getNaturalSpawnChunkCount();
@@ -388,7 +387,7 @@ public class ServerChunkCache extends ChunkSource {
 											&& (!mobCategory.isPersistent() || bl3)) {
 											int k = mobCategory.getMaxInstancesPerChunk() * j / MAGIC_NUMBER;
 											if (object2IntMap.getInt(mobCategory) <= k) {
-												NaturalSpawner.spawnCategoryForChunk(mobCategory, this.level, levelChunk, blockPos);
+												NaturalSpawner.spawnCategoryForChunk(mobCategory, this.level, levelChunk);
 											}
 										}
 									}

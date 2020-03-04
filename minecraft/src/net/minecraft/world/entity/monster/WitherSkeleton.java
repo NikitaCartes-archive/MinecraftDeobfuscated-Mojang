@@ -16,6 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,6 +29,12 @@ public class WitherSkeleton extends AbstractSkeleton {
 	public WitherSkeleton(EntityType<? extends WitherSkeleton> entityType, Level level) {
 		super(entityType, level);
 		this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
+	}
+
+	@Override
+	protected void registerGoals() {
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Piglin.class, true));
+		super.registerGoals();
 	}
 
 	@Override

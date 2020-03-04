@@ -43,22 +43,14 @@ public class CommandBlockEntity extends BlockEntity {
 		@Environment(EnvType.CLIENT)
 		@Override
 		public Vec3 getPosition() {
-			return new Vec3(
-				(double)CommandBlockEntity.this.worldPosition.getX() + 0.5,
-				(double)CommandBlockEntity.this.worldPosition.getY() + 0.5,
-				(double)CommandBlockEntity.this.worldPosition.getZ() + 0.5
-			);
+			return Vec3.atCenterOf(CommandBlockEntity.this.worldPosition);
 		}
 
 		@Override
 		public CommandSourceStack createCommandSourceStack() {
 			return new CommandSourceStack(
 				this,
-				new Vec3(
-					(double)CommandBlockEntity.this.worldPosition.getX() + 0.5,
-					(double)CommandBlockEntity.this.worldPosition.getY() + 0.5,
-					(double)CommandBlockEntity.this.worldPosition.getZ() + 0.5
-				),
+				Vec3.atCenterOf(CommandBlockEntity.this.worldPosition),
 				Vec2.ZERO,
 				this.getLevel(),
 				2,

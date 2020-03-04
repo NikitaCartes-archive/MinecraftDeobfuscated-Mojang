@@ -5,6 +5,18 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvents {
 	public static final SoundEvent AMBIENT_CAVE = register("ambient.cave");
+	public static final SoundEvent AMBIENT_CRIMSON_FOREST_ADDITIONS = register("ambient.crimson_forest.additions");
+	public static final SoundEvent AMBIENT_CRIMSON_FOREST_LOOP = register("ambient.crimson_forest.loop");
+	public static final SoundEvent AMBIENT_CRIMSON_FOREST_MOOD = register("ambient.crimson_forest.mood");
+	public static final SoundEvent AMBIENT_NETHER_WASTES_ADDITIONS = register("ambient.nether_wastes.additions");
+	public static final SoundEvent AMBIENT_NETHER_WASTES_LOOP = register("ambient.nether_wastes.loop");
+	public static final SoundEvent AMBIENT_NETHER_WASTES_MOOD = register("ambient.nether_wastes.mood");
+	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_ADDITIONS = register("ambient.soul_sand_valley.additions");
+	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_LOOP = register("ambient.soul_sand_valley.loop");
+	public static final SoundEvent AMBIENT_SOUL_SAND_VALLEY_MOOD = register("ambient.soul_sand_valley.mood");
+	public static final SoundEvent AMBIENT_WARPED_FOREST_ADDITIONS = register("ambient.warped_forest.additions");
+	public static final SoundEvent AMBIENT_WARPED_FOREST_LOOP = register("ambient.warped_forest.loop");
+	public static final SoundEvent AMBIENT_WARPED_FOREST_MOOD = register("ambient.warped_forest.mood");
 	public static final SoundEvent AMBIENT_UNDERWATER_ENTER = register("ambient.underwater.enter");
 	public static final SoundEvent AMBIENT_UNDERWATER_EXIT = register("ambient.underwater.exit");
 	public static final SoundEvent AMBIENT_UNDERWATER_LOOP = register("ambient.underwater.loop");
@@ -727,6 +739,7 @@ public class SoundEvents {
 	public static final SoundEvent SLIME_HURT_SMALL = register("entity.slime.hurt_small");
 	public static final SoundEvent SLIME_JUMP_SMALL = register("entity.slime.jump_small");
 	public static final SoundEvent SLIME_SQUISH_SMALL = register("entity.slime.squish_small");
+	public static final SoundEvent SMITHING_TABLE_USE = register("block.smithing_table.use");
 	public static final SoundEvent SMOKER_SMOKE = register("block.smoker.smoke");
 	public static final SoundEvent SNOWBALL_THROW = register("entity.snowball.throw");
 	public static final SoundEvent SNOW_BREAK = register("block.snow.break");

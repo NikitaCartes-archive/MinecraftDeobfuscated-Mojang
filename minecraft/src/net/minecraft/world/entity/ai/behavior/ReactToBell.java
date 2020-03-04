@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -18,7 +17,7 @@ public class ReactToBell extends Behavior<LivingEntity> {
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Brain<?> brain = livingEntity.getBrain();
-		Raid raid = serverLevel.getRaidAt(new BlockPos(livingEntity));
+		Raid raid = serverLevel.getRaidAt(livingEntity.blockPosition());
 		if (raid == null) {
 			brain.setActiveActivityIfPossible(Activity.HIDE);
 		}

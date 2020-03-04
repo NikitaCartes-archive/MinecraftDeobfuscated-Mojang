@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.goal.target;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -97,7 +96,7 @@ public abstract class TargetGoal extends Goal {
 			return false;
 		} else if (!targetingConditions.test(this.mob, livingEntity)) {
 			return false;
-		} else if (!this.mob.isWithinRestriction(new BlockPos(livingEntity))) {
+		} else if (!this.mob.isWithinRestriction(livingEntity.blockPosition())) {
 			return false;
 		} else {
 			if (this.mustReach) {

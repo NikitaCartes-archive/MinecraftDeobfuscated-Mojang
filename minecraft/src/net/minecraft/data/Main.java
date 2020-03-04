@@ -13,6 +13,7 @@ import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
 import net.minecraft.data.info.RegistryDumpReport;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.SnbtToNbt;
@@ -56,6 +57,10 @@ public class Main {
 		DataGenerator dataGenerator = new DataGenerator(path, collection);
 		if (bl || bl2) {
 			dataGenerator.addProvider(new SnbtToNbt(dataGenerator).addFilter(new StructureUpdater()));
+		}
+
+		if (bl) {
+			dataGenerator.addProvider(new ModelProvider(dataGenerator));
 		}
 
 		if (bl2) {

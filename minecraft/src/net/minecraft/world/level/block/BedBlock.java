@@ -271,7 +271,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		if (voxelShape.max(Direction.Axis.Y) > 0.4375) {
 			return Optional.empty();
 		} else {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 			while (
 				mutableBlockPos.getY() >= 0

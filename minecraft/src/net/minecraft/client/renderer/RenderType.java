@@ -168,6 +168,20 @@ public abstract class RenderType extends RenderStateShard {
 		return TRANSLUCENT_NO_CRUMBLING;
 	}
 
+	public static RenderType armorCutoutNoCull(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(NO_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setCullState(NO_CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(true);
+		return create("armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+	}
+
 	public static RenderType entitySolid(ResourceLocation resourceLocation) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))

@@ -65,7 +65,7 @@ public abstract class DoorInteractGoal extends Goal {
 					}
 				}
 
-				this.doorPos = new BlockPos(this.mob).above();
+				this.doorPos = this.mob.blockPosition().above();
 				this.hasDoor = DoorBlock.isWoodenDoor(this.mob.level, this.doorPos);
 				return this.hasDoor;
 			} else {

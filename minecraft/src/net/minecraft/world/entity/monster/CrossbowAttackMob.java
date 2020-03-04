@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -36,11 +35,10 @@ public interface CrossbowAttackMob extends RangedAttackMob {
 	}
 
 	default void shootCrossbowProjectile(LivingEntity livingEntity, LivingEntity livingEntity2, Projectile projectile, float f, float g) {
-		Entity entity = (Entity)projectile;
 		double d = livingEntity2.getX() - livingEntity.getX();
 		double e = livingEntity2.getZ() - livingEntity.getZ();
 		double h = (double)Mth.sqrt(d * d + e * e);
-		double i = livingEntity2.getY(0.3333333333333333) - entity.getY() + h * 0.2F;
+		double i = livingEntity2.getY(0.3333333333333333) - projectile.getY() + h * 0.2F;
 		Vector3f vector3f = this.getProjectileShotVector(livingEntity, new Vec3(d, i, e), f);
 		projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), g, (float)(14 - livingEntity.level.getDifficulty().getId() * 4));
 		livingEntity.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (livingEntity.getRandom().nextFloat() * 0.4F + 0.8F));

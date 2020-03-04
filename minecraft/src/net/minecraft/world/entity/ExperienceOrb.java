@@ -63,7 +63,7 @@ public class ExperienceOrb extends Entity {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
 		}
 
-		if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
+		if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {
 			this.setDeltaMovement(
 				(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.2F, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F)
 			);

@@ -33,7 +33,7 @@ public class WaterAvoidingRandomFlyingGoal extends WaterAvoidingRandomStrollGoal
 
 	@Nullable
 	private Vec3 getTreePos() {
-		BlockPos blockPos = new BlockPos(this.mob);
+		BlockPos blockPos = this.mob.blockPosition();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 
@@ -46,10 +46,10 @@ public class WaterAvoidingRandomFlyingGoal extends WaterAvoidingRandomStrollGoal
 			Mth.floor(this.mob.getZ() + 3.0)
 		)) {
 			if (!blockPos.equals(blockPos2)) {
-				Block block = this.mob.level.getBlockState(mutableBlockPos2.set(blockPos2).move(Direction.DOWN)).getBlock();
+				Block block = this.mob.level.getBlockState(mutableBlockPos2.setWithOffset(blockPos2, Direction.DOWN)).getBlock();
 				boolean bl = block instanceof LeavesBlock || block.is(BlockTags.LOGS);
-				if (bl && this.mob.level.isEmptyBlock(blockPos2) && this.mob.level.isEmptyBlock(mutableBlockPos.set(blockPos2).move(Direction.UP))) {
-					return new Vec3(blockPos2);
+				if (bl && this.mob.level.isEmptyBlock(blockPos2) && this.mob.level.isEmptyBlock(mutableBlockPos.setWithOffset(blockPos2, Direction.UP))) {
+					return Vec3.atBottomCenterOf(blockPos2);
 				}
 			}
 		}

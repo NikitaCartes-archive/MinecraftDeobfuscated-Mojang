@@ -171,7 +171,7 @@ public class Turtle extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setHomePos(new BlockPos(this));
+		this.setHomePos(this.blockPosition());
 		this.setTravelPos(BlockPos.ZERO);
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
@@ -302,7 +302,7 @@ public class Turtle extends Animal {
 	public void aiStep() {
 		super.aiStep();
 		if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0) {
-			BlockPos blockPos = new BlockPos(this);
+			BlockPos blockPos = this.blockPosition();
 			if (this.level.getBlockState(blockPos.below()).getBlock() == Blocks.SAND) {
 				this.level.levelEvent(2001, blockPos, Block.getId(Blocks.SAND.defaultBlockState()));
 			}
@@ -424,7 +424,7 @@ public class Turtle extends Animal {
 			}
 
 			if (this.turtle.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(blockPos);
+				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
 				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
 					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
@@ -500,7 +500,7 @@ public class Turtle extends Animal {
 		@Override
 		public void tick() {
 			super.tick();
-			BlockPos blockPos = new BlockPos(this.turtle);
+			BlockPos blockPos = this.turtle.blockPosition();
 			if (!this.turtle.isInWater() && this.isReachedTarget()) {
 				if (this.turtle.layEggCounter < 1) {
 					this.turtle.setLayingEgg(true);
@@ -731,7 +731,7 @@ public class Turtle extends Animal {
 		@Override
 		public void tick() {
 			if (this.turtle.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(this.turtle.getTravelPos());
+				Vec3 vec3 = Vec3.atBottomCenterOf(this.turtle.getTravelPos());
 				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
 					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);

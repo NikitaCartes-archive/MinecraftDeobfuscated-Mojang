@@ -2,7 +2,6 @@ package net.minecraft.world.entity.projectile;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -16,14 +15,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
-public abstract class AbstractHurtingProjectile extends Entity {
-	public LivingEntity owner;
-	private int life;
+public abstract class AbstractHurtingProjectile extends Projectile {
 	private int flightTime;
 	public double xPower;
 	public double yPower;
@@ -49,7 +44,7 @@ public abstract class AbstractHurtingProjectile extends Entity {
 		EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, double d, double e, double f, Level level
 	) {
 		this(entityType, level);
-		this.owner = livingEntity;
+		this.setOwner(livingEntity);
 		this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
 		this.reapplyPosition();
 		this.setDeltaMovement(Vec3.ZERO);
@@ -80,14 +75,15 @@ public abstract class AbstractHurtingProjectile extends Entity {
 
 	@Override
 	public void tick() {
-		if (this.level.isClientSide || (this.owner == null || !this.owner.removed) && this.level.hasChunkAt(new BlockPos(this))) {
+		Entity entity = this.getOwner();
+		if (this.level.isClientSide || (entity == null || !entity.removed) && this.level.hasChunkAt(this.blockPosition())) {
 			super.tick();
 			if (this.shouldBurn()) {
 				this.setSecondsOnFire(1);
 			}
 
 			this.flightTime++;
-			HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, this.flightTime >= 25, this.owner, ClipContext.Block.COLLIDER);
+			HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, this.flightTime >= 25, entity, ClipContext.Block.COLLIDER);
 			if (hitResult.getType() != HitResult.Type.MISS) {
 				this.onHit(hitResult);
 			}
@@ -127,25 +123,15 @@ public abstract class AbstractHurtingProjectile extends Entity {
 		return 0.95F;
 	}
 
-	protected void onHit(HitResult hitResult) {
-		HitResult.Type type = hitResult.getType();
-		if (type == HitResult.Type.BLOCK) {
-			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
-			BlockState blockState = this.level.getBlockState(blockHitResult.getBlockPos());
-			blockState.onProjectileHit(this.level, blockState, blockHitResult, this);
-		}
-	}
-
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
-		Vec3 vec3 = this.getDeltaMovement();
-		compoundTag.put("direction", this.newDoubleList(new double[]{vec3.x, vec3.y, vec3.z}));
+		super.addAdditionalSaveData(compoundTag);
 		compoundTag.put("power", this.newDoubleList(new double[]{this.xPower, this.yPower, this.zPower}));
-		compoundTag.putInt("life", this.life);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("power", 9)) {
 			ListTag listTag = compoundTag.getList("power", 6);
 			if (listTag.size() == 3) {
@@ -153,14 +139,6 @@ public abstract class AbstractHurtingProjectile extends Entity {
 				this.yPower = listTag.getDouble(1);
 				this.zPower = listTag.getDouble(2);
 			}
-		}
-
-		this.life = compoundTag.getInt("life");
-		if (compoundTag.contains("direction", 9) && compoundTag.getList("direction", 6).size() == 3) {
-			ListTag listTag = compoundTag.getList("direction", 6);
-			this.setDeltaMovement(listTag.getDouble(0), listTag.getDouble(1), listTag.getDouble(2));
-		} else {
-			this.remove();
 		}
 	}
 
@@ -180,16 +158,14 @@ public abstract class AbstractHurtingProjectile extends Entity {
 			return false;
 		} else {
 			this.markHurt();
-			if (damageSource.getEntity() != null) {
-				Vec3 vec3 = damageSource.getEntity().getLookAngle();
+			Entity entity = damageSource.getEntity();
+			if (entity != null) {
+				Vec3 vec3 = entity.getLookAngle();
 				this.setDeltaMovement(vec3);
 				this.xPower = vec3.x * 0.1;
 				this.yPower = vec3.y * 0.1;
 				this.zPower = vec3.z * 0.1;
-				if (damageSource.getEntity() instanceof LivingEntity) {
-					this.owner = (LivingEntity)damageSource.getEntity();
-				}
-
+				this.setOwner(entity);
 				return true;
 			} else {
 				return false;
@@ -204,7 +180,8 @@ public abstract class AbstractHurtingProjectile extends Entity {
 
 	@Override
 	public Packet<?> getAddEntityPacket() {
-		int i = this.owner == null ? 0 : this.owner.getId();
+		Entity entity = this.getOwner();
+		int i = entity == null ? 0 : entity.getId();
 		return new ClientboundAddEntityPacket(
 			this.getId(),
 			this.getUUID(),

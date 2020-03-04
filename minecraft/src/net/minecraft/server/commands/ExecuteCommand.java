@@ -106,29 +106,15 @@ public class ExecuteCommand {
 
 					return list;
 				})))
-				.then(
-					Commands.literal("at")
-						.then(
-							Commands.argument("targets", EntityArgument.entities())
-								.fork(
-									literalCommandNode,
-									commandContext -> {
-										List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
+				.then(Commands.literal("at").then(Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
+					List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
-										for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-											list.add(
-												commandContext.getSource()
-													.withLevel((ServerLevel)entity.level)
-													.withPosition(entity.getCommandSenderWorldPosition())
-													.withRotation(entity.getRotationVector())
-											);
-										}
+					for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
+						list.add(commandContext.getSource().withLevel((ServerLevel)entity.level).withPosition(entity.position()).withRotation(entity.getRotationVector()));
+					}
 
-										return list;
-									}
-								)
-						)
-				)
+					return list;
+				})))
 				.then(
 					Commands.literal("store")
 						.then(wrapStores(literalCommandNode, Commands.literal("result"), true))
@@ -147,7 +133,7 @@ public class ExecuteCommand {
 							List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
 							for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-								list.add(commandContext.getSource().withPosition(entity.getCommandSenderWorldPosition()));
+								list.add(commandContext.getSource().withPosition(entity.position()));
 							}
 
 							return list;
