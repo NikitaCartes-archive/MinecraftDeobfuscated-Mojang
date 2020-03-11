@@ -3,7 +3,6 @@ package net.minecraft.core;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -142,9 +141,6 @@ public abstract class Registry<T> implements IdMap<T> {
 	public abstract Optional<T> getOptional(@Nullable ResourceLocation resourceLocation);
 
 	public abstract Set<ResourceLocation> keySet();
-
-	@Nullable
-	public abstract T getRandom(Random random);
 
 	public Stream<T> stream() {
 		return StreamSupport.stream(this.spliterator(), false);

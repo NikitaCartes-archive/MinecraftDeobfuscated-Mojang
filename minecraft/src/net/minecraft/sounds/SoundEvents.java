@@ -735,6 +735,7 @@ public class SoundEvents {
 	public static final SoundEvent SOUL_SOIL_PLACE = register("block.soul_soil.place");
 	public static final SoundEvent SOUL_SOIL_HIT = register("block.soul_soil.hit");
 	public static final SoundEvent SOUL_SOIL_FALL = register("block.soul_soil.fall");
+	public static final SoundEvent SOUL_ESCAPE = register("particle.soul_escape");
 	public static final SoundEvent SLIME_DEATH_SMALL = register("entity.slime.death_small");
 	public static final SoundEvent SLIME_HURT_SMALL = register("entity.slime.hurt_small");
 	public static final SoundEvent SLIME_JUMP_SMALL = register("entity.slime.jump_small");
@@ -846,6 +847,7 @@ public class SoundEvents {
 	public static final SoundEvent VINDICATOR_CELEBRATE = register("entity.vindicator.celebrate");
 	public static final SoundEvent VINDICATOR_DEATH = register("entity.vindicator.death");
 	public static final SoundEvent VINDICATOR_HURT = register("entity.vindicator.hurt");
+	public static final SoundEvent VINE_STEP = register("block.vine.step");
 	public static final SoundEvent LILY_PAD_PLACE = register("block.lily_pad.place");
 	public static final SoundEvent WANDERING_TRADER_AMBIENT = register("entity.wandering_trader.ambient");
 	public static final SoundEvent WANDERING_TRADER_DEATH = register("entity.wandering_trader.death");

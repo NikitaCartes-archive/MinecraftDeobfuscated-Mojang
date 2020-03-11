@@ -42,6 +42,7 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -87,6 +88,11 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(IS_CHARGING_CROSSBOW, false);
+	}
+
+	@Override
+	public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeaponItem) {
+		return projectileWeaponItem == Items.CROSSBOW;
 	}
 
 	@Environment(EnvType.CLIENT)

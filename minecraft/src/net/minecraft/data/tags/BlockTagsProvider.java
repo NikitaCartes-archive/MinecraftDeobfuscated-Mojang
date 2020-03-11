@@ -453,6 +453,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.JIGSAW,
 				Blocks.MOVING_PISTON,
 				Blocks.OBSIDIAN,
+				Blocks.CRYING_OBSIDIAN,
 				Blocks.END_STONE,
 				Blocks.IRON_BARS
 			);
@@ -501,11 +502,14 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.NYLIUM).add(Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM);
 		this.tag(BlockTags.WART_BLOCKS).add(Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK);
 		this.tag(BlockTags.BEACON_BASE_BLOCKS).add(Blocks.NETHERITE_BLOCK, Blocks.EMERALD_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK, Blocks.IRON_BLOCK);
+		this.tag(BlockTags.SOUL_SPEED_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.WALL_POST_OVERRIDE)
 			.add(Blocks.LANTERN, Blocks.SOUL_FIRE_LANTERN, Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE);
-		this.tag(BlockTags.CLIMBABLE).add(Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT);
+		this.tag(BlockTags.CLIMBABLE)
+			.add(Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
 		this.tag(BlockTags.PIGLIN_REPELLENTS).add(Blocks.SOUL_FIRE).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.SOUL_FIRE_WALL_TORCH);
-		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS);
+		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS);
+		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE);
 	}
 
 	@Override

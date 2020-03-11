@@ -13,7 +13,8 @@ public enum DataFixTypes {
 	STATS(References.STATS),
 	SAVED_DATA(References.SAVED_DATA),
 	ADVANCEMENTS(References.ADVANCEMENTS),
-	POI_CHUNK(References.POI_CHUNK);
+	POI_CHUNK(References.POI_CHUNK),
+	CHUNK_GENERATOR_SETTINGS(References.CHUNK_GENERATOR_SETTINGS);
 
 	private final TypeReference type;
 

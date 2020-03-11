@@ -33,6 +33,7 @@ public class BlockStateProperties {
 	public static final BooleanProperty TRIGGERED = BooleanProperty.create("triggered");
 	public static final BooleanProperty UNSTABLE = BooleanProperty.create("unstable");
 	public static final BooleanProperty WATERLOGGED = BooleanProperty.create("waterlogged");
+	public static final BooleanProperty VINE_END = BooleanProperty.create("vine_end");
 	public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create("axis", Direction.Axis.class, Direction.Axis.X, Direction.Axis.Z);
 	public static final EnumProperty<Direction.Axis> AXIS = EnumProperty.create("axis", Direction.Axis.class);
 	public static final BooleanProperty UP = BooleanProperty.create("up");

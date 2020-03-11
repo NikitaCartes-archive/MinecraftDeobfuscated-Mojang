@@ -203,8 +203,10 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SOUL_FIRE_LANTERN, renderType2);
 		hashMap.put(Blocks.CAMPFIRE, renderType2);
 		hashMap.put(Blocks.SWEET_BERRY_BUSH, renderType2);
-		hashMap.put(Blocks.WEEPING_VINES_PLANT, renderType2);
 		hashMap.put(Blocks.WEEPING_VINES, renderType2);
+		hashMap.put(Blocks.WEEPING_VINES_PLANT, renderType2);
+		hashMap.put(Blocks.TWISTING_VINES, renderType2);
+		hashMap.put(Blocks.TWISTING_VINES_PLANT, renderType2);
 		hashMap.put(Blocks.NETHER_SPROUTS, renderType2);
 		hashMap.put(Blocks.CRIMSON_FUNGUS, renderType2);
 		hashMap.put(Blocks.WARPED_FUNGUS, renderType2);

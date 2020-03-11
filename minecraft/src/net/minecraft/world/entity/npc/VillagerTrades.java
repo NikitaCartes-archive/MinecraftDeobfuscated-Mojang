@@ -781,7 +781,8 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, Random random) {
-			Enchantment enchantment = Registry.ENCHANTMENT.getRandom(random);
+			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT.stream().filter(Enchantment::isTradeable).collect(Collectors.toList());
+			Enchantment enchantment = (Enchantment)list.get(random.nextInt(list.size()));
 			int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
 			ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i));
 			int j = 2 + random.nextInt(5 + i * 10) + 3 * i;

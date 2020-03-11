@@ -237,30 +237,32 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 	public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
 		Block block = blockState.getBlock();
-		if (block == Blocks.OBSIDIAN) {
-			return false;
-		} else if (!level.getWorldBorder().isWithinBounds(blockPos)) {
-			return false;
-		} else if (blockPos.getY() >= 0 && (direction != Direction.DOWN || blockPos.getY() != 0)) {
-			if (blockPos.getY() <= level.getMaxBuildHeight() - 1 && (direction != Direction.UP || blockPos.getY() != level.getMaxBuildHeight() - 1)) {
-				if (block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
-					if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
+		if (block != Blocks.OBSIDIAN && block != Blocks.CRYING_OBSIDIAN) {
+			if (!level.getWorldBorder().isWithinBounds(blockPos)) {
+				return false;
+			} else if (blockPos.getY() >= 0 && (direction != Direction.DOWN || blockPos.getY() != 0)) {
+				if (blockPos.getY() <= level.getMaxBuildHeight() - 1 && (direction != Direction.UP || blockPos.getY() != level.getMaxBuildHeight() - 1)) {
+					if (block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
+						if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
+							return false;
+						}
+
+						switch (blockState.getPistonPushReaction()) {
+							case BLOCK:
+								return false;
+							case DESTROY:
+								return bl;
+							case PUSH_ONLY:
+								return direction == direction2;
+						}
+					} else if ((Boolean)blockState.getValue(EXTENDED)) {
 						return false;
 					}
 
-					switch (blockState.getPistonPushReaction()) {
-						case BLOCK:
-							return false;
-						case DESTROY:
-							return bl;
-						case PUSH_ONLY:
-							return direction == direction2;
-					}
-				} else if ((Boolean)blockState.getValue(EXTENDED)) {
+					return !block.isEntityBlock();
+				} else {
 					return false;
 				}
-
-				return !block.isEntityBlock();
 			} else {
 				return false;
 			}

@@ -8,7 +8,6 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.BlockFinder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -55,6 +54,6 @@ public class HoglinSpecificSensor extends Sensor<Hoglin> {
 	}
 
 	private Optional<BlockPos> findNearestRepellent(ServerLevel serverLevel, Hoglin hoglin) {
-		return BlockFinder.findClosestMatchingBlockPos(hoglin.blockPosition(), 8, 4, blockPos -> serverLevel.getBlockState(blockPos).is(BlockTags.HOGLIN_REPELLENTS));
+		return BlockPos.findClosestMatch(hoglin.blockPosition(), 8, 4, blockPos -> serverLevel.getBlockState(blockPos).is(BlockTags.HOGLIN_REPELLENTS));
 	}
 }

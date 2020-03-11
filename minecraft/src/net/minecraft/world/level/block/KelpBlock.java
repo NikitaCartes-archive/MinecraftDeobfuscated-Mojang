@@ -11,19 +11,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockContainer {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 9.0, 16.0);
 
 	protected KelpBlock(Block.Properties properties) {
-		super(properties, Direction.UP, true, 0.14);
-	}
-
-	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return SHAPE;
+		super(properties, Direction.UP, SHAPE, true, 0.14);
 	}
 
 	@Override

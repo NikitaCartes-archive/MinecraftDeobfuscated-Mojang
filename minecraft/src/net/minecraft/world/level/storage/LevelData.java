@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import com.google.common.hash.Hashing;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,12 +25,14 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
 
@@ -41,8 +42,7 @@ public class LevelData {
 	private boolean snapshot;
 	public static final Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 	private long seed;
-	private LevelType generator = LevelType.NORMAL;
-	private CompoundTag generatorOptions = new CompoundTag();
+	private ChunkGeneratorProvider generatorProvider = LevelType.NORMAL.getDefaultProvider();
 	@Nullable
 	private String legacyCustomOptions;
 	private int xSpawn;
@@ -95,7 +95,6 @@ public class LevelData {
 	protected LevelData() {
 		this.fixerUpper = null;
 		this.playerDataVersion = SharedConstants.getCurrentVersion().getWorldVersion();
-		this.setGeneratorOptions(new CompoundTag());
 	}
 
 	public LevelData(CompoundTag compoundTag, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag2) {
@@ -117,21 +116,24 @@ public class LevelData {
 		this.seed = compoundTag.getLong("RandomSeed");
 		if (compoundTag.contains("generatorName", 8)) {
 			String string = compoundTag.getString("generatorName");
-			this.generator = LevelType.getLevelType(string);
-			if (this.generator == null) {
-				this.generator = LevelType.NORMAL;
-			} else if (this.generator == LevelType.CUSTOMIZED) {
+			LevelType levelType = LevelType.getLevelType(string);
+			if (levelType == null) {
+				levelType = LevelType.NORMAL;
+			} else if (levelType == LevelType.CUSTOMIZED) {
 				this.legacyCustomOptions = compoundTag.getString("generatorOptions");
-			} else if (this.generator.hasReplacement()) {
+			} else if (levelType.hasReplacement()) {
 				int k = 0;
 				if (compoundTag.contains("generatorVersion", 99)) {
 					k = compoundTag.getInt("generatorVersion");
 				}
 
-				this.generator = this.generator.getReplacementForVersion(k);
+				levelType = levelType.getReplacementForVersion(k);
 			}
 
-			this.setGeneratorOptions(compoundTag.getCompound("generatorOptions"));
+			CompoundTag compoundTag4 = compoundTag.getCompound("generatorOptions");
+			Dynamic<?> dynamic = new Dynamic<>(NbtOps.INSTANCE, compoundTag4);
+			Dynamic<?> dynamic2 = datafixGeneratorOptions(levelType, dynamic, i, dataFixer);
+			this.generatorProvider = levelType.createProvider(dynamic2);
 		}
 
 		this.gameType = GameType.byId(compoundTag.getInt("GameType"));
@@ -242,14 +244,14 @@ public class LevelData {
 			CompoundTag compoundTag3 = compoundTag.getCompound("DataPacks");
 			ListTag listTag2 = compoundTag3.getList("Disabled", 8);
 
-			for (int l = 0; l < listTag2.size(); l++) {
-				this.disabledDataPacks.add(listTag2.getString(l));
+			for (int k = 0; k < listTag2.size(); k++) {
+				this.disabledDataPacks.add(listTag2.getString(k));
 			}
 
 			ListTag listTag3 = compoundTag3.getList("Enabled", 8);
 
-			for (int m = 0; m < listTag3.size(); m++) {
-				this.enabledDataPacks.add(listTag3.getString(m));
+			for (int l = 0; l < listTag3.size(); l++) {
+				this.enabledDataPacks.add(listTag3.getString(l));
 			}
 		}
 
@@ -274,6 +276,12 @@ public class LevelData {
 		}
 	}
 
+	private static <T> Dynamic<T> datafixGeneratorOptions(LevelType levelType, Dynamic<T> dynamic, int i, DataFixer dataFixer) {
+		int j = Math.max(i, 2501);
+		Dynamic<T> dynamic2 = dynamic.merge(dynamic.createString("levelType"), dynamic.createString(levelType.getSerialization()));
+		return dataFixer.update(References.CHUNK_GENERATOR_SETTINGS, dynamic2, j, SharedConstants.getCurrentVersion().getWorldVersion()).remove("levelType");
+	}
+
 	public LevelData(LevelSettings levelSettings, String string) {
 		this.fixerUpper = null;
 		this.playerDataVersion = SharedConstants.getCurrentVersion().getWorldVersion();
@@ -288,8 +296,7 @@ public class LevelData {
 		this.gameType = levelSettings.getGameType();
 		this.generateMapFeatures = levelSettings.isGenerateMapFeatures();
 		this.hardcore = levelSettings.isHardcore();
-		this.generator = levelSettings.getLevelType();
-		this.setGeneratorOptions((CompoundTag)Dynamic.convert(JsonOps.INSTANCE, NbtOps.INSTANCE, levelSettings.getLevelTypeOptions()));
+		this.generatorProvider = levelSettings.getGeneratorProvider();
 		this.allowCommands = levelSettings.getAllowCommands();
 	}
 
@@ -316,10 +323,11 @@ public class LevelData {
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
 		compoundTag.putLong("RandomSeed", this.seed);
-		compoundTag.putString("generatorName", this.generator.getSerialization());
-		compoundTag.putInt("generatorVersion", this.generator.getVersion());
-		if (!this.generatorOptions.isEmpty()) {
-			compoundTag.put("generatorOptions", this.generatorOptions);
+		compoundTag.putString("generatorName", this.generatorProvider.getType().getSerialization());
+		compoundTag.putInt("generatorVersion", this.generatorProvider.getType().getVersion());
+		CompoundTag compoundTag4 = (CompoundTag)this.generatorProvider.getSettings().convert(NbtOps.INSTANCE).getValue();
+		if (!compoundTag4.isEmpty()) {
+			compoundTag.put("generatorOptions", compoundTag4);
 		}
 
 		if (this.legacyCustomOptions != null) {
@@ -360,33 +368,33 @@ public class LevelData {
 
 		compoundTag.putBoolean("DifficultyLocked", this.difficultyLocked);
 		compoundTag.put("GameRules", this.gameRules.createTag());
-		CompoundTag compoundTag4 = new CompoundTag();
+		CompoundTag compoundTag5 = new CompoundTag();
 
 		for (Entry<DimensionType, CompoundTag> entry : this.dimensionData.entrySet()) {
-			compoundTag4.put(String.valueOf(((DimensionType)entry.getKey()).getId()), (Tag)entry.getValue());
+			compoundTag5.put(String.valueOf(((DimensionType)entry.getKey()).getId()), (Tag)entry.getValue());
 		}
 
-		compoundTag.put("DimensionData", compoundTag4);
+		compoundTag.put("DimensionData", compoundTag5);
 		if (compoundTag2 != null) {
 			compoundTag.put("Player", compoundTag2);
 		}
 
-		CompoundTag compoundTag5 = new CompoundTag();
+		CompoundTag compoundTag6 = new CompoundTag();
 		ListTag listTag2 = new ListTag();
 
 		for (String string : this.enabledDataPacks) {
 			listTag2.add(StringTag.valueOf(string));
 		}
 
-		compoundTag5.put("Enabled", listTag2);
+		compoundTag6.put("Enabled", listTag2);
 		ListTag listTag3 = new ListTag();
 
 		for (String string2 : this.disabledDataPacks) {
 			listTag3.add(StringTag.valueOf(string2));
 		}
 
-		compoundTag5.put("Disabled", listTag3);
-		compoundTag.put("DataPacks", compoundTag5);
+		compoundTag6.put("Disabled", listTag3);
+		compoundTag.put("DataPacks", compoundTag6);
 		if (this.customBossEvents != null) {
 			compoundTag.put("CustomBossEvents", this.customBossEvents);
 		}
@@ -561,19 +569,15 @@ public class LevelData {
 	}
 
 	public LevelType getGeneratorType() {
-		return this.generator;
+		return this.generatorProvider.getType();
 	}
 
-	public void setGenerator(LevelType levelType) {
-		this.generator = levelType;
+	public ChunkGeneratorProvider getGeneratorProvider() {
+		return this.generatorProvider;
 	}
 
-	public CompoundTag getGeneratorOptions() {
-		return this.generatorOptions;
-	}
-
-	public void setGeneratorOptions(CompoundTag compoundTag) {
-		this.generatorOptions = compoundTag;
+	public void setGeneratorProvider(ChunkGeneratorProvider chunkGeneratorProvider) {
+		this.generatorProvider = chunkGeneratorProvider;
 	}
 
 	public boolean getAllowCommands() {
@@ -694,10 +698,14 @@ public class LevelData {
 		crashReportCategory.setDetail(
 			"Level generator",
 			(CrashReportDetail<String>)(() -> String.format(
-					"ID %02d - %s, ver %d. Features enabled: %b", this.generator.getId(), this.generator.getName(), this.generator.getVersion(), this.generateMapFeatures
+					"ID %02d - %s, ver %d. Features enabled: %b",
+					this.generatorProvider.getType().getId(),
+					this.generatorProvider.getType().getName(),
+					this.generatorProvider.getType().getVersion(),
+					this.generateMapFeatures
 				))
 		);
-		crashReportCategory.setDetail("Level generator options", (CrashReportDetail<String>)(() -> this.generatorOptions.toString()));
+		crashReportCategory.setDetail("Level generator options", (CrashReportDetail<String>)(() -> this.generatorProvider.getSettings().toString()));
 		crashReportCategory.setDetail(
 			"Level spawn location", (CrashReportDetail<String>)(() -> CrashReportCategory.formatLocation(this.xSpawn, this.ySpawn, this.zSpawn))
 		);

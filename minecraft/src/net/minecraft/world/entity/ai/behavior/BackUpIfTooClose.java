@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -34,8 +35,9 @@ public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
 	}
 
 	protected void start(ServerLevel serverLevel, E mob, long l) {
-		mob.getMoveControl().strafe(-this.strafeSpeed, 0.0F);
 		mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(this.getTarget(mob)));
+		mob.getMoveControl().strafe(-this.strafeSpeed, 0.0F);
+		mob.yRot = Mth.rotateIfNecessary(mob.yRot, mob.yHeadRot, 0.0F);
 	}
 
 	private boolean isTargetVisible(E mob) {

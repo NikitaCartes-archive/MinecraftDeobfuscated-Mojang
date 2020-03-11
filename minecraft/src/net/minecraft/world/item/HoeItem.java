@@ -17,7 +17,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HoeItem extends DiggerItem {
-	private static final Set<Block> DIGGABLES = ImmutableSet.of(Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK, Blocks.HAY_BLOCK);
+	private static final Set<Block> DIGGABLES = ImmutableSet.of(
+		Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK, Blocks.HAY_BLOCK, Blocks.DRIED_KELP_BLOCK, Blocks.TARGET, Blocks.SHROOMLIGHT
+	);
 	protected static final Map<Block, BlockState> TILLABLES = Maps.<Block, BlockState>newHashMap(
 		ImmutableMap.of(
 			Blocks.GRASS_BLOCK,

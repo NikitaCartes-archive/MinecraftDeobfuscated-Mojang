@@ -99,6 +99,9 @@ public class SoundType {
 	public static final SoundType HARD_CROP = new SoundType(
 		1.0F, 1.0F, SoundEvents.WOOD_BREAK, SoundEvents.WOOD_STEP, SoundEvents.CROP_PLANTED, SoundEvents.WOOD_HIT, SoundEvents.WOOD_FALL
 	);
+	public static final SoundType VINE = new SoundType(
+		1.0F, 1.0F, SoundEvents.GRASS_BREAK, SoundEvents.VINE_STEP, SoundEvents.GRASS_PLACE, SoundEvents.GRASS_HIT, SoundEvents.GRASS_FALL
+	);
 	public static final SoundType NETHER_WART = new SoundType(
 		1.0F, 1.0F, SoundEvents.NETHER_WART_BREAK, SoundEvents.STONE_STEP, SoundEvents.NETHER_WART_PLANTED, SoundEvents.STONE_HIT, SoundEvents.STONE_FALL
 	);
@@ -129,6 +132,15 @@ public class SoundType {
 	public static final SoundType WEEPING_VINES = new SoundType(
 		1.0F,
 		1.0F,
+		SoundEvents.WEEPING_VINES_BREAK,
+		SoundEvents.WEEPING_VINES_STEP,
+		SoundEvents.WEEPING_VINES_PLACE,
+		SoundEvents.WEEPING_VINES_HIT,
+		SoundEvents.WEEPING_VINES_FALL
+	);
+	public static final SoundType TWISTING_VINES = new SoundType(
+		1.0F,
+		0.5F,
 		SoundEvents.WEEPING_VINES_BREAK,
 		SoundEvents.WEEPING_VINES_STEP,
 		SoundEvents.WEEPING_VINES_PLACE,

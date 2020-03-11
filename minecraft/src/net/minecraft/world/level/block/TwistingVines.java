@@ -4,16 +4,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class WeepingVines extends GrowingPlantHeadBlock {
-	protected static final VoxelShape SHAPE = Block.box(4.0, 9.0, 4.0, 12.0, 16.0, 12.0);
+public class TwistingVines extends GrowingPlantHeadBlock {
+	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0);
 
-	public WeepingVines(Block.Properties properties) {
-		super(properties, Direction.DOWN, SHAPE, false, 0.1);
+	public TwistingVines(Block.Properties properties) {
+		super(properties, Direction.UP, SHAPE, false, 0.1);
 	}
 
 	@Override
 	protected Block getBodyBlock() {
-		return Blocks.WEEPING_VINES_PLANT;
+		return Blocks.TWISTING_VINES_PLANT;
 	}
 
 	@Override

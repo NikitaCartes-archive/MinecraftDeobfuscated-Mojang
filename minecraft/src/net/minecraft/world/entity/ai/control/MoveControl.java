@@ -70,18 +70,9 @@ public class MoveControl {
 			float l = Mth.cos(this.mob.yRot * (float) (Math.PI / 180.0));
 			float m = h * l - i * k;
 			float n = i * l + h * k;
-			PathNavigation pathNavigation = this.mob.getNavigation();
-			if (pathNavigation != null) {
-				NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
-				if (nodeEvaluator != null
-					&& nodeEvaluator.getBlockPathType(
-							this.mob.level, Mth.floor(this.mob.getX() + (double)m), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)n)
-						)
-						!= BlockPathTypes.WALKABLE) {
-					this.strafeForwards = 1.0F;
-					this.strafeRight = 0.0F;
-					g = f;
-				}
+			if (!this.isWalkable(m, n)) {
+				this.strafeForwards = 1.0F;
+				this.strafeRight = 0.0F;
 			}
 
 			this.mob.setSpeed(g);
@@ -122,6 +113,22 @@ public class MoveControl {
 		} else {
 			this.mob.setZza(0.0F);
 		}
+	}
+
+	private boolean isWalkable(float f, float g) {
+		PathNavigation pathNavigation = this.mob.getNavigation();
+		if (pathNavigation != null) {
+			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
+			if (nodeEvaluator != null
+				&& nodeEvaluator.getBlockPathType(
+						this.mob.level, Mth.floor(this.mob.getX() + (double)f), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)g)
+					)
+					!= BlockPathTypes.WALKABLE) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	protected float rotlerp(float f, float g, float h) {

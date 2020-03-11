@@ -45,7 +45,8 @@ public class BlockTags {
 	public static final Tag<Block> FENCES = bind("fences");
 	public static final Tag<Block> TALL_FLOWERS = bind("tall_flowers");
 	public static final Tag<Block> FLOWERS = bind("flowers");
-	public static final Tag<Block> SHULKER_BOXES = bind("shulker_boxes");
+	public static final Tag<Block> PIGLIN_REPELLENTS = bind("piglin_repellents");
+	public static final Tag<Block> GOLD_ORES = bind("gold_ores");
 	public static final Tag<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag<Block> ICE = bind("ice");
@@ -71,9 +72,10 @@ public class BlockTags {
 	public static final Tag<Block> NYLIUM = bind("nylium");
 	public static final Tag<Block> WART_BLOCKS = bind("wart_blocks");
 	public static final Tag<Block> BEACON_BASE_BLOCKS = bind("beacon_base_blocks");
+	public static final Tag<Block> SOUL_SPEED_BLOCKS = bind("soul_speed_blocks");
 	public static final Tag<Block> WALL_POST_OVERRIDE = bind("wall_post_override");
 	public static final Tag<Block> CLIMBABLE = bind("climbable");
-	public static final Tag<Block> PIGLIN_REPELLENTS = bind("piglin_repellents");
+	public static final Tag<Block> SHULKER_BOXES = bind("shulker_boxes");
 	public static final Tag<Block> HOGLIN_REPELLENTS = bind("hoglin_repellents");
 
 	public static void reset(TagCollection<Block> tagCollection) {

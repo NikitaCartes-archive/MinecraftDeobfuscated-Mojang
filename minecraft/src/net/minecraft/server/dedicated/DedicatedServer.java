@@ -8,6 +8,8 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.JsonOps;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +59,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -175,9 +178,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 		try {
 			this.getConnection().startTcpServerListener(inetAddress, this.getPort());
-		} catch (IOException var17) {
+		} catch (IOException var18) {
 			LOGGER.warn("**** FAILED TO BIND TO PORT!");
-			LOGGER.warn("The exception was: {}", var17.toString());
+			LOGGER.warn("The exception was: {}", var18.toString());
 			LOGGER.warn("Perhaps a server is already running on that port?");
 			return false;
 		}
@@ -209,7 +212,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 					if (n != 0L) {
 						m = n;
 					}
-				} catch (NumberFormatException var16) {
+				} catch (NumberFormatException var17) {
 					m = (long)string.hashCode();
 				}
 			}
@@ -220,14 +223,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 			SkullBlockEntity.setSessionService(this.getSessionService());
 			GameProfileCache.setUsesAuthentication(this.usesAuthentication());
 			LOGGER.info("Preparing level \"{}\"", this.getLevelIdName());
-			JsonObject jsonObject = new JsonObject();
-			if (levelType == LevelType.FLAT) {
-				jsonObject.addProperty("flat_world_options", string2);
-			} else if (!string2.isEmpty()) {
-				jsonObject = GsonHelper.parse(string2);
-			}
-
-			this.loadLevel(this.getLevelIdName(), this.getLevelIdName(), m, levelType, jsonObject);
+			JsonObject jsonObject = !string2.isEmpty() ? GsonHelper.parse(string2) : new JsonObject();
+			ChunkGeneratorProvider chunkGeneratorProvider = levelType.createProvider(new Dynamic<>(JsonOps.INSTANCE, jsonObject));
+			this.loadLevel(this.getLevelIdName(), this.getLevelIdName(), m, chunkGeneratorProvider);
 			long o = Util.getNanos() - l;
 			String string3 = String.format(Locale.ROOT, "%.3fs", (double)o / 1.0E9);
 			LOGGER.info("Done ({})! For help, type \"help\"", string3);

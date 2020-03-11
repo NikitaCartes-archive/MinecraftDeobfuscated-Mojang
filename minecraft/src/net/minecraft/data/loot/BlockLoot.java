@@ -499,6 +499,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.RED_SAND);
 		this.dropSelf(Blocks.GOLD_ORE);
 		this.dropSelf(Blocks.IRON_ORE);
+		this.dropSelf(Blocks.NETHER_GOLD_ORE);
 		this.dropSelf(Blocks.OAK_LOG);
 		this.dropSelf(Blocks.SPRUCE_LOG);
 		this.dropSelf(Blocks.BIRCH_LOG);
@@ -840,7 +841,6 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.CRIMSON_FUNGUS);
 		this.dropSelf(Blocks.SHROOMLIGHT);
 		this.dropSelf(Blocks.CRIMSON_ROOTS);
-		this.dropSelf(Blocks.WEEPING_VINES);
 		this.dropSelf(Blocks.CRIMSON_PLANKS);
 		this.dropSelf(Blocks.WARPED_PLANKS);
 		this.dropSelf(Blocks.WARPED_PRESSURE_PLATE);
@@ -864,7 +864,6 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
 		this.dropOther(Blocks.KELP_PLANT, Blocks.KELP);
 		this.dropOther(Blocks.BAMBOO_SAPLING, Blocks.BAMBOO);
-		this.dropOther(Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES);
 		this.add(Blocks.STONE, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.COBBLESTONE));
 		this.add(Blocks.GRASS_BLOCK, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DIRT));
 		this.add(Blocks.PODZOL, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DIRT));
@@ -1551,9 +1550,13 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.otherWhenSilkTouch(Blocks.INFESTED_MOSSY_STONE_BRICKS, Blocks.MOSSY_STONE_BRICKS);
 		this.otherWhenSilkTouch(Blocks.INFESTED_CRACKED_STONE_BRICKS, Blocks.CRACKED_STONE_BRICKS);
 		this.otherWhenSilkTouch(Blocks.INFESTED_CHISELED_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS);
+		this.addNetherVinesDropTable(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT);
+		this.addNetherVinesDropTable(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
 		this.add(Blocks.CAKE, noDrop());
 		this.add(Blocks.FROSTED_ICE, noDrop());
 		this.add(Blocks.SPAWNER, noDrop());
+		this.add(Blocks.FIRE, noDrop());
+		this.add(Blocks.SOUL_FIRE, noDrop());
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 
 		for (Block block : Registry.BLOCK) {
@@ -1571,6 +1574,21 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		if (!this.map.isEmpty()) {
 			throw new IllegalStateException("Created block loot tables for non-blocks: " + this.map.keySet());
 		}
+	}
+
+	private void addNetherVinesDropTable(Block block, Block block2) {
+		LootTable.Builder builder = LootTable.lootTable()
+			.withPool(
+				LootPool.lootPool()
+					.setRolls(ConstantIntValue.exactly(1))
+					.add(
+						LootItem.lootTableItem(block)
+							.when(LootItemRandomChanceCondition.randomChance(0.33333334F))
+							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE, 2))
+					)
+			);
+		this.add(block, builder);
+		this.add(block2, builder);
 	}
 
 	public static LootTable.Builder createDoorTable(Block block) {

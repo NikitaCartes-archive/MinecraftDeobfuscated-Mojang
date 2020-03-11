@@ -167,6 +167,12 @@ public abstract class AbstractMinecart extends Entity {
 		}
 	}
 
+	@Override
+	protected float getBlockSpeedFactor() {
+		BlockState blockState = this.level.getBlockState(this.blockPosition());
+		return blockState.is(BlockTags.RAILS) ? 1.0F : super.getBlockSpeedFactor();
+	}
+
 	public void destroy(DamageSource damageSource) {
 		this.remove();
 		if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

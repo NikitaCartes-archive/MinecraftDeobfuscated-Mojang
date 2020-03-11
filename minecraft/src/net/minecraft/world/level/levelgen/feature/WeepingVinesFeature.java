@@ -9,7 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.WeepingVines;
+import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -98,16 +98,14 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 	public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
 		for (int l = 0; l <= i; l++) {
 			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
-				if (l == i) {
-					levelAccessor.setBlock(mutableBlockPos, Blocks.WEEPING_VINES.defaultBlockState().setValue(WeepingVines.AGE, Integer.valueOf(Mth.nextInt(random, j, k))), 2);
-				} else {
-					levelAccessor.setBlock(mutableBlockPos, Blocks.WEEPING_VINES_PLANT.defaultBlockState(), 2);
+				if (l == i || !levelAccessor.isEmptyBlock(mutableBlockPos.below())) {
+					levelAccessor.setBlock(
+						mutableBlockPos, Blocks.WEEPING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Integer.valueOf(Mth.nextInt(random, j, k))), 2
+					);
+					break;
 				}
-			} else if (levelAccessor.getBlockState(mutableBlockPos.above()).getBlock() == Blocks.WEEPING_VINES_PLANT) {
-				levelAccessor.setBlock(
-					mutableBlockPos.above(), Blocks.WEEPING_VINES.defaultBlockState().setValue(WeepingVines.AGE, Integer.valueOf(Mth.nextInt(random, j, k))), 2
-				);
-				break;
+
+				levelAccessor.setBlock(mutableBlockPos, Blocks.WEEPING_VINES_PLANT.defaultBlockState(), 2);
 			}
 
 			mutableBlockPos.move(Direction.DOWN);

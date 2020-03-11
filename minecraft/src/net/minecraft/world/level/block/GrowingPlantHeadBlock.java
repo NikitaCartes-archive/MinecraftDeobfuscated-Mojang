@@ -4,19 +4,22 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock {
+public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements BonemealableBlock {
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_25;
 	private final double growPerTickProbability;
 
-	protected GrowingPlantHeadBlock(Block.Properties properties, Direction direction, boolean bl, double d) {
-		super(properties, direction, bl);
+	protected GrowingPlantHeadBlock(Block.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl, double d) {
+		super(properties, direction, voxelShape, bl);
 		this.growPerTickProbability = d;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
@@ -61,6 +64,28 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(AGE);
+	}
+
+	@Override
+	public boolean isValidBonemealTarget(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, boolean bl) {
+		return this.canGrowInto(blockGetter.getBlockState(blockPos.relative(this.growthDirection)));
+	}
+
+	@Override
+	public boolean isBonemealSuccess(Level level, Random random, BlockPos blockPos, BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
+		BlockPos blockPos2 = blockPos.relative(this.growthDirection);
+		int i = Math.min((Integer)blockState.getValue(AGE) + 1, 25);
+
+		for (double d = 1.0; this.canGrowInto(serverLevel.getBlockState(blockPos2)) && random.nextDouble() < d; d *= 0.94) {
+			serverLevel.setBlockAndUpdate(blockPos2, blockState.setValue(AGE, Integer.valueOf(i)));
+			blockPos2 = blockPos2.relative(this.growthDirection);
+			i = Math.min(i + 1, 25);
+		}
 	}
 
 	protected abstract boolean canGrowInto(BlockState blockState);

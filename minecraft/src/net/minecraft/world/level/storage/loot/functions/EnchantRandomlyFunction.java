@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -12,6 +13,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -71,6 +73,24 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 
 	public static LootItemConditionalFunction.Builder<?> randomApplicableEnchantment() {
 		return simpleBuilder(lootItemConditions -> new EnchantRandomlyFunction(lootItemConditions, ImmutableList.<Enchantment>of()));
+	}
+
+	public static class Builder extends LootItemConditionalFunction.Builder<EnchantRandomlyFunction.Builder> {
+		private final Set<Enchantment> enchantments = Sets.<Enchantment>newHashSet();
+
+		protected EnchantRandomlyFunction.Builder getThis() {
+			return this;
+		}
+
+		public EnchantRandomlyFunction.Builder withEnchantment(Enchantment enchantment) {
+			this.enchantments.add(enchantment);
+			return this;
+		}
+
+		@Override
+		public LootItemFunction build() {
+			return new EnchantRandomlyFunction(this.getConditions(), this.enchantments);
+		}
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<EnchantRandomlyFunction> {

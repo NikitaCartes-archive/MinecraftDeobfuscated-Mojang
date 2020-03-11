@@ -2,16 +2,19 @@ package net.minecraft.world.level.biome;
 
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.levelgen.OverworldGeneratorSettings;
-import net.minecraft.world.level.storage.LevelData;
 
 public class OverworldBiomeSourceSettings implements BiomeSourceSettings {
 	private final long seed;
-	private final LevelType generatorType;
+	private LevelType generatorType = LevelType.NORMAL;
 	private OverworldGeneratorSettings generatorSettings = new OverworldGeneratorSettings();
 
-	public OverworldBiomeSourceSettings(LevelData levelData) {
-		this.seed = levelData.getSeed();
-		this.generatorType = levelData.getGeneratorType();
+	public OverworldBiomeSourceSettings(long l) {
+		this.seed = l;
+	}
+
+	public OverworldBiomeSourceSettings setLevelType(LevelType levelType) {
+		this.generatorType = levelType;
+		return this;
 	}
 
 	public OverworldBiomeSourceSettings setGeneratorSettings(OverworldGeneratorSettings overworldGeneratorSettings) {

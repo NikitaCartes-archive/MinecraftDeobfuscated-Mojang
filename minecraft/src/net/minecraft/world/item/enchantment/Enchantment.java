@@ -131,6 +131,14 @@ public abstract class Enchantment {
 		return false;
 	}
 
+	public boolean isTradeable() {
+		return true;
+	}
+
+	public boolean isDiscoverable() {
+		return true;
+	}
+
 	public static enum Rarity {
 		COMMON(10),
 		UNCOMMON(5),

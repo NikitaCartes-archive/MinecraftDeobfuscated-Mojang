@@ -6,12 +6,14 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.ConstantIntValue;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
 
@@ -24,6 +26,8 @@ public class PiglinBarterLoot implements Consumer<BiConsumer<ResourceLocation, L
 					LootPool.lootPool()
 						.setRolls(ConstantIntValue.exactly(1))
 						.add(LootItem.lootTableItem(Items.NETHERITE_HOE).setWeight(1))
+						.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(1).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED)))
+						.add(LootItem.lootTableItem(Items.IRON_BOOTS).setWeight(5).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED)))
 						.add(
 							LootItem.lootTableItem(Items.POTION)
 								.setWeight(10)

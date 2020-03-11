@@ -72,7 +72,7 @@ public class SummonCommand {
 
 	private static int spawnEntity(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation, Vec3 vec3, CompoundTag compoundTag, boolean bl) throws CommandSyntaxException {
 		BlockPos blockPos = new BlockPos(vec3);
-		if (!Level.isInWorldBoundsHorizontal(blockPos)) {
+		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw INVALID_POSITION.create();
 		} else {
 			CompoundTag compoundTag2 = compoundTag.copy();

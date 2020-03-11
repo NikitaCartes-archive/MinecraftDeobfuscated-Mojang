@@ -108,6 +108,7 @@ public class Blocks {
 	public static final Block GOLD_ORE = register("gold_ore", new OreBlock(Block.Properties.of(Material.STONE).strength(3.0F, 3.0F)));
 	public static final Block IRON_ORE = register("iron_ore", new OreBlock(Block.Properties.of(Material.STONE).strength(3.0F, 3.0F)));
 	public static final Block COAL_ORE = register("coal_ore", new OreBlock(Block.Properties.of(Material.STONE).strength(3.0F, 3.0F)));
+	public static final Block NETHER_GOLD_ORE = register("nether_gold_ore", new OreBlock(Block.Properties.of(Material.STONE).strength(3.0F, 3.0F)));
 	public static final Block OAK_LOG = register(
 		"oak_log", new LogBlock(MaterialColor.WOOD, Block.Properties.of(Material.WOOD, MaterialColor.PODZOL).strength(2.0F).sound(SoundType.WOOD))
 	);
@@ -406,13 +407,12 @@ public class Blocks {
 		)
 	);
 	public static final Block FIRE = register(
-		"fire",
-		new FireBlock(Block.Properties.of(Material.FIRE, MaterialColor.FIRE).noCollission().randomTicks().instabreak().lightLevel(15).sound(SoundType.WOOL).noDrops())
+		"fire", new FireBlock(Block.Properties.of(Material.FIRE, MaterialColor.FIRE).noCollission().randomTicks().instabreak().lightLevel(15).sound(SoundType.WOOL))
 	);
 	public static final Block SOUL_FIRE = register(
 		"soul_fire",
 		new SoulFireBlock(
-			Block.Properties.of(Material.FIRE, MaterialColor.COLOR_LIGHT_BLUE).noCollission().randomTicks().instabreak().lightLevel(10).sound(SoundType.WOOL).noDrops()
+			Block.Properties.of(Material.FIRE, MaterialColor.COLOR_LIGHT_BLUE).noCollission().randomTicks().instabreak().lightLevel(10).sound(SoundType.WOOL)
 		)
 	);
 	public static final Block SPAWNER = register(
@@ -761,7 +761,7 @@ public class Blocks {
 		"melon_stem", new StemBlock((StemGrownBlock)MELON, Block.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.HARD_CROP))
 	);
 	public static final Block VINE = register(
-		"vine", new VineBlock(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().randomTicks().strength(0.2F).sound(SoundType.GRASS))
+		"vine", new VineBlock(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().randomTicks().strength(0.2F).sound(SoundType.VINE))
 	);
 	public static final Block OAK_FENCE_GATE = register(
 		"oak_fence_gate", new FenceGateBlock(Block.Properties.of(Material.WOOD, OAK_PLANKS.materialColor).strength(2.0F, 3.0F).sound(SoundType.WOOD))
@@ -2092,6 +2092,12 @@ public class Blocks {
 	);
 	public static final Block WEEPING_VINES_PLANT = register(
 		"weeping_vines_plant", new WeepingVinesPlant(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+	);
+	public static final Block TWISTING_VINES = register(
+		"twisting_vines", new TwistingVines(Block.Properties.of(Material.REPLACEABLE_PLANT).randomTicks().noCollission().instabreak().sound(SoundType.WEEPING_VINES))
+	);
+	public static final Block TWISTING_VINES_PLANT = register(
+		"twisting_vines_plant", new TwistingVinesPlant(Block.Properties.of(Material.REPLACEABLE_PLANT).noCollission().instabreak().sound(SoundType.WEEPING_VINES))
 	);
 	public static final Block CRIMSON_ROOTS = register(
 		"crimson_roots", new RootsBlock(Block.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))

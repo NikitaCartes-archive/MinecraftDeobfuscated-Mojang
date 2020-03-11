@@ -3516,6 +3516,7 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.EMERALD_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.EMERALD_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.GOLD_ORE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.NETHER_GOLD_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.GOLD_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.IRON_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.IRON_BLOCK, TexturedModel.CUBE);
@@ -3878,8 +3879,11 @@ public class BlockModelGenerators {
 		this.createSimpleFlatItemModel(Items.KELP);
 		this.skipAutoItemBlock(Blocks.KELP_PLANT);
 		this.createGrowingPlant(Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
+		this.createGrowingPlant(Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createSimpleFlatItemModel(Blocks.WEEPING_VINES, "_plant");
 		this.skipAutoItemBlock(Blocks.WEEPING_VINES_PLANT);
+		this.createSimpleFlatItemModel(Blocks.TWISTING_VINES, "_plant");
+		this.skipAutoItemBlock(Blocks.TWISTING_VINES_PLANT);
 		this.createCrossBlockWithDefaultItem(
 			Blocks.BAMBOO_SAPLING, BlockModelGenerators.TintState.TINTED, TextureMapping.cross(TextureMapping.getBlockTexture(Blocks.BAMBOO, "_stage0"))
 		);

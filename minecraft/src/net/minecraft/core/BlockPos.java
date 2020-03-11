@@ -3,12 +3,13 @@ package net.minecraft.core;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Optional;
 import java.util.Spliterator.OfInt;
-import java.util.Spliterators.AbstractSpliterator;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Serializable;
@@ -207,6 +208,67 @@ public class BlockPos extends Vec3i implements Serializable {
 		return new BlockPos.MutableBlockPos(this.getX(), this.getY(), this.getZ());
 	}
 
+	public static Iterable<BlockPos> withinManhattan(BlockPos blockPos, int i, int j, int k) {
+		int l = i + j + k;
+		return () -> new AbstractIterator<BlockPos>() {
+				private int currentDepth;
+				private int maxX;
+				private int maxY;
+				private int x;
+				private int y;
+				@Nullable
+				private BlockPos pendingBlockPos;
+
+				protected BlockPos computeNext() {
+					if (this.pendingBlockPos != null) {
+						BlockPos blockPos = this.pendingBlockPos;
+						this.pendingBlockPos = null;
+						return blockPos;
+					} else {
+						BlockPos blockPos;
+						for (blockPos = null; blockPos == null; this.y++) {
+							if (this.y > this.maxY) {
+								this.x++;
+								if (this.x > this.maxX) {
+									this.currentDepth++;
+									if (this.currentDepth > l) {
+										return this.endOfData();
+									}
+
+									this.maxX = Math.min(i, this.currentDepth);
+									this.x = -this.maxX;
+								}
+
+								this.maxY = Math.min(j, this.currentDepth - Math.abs(this.x));
+								this.y = -this.maxY;
+							}
+
+							int i = this.x;
+							int j = this.y;
+							int k = this.currentDepth - Math.abs(i) - Math.abs(j);
+							if (k <= k) {
+								if (k != 0) {
+									this.pendingBlockPos = blockPos.offset(i, j, -k);
+								}
+
+								blockPos = blockPos.offset(i, j, k);
+							}
+						}
+
+						return blockPos;
+					}
+				}
+			};
+	}
+
+	public static Optional<BlockPos> findClosestMatch(BlockPos blockPos, int i, int j, Predicate<BlockPos> predicate) {
+		return withinManhattanStream(blockPos, i, j, i).filter(predicate).findFirst();
+	}
+
+	public static Stream<BlockPos> withinManhattanStream(BlockPos blockPos, int i, int j, int k) {
+		return StreamSupport.stream(withinManhattan(blockPos, i, j, k).spliterator(), false);
+	}
+
 	public static Iterable<BlockPos> betweenClosed(BlockPos blockPos, BlockPos blockPos2) {
 		return betweenClosed(
 			Math.min(blockPos.getX(), blockPos2.getX()),
@@ -219,14 +281,7 @@ public class BlockPos extends Vec3i implements Serializable {
 	}
 
 	public static Stream<BlockPos> betweenClosedStream(BlockPos blockPos, BlockPos blockPos2) {
-		return betweenClosedStream(
-			Math.min(blockPos.getX(), blockPos2.getX()),
-			Math.min(blockPos.getY(), blockPos2.getY()),
-			Math.min(blockPos.getZ(), blockPos2.getZ()),
-			Math.max(blockPos.getX(), blockPos2.getX()),
-			Math.max(blockPos.getY(), blockPos2.getY()),
-			Math.max(blockPos.getZ(), blockPos2.getZ())
-		);
+		return StreamSupport.stream(betweenClosed(blockPos, blockPos2).spliterator(), false);
 	}
 
 	public static Stream<BlockPos> betweenClosedStream(BoundingBox boundingBox) {
@@ -241,28 +296,28 @@ public class BlockPos extends Vec3i implements Serializable {
 	}
 
 	public static Stream<BlockPos> betweenClosedStream(int i, int j, int k, int l, int m, int n) {
-		return StreamSupport.stream(new AbstractSpliterator<BlockPos>((long)((l - i + 1) * (m - j + 1) * (n - k + 1)), 64) {
-			final Cursor3D cursor = new Cursor3D(i, j, k, l, m, n);
-			final BlockPos.MutableBlockPos nextPos = new BlockPos.MutableBlockPos();
-
-			public boolean tryAdvance(Consumer<? super BlockPos> consumer) {
-				if (this.cursor.advance()) {
-					consumer.accept(this.nextPos.set(this.cursor.nextX(), this.cursor.nextY(), this.cursor.nextZ()));
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}, false);
+		return StreamSupport.stream(betweenClosed(i, j, k, l, m, n).spliterator(), false);
 	}
 
 	public static Iterable<BlockPos> betweenClosed(int i, int j, int k, int l, int m, int n) {
+		int o = l - i + 1;
+		int p = m - j + 1;
+		int q = n - k + 1;
+		int r = o * p * q;
 		return () -> new AbstractIterator<BlockPos>() {
-				final Cursor3D cursor = new Cursor3D(i, j, k, l, m, n);
-				final BlockPos.MutableBlockPos nextPos = new BlockPos.MutableBlockPos();
+				private int index;
 
 				protected BlockPos computeNext() {
-					return (BlockPos)(this.cursor.advance() ? this.nextPos.set(this.cursor.nextX(), this.cursor.nextY(), this.cursor.nextZ()) : this.endOfData());
+					if (this.index == r) {
+						return this.endOfData();
+					} else {
+						int i = this.index % o;
+						int j = this.index / o;
+						int k = j % p;
+						int l = j / p;
+						this.index++;
+						return new BlockPos(i + i, j + k, k + l);
+					}
 				}
 			};
 	}

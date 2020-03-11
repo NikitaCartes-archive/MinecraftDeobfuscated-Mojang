@@ -1,7 +1,5 @@
 package net.minecraft.client.gui.screens.worldselection;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -13,12 +11,11 @@ import net.minecraft.client.gui.screens.CreateBuffetWorldScreen;
 import net.minecraft.client.gui.screens.CreateFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.StringUtils;
 
@@ -51,7 +48,7 @@ public class CreateWorldScreen extends Screen {
 	private String initSeed;
 	private String initName;
 	private int levelTypeIndex;
-	public CompoundTag levelTypeOptions = new CompoundTag();
+	public ChunkGeneratorProvider levelTypeOptions = LevelType.NORMAL.getDefaultProvider();
 
 	public CreateWorldScreen(Screen screen) {
 		super(new TranslatableComponent("selectWorld.create"));
@@ -138,28 +135,28 @@ public class CreateWorldScreen extends Screen {
 				}
 			}
 
-			this.levelTypeOptions = new CompoundTag();
+			this.levelTypeOptions = this.getLevelType().getDefaultProvider();
 			this.setDisplayOptions(this.displayOptions);
 			button.queueNarration(250);
 		}) {
 			@Override
 			public String getMessage() {
-				return I18n.get("selectWorld.mapType") + ' ' + I18n.get(LevelType.LEVEL_TYPES[CreateWorldScreen.this.levelTypeIndex].getDescriptionId());
+				return I18n.get("selectWorld.mapType") + ' ' + I18n.get(CreateWorldScreen.this.getLevelType().getDescriptionId());
 			}
 
 			@Override
 			protected String getNarrationMessage() {
-				LevelType levelType = LevelType.LEVEL_TYPES[CreateWorldScreen.this.levelTypeIndex];
+				LevelType levelType = CreateWorldScreen.this.getLevelType();
 				return levelType.hasHelpText() ? super.getNarrationMessage() + ". " + I18n.get(levelType.getHelpTextId()) : super.getNarrationMessage();
 			}
 		});
 		this.typeButton.visible = false;
 		this.customizeTypeButton = this.addButton(new Button(this.width / 2 + 5, 120, 150, 20, I18n.get("selectWorld.customizeType"), button -> {
-			if (LevelType.LEVEL_TYPES[this.levelTypeIndex] == LevelType.FLAT) {
+			if (this.getLevelType() == LevelType.FLAT) {
 				this.minecraft.setScreen(new CreateFlatWorldScreen(this, this.levelTypeOptions));
 			}
 
-			if (LevelType.LEVEL_TYPES[this.levelTypeIndex] == LevelType.BUFFET) {
+			if (this.getLevelType() == LevelType.BUFFET) {
 				this.minecraft.setScreen(new CreateBuffetWorldScreen(this, this.levelTypeOptions));
 			}
 		}));
@@ -210,6 +207,10 @@ public class CreateWorldScreen extends Screen {
 		this.updateResultFolder();
 	}
 
+	private LevelType getLevelType() {
+		return LevelType.LEVEL_TYPES[this.levelTypeIndex];
+	}
+
 	private void updateGameModeHelp() {
 		this.gameModeHelp1 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line1");
 		this.gameModeHelp2 = I18n.get("selectWorld.gameMode." + this.gameMode.name + ".line2");
@@ -256,8 +257,7 @@ public class CreateWorldScreen extends Screen {
 				}
 			}
 
-			LevelSettings levelSettings = new LevelSettings(l, this.gameMode.gameType, this.features, this.hardCore, LevelType.LEVEL_TYPES[this.levelTypeIndex]);
-			levelSettings.setLevelTypeOptions(Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, this.levelTypeOptions));
+			LevelSettings levelSettings = new LevelSettings(l, this.gameMode.gameType, this.features, this.hardCore, this.levelTypeOptions);
 			if (this.bonusItems && !this.hardCore) {
 				levelSettings.enableStartingBonusItems();
 			}
@@ -271,7 +271,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private boolean isValidLevelType() {
-		LevelType levelType = LevelType.LEVEL_TYPES[this.levelTypeIndex];
+		LevelType levelType = this.getLevelType();
 		if (levelType == null || !levelType.isSelectable()) {
 			return false;
 		} else {
@@ -306,7 +306,7 @@ public class CreateWorldScreen extends Screen {
 		this.displayOptions = bl;
 		this.modeButton.visible = !this.displayOptions;
 		this.typeButton.visible = this.displayOptions;
-		if (LevelType.LEVEL_TYPES[this.levelTypeIndex] == LevelType.DEBUG_ALL_BLOCK_STATES) {
+		if (this.getLevelType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
 			this.modeButton.active = false;
 			if (this.oldGameMode == null) {
 				this.oldGameMode = this.gameMode;
@@ -323,10 +323,10 @@ public class CreateWorldScreen extends Screen {
 				this.setGameMode(this.oldGameMode);
 			}
 
-			this.featuresButton.visible = this.displayOptions && LevelType.LEVEL_TYPES[this.levelTypeIndex] != LevelType.CUSTOMIZED;
+			this.featuresButton.visible = this.displayOptions && this.getLevelType() != LevelType.CUSTOMIZED;
 			this.bonusItemsButton.visible = this.displayOptions;
 			this.commandsButton.visible = this.displayOptions;
-			this.customizeTypeButton.visible = this.displayOptions && LevelType.LEVEL_TYPES[this.levelTypeIndex].hasCustomOptions();
+			this.customizeTypeButton.visible = this.displayOptions && this.getLevelType().hasCustomOptions();
 		}
 
 		this.seedEdit.setVisible(this.displayOptions);
@@ -375,11 +375,8 @@ public class CreateWorldScreen extends Screen {
 			}
 
 			this.seedEdit.render(i, j, f);
-			if (LevelType.LEVEL_TYPES[this.levelTypeIndex].hasHelpText()) {
-				this.font
-					.drawWordWrap(
-						I18n.get(LevelType.LEVEL_TYPES[this.levelTypeIndex].getHelpTextId()), this.typeButton.x + 2, this.typeButton.y + 22, this.typeButton.getWidth(), 10526880
-					);
+			if (this.getLevelType().hasHelpText()) {
+				this.font.drawWordWrap(I18n.get(this.getLevelType().getHelpTextId()), this.typeButton.x + 2, this.typeButton.y + 22, this.typeButton.getWidth(), 10526880);
 			}
 		} else {
 			this.drawString(this.font, I18n.get("selectWorld.enterName"), this.width / 2 - 100, 47, -6250336);
@@ -395,9 +392,9 @@ public class CreateWorldScreen extends Screen {
 	public void copyFromWorld(LevelData levelData) {
 		this.initName = levelData.getLevelName();
 		this.initSeed = Long.toString(levelData.getSeed());
-		LevelType levelType = levelData.getGeneratorType() == LevelType.CUSTOMIZED ? LevelType.NORMAL : levelData.getGeneratorType();
+		this.levelTypeOptions = levelData.getGeneratorProvider();
+		LevelType levelType = this.levelTypeOptions.getType() == LevelType.CUSTOMIZED ? LevelType.NORMAL : levelData.getGeneratorType();
 		this.levelTypeIndex = levelType.getId();
-		this.levelTypeOptions = levelData.getGeneratorOptions();
 		this.features = levelData.isGenerateMapFeatures();
 		this.commands = levelData.getAllowCommands();
 		if (levelData.isHardcore()) {

@@ -88,7 +88,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 				);
 		}
 
-		if (!this.level.isClientSide) {
+		if (!this.level.isClientSide && !this.removed) {
 			if (entity instanceof ServerPlayer) {
 				ServerPlayer serverPlayer = (ServerPlayer)entity;
 				if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {

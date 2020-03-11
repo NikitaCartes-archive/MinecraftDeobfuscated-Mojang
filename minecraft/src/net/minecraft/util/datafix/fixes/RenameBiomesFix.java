@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.Objects;
 
 public class RenameBiomesFix extends DataFix {
-	public final Map<String, String> biomes;
+	private final String name;
+	private final Map<String, String> biomes;
 
-	public RenameBiomesFix(Schema schema, boolean bl, Map<String, String> map) {
+	public RenameBiomesFix(Schema schema, boolean bl, String string, Map<String, String> map) {
 		super(schema, bl);
 		this.biomes = map;
+		this.name = string;
 	}
 
 	@Override
@@ -23,7 +25,7 @@ public class RenameBiomesFix extends DataFix {
 		if (!Objects.equals(type, this.getInputSchema().getType(References.BIOME))) {
 			throw new IllegalStateException("Biome type is not what was expected.");
 		} else {
-			return this.fixTypeEverywhere("Biomes fix", type, dynamicOps -> pair -> pair.mapSecond(string -> (String)this.biomes.getOrDefault(string, string)));
+			return this.fixTypeEverywhere(this.name, type, dynamicOps -> pair -> pair.mapSecond(string -> (String)this.biomes.getOrDefault(string, string)));
 		}
 	}
 }

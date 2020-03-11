@@ -10,7 +10,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -71,11 +70,9 @@ public class BellBlock extends BaseEntityBlock {
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		if (projectile instanceof AbstractArrow) {
-			Entity entity = projectile.getOwner();
-			Player player = entity instanceof Player ? (Player)entity : null;
-			this.onHit(level, blockState, blockHitResult, player, true);
-		}
+		Entity entity = projectile.getOwner();
+		Player player = entity instanceof Player ? (Player)entity : null;
+		this.onHit(level, blockState, blockHitResult, player, true);
 	}
 
 	@Override

@@ -19,8 +19,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
@@ -219,15 +217,12 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		if (!level.isClientSide) {
-			boolean bl = projectile instanceof Fireball || projectile instanceof AbstractArrow && projectile.isOnFire();
-			if (bl) {
-				Entity entity = projectile.getOwner();
-				boolean bl2 = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-				if (bl2 && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
-					BlockPos blockPos = blockHitResult.getBlockPos();
-					level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
-				}
+		if (!level.isClientSide && projectile.isOnFire()) {
+			Entity entity = projectile.getOwner();
+			boolean bl = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+			if (bl && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
+				BlockPos blockPos = blockHitResult.getBlockPos();
+				level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
 			}
 		}
 	}

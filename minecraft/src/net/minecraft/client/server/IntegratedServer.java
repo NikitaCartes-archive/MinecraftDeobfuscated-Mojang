@@ -1,7 +1,6 @@
 package net.minecraft.client.server;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
@@ -30,8 +29,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorage;
 import org.apache.logging.log4j.LogManager;
@@ -81,7 +80,7 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public void loadLevel(String string, String string2, long l, LevelType levelType, JsonElement jsonElement) {
+	public void loadLevel(String string, String string2, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
 		this.ensureLevelConversion(string);
 		LevelStorage levelStorage = this.getStorageSource().selectLevel(string, this);
 		this.detectBundledResources(this.getLevelIdName(), levelStorage);
@@ -113,7 +112,7 @@ public class IntegratedServer extends MinecraftServer {
 		this.setFlightAllowed(true);
 		LOGGER.info("Generating keypair");
 		this.setKeyPair(Crypt.generateKeyPair());
-		this.loadLevel(this.getLevelIdName(), this.getLevelName(), this.settings.getSeed(), this.settings.getLevelType(), this.settings.getLevelTypeOptions());
+		this.loadLevel(this.getLevelIdName(), this.getLevelName(), this.settings.getSeed(), this.settings.getGeneratorProvider());
 		this.setMotd(this.getSingleplayerName() + " - " + this.getLevel(DimensionType.OVERWORLD).getLevelData().getLevelName());
 		return true;
 	}

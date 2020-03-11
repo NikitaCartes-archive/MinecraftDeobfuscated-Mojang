@@ -75,9 +75,13 @@ public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 			blockPos2 = blockPos2.relative(direction);
 			blockState2 = level.getBlockState(blockPos2);
 			ItemFrame itemFrame = this.getItemFrame(level, direction, blockPos2);
-			int j = itemFrame == null ? 0 : itemFrame.getAnalogOutput();
-			int k = blockState2.hasAnalogOutputSignal() ? blockState2.getAnalogOutputSignal(level, blockPos2) : 0;
-			i = Math.max(Math.max(j, k), i);
+			int j = Math.max(
+				itemFrame == null ? Integer.MIN_VALUE : itemFrame.getAnalogOutput(),
+				blockState2.hasAnalogOutputSignal() ? blockState2.getAnalogOutputSignal(level, blockPos2) : Integer.MIN_VALUE
+			);
+			if (j != Integer.MIN_VALUE) {
+				i = j;
+			}
 		}
 
 		return i;

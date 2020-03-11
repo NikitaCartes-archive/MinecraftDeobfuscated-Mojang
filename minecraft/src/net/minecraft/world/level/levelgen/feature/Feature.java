@@ -151,6 +151,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"nether_forest_vegetation", new NetherForestVegetationFeature(BlockPileConfiguration::deserialize)
 	);
 	public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration::deserialize));
+	public static final Feature<NoneFeatureConfiguration> TWISTING_VINES = register(
+		"twisting_vines", new TwistingVinesFeature(NoneFeatureConfiguration::deserialize)
+	);
 	public static final Feature<LayerConfiguration> FILL_LAYER = register("fill_layer", new FillLayerFeature(LayerConfiguration::deserialize));
 	public static final BonusChestFeature BONUS_CHEST = register("bonus_chest", new BonusChestFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<NoneFeatureConfiguration> BASALT_PILLAR = register("basalt_pillar", new BasaltPillarFeature(NoneFeatureConfiguration::deserialize));

@@ -60,7 +60,7 @@ public abstract class FlyingMob extends Mob {
 	}
 
 	@Override
-	public boolean onLadder() {
+	public boolean onClimbable() {
 		return false;
 	}
 }

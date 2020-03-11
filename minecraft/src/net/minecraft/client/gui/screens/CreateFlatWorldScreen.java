@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.Dynamic;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -12,15 +11,16 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
@@ -33,26 +33,20 @@ public class CreateFlatWorldScreen extends Screen {
 	private CreateFlatWorldScreen.DetailsList list;
 	private Button deleteLayerButton;
 
-	public CreateFlatWorldScreen(CreateWorldScreen createWorldScreen, CompoundTag compoundTag) {
+	public CreateFlatWorldScreen(CreateWorldScreen createWorldScreen, ChunkGeneratorProvider chunkGeneratorProvider) {
 		super(new TranslatableComponent("createWorld.customize.flat.title"));
 		this.parent = createWorldScreen;
-		this.loadLayers(compoundTag);
+		if (chunkGeneratorProvider.getType() == LevelType.FLAT) {
+			this.generator = FlatLevelGeneratorSettings.fromObject(chunkGeneratorProvider.getSettings());
+		}
 	}
 
 	public String saveLayerString() {
 		return this.generator.toString();
 	}
 
-	public CompoundTag saveLayers() {
-		return (CompoundTag)this.generator.toObject(NbtOps.INSTANCE).getValue();
-	}
-
 	public void loadLayers(String string) {
 		this.generator = FlatLevelGeneratorSettings.fromString(string);
-	}
-
-	public void loadLayers(CompoundTag compoundTag) {
-		this.generator = FlatLevelGeneratorSettings.fromObject(new Dynamic<>(NbtOps.INSTANCE, compoundTag));
 	}
 
 	@Override
@@ -80,7 +74,7 @@ public class CreateFlatWorldScreen extends Screen {
 			this.updateButtonValidity();
 		}));
 		this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, I18n.get("gui.done"), button -> {
-			this.parent.levelTypeOptions = this.saveLayers();
+			this.parent.levelTypeOptions = LevelType.FLAT.createProvider(this.generator.toObject(NbtOps.INSTANCE));
 			this.minecraft.setScreen(this.parent);
 			this.generator.updateLayers();
 			this.updateButtonValidity();

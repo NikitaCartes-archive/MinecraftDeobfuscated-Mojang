@@ -346,7 +346,11 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.level = new ClientLevel(
 			this,
 			new LevelSettings(
-				clientboundLoginPacket.getSeed(), clientboundLoginPacket.getGameType(), false, clientboundLoginPacket.isHardcore(), clientboundLoginPacket.getLevelType()
+				clientboundLoginPacket.getSeed(),
+				clientboundLoginPacket.getGameType(),
+				false,
+				clientboundLoginPacket.isHardcore(),
+				clientboundLoginPacket.getLevelType().getDefaultProvider()
 			),
 			clientboundLoginPacket.getDimension(),
 			this.serverChunkRadius,
@@ -1047,7 +1051,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					clientboundRespawnPacket.getPlayerGameType(),
 					false,
 					this.minecraft.level.getLevelData().isHardcore(),
-					clientboundRespawnPacket.getLevelType()
+					clientboundRespawnPacket.getLevelType().getDefaultProvider()
 				),
 				clientboundRespawnPacket.getDimension(),
 				this.serverChunkRadius,

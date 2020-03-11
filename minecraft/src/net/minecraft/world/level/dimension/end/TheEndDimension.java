@@ -35,7 +35,7 @@ public class TheEndDimension extends Dimension {
 		theEndGeneratorSettings.setDefaultFluid(Blocks.AIR.defaultBlockState());
 		theEndGeneratorSettings.setSpawnPosition(this.getDimensionSpecificSpawn());
 		return ChunkGeneratorType.FLOATING_ISLANDS
-			.create(this.level, BiomeSourceType.THE_END.create(BiomeSourceType.THE_END.createSettings(this.level.getLevelData())), theEndGeneratorSettings);
+			.create(this.level, BiomeSourceType.THE_END.create(BiomeSourceType.THE_END.createSettings(this.level.getSeed())), theEndGeneratorSettings);
 	}
 
 	@Override

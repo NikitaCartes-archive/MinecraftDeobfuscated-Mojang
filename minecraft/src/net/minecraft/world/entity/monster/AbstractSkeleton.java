@@ -37,6 +37,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -196,6 +197,11 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 
 	protected AbstractArrow getArrow(ItemStack itemStack, float f) {
 		return ProjectileUtil.getMobArrow(this, itemStack, f);
+	}
+
+	@Override
+	public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeaponItem) {
+		return projectileWeaponItem == Items.BOW;
 	}
 
 	@Override

@@ -33,28 +33,21 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	) {
 		this(entityType, level);
 		this.moveTo(d, e, f, this.yRot, this.xRot);
-		this.setPos(d, e, f);
+		this.reapplyPosition();
 		double j = (double)Mth.sqrt(g * g + h * h + i * i);
-		this.xPower = g / j * 0.1;
-		this.yPower = h / j * 0.1;
-		this.zPower = i / j * 0.1;
+		if (j != 0.0) {
+			this.xPower = g / j * 0.1;
+			this.yPower = h / j * 0.1;
+			this.zPower = i / j * 0.1;
+		}
 	}
 
 	public AbstractHurtingProjectile(
 		EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, double d, double e, double f, Level level
 	) {
-		this(entityType, level);
+		this(entityType, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), d, e, f, level);
 		this.setOwner(livingEntity);
-		this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
-		this.reapplyPosition();
-		this.setDeltaMovement(Vec3.ZERO);
-		d += this.random.nextGaussian() * 0.4;
-		e += this.random.nextGaussian() * 0.4;
-		f += this.random.nextGaussian() * 0.4;
-		double g = (double)Mth.sqrt(d * d + e * e + f * f);
-		this.xPower = d / g * 0.1;
-		this.yPower = e / g * 0.1;
-		this.zPower = f / g * 0.1;
+		this.setRot(livingEntity.yRot, livingEntity.xRot);
 	}
 
 	@Override

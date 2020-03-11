@@ -244,13 +244,13 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 		if (this.rightArmPose == HumanoidModel.ArmPose.CROSSBOW_CHARGE) {
 			AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, true);
 		} else if (this.leftArmPose == HumanoidModel.ArmPose.CROSSBOW_CHARGE) {
-			AnimationUtils.animateCrossbowCharge(this.leftArm, this.rightArm, livingEntity, false);
+			AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, false);
 		}
 
 		if (this.rightArmPose == HumanoidModel.ArmPose.CROSSBOW_HOLD && this.attackTime <= 0.0F) {
 			AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
 		} else if (this.leftArmPose == HumanoidModel.ArmPose.CROSSBOW_HOLD) {
-			AnimationUtils.animateCrossbowHold(this.leftArm, this.rightArm, this.head, false);
+			AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
 		}
 
 		if (this.swimAmount > 0.0F) {

@@ -90,7 +90,6 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Nullable
-	@Override
 	public T getRandom(Random random) {
 		if (this.randomCache == null) {
 			Collection<?> collection = this.storage.values();

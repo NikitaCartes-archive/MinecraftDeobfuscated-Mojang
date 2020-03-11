@@ -103,8 +103,15 @@ public class Hoglin extends Animal implements Enemy {
 	public boolean doHurtTarget(Entity entity) {
 		this.attackAnimationRemainingTicks = 10;
 		this.level.broadcastEntityEvent(this, (byte)4);
-		float f = this.isBaby() ? 0.5F : this.getAttackDamage() / 2.0F + (float)this.random.nextInt((int)this.getAttackDamage());
-		boolean bl = entity.hurt(DamageSource.mobAttack(this), f);
+		float f = this.getAttackDamage();
+		float g;
+		if (!this.isAdult() && (int)f <= 0) {
+			g = f;
+		} else {
+			g = f / 2.0F + (float)this.random.nextInt((int)f);
+		}
+
+		boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
 		if (bl) {
 			this.doEnchantDamageEffects(this, entity);
 			if (this.isAdult()) {
@@ -186,6 +193,8 @@ public class Hoglin extends Animal implements Enemy {
 	) {
 		if (levelAccessor.getRandom().nextFloat() < 0.2F) {
 			this.setBaby(true);
+			this.xpReward = 3;
+			this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(0.5);
 		}
 
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
@@ -229,6 +238,11 @@ public class Hoglin extends Animal implements Enemy {
 	@Environment(EnvType.CLIENT)
 	public int getAttackAnimationRemainingTicks() {
 		return this.attackAnimationRemainingTicks;
+	}
+
+	@Override
+	protected boolean shouldDropExperience() {
+		return true;
 	}
 
 	@Override

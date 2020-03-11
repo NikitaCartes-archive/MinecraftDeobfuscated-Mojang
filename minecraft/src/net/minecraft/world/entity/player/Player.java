@@ -1082,7 +1082,7 @@ public abstract class Player extends LivingEntity {
 					boolean bl3 = bl
 						&& this.fallDistance > 0.0F
 						&& !this.onGround
-						&& !this.onLadder()
+						&& !this.onClimbable()
 						&& !this.isInWater()
 						&& !this.hasEffect(MobEffects.BLINDNESS)
 						&& !this.isPassenger()
@@ -1511,7 +1511,7 @@ public abstract class Player extends LivingEntity {
 					this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
 					this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
 				}
-			} else if (this.onLadder()) {
+			} else if (this.onClimbable()) {
 				if (e > 0.0) {
 					this.awardStat(Stats.CLIMB_ONE_CM, (int)Math.round(e * 100.0));
 				}

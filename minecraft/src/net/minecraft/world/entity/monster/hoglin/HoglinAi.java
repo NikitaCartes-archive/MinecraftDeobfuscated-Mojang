@@ -89,8 +89,8 @@ public class HoglinAi {
 				new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200),
 				new AnimalMakeLove(EntityType.HOGLIN),
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.8F),
-				new RunIf<>(Hoglin::isAdult, new MeleeAttack(1.5, 40)),
-				new RunIf<>(AgableMob::isBaby, new MeleeAttack(1.5, 15)),
+				new RunIf<>(Hoglin::isAdult, new MeleeAttack(40)),
+				new RunIf<>(AgableMob::isBaby, new MeleeAttack(15)),
 				new StopAttackingIfTargetInvalid()
 			),
 			MemoryModuleType.ATTACK_TARGET
@@ -106,7 +106,7 @@ public class HoglinAi {
 				SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, f, 15, false),
 				createIdleMovementBehaviors(hoglin.getMovementSpeed()),
 				new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0F), IntRange.of(30, 60)),
-				new EraseMemoryIf(HoglinAi::hoglinsOutnumberPiglins, MemoryModuleType.AVOID_TARGET)
+				new EraseMemoryIf(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
 			),
 			MemoryModuleType.AVOID_TARGET
 		);
@@ -130,7 +130,7 @@ public class HoglinAi {
 
 	protected static void onHitTarget(Hoglin hoglin, LivingEntity livingEntity) {
 		if (!hoglin.isBaby()) {
-			if (livingEntity.getType() == EntityType.PIGLIN && !hoglinsOutnumberPiglins(hoglin)) {
+			if (livingEntity.getType() == EntityType.PIGLIN && piglinsOutnumberHoglins(hoglin)) {
 				setAvoidTarget(hoglin, livingEntity);
 				broadcastRetreat(hoglin, livingEntity);
 			} else {
@@ -164,13 +164,17 @@ public class HoglinAi {
 		return optional.isPresent() && ((BlockPos)optional.get()).closerThan(blockPos, 8.0);
 	}
 
-	private static boolean hoglinsOutnumberPiglins(Hoglin hoglin) {
+	private static boolean wantsToStopFleeing(Hoglin hoglin) {
+		return hoglin.isAdult() && !piglinsOutnumberHoglins(hoglin);
+	}
+
+	private static boolean piglinsOutnumberHoglins(Hoglin hoglin) {
 		if (hoglin.isBaby()) {
 			return false;
 		} else {
 			int i = (Integer)hoglin.getBrain().getMemory(MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT).orElse(0);
 			int j = (Integer)hoglin.getBrain().getMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT).orElse(0) + 1;
-			return j > i;
+			return i > j;
 		}
 	}
 

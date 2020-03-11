@@ -62,6 +62,6 @@ public class BiomeFix extends RenameBiomesFix {
 		.build();
 
 	public BiomeFix(Schema schema, boolean bl) {
-		super(schema, bl, BIOMES);
+		super(schema, bl, "Biomes fix", BIOMES);
 	}
 }

@@ -8,10 +8,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.Shapes;
 
 public class KelpPlantBlock extends GrowingPlantBodyBlock implements LiquidBlockContainer {
 	protected KelpPlantBlock(Block.Properties properties) {
-		super(properties, Direction.UP, true);
+		super(properties, Direction.UP, Shapes.block(), true);
 	}
 
 	@Override
