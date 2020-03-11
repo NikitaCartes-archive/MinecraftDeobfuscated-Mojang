@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorFactory;
@@ -45,8 +45,8 @@ implements ChunkGeneratorFactory<C, T> {
     }
 
     @Override
-    public T create(Level level, BiomeSource biomeSource, C chunkGeneratorSettings) {
-        return this.factory.create(level, biomeSource, chunkGeneratorSettings);
+    public T create(LevelAccessor levelAccessor, BiomeSource biomeSource, C chunkGeneratorSettings) {
+        return this.factory.create(levelAccessor, biomeSource, chunkGeneratorSettings);
     }
 
     public C createSettings() {

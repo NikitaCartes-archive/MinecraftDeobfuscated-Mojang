@@ -141,6 +141,7 @@ public class BiomeDefaultFeatures {
     private static final BlockState HUGE_RED_MUSHROOM = (BlockState)Blocks.RED_MUSHROOM_BLOCK.defaultBlockState().setValue(HugeMushroomBlock.DOWN, false);
     private static final BlockState HUGE_BROWN_MUSHROOM = (BlockState)((BlockState)Blocks.BROWN_MUSHROOM_BLOCK.defaultBlockState().setValue(HugeMushroomBlock.UP, true)).setValue(HugeMushroomBlock.DOWN, false);
     private static final BlockState HUGE_MUSHROOM_STEM = (BlockState)((BlockState)Blocks.MUSHROOM_STEM.defaultBlockState().setValue(HugeMushroomBlock.UP, false)).setValue(HugeMushroomBlock.DOWN, false);
+    private static final BlockState NETHER_GOLD_ORE = Blocks.NETHER_GOLD_ORE.defaultBlockState();
     private static final BlockState NETHER_QUARTZ_ORE = Blocks.NETHER_QUARTZ_ORE.defaultBlockState();
     private static final BlockState WARPED_STEM = Blocks.WARPED_STEM.defaultBlockState();
     private static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
@@ -547,6 +548,7 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addNetherDefaultOres(Biome biome) {
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, NETHER_GOLD_ORE, 10)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 10, 20, 128))));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, NETHER_QUARTZ_ORE, 14)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128))));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3)).decorated(FeatureDecorator.COUNT_DEPTH_AVERAGE.configured(new DepthAverageConfigation(1, 16, 8))));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(1, 8, 16, 128))));
@@ -561,6 +563,7 @@ public class BiomeDefaultFeatures {
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.HUGE_FUNGUS.configured(HugeFungusConfiguration.HUGE_WARPED_FUNGI_NOT_PLANTED_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(8))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NETHER_FOREST_VEGETATION.configured(WARPED_FOREST_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(5))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NETHER_FOREST_VEGETATION.configured(NETHER_SPROUTS_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(4))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.TWISTING_VINES.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128))));
     }
 }
 

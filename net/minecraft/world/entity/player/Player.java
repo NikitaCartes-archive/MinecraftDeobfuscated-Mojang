@@ -977,7 +977,7 @@ extends LivingEntity {
                 ++i;
                 bl2 = true;
             }
-            boolean bl3 = bl && this.fallDistance > 0.0f && !this.onGround && !this.onLadder() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && entity instanceof LivingEntity;
+            boolean bl3 = bl && this.fallDistance > 0.0f && !this.onGround && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && entity instanceof LivingEntity;
             boolean bl4 = bl3 = bl3 && !this.isSprinting();
             if (bl3) {
                 f *= 1.5f;
@@ -1359,7 +1359,7 @@ extends LivingEntity {
                 this.awardStat(Stats.WALK_ON_WATER_ONE_CM, i);
                 this.causeFoodExhaustion(0.01f * (float)i * 0.01f);
             }
-        } else if (this.onLadder()) {
+        } else if (this.onClimbable()) {
             if (e > 0.0) {
                 this.awardStat(Stats.CLIMB_ONE_CM, (int)Math.round(e * 100.0));
             }

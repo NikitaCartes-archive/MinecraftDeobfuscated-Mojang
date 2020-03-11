@@ -49,6 +49,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -165,11 +167,6 @@ implements CrossbowAttackMob {
     }
 
     @Override
-    public boolean isLeftHanded() {
-        return false;
-    }
-
-    @Override
     protected boolean shouldDespawnInPeaceful() {
         return false;
     }
@@ -281,12 +278,23 @@ implements CrossbowAttackMob {
         zombifiedPiglin.copyPosition(this);
         zombifiedPiglin.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombifiedPiglin.blockPosition()), MobSpawnType.CONVERSION, null, null);
         zombifiedPiglin.setBaby(this.isBaby());
-        this.remove();
         zombifiedPiglin.setNoAi(this.isNoAi());
+        PiglinAi.cancelAdmiring(this);
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            ItemStack itemStack;
+            if (this.isAdult() && equipmentSlot == EquipmentSlot.MAINHAND || (itemStack = this.getItemBySlot(equipmentSlot)).isEmpty()) continue;
+            zombifiedPiglin.setItemSlot(equipmentSlot, itemStack.copy());
+            zombifiedPiglin.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
+            itemStack.setCount(0);
+        }
         if (this.hasCustomName()) {
             zombifiedPiglin.setCustomName(this.getCustomName());
             zombifiedPiglin.setCustomNameVisible(this.isCustomNameVisible());
         }
+        if (this.isPersistenceRequired()) {
+            zombifiedPiglin.setPersistenceRequired();
+        }
+        this.remove();
         serverLevel.addFreshEntity(zombifiedPiglin);
         zombifiedPiglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
     }
@@ -358,6 +366,11 @@ implements CrossbowAttackMob {
         this.shootCrossbowProjectile(this, livingEntity, projectile, f, 1.6f);
     }
 
+    @Override
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeaponItem) {
+        return projectileWeaponItem == Items.CROSSBOW;
+    }
+
     protected void holdInMainHand(ItemStack itemStack) {
         this.setItemSlotAndDropWhenKilled(EquipmentSlot.MAINHAND, itemStack);
     }
@@ -365,6 +378,7 @@ implements CrossbowAttackMob {
     protected void holdInOffHand(ItemStack itemStack) {
         if (itemStack.getItem() == Items.GOLD_INGOT) {
             this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
+            this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
         } else {
             this.setItemSlotAndDropWhenKilled(EquipmentSlot.OFFHAND, itemStack);
         }
@@ -372,7 +386,7 @@ implements CrossbowAttackMob {
 
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
-        return PiglinAi.wantsToPickup(this, itemStack);
+        return this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && PiglinAi.wantsToPickup(this, itemStack);
     }
 
     protected boolean canReplaceCurrentItem(ItemStack itemStack) {

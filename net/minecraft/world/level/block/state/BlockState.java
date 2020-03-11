@@ -226,6 +226,10 @@ implements StateHolder<BlockState> {
         return this.getBlock().getCollisionShape(this, blockGetter, blockPos, collisionContext);
     }
 
+    public VoxelShape getBlockSupportShape(BlockGetter blockGetter, BlockPos blockPos) {
+        return this.getBlock().getBlockSupportShape(this, blockGetter, blockPos);
+    }
+
     public VoxelShape getOcclusionShape(BlockGetter blockGetter, BlockPos blockPos) {
         return this.getBlock().getOcclusionShape(this, blockGetter, blockPos);
     }

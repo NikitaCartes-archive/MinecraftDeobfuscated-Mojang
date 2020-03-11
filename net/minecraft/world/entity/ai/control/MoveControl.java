@@ -57,7 +57,7 @@ public class MoveControl {
 
     public void tick() {
         if (this.operation == Operation.STRAFE) {
-            NodeEvaluator nodeEvaluator;
+            float n;
             float f = (float)this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
             float g = (float)this.speedModifier * f;
             float h = this.strafeForwards;
@@ -70,12 +70,9 @@ public class MoveControl {
             float k = Mth.sin(this.mob.yRot * ((float)Math.PI / 180));
             float l = Mth.cos(this.mob.yRot * ((float)Math.PI / 180));
             float m = (h *= j) * l - (i *= j) * k;
-            float n = i * l + h * k;
-            PathNavigation pathNavigation = this.mob.getNavigation();
-            if (pathNavigation != null && (nodeEvaluator = pathNavigation.getNodeEvaluator()) != null && nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.getX() + (double)m), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)n)) != BlockPathTypes.WALKABLE) {
+            if (!this.isWalkable(m, n = i * l + h * k)) {
                 this.strafeForwards = 1.0f;
                 this.strafeRight = 0.0f;
-                g = f;
             }
             this.mob.setSpeed(g);
             this.mob.setZza(this.strafeForwards);
@@ -110,6 +107,12 @@ public class MoveControl {
         } else {
             this.mob.setZza(0.0f);
         }
+    }
+
+    private boolean isWalkable(float f, float g) {
+        NodeEvaluator nodeEvaluator;
+        PathNavigation pathNavigation = this.mob.getNavigation();
+        return pathNavigation == null || (nodeEvaluator = pathNavigation.getNodeEvaluator()) == null || nodeEvaluator.getBlockPathType(this.mob.level, Mth.floor(this.mob.getX() + (double)f), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)g)) == BlockPathTypes.WALKABLE;
     }
 
     protected float rotlerp(float f, float g, float h) {

@@ -97,6 +97,7 @@ extends AbstractClientPlayer {
     private float yRotLast;
     private float xRotLast;
     private boolean lastOnGround;
+    private boolean crouching;
     private boolean wasShiftKeyDown;
     private boolean wasSprinting;
     private int positionReminder;
@@ -589,10 +590,7 @@ extends AbstractClientPlayer {
 
     @Override
     public boolean isCrouching() {
-        if (this.abilities.flying || this.isSwimming() || !this.canEnterPose(Pose.CROUCHING)) {
-            return false;
-        }
-        return this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING);
+        return this.crouching;
     }
 
     public boolean isMovingSlowly() {
@@ -631,6 +629,7 @@ extends AbstractClientPlayer {
         boolean bl = this.input.jumping;
         boolean bl2 = this.input.shiftKeyDown;
         boolean bl3 = this.hasEnoughImpulseToStartSprinting();
+        this.crouching = !this.abilities.flying && !this.isSwimming() && this.canEnterPose(Pose.CROUCHING) && (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
         this.input.tick(this.isMovingSlowly());
         this.minecraft.getTutorial().onInput(this.input);
         if (this.isUsingItem() && !this.isPassenger()) {
@@ -692,7 +691,7 @@ extends AbstractClientPlayer {
                 }
             }
         }
-        if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger() && !this.onLadder() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
+        if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger() && !this.onClimbable() && (itemStack = this.getItemBySlot(EquipmentSlot.CHEST)).getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();

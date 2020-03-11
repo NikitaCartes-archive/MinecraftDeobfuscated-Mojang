@@ -219,7 +219,7 @@ extends DirectionalBlock {
 
     public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
         Block block = blockState.getBlock();
-        if (block == Blocks.OBSIDIAN) {
+        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN) {
             return false;
         }
         if (!level.getWorldBorder().isWithinBounds(blockPos)) {

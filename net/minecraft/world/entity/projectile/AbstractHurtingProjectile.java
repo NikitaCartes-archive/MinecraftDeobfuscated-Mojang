@@ -37,23 +37,19 @@ extends Projectile {
     public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, double d, double e, double f, double g, double h, double i, Level level) {
         this(entityType, level);
         this.moveTo(d, e, f, this.yRot, this.xRot);
-        this.setPos(d, e, f);
+        this.reapplyPosition();
         double j = Mth.sqrt(g * g + h * h + i * i);
-        this.xPower = g / j * 0.1;
-        this.yPower = h / j * 0.1;
-        this.zPower = i / j * 0.1;
+        if (j != 0.0) {
+            this.xPower = g / j * 0.1;
+            this.yPower = h / j * 0.1;
+            this.zPower = i / j * 0.1;
+        }
     }
 
     public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, double d, double e, double f, Level level) {
-        this(entityType, level);
+        this(entityType, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), d, e, f, level);
         this.setOwner(livingEntity);
-        this.moveTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), livingEntity.yRot, livingEntity.xRot);
-        this.reapplyPosition();
-        this.setDeltaMovement(Vec3.ZERO);
-        double g = Mth.sqrt((d += this.random.nextGaussian() * 0.4) * d + (e += this.random.nextGaussian() * 0.4) * e + (f += this.random.nextGaussian() * 0.4) * f);
-        this.xPower = d / g * 0.1;
-        this.yPower = e / g * 0.1;
-        this.zPower = f / g * 0.1;
+        this.setRot(livingEntity.yRot, livingEntity.xRot);
     }
 
     @Override

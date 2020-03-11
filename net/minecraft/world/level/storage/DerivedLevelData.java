@@ -14,6 +14,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.timers.TimerQueue;
 import org.jetbrains.annotations.Nullable;
@@ -174,7 +175,7 @@ extends LevelData {
     }
 
     @Override
-    public void setGenerator(LevelType levelType) {
+    public void setGeneratorProvider(ChunkGeneratorProvider chunkGeneratorProvider) {
     }
 
     @Override

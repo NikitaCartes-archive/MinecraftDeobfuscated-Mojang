@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosWrapper;
 import net.minecraft.world.entity.ai.behavior.EntityPosWrapper;
@@ -23,7 +24,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.phys.Vec3;
 
 public class BehaviorUtils {
@@ -92,16 +95,19 @@ public class BehaviorUtils {
         return SectionPos.cube(sectionPos2, i).filter(sectionPos -> serverLevel.sectionsToVillage((SectionPos)sectionPos) < j).min(Comparator.comparingInt(serverLevel::sectionsToVillage)).orElse(sectionPos2);
     }
 
-    public static boolean isAttackTargetVisibleAndInRange(LivingEntity livingEntity, double d) {
-        Brain<LivingEntity> brain = livingEntity.getBrain();
-        if (!brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
-            return false;
+    public static boolean isWithinAttackRange(Mob mob, LivingEntity livingEntity, int i) {
+        Item item = mob.getMainHandItem().getItem();
+        if (item instanceof ProjectileWeaponItem && mob.canFireProjectileWeapon((ProjectileWeaponItem)item)) {
+            int j = ((ProjectileWeaponItem)item).getDefaultProjectileRange() - i;
+            return mob.closerThan(livingEntity, j);
         }
-        LivingEntity livingEntity2 = brain.getMemory(MemoryModuleType.ATTACK_TARGET).get();
-        if (!BehaviorUtils.canSee(livingEntity, livingEntity2)) {
-            return false;
-        }
-        return livingEntity2.closerThan(livingEntity, d);
+        return BehaviorUtils.isWithinMeleeAttackRange(mob, livingEntity);
+    }
+
+    public static boolean isWithinMeleeAttackRange(LivingEntity livingEntity, LivingEntity livingEntity2) {
+        double e;
+        double d = livingEntity.distanceToSqr(livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ());
+        return d <= (e = (double)(livingEntity.getBbWidth() * 2.0f * (livingEntity.getBbWidth() * 2.0f) + livingEntity2.getBbWidth()));
     }
 
     public static boolean isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(LivingEntity livingEntity, LivingEntity livingEntity2, double d) {

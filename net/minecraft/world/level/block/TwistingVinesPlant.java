@@ -10,15 +10,15 @@ import net.minecraft.world.level.block.GrowingPlantBodyBlock;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.NetherVines;
 
-public class WeepingVinesPlant
+public class TwistingVinesPlant
 extends GrowingPlantBodyBlock {
-    public WeepingVinesPlant(Block.Properties properties) {
-        super(properties, Direction.DOWN, NetherVines.SHAPE, false);
+    public TwistingVinesPlant(Block.Properties properties) {
+        super(properties, Direction.UP, NetherVines.SHAPE, false);
     }
 
     @Override
     protected GrowingPlantHeadBlock getHeadBlock() {
-        return (GrowingPlantHeadBlock)Blocks.WEEPING_VINES;
+        return (GrowingPlantHeadBlock)Blocks.TWISTING_VINES;
     }
 }
 

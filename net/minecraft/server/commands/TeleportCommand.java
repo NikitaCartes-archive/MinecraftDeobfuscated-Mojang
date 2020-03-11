@@ -98,7 +98,7 @@ public class TeleportCommand {
 
     private static void performTeleport(CommandSourceStack commandSourceStack, Entity entity, ServerLevel serverLevel, double d, double e, double f, Set<ClientboundPlayerPositionPacket.RelativeArgument> set, float g, float h, @Nullable LookAt lookAt) throws CommandSyntaxException {
         BlockPos blockPos = new BlockPos(d, e, f);
-        if (!Level.isInWorldBoundsHorizontal(blockPos)) {
+        if (!Level.isInSpawnableBounds(blockPos)) {
             throw INVALID_POSITION.create();
         }
         if (entity instanceof ServerPlayer) {

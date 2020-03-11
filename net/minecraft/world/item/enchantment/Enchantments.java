@@ -26,6 +26,7 @@ import net.minecraft.world.item.enchantment.MultiShotEnchantment;
 import net.minecraft.world.item.enchantment.OxygenEnchantment;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.item.enchantment.QuickChargeEnchantment;
+import net.minecraft.world.item.enchantment.SoulSpeedEnchantment;
 import net.minecraft.world.item.enchantment.SweepingEdgeEnchantment;
 import net.minecraft.world.item.enchantment.ThornsEnchantment;
 import net.minecraft.world.item.enchantment.TridentChannelingEnchantment;
@@ -50,6 +51,7 @@ public class Enchantments {
     public static final Enchantment DEPTH_STRIDER = Enchantments.register("depth_strider", new WaterWalkerEnchantment(Enchantment.Rarity.RARE, ARMOR_SLOTS));
     public static final Enchantment FROST_WALKER = Enchantments.register("frost_walker", new FrostWalkerEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.FEET));
     public static final Enchantment BINDING_CURSE = Enchantments.register("binding_curse", new BindingCurseEnchantment(Enchantment.Rarity.VERY_RARE, ARMOR_SLOTS));
+    public static final Enchantment SOUL_SPEED = Enchantments.register("soul_speed", new SoulSpeedEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.FEET));
     public static final Enchantment SHARPNESS = Enchantments.register("sharpness", new DamageEnchantment(Enchantment.Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
     public static final Enchantment SMITE = Enchantments.register("smite", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 1, EquipmentSlot.MAINHAND));
     public static final Enchantment BANE_OF_ARTHROPODS = Enchantments.register("bane_of_arthropods", new DamageEnchantment(Enchantment.Rarity.UNCOMMON, 2, EquipmentSlot.MAINHAND));

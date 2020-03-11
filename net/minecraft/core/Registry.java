@@ -6,7 +6,6 @@ package net.minecraft.core;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -148,9 +147,6 @@ implements IdMap<T> {
     public abstract Optional<T> getOptional(@Nullable ResourceLocation var1);
 
     public abstract Set<ResourceLocation> keySet();
-
-    @Nullable
-    public abstract T getRandom(Random var1);
 
     public Stream<T> stream() {
         return StreamSupport.stream(this.spliterator(), false);

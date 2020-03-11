@@ -15,11 +15,13 @@ import net.minecraft.util.datafix.fixes.References;
 
 public class RenameBiomesFix
 extends DataFix {
-    public final Map<String, String> biomes;
+    private final String name;
+    private final Map<String, String> biomes;
 
-    public RenameBiomesFix(Schema schema, boolean bl, Map<String, String> map) {
+    public RenameBiomesFix(Schema schema, boolean bl, String string, Map<String, String> map) {
         super(schema, bl);
         this.biomes = map;
+        this.name = string;
     }
 
     @Override
@@ -28,7 +30,7 @@ extends DataFix {
         if (!Objects.equals(type, this.getInputSchema().getType(References.BIOME))) {
             throw new IllegalStateException("Biome type is not what was expected.");
         }
-        return this.fixTypeEverywhere("Biomes fix", type, dynamicOps -> pair -> pair.mapSecond(string -> this.biomes.getOrDefault(string, (String)string)));
+        return this.fixTypeEverywhere(this.name, type, dynamicOps -> pair -> pair.mapSecond(string -> this.biomes.getOrDefault(string, (String)string)));
     }
 }
 

@@ -6,7 +6,6 @@ package net.minecraft.server;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
@@ -138,6 +137,7 @@ import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.saveddata.SaveDataDirtyRunnable;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -163,7 +163,7 @@ Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final File USERID_CACHE_FILE = new File("usercache.json");
     private static final CompletableFuture<Unit> DATA_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
-    public static final LevelSettings DEMO_SETTINGS = new LevelSettings("North Carolina".hashCode(), GameType.SURVIVAL, true, false, LevelType.NORMAL).enableStartingBonusItems();
+    public static final LevelSettings DEMO_SETTINGS = new LevelSettings("North Carolina".hashCode(), GameType.SURVIVAL, true, false, LevelType.NORMAL.getDefaultProvider()).enableStartingBonusItems();
     private final LevelStorageSource storageSource;
     private final Snooper snooper = new Snooper("server", this, Util.getMillis());
     private final File universe;
@@ -346,7 +346,7 @@ Runnable {
         this.startupState = component;
     }
 
-    protected void loadLevel(String string, String string2, long l, LevelType levelType, JsonElement jsonElement) {
+    protected void loadLevel(String string, String string2, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
         LevelSettings levelSettings;
         this.ensureLevelConversion(string);
         this.setServerStartupState(new TranslatableComponent("menu.loadingLevel", new Object[0]));
@@ -357,8 +357,7 @@ Runnable {
             if (this.isDemo()) {
                 levelSettings = DEMO_SETTINGS;
             } else {
-                levelSettings = new LevelSettings(l, this.getDefaultGameType(), this.canGenerateStructures(), this.isHardcore(), levelType);
-                levelSettings.setLevelTypeOptions(jsonElement);
+                levelSettings = new LevelSettings(l, this.getDefaultGameType(), this.canGenerateStructures(), this.isHardcore(), chunkGeneratorProvider);
                 if (this.levelHasStartingBonusChest) {
                     levelSettings.enableStartingBonusItems();
                 }

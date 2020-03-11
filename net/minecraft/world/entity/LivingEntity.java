@@ -193,7 +193,7 @@ extends Entity {
     protected int useItemRemaining;
     protected int fallFlyTicks;
     private BlockPos lastPos;
-    private Optional<BlockPos> lastLadderPos = Optional.empty();
+    private Optional<BlockPos> lastClimbablePos = Optional.empty();
     private DamageSource lastDamageSource;
     private long lastDamageStamp;
     protected int autoSpinAttackTicks;
@@ -362,10 +362,39 @@ extends Entity {
         this.level.getProfiler().pop();
     }
 
+    @Override
+    public void updateSprintingState() {
+        super.updateSprintingState();
+        if (EnchantmentHelper.hasSoulSpeed(this) && this.getBlockStateOn().is(BlockTags.SOUL_SPEED_BLOCKS) && this.getDeltaMovement().x != 0.0 && this.getDeltaMovement().z != 0.0 && this.tickCount % 5 == 0) {
+            this.doSoulSpeedParticles();
+        }
+    }
+
+    protected void doSoulSpeedParticles() {
+        Vec3 vec3 = this.getDeltaMovement();
+        this.level.addParticle(ParticleTypes.SOUL, this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), vec3.x * -0.2, 0.1, vec3.z * -0.2);
+        float f = this.random.nextFloat() * 0.4f + (this.random.nextFloat() > 0.9f ? 0.6f : 0.0f);
+        this.playSound(SoundEvents.SOUL_ESCAPE, f, 0.6f + this.random.nextFloat() * 0.4f);
+    }
+
+    @Override
+    protected float getBlockSpeedFactor() {
+        int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this);
+        if (this.getBlockStateOn().is(BlockTags.SOUL_SPEED_BLOCKS) && i > 0) {
+            return 0.9f + (float)i * 0.125f;
+        }
+        return super.getBlockSpeedFactor();
+    }
+
     protected void onChangedBlock(BlockPos blockPos) {
         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FROST_WALKER, this);
         if (i > 0) {
             FrostWalkerEnchantment.onEntityMoved(this, this.level, blockPos, i);
+        }
+        if (this.getBlockStateOn().is(BlockTags.SOUL_SPEED_BLOCKS) && EnchantmentHelper.hasSoulSpeed(this) && this.getRandom().nextFloat() < 0.04f) {
+            ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
+            ServerPlayer serverPlayer = this instanceof ServerPlayer ? (ServerPlayer)this : null;
+            itemStack.hurt(1, this.getRandom(), serverPlayer);
         }
     }
 
@@ -1080,15 +1109,15 @@ extends Entity {
     public void setOnGround(boolean bl) {
         super.setOnGround(bl);
         if (bl) {
-            this.lastLadderPos = Optional.empty();
+            this.lastClimbablePos = Optional.empty();
         }
     }
 
-    public Optional<BlockPos> lastLadderPos() {
-        return this.lastLadderPos;
+    public Optional<BlockPos> getLastClimbablePos() {
+        return this.lastClimbablePos;
     }
 
-    public boolean onLadder() {
+    public boolean onClimbable() {
         if (this.isSpectator()) {
             return false;
         }
@@ -1096,11 +1125,11 @@ extends Entity {
         BlockState blockState = this.getFeetBlockState();
         Block block = blockState.getBlock();
         if (block.is(BlockTags.CLIMBABLE)) {
-            this.lastLadderPos = Optional.of(blockPos);
+            this.lastClimbablePos = Optional.of(blockPos);
             return true;
         }
         if (block instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
-            this.lastLadderPos = Optional.of(blockPos);
+            this.lastClimbablePos = Optional.of(blockPos);
             return true;
         }
         return false;
@@ -1594,7 +1623,7 @@ extends Entity {
                 this.moveRelative(g, vec3);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vec3 vec32 = this.getDeltaMovement();
-                if (this.horizontalCollision && this.onLadder()) {
+                if (this.horizontalCollision && this.onClimbable()) {
                     vec32 = new Vec3(vec32.x, 0.2, vec32.z);
                 }
                 this.setDeltaMovement(vec32.multiply(f, 0.8f, f));
@@ -1663,7 +1692,7 @@ extends Entity {
                 this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 Vec3 vec37 = this.getDeltaMovement();
-                if ((this.horizontalCollision || this.jumping) && this.onLadder()) {
+                if ((this.horizontalCollision || this.jumping) && this.onClimbable()) {
                     vec37 = new Vec3(vec37.x, 0.2, vec37.z);
                 }
                 double q = vec37.y;
@@ -1691,7 +1720,7 @@ extends Entity {
     }
 
     private Vec3 handleOnClimbable(Vec3 vec3) {
-        if (this.onLadder()) {
+        if (this.onClimbable()) {
             this.fallDistance = 0.0f;
             float f = 0.15f;
             double d = Mth.clamp(vec3.x, (double)-0.15f, (double)0.15f);
@@ -2122,7 +2151,7 @@ extends Entity {
 
     @Override
     public boolean isPushable() {
-        return this.isAlive() && !this.onLadder();
+        return this.isAlive() && !this.onClimbable();
     }
 
     @Override

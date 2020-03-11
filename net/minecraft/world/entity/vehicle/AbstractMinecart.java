@@ -187,6 +187,15 @@ extends Entity {
         return true;
     }
 
+    @Override
+    protected float getBlockSpeedFactor() {
+        BlockState blockState = this.level.getBlockState(this.blockPosition());
+        if (blockState.is(BlockTags.RAILS)) {
+            return 1.0f;
+        }
+        return super.getBlockSpeedFactor();
+    }
+
     public void destroy(DamageSource damageSource) {
         this.remove();
         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

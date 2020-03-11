@@ -40,6 +40,7 @@ public class ParticleTypes {
     public static final SimpleParticleType FISHING = ParticleTypes.register("fishing", false);
     public static final SimpleParticleType FLAME = ParticleTypes.register("flame", false);
     public static final SimpleParticleType SOUL_FIRE_FLAME = ParticleTypes.register("soul_fire_flame", false);
+    public static final SimpleParticleType SOUL = ParticleTypes.register("soul", false);
     public static final SimpleParticleType FLASH = ParticleTypes.register("flash", false);
     public static final SimpleParticleType HAPPY_VILLAGER = ParticleTypes.register("happy_villager", false);
     public static final SimpleParticleType COMPOSTER = ParticleTypes.register("composter", false);

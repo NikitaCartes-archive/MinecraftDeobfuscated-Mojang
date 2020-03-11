@@ -50,6 +50,8 @@ public class ItemTags {
     public static final Tag<Item> FENCES;
     public static final Tag<Item> TALL_FLOWERS;
     public static final Tag<Item> FLOWERS;
+    public static final Tag<Item> PIGLIN_REPELLENTS;
+    public static final Tag<Item> GOLD_ORES;
     public static final Tag<Item> BOATS;
     public static final Tag<Item> FISHES;
     public static final Tag<Item> SIGNS;
@@ -110,6 +112,8 @@ public class ItemTags {
         FENCES = ItemTags.bind("fences");
         TALL_FLOWERS = ItemTags.bind("tall_flowers");
         FLOWERS = ItemTags.bind("flowers");
+        PIGLIN_REPELLENTS = ItemTags.bind("piglin_repellents");
+        GOLD_ORES = ItemTags.bind("gold_ores");
         BOATS = ItemTags.bind("boats");
         FISHES = ItemTags.bind("fishes");
         SIGNS = ItemTags.bind("signs");

@@ -56,15 +56,16 @@ public class McRegionUpgrader {
         int i = list.size() + list2.size() + list3.size();
         LOGGER.info("Total conversion count is {}", (Object)i);
         LevelData levelData = LevelStorageSource.getDataTagFor(path, dataFixer, string);
+        long l = levelData != null ? levelData.getSeed() : 0L;
         BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
         BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
-        BiomeSource biomeSource = levelData != null && levelData.getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(levelData).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(levelData));
+        BiomeSource biomeSource = levelData != null && levelData.getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(levelData.getSeed()).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(l));
         McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
-        McRegionUpgrader.convertRegions(new File(file2, "region"), list2, biomeSourceType.create(biomeSourceType.createSettings(levelData).setBiome(Biomes.NETHER_WASTES)), list.size(), i, progressListener);
-        McRegionUpgrader.convertRegions(new File(file3, "region"), list3, biomeSourceType.create(biomeSourceType.createSettings(levelData).setBiome(Biomes.THE_END)), list.size() + list2.size(), i, progressListener);
+        McRegionUpgrader.convertRegions(new File(file2, "region"), list2, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.NETHER_WASTES)), list.size(), i, progressListener);
+        McRegionUpgrader.convertRegions(new File(file3, "region"), list3, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.THE_END)), list.size() + list2.size(), i, progressListener);
         levelData.setVersion(19133);
         if (levelData.getGeneratorType() == LevelType.NORMAL_1_1) {
-            levelData.setGenerator(LevelType.NORMAL);
+            levelData.setGeneratorProvider(LevelType.NORMAL.getDefaultProvider());
         }
         McRegionUpgrader.makeMcrLevelDatBackup(path, string);
         LevelStorage levelStorage = LevelStorageSource.selectLevel(path, dataFixer, string, null);

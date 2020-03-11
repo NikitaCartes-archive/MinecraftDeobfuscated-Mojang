@@ -21,8 +21,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
@@ -188,17 +186,13 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-        if (!level.isClientSide) {
+        if (!level.isClientSide && projectile.isOnFire()) {
             boolean bl;
-            boolean bl2 = bl = projectile instanceof Fireball || projectile instanceof AbstractArrow && projectile.isOnFire();
-            if (bl) {
-                boolean bl22;
-                Entity entity = projectile.getOwner();
-                boolean bl3 = bl22 = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-                if (bl22 && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
-                    BlockPos blockPos = blockHitResult.getBlockPos();
-                    level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
-                }
+            Entity entity = projectile.getOwner();
+            boolean bl2 = bl = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+            if (bl && !blockState.getValue(LIT).booleanValue() && !blockState.getValue(WATERLOGGED).booleanValue()) {
+                BlockPos blockPos = blockHitResult.getBlockPos();
+                level.setBlock(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true), 11);
             }
         }
     }

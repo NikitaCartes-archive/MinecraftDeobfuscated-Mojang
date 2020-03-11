@@ -395,6 +395,11 @@ implements ItemLike {
     }
 
     @Deprecated
+    public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return this.getCollisionShape(blockState, blockGetter, blockPos, CollisionContext.empty());
+    }
+
+    @Deprecated
     public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return blockState.getShape(blockGetter, blockPos);
     }
@@ -406,16 +411,16 @@ implements ItemLike {
 
     public static boolean canSupportRigidBlock(BlockGetter blockGetter, BlockPos blockPos) {
         BlockState blockState = blockGetter.getBlockState(blockPos);
-        return !blockState.is(BlockTags.LEAVES) && !Shapes.joinIsNotEmpty(blockState.getCollisionShape(blockGetter, blockPos).getFaceShape(Direction.UP), RIGID_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
+        return !Shapes.joinIsNotEmpty(blockState.getBlockSupportShape(blockGetter, blockPos).getFaceShape(Direction.UP), RIGID_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
     }
 
     public static boolean canSupportCenter(LevelReader levelReader, BlockPos blockPos, Direction direction) {
         BlockState blockState = levelReader.getBlockState(blockPos);
-        return !blockState.is(BlockTags.LEAVES) && !Shapes.joinIsNotEmpty(blockState.getCollisionShape(levelReader, blockPos).getFaceShape(direction), CENTER_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
+        return !Shapes.joinIsNotEmpty(blockState.getBlockSupportShape(levelReader, blockPos).getFaceShape(direction), CENTER_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
     }
 
     public static boolean isFaceSturdy(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-        return !blockState.is(BlockTags.LEAVES) && Block.isFaceFull(blockState.getCollisionShape(blockGetter, blockPos), direction);
+        return Block.isFaceFull(blockState.getBlockSupportShape(blockGetter, blockPos), direction);
     }
 
     public static boolean isFaceFull(VoxelShape voxelShape, Direction direction) {

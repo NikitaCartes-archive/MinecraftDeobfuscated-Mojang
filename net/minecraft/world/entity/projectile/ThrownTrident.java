@@ -122,7 +122,6 @@ extends AbstractArrow {
     protected void onHitEntity(EntityHitResult entityHitResult) {
         BlockPos blockPos;
         Entity entity2;
-        super.onHitEntity(entityHitResult);
         Entity entity = entityHitResult.getEntity();
         float f = 8.0f;
         if (entity instanceof LivingEntity) {

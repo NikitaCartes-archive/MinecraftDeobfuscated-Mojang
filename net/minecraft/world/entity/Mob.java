@@ -63,6 +63,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -192,6 +193,10 @@ extends LivingEntity {
     @Override
     public boolean canAttackType(EntityType<?> entityType) {
         return entityType != EntityType.GHAST;
+    }
+
+    public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeaponItem) {
+        return false;
     }
 
     public void ate() {
@@ -488,6 +493,11 @@ extends LivingEntity {
 
     protected void setItemSlotAndDropWhenKilled(EquipmentSlot equipmentSlot, ItemStack itemStack) {
         this.setItemSlot(equipmentSlot, itemStack);
+        this.setGuaranteedDrop(equipmentSlot);
+        this.persistenceRequired = true;
+    }
+
+    public void setGuaranteedDrop(EquipmentSlot equipmentSlot) {
         switch (equipmentSlot.getType()) {
             case HAND: {
                 this.handDropChances[equipmentSlot.getIndex()] = 2.0f;
@@ -497,7 +507,6 @@ extends LivingEntity {
                 this.armorDropChances[equipmentSlot.getIndex()] = 2.0f;
             }
         }
-        this.persistenceRequired = true;
     }
 
     protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {

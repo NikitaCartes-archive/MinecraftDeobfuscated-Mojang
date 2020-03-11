@@ -9,6 +9,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -35,10 +36,10 @@ public class CombatTracker {
 
     public void prepareForDamage() {
         this.resetPreparedStatus();
-        Optional<BlockPos> optional = this.mob.lastLadderPos();
+        Optional<BlockPos> optional = this.mob.getLastClimbablePos();
         if (optional.isPresent()) {
             Block block = this.mob.level.getBlockState(optional.get()).getBlock();
-            this.nextLocation = block == Blocks.LADDER ? "ladder" : (block == Blocks.VINE ? "vines" : (block == Blocks.WEEPING_VINES_PLANT || block == Blocks.WEEPING_VINES ? "weeping_vines" : "other_climbable"));
+            this.nextLocation = block == Blocks.LADDER || block.is(BlockTags.TRAPDOORS) ? "ladder" : (block == Blocks.VINE ? "vines" : (block == Blocks.WEEPING_VINES || block == Blocks.WEEPING_VINES_PLANT ? "weeping_vines" : (block == Blocks.TWISTING_VINES || block == Blocks.TWISTING_VINES_PLANT ? "twisting_vines" : (block == Blocks.SCAFFOLDING ? "scaffolding" : "other_climbable"))));
         } else if (this.mob.isInWater()) {
             this.nextLocation = "water";
         }

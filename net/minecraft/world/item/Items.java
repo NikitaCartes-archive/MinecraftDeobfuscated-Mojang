@@ -137,6 +137,7 @@ public class Items {
     public static final Item GOLD_ORE = Items.registerBlock(Blocks.GOLD_ORE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item IRON_ORE = Items.registerBlock(Blocks.IRON_ORE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item COAL_ORE = Items.registerBlock(Blocks.COAL_ORE, CreativeModeTab.TAB_BUILDING_BLOCKS);
+    public static final Item NETHER_GOLD_ORE = Items.registerBlock(Blocks.NETHER_GOLD_ORE, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_LOG = Items.registerBlock(Blocks.OAK_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item SPRUCE_LOG = Items.registerBlock(Blocks.SPRUCE_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item BIRCH_LOG = Items.registerBlock(Blocks.BIRCH_LOG, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -232,6 +233,7 @@ public class Items {
     public static final Item WARPED_ROOTS = Items.registerBlock(Blocks.WARPED_ROOTS, CreativeModeTab.TAB_DECORATIONS);
     public static final Item NETHER_SPROUTS = Items.registerBlock(Blocks.NETHER_SPROUTS, CreativeModeTab.TAB_DECORATIONS);
     public static final Item WEEPING_VINES = Items.registerBlock(Blocks.WEEPING_VINES, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item TWISTING_VINES = Items.registerBlock(Blocks.TWISTING_VINES, CreativeModeTab.TAB_DECORATIONS);
     public static final Item GOLD_BLOCK = Items.registerBlock(Blocks.GOLD_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item IRON_BLOCK = Items.registerBlock(Blocks.IRON_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item OAK_SLAB = Items.registerBlock(Blocks.OAK_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -690,6 +692,10 @@ public class Items {
     public static final Item GOLDEN_SHOVEL = Items.registerItem("golden_shovel", (Item)new ShovelItem(Tiers.GOLD, 1.5f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item GOLDEN_PICKAXE = Items.registerItem("golden_pickaxe", (Item)new PickaxeItem(Tiers.GOLD, 1, -2.8f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item GOLDEN_AXE = Items.registerItem("golden_axe", (Item)new AxeItem(Tiers.GOLD, 6.0f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+    public static final Item NETHERITE_SWORD = Items.registerItem("netherite_sword", (Item)new SwordItem(Tiers.NETHERITE, 3, -2.4f, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_SHOVEL = Items.registerItem("netherite_shovel", (Item)new ShovelItem(Tiers.NETHERITE, 1.5f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_PICKAXE = Items.registerItem("netherite_pickaxe", (Item)new PickaxeItem(Tiers.NETHERITE, 1, -2.8f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
+    public static final Item NETHERITE_AXE = Items.registerItem("netherite_axe", (Item)new AxeItem(Tiers.NETHERITE, 5.0f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
     public static final Item STRING = Items.registerItem("string", (Item)new ItemNameBlockItem(Blocks.TRIPWIRE, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item FEATHER = Items.registerItem("feather", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item GUNPOWDER = Items.registerItem("gunpowder", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
@@ -698,6 +704,7 @@ public class Items {
     public static final Item IRON_HOE = Items.registerItem("iron_hoe", (Item)new HoeItem(Tiers.IRON, -2, -1.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item DIAMOND_HOE = Items.registerItem("diamond_hoe", (Item)new HoeItem(Tiers.DIAMOND, -3, 0.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item GOLDEN_HOE = Items.registerItem("golden_hoe", (Item)new HoeItem(Tiers.GOLD, 0, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+    public static final Item NETHERITE_HOE = Items.registerItem("netherite_hoe", (Item)new HoeItem(Tiers.NETHERITE, -4, 0.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
     public static final Item WHEAT_SEEDS = Items.registerItem("wheat_seeds", (Item)new ItemNameBlockItem(Blocks.WHEAT, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item WHEAT = Items.registerItem("wheat", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item BREAD = Items.registerItem("bread", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.BREAD)));
@@ -721,6 +728,10 @@ public class Items {
     public static final Item GOLDEN_CHESTPLATE = Items.registerItem("golden_chestplate", (Item)new ArmorItem(ArmorMaterials.GOLD, EquipmentSlot.CHEST, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item GOLDEN_LEGGINGS = Items.registerItem("golden_leggings", (Item)new ArmorItem(ArmorMaterials.GOLD, EquipmentSlot.LEGS, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item GOLDEN_BOOTS = Items.registerItem("golden_boots", (Item)new ArmorItem(ArmorMaterials.GOLD, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT)));
+    public static final Item NETHERITE_HELMET = Items.registerItem("netherite_helmet", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_CHESTPLATE = Items.registerItem("netherite_chestplate", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.CHEST, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_LEGGINGS = Items.registerItem("netherite_leggings", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.LEGS, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
+    public static final Item NETHERITE_BOOTS = Items.registerItem("netherite_boots", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
     public static final Item FLINT = Items.registerItem("flint", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item PORKCHOP = Items.registerItem("porkchop", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.PORKCHOP)));
     public static final Item COOKED_PORKCHOP = Items.registerItem("cooked_porkchop", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COOKED_PORKCHOP)));
@@ -1033,15 +1044,6 @@ public class Items {
     public static final Item ANCIENT_DEBRIS = Items.registerBlock(new BlockItem(Blocks.ANCIENT_DEBRIS, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant()));
     public static final Item NETHERITE_INGOT = Items.registerItem("netherite_ingot", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).fireResistant()));
     public static final Item NETHERITE_SCRAP = Items.registerItem("netherite_scrap", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).fireResistant()));
-    public static final Item NETHERITE_SWORD = Items.registerItem("netherite_sword", (Item)new SwordItem(Tiers.NETHERITE, 3, -2.4f, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
-    public static final Item NETHERITE_SHOVEL = Items.registerItem("netherite_shovel", (Item)new ShovelItem(Tiers.NETHERITE, 1.5f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
-    public static final Item NETHERITE_PICKAXE = Items.registerItem("netherite_pickaxe", (Item)new PickaxeItem(Tiers.NETHERITE, 1, -2.8f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
-    public static final Item NETHERITE_AXE = Items.registerItem("netherite_axe", (Item)new AxeItem(Tiers.NETHERITE, 5.0f, -3.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
-    public static final Item NETHERITE_HOE = Items.registerItem("netherite_hoe", (Item)new HoeItem(Tiers.NETHERITE, -4, 0.0f, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).fireResistant()));
-    public static final Item NETHERITE_HELMET = Items.registerItem("netherite_helmet", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.HEAD, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
-    public static final Item NETHERITE_CHESTPLATE = Items.registerItem("netherite_chestplate", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.CHEST, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
-    public static final Item NETHERITE_LEGGINGS = Items.registerItem("netherite_leggings", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.LEGS, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
-    public static final Item NETHERITE_BOOTS = Items.registerItem("netherite_boots", (Item)new ArmorItem(ArmorMaterials.NETHERITE, EquipmentSlot.FEET, new Item.Properties().tab(CreativeModeTab.TAB_COMBAT).fireResistant()));
     public static final Item TARGET = Items.registerBlock(Blocks.TARGET, CreativeModeTab.TAB_REDSTONE);
     public static final Item CRYING_OBSIDIAN = Items.registerBlock(Blocks.CRYING_OBSIDIAN, CreativeModeTab.TAB_BUILDING_BLOCKS);
 

@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SerializableBoolean;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.IntRange;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.world.InteractionHand;
@@ -119,7 +120,7 @@ public class PiglinAi {
 
     private static void initFightActivity(Piglin piglin, Brain<Piglin> brain) {
         float f = piglin.getMovementSpeed();
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new StopAttackingIfTargetInvalid(livingEntity -> !PiglinAi.isNearestValidAttackTarget(piglin, livingEntity)), new RunIf<Piglin>(PiglinAi::hasCrossbow, new BackUpIfTooClose(5, 0.75f)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.2f), new MeleeAttack(1.5, 20), new CrossbowAttack(), new RememberIfHoglinWasKilled()), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new StopAttackingIfTargetInvalid(livingEntity -> !PiglinAi.isNearestValidAttackTarget(piglin, livingEntity)), new RunIf<Piglin>(PiglinAi::hasCrossbow, new BackUpIfTooClose(5, 0.75f)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.2f), new MeleeAttack(20), new CrossbowAttack(), new RememberIfHoglinWasKilled()), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static void initCelebrateActivity(Piglin piglin, Brain<Piglin> brain) {
@@ -240,6 +241,13 @@ public class PiglinAi {
         }
     }
 
+    protected static void cancelAdmiring(Piglin piglin) {
+        if (PiglinAi.isAdmiringItem(piglin) && !piglin.getOffhandItem().isEmpty()) {
+            piglin.spawnAtLocation(piglin.getOffhandItem());
+            piglin.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        }
+    }
+
     private static void putInInventory(Piglin piglin, ItemStack itemStack) {
         ItemStack itemStack2 = piglin.addToInventory(itemStack);
         PiglinAi.throwItemTowardRandomPos(piglin, itemStack2);
@@ -279,6 +287,9 @@ public class PiglinAi {
         Item item = itemStack.getItem();
         if (item == Items.GOLD_NUGGET) {
             return true;
+        }
+        if (item.is(ItemTags.PIGLIN_REPELLENTS)) {
+            return false;
         }
         if (PiglinAi.isAdmiringDisabled(piglin) && piglin.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
             return false;

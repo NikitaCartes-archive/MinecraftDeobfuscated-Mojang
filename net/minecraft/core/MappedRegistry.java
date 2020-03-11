@@ -93,7 +93,6 @@ extends WritableRegistry<T> {
         return this.storage.isEmpty();
     }
 
-    @Override
     @Nullable
     public T getRandom(Random random) {
         if (this.randomCache == null) {

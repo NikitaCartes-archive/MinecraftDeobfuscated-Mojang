@@ -91,6 +91,7 @@ import net.minecraft.world.level.levelgen.feature.StrongholdFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.SwamplandHutFeature;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.feature.TwistingVinesFeature;
 import net.minecraft.world.level.levelgen.feature.VillageFeature;
 import net.minecraft.world.level.levelgen.feature.VinesFeature;
 import net.minecraft.world.level.levelgen.feature.VoidStartPlatformFeature;
@@ -193,6 +194,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<HugeFungusConfiguration> HUGE_FUNGUS = Feature.register("huge_fungus", new HugeFungusFeature((Function<Dynamic<?>, ? extends HugeFungusConfiguration>)((Function<Dynamic<?>, HugeFungusConfiguration>)HugeFungusConfiguration::deserialize)));
     public static final Feature<BlockPileConfiguration> NETHER_FOREST_VEGETATION = Feature.register("nether_forest_vegetation", new NetherForestVegetationFeature((Function<Dynamic<?>, ? extends BlockPileConfiguration>)((Function<Dynamic<?>, BlockPileConfiguration>)BlockPileConfiguration::deserialize)));
     public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = Feature.register("weeping_vines", new WeepingVinesFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
+    public static final Feature<NoneFeatureConfiguration> TWISTING_VINES = Feature.register("twisting_vines", new TwistingVinesFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<LayerConfiguration> FILL_LAYER = Feature.register("fill_layer", new FillLayerFeature((Function<Dynamic<?>, ? extends LayerConfiguration>)((Function<Dynamic<?>, LayerConfiguration>)LayerConfiguration::deserialize)));
     public static final BonusChestFeature BONUS_CHEST = Feature.register("bonus_chest", new BonusChestFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<NoneFeatureConfiguration> BASALT_PILLAR = Feature.register("basalt_pillar", new BasaltPillarFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));

@@ -125,6 +125,9 @@ public final class ProjectileUtil {
 
     public static final void rotateTowardsMovement(Entity entity, float f) {
         Vec3 vec3 = entity.getDeltaMovement();
+        if (vec3.lengthSqr() == 0.0) {
+            return;
+        }
         float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
         entity.yRot = (float)(Mth.atan2(vec3.z, vec3.x) * 57.2957763671875) + 90.0f;
         entity.xRot = (float)(Mth.atan2(g, vec3.y) * 57.2957763671875) - 90.0f;

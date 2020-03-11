@@ -50,7 +50,8 @@ public class BlockTags {
     public static final Tag<Block> FENCES;
     public static final Tag<Block> TALL_FLOWERS;
     public static final Tag<Block> FLOWERS;
-    public static final Tag<Block> SHULKER_BOXES;
+    public static final Tag<Block> PIGLIN_REPELLENTS;
+    public static final Tag<Block> GOLD_ORES;
     public static final Tag<Block> FLOWER_POTS;
     public static final Tag<Block> ENDERMAN_HOLDABLE;
     public static final Tag<Block> ICE;
@@ -76,9 +77,10 @@ public class BlockTags {
     public static final Tag<Block> NYLIUM;
     public static final Tag<Block> WART_BLOCKS;
     public static final Tag<Block> BEACON_BASE_BLOCKS;
+    public static final Tag<Block> SOUL_SPEED_BLOCKS;
     public static final Tag<Block> WALL_POST_OVERRIDE;
     public static final Tag<Block> CLIMBABLE;
-    public static final Tag<Block> PIGLIN_REPELLENTS;
+    public static final Tag<Block> SHULKER_BOXES;
     public static final Tag<Block> HOGLIN_REPELLENTS;
 
     public static void reset(TagCollection<Block> tagCollection) {
@@ -132,7 +134,8 @@ public class BlockTags {
         FENCES = BlockTags.bind("fences");
         TALL_FLOWERS = BlockTags.bind("tall_flowers");
         FLOWERS = BlockTags.bind("flowers");
-        SHULKER_BOXES = BlockTags.bind("shulker_boxes");
+        PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
+        GOLD_ORES = BlockTags.bind("gold_ores");
         FLOWER_POTS = BlockTags.bind("flower_pots");
         ENDERMAN_HOLDABLE = BlockTags.bind("enderman_holdable");
         ICE = BlockTags.bind("ice");
@@ -158,9 +161,10 @@ public class BlockTags {
         NYLIUM = BlockTags.bind("nylium");
         WART_BLOCKS = BlockTags.bind("wart_blocks");
         BEACON_BASE_BLOCKS = BlockTags.bind("beacon_base_blocks");
+        SOUL_SPEED_BLOCKS = BlockTags.bind("soul_speed_blocks");
         WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
         CLIMBABLE = BlockTags.bind("climbable");
-        PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
+        SHULKER_BOXES = BlockTags.bind("shulker_boxes");
         HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
     }
 

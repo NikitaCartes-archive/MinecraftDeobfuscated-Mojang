@@ -7,8 +7,6 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -54,7 +52,6 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractArrow
 extends Projectile {
     private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
-    protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Byte> PIERCE_LEVEL = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
     @Nullable
     private BlockState lastState;
@@ -104,7 +101,6 @@ extends Projectile {
     @Override
     protected void defineSynchedData() {
         this.entityData.define(ID_FLAGS, (byte)0);
-        this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
         this.entityData.define(PIERCE_LEVEL, (byte)0);
     }
 

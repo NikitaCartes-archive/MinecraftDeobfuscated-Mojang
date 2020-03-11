@@ -11,44 +11,29 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.RisingParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
-public class FlameParticle
+public class SoulParticle
 extends RisingParticle {
-    private FlameParticle(Level level, double d, double e, double f, double g, double h, double i) {
+    private final SpriteSet sprites;
+
+    private SoulParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
         super(level, d, e, f, g, h, i);
+        this.sprites = spriteSet;
+        this.scale(1.5f);
+        this.setSpriteFromAge(spriteSet);
     }
 
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     @Override
-    public void move(double d, double e, double f) {
-        this.setBoundingBox(this.getBoundingBox().move(d, e, f));
-        this.setLocationFromBoundingbox();
-    }
-
-    @Override
-    public float getQuadSize(float f) {
-        float g = ((float)this.age + f) / (float)this.lifetime;
-        return this.quadSize * (1.0f - g * g * 0.5f);
-    }
-
-    @Override
-    public int getLightColor(float f) {
-        float g = ((float)this.age + f) / (float)this.lifetime;
-        g = Mth.clamp(g, 0.0f, 1.0f);
-        int i = super.getLightColor(f);
-        int j = i & 0xFF;
-        int k = i >> 16 & 0xFF;
-        if ((j += (int)(g * 15.0f * 16.0f)) > 240) {
-            j = 240;
-        }
-        return j | k << 16;
+    public void tick() {
+        super.tick();
+        this.setSpriteFromAge(this.sprites);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -62,9 +47,10 @@ extends RisingParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            FlameParticle flameParticle = new FlameParticle(level, d, e, f, g, h, i);
-            flameParticle.pickSprite(this.sprite);
-            return flameParticle;
+            SoulParticle soulParticle = new SoulParticle(level, d, e, f, g, h, i, this.sprite);
+            soulParticle.setAlpha(1.0f);
+            soulParticle.pickSprite(this.sprite);
+            return soulParticle;
         }
     }
 }

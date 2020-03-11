@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -31,8 +32,9 @@ extends Behavior<E> {
 
     @Override
     protected void start(ServerLevel serverLevel, E mob, long l) {
-        ((Mob)mob).getMoveControl().strafe(-this.strafeSpeed, 0.0f);
         ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(this.getTarget(mob)));
+        ((Mob)mob).getMoveControl().strafe(-this.strafeSpeed, 0.0f);
+        ((Mob)mob).yRot = Mth.rotateIfNecessary(((Mob)mob).yRot, ((Mob)mob).yHeadRot, 0.0f);
     }
 
     private boolean isTargetVisible(E mob) {

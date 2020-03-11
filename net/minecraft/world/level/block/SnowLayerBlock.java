@@ -61,6 +61,11 @@ extends Block {
     }
 
     @Override
+    public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
+    }
+
+    @Override
     public boolean useShapeForLightOcclusion(BlockState blockState) {
         return true;
     }

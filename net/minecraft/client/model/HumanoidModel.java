@@ -240,12 +240,12 @@ HeadedModel {
         if (this.rightArmPose == ArmPose.CROSSBOW_CHARGE) {
             AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, true);
         } else if (this.leftArmPose == ArmPose.CROSSBOW_CHARGE) {
-            AnimationUtils.animateCrossbowCharge(this.leftArm, this.rightArm, livingEntity, false);
+            AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, false);
         }
         if (this.rightArmPose == ArmPose.CROSSBOW_HOLD && this.attackTime <= 0.0f) {
             AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
         } else if (this.leftArmPose == ArmPose.CROSSBOW_HOLD) {
-            AnimationUtils.animateCrossbowHold(this.leftArm, this.rightArm, this.head, false);
+            AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
         }
         if (this.swimAmount > 0.0f) {
             float p;

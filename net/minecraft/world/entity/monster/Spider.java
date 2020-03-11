@@ -120,7 +120,7 @@ extends Monster {
     }
 
     @Override
-    public boolean onLadder() {
+    public boolean onClimbable() {
         return this.isClimbing();
     }
 

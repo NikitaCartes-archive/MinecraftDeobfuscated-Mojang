@@ -36,7 +36,6 @@ extends ItemCombinerScreen<AnvilMenu> {
         int j = (this.height - this.imageHeight) / 2;
         this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, I18n.get("container.repair", new Object[0]));
         this.name.setCanLoseFocus(false);
-        this.name.changeFocus(true);
         this.name.setTextColor(-1);
         this.name.setTextColorUneditable(-1);
         this.name.setBordered(false);
@@ -119,6 +118,7 @@ extends ItemCombinerScreen<AnvilMenu> {
         if (i == 0) {
             this.name.setValue(itemStack.isEmpty() ? "" : itemStack.getHoverName().getString());
             this.name.setEditable(!itemStack.isEmpty());
+            this.setFocused(this.name);
         }
     }
 }

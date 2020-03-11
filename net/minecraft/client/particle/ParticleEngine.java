@@ -66,6 +66,7 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.PlayerCloudParticle;
 import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.SmokeParticle;
+import net.minecraft.client.particle.SoulParticle;
 import net.minecraft.client.particle.SpellParticle;
 import net.minecraft.client.particle.SpitParticle;
 import net.minecraft.client.particle.SplashParticle;
@@ -162,6 +163,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
         this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
         this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
+        this.register(ParticleTypes.SOUL, SoulParticle.Provider::new);
         this.register(ParticleTypes.SOUL_FIRE_FLAME, FlameParticle.Provider::new);
         this.register(ParticleTypes.FLASH, FireworkParticles.FlashProvider::new);
         this.register(ParticleTypes.HAPPY_VILLAGER, SuspendedTownParticle.HappyVillagerProvider::new);

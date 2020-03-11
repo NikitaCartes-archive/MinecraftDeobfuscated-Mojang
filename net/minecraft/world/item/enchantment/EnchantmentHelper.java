@@ -200,6 +200,10 @@ public class EnchantmentHelper {
         return EnchantmentHelper.getEnchantmentLevel(Enchantments.FROST_WALKER, livingEntity) > 0;
     }
 
+    public static boolean hasSoulSpeed(LivingEntity livingEntity) {
+        return EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, livingEntity) > 0;
+    }
+
     public static boolean hasBindingCurse(ItemStack itemStack) {
         return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BINDING_CURSE, itemStack) > 0;
     }
@@ -319,7 +323,7 @@ public class EnchantmentHelper {
         Item item = itemStack.getItem();
         boolean bl2 = itemStack.getItem() == Items.BOOK;
         block0: for (Enchantment enchantment : Registry.ENCHANTMENT) {
-            if (enchantment.isTreasureOnly() && !bl || !enchantment.category.canEnchant(item) && !bl2) continue;
+            if (enchantment.isTreasureOnly() && !bl || !enchantment.isDiscoverable() || !enchantment.category.canEnchant(item) && !bl2) continue;
             for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; --j) {
                 if (i < enchantment.getMinCost(j) || i > enchantment.getMaxCost(j)) continue;
                 list.add(new EnchantmentInstance(enchantment, j));

@@ -88,7 +88,7 @@ extends ThrowableItemProjectile {
         for (int i = 0; i < 32; ++i) {
             this.level.addParticle(ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0, this.getZ(), this.random.nextGaussian(), 0.0, this.random.nextGaussian());
         }
-        if (!this.level.isClientSide) {
+        if (!this.level.isClientSide && !this.removed) {
             if (entity instanceof ServerPlayer) {
                 ServerPlayer serverPlayer = (ServerPlayer)entity;
                 if (serverPlayer.connection.getConnection().isConnected() && serverPlayer.level == this.level && !serverPlayer.isSleeping()) {

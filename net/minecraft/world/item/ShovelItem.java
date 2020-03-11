@@ -52,7 +52,9 @@ extends DiggerItem {
                 level.playSound(player2, blockPos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
                 blockState3 = blockState2;
             } else if (blockState.getBlock() instanceof CampfireBlock && blockState.getValue(CampfireBlock.LIT).booleanValue()) {
-                level.levelEvent(null, 1009, blockPos, 0);
+                if (!level.isClientSide()) {
+                    level.levelEvent(null, 1009, blockPos, 0);
+                }
                 blockState3 = (BlockState)blockState.setValue(CampfireBlock.LIT, false);
             }
             if (blockState3 != null) {
