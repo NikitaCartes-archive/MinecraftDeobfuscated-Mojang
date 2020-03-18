@@ -14,6 +14,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -28,7 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class BubbleColumnBlock extends Block implements BucketPickup {
 	public static final BooleanProperty DRAG_DOWN = BlockStateProperties.DRAG;
 
-	public BubbleColumnBlock(Block.Properties properties) {
+	public BubbleColumnBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(DRAG_DOWN, Boolean.valueOf(true)));
 	}
@@ -103,11 +104,6 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 		return block == Blocks.BUBBLE_COLUMN ? (Boolean)blockState.getValue(DRAG_DOWN) : block != Blocks.SOUL_SAND;
 	}
 
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 5;
-	}
-
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
@@ -144,7 +140,7 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 			if (direction == Direction.DOWN) {
 				levelAccessor.setBlock(blockPos, Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, Boolean.valueOf(getDrag(levelAccessor, blockPos2))), 2);
 			} else if (direction == Direction.UP && blockState2.getBlock() != Blocks.BUBBLE_COLUMN && canExistIn(levelAccessor, blockPos2)) {
-				levelAccessor.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(levelAccessor));
+				levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 5);
 			}
 
 			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));

@@ -9,8 +9,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.entity.npc.CatSpawner;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -152,6 +154,11 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 		}
 
 		return 0;
+	}
+
+	@Override
+	public BlockGetter getBaseColumn(int i, int j) {
+		return new NoiseColumn(this.settings.getLayers());
 	}
 
 	@Override

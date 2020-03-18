@@ -13,6 +13,7 @@ import net.minecraft.world.item.LeadItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -20,12 +21,13 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FenceBlock extends CrossCollisionBlock {
 	private final VoxelShape[] occlusionByIndex;
 
-	public FenceBlock(Block.Properties properties) {
+	public FenceBlock(BlockBehaviour.Properties properties) {
 		super(2.0F, 2.0F, 16.0F, 16.0F, 24.0F, properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -42,6 +44,11 @@ public class FenceBlock extends CrossCollisionBlock {
 	@Override
 	public VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return this.occlusionByIndex[this.getAABBIndex(blockState)];
+	}
+
+	@Override
+	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return this.getShape(blockState, blockGetter, blockPos, collisionContext);
 	}
 
 	@Override

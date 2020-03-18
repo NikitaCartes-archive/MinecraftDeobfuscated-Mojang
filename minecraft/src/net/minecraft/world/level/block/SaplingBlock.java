@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -18,7 +19,7 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0);
 	private final AbstractTreeGrower treeGrower;
 
-	protected SaplingBlock(AbstractTreeGrower abstractTreeGrower, Block.Properties properties) {
+	protected SaplingBlock(AbstractTreeGrower abstractTreeGrower, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.treeGrower = abstractTreeGrower;
 		this.registerDefaultState(this.stateDefinition.any().setValue(STAGE, Integer.valueOf(0)));
@@ -30,8 +31,7 @@ public class SaplingBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		super.tick(blockState, serverLevel, blockPos, random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getMaxLocalRawBrightness(blockPos.above()) >= 9 && random.nextInt(7) == 0) {
 			this.advanceTree(serverLevel, blockPos, blockState, random);
 		}

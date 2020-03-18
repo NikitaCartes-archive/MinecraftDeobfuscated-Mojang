@@ -2,12 +2,14 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SoulFireBlock extends BaseFireBlock {
-	public SoulFireBlock(Block.Properties properties) {
+	public SoulFireBlock(BlockBehaviour.Properties properties) {
 		super(properties, 2.0F);
 	}
 
@@ -20,7 +22,11 @@ public class SoulFireBlock extends BaseFireBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.SOUL_SOIL;
+		return canSurviveOnBlock(levelReader.getBlockState(blockPos.below()).getBlock());
+	}
+
+	public static boolean canSurviveOnBlock(Block block) {
+		return block.is(BlockTags.SOUL_FIRE_BASE_BLOCKS);
 	}
 
 	@Override

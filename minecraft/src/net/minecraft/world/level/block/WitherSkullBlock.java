@@ -15,6 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
@@ -29,7 +30,7 @@ public class WitherSkullBlock extends SkullBlock {
 	@Nullable
 	private static BlockPattern witherPatternBase;
 
-	protected WitherSkullBlock(Block.Properties properties) {
+	protected WitherSkullBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.WITHER_SKELETON, properties);
 	}
 

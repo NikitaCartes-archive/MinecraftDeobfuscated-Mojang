@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
 public class ClientboundGameEventPacket implements Packet<ClientGamePacketListener> {
-	public static final String[] EVENT_LANGUAGE_ID = new String[]{"block.minecraft.bed.not_valid"};
+	public static final String[] EVENT_LANGUAGE_ID = new String[]{"block.minecraft.spawn.not_valid"};
 	private int event;
 	private float param;
 

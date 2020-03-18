@@ -34,6 +34,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -53,6 +54,7 @@ public class FishingHook extends Entity {
 	private int timeUntilLured;
 	private int timeUntilHooked;
 	private float fishAngle;
+	private boolean openWater = true;
 	public Entity hookedIn;
 	private FishingHook.FishHookState currentState = FishingHook.FishHookState.FLYING;
 	private final int luck;
@@ -186,6 +188,7 @@ public class FishingHook extends Entity {
 					}
 
 					this.setDeltaMovement(vec3.x * 0.9, vec3.y - d * (double)this.random.nextFloat() * 0.2, vec3.z * 0.9);
+					this.openWater = this.openWater && this.calculateOpenWater(blockPos);
 					if (!this.level.isClientSide && f > 0.0F) {
 						this.catchingFish(blockPos);
 					}
@@ -379,6 +382,27 @@ public class FishingHook extends Entity {
 		}
 	}
 
+	private boolean calculateOpenWater(BlockPos blockPos) {
+		return BlockPos.betweenClosedStream(blockPos.offset(-2, -1, -2), blockPos.offset(2, 2, 2)).allMatch(this::validOpenWaterBlockAt);
+	}
+
+	private boolean validOpenWaterBlockAt(BlockPos blockPos) {
+		BlockState blockState = this.level.getBlockState(blockPos);
+		if (blockState.isAir()) {
+			return true;
+		} else {
+			FluidState fluidState = blockState.getFluidState();
+			return fluidState.is(FluidTags.WATER)
+				&& fluidState.isSource()
+				&& blockState.getBlock() != Blocks.BUBBLE_COLUMN
+				&& blockState.getCollisionShape(this.level, blockPos).isEmpty();
+		}
+	}
+
+	public boolean isOpenWaterFishing() {
+		return this.openWater;
+	}
+
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 	}
@@ -399,6 +423,7 @@ public class FishingHook extends Entity {
 				LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
 					.withParameter(LootContextParams.BLOCK_POS, this.blockPosition())
 					.withParameter(LootContextParams.TOOL, itemStack)
+					.withParameter(LootContextParams.THIS_ENTITY, this)
 					.withRandom(this.random)
 					.withLuck((float)this.luck + this.owner.getLuck());
 				LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);

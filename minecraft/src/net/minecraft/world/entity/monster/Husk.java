@@ -71,7 +71,9 @@ public class Husk extends Zombie {
 	@Override
 	protected void doUnderWaterConversion() {
 		this.convertTo(EntityType.ZOMBIE);
-		this.level.levelEvent(null, 1041, this.blockPosition(), 0);
+		if (!this.isSilent()) {
+			this.level.levelEvent(null, 1041, this.blockPosition(), 0);
+		}
 	}
 
 	@Override

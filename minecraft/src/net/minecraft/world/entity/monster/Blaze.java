@@ -230,7 +230,9 @@ public class Blaze extends Monster {
 
 						if (this.attackStep > 1) {
 							float h = Mth.sqrt(Mth.sqrt(d)) * 0.5F;
-							this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+							if (!this.blaze.isSilent()) {
+								this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+							}
 
 							for (int i = 0; i < 1; i++) {
 								SmallFireball smallFireball = new SmallFireball(

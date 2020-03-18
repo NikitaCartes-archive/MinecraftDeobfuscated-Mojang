@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -19,7 +20,7 @@ public class FungusBlock extends BushBlock implements BonemealableBlock {
 	protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
 	private final Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> feature;
 
-	protected FungusBlock(Block.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
+	protected FungusBlock(BlockBehaviour.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
 		super(properties);
 		this.feature = supplier;
 	}

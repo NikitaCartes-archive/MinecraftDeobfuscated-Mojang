@@ -15,7 +15,7 @@ import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,14 +29,9 @@ public class DetectorRailBlock extends BaseRailBlock {
 	public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE_STRAIGHT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	public DetectorRailBlock(Block.Properties properties) {
+	public DetectorRailBlock(BlockBehaviour.Properties properties) {
 		super(true, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)).setValue(SHAPE, RailShape.NORTH_SOUTH));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 20;
 	}
 
 	@Override
@@ -101,7 +96,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 		}
 
 		if (bl2) {
-			level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+			level.getBlockTicks().scheduleTick(blockPos, this, 20);
 		}
 
 		level.updateNeighbourForOutputSignal(blockPos, this);

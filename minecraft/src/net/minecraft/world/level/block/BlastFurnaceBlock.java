@@ -15,10 +15,11 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlastFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BlastFurnaceBlock extends AbstractFurnaceBlock {
-	protected BlastFurnaceBlock(Block.Properties properties) {
+	protected BlastFurnaceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

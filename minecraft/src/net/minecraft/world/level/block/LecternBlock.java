@@ -20,6 +20,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -65,7 +66,7 @@ public class LecternBlock extends BaseEntityBlock {
 		SHAPE_COMMON
 	);
 
-	protected LecternBlock(Block.Properties properties) {
+	protected LecternBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(false))

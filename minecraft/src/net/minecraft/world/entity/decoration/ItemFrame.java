@@ -151,7 +151,7 @@ public class ItemFrame extends HangingEntity {
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.fixed) {
-			return false;
+			return damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer() ? false : super.hurt(damageSource, f);
 		} else if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!damageSource.isExplosion() && !this.getItem().isEmpty()) {
@@ -196,30 +196,32 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void dropItem(@Nullable Entity entity, boolean bl) {
-		if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-			if (entity == null) {
-				this.removeFramedMap(this.getItem());
-			}
-		} else {
-			ItemStack itemStack = this.getItem();
-			this.setItem(ItemStack.EMPTY);
-			if (entity instanceof Player) {
-				Player player = (Player)entity;
-				if (player.abilities.instabuild) {
-					this.removeFramedMap(itemStack);
-					return;
+		if (!this.fixed) {
+			if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+				if (entity == null) {
+					this.removeFramedMap(this.getItem());
 				}
-			}
+			} else {
+				ItemStack itemStack = this.getItem();
+				this.setItem(ItemStack.EMPTY);
+				if (entity instanceof Player) {
+					Player player = (Player)entity;
+					if (player.abilities.instabuild) {
+						this.removeFramedMap(itemStack);
+						return;
+					}
+				}
 
-			if (bl) {
-				this.spawnAtLocation(Items.ITEM_FRAME);
-			}
+				if (bl) {
+					this.spawnAtLocation(Items.ITEM_FRAME);
+				}
 
-			if (!itemStack.isEmpty()) {
-				itemStack = itemStack.copy();
-				this.removeFramedMap(itemStack);
-				if (this.random.nextFloat() < this.dropChance) {
-					this.spawnAtLocation(itemStack);
+				if (!itemStack.isEmpty()) {
+					itemStack = itemStack.copy();
+					this.removeFramedMap(itemStack);
+					if (this.random.nextFloat() < this.dropChance) {
+						this.spawnAtLocation(itemStack);
+					}
 				}
 			}
 		}

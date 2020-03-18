@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -32,7 +33,7 @@ public class CrossCollisionBlock extends Block implements SimpleWaterloggedBlock
 	protected final VoxelShape[] shapeByIndex;
 	private final Object2IntMap<BlockState> stateToIndex = new Object2IntOpenHashMap<>();
 
-	protected CrossCollisionBlock(float f, float g, float h, float i, float j, Block.Properties properties) {
+	protected CrossCollisionBlock(float f, float g, float h, float i, float j, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.collisionShapeByIndex = this.makeShapes(f, g, j, 0.0F, j);
 		this.shapeByIndex = this.makeShapes(f, g, h, 0.0F, i);

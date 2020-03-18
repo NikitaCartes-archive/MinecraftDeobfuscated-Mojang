@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,13 +34,18 @@ public class CocoaBlock extends HorizontalDirectionalBlock implements Bonemealab
 		Block.box(6.0, 7.0, 11.0, 10.0, 12.0, 15.0), Block.box(5.0, 5.0, 9.0, 11.0, 12.0, 15.0), Block.box(4.0, 3.0, 7.0, 12.0, 12.0, 15.0)
 	};
 
-	public CocoaBlock(Block.Properties properties) {
+	public CocoaBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(AGE, Integer.valueOf(0)));
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(AGE) < 2;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.random.nextInt(5) == 0) {
 			int i = (Integer)blockState.getValue(AGE);
 			if (i < 2) {

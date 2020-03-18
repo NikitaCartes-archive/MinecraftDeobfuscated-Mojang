@@ -10,6 +10,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -32,7 +33,7 @@ public class BaseCoralWallFanBlock extends BaseCoralFanBlock {
 		)
 	);
 
-	protected BaseCoralWallFanBlock(Block.Properties properties) {
+	protected BaseCoralWallFanBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(true)));
 	}

@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -18,7 +19,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_25;
 	private final double growPerTickProbability;
 
-	protected GrowingPlantHeadBlock(Block.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl, double d) {
+	protected GrowingPlantHeadBlock(BlockBehaviour.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl, double d) {
 		super(properties, direction, voxelShape, bl);
 		this.growPerTickProbability = d;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
@@ -32,12 +33,20 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
-		} else {
-			if ((Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability) {
-				BlockPos blockPos2 = blockPos.relative(this.growthDirection);
-				if (this.canGrowInto(serverLevel.getBlockState(blockPos2))) {
-					serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
-				}
+		}
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(AGE) < 25;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if ((Integer)blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability) {
+			BlockPos blockPos2 = blockPos.relative(this.growthDirection);
+			if (this.canGrowInto(serverLevel.getBlockState(blockPos2))) {
+				serverLevel.setBlockAndUpdate(blockPos2, blockState.cycle(AGE));
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -85,9 +86,9 @@ public class Path {
 		return this.getPos(entity, this.index);
 	}
 
-	public Vec3 currentPos() {
+	public Vec3i currentPos() {
 		Node node = (Node)this.nodes.get(this.index);
-		return new Vec3((double)node.x, (double)node.y, (double)node.z);
+		return new Vec3i(node.x, node.y, node.z);
 	}
 
 	public boolean sameAs(@Nullable Path path) {

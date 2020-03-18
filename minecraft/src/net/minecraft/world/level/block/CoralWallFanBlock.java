@@ -6,13 +6,14 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 
 public class CoralWallFanBlock extends BaseCoralWallFanBlock {
 	private final Block deadBlock;
 
-	protected CoralWallFanBlock(Block block, Block.Properties properties) {
+	protected CoralWallFanBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.deadBlock = block;
 	}

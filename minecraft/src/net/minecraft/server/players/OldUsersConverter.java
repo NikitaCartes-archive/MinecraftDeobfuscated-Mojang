@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.StringUtil;
@@ -237,11 +238,12 @@ public class OldUsersConverter {
 		}
 	}
 
-	public static String convertMobOwnerIfNecessary(MinecraftServer minecraftServer, String string) {
+	@Nullable
+	public static UUID convertMobOwnerIfNecessary(MinecraftServer minecraftServer, String string) {
 		if (!StringUtil.isNullOrEmpty(string) && string.length() <= 16) {
 			GameProfile gameProfile = minecraftServer.getProfileCache().get(string);
 			if (gameProfile != null && gameProfile.getId() != null) {
-				return gameProfile.getId().toString();
+				return gameProfile.getId();
 			} else if (!minecraftServer.isSingleplayer() && minecraftServer.usesAuthentication()) {
 				final List<GameProfile> list = Lists.<GameProfile>newArrayList();
 				ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
@@ -257,12 +259,16 @@ public class OldUsersConverter {
 					}
 				};
 				lookupPlayers(minecraftServer, Lists.<String>newArrayList(string), profileLookupCallback);
-				return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId().toString() : "";
+				return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId() : null;
 			} else {
-				return Player.createPlayerUUID(new GameProfile(null, string)).toString();
+				return Player.createPlayerUUID(new GameProfile(null, string));
 			}
 		} else {
-			return string;
+			try {
+				return UUID.fromString(string);
+			} catch (IllegalArgumentException var5) {
+				return null;
+			}
 		}
 	}
 

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -22,7 +21,12 @@ public final class SnowyBeachBiome extends Biome {
 				.temperature(0.05F)
 				.downfall(0.3F)
 				.specialEffects(
-					new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+					new BiomeSpecialEffects.Builder()
+						.waterColor(4020182)
+						.waterFogColor(329011)
+						.fogColor(12638463)
+						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+						.build()
 				)
 				.parent(null)
 		);

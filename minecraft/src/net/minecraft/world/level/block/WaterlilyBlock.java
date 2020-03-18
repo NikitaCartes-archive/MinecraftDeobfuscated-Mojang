@@ -6,6 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -16,7 +17,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class WaterlilyBlock extends BushBlock {
 	protected static final VoxelShape AABB = Block.box(1.0, 0.0, 1.0, 15.0, 1.5, 15.0);
 
-	protected WaterlilyBlock(Block.Properties properties) {
+	protected WaterlilyBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

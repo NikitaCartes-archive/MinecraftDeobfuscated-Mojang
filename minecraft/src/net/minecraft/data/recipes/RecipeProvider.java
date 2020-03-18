@@ -2550,7 +2550,16 @@ public class RecipeProvider implements DataProvider {
 		ShapelessRecipeBuilder.shapeless(Items.NETHERITE_INGOT)
 			.requires(Items.NETHERITE_SCRAP, 4)
 			.requires(Items.GOLD_INGOT, 4)
+			.group("netherite_ingot")
 			.unlockedBy("has_netherite_scrap", has(Items.NETHERITE_SCRAP))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.RESPAWN_ANCHOR)
+			.define('O', Blocks.CRYING_OBSIDIAN)
+			.define('G', Blocks.GLOWSTONE)
+			.pattern("OOO")
+			.pattern("GGG")
+			.pattern("OOO")
+			.unlockedBy("has_obsidian", has(Blocks.CRYING_OBSIDIAN))
 			.save(consumer);
 		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
 		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
@@ -2757,6 +2766,9 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.ANCIENT_DEBRIS), Items.NETHERITE_SCRAP, 2.0F, 200)
 			.unlockedBy("has_ancient_debris", has(Blocks.ANCIENT_DEBRIS))
+			.save(consumer);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.BASALT), Blocks.POLISHED_BASALT.asItem(), 0.1F, 200)
+			.unlockedBy("has_basalt", has(Blocks.BASALT))
 			.save(consumer);
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7F, 100)
 			.unlockedBy("has_iron_ore", has(Blocks.IRON_ORE.asItem()))
@@ -3234,6 +3246,7 @@ public class RecipeProvider implements DataProvider {
 	private static void woodenSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
 		String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
 		ShapedRecipeBuilder.shaped(itemLike, 3)
+			.group("sign")
 			.define('#', itemLike2)
 			.define('X', Items.STICK)
 			.pattern("###")

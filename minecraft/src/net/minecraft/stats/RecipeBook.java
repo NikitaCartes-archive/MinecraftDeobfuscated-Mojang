@@ -27,6 +27,14 @@ public class RecipeBook {
 	public void copyOverData(RecipeBook recipeBook) {
 		this.known.clear();
 		this.highlight.clear();
+		this.guiOpen = recipeBook.guiOpen;
+		this.filteringCraftable = recipeBook.filteringCraftable;
+		this.furnaceGuiOpen = recipeBook.furnaceGuiOpen;
+		this.furnaceFilteringCraftable = recipeBook.furnaceFilteringCraftable;
+		this.blastingFurnaceGuiOpen = recipeBook.blastingFurnaceGuiOpen;
+		this.blastingFurnaceFilteringCraftable = recipeBook.blastingFurnaceFilteringCraftable;
+		this.smokerGuiOpen = recipeBook.smokerGuiOpen;
+		this.smokerFilteringCraftable = recipeBook.smokerFilteringCraftable;
 		this.known.addAll(recipeBook.known);
 		this.highlight.addAll(recipeBook.highlight);
 	}

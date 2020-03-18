@@ -10,11 +10,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 public class EndGatewayBlock extends BaseEntityBlock {
-	protected EndGatewayBlock(Block.Properties properties) {
+	protected EndGatewayBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

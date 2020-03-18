@@ -63,7 +63,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, PlayerRideableJumping {
@@ -757,7 +756,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		compoundTag.putInt("Temper", this.getTemper());
 		compoundTag.putBoolean("Tame", this.isTamed());
 		if (this.getOwnerUUID() != null) {
-			compoundTag.putString("OwnerUUID", this.getOwnerUUID().toString());
+			compoundTag.putUUID("Owner", this.getOwnerUUID());
 		}
 
 		if (!this.inventory.getItem(0).isEmpty()) {
@@ -772,16 +771,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.setBred(compoundTag.getBoolean("Bred"));
 		this.setTemper(compoundTag.getInt("Temper"));
 		this.setTamed(compoundTag.getBoolean("Tame"));
-		String string;
-		if (compoundTag.contains("OwnerUUID", 8)) {
-			string = compoundTag.getString("OwnerUUID");
+		UUID uUID;
+		if (compoundTag.hasUUID("Owner")) {
+			uUID = compoundTag.getUUID("Owner");
 		} else {
-			String string2 = compoundTag.getString("Owner");
-			string = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string2);
+			String string = compoundTag.getString("Owner");
+			uUID = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string);
 		}
 
-		if (!string.isEmpty()) {
-			this.setOwnerUUID(UUID.fromString(string));
+		if (uUID != null) {
+			this.setOwnerUUID(uUID);
 		}
 
 		AttributeInstance attributeInstance = this.getAttributes().getInstance("Speed");
@@ -993,13 +992,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		double d = this.getX() + vec3.x;
 		double e = this.getBoundingBox().minY;
 		double f = this.getZ() + vec3.z;
-		CollisionContext collisionContext = CollisionContext.of(livingEntity);
-		AABB aABB = livingEntity.getLocalBoundsForPose(Pose.SWIMMING).move(d, e, f);
+		AABB aABB = livingEntity.getLocalBoundsForPose(livingEntity.getShortestDismountPose()).move(d, e, f);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
 		double g = this.getBoundingBox().maxY + 0.75;
 
 		do {
-			double h = getDismountTargetFloorHeight(this.level, mutableBlockPos, collisionContext);
+			double h = this.level.getRelativeFloorHeight(mutableBlockPos);
 			if ((double)mutableBlockPos.getY() + h > g) {
 				break;
 			}

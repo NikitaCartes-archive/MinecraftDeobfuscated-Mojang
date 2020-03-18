@@ -46,7 +46,8 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.CAT,
 		EntityType.PANDA,
 		EntityType.FOX,
-		EntityType.BEE
+		EntityType.BEE,
+		EntityType.HOGLIN
 	};
 	private static final Item[] FISH = new Item[]{Items.COD, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON};
 	private static final Item[] FISH_BUCKETS = new Item[]{Items.COD_BUCKET, Items.TROPICAL_FISH_BUCKET, Items.PUFFERFISH_BUCKET, Items.SALMON_BUCKET};

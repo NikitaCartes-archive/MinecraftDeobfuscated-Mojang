@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -19,7 +20,7 @@ public class PressurePlateBlock extends BasePressurePlateBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private final PressurePlateBlock.Sensitivity sensitivity;
 
-	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, Block.Properties properties) {
+	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
 		this.sensitivity = sensitivity;

@@ -103,21 +103,6 @@ public class DerivedLevelData extends LevelData {
 		return this.wrapped.getGameType();
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void setXSpawn(int i) {
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void setYSpawn(int i) {
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void setZSpawn(int i) {
-	}
-
 	@Override
 	public void setGameTime(long l) {
 	}

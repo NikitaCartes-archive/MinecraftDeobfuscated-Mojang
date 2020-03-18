@@ -10,11 +10,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.StringUtils;
 
 public class PlayerHeadBlock extends SkullBlock {
-	protected PlayerHeadBlock(Block.Properties properties) {
+	protected PlayerHeadBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.PLAYER, properties);
 	}
 

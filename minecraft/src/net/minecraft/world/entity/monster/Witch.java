@@ -156,8 +156,11 @@ public class Witch extends Raider implements RangedAttackMob {
 					this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), potion));
 					this.usingTime = this.getMainHandItem().getUseDuration();
 					this.setUsingItem(true);
-					this.level
-						.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+					if (!this.isSilent()) {
+						this.level
+							.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+					}
+
 					AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
 					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING);
 					attributeInstance.addModifier(SPEED_MODIFIER_DRINKING);
@@ -241,8 +244,11 @@ public class Witch extends Raider implements RangedAttackMob {
 			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
 			thrownPotion.xRot -= -20.0F;
 			thrownPotion.shoot(d, e + (double)(h * 0.2F), g, 0.75F, 8.0F);
-			this.level
-				.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+			if (!this.isSilent()) {
+				this.level
+					.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0F, 0.8F + this.random.nextFloat() * 0.4F);
+			}
+
 			this.level.addFreshEntity(thrownPotion);
 		}
 	}

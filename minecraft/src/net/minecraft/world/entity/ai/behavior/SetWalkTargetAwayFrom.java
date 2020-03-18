@@ -15,14 +15,14 @@ import net.minecraft.world.phys.Vec3;
 
 public class SetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
 	private final MemoryModuleType<T> walkAwayFromMemory;
-	private final float speed;
+	private final float speedModifier;
 	private final int desiredDistance;
 	private final Function<T, Vec3> toPosition;
 
 	public SetWalkTargetAwayFrom(MemoryModuleType<T> memoryModuleType, float f, int i, boolean bl, Function<T, Vec3> function) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, bl ? MemoryStatus.REGISTERED : MemoryStatus.VALUE_ABSENT, memoryModuleType, MemoryStatus.VALUE_PRESENT));
 		this.walkAwayFromMemory = memoryModuleType;
-		this.speed = f;
+		this.speedModifier = f;
 		this.desiredDistance = i;
 		this.toPosition = function;
 	}
@@ -56,7 +56,7 @@ public class SetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
 	}
 
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-		moveAwayFrom(pathfinderMob, this.getPosToAvoid(pathfinderMob), this.speed);
+		moveAwayFrom(pathfinderMob, this.getPosToAvoid(pathfinderMob), this.speedModifier);
 	}
 
 	private static void moveAwayFrom(PathfinderMob pathfinderMob, Vec3 vec3, float f) {

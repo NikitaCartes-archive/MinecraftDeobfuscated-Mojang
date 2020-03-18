@@ -6,10 +6,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class NetherrackBlock extends Block implements BonemealableBlock {
-	public NetherrackBlock(Block.Properties properties) {
+	public NetherrackBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

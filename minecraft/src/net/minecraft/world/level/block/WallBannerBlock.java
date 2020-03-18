@@ -10,6 +10,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -31,7 +32,7 @@ public class WallBannerBlock extends AbstractBannerBlock {
 		)
 	);
 
-	public WallBannerBlock(DyeColor dyeColor, Block.Properties properties) {
+	public WallBannerBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(dyeColor, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -28,7 +29,7 @@ public class WallSkullBlock extends AbstractSkullBlock {
 		)
 	);
 
-	protected WallSkullBlock(SkullBlock.Type type, Block.Properties properties) {
+	protected WallSkullBlock(SkullBlock.Type type, BlockBehaviour.Properties properties) {
 		super(type, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}

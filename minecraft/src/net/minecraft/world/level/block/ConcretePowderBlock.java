@@ -5,22 +5,24 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ConcretePowderBlock extends FallingBlock {
 	private final BlockState concrete;
 
-	public ConcretePowderBlock(Block block, Block.Properties properties) {
+	public ConcretePowderBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.concrete = block.defaultBlockState();
 	}
 
 	@Override
-	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
+	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, FallingBlockEntity fallingBlockEntity) {
 		if (shouldSolidify(level, blockPos, blockState2)) {
 			level.setBlock(blockPos, this.concrete, 3);
 		}
@@ -70,7 +72,7 @@ public class ConcretePowderBlock extends FallingBlock {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public int getDustColor(BlockState blockState) {
-		return this.materialColor.col;
+	public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return blockState.getMapColor(blockGetter, blockPos).col;
 	}
 }

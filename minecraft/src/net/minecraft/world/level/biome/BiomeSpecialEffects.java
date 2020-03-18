@@ -12,8 +12,8 @@ public class BiomeSpecialEffects {
 	private final int waterFogColor;
 	private final Optional<AmbientParticleSettings> ambientParticleSettings;
 	private final Optional<SoundEvent> ambientLoopSoundEvent;
-	private final Optional<SoundEvent> ambientMoodSoundEvent;
-	private final Optional<SoundEvent> ambientAdditionsSoundEvent;
+	private final Optional<AmbientMoodSettings> ambientMoodSettings;
+	private final Optional<AmbientAdditionsSettings> ambientAdditionsSettings;
 
 	private BiomeSpecialEffects(
 		int i,
@@ -21,16 +21,16 @@ public class BiomeSpecialEffects {
 		int k,
 		Optional<AmbientParticleSettings> optional,
 		Optional<SoundEvent> optional2,
-		Optional<SoundEvent> optional3,
-		Optional<SoundEvent> optional4
+		Optional<AmbientMoodSettings> optional3,
+		Optional<AmbientAdditionsSettings> optional4
 	) {
 		this.fogColor = i;
 		this.waterColor = j;
 		this.waterFogColor = k;
 		this.ambientParticleSettings = optional;
 		this.ambientLoopSoundEvent = optional2;
-		this.ambientMoodSoundEvent = optional3;
-		this.ambientAdditionsSoundEvent = optional4;
+		this.ambientMoodSettings = optional3;
+		this.ambientAdditionsSettings = optional4;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -59,13 +59,13 @@ public class BiomeSpecialEffects {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Optional<SoundEvent> getAmbientMoodSoundEvent() {
-		return this.ambientMoodSoundEvent;
+	public Optional<AmbientMoodSettings> getAmbientMoodSettings() {
+		return this.ambientMoodSettings;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Optional<SoundEvent> getAmbientAdditionsSoundEvent() {
-		return this.ambientAdditionsSoundEvent;
+	public Optional<AmbientAdditionsSettings> getAmbientAdditionsSettings() {
+		return this.ambientAdditionsSettings;
 	}
 
 	public static class Builder {
@@ -74,8 +74,8 @@ public class BiomeSpecialEffects {
 		private OptionalInt waterFogColor = OptionalInt.empty();
 		private Optional<AmbientParticleSettings> ambientParticle = Optional.empty();
 		private Optional<SoundEvent> ambientLoopSoundEvent = Optional.empty();
-		private Optional<SoundEvent> ambientMoodSoundEvent = Optional.empty();
-		private Optional<SoundEvent> ambientAdditionsSoundEvent = Optional.empty();
+		private Optional<AmbientMoodSettings> ambientMoodSettings = Optional.empty();
+		private Optional<AmbientAdditionsSettings> ambientAdditionsSettings = Optional.empty();
 
 		public BiomeSpecialEffects.Builder fogColor(int i) {
 			this.fogColor = OptionalInt.of(i);
@@ -102,13 +102,13 @@ public class BiomeSpecialEffects {
 			return this;
 		}
 
-		public BiomeSpecialEffects.Builder ambientMoodSound(SoundEvent soundEvent) {
-			this.ambientMoodSoundEvent = Optional.of(soundEvent);
+		public BiomeSpecialEffects.Builder ambientMoodSound(AmbientMoodSettings ambientMoodSettings) {
+			this.ambientMoodSettings = Optional.of(ambientMoodSettings);
 			return this;
 		}
 
-		public BiomeSpecialEffects.Builder ambientAdditionsSound(SoundEvent soundEvent) {
-			this.ambientAdditionsSoundEvent = Optional.of(soundEvent);
+		public BiomeSpecialEffects.Builder ambientAdditionsSound(AmbientAdditionsSettings ambientAdditionsSettings) {
+			this.ambientAdditionsSettings = Optional.of(ambientAdditionsSettings);
 			return this;
 		}
 
@@ -119,8 +119,8 @@ public class BiomeSpecialEffects {
 				this.waterFogColor.orElseThrow(() -> new IllegalStateException("Missing 'water fog' color.")),
 				this.ambientParticle,
 				this.ambientLoopSoundEvent,
-				this.ambientMoodSoundEvent,
-				this.ambientAdditionsSoundEvent
+				this.ambientMoodSettings,
+				this.ambientAdditionsSettings
 			);
 		}
 	}

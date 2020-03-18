@@ -6,6 +6,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -14,7 +15,7 @@ public class WoolCarpetBlock extends Block {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
 	private final DyeColor color;
 
-	protected WoolCarpetBlock(DyeColor dyeColor, Block.Properties properties) {
+	protected WoolCarpetBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.color = dyeColor;
 	}

@@ -11,7 +11,7 @@ public class PortalParticle extends TextureSheetParticle {
 	private final double yStart;
 	private final double zStart;
 
-	private PortalParticle(Level level, double d, double e, double f, double g, double h, double i) {
+	protected PortalParticle(Level level, double d, double e, double f, double g, double h, double i) {
 		super(level, d, e, f);
 		this.xd = g;
 		this.yd = h;

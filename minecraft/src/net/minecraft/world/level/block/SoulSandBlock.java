@@ -1,14 +1,13 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -18,7 +17,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class SoulSandBlock extends Block {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0);
 
-	public SoulSandBlock(Block.Properties properties) {
+	public SoulSandBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -33,43 +32,33 @@ public class SoulSandBlock extends Block {
 	}
 
 	@Override
+	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return Shapes.block();
+	}
+
+	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), false);
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
-	}
+	public BlockState updateShape(
+		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+	) {
+		if (direction == Direction.UP && blockState2.getBlock() == Blocks.WATER) {
+			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 20);
+		}
 
-	@Override
-	public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 20;
+		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+		level.getBlockTicks().scheduleTick(blockPos, this, 20);
 	}
 
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
-	}
-
-	@Override
-	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-		return true;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
 	}
 }

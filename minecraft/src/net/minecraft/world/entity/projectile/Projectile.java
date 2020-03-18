@@ -35,14 +35,14 @@ public abstract class Projectile extends Entity {
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		if (this.ownerUUID != null) {
-			compoundTag.putUUIDAsArray("OwnerUUID", this.ownerUUID);
+			compoundTag.putUUID("Owner", this.ownerUUID);
 		}
 	}
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
-		if (compoundTag.hasUUIDArray("OwnerUUID")) {
-			this.ownerUUID = compoundTag.getUUIDFromArray("OwnerUUID");
+		if (compoundTag.hasUUID("Owner")) {
+			this.ownerUUID = compoundTag.getUUID("Owner");
 		}
 	}
 

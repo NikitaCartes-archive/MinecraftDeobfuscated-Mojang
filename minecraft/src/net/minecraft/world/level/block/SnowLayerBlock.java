@@ -10,6 +10,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,7 +34,7 @@ public class SnowLayerBlock extends Block {
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
 
-	protected SnowLayerBlock(Block.Properties properties) {
+	protected SnowLayerBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LAYERS, Integer.valueOf(1)));
 	}
@@ -68,6 +69,11 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
+	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
+	}
+
+	@Override
 	public boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
 	}
@@ -96,7 +102,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getBrightness(LightLayer.BLOCK, blockPos) > 11) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);

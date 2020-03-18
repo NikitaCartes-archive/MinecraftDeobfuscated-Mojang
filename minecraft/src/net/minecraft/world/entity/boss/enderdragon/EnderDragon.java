@@ -520,7 +520,7 @@ public class EnderDragon extends Mob implements Enemy {
 				this.dropExperience(Mth.floor((float)i * 0.08F));
 			}
 
-			if (this.dragonDeathTime == 1) {
+			if (this.dragonDeathTime == 1 && !this.isSilent()) {
 				this.level.globalLevelEvent(1028, this.blockPosition(), 0);
 			}
 		}

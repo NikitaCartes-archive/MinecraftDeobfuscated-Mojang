@@ -105,6 +105,8 @@ public class Bee extends Animal implements FlyingAnimal {
 		super(entityType, level);
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.lookControl = new Bee.BeeLookControl(this);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0F);
@@ -161,9 +163,7 @@ public class Bee extends Animal implements FlyingAnimal {
 		compoundTag.putInt("CropsGrownSincePollination", this.numCropsGrownSincePollination);
 		compoundTag.putInt("Anger", this.getAngerTime());
 		if (this.lastHurtByUUID != null) {
-			compoundTag.putString("HurtBy", this.lastHurtByUUID.toString());
-		} else {
-			compoundTag.putString("HurtBy", "");
+			compoundTag.putUUID("HurtBy", this.lastHurtByUUID);
 		}
 	}
 
@@ -186,9 +186,8 @@ public class Bee extends Animal implements FlyingAnimal {
 		this.ticksWithoutNectarSinceExitingHive = compoundTag.getInt("TicksSincePollination");
 		this.stayOutOfHiveCountdown = compoundTag.getInt("CannotEnterHiveTicks");
 		this.numCropsGrownSincePollination = compoundTag.getInt("CropsGrownSincePollination");
-		String string = compoundTag.getString("HurtBy");
-		if (!string.isEmpty()) {
-			this.lastHurtByUUID = UUID.fromString(string);
+		if (compoundTag.hasUUID("HurtBy")) {
+			this.lastHurtByUUID = compoundTag.getUUID("HurtBy");
 			Player player = this.level.getPlayerByUUID(this.lastHurtByUUID);
 			this.setLastHurtByMob(player);
 			if (player != null) {
@@ -474,7 +473,7 @@ public class Bee extends Animal implements FlyingAnimal {
 	}
 
 	private boolean isTooFarAway(BlockPos blockPos) {
-		return !this.closerThan(blockPos, 48);
+		return !this.closerThan(blockPos, 32);
 	}
 
 	private void setFlag(int i, boolean bl) {
@@ -723,6 +722,7 @@ public class Bee extends Animal implements FlyingAnimal {
 		private List<BlockPos> blacklistedTargets = Lists.<BlockPos>newArrayList();
 		@Nullable
 		private Path lastPath = null;
+		private int ticksStuck;
 
 		BeeGoToHiveGoal() {
 			this.setFlags(EnumSet.of(Goal.Flag.MOVE));
@@ -745,12 +745,14 @@ public class Bee extends Animal implements FlyingAnimal {
 		@Override
 		public void start() {
 			this.travellingTicks = 0;
+			this.ticksStuck = 0;
 			super.start();
 		}
 
 		@Override
 		public void stop() {
 			this.travellingTicks = 0;
+			this.ticksStuck = 0;
 			Bee.this.navigation.stop();
 			Bee.this.navigation.resetMaxVisitedNodesMultiplier();
 		}
@@ -773,7 +775,11 @@ public class Bee extends Animal implements FlyingAnimal {
 						if (!bl) {
 							this.dropAndBlacklistHive();
 						} else if (this.lastPath != null && Bee.this.navigation.getPath().sameAs(this.lastPath)) {
-							this.dropHive();
+							this.ticksStuck++;
+							if (this.ticksStuck > 60) {
+								this.dropHive();
+								this.ticksStuck = 0;
+							}
 						} else {
 							this.lastPath = Bee.this.navigation.getPath();
 						}
@@ -1128,7 +1134,7 @@ public class Bee extends Animal implements FlyingAnimal {
 						Bee.this.savedFlowerPos = null;
 					} else {
 						if (bl) {
-							boolean bl3 = Bee.this.random.nextInt(100) == 0;
+							boolean bl3 = Bee.this.random.nextInt(25) == 0;
 							if (bl3) {
 								this.hoverPos = new Vec3(vec3.x() + (double)this.getOffset(), vec3.y(), vec3.z() + (double)this.getOffset());
 								Bee.this.navigation.stop();
@@ -1212,7 +1218,7 @@ public class Bee extends Animal implements FlyingAnimal {
 		@Nullable
 		private Vec3 findPos() {
 			Vec3 vec32;
-			if (Bee.this.isHiveValid() && !Bee.this.closerThan(Bee.this.hivePos, 40)) {
+			if (Bee.this.isHiveValid() && !Bee.this.closerThan(Bee.this.hivePos, 22)) {
 				Vec3 vec3 = Vec3.atCenterOf(Bee.this.hivePos);
 				vec32 = vec3.subtract(Bee.this.position()).normalize();
 			} else {

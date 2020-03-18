@@ -25,6 +25,11 @@ public class RidingMinecartSoundInstance extends AbstractTickableSoundInstance {
 	}
 
 	@Override
+	public boolean canPlaySound() {
+		return !this.minecart.isSilent();
+	}
+
+	@Override
 	public boolean canStartSilent() {
 		return true;
 	}

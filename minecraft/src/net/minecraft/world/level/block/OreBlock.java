@@ -7,10 +7,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class OreBlock extends Block {
-	public OreBlock(Block.Properties properties) {
+	public OreBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

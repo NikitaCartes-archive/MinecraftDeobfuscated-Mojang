@@ -2625,13 +2625,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					}
 				}
 
-				this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
+				if (j == 1) {
+					this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
+				}
 				break;
 			case 2008:
 				this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
 				break;
 			case 2009:
-				for (int k = 0; k < 8; k++) {
+				for (int kx = 0; kx < 8; kx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.CLOUD, (double)blockPos.getX() + Math.random(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + Math.random(), 0.0, 0.0, 0.0
@@ -2705,7 +2707,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public static int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos) {
-		if (blockState.emissiveRendering()) {
+		if (blockState.emissiveRendering(blockAndTintGetter, blockPos)) {
 			return 15728880;
 		} else {
 			int i = blockAndTintGetter.getBrightness(LightLayer.SKY, blockPos);

@@ -1050,6 +1050,7 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			this.leashHolder = null;
+			this.leashInfoTag = null;
 			if (!this.level.isClientSide && bl2) {
 				this.spawnAtLocation(Items.LEAD);
 			}
@@ -1079,6 +1080,7 @@ public abstract class Mob extends LivingEntity {
 
 	public void setLeashedTo(Entity entity, boolean bl) {
 		this.leashHolder = entity;
+		this.leashInfoTag = null;
 		this.forcedLoading = true;
 		if (!(this.leashHolder instanceof Player)) {
 			this.leashHolder.forcedLoading = true;
@@ -1124,7 +1126,9 @@ public abstract class Mob extends LivingEntity {
 				this.dropLeash(false, true);
 			}
 
-			this.leashInfoTag = null;
+			if (this.tickCount > 100) {
+				this.leashInfoTag = null;
+			}
 		}
 	}
 

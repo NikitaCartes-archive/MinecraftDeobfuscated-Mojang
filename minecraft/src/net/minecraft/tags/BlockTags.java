@@ -77,6 +77,7 @@ public class BlockTags {
 	public static final Tag<Block> CLIMBABLE = bind("climbable");
 	public static final Tag<Block> SHULKER_BOXES = bind("shulker_boxes");
 	public static final Tag<Block> HOGLIN_REPELLENTS = bind("hoglin_repellents");
+	public static final Tag<Block> SOUL_FIRE_BASE_BLOCKS = bind("soul_fire_base_blocks");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

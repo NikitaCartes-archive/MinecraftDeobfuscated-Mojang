@@ -10,9 +10,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.item.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -36,7 +36,7 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 	private static final Predicate<BlockState> PUMPKINS_PREDICATE = blockState -> blockState != null
 			&& (blockState.getBlock() == Blocks.CARVED_PUMPKIN || blockState.getBlock() == Blocks.JACK_O_LANTERN);
 
-	protected CarvedPumpkinBlock(Block.Properties properties) {
+	protected CarvedPumpkinBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
@@ -161,10 +161,5 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 		}
 
 		return this.ironGolemFull;
-	}
-
-	@Override
-	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-		return true;
 	}
 }

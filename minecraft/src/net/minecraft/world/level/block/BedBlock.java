@@ -29,13 +29,13 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
@@ -59,15 +59,10 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	protected static final VoxelShape EAST_SHAPE = Shapes.or(BASE, LEG_NORTH_EAST, LEG_SOUTH_EAST);
 	private final DyeColor color;
 
-	public BedBlock(DyeColor dyeColor, Block.Properties properties) {
+	public BedBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.color = dyeColor;
 		this.registerDefaultState(this.stateDefinition.any().setValue(PART, BedPart.FOOT).setValue(OCCUPIED, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public MaterialColor getMapColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getValue(PART) == BedPart.FOOT ? this.color.getMaterialColor() : MaterialColor.WOOL;
 	}
 
 	@Nullable

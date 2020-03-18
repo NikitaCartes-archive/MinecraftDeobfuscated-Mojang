@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -42,15 +43,10 @@ public class PistonBaseBlock extends DirectionalBlock {
 	protected static final VoxelShape DOWN_AABB = Block.box(0.0, 4.0, 0.0, 16.0, 16.0, 16.0);
 	private final boolean isSticky;
 
-	public PistonBaseBlock(boolean bl, Block.Properties properties) {
+	public PistonBaseBlock(boolean bl, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(EXTENDED, Boolean.valueOf(false)));
 		this.isSticky = bl;
-	}
-
-	@Override
-	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return !(Boolean)blockState.getValue(EXTENDED);
 	}
 
 	@Override
@@ -74,11 +70,6 @@ public class PistonBaseBlock extends DirectionalBlock {
 		} else {
 			return Shapes.block();
 		}
-	}
-
-	@Override
-	public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return false;
 	}
 
 	@Override
@@ -237,7 +228,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 	public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
 		Block block = blockState.getBlock();
-		if (block != Blocks.OBSIDIAN && block != Blocks.CRYING_OBSIDIAN) {
+		if (block != Blocks.OBSIDIAN && block != Blocks.CRYING_OBSIDIAN && block != Blocks.RESPAWN_ANCHOR) {
 			if (!level.getWorldBorder().isWithinBounds(blockPos)) {
 				return false;
 			} else if (blockPos.getY() >= 0 && (direction != Direction.DOWN || blockPos.getY() != 0)) {

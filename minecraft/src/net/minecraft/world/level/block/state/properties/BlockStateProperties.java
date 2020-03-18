@@ -92,6 +92,7 @@ public class BlockStateProperties {
 	public static final IntegerProperty POWER = IntegerProperty.create("power", 0, 15);
 	public static final IntegerProperty STAGE = IntegerProperty.create("stage", 0, 1);
 	public static final IntegerProperty STABILITY_DISTANCE = IntegerProperty.create("distance", 0, 7);
+	public static final IntegerProperty RESPAWN_ANCHOR_CHARGES = IntegerProperty.create("charges", 0, 4);
 	public static final IntegerProperty ROTATION_16 = IntegerProperty.create("rotation", 0, 15);
 	public static final EnumProperty<BedPart> BED_PART = EnumProperty.create("part", BedPart.class);
 	public static final EnumProperty<ChestType> CHEST_TYPE = EnumProperty.create("type", ChestType.class);

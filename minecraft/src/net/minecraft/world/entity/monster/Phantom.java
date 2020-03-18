@@ -522,7 +522,9 @@ public class Phantom extends FlyingMob implements Enemy {
 			if (Phantom.this.getBoundingBox().inflate(0.2F).intersects(livingEntity.getBoundingBox())) {
 				Phantom.this.doHurtTarget(livingEntity);
 				Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
-				Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+				if (!Phantom.this.isSilent()) {
+					Phantom.this.level.levelEvent(1039, Phantom.this.blockPosition(), 0);
+				}
 			} else if (Phantom.this.horizontalCollision || Phantom.this.hurtTime > 0) {
 				Phantom.this.attackPhase = Phantom.AttackPhase.CIRCLE;
 			}

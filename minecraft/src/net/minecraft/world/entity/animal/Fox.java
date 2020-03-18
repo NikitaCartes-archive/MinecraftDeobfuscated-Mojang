@@ -374,11 +374,11 @@ public class Fox extends Animal {
 
 		for (UUID uUID : list) {
 			if (uUID != null) {
-				listTag.add(NbtUtils.createUUIDTag(uUID));
+				listTag.add(NbtUtils.createUUID(uUID));
 			}
 		}
 
-		compoundTag.put("TrustedUUIDs", listTag);
+		compoundTag.put("Trusted", listTag);
 		compoundTag.putBoolean("Sleeping", this.isSleeping());
 		compoundTag.putString("Type", this.getFoxType().getName());
 		compoundTag.putBoolean("Sitting", this.isSitting());
@@ -388,10 +388,10 @@ public class Fox extends Animal {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		ListTag listTag = compoundTag.getList("TrustedUUIDs", 10);
+		ListTag listTag = compoundTag.getList("Trusted", 11);
 
 		for (int i = 0; i < listTag.size(); i++) {
-			this.addTrustedUUID(NbtUtils.loadUUIDTag(listTag.getCompound(i)));
+			this.addTrustedUUID(NbtUtils.loadUUID(listTag.get(i)));
 		}
 
 		this.setSleeping(compoundTag.getBoolean("Sleeping"));

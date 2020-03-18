@@ -14,18 +14,18 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveToSkySeeingSpot extends Behavior<LivingEntity> {
-	private final float speed;
+	private final float speedModifier;
 
 	public MoveToSkySeeingSpot(float f) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 	}
 
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Optional<Vec3> optional = Optional.ofNullable(this.getOutdoorPosition(serverLevel, livingEntity));
 		if (optional.isPresent()) {
-			livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speed, 0)));
+			livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 0)));
 		}
 	}
 

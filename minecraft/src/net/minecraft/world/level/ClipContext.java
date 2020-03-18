@@ -3,6 +3,7 @@ package net.minecraft.world.level;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
@@ -42,8 +43,9 @@ public class ClipContext {
 	}
 
 	public static enum Block implements ClipContext.ShapeGetter {
-		COLLIDER(BlockState::getCollisionShape),
-		OUTLINE(BlockState::getShape);
+		COLLIDER(BlockBehaviour.BlockStateBase::getCollisionShape),
+		OUTLINE(BlockBehaviour.BlockStateBase::getShape),
+		VISUAL(BlockBehaviour.BlockStateBase::getVisualShape);
 
 		private final ClipContext.ShapeGetter shapeGetter;
 

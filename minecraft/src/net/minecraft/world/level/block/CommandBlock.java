@@ -15,9 +15,9 @@ import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +32,7 @@ public class CommandBlock extends BaseEntityBlock {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty CONDITIONAL = BlockStateProperties.CONDITIONAL;
 
-	public CommandBlock(Block.Properties properties) {
+	public CommandBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(CONDITIONAL, Boolean.valueOf(false)));
 	}
@@ -56,7 +56,7 @@ public class CommandBlock extends BaseEntityBlock {
 				if (!bl3 && !commandBlockEntity.isAutomatic() && commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
 					if (bl2) {
 						commandBlockEntity.markConditionMet();
-						level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+						level.getBlockTicks().scheduleTick(blockPos, this, 1);
 					}
 				}
 			}
@@ -81,7 +81,7 @@ public class CommandBlock extends BaseEntityBlock {
 				}
 
 				if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel));
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, 1);
 				}
 			} else if (mode == CommandBlockEntity.Mode.REDSTONE) {
 				if (bl2) {
@@ -103,11 +103,6 @@ public class CommandBlock extends BaseEntityBlock {
 		}
 
 		executeChain(level, blockPos, blockState.getValue(FACING));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 1;
 	}
 
 	@Override

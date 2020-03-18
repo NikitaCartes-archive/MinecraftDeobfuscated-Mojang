@@ -5,10 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class BaseEntityBlock extends Block implements EntityBlock {
-	protected BaseEntityBlock(Block.Properties properties) {
+	protected BaseEntityBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

@@ -12,6 +12,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,7 +25,7 @@ public class BannerBlock extends AbstractBannerBlock {
 	private static final Map<DyeColor, Block> BY_COLOR = Maps.<DyeColor, Block>newHashMap();
 	private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 
-	public BannerBlock(DyeColor dyeColor, Block.Properties properties) {
+	public BannerBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(dyeColor, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(ROTATION, Integer.valueOf(0)));
 		BY_COLOR.put(dyeColor, this);

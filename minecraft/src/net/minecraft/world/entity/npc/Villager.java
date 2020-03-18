@@ -184,29 +184,31 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	private void registerBrainGoals(Brain<Villager> brain) {
 		VillagerProfession villagerProfession = this.getVillagerData().getProfession();
-		float f = (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+		float f = 0.5F;
 		if (this.isBaby()) {
 			brain.setSchedule(Schedule.VILLAGER_BABY);
-			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(f));
+			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(0.5F));
 		} else {
 			brain.setSchedule(Schedule.VILLAGER_DEFAULT);
 			brain.addActivityWithConditions(
-				Activity.WORK, VillagerGoalPackages.getWorkPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT))
+				Activity.WORK,
+				VillagerGoalPackages.getWorkPackage(villagerProfession, 0.5F),
+				ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT))
 			);
 		}
 
-		brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, f));
+		brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, 0.5F));
 		brain.addActivityWithConditions(
 			Activity.MEET,
-			VillagerGoalPackages.getMeetPackage(villagerProfession, f),
+			VillagerGoalPackages.getMeetPackage(villagerProfession, 0.5F),
 			ImmutableSet.of(Pair.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT))
 		);
-		brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(villagerProfession, f));
-		brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(villagerProfession, f));
-		brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(villagerProfession, f));
-		brain.addActivity(Activity.PRE_RAID, VillagerGoalPackages.getPreRaidPackage(villagerProfession, f));
-		brain.addActivity(Activity.RAID, VillagerGoalPackages.getRaidPackage(villagerProfession, f));
-		brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, f));
+		brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.PRE_RAID, VillagerGoalPackages.getPreRaidPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.RAID, VillagerGoalPackages.getRaidPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, 0.5F));
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
 		brain.setActiveActivityIfPossible(Activity.IDLE);

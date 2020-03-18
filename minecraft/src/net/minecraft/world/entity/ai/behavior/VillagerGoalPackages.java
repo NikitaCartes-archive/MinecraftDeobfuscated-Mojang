@@ -26,7 +26,7 @@ public class VillagerGoalPackages {
 			Pair.of(0, new SetRaidStatus()),
 			Pair.of(1, new MoveToTargetSink(200)),
 			Pair.of(2, new LookAndFollowTradingPlayerSink(f)),
-			Pair.of(5, new GoToWantedItem<>(4, false)),
+			Pair.of(5, new GoToWantedItem<>(0.5F, false, 4)),
 			Pair.of(10, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, true)),
 			Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false)),
 			Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true)),
@@ -45,7 +45,7 @@ public class VillagerGoalPackages {
 						Pair.of(new WorkAtPoi(), 7),
 						Pair.of(new StrollAroundPoi(MemoryModuleType.JOB_SITE, 4), 2),
 						Pair.of(new StrollToPoi(MemoryModuleType.JOB_SITE, 1, 10), 5),
-						Pair.of(new StrollToPoiList(MemoryModuleType.SECONDARY_JOB_SITE, 0.4F, 1, 6, MemoryModuleType.JOB_SITE), 5),
+						Pair.of(new StrollToPoiList(MemoryModuleType.SECONDARY_JOB_SITE, f, 1, 6, MemoryModuleType.JOB_SITE), 5),
 						Pair.of(new HarvestFarmland(), villagerProfession == VillagerProfession.FARMER ? 2 : 5)
 					)
 				)

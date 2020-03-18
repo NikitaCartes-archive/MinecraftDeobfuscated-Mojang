@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.GrindstoneMenu;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -90,7 +91,7 @@ public class GrindstoneBlock extends FaceAttachedHorizontalDirectionalBlock {
 	public static final VoxelShape CEILING_EAST_WEST_GRINDSTONE = Shapes.or(CEILING_EAST_WEST_ALL_LEGS, Block.box(2.0, 0.0, 4.0, 14.0, 12.0, 12.0));
 	private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.grindstone_title");
 
-	protected GrindstoneBlock(Block.Properties properties) {
+	protected GrindstoneBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(FACE, AttachFace.WALL));
 	}

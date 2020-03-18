@@ -6,6 +6,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -14,7 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class NetherSproutsBlock extends Block {
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0);
 
-	public NetherSproutsBlock(Block.Properties properties) {
+	public NetherSproutsBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,7 +26,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class TntBlock extends Block {
 	public static final BooleanProperty UNSTABLE = BlockStateProperties.UNSTABLE;
 
-	public TntBlock(Block.Properties properties) {
+	public TntBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(UNSTABLE, Boolean.valueOf(false)));
 	}

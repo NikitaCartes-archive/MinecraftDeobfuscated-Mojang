@@ -13,9 +13,10 @@ import net.minecraft.world.entity.animal.Animal;
 
 public class AnimalMakeLove extends Behavior<Animal> {
 	private final EntityType<? extends Animal> partnerType;
+	private final float speedModifier;
 	private long spawnChildAtTime;
 
-	public AnimalMakeLove(EntityType<? extends Animal> entityType) {
+	public AnimalMakeLove(EntityType<? extends Animal> entityType, float f) {
 		super(
 			ImmutableMap.of(
 				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
@@ -30,6 +31,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 			325
 		);
 		this.partnerType = entityType;
+		this.speedModifier = f;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Animal animal) {
@@ -40,7 +42,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 		Animal animal2 = (Animal)this.findValidBreedPartner(animal).get();
 		animal.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal2);
 		animal2.getBrain().setMemory(MemoryModuleType.BREED_TARGET, animal);
-		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2);
+		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier);
 		int i = 275 + animal.getRandom().nextInt(50);
 		this.spawnChildAtTime = l + (long)i;
 	}
@@ -56,7 +58,7 @@ public class AnimalMakeLove extends Behavior<Animal> {
 
 	protected void tick(ServerLevel serverLevel, Animal animal, long l) {
 		Animal animal2 = this.getBreedTarget(animal);
-		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2);
+		BehaviorUtils.lockGazeAndWalkToEachOther(animal, animal2, this.speedModifier);
 		if (animal.closerThan(animal2, 3.0)) {
 			if (l >= this.spawnChildAtTime) {
 				animal.spawnChildFromBreeding(serverLevel, animal2);

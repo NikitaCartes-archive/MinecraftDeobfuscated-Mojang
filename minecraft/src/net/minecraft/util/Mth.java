@@ -303,7 +303,6 @@ public class Mth {
 		return (l << 8) + k;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static float frac(float f) {
 		return f - (float)floor(f);
 	}

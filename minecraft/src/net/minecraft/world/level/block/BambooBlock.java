@@ -13,6 +13,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -33,7 +34,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	public static final EnumProperty<BambooLeaves> LEAVES = BlockStateProperties.BAMBOO_LEAVES;
 	public static final IntegerProperty STAGE = BlockStateProperties.STAGE;
 
-	public BambooBlock(Block.Properties properties) {
+	public BambooBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)).setValue(LEAVES, BambooLeaves.NONE).setValue(STAGE, Integer.valueOf(0))
@@ -46,8 +47,8 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public Block.OffsetType getOffsetType() {
-		return Block.OffsetType.XZ;
+	public BlockBehaviour.OffsetType getOffsetType() {
+		return BlockBehaviour.OffsetType.XZ;
 	}
 
 	@Override
@@ -101,7 +102,17 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
-		} else if ((Integer)blockState.getValue(STAGE) == 0) {
+		}
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(STAGE) == 0;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if ((Integer)blockState.getValue(STAGE) == 0) {
 			if (random.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
 				int i = this.getHeightBelowUpToMax(serverLevel, blockPos) + 1;
 				if (i < 16) {

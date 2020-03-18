@@ -3,7 +3,6 @@ package net.minecraft.client.resources.sounds;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Optional;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.player.LocalPlayer;
@@ -14,9 +13,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
@@ -24,10 +24,10 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 	private final SoundManager soundManager;
 	private final BiomeManager biomeManager;
 	private final Random random;
-	private Object2ObjectArrayMap<Biome, BiomeAmbientSoundsHandler.LoopSoundInstance> loopSounds;
-	private Optional<SoundEvent> moodSound;
-	private Optional<SoundEvent> additionsSound;
-	private int ticksUntilNextMoodSound;
+	private Object2ObjectArrayMap<Biome, BiomeAmbientSoundsHandler.LoopSoundInstance> loopSounds = new Object2ObjectArrayMap<>();
+	private Optional<AmbientMoodSettings> moodSettings = Optional.empty();
+	private Optional<AmbientAdditionsSettings> additionsSettings = Optional.empty();
+	private float moodiness;
 	private Biome previousBiome;
 
 	public BiomeAmbientSoundsHandler(LocalPlayer localPlayer, SoundManager soundManager, BiomeManager biomeManager) {
@@ -35,10 +35,10 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 		this.player = localPlayer;
 		this.soundManager = soundManager;
 		this.biomeManager = biomeManager;
-		this.loopSounds = new Object2ObjectArrayMap<>();
-		this.moodSound = Optional.empty();
-		this.additionsSound = Optional.empty();
-		this.ticksUntilNextMoodSound = calculateTicksUntilNextMoodSound(this.random);
+	}
+
+	public float getMoodiness() {
+		return this.moodiness;
 	}
 
 	@Override
@@ -47,10 +47,10 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 		Biome biome = this.biomeManager.getNoiseBiomeAtPosition(this.player.getX(), this.player.getY(), this.player.getZ());
 		if (biome != this.previousBiome) {
 			this.previousBiome = biome;
-			this.moodSound = biome.getAmbientMoodSoundEvent();
-			this.additionsSound = biome.getAmbientAdditionsSoundEvent();
+			this.moodSettings = biome.getAmbientMood();
+			this.additionsSettings = biome.getAmbientAdditions();
 			this.loopSounds.values().forEach(BiomeAmbientSoundsHandler.LoopSoundInstance::fadeOut);
-			biome.getAmbientLoopSoundEvent()
+			biome.getAmbientLoop()
 				.ifPresent(
 					soundEvent -> {
 						BiomeAmbientSoundsHandler.LoopSoundInstance var10000 = (BiomeAmbientSoundsHandler.LoopSoundInstance)this.loopSounds
@@ -67,43 +67,50 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 				);
 		}
 
-		this.additionsSound.ifPresent(soundEvent -> {
-			if (this.random.nextDouble() < 0.0111F) {
-				this.soundManager.play(SimpleSoundInstance.forAmbientAddition(soundEvent));
+		this.additionsSettings.ifPresent(ambientAdditionsSettings -> {
+			if (this.random.nextDouble() < ambientAdditionsSettings.getTickChance()) {
+				this.soundManager.play(SimpleSoundInstance.forAmbientAddition(ambientAdditionsSettings.getSoundEvent()));
 			}
 		});
-		if (this.ticksUntilNextMoodSound > 0) {
-			this.ticksUntilNextMoodSound--;
-		} else {
-			this.moodSound.ifPresent(soundEvent -> {
-				BlockPos blockPos = this.findMoodyBlock();
-				if (blockPos != null) {
-					this.soundManager.play(SimpleSoundInstance.forAmbientMood(soundEvent, (float)blockPos.getX(), (float)blockPos.getY(), (float)blockPos.getZ()));
-					this.ticksUntilNextMoodSound = calculateTicksUntilNextMoodSound(this.random);
+		this.moodSettings
+			.ifPresent(
+				ambientMoodSettings -> {
+					Level level = this.player.level;
+					int i = ambientMoodSettings.getBlockSearchExtent() * 2 + 1;
+					BlockPos blockPos = new BlockPos(
+						this.player.getX() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(),
+						this.player.getEyeY() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent(),
+						this.player.getZ() + (double)this.random.nextInt(i) - (double)ambientMoodSettings.getBlockSearchExtent()
+					);
+					int j = level.getBrightness(LightLayer.SKY, blockPos);
+					if (j > 0) {
+						this.moodiness = this.moodiness - (float)j / (float)level.getMaxLightLevel() * 0.001F;
+					} else {
+						this.moodiness = this.moodiness - (float)(level.getBrightness(LightLayer.BLOCK, blockPos) - 1) / (float)ambientMoodSettings.getTickDelay();
+					}
+
+					if (this.moodiness >= 1.0F) {
+						double d = (double)blockPos.getX() + 0.5;
+						double e = (double)blockPos.getY() + 0.5;
+						double f = (double)blockPos.getZ() + 0.5;
+						double g = d - this.player.getX();
+						double h = e - this.player.getEyeY();
+						double k = f - this.player.getZ();
+						double l = (double)Mth.sqrt(g * g + h * h + k * k);
+						double m = l + ambientMoodSettings.getSoundPositionOffset();
+						SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(
+							ambientMoodSettings.getSoundEvent(),
+							(float)(this.player.getX() + g / l * m),
+							(float)(this.player.getEyeY() + h / l * m),
+							(float)(this.player.getZ() + k / l * m)
+						);
+						this.soundManager.play(simpleSoundInstance);
+						this.moodiness = 0.0F;
+					} else {
+						this.moodiness = Math.max(this.moodiness, 0.0F);
+					}
 				}
-			});
-		}
-	}
-
-	@Nullable
-	private BlockPos findMoodyBlock() {
-		BlockPos blockPos = this.player.blockPosition();
-		Level level = this.player.level;
-		int i = 9;
-		BlockPos blockPos2 = blockPos.offset(this.random.nextInt(9) - 4, this.random.nextInt(9) - 4, this.random.nextInt(9) - 4);
-		double d = blockPos.distSqr(blockPos2);
-		if (d >= 4.0 && d <= 256.0) {
-			BlockState blockState = level.getBlockState(blockPos2);
-			if (blockState.isAir() && level.getRawBrightness(blockPos2, 0) <= this.random.nextInt(8) && level.getBrightness(LightLayer.SKY, blockPos2) <= 0) {
-				return blockPos2;
-			}
-		}
-
-		return null;
-	}
-
-	private static int calculateTicksUntilNextMoodSound(Random random) {
-		return random.nextInt(12000) + 6000;
+			);
 	}
 
 	@Environment(EnvType.CLIENT)

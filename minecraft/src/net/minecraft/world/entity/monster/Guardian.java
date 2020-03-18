@@ -402,7 +402,9 @@ public class Guardian extends Monster {
 				this.attackTime++;
 				if (this.attackTime == 0) {
 					this.guardian.setActiveAttackTarget(this.guardian.getTarget().getId());
-					this.guardian.level.broadcastEntityEvent(this.guardian, (byte)21);
+					if (!this.guardian.isSilent()) {
+						this.guardian.level.broadcastEntityEvent(this.guardian, (byte)21);
+					}
 				} else if (this.attackTime >= this.guardian.getAttackDuration()) {
 					float f = 1.0F;
 					if (this.guardian.level.getDifficulty() == Difficulty.HARD) {

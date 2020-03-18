@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +33,7 @@ public class CakeBlock extends Block {
 		Block.box(13.0, 0.0, 1.0, 15.0, 8.0, 15.0)
 	};
 
-	protected CakeBlock(Block.Properties properties) {
+	protected CakeBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(BITES, Integer.valueOf(0)));
 	}

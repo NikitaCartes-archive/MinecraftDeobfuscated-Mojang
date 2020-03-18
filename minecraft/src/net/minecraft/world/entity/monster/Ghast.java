@@ -252,7 +252,7 @@ public class Ghast extends FlyingMob implements Enemy {
 			if (livingEntity.distanceToSqr(this.ghast) < 4096.0 && this.ghast.canSee(livingEntity)) {
 				Level level = this.ghast.level;
 				this.chargeTime++;
-				if (this.chargeTime == 10) {
+				if (this.chargeTime == 10 && !this.ghast.isSilent()) {
 					level.levelEvent(null, 1015, this.ghast.blockPosition(), 0);
 				}
 
@@ -262,7 +262,10 @@ public class Ghast extends FlyingMob implements Enemy {
 					double f = livingEntity.getX() - (this.ghast.getX() + vec3.x * 4.0);
 					double g = livingEntity.getY(0.5) - (0.5 + this.ghast.getY(0.5));
 					double h = livingEntity.getZ() - (this.ghast.getZ() + vec3.z * 4.0);
-					level.levelEvent(null, 1016, this.ghast.blockPosition(), 0);
+					if (!this.ghast.isSilent()) {
+						level.levelEvent(null, 1016, this.ghast.blockPosition(), 0);
+					}
+
 					LargeFireball largeFireball = new LargeFireball(level, this.ghast, f, g, h);
 					largeFireball.explosionPower = this.ghast.getExplosionPower();
 					largeFireball.setPos(this.ghast.getX() + vec3.x * 4.0, this.ghast.getY(0.5) + 0.5, largeFireball.getZ() + vec3.z * 4.0);

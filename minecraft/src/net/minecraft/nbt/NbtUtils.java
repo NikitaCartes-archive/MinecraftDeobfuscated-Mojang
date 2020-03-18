@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SerializableUUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -30,44 +31,37 @@ public final class NbtUtils {
 	@Nullable
 	public static GameProfile readGameProfile(CompoundTag compoundTag) {
 		String string = null;
-		String string2 = null;
+		UUID uUID = null;
 		if (compoundTag.contains("Name", 8)) {
 			string = compoundTag.getString("Name");
 		}
 
-		if (compoundTag.contains("Id", 8)) {
-			string2 = compoundTag.getString("Id");
+		if (compoundTag.hasUUID("Id")) {
+			uUID = compoundTag.getUUID("Id");
 		}
 
 		try {
-			UUID uUID;
-			try {
-				uUID = UUID.fromString(string2);
-			} catch (Throwable var12) {
-				uUID = null;
-			}
-
 			GameProfile gameProfile = new GameProfile(uUID, string);
 			if (compoundTag.contains("Properties", 10)) {
 				CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
 
-				for (String string3 : compoundTag2.getAllKeys()) {
-					ListTag listTag = compoundTag2.getList(string3, 10);
+				for (String string2 : compoundTag2.getAllKeys()) {
+					ListTag listTag = compoundTag2.getList(string2, 10);
 
 					for (int i = 0; i < listTag.size(); i++) {
 						CompoundTag compoundTag3 = listTag.getCompound(i);
-						String string4 = compoundTag3.getString("Value");
+						String string3 = compoundTag3.getString("Value");
 						if (compoundTag3.contains("Signature", 8)) {
-							gameProfile.getProperties().put(string3, new com.mojang.authlib.properties.Property(string3, string4, compoundTag3.getString("Signature")));
+							gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3, compoundTag3.getString("Signature")));
 						} else {
-							gameProfile.getProperties().put(string3, new com.mojang.authlib.properties.Property(string3, string4));
+							gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3));
 						}
 					}
 				}
 			}
 
 			return gameProfile;
-		} catch (Throwable var13) {
+		} catch (Throwable var11) {
 			return null;
 		}
 	}
@@ -78,7 +72,7 @@ public final class NbtUtils {
 		}
 
 		if (gameProfile.getId() != null) {
-			compoundTag.putString("Id", gameProfile.getId().toString());
+			compoundTag.putUUID("Id", gameProfile.getId());
 		}
 
 		if (!gameProfile.getProperties().isEmpty()) {
@@ -157,13 +151,11 @@ public final class NbtUtils {
 		}
 	}
 
-	public static IntArrayTag createUUIDArray(UUID uUID) {
-		long l = uUID.getMostSignificantBits();
-		long m = uUID.getLeastSignificantBits();
-		return new IntArrayTag(new int[]{(int)(l >> 32), (int)l, (int)(m >> 32), (int)m});
+	public static IntArrayTag createUUID(UUID uUID) {
+		return new IntArrayTag(SerializableUUID.uuidToIntArray(uUID));
 	}
 
-	public static UUID loadUUIDArray(Tag tag) {
+	public static UUID loadUUID(Tag tag) {
 		if (tag.getType() != IntArrayTag.TYPE) {
 			throw new IllegalArgumentException("Expected UUID-Tag to be of type " + IntArrayTag.TYPE.getName() + ", but found " + tag.getType().getName() + ".");
 		} else {
@@ -171,22 +163,9 @@ public final class NbtUtils {
 			if (is.length != 4) {
 				throw new IllegalArgumentException("Expected UUID-Array to be of length 4, but found " + is.length + ".");
 			} else {
-				return new UUID((long)is[0] << 32 | (long)is[1] & 4294967295L, (long)is[2] << 32 | (long)is[3] & 4294967295L);
+				return SerializableUUID.uuidFromIntArray(is);
 			}
 		}
-	}
-
-	@Deprecated
-	public static CompoundTag createUUIDTag(UUID uUID) {
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putLong("M", uUID.getMostSignificantBits());
-		compoundTag.putLong("L", uUID.getLeastSignificantBits());
-		return compoundTag;
-	}
-
-	@Deprecated
-	public static UUID loadUUIDTag(CompoundTag compoundTag) {
-		return new UUID(compoundTag.getLong("M"), compoundTag.getLong("L"));
 	}
 
 	public static BlockPos readBlockPos(CompoundTag compoundTag) {

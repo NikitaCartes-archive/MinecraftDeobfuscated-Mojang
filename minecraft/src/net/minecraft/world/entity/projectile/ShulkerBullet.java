@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -27,13 +26,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class ShulkerBullet extends Entity {
-	private LivingEntity owner;
+	private Entity owner;
 	private Entity finalTarget;
 	@Nullable
 	private Direction currentMoveDirection;
@@ -43,10 +41,8 @@ public class ShulkerBullet extends Entity {
 	private double targetDeltaZ;
 	@Nullable
 	private UUID ownerId;
-	private BlockPos lastKnownOwnerPos;
 	@Nullable
 	private UUID targetId;
-	private BlockPos lastKnownTargetPos;
 
 	public ShulkerBullet(EntityType<? extends ShulkerBullet> entityType, Level level) {
 		super(entityType, level);
@@ -81,21 +77,11 @@ public class ShulkerBullet extends Entity {
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		if (this.owner != null) {
-			BlockPos blockPos = this.owner.blockPosition();
-			CompoundTag compoundTag2 = NbtUtils.createUUIDTag(this.owner.getUUID());
-			compoundTag2.putInt("X", blockPos.getX());
-			compoundTag2.putInt("Y", blockPos.getY());
-			compoundTag2.putInt("Z", blockPos.getZ());
-			compoundTag.put("Owner", compoundTag2);
+			compoundTag.putUUID("Owner", this.owner.getUUID());
 		}
 
 		if (this.finalTarget != null) {
-			BlockPos blockPos = this.finalTarget.blockPosition();
-			CompoundTag compoundTag2 = NbtUtils.createUUIDTag(this.finalTarget.getUUID());
-			compoundTag2.putInt("X", blockPos.getX());
-			compoundTag2.putInt("Y", blockPos.getY());
-			compoundTag2.putInt("Z", blockPos.getZ());
-			compoundTag.put("Target", compoundTag2);
+			compoundTag.putUUID("Target", this.finalTarget.getUUID());
 		}
 
 		if (this.currentMoveDirection != null) {
@@ -118,16 +104,12 @@ public class ShulkerBullet extends Entity {
 			this.currentMoveDirection = Direction.from3DDataValue(compoundTag.getInt("Dir"));
 		}
 
-		if (compoundTag.contains("Owner", 10)) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("Owner");
-			this.ownerId = NbtUtils.loadUUIDTag(compoundTag2);
-			this.lastKnownOwnerPos = new BlockPos(compoundTag2.getInt("X"), compoundTag2.getInt("Y"), compoundTag2.getInt("Z"));
+		if (compoundTag.hasUUID("Owner")) {
+			this.ownerId = compoundTag.getUUID("Owner");
 		}
 
-		if (compoundTag.contains("Target", 10)) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("Target");
-			this.targetId = NbtUtils.loadUUIDTag(compoundTag2);
-			this.lastKnownTargetPos = new BlockPos(compoundTag2.getInt("X"), compoundTag2.getInt("Y"), compoundTag2.getInt("Z"));
+		if (compoundTag.hasUUID("Target")) {
+			this.targetId = compoundTag.getUUID("Target");
 		}
 	}
 
@@ -225,27 +207,17 @@ public class ShulkerBullet extends Entity {
 		super.tick();
 		if (!this.level.isClientSide) {
 			if (this.finalTarget == null && this.targetId != null) {
-				for (LivingEntity livingEntity : this.level
-					.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownTargetPos.offset(-2, -2, -2), this.lastKnownTargetPos.offset(2, 2, 2)))) {
-					if (livingEntity.getUUID().equals(this.targetId)) {
-						this.finalTarget = livingEntity;
-						break;
-					}
+				this.finalTarget = ((ServerLevel)this.level).getEntity(this.targetId);
+				if (this.finalTarget == null) {
+					this.targetId = null;
 				}
-
-				this.targetId = null;
 			}
 
 			if (this.owner == null && this.ownerId != null) {
-				for (LivingEntity livingEntityx : this.level
-					.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownOwnerPos.offset(-2, -2, -2), this.lastKnownOwnerPos.offset(2, 2, 2)))) {
-					if (livingEntityx.getUUID().equals(this.ownerId)) {
-						this.owner = livingEntityx;
-						break;
-					}
+				this.owner = ((ServerLevel)this.level).getEntity(this.ownerId);
+				if (this.owner == null) {
+					this.ownerId = null;
 				}
-
-				this.ownerId = null;
 			}
 
 			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator()) {
@@ -315,9 +287,10 @@ public class ShulkerBullet extends Entity {
 	protected void onHit(HitResult hitResult) {
 		if (hitResult.getType() == HitResult.Type.ENTITY) {
 			Entity entity = ((EntityHitResult)hitResult).getEntity();
-			boolean bl = entity.hurt(DamageSource.indirectMobAttack(this, this.owner).setProjectile(), 4.0F);
+			LivingEntity livingEntity = this.owner instanceof LivingEntity ? (LivingEntity)this.owner : null;
+			boolean bl = entity.hurt(DamageSource.indirectMobAttack(this, livingEntity).setProjectile(), 4.0F);
 			if (bl) {
-				this.doEnchantDamageEffects(this.owner, entity);
+				this.doEnchantDamageEffects(livingEntity, entity);
 				if (entity instanceof LivingEntity) {
 					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200));
 				}

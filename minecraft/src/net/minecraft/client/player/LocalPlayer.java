@@ -202,6 +202,16 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 	}
 
+	public float getCurrentMood() {
+		for (AmbientSoundHandler ambientSoundHandler : this.ambientSoundHandlers) {
+			if (ambientSoundHandler instanceof BiomeAmbientSoundsHandler) {
+				return ((BiomeAmbientSoundsHandler)ambientSoundHandler).getMoodiness();
+			}
+		}
+
+		return 0.0F;
+	}
+
 	private void sendPosition() {
 		boolean bl = this.isSprinting();
 		if (bl != this.wasSprinting) {

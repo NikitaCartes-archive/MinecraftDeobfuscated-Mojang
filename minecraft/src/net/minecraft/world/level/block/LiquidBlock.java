@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -35,7 +35,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	protected final FlowingFluid fluid;
 	private final List<FluidState> stateCache;
 
-	protected LiquidBlock(FlowingFluid flowingFluid, Block.Properties properties) {
+	protected LiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.fluid = flowingFluid;
 		this.stateCache = Lists.<FluidState>newArrayList();
@@ -50,8 +50,13 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return blockState.getFluidState().isRandomlyTicking();
+	}
+
+	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		serverLevel.getFluidState(blockPos).randomTick(serverLevel, blockPos, random);
+		blockState.getFluidState().randomTick(serverLevel, blockPos, random);
 	}
 
 	@Override
@@ -92,14 +97,9 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return this.fluid.getTickDelay(levelReader);
-	}
-
-	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
-			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(level));
+			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}
 	}
 
@@ -108,7 +108,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (blockState.getFluidState().isSource() || blockState2.getFluidState().isSource()) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(levelAccessor));
+			levelAccessor.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(levelAccessor));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -117,7 +117,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
-			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(level));
+			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}
 	}
 

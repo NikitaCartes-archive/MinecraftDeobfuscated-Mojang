@@ -1,8 +1,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -10,6 +8,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -18,7 +17,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class GrassPathBlock extends Block {
 	protected static final VoxelShape SHAPE = FarmBlock.SHAPE;
 
-	protected GrassPathBlock(Block.Properties properties) {
+	protected GrassPathBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -64,11 +63,5 @@ public class GrassPathBlock extends Block {
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
 	}
 }

@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ComparatorBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -28,7 +29,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class ComparatorBlock extends DiodeBlock implements EntityBlock {
 	public static final EnumProperty<ComparatorMode> MODE = BlockStateProperties.MODE_COMPARATOR;
 
-	public ComparatorBlock(Block.Properties properties) {
+	public ComparatorBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(MODE, ComparatorMode.COMPARE)

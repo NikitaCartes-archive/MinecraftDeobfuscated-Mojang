@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -40,32 +41,34 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Random random = lootContext.getRandom();
-		Enchantment enchantment2;
+		Enchantment enchantment;
 		if (this.enchantments.isEmpty()) {
-			List<Enchantment> list = Lists.<Enchantment>newArrayList();
-
-			for (Enchantment enchantment : Registry.ENCHANTMENT) {
-				if (itemStack.getItem() == Items.BOOK || enchantment.canEnchant(itemStack)) {
-					list.add(enchantment);
-				}
-			}
-
+			boolean bl = itemStack.getItem() == Items.BOOK;
+			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT
+				.stream()
+				.filter(Enchantment::isDiscoverable)
+				.filter(enchantmentx -> bl || enchantmentx.canEnchant(itemStack))
+				.collect(Collectors.toList());
 			if (list.isEmpty()) {
 				LOGGER.warn("Couldn't find a compatible enchantment for {}", itemStack);
 				return itemStack;
 			}
 
-			enchantment2 = (Enchantment)list.get(random.nextInt(list.size()));
+			enchantment = (Enchantment)list.get(random.nextInt(list.size()));
 		} else {
-			enchantment2 = (Enchantment)this.enchantments.get(random.nextInt(this.enchantments.size()));
+			enchantment = (Enchantment)this.enchantments.get(random.nextInt(this.enchantments.size()));
 		}
 
-		int i = Mth.nextInt(random, enchantment2.getMinLevel(), enchantment2.getMaxLevel());
+		return enchantItem(itemStack, enchantment, random);
+	}
+
+	private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, Random random) {
+		int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
 		if (itemStack.getItem() == Items.BOOK) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-			EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment2, i));
+			EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
 		} else {
-			itemStack.enchant(enchantment2, i);
+			itemStack.enchant(enchantment, i);
 		}
 
 		return itemStack;

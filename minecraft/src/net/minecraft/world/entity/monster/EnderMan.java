@@ -252,7 +252,7 @@ public class EnderMan extends Monster {
 		boolean bl2 = blockState.getFluidState().is(FluidTags.WATER);
 		if (bl && !bl2) {
 			boolean bl3 = this.randomTeleport(d, e, f, true);
-			if (bl3) {
+			if (bl3 && !this.isSilent()) {
 				this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0F, 1.0F);
 				this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 			}

@@ -137,7 +137,7 @@ public class CommandBlockEntity extends BlockEntity {
 		Block block = this.getBlockState().getBlock();
 		if (block instanceof CommandBlock) {
 			this.markConditionMet();
-			this.level.getBlockTicks().scheduleTick(this.worldPosition, block, block.getTickDelay(this.level));
+			this.level.getBlockTicks().scheduleTick(this.worldPosition, block, 1);
 		}
 	}
 

@@ -63,6 +63,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -115,11 +116,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return null;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public void validateSpawn() {
-		this.setSpawnPos(new BlockPos(8, 64, 8));
-	}
-
 	public BlockState getTopBlockState(BlockPos blockPos) {
 		BlockPos blockPos2 = new BlockPos(blockPos.getX(), this.getSeaLevel(), blockPos.getZ());
 
@@ -152,6 +148,36 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public static boolean isOutsideBuildHeight(int i) {
 		return i < 0 || i >= 256;
+	}
+
+	public double getRelativeFloorHeight(BlockPos blockPos) {
+		VoxelShape voxelShape = this.getBlockState(blockPos).getCollisionShape(this, blockPos);
+		if (voxelShape.isEmpty()) {
+			BlockPos blockPos2 = blockPos.below();
+			VoxelShape voxelShape2 = this.getBlockState(blockPos2).getCollisionShape(this, blockPos2);
+			double d = voxelShape2.max(Direction.Axis.Y);
+			return d >= 1.0 ? d - 1.0 : Double.NEGATIVE_INFINITY;
+		} else {
+			return voxelShape.max(Direction.Axis.Y);
+		}
+	}
+
+	public double getRelativeCeilingHeight(BlockPos blockPos, double d) {
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+		int i = Mth.ceil(d);
+		int j = 0;
+
+		while (j < i) {
+			VoxelShape voxelShape = this.getBlockState(mutableBlockPos).getCollisionShape(this, mutableBlockPos);
+			if (!voxelShape.isEmpty()) {
+				return (double)j + voxelShape.min(Direction.Axis.Y);
+			}
+
+			j++;
+			mutableBlockPos.move(Direction.UP);
+		}
+
+		return Double.POSITIVE_INFINITY;
 	}
 
 	public LevelChunk getChunkAt(BlockPos blockPos) {
@@ -972,7 +998,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return blockPos;
 	}
 
-	public void setSpawnPos(BlockPos blockPos) {
+	public void setDefaultSpawnPos(BlockPos blockPos) {
 		this.levelData.setSpawn(blockPos);
 	}
 

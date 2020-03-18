@@ -499,7 +499,6 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.RED_SAND);
 		this.dropSelf(Blocks.GOLD_ORE);
 		this.dropSelf(Blocks.IRON_ORE);
-		this.dropSelf(Blocks.NETHER_GOLD_ORE);
 		this.dropSelf(Blocks.OAK_LOG);
 		this.dropSelf(Blocks.SPRUCE_LOG);
 		this.dropSelf(Blocks.BIRCH_LOG);
@@ -609,6 +608,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.SOUL_SAND);
 		this.dropSelf(Blocks.SOUL_SOIL);
 		this.dropSelf(Blocks.BASALT);
+		this.dropSelf(Blocks.POLISHED_BASALT);
 		this.dropSelf(Blocks.SOUL_FIRE_TORCH);
 		this.dropSelf(Blocks.CARVED_PUMPKIN);
 		this.dropSelf(Blocks.JACK_O_LANTERN);
@@ -829,6 +829,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.SCAFFOLDING);
 		this.dropSelf(Blocks.HONEY_BLOCK);
 		this.dropSelf(Blocks.HONEYCOMB_BLOCK);
+		this.dropSelf(Blocks.RESPAWN_ANCHOR);
 		this.dropSelf(Blocks.WARPED_STEM);
 		this.dropSelf(Blocks.WARPED_HYPHAE);
 		this.dropSelf(Blocks.WARPED_NYLIUM);
@@ -1122,7 +1123,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 							blockx,
 							LootPool.lootPool()
 								.setRolls(ConstantIntValue.exactly(1))
-								.add(LootItem.lootTableItem(blockx).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Owner", "SkullOwner")))
+								.add(LootItem.lootTableItem(blockx).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("SkullOwner", "SkullOwner")))
 						)
 					)
 		);
@@ -1204,6 +1205,18 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.EMERALD_ORE, blockx -> createOreDrop(blockx, Items.EMERALD));
 		this.add(Blocks.NETHER_QUARTZ_ORE, blockx -> createOreDrop(blockx, Items.QUARTZ));
 		this.add(Blocks.DIAMOND_ORE, blockx -> createOreDrop(blockx, Items.DIAMOND));
+		this.add(
+			Blocks.NETHER_GOLD_ORE,
+			blockx -> createSilkTouchDispatchTable(
+					blockx,
+					(LootPoolEntryContainer.Builder<?>)applyExplosionDecay(
+						blockx,
+						LootItem.lootTableItem(Items.GOLD_NUGGET)
+							.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 6.0F)))
+							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE))
+					)
+				)
+		);
 		this.add(
 			Blocks.LAPIS_ORE,
 			blockx -> createSilkTouchDispatchTable(

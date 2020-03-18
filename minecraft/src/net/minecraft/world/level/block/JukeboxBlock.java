@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -22,7 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class JukeboxBlock extends BaseEntityBlock {
 	public static final BooleanProperty HAS_RECORD = BlockStateProperties.HAS_RECORD;
 
-	protected JukeboxBlock(Block.Properties properties) {
+	protected JukeboxBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HAS_RECORD, Boolean.valueOf(false)));
 	}

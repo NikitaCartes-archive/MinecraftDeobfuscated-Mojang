@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacerType;
@@ -87,7 +88,7 @@ public class RandomPatchConfiguration implements FeatureConfiguration {
 		return new RandomPatchConfiguration(
 			blockStateProviderType.deserialize(dynamic.get("state_provider").orElseEmptyMap()),
 			blockPlacerType.deserialize(dynamic.get("block_placer").orElseEmptyMap()),
-			(Set<Block>)dynamic.get("whitelist").asList(BlockState::deserialize).stream().map(BlockState::getBlock).collect(Collectors.toSet()),
+			(Set<Block>)dynamic.get("whitelist").asList(BlockState::deserialize).stream().map(BlockBehaviour.BlockStateBase::getBlock).collect(Collectors.toSet()),
 			Sets.<BlockState>newHashSet(dynamic.get("blacklist").asList(BlockState::deserialize)),
 			dynamic.get("tries").asInt(128),
 			dynamic.get("xspread").asInt(7),

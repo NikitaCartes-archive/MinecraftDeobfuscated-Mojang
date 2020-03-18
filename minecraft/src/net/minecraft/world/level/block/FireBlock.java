@@ -14,6 +14,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -39,7 +40,7 @@ public class FireBlock extends BaseFireBlock {
 	private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
 
-	public FireBlock(Block.Properties properties) {
+	public FireBlock(BlockBehaviour.Properties properties) {
 		super(properties, 1.0F);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -119,11 +120,6 @@ public class FireBlock extends BaseFireBlock {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 30;
-	}
-
-	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
 			if (!blockState.canSurvive(serverLevel, blockPos)) {
@@ -143,7 +139,7 @@ public class FireBlock extends BaseFireBlock {
 				}
 
 				if (!bl) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel) + random.nextInt(10));
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, getFireTickDelay(serverLevel.random));
 					if (!this.isValidFireLocation(serverLevel, blockPos)) {
 						BlockPos blockPos2 = blockPos.below();
 						if (!serverLevel.getBlockState(blockPos2).isFaceSturdy(serverLevel, blockPos2, Direction.UP) || i > 3) {
@@ -275,7 +271,11 @@ public class FireBlock extends BaseFireBlock {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		super.onPlace(blockState, level, blockPos, blockState2, bl);
-		level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
+		level.getBlockTicks().scheduleTick(blockPos, this, getFireTickDelay(level.random));
+	}
+
+	private static int getFireTickDelay(Random random) {
+		return 30 + random.nextInt(10);
 	}
 
 	@Override

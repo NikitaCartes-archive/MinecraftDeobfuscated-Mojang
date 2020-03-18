@@ -7,10 +7,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class CryingObsidianBlock extends Block {
-	public CryingObsidianBlock(Block.Properties properties) {
+	public CryingObsidianBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

@@ -8,10 +8,11 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnerBlock extends BaseEntityBlock {
-	protected SpawnerBlock(Block.Properties properties) {
+	protected SpawnerBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

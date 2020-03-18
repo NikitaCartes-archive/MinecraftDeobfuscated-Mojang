@@ -17,6 +17,7 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -82,6 +83,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -102,12 +104,14 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
@@ -149,6 +153,9 @@ public class ServerPlayer extends Player implements ContainerListener {
 	@Nullable
 	private Vec3 enteredNetherPosition;
 	private SectionPos lastSectionPos = SectionPos.of(0, 0, 0);
+	private DimensionType respawnDimension = DimensionType.OVERWORLD;
+	private BlockPos respawnPosition;
+	private boolean respawnForced;
 	private int containerCounter;
 	public boolean ignoreSlotUpdateHack;
 	public int latency;
@@ -234,6 +241,15 @@ public class ServerPlayer extends Player implements ContainerListener {
 		if (this.isSleeping()) {
 			this.stopSleeping();
 		}
+
+		if (compoundTag.contains("SpawnX", 99) && compoundTag.contains("SpawnY", 99) && compoundTag.contains("SpawnZ", 99)) {
+			this.respawnPosition = new BlockPos(compoundTag.getInt("SpawnX"), compoundTag.getInt("SpawnY"), compoundTag.getInt("SpawnZ"));
+			this.respawnForced = compoundTag.getBoolean("SpawnForced");
+			if (compoundTag.contains("SpawnDimension", 8)) {
+				ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("SpawnDimension"));
+				this.respawnDimension = resourceLocation != null ? DimensionType.getByName(resourceLocation) : DimensionType.OVERWORLD;
+			}
+		}
 	}
 
 	@Override
@@ -261,6 +277,13 @@ public class ServerPlayer extends Player implements ContainerListener {
 		}
 
 		compoundTag.put("recipeBook", this.recipeBook.toNbt());
+		if (this.respawnPosition != null) {
+			compoundTag.putInt("SpawnX", this.respawnPosition.getX());
+			compoundTag.putInt("SpawnY", this.respawnPosition.getY());
+			compoundTag.putInt("SpawnZ", this.respawnPosition.getZ());
+			compoundTag.putBoolean("SpawnForced", this.respawnForced);
+			compoundTag.putString("SpawnDimension", DimensionType.getName(this.respawnDimension).toString());
+		}
 	}
 
 	public void setExperiencePoints(int i) {
@@ -711,10 +734,63 @@ public class ServerPlayer extends Player implements ContainerListener {
 
 	@Override
 	public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
-		return super.startSleepInBed(blockPos).ifRight(unit -> {
-			this.awardStat(Stats.SLEEP_IN_BED);
-			CriteriaTriggers.SLEPT_IN_BED.trigger(this);
-		});
+		Direction direction = this.level.getBlockState(blockPos).getValue(HorizontalDirectionalBlock.FACING);
+		if (this.isSleeping() || !this.isAlive()) {
+			return Either.left(Player.BedSleepingProblem.OTHER_PROBLEM);
+		} else if (!this.level.dimension.isNaturalDimension()) {
+			return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_HERE);
+		} else if (!this.bedInRange(blockPos, direction)) {
+			return Either.left(Player.BedSleepingProblem.TOO_FAR_AWAY);
+		} else if (this.bedBlocked(blockPos, direction)) {
+			return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
+		} else {
+			this.setRespawnPosition(this.level.getDimension().getType(), blockPos, false, true);
+			if (this.level.isDay()) {
+				return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
+			} else {
+				if (!this.isCreative()) {
+					double d = 8.0;
+					double e = 5.0;
+					Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+					List<Monster> list = this.level
+						.getEntitiesOfClass(
+							Monster.class,
+							new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0),
+							monster -> monster.isPreventingPlayerRest(this)
+						);
+					if (!list.isEmpty()) {
+						return Either.left(Player.BedSleepingProblem.NOT_SAFE);
+					}
+				}
+
+				Either<Player.BedSleepingProblem, Unit> either = super.startSleepInBed(blockPos).ifRight(unit -> {
+					this.awardStat(Stats.SLEEP_IN_BED);
+					CriteriaTriggers.SLEPT_IN_BED.trigger(this);
+				});
+				((ServerLevel)this.level).updateSleepingPlayerList();
+				return either;
+			}
+		}
+	}
+
+	@Override
+	public void startSleeping(BlockPos blockPos) {
+		this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
+		super.startSleeping(blockPos);
+	}
+
+	private boolean bedInRange(BlockPos blockPos, Direction direction) {
+		return this.isReachableBedBlock(blockPos) || this.isReachableBedBlock(blockPos.relative(direction.getOpposite()));
+	}
+
+	private boolean isReachableBedBlock(BlockPos blockPos) {
+		Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+		return Math.abs(this.getX() - vec3.x()) <= 3.0 && Math.abs(this.getY() - vec3.y()) <= 2.0 && Math.abs(this.getZ() - vec3.z()) <= 3.0;
+	}
+
+	private boolean bedBlocked(BlockPos blockPos, Direction direction) {
+		BlockPos blockPos2 = blockPos.above();
+		return !this.freeAt(blockPos2) || !this.freeAt(blockPos2.relative(direction.getOpposite()));
 	}
 
 	@Override
@@ -1278,6 +1354,35 @@ public class ServerPlayer extends Player implements ContainerListener {
 			this.gameMode.setLevel(serverLevel);
 			this.server.getPlayerList().sendLevelInfo(this, serverLevel);
 			this.server.getPlayerList().sendAllPlayerInfo(this);
+		}
+	}
+
+	public BlockPos getRespawnPosition() {
+		return this.respawnPosition;
+	}
+
+	public DimensionType getRespawnDimension() {
+		return this.respawnDimension;
+	}
+
+	public boolean isRespawnForced() {
+		return this.respawnForced;
+	}
+
+	public void setRespawnPosition(DimensionType dimensionType, BlockPos blockPos, boolean bl, boolean bl2) {
+		if (blockPos != null) {
+			boolean bl3 = blockPos.equals(this.respawnPosition) && dimensionType.equals(this.respawnDimension);
+			if (bl2 && !bl3) {
+				this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"));
+			}
+
+			this.respawnPosition = blockPos;
+			this.respawnDimension = dimensionType;
+			this.respawnForced = bl;
+		} else {
+			this.respawnPosition = null;
+			this.respawnDimension = DimensionType.OVERWORLD;
+			this.respawnForced = false;
 		}
 	}
 

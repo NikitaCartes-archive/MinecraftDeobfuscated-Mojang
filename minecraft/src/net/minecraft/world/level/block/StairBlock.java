@@ -16,7 +16,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -83,7 +83,7 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 		return voxelShape6;
 	}
 
-	protected StairBlock(BlockState blockState, Block.Properties properties) {
+	protected StairBlock(BlockState blockState, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -133,11 +133,6 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return this.base.getTickDelay(levelReader);
-	}
-
-	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (blockState.getBlock() != blockState.getBlock()) {
 			this.baseState.neighborChanged(level, blockPos, Blocks.AIR, blockPos, false);
@@ -155,6 +150,16 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 	@Override
 	public void stepOn(Level level, BlockPos blockPos, Entity entity) {
 		this.base.stepOn(level, blockPos, entity);
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return this.base.isRandomlyTicking(blockState);
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		this.base.randomTick(blockState, serverLevel, blockPos, random);
 	}
 
 	@Override

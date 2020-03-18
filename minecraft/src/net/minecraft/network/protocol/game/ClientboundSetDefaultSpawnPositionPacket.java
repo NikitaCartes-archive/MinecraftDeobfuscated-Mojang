@@ -7,13 +7,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
-public class ClientboundSetSpawnPositionPacket implements Packet<ClientGamePacketListener> {
+public class ClientboundSetDefaultSpawnPositionPacket implements Packet<ClientGamePacketListener> {
 	private BlockPos pos;
 
-	public ClientboundSetSpawnPositionPacket() {
+	public ClientboundSetDefaultSpawnPositionPacket() {
 	}
 
-	public ClientboundSetSpawnPositionPacket(BlockPos blockPos) {
+	public ClientboundSetDefaultSpawnPositionPacket(BlockPos blockPos) {
 		this.pos = blockPos;
 	}
 

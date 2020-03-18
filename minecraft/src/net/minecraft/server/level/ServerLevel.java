@@ -54,6 +54,7 @@ import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -540,29 +541,6 @@ public class ServerLevel extends Level {
 		this.levelData.setRaining(false);
 		this.levelData.setThunderTime(0);
 		this.levelData.setThundering(false);
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void validateSpawn() {
-		if (this.levelData.getYSpawn() <= 0) {
-			this.levelData.setYSpawn(this.getSeaLevel() + 1);
-		}
-
-		int i = this.levelData.getXSpawn();
-		int j = this.levelData.getZSpawn();
-		int k = 0;
-
-		while (this.getTopBlockState(new BlockPos(i, 0, j)).isAir()) {
-			i += this.random.nextInt(8) - this.random.nextInt(8);
-			j += this.random.nextInt(8) - this.random.nextInt(8);
-			if (++k == 10000) {
-				break;
-			}
-		}
-
-		this.levelData.setXSpawn(i);
-		this.levelData.setZSpawn(j);
 	}
 
 	public void resetEmptyTime() {
@@ -1269,11 +1247,12 @@ public class ServerLevel extends Level {
 	}
 
 	@Override
-	public void setSpawnPos(BlockPos blockPos) {
+	public void setDefaultSpawnPos(BlockPos blockPos) {
 		ChunkPos chunkPos = new ChunkPos(new BlockPos(this.levelData.getXSpawn(), 0, this.levelData.getZSpawn()));
-		super.setSpawnPos(blockPos);
+		super.setDefaultSpawnPos(blockPos);
 		this.getChunkSource().removeRegionTicket(TicketType.START, chunkPos, 11, Unit.INSTANCE);
 		this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
+		this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos));
 	}
 
 	public LongSet getForcedChunks() {

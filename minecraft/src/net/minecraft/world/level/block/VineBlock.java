@@ -11,6 +11,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -35,7 +36,7 @@ public class VineBlock extends Block {
 	protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
 	protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
 
-	public VineBlock(Block.Properties properties) {
+	public VineBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -157,23 +158,15 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		BlockState blockState2 = this.getUpdatedState(blockState, serverLevel, blockPos);
-		if (blockState2 != blockState) {
-			if (this.hasFaces(blockState2)) {
-				serverLevel.setBlock(blockPos, blockState2, 2);
-			} else {
-				dropResources(blockState, serverLevel, blockPos);
-				serverLevel.removeBlock(blockPos, false);
-			}
-		} else if (serverLevel.random.nextInt(4) == 0) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (serverLevel.random.nextInt(4) == 0) {
 			Direction direction = Direction.getRandomFace(random);
 			BlockPos blockPos2 = blockPos.above();
 			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
 				if (this.canSpread(serverLevel, blockPos)) {
 					BlockPos blockPos3 = blockPos.relative(direction);
-					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-					if (blockState3.isAir()) {
+					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
+					if (blockState2.isAir()) {
 						Direction direction2 = direction.getClockWise();
 						Direction direction3 = direction.getCounterClockWise();
 						boolean bl = (Boolean)blockState.getValue(getPropertyForFace(direction2));
@@ -210,16 +203,16 @@ public class VineBlock extends Block {
 							return;
 						}
 
-						BlockState blockState4 = blockState;
+						BlockState blockState3 = blockState;
 
 						for (Direction direction2 : Direction.Plane.HORIZONTAL) {
 							if (random.nextBoolean() || !isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), Direction.UP)) {
-								blockState4 = blockState4.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
+								blockState3 = blockState3.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
 							}
 						}
 
-						if (this.hasHorizontalConnection(blockState4)) {
-							serverLevel.setBlock(blockPos2, blockState4, 2);
+						if (this.hasHorizontalConnection(blockState3)) {
+							serverLevel.setBlock(blockPos2, blockState3, 2);
 						}
 
 						return;
@@ -228,12 +221,12 @@ public class VineBlock extends Block {
 
 				if (blockPos.getY() > 0) {
 					BlockPos blockPos3 = blockPos.below();
-					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-					if (blockState3.isAir() || blockState3.getBlock() == this) {
-						BlockState blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3;
-						BlockState blockState6 = this.copyRandomFaces(blockState, blockState5, random);
-						if (blockState5 != blockState6 && this.hasHorizontalConnection(blockState6)) {
-							serverLevel.setBlock(blockPos3, blockState6, 2);
+					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
+					if (blockState2.isAir() || blockState2.getBlock() == this) {
+						BlockState blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2;
+						BlockState blockState5 = this.copyRandomFaces(blockState, blockState4, random);
+						if (blockState4 != blockState5 && this.hasHorizontalConnection(blockState5)) {
+							serverLevel.setBlock(blockPos3, blockState5, 2);
 						}
 					}
 				}

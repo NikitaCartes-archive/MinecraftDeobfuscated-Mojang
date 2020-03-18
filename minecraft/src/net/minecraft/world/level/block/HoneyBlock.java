@@ -15,6 +15,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class HoneyBlock extends HalfTransparentBlock {
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
 
-	public HoneyBlock(Block.Properties properties) {
+	public HoneyBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

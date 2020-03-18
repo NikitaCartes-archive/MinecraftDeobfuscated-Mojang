@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -243,11 +242,11 @@ public class ItemEntity extends Entity {
 		compoundTag.putShort("Age", (short)this.age);
 		compoundTag.putShort("PickupDelay", (short)this.pickupDelay);
 		if (this.getThrower() != null) {
-			compoundTag.put("Thrower", NbtUtils.createUUIDTag(this.getThrower()));
+			compoundTag.putUUID("Thrower", this.getThrower());
 		}
 
 		if (this.getOwner() != null) {
-			compoundTag.put("Owner", NbtUtils.createUUIDTag(this.getOwner()));
+			compoundTag.putUUID("Owner", this.getOwner());
 		}
 
 		if (!this.getItem().isEmpty()) {
@@ -263,12 +262,12 @@ public class ItemEntity extends Entity {
 			this.pickupDelay = compoundTag.getShort("PickupDelay");
 		}
 
-		if (compoundTag.contains("Owner", 10)) {
-			this.owner = NbtUtils.loadUUIDTag(compoundTag.getCompound("Owner"));
+		if (compoundTag.hasUUID("Owner")) {
+			this.owner = compoundTag.getUUID("Owner");
 		}
 
-		if (compoundTag.contains("Thrower", 10)) {
-			this.thrower = NbtUtils.loadUUIDTag(compoundTag.getCompound("Thrower"));
+		if (compoundTag.hasUUID("Thrower")) {
+			this.thrower = compoundTag.getUUID("Thrower");
 		}
 
 		CompoundTag compoundTag2 = compoundTag.getCompound("Item");

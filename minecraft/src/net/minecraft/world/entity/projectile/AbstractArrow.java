@@ -357,7 +357,7 @@ public abstract class AbstractArrow extends Projectile {
 				}
 
 				this.doPostHurtEffects(livingEntity);
-				if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer) {
+				if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer && !this.isSilent()) {
 					((ServerPlayer)entity2).connection.send(new ClientboundGameEventPacket(6, 0.0F));
 				}
 
@@ -397,8 +397,8 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
-		super.onHitBlock(blockHitResult);
 		this.lastState = this.level.getBlockState(blockHitResult.getBlockPos());
+		super.onHitBlock(blockHitResult);
 		Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
 		this.setDeltaMovement(vec3);
 		Vec3 vec32 = vec3.normalize().scale(0.05F);

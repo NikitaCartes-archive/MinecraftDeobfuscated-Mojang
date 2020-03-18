@@ -3,7 +3,12 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.datafixers.Dynamic;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -52,11 +57,26 @@ public class NetherFossilFeature extends RandomScatteredFeature<NoneFeatureConfi
 
 		@Override
 		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
-			int k = i * 16;
-			int l = j * 16;
-			int m = chunkGenerator.getSeaLevel() + this.random.nextInt(126 - chunkGenerator.getSeaLevel());
-			NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(k + this.random.nextInt(16), m, l + this.random.nextInt(16)));
-			this.calculateBoundingBox();
+			ChunkPos chunkPos = new ChunkPos(i, j);
+			int k = chunkPos.getMinBlockX() + this.random.nextInt(16);
+			int l = chunkPos.getMinBlockZ() + this.random.nextInt(16);
+			int m = chunkGenerator.getSeaLevel();
+			int n = m + this.random.nextInt(chunkGenerator.getGenDepth() - 2 - m);
+			BlockGetter blockGetter = chunkGenerator.getBaseColumn(k, l);
+
+			for (BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(k, n, l); n > m; n--) {
+				BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+				mutableBlockPos.move(Direction.DOWN);
+				BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos);
+				if (blockState.isAir() && (blockState2.getBlock() == Blocks.SOUL_SAND || blockState2.isFaceSturdy(blockGetter, mutableBlockPos, Direction.UP))) {
+					break;
+				}
+			}
+
+			if (n > m) {
+				NetherFossilPieces.addPieces(structureManager, this.pieces, this.random, new BlockPos(k, n, l));
+				this.calculateBoundingBox();
+			}
 		}
 	}
 }

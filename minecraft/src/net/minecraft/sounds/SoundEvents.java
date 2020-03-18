@@ -659,6 +659,10 @@ public class SoundEvents {
 	public static final SoundEvent NETHER_ORE_PLACE = register("block.nether_ore.place");
 	public static final SoundEvent NETHER_ORE_STEP = register("block.nether_ore.step");
 	public static final SoundEvent REDSTONE_TORCH_BURNOUT = register("block.redstone_torch.burnout");
+	public static final SoundEvent RESPAWN_ANCHOR_AMBIENT = register("block.respawn_anchor.ambient");
+	public static final SoundEvent RESPAWN_ANCHOR_CHARGE = register("block.respawn_anchor.charge");
+	public static final SoundEvent RESPAWN_ANCHOR_DEPLETE = register("block.respawn_anchor.deplete");
+	public static final SoundEvent RESPAWN_ANCHOR_SET_SPAWN = register("block.respawn_anchor.set_spawn");
 	public static final SoundEvent SALMON_AMBIENT = register("entity.salmon.ambient");
 	public static final SoundEvent SALMON_DEATH = register("entity.salmon.death");
 	public static final SoundEvent SALMON_FLOP = register("entity.salmon.flop");

@@ -116,6 +116,7 @@ public class Bat extends AmbientCreature {
 		BlockPos blockPos = this.blockPosition();
 		BlockPos blockPos2 = blockPos.above();
 		if (this.isResting()) {
+			boolean bl = this.isSilent();
 			if (this.level.getBlockState(blockPos2).isRedstoneConductor(this.level, blockPos)) {
 				if (this.random.nextInt(200) == 0) {
 					this.yHeadRot = (float)this.random.nextInt(360);
@@ -123,11 +124,15 @@ public class Bat extends AmbientCreature {
 
 				if (this.level.getNearestPlayer(BAT_RESTING_TARGETING, this) != null) {
 					this.setResting(false);
-					this.level.levelEvent(null, 1025, blockPos, 0);
+					if (!bl) {
+						this.level.levelEvent(null, 1025, blockPos, 0);
+					}
 				}
 			} else {
 				this.setResting(false);
-				this.level.levelEvent(null, 1025, blockPos, 0);
+				if (!bl) {
+					this.level.levelEvent(null, 1025, blockPos, 0);
+				}
 			}
 		} else {
 			if (this.targetPosition != null && (!this.level.isEmptyBlock(this.targetPosition) || this.targetPosition.getY() < 1)) {

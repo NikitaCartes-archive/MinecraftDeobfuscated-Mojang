@@ -71,7 +71,7 @@ public class ElderGuardian extends Guardian {
 
 			for (ServerPlayer serverPlayer : list) {
 				if (!serverPlayer.hasEffect(mobEffect) || serverPlayer.getEffect(mobEffect).getAmplifier() < 2 || serverPlayer.getEffect(mobEffect).getDuration() < 1200) {
-					serverPlayer.connection.send(new ClientboundGameEventPacket(10, 0.0F));
+					serverPlayer.connection.send(new ClientboundGameEventPacket(10, this.isSilent() ? 0.0F : 1.0F));
 					serverPlayer.addEffect(new MobEffectInstance(mobEffect, 6000, 2));
 				}
 			}

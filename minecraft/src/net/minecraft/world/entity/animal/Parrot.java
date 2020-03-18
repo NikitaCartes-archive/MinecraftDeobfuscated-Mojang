@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -56,7 +57,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LogBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
@@ -136,6 +136,11 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	}
 
 	@Override
+	public boolean isBaby() {
+		return false;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new PanicGoal(this, 1.25));
 		this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -172,10 +177,13 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 
 	@Override
 	public void aiStep() {
-		imitateNearbyMobs(this.level, this);
 		if (this.jukebox == null || !this.jukebox.closerThan(this.position(), 3.46) || this.level.getBlockState(this.jukebox).getBlock() != Blocks.JUKEBOX) {
 			this.partyParrot = false;
 			this.jukebox = null;
+		}
+
+		if (this.level.random.nextInt(400) == 0) {
+			imitateNearbyMobs(this.level, this);
 		}
 
 		super.aiStep();
@@ -212,8 +220,8 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		this.flap = this.flap + this.flapping * 2.0F;
 	}
 
-	private static boolean imitateNearbyMobs(Level level, Entity entity) {
-		if (entity.isAlive() && !entity.isSilent() && level.random.nextInt(50) == 0) {
+	public static boolean imitateNearbyMobs(Level level, Entity entity) {
+		if (entity.isAlive() && !entity.isSilent() && level.random.nextInt(2) == 0) {
 			List<Mob> list = level.getEntitiesOfClass(Mob.class, entity.getBoundingBox().inflate(20.0), NOT_PARROT_PREDICATE);
 			if (!list.isEmpty()) {
 				Mob mob = (Mob)list.get(level.random.nextInt(list.size()));
@@ -295,7 +303,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		EntityType<Parrot> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
 		Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-		return (block.is(BlockTags.LEAVES) || block == Blocks.GRASS_BLOCK || block instanceof LogBlock || block == Blocks.AIR)
+		return (block.is(BlockTags.LEAVES) || block == Blocks.GRASS_BLOCK || block.is(BlockTags.LOGS) || block == Blocks.AIR)
 			&& levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
@@ -319,12 +327,6 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		return null;
 	}
 
-	public static void playAmbientSound(Level level, Entity entity) {
-		if (!entity.isSilent() && !imitateNearbyMobs(level, entity) && level.random.nextInt(200) == 0) {
-			level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), getAmbient(level.random), entity.getSoundSource(), 1.0F, getPitch(level.random));
-		}
-	}
-
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		return entity.hurt(DamageSource.mobAttack(this), 3.0F);
@@ -333,11 +335,11 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 	@Nullable
 	@Override
 	public SoundEvent getAmbientSound() {
-		return getAmbient(this.random);
+		return getAmbient(this.level, this.level.random);
 	}
 
-	private static SoundEvent getAmbient(Random random) {
-		if (random.nextInt(1000) == 0) {
+	public static SoundEvent getAmbient(Level level, Random random) {
+		if (level.getDifficulty() != Difficulty.PEACEFUL && random.nextInt(1000) == 0) {
 			List<EntityType<?>> list = Lists.<EntityType<?>>newArrayList(MOB_SOUND_MAP.keySet());
 			return getImitatedSound((EntityType<?>)list.get(random.nextInt(list.size())));
 		} else {
@@ -380,7 +382,7 @@ public class Parrot extends ShoulderRidingEntity implements FlyingAnimal {
 		return getPitch(this.random);
 	}
 
-	private static float getPitch(Random random) {
+	public static float getPitch(Random random) {
 		return (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F;
 	}
 

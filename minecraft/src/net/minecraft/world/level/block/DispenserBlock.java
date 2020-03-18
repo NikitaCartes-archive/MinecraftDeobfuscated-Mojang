@@ -26,10 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -48,14 +48,9 @@ public class DispenserBlock extends BaseEntityBlock {
 		DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);
 	}
 
-	protected DispenserBlock(Block.Properties properties) {
+	protected DispenserBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TRIGGERED, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 4;
 	}
 
 	@Override
@@ -103,7 +98,7 @@ public class DispenserBlock extends BaseEntityBlock {
 		boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		if (bl2 && !bl3) {
-			level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+			level.getBlockTicks().scheduleTick(blockPos, this, 4);
 			level.setBlock(blockPos, blockState.setValue(TRIGGERED, Boolean.valueOf(true)), 4);
 		} else if (!bl2 && bl3) {
 			level.setBlock(blockPos, blockState.setValue(TRIGGERED, Boolean.valueOf(false)), 4);

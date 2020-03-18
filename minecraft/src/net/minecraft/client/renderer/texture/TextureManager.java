@@ -30,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class TextureManager implements Tickable, AutoCloseable, PreparableReloadListener {
+public class TextureManager implements PreparableReloadListener, Tickable, AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final ResourceLocation INTENTIONAL_MISSING_TEXTURE = new ResourceLocation("");
 	private final Map<ResourceLocation, AbstractTexture> byPath = Maps.<ResourceLocation, AbstractTexture>newHashMap();

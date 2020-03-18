@@ -9,12 +9,12 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class SetWalkTargetFromLookTarget extends Behavior<LivingEntity> {
-	private final float speed;
+	private final float speedModifier;
 	private final int closeEnoughDistance;
 
 	public SetWalkTargetFromLookTarget(float f, int i) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.VALUE_PRESENT));
-		this.speed = f;
+		this.speedModifier = f;
 		this.closeEnoughDistance = i;
 	}
 
@@ -22,6 +22,6 @@ public class SetWalkTargetFromLookTarget extends Behavior<LivingEntity> {
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Brain<?> brain = livingEntity.getBrain();
 		PositionWrapper positionWrapper = (PositionWrapper)brain.getMemory(MemoryModuleType.LOOK_TARGET).get();
-		brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(positionWrapper, this.speed, this.closeEnoughDistance));
+		brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(positionWrapper, this.speedModifier, this.closeEnoughDistance));
 	}
 }

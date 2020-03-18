@@ -16,6 +16,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -37,7 +38,7 @@ public class WallTorchBlock extends TorchBlock {
 		)
 	);
 
-	protected WallTorchBlock(Block.Properties properties, ParticleOptions particleOptions) {
+	protected WallTorchBlock(BlockBehaviour.Properties properties, ParticleOptions particleOptions) {
 		super(properties, particleOptions);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}

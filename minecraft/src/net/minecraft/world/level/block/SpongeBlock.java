@@ -8,13 +8,14 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 
 public class SpongeBlock extends Block {
-	protected SpongeBlock(Block.Properties properties) {
+	protected SpongeBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

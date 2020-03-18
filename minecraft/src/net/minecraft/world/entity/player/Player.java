@@ -71,7 +71,6 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -94,10 +93,9 @@ import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -145,8 +143,6 @@ public abstract class Player extends LivingEntity {
 	public double zCloak;
 	private int sleepCounter;
 	protected boolean wasUnderwater;
-	private BlockPos respawnPosition;
-	private boolean respawnForced;
 	public final Abilities abilities = new Abilities();
 	public int experienceLevel;
 	public int totalExperience;
@@ -560,9 +556,27 @@ public abstract class Player extends LivingEntity {
 	}
 
 	private void playShoulderEntityAmbientSound(@Nullable CompoundTag compoundTag) {
-		if (compoundTag != null && !compoundTag.contains("Silent") || !compoundTag.getBoolean("Silent")) {
+		if (compoundTag != null && (!compoundTag.contains("Silent") || !compoundTag.getBoolean("Silent")) && this.level.random.nextInt(200) == 0) {
 			String string = compoundTag.getString("id");
-			EntityType.byString(string).filter(entityType -> entityType == EntityType.PARROT).ifPresent(entityType -> Parrot.playAmbientSound(this.level, this));
+			EntityType.byString(string)
+				.filter(entityType -> entityType == EntityType.PARROT)
+				.ifPresent(
+					entityType -> {
+						if (!Parrot.imitateNearbyMobs(this.level, this)) {
+							this.level
+								.playSound(
+									null,
+									this.getX(),
+									this.getY(),
+									this.getZ(),
+									Parrot.getAmbient(this.level, this.level.random),
+									this.getSoundSource(),
+									1.0F,
+									Parrot.getPitch(this.level.random)
+								);
+						}
+					}
+				);
 		}
 	}
 
@@ -761,11 +775,6 @@ public abstract class Player extends LivingEntity {
 		}
 
 		this.setScore(compoundTag.getInt("Score"));
-		if (compoundTag.contains("SpawnX", 99) && compoundTag.contains("SpawnY", 99) && compoundTag.contains("SpawnZ", 99)) {
-			this.respawnPosition = new BlockPos(compoundTag.getInt("SpawnX"), compoundTag.getInt("SpawnY"), compoundTag.getInt("SpawnZ"));
-			this.respawnForced = compoundTag.getBoolean("SpawnForced");
-		}
-
 		this.foodData.readAdditionalSaveData(compoundTag);
 		this.abilities.loadSaveData(compoundTag);
 		if (compoundTag.contains("EnderItems", 9)) {
@@ -793,13 +802,6 @@ public abstract class Player extends LivingEntity {
 		compoundTag.putInt("XpTotal", this.totalExperience);
 		compoundTag.putInt("XpSeed", this.enchantmentSeed);
 		compoundTag.putInt("Score", this.getScore());
-		if (this.respawnPosition != null) {
-			compoundTag.putInt("SpawnX", this.respawnPosition.getX());
-			compoundTag.putInt("SpawnY", this.respawnPosition.getY());
-			compoundTag.putInt("SpawnZ", this.respawnPosition.getZ());
-			compoundTag.putBoolean("SpawnForced", this.respawnForced);
-		}
-
 		this.foodData.addAdditionalSaveData(compoundTag);
 		this.abilities.addSaveData(compoundTag);
 		compoundTag.put("EnderItems", this.enderChestInventory.createTag());
@@ -1271,73 +1273,9 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
-		Direction direction = this.level.getBlockState(blockPos).getValue(HorizontalDirectionalBlock.FACING);
-		if (!this.level.isClientSide) {
-			if (this.isSleeping() || !this.isAlive()) {
-				return Either.left(Player.BedSleepingProblem.OTHER_PROBLEM);
-			}
-
-			if (!this.level.dimension.isNaturalDimension()) {
-				return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_HERE);
-			}
-
-			if (!this.bedInRange(blockPos, direction)) {
-				return Either.left(Player.BedSleepingProblem.TOO_FAR_AWAY);
-			}
-
-			if (this.bedBlocked(blockPos, direction)) {
-				return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
-			}
-
-			this.setRespawnPosition(blockPos, false, true);
-			if (this.level.isDay()) {
-				return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
-			}
-
-			if (!this.isCreative()) {
-				double d = 8.0;
-				double e = 5.0;
-				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-				List<Monster> list = this.level
-					.getEntitiesOfClass(
-						Monster.class,
-						new AABB(vec3.x() - 8.0, vec3.y() - 5.0, vec3.z() - 8.0, vec3.x() + 8.0, vec3.y() + 5.0, vec3.z() + 8.0),
-						monster -> monster.isPreventingPlayerRest(this)
-					);
-				if (!list.isEmpty()) {
-					return Either.left(Player.BedSleepingProblem.NOT_SAFE);
-				}
-			}
-		}
-
 		this.startSleeping(blockPos);
 		this.sleepCounter = 0;
-		if (this.level instanceof ServerLevel) {
-			((ServerLevel)this.level).updateSleepingPlayerList();
-		}
-
 		return Either.right(Unit.INSTANCE);
-	}
-
-	@Override
-	public void startSleeping(BlockPos blockPos) {
-		this.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
-		this.setRespawnPosition(blockPos, false, true);
-		super.startSleeping(blockPos);
-	}
-
-	private boolean bedInRange(BlockPos blockPos, Direction direction) {
-		return this.isReachableBedBlock(blockPos) || this.isReachableBedBlock(blockPos.relative(direction.getOpposite()));
-	}
-
-	private boolean isReachableBedBlock(BlockPos blockPos) {
-		Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-		return Math.abs(this.getX() - vec3.x()) <= 3.0 && Math.abs(this.getY() - vec3.y()) <= 2.0 && Math.abs(this.getZ() - vec3.z()) <= 3.0;
-	}
-
-	private boolean bedBlocked(BlockPos blockPos, Direction direction) {
-		BlockPos blockPos2 = blockPos.above();
-		return !this.freeAt(blockPos2) || !this.freeAt(blockPos2.relative(direction.getOpposite()));
 	}
 
 	public void stopSleepInBed(boolean bl, boolean bl2) {
@@ -1354,18 +1292,22 @@ public abstract class Player extends LivingEntity {
 		this.stopSleepInBed(true, true);
 	}
 
-	public static Optional<Vec3> checkBedValidRespawnPosition(LevelReader levelReader, BlockPos blockPos, boolean bl) {
-		Block block = levelReader.getBlockState(blockPos).getBlock();
-		if (!(block instanceof BedBlock)) {
-			if (!bl) {
-				return Optional.empty();
-			} else {
-				boolean bl2 = block.isPossibleToRespawnInThis();
-				boolean bl3 = levelReader.getBlockState(blockPos.above()).getBlock().isPossibleToRespawnInThis();
-				return bl2 && bl3 ? Optional.of(new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5)) : Optional.empty();
-			}
+	public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+		BlockState blockState = serverLevel.getBlockState(blockPos);
+		Block block = blockState.getBlock();
+		if (block instanceof RespawnAnchorBlock && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) {
+			serverLevel.setBlock(
+				blockPos, blockState.setValue(RespawnAnchorBlock.CHARGE, Integer.valueOf((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) - 1)), 3
+			);
+			return RespawnAnchorBlock.findStandUpPosition(serverLevel, blockPos);
+		} else if (block instanceof BedBlock) {
+			return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
+		} else if (!bl) {
+			return Optional.empty();
 		} else {
-			return BedBlock.findStandUpPosition(EntityType.PLAYER, levelReader, blockPos, 0);
+			boolean bl2 = block.isPossibleToRespawnInThis();
+			boolean bl3 = serverLevel.getBlockState(blockPos.above()).getBlock().isPossibleToRespawnInThis();
+			return bl2 && bl3 ? Optional.of(new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5)) : Optional.empty();
 		}
 	}
 
@@ -1378,28 +1320,6 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public void displayClientMessage(Component component, boolean bl) {
-	}
-
-	public BlockPos getRespawnPosition() {
-		return this.respawnPosition;
-	}
-
-	public boolean isRespawnForced() {
-		return this.respawnForced;
-	}
-
-	public void setRespawnPosition(BlockPos blockPos, boolean bl, boolean bl2) {
-		if (blockPos != null) {
-			if (bl2 && !blockPos.equals(this.respawnPosition)) {
-				this.sendMessage(new TranslatableComponent("block.minecraft.bed.set_spawn"));
-			}
-
-			this.respawnPosition = blockPos;
-			this.respawnForced = bl;
-		} else {
-			this.respawnPosition = null;
-			this.respawnForced = false;
-		}
 	}
 
 	public void awardStat(ResourceLocation resourceLocation) {

@@ -44,8 +44,8 @@ public class CrimsonForestBiome extends Biome {
 							)
 						)
 						.ambientLoopSound(SoundEvents.AMBIENT_CRIMSON_FOREST_LOOP)
-						.ambientMoodSound(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD)
-						.ambientAdditionsSound(SoundEvents.AMBIENT_CRIMSON_FOREST_ADDITIONS)
+						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD, 6000, 8, 2.0))
+						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_ADDITIONS, 0.0111))
 						.build()
 				)
 				.parent(null)
@@ -106,7 +106,7 @@ public class CrimsonForestBiome extends Biome {
 		BiomeDefaultFeatures.addCrimsonForestVegetation(this);
 		BiomeDefaultFeatures.addNetherDefaultOres(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 1, 2, 4));
-		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.HOGLIN, 10, 3, 4));
+		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.HOGLIN, 9, 3, 4));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.PIGLIN, 5, 3, 4));
 	}
 }

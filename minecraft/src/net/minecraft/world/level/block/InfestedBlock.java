@@ -11,13 +11,14 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class InfestedBlock extends Block {
 	private final Block hostBlock;
 	private static final Map<Block, Block> BLOCK_BY_HOST_BLOCK = Maps.<Block, Block>newIdentityHashMap();
 
-	public InfestedBlock(Block block, Block.Properties properties) {
+	public InfestedBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.hostBlock = block;
 		BLOCK_BY_HOST_BLOCK.put(block, this);

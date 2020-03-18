@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -110,7 +111,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 		}
 	};
 
-	protected ChestBlock(Block.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
+	protected ChestBlock(BlockBehaviour.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
 		super(properties, supplier);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TYPE, ChestType.SINGLE).setValue(WATERLOGGED, Boolean.valueOf(false))

@@ -80,7 +80,7 @@ public class Camera {
 				this.position.y - (double)this.forwards.y() * d + (double)g,
 				this.position.z - (double)this.forwards.z() * d + (double)h
 			);
-			HitResult hitResult = this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this.entity));
+			HitResult hitResult = this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, this.entity));
 			if (hitResult.getType() != HitResult.Type.MISS) {
 				double e = hitResult.getLocation().distanceTo(this.position);
 				if (e < d) {

@@ -271,8 +271,8 @@ public class LevelData {
 			this.wanderingTraderSpawnChance = compoundTag.getInt("WanderingTraderSpawnChance");
 		}
 
-		if (compoundTag.contains("WanderingTraderId", 8)) {
-			this.wanderingTraderId = UUID.fromString(compoundTag.getString("WanderingTraderId"));
+		if (compoundTag.hasUUID("WanderingTraderId")) {
+			this.wanderingTraderId = compoundTag.getUUID("WanderingTraderId");
 		}
 	}
 
@@ -403,7 +403,7 @@ public class LevelData {
 		compoundTag.putInt("WanderingTraderSpawnDelay", this.wanderingTraderSpawnDelay);
 		compoundTag.putInt("WanderingTraderSpawnChance", this.wanderingTraderSpawnChance);
 		if (this.wanderingTraderId != null) {
-			compoundTag.putString("WanderingTraderId", this.wanderingTraderId.toString());
+			compoundTag.putUUID("WanderingTraderId", this.wanderingTraderId);
 		}
 	}
 
@@ -452,21 +452,6 @@ public class LevelData {
 	public CompoundTag getLoadedPlayerTag() {
 		this.updatePlayerTag();
 		return this.loadedPlayerTag;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setXSpawn(int i) {
-		this.xSpawn = i;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setYSpawn(int i) {
-		this.ySpawn = i;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public void setZSpawn(int i) {
-		this.zSpawn = i;
 	}
 
 	public void setGameTime(long l) {

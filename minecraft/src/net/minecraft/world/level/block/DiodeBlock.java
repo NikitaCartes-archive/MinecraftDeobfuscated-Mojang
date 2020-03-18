@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -22,7 +23,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	protected DiodeBlock(Block.Properties properties) {
+	protected DiodeBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

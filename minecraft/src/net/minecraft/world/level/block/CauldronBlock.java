@@ -21,6 +21,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -41,7 +42,7 @@ public class CauldronBlock extends Block {
 		BooleanOp.ONLY_FIRST
 	);
 
-	public CauldronBlock(Block.Properties properties) {
+	public CauldronBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(0)));
 	}

@@ -1,7 +1,6 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -23,7 +22,12 @@ public final class DesertBiome extends Biome {
 				.temperature(2.0F)
 				.downfall(0.0F)
 				.specialEffects(
-					new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()
+					new BiomeSpecialEffects.Builder()
+						.waterColor(4159204)
+						.waterFogColor(329011)
+						.fogColor(12638463)
+						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+						.build()
 				)
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5F, -0.5F, 0.0F, 0.0F, 1.0F)))

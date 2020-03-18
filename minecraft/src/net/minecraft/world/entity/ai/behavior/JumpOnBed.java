@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class JumpOnBed extends Behavior<Mob> {
-	private final float speed;
+	private final float speedModifier;
 	@Nullable
 	private BlockPos targetBed;
 	private int remainingTimeToReachBed;
@@ -21,7 +21,7 @@ public class JumpOnBed extends Behavior<Mob> {
 
 	public JumpOnBed(float f) {
 		super(ImmutableMap.of(MemoryModuleType.NEAREST_BED, MemoryStatus.VALUE_PRESENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
@@ -75,7 +75,7 @@ public class JumpOnBed extends Behavior<Mob> {
 	}
 
 	private void startWalkingTowardsBed(Mob mob, BlockPos blockPos) {
-		mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, this.speed, 0));
+		mob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, this.speedModifier, 0));
 	}
 
 	private boolean nearBed(ServerLevel serverLevel, Mob mob) {

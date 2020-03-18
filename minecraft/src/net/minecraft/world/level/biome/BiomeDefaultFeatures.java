@@ -521,7 +521,7 @@ public class BiomeDefaultFeatures {
 		new WeightedStateProvider()
 			.add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87)
 			.add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11)
-			.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 2)
+			.add(Blocks.WARPED_FUNGUS.defaultBlockState(), 1)
 	);
 	public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(
 		new WeightedStateProvider()

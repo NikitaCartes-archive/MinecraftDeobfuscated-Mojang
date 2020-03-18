@@ -2,6 +2,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
@@ -60,15 +61,15 @@ public class DragonTakeoffPhase extends AbstractDragonPhaseInstance {
 		if (this.currentPath != null) {
 			this.currentPath.next();
 			if (!this.currentPath.isDone()) {
-				Vec3 vec3 = this.currentPath.currentPos();
+				Vec3i vec3i = this.currentPath.currentPos();
 				this.currentPath.next();
 
 				double d;
 				do {
-					d = vec3.y + (double)(this.dragon.getRandom().nextFloat() * 20.0F);
-				} while (d < vec3.y);
+					d = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+				} while (d < (double)vec3i.getY());
 
-				this.targetLocation = new Vec3(vec3.x, d, vec3.z);
+				this.targetLocation = new Vec3((double)vec3i.getX(), d, (double)vec3i.getZ());
 			}
 		}
 	}

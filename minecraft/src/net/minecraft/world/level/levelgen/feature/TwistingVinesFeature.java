@@ -26,43 +26,47 @@ public class TwistingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		if (this.isInvalidPlacementLocation(levelAccessor, blockPos)) {
+		return place(levelAccessor, random, blockPos, 8, 4, 8);
+	}
+
+	public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, int i, int j, int k) {
+		if (isInvalidPlacementLocation(levelAccessor, blockPos)) {
 			return false;
 		} else {
-			this.placeTwistingVines(levelAccessor, random, blockPos);
+			placeTwistingVines(levelAccessor, random, blockPos, i, j, k);
 			return true;
 		}
 	}
 
-	private void placeTwistingVines(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
+	private static void placeTwistingVines(LevelAccessor levelAccessor, Random random, BlockPos blockPos, int i, int j, int k) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int i = 0; i < 100; i++) {
-			mutableBlockPos.set(blockPos).move(Mth.nextInt(random, -8, 8), Mth.nextInt(random, -2, 7), Mth.nextInt(random, -8, 8));
+		for (int l = 0; l < i * i; l++) {
+			mutableBlockPos.set(blockPos).move(Mth.nextInt(random, -i, i), Mth.nextInt(random, -j, j), Mth.nextInt(random, -i, i));
 
 			while (levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
 				mutableBlockPos.move(0, -1, 0);
 			}
 
-			if (!this.isInvalidPlacementLocation(levelAccessor, mutableBlockPos)) {
-				int j = Mth.nextInt(random, 1, 8);
+			if (!isInvalidPlacementLocation(levelAccessor, mutableBlockPos)) {
+				int m = Mth.nextInt(random, 1, k);
 				if (random.nextInt(6) == 0) {
-					j *= 2;
+					m *= 2;
 				}
 
 				if (random.nextInt(5) == 0) {
-					j = 1;
+					m = 1;
 				}
 
-				int k = 17;
-				int l = 25;
-				placeWeepingVinesColumn(levelAccessor, random, mutableBlockPos, j, 17, 25);
+				int n = 17;
+				int o = 25;
+				placeWeepingVinesColumn(levelAccessor, random, mutableBlockPos, m, 17, 25);
 			}
 		}
 	}
 
 	public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
-		for (int l = 0; l <= i; l++) {
+		for (int l = 1; l <= i; l++) {
 			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
 				if (l == i || !levelAccessor.isEmptyBlock(mutableBlockPos.above())) {
 					levelAccessor.setBlock(
@@ -78,7 +82,7 @@ public class TwistingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		}
 	}
 
-	private boolean isInvalidPlacementLocation(LevelAccessor levelAccessor, BlockPos blockPos) {
+	private static boolean isInvalidPlacementLocation(LevelAccessor levelAccessor, BlockPos blockPos) {
 		if (!levelAccessor.isEmptyBlock(blockPos)) {
 			return true;
 		} else {

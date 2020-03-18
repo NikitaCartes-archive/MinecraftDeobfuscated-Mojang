@@ -15,6 +15,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -35,7 +36,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
 
-	protected CropBlock(Block.Properties properties) {
+	protected CropBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(this.getAgeProperty(), Integer.valueOf(0)));
 	}
@@ -71,8 +72,12 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		super.tick(blockState, serverLevel, blockPos, random);
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return !this.isMaxAge(blockState);
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getRawBrightness(blockPos, 0) >= 9) {
 			int i = this.getAge(blockState);
 			if (i < this.getMaxAge()) {

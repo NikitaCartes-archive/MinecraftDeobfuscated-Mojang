@@ -1173,14 +1173,14 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 			case PERFORM_RESPAWN:
 				if (this.player.wonGame) {
 					this.player.wonGame = false;
-					this.player = this.server.getPlayerList().respawn(this.player, DimensionType.OVERWORLD, true);
+					this.player = this.server.getPlayerList().respawn(this.player, true);
 					CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, DimensionType.THE_END, DimensionType.OVERWORLD);
 				} else {
 					if (this.player.getHealth() > 0.0F) {
 						return;
 					}
 
-					this.player = this.server.getPlayerList().respawn(this.player, DimensionType.OVERWORLD, false);
+					this.player = this.server.getPlayerList().respawn(this.player, false);
 					if (this.server.isHardcore()) {
 						this.player.setGameMode(GameType.SPECTATOR);
 						this.player.getLevel().getGameRules().getRule(GameRules.RULE_SPECTATORSGENERATECHUNKS).set(false, this.server);

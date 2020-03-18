@@ -57,7 +57,7 @@ public class DragonFireball extends AbstractHurtingProjectile {
 					}
 				}
 
-				this.level.levelEvent(2006, this.blockPosition(), 0);
+				this.level.levelEvent(2006, this.blockPosition(), this.isSilent() ? -1 : 1);
 				this.level.addFreshEntity(areaEffectCloud);
 				this.remove();
 			}
