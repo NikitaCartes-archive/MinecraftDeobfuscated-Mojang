@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -38,7 +39,7 @@ public abstract class PathNavigation {
     protected int tick;
     protected int lastStuckCheck;
     protected Vec3 lastStuckCheckPos = Vec3.ZERO;
-    protected Vec3 timeoutCachedNode = Vec3.ZERO;
+    protected Vec3i timeoutCachedNode = Vec3i.ZERO;
     protected long timeoutTimer;
     protected long lastTimeoutCheck;
     protected double timeoutLimit;
@@ -138,6 +139,7 @@ public abstract class PathNavigation {
         if (path != null && path.getTarget() != null) {
             this.targetPos = path.getTarget();
             this.reachRange = j;
+            this.resetStuckTimeout();
         }
         return path;
     }
@@ -208,8 +210,8 @@ public abstract class PathNavigation {
     protected void updatePath() {
         Vec3 vec3 = this.getTempMobPos();
         this.maxDistanceToWaypoint = this.mob.getBbWidth() > 0.75f ? this.mob.getBbWidth() / 2.0f : 0.75f - this.mob.getBbWidth() / 2.0f;
-        Vec3 vec32 = this.path.currentPos();
-        if (Math.abs(this.mob.getX() - (vec32.x + 0.5)) < (double)this.maxDistanceToWaypoint && Math.abs(this.mob.getZ() - (vec32.z + 0.5)) < (double)this.maxDistanceToWaypoint && Math.abs(this.mob.getY() - vec32.y) < 1.0) {
+        Vec3i vec3i = this.path.currentPos();
+        if (Math.abs(this.mob.getX() - (double)((float)vec3i.getX() + 0.5f)) < (double)this.maxDistanceToWaypoint && Math.abs(this.mob.getZ() - (double)((float)vec3i.getZ() + 0.5f)) < (double)this.maxDistanceToWaypoint && Math.abs(this.mob.getY() - (double)vec3i.getY()) < 1.0) {
             this.path.setIndex(this.path.getIndex() + 1);
         }
         this.doStuckDetection(vec3);
@@ -224,22 +226,26 @@ public abstract class PathNavigation {
             this.lastStuckCheckPos = vec3;
         }
         if (this.path != null && !this.path.isDone()) {
-            Vec3 vec32 = this.path.currentPos();
-            if (vec32.equals(this.timeoutCachedNode)) {
+            Vec3i vec3i = this.path.currentPos();
+            if (vec3i.equals(this.timeoutCachedNode)) {
                 this.timeoutTimer += Util.getMillis() - this.lastTimeoutCheck;
             } else {
-                this.timeoutCachedNode = vec32;
-                double d = vec3.distanceTo(this.timeoutCachedNode);
+                this.timeoutCachedNode = vec3i;
+                double d = vec3.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
                 double d2 = this.timeoutLimit = this.mob.getSpeed() > 0.0f ? d / (double)this.mob.getSpeed() * 1000.0 : 0.0;
             }
             if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 3.0) {
-                this.timeoutCachedNode = Vec3.ZERO;
-                this.timeoutTimer = 0L;
-                this.timeoutLimit = 0.0;
+                this.resetStuckTimeout();
                 this.stop();
             }
             this.lastTimeoutCheck = Util.getMillis();
         }
+    }
+
+    private void resetStuckTimeout() {
+        this.timeoutCachedNode = Vec3i.ZERO;
+        this.timeoutTimer = 0L;
+        this.timeoutLimit = 0.0;
     }
 
     public boolean isDone() {

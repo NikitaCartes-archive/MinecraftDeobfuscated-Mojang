@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -54,7 +55,7 @@ implements SimpleWaterloggedBlock {
     protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
     public static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.enderchest", new Object[0]);
 
-    protected EnderChestBlock(Block.Properties properties) {
+    protected EnderChestBlock(BlockBehaviour.Properties properties) {
         super(properties, () -> BlockEntityType.ENDER_CHEST);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(WATERLOGGED, false));
     }

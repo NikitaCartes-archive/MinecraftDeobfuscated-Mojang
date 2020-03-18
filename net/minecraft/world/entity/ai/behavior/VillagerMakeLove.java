@@ -42,7 +42,7 @@ extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel serverLevel, Villager villager, long l) {
         AgableMob agableMob = villager.getBrain().getMemory(MemoryModuleType.BREED_TARGET).get();
-        BehaviorUtils.lockGazeAndWalkToEachOther(villager, agableMob);
+        BehaviorUtils.lockGazeAndWalkToEachOther(villager, agableMob, 0.5f);
         serverLevel.broadcastEntityEvent(agableMob, (byte)18);
         serverLevel.broadcastEntityEvent(villager, (byte)18);
         int i = 275 + villager.getRandom().nextInt(50);
@@ -55,7 +55,7 @@ extends Behavior<Villager> {
         if (villager.distanceToSqr(villager2) > 5.0) {
             return;
         }
-        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2);
+        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5f);
         if (l >= this.birthTimestamp) {
             villager.eatAndDigestFood();
             villager2.eatAndDigestFood();

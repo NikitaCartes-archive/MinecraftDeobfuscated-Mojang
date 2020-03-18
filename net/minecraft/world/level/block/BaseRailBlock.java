@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RailState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -33,7 +34,7 @@ extends Block {
         return blockState.is(BlockTags.RAILS);
     }
 
-    protected BaseRailBlock(boolean bl, Block.Properties properties) {
+    protected BaseRailBlock(boolean bl, BlockBehaviour.Properties properties) {
         super(properties);
         this.isStraight = bl;
     }

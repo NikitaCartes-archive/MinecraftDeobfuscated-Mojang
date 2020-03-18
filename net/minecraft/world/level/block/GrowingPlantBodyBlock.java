@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.GrowingPlantBlock;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -26,7 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public abstract class GrowingPlantBodyBlock
 extends GrowingPlantBlock
 implements BonemealableBlock {
-    protected GrowingPlantBodyBlock(Block.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl) {
+    protected GrowingPlantBodyBlock(BlockBehaviour.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl) {
         super(properties, direction, voxelShape, bl);
     }
 
@@ -35,7 +36,6 @@ implements BonemealableBlock {
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
         }
-        super.tick(blockState, serverLevel, blockPos, random);
     }
 
     @Override

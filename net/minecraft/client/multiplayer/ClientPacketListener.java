@@ -154,6 +154,7 @@ import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -165,7 +166,6 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
-import net.minecraft.network.protocol.game.ClientboundSetSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
@@ -812,7 +812,7 @@ implements ClientGamePacketListener {
             if (livingEntity instanceof Bee) {
                 boolean bl = ((Bee)livingEntity).isAngry();
                 BeeSoundInstance beeSoundInstance = bl ? new BeeAggressiveSoundInstance((Bee)livingEntity) : new BeeFlyingSoundInstance((Bee)livingEntity);
-                this.minecraft.getSoundManager().play(beeSoundInstance);
+                this.minecraft.getSoundManager().queueTickingSound(beeSoundInstance);
             }
         } else {
             LOGGER.warn("Skipping Entity with id {}", (Object)clientboundAddMobPacket.getType());
@@ -827,10 +827,9 @@ implements ClientGamePacketListener {
     }
 
     @Override
-    public void handleSetSpawn(ClientboundSetSpawnPositionPacket clientboundSetSpawnPositionPacket) {
-        PacketUtils.ensureRunningOnSameThread(clientboundSetSpawnPositionPacket, this, this.minecraft);
-        this.minecraft.player.setRespawnPosition(clientboundSetSpawnPositionPacket.getPos(), true, false);
-        this.minecraft.level.getLevelData().setSpawn(clientboundSetSpawnPositionPacket.getPos());
+    public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket) {
+        PacketUtils.ensureRunningOnSameThread(clientboundSetDefaultSpawnPositionPacket, this, this.minecraft);
+        this.minecraft.level.getLevelData().setSpawn(clientboundSetDefaultSpawnPositionPacket.getPos());
     }
 
     @Override
@@ -918,7 +917,6 @@ implements ClientGamePacketListener {
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());
         }
-        this.level.validateSpawn();
         this.level.removeAllPendingEntityRemovals();
         String string = localPlayer.getServerBrand();
         this.minecraft.cameraEntity = null;
@@ -1140,7 +1138,9 @@ implements ClientGamePacketListener {
             this.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.PUFFER_FISH_STING, SoundSource.NEUTRAL, 1.0f, 1.0f);
         } else if (i == 10) {
             this.level.addParticle(ParticleTypes.ELDER_GUARDIAN, player.getX(), player.getY(), player.getZ(), 0.0, 0.0, 0.0);
-            this.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 1.0f, 1.0f);
+            if (j == 1) {
+                this.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 1.0f, 1.0f);
+            }
         } else if (i == 11) {
             this.minecraft.player.setShowDeathScreen(f == 0.0f);
         }
@@ -1307,7 +1307,7 @@ implements ClientGamePacketListener {
         }
         MobEffectInstance mobEffectInstance = new MobEffectInstance(mobEffect, clientboundUpdateMobEffectPacket.getEffectDurationTicks(), clientboundUpdateMobEffectPacket.getEffectAmplifier(), clientboundUpdateMobEffectPacket.isEffectAmbient(), clientboundUpdateMobEffectPacket.isEffectVisible(), clientboundUpdateMobEffectPacket.effectShowsIcon());
         mobEffectInstance.setNoCounter(clientboundUpdateMobEffectPacket.isSuperLongDuration());
-        ((LivingEntity)entity).addEffect(mobEffectInstance);
+        ((LivingEntity)entity).forceAddEffect(mobEffectInstance);
     }
 
     @Override

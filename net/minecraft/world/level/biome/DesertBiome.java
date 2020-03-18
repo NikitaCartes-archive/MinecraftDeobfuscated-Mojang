@@ -4,9 +4,9 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -20,7 +20,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public final class DesertBiome
 extends Biome {
     public DesertBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_DESERT).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.DESERT).depth(0.125f).scale(0.05f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5f, -0.5f, 0.0f, 0.0f, 1.0f))));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_DESERT).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.DESERT).depth(0.125f).scale(0.05f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5f, -0.5f, 0.0f, 0.0f, 1.0f))));
         this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/desert/town_centers", 6)));
         this.addStructureStart(Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE));
         this.addStructureStart(Feature.DESERT_PYRAMID.configured(FeatureConfiguration.NONE));

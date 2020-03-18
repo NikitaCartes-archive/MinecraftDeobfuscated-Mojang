@@ -446,20 +446,15 @@ TickableBlockEntity {
     }
 
     private static void createExperience(Player player, int i, float f) {
-        int j;
-        if (f == 0.0f) {
-            i = 0;
-        } else if (f < 1.0f) {
-            j = Mth.floor((float)i * f);
-            if (j < Mth.ceil((float)i * f) && Math.random() < (double)((float)i * f - (float)j)) {
-                ++j;
-            }
-            i = j;
+        int j = Mth.floor((float)i * f);
+        float g = Mth.frac((float)i * f);
+        if (g != 0.0f && Math.random() < (double)g) {
+            ++j;
         }
-        while (i > 0) {
-            j = ExperienceOrb.getExperienceValue(i);
-            i -= j;
-            player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, j));
+        while (j > 0) {
+            int k = ExperienceOrb.getExperienceValue(j);
+            j -= k;
+            player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, k));
         }
     }
 

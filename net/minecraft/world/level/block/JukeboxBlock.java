@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,7 +30,7 @@ public class JukeboxBlock
 extends BaseEntityBlock {
     public static final BooleanProperty HAS_RECORD = BlockStateProperties.HAS_RECORD;
 
-    protected JukeboxBlock(Block.Properties properties) {
+    protected JukeboxBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(HAS_RECORD, false));
     }

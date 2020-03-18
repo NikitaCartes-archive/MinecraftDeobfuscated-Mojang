@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.CartographyTableMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,7 @@ public class CartographyTableBlock
 extends Block {
     private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.cartography_table", new Object[0]);
 
-    protected CartographyTableBlock(Block.Properties properties) {
+    protected CartographyTableBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

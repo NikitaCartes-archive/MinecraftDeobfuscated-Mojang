@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -37,7 +38,7 @@ extends Block {
     public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
     public static final IntegerProperty EGGS = BlockStateProperties.EGGS;
 
-    public TurtleEggBlock(Block.Properties properties) {
+    public TurtleEggBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(HATCH, 0)).setValue(EGGS, 1));
     }
@@ -78,7 +79,7 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (this.shouldUpdateHatchLevel(serverLevel) && this.onSand(serverLevel, blockPos)) {
             int i = blockState.getValue(HATCH);
             if (i < 2) {

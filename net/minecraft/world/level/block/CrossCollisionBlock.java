@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -38,7 +39,7 @@ implements SimpleWaterloggedBlock {
     protected final VoxelShape[] shapeByIndex;
     private final Object2IntMap<BlockState> stateToIndex = new Object2IntOpenHashMap<BlockState>();
 
-    protected CrossCollisionBlock(float f, float g, float h, float i, float j, Block.Properties properties) {
+    protected CrossCollisionBlock(float f, float g, float h, float i, float j, BlockBehaviour.Properties properties) {
         super(properties);
         this.collisionShapeByIndex = this.makeShapes(f, g, j, 0.0f, j);
         this.shapeByIndex = this.makeShapes(f, g, h, 0.0f, i);

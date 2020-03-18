@@ -237,7 +237,7 @@ extends Monster {
             return false;
         }
         boolean bl3 = this.randomTeleport(d, e, f, true);
-        if (bl3) {
+        if (bl3 && !this.isSilent()) {
             this.level.playSound(null, this.xo, this.yo, this.zo, SoundEvents.ENDERMAN_TELEPORT, this.getSoundSource(), 1.0f, 1.0f);
             this.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0f, 1.0f);
         }

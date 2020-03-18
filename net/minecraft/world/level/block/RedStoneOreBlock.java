@@ -20,6 +20,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -29,14 +30,9 @@ public class RedStoneOreBlock
 extends Block {
     public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
 
-    public RedStoneOreBlock(Block.Properties properties) {
+    public RedStoneOreBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)this.defaultBlockState().setValue(LIT, false));
-    }
-
-    @Override
-    public int getLightEmission(BlockState blockState) {
-        return blockState.getValue(LIT) != false ? super.getLightEmission(blockState) : 0;
     }
 
     @Override
@@ -69,7 +65,12 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return blockState.getValue(LIT);
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (blockState.getValue(LIT).booleanValue()) {
             serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
         }

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +27,7 @@ public class StandingSignBlock
 extends SignBlock {
     public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
 
-    public StandingSignBlock(Block.Properties properties, WoodType woodType) {
+    public StandingSignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
         super(properties, woodType);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(ROTATION, 0)).setValue(WATERLOGGED, false));
     }

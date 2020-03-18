@@ -36,6 +36,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -57,6 +58,7 @@ extends Entity {
     private int timeUntilLured;
     private int timeUntilHooked;
     private float fishAngle;
+    private boolean openWater = true;
     public Entity hookedIn;
     private FishHookState currentState = FishHookState.FLYING;
     private final int luck;
@@ -182,6 +184,7 @@ extends Entity {
                     d += Math.signum(d) * 0.1;
                 }
                 this.setDeltaMovement(vec3.x * 0.9, vec3.y - d * (double)this.random.nextFloat() * 0.2, vec3.z * 0.9);
+                boolean bl = this.openWater = this.openWater && this.calculateOpenWater(blockPos);
                 if (!this.level.isClientSide && f > 0.0f) {
                     this.catchingFish(blockPos);
                 }
@@ -335,6 +338,23 @@ extends Entity {
         }
     }
 
+    private boolean calculateOpenWater(BlockPos blockPos) {
+        return BlockPos.betweenClosedStream(blockPos.offset(-2, -1, -2), blockPos.offset(2, 2, 2)).allMatch(this::validOpenWaterBlockAt);
+    }
+
+    private boolean validOpenWaterBlockAt(BlockPos blockPos) {
+        BlockState blockState = this.level.getBlockState(blockPos);
+        if (blockState.isAir()) {
+            return true;
+        }
+        FluidState fluidState = blockState.getFluidState();
+        return fluidState.is(FluidTags.WATER) && fluidState.isSource() && blockState.getBlock() != Blocks.BUBBLE_COLUMN && blockState.getCollisionShape(this.level, blockPos).isEmpty();
+    }
+
+    public boolean isOpenWaterFishing() {
+        return this.openWater;
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
     }
@@ -354,7 +374,7 @@ extends Entity {
             this.level.broadcastEntityEvent(this, (byte)31);
             i = this.hookedIn instanceof ItemEntity ? 3 : 5;
         } else if (this.nibble > 0) {
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withParameter(LootContextParams.BLOCK_POS, this.blockPosition()).withParameter(LootContextParams.TOOL, itemStack).withRandom(this.random).withLuck((float)this.luck + this.owner.getLuck());
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level).withParameter(LootContextParams.BLOCK_POS, this.blockPosition()).withParameter(LootContextParams.TOOL, itemStack).withParameter(LootContextParams.THIS_ENTITY, this).withRandom(this.random).withLuck((float)this.luck + this.owner.getLuck());
             LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.FISHING));
             CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer)this.owner, itemStack, this, list);

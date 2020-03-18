@@ -12,6 +12,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BaseCoralFanBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 
@@ -19,7 +20,7 @@ public class CoralFanBlock
 extends BaseCoralFanBlock {
     private final Block deadBlock;
 
-    protected CoralFanBlock(Block block, Block.Properties properties) {
+    protected CoralFanBlock(Block block, BlockBehaviour.Properties properties) {
         super(properties);
         this.deadBlock = block;
     }

@@ -9,6 +9,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -17,7 +18,7 @@ public class RootsBlock
 extends BushBlock {
     protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 13.0, 14.0);
 
-    protected RootsBlock(Block.Properties properties) {
+    protected RootsBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

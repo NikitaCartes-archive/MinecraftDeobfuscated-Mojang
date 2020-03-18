@@ -48,27 +48,25 @@ extends Animal {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        if (this.getOwnerUUID() == null) {
-            compoundTag.putString("OwnerUUID", "");
-        } else {
-            compoundTag.putString("OwnerUUID", this.getOwnerUUID().toString());
+        if (this.getOwnerUUID() != null) {
+            compoundTag.putUUID("Owner", this.getOwnerUUID());
         }
         compoundTag.putBoolean("Sitting", this.orderedToSit);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
-        String string;
+        UUID uUID;
         super.readAdditionalSaveData(compoundTag);
-        if (compoundTag.contains("OwnerUUID", 8)) {
-            string = compoundTag.getString("OwnerUUID");
+        if (compoundTag.hasUUID("Owner")) {
+            uUID = compoundTag.getUUID("Owner");
         } else {
-            String string2 = compoundTag.getString("Owner");
-            string = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string2);
+            String string = compoundTag.getString("Owner");
+            uUID = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string);
         }
-        if (!string.isEmpty()) {
+        if (uUID != null) {
             try {
-                this.setOwnerUUID(UUID.fromString(string));
+                this.setOwnerUUID(uUID);
                 this.setTame(true);
             } catch (Throwable throwable) {
                 this.setTame(false);

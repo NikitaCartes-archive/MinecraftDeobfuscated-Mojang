@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -41,14 +42,9 @@ SimpleWaterloggedBlock {
     protected static final VoxelShape THREE_AABB = Block.box(2.0, 0.0, 2.0, 14.0, 6.0, 14.0);
     protected static final VoxelShape FOUR_AABB = Block.box(2.0, 0.0, 2.0, 14.0, 7.0, 14.0);
 
-    protected SeaPickleBlock(Block.Properties properties) {
+    protected SeaPickleBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(PICKLES, 1)).setValue(WATERLOGGED, true));
-    }
-
-    @Override
-    public int getLightEmission(BlockState blockState) {
-        return this.isDead(blockState) ? 0 : super.getLightEmission(blockState) + 3 * blockState.getValue(PICKLES);
     }
 
     @Override
@@ -63,7 +59,7 @@ SimpleWaterloggedBlock {
         return (BlockState)super.getStateForPlacement(blockPlaceContext).setValue(WATERLOGGED, bl);
     }
 
-    private boolean isDead(BlockState blockState) {
+    public static boolean isDead(BlockState blockState) {
         return blockState.getValue(WATERLOGGED) == false;
     }
 
@@ -139,7 +135,7 @@ SimpleWaterloggedBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        if (!this.isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
+        if (!SeaPickleBlock.isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
             int i = 5;
             int j = 1;
             int k = 2;

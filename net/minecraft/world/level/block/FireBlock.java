@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -44,7 +45,7 @@ extends BaseFireBlock {
     private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<Block>();
     private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<Block>();
 
-    public FireBlock(Block.Properties properties) {
+    public FireBlock(BlockBehaviour.Properties properties) {
         super(properties, 1.0f);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0)).setValue(NORTH, false)).setValue(EAST, false)).setValue(SOUTH, false)).setValue(WEST, false)).setValue(UP, false));
     }
@@ -108,11 +109,6 @@ extends BaseFireBlock {
     }
 
     @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 30;
-    }
-
-    @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         boolean bl2;
         if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
@@ -134,7 +130,7 @@ extends BaseFireBlock {
             serverLevel.setBlock(blockPos, blockState, 4);
         }
         if (!bl) {
-            serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel) + random.nextInt(10));
+            serverLevel.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(serverLevel.random));
             if (!this.isValidFireLocation(serverLevel, blockPos)) {
                 BlockPos blockPos2 = blockPos.below();
                 if (!serverLevel.getBlockState(blockPos2).isFaceSturdy(serverLevel, blockPos2, Direction.UP) || i > 3) {
@@ -250,7 +246,11 @@ extends BaseFireBlock {
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
         super.onPlace(blockState, level, blockPos, blockState2, bl);
-        level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
+        level.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(level.random));
+    }
+
+    private static int getFireTickDelay(Random random) {
+        return 30 + random.nextInt(10);
     }
 
     @Override

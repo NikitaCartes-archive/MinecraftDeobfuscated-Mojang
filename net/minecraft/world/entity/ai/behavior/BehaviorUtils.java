@@ -23,16 +23,15 @@ import net.minecraft.world.entity.ai.behavior.PositionWrapper;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.phys.Vec3;
 
 public class BehaviorUtils {
-    public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2) {
+    public static void lockGazeAndWalkToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
         BehaviorUtils.lookAtEachOther(livingEntity, livingEntity2);
-        BehaviorUtils.setWalkAndLookTargetMemoriesToEachOther(livingEntity, livingEntity2);
+        BehaviorUtils.setWalkAndLookTargetMemoriesToEachOther(livingEntity, livingEntity2, f);
     }
 
     public static boolean entityIsVisible(Brain<?> brain, LivingEntity livingEntity) {
@@ -56,24 +55,23 @@ public class BehaviorUtils {
         livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntity2));
     }
 
-    private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2) {
+    private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
         int i = 2;
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, livingEntity2, 2);
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity2, livingEntity, 2);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, livingEntity2, f, 2);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity2, livingEntity, f, 2);
     }
 
-    public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, int i) {
+    public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {
         EntityPosWrapper positionWrapper = new EntityPosWrapper(entity);
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionWrapper, i);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionWrapper, f, i);
     }
 
-    public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, int i) {
+    public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, float f, int i) {
         BlockPosWrapper positionWrapper = new BlockPosWrapper(blockPos);
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionWrapper, i);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionWrapper, f, i);
     }
 
-    private static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionWrapper positionWrapper, int i) {
-        float f = (float)livingEntity.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+    private static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionWrapper positionWrapper, float f, int i) {
         WalkTarget walkTarget = new WalkTarget(positionWrapper, f, i);
         livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionWrapper);
         livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);

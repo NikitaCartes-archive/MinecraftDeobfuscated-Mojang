@@ -8,19 +8,24 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class IronBarsBlock
 extends CrossCollisionBlock {
-    protected IronBarsBlock(Block.Properties properties) {
+    protected IronBarsBlock(BlockBehaviour.Properties properties) {
         super(1.0f, 1.0f, 16.0f, 16.0f, 16.0f, properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(NORTH, false)).setValue(EAST, false)).setValue(SOUTH, false)).setValue(WEST, false)).setValue(WATERLOGGED, false));
     }
@@ -50,6 +55,11 @@ extends CrossCollisionBlock {
             return (BlockState)blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), this.attachsTo(blockState2, blockState2.isFaceSturdy(levelAccessor, blockPos2, direction.getOpposite())));
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+    }
+
+    @Override
+    public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+        return Shapes.empty();
     }
 
     @Override

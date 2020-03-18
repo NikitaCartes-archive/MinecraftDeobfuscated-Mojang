@@ -30,7 +30,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
@@ -40,6 +39,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -57,14 +57,9 @@ extends BaseEntityBlock {
         DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);
     }
 
-    protected DispenserBlock(Block.Properties properties) {
+    protected DispenserBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(TRIGGERED, false));
-    }
-
-    @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 4;
     }
 
     @Override
@@ -108,7 +103,7 @@ extends BaseEntityBlock {
         boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
         boolean bl3 = blockState.getValue(TRIGGERED);
         if (bl2 && !bl3) {
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(blockPos, this, 4);
             level.setBlock(blockPos, (BlockState)blockState.setValue(TRIGGERED, true), 4);
         } else if (!bl2 && bl3) {
             level.setBlock(blockPos, (BlockState)blockState.setValue(TRIGGERED, false), 4);

@@ -8,6 +8,8 @@ import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 
 public class BiomeSpecialEffects {
@@ -16,17 +18,17 @@ public class BiomeSpecialEffects {
     private final int waterFogColor;
     private final Optional<AmbientParticleSettings> ambientParticleSettings;
     private final Optional<SoundEvent> ambientLoopSoundEvent;
-    private final Optional<SoundEvent> ambientMoodSoundEvent;
-    private final Optional<SoundEvent> ambientAdditionsSoundEvent;
+    private final Optional<AmbientMoodSettings> ambientMoodSettings;
+    private final Optional<AmbientAdditionsSettings> ambientAdditionsSettings;
 
-    private BiomeSpecialEffects(int i, int j, int k, Optional<AmbientParticleSettings> optional, Optional<SoundEvent> optional2, Optional<SoundEvent> optional3, Optional<SoundEvent> optional4) {
+    private BiomeSpecialEffects(int i, int j, int k, Optional<AmbientParticleSettings> optional, Optional<SoundEvent> optional2, Optional<AmbientMoodSettings> optional3, Optional<AmbientAdditionsSettings> optional4) {
         this.fogColor = i;
         this.waterColor = j;
         this.waterFogColor = k;
         this.ambientParticleSettings = optional;
         this.ambientLoopSoundEvent = optional2;
-        this.ambientMoodSoundEvent = optional3;
-        this.ambientAdditionsSoundEvent = optional4;
+        this.ambientMoodSettings = optional3;
+        this.ambientAdditionsSettings = optional4;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -55,13 +57,13 @@ public class BiomeSpecialEffects {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public Optional<SoundEvent> getAmbientMoodSoundEvent() {
-        return this.ambientMoodSoundEvent;
+    public Optional<AmbientMoodSettings> getAmbientMoodSettings() {
+        return this.ambientMoodSettings;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public Optional<SoundEvent> getAmbientAdditionsSoundEvent() {
-        return this.ambientAdditionsSoundEvent;
+    public Optional<AmbientAdditionsSettings> getAmbientAdditionsSettings() {
+        return this.ambientAdditionsSettings;
     }
 
     public static class Builder {
@@ -70,8 +72,8 @@ public class BiomeSpecialEffects {
         private OptionalInt waterFogColor = OptionalInt.empty();
         private Optional<AmbientParticleSettings> ambientParticle = Optional.empty();
         private Optional<SoundEvent> ambientLoopSoundEvent = Optional.empty();
-        private Optional<SoundEvent> ambientMoodSoundEvent = Optional.empty();
-        private Optional<SoundEvent> ambientAdditionsSoundEvent = Optional.empty();
+        private Optional<AmbientMoodSettings> ambientMoodSettings = Optional.empty();
+        private Optional<AmbientAdditionsSettings> ambientAdditionsSettings = Optional.empty();
 
         public Builder fogColor(int i) {
             this.fogColor = OptionalInt.of(i);
@@ -98,18 +100,18 @@ public class BiomeSpecialEffects {
             return this;
         }
 
-        public Builder ambientMoodSound(SoundEvent soundEvent) {
-            this.ambientMoodSoundEvent = Optional.of(soundEvent);
+        public Builder ambientMoodSound(AmbientMoodSettings ambientMoodSettings) {
+            this.ambientMoodSettings = Optional.of(ambientMoodSettings);
             return this;
         }
 
-        public Builder ambientAdditionsSound(SoundEvent soundEvent) {
-            this.ambientAdditionsSoundEvent = Optional.of(soundEvent);
+        public Builder ambientAdditionsSound(AmbientAdditionsSettings ambientAdditionsSettings) {
+            this.ambientAdditionsSettings = Optional.of(ambientAdditionsSettings);
             return this;
         }
 
         public BiomeSpecialEffects build() {
-            return new BiomeSpecialEffects(this.fogColor.orElseThrow(() -> new IllegalStateException("Missing 'fog' color.")), this.waterColor.orElseThrow(() -> new IllegalStateException("Missing 'water' color.")), this.waterFogColor.orElseThrow(() -> new IllegalStateException("Missing 'water fog' color.")), this.ambientParticle, this.ambientLoopSoundEvent, this.ambientMoodSoundEvent, this.ambientAdditionsSoundEvent);
+            return new BiomeSpecialEffects(this.fogColor.orElseThrow(() -> new IllegalStateException("Missing 'fog' color.")), this.waterColor.orElseThrow(() -> new IllegalStateException("Missing 'water' color.")), this.waterFogColor.orElseThrow(() -> new IllegalStateException("Missing 'water fog' color.")), this.ambientParticle, this.ambientLoopSoundEvent, this.ambientMoodSettings, this.ambientAdditionsSettings);
         }
     }
 }

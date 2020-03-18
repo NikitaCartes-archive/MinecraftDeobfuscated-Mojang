@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -49,11 +50,8 @@ extends LootItemConditionalFunction {
         Enchantment enchantment2;
         Random random = lootContext.getRandom();
         if (this.enchantments.isEmpty()) {
-            ArrayList<Enchantment> list = Lists.newArrayList();
-            for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                if (itemStack.getItem() != Items.BOOK && !enchantment.canEnchant(itemStack)) continue;
-                list.add(enchantment);
-            }
+            boolean bl = itemStack.getItem() == Items.BOOK;
+            List list = Registry.ENCHANTMENT.stream().filter(Enchantment::isDiscoverable).filter(enchantment -> bl || enchantment.canEnchant(itemStack)).collect(Collectors.toList());
             if (list.isEmpty()) {
                 LOGGER.warn("Couldn't find a compatible enchantment for {}", (Object)itemStack);
                 return itemStack;
@@ -62,12 +60,16 @@ extends LootItemConditionalFunction {
         } else {
             enchantment2 = this.enchantments.get(random.nextInt(this.enchantments.size()));
         }
-        int i = Mth.nextInt(random, enchantment2.getMinLevel(), enchantment2.getMaxLevel());
+        return EnchantRandomlyFunction.enchantItem(itemStack, enchantment2, random);
+    }
+
+    private static ItemStack enchantItem(ItemStack itemStack, Enchantment enchantment, Random random) {
+        int i = Mth.nextInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
         if (itemStack.getItem() == Items.BOOK) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-            EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment2, i));
+            EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
         } else {
-            itemStack.enchant(enchantment2, i);
+            itemStack.enchant(enchantment, i);
         }
         return itemStack;
     }

@@ -17,10 +17,12 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 public class GoToCelebrateLocation<E extends Mob>
 extends Behavior<E> {
     private final int closeEnoughDist;
+    private final float speedModifier;
 
-    public GoToCelebrateLocation(int i) {
+    public GoToCelebrateLocation(int i, float f) {
         super(ImmutableMap.of(MemoryModuleType.CELEBRATE_LOCATION, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED));
         this.closeEnoughDist = i;
+        this.speedModifier = f;
     }
 
     @Override
@@ -28,7 +30,7 @@ extends Behavior<E> {
         BlockPos blockPos = GoToCelebrateLocation.getCelebrateLocation(mob);
         boolean bl = blockPos.closerThan(mob.blockPosition(), (double)this.closeEnoughDist);
         if (!bl) {
-            BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)mob, GoToCelebrateLocation.getNearbyPos(mob, blockPos), this.closeEnoughDist);
+            BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)mob, GoToCelebrateLocation.getNearbyPos(mob, blockPos), this.speedModifier, this.closeEnoughDist);
         }
     }
 

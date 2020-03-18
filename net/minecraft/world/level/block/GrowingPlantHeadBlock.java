@@ -13,6 +13,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.GrowingPlantBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +27,7 @@ implements BonemealableBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_25;
     private final double growPerTickProbability;
 
-    protected GrowingPlantHeadBlock(Block.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl, double d) {
+    protected GrowingPlantHeadBlock(BlockBehaviour.Properties properties, Direction direction, VoxelShape voxelShape, boolean bl, double d) {
         super(properties, direction, voxelShape, bl);
         this.growPerTickProbability = d;
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
@@ -38,11 +39,19 @@ implements BonemealableBlock {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        BlockPos blockPos2;
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
-            return;
         }
+    }
+
+    @Override
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return blockState.getValue(AGE) < 25;
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        BlockPos blockPos2;
         if (blockState.getValue(AGE) < 25 && random.nextDouble() < this.growPerTickProbability && this.canGrowInto(serverLevel.getBlockState(blockPos2 = blockPos.relative(this.growthDirection)))) {
             serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState.cycle(AGE));
         }

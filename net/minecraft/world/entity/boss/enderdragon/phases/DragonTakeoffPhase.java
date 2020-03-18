@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.AbstractDragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
@@ -63,11 +64,11 @@ extends AbstractDragonPhaseInstance {
             this.currentPath.next();
             if (!this.currentPath.isDone()) {
                 double d;
-                Vec3 vec3 = this.currentPath.currentPos();
+                Vec3i vec3i = this.currentPath.currentPos();
                 this.currentPath.next();
-                while ((d = vec3.y + (double)(this.dragon.getRandom().nextFloat() * 20.0f)) < vec3.y) {
+                while ((d = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
                 }
-                this.targetLocation = new Vec3(vec3.x, d, vec3.z);
+                this.targetLocation = new Vec3(vec3i.getX(), d, vec3i.getZ());
             }
         }
     }

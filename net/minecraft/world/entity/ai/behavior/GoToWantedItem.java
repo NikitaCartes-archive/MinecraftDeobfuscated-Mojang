@@ -18,15 +18,17 @@ public class GoToWantedItem<E extends LivingEntity>
 extends Behavior<E> {
     private final Predicate<E> predicate;
     private final int maxDistToWalk;
+    private final float speedModifier;
 
-    public GoToWantedItem(int i, boolean bl) {
-        this((E livingEntity) -> true, i, bl);
+    public GoToWantedItem(float f, boolean bl, int i) {
+        this(livingEntity -> true, f, bl, i);
     }
 
-    public GoToWantedItem(Predicate<E> predicate, int i, boolean bl) {
+    public GoToWantedItem(Predicate<E> predicate, float f, boolean bl, int i) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, bl ? MemoryStatus.REGISTERED : MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryStatus.VALUE_PRESENT));
         this.predicate = predicate;
         this.maxDistToWalk = i;
+        this.speedModifier = f;
     }
 
     @Override
@@ -36,7 +38,7 @@ extends Behavior<E> {
 
     @Override
     protected void start(ServerLevel serverLevel, E livingEntity, long l) {
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, this.getClosestLovedItem(livingEntity), 0);
+        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, this.getClosestLovedItem(livingEntity), this.speedModifier, 0);
     }
 
     private ItemEntity getClosestLovedItem(E livingEntity) {

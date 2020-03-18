@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 public class JigsawBlock
 extends DirectionalBlock
 implements EntityBlock {
-    protected JigsawBlock(Block.Properties properties) {
+    protected JigsawBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.UP));
     }

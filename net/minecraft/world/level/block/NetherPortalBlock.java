@@ -26,6 +26,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -42,7 +43,7 @@ extends Block {
     protected static final VoxelShape X_AXIS_AABB = Block.box(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
     protected static final VoxelShape Z_AXIS_AABB = Block.box(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
 
-    public NetherPortalBlock(Block.Properties properties) {
+    public NetherPortalBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AXIS, Direction.Axis.X));
     }
@@ -58,7 +59,7 @@ extends Block {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.dimension.isNaturalDimension() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
             ZombifiedPiglin entity;
             while (serverLevel.getBlockState(blockPos).getBlock() == this) {

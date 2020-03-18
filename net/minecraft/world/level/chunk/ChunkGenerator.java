@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -195,6 +196,8 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
     }
 
     public abstract int getBaseHeight(int var1, int var2, Heightmap.Types var3);
+
+    public abstract BlockGetter getBaseColumn(int var1, int var2);
 
     public int getFirstFreeHeight(int i, int j, Heightmap.Types types) {
         return this.getBaseHeight(i, j, types);

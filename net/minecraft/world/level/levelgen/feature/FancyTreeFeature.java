@@ -15,7 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.block.LogBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
@@ -80,7 +80,7 @@ extends AbstractTreeFeature<SmallTreeConfiguration> {
         for (int j = 0; j <= i; ++j) {
             BlockPos blockPos4 = blockPos.offset(0.5f + (float)j * f, 0.5f + (float)j * g, 0.5f + (float)j * h);
             if (bl) {
-                this.setBlock(levelSimulatedRW, blockPos4, (BlockState)smallTreeConfiguration.trunkProvider.getState(random, blockPos4).setValue(LogBlock.AXIS, this.getLogAxis(blockPos, blockPos4)), boundingBox);
+                this.setBlock(levelSimulatedRW, blockPos4, (BlockState)smallTreeConfiguration.trunkProvider.getState(random, blockPos4).setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)), boundingBox);
                 set.add(blockPos4);
                 continue;
             }

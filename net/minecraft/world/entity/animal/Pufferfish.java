@@ -143,7 +143,9 @@ extends AbstractFish {
     public void playerTouch(Player player) {
         int i = this.getPuffState();
         if (player instanceof ServerPlayer && i > 0 && player.hurt(DamageSource.mobAttack(this), 1 + i)) {
-            ((ServerPlayer)player).connection.send(new ClientboundGameEventPacket(9, 0.0f));
+            if (!this.isSilent()) {
+                ((ServerPlayer)player).connection.send(new ClientboundGameEventPacket(9, 0.0f));
+            }
             player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0));
         }
     }

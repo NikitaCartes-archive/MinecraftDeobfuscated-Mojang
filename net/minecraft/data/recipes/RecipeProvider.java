@@ -718,7 +718,8 @@ implements DataProvider {
         ShapedRecipeBuilder.shaped(Blocks.STONECUTTER).define(Character.valueOf('I'), Items.IRON_INGOT).define(Character.valueOf('#'), Blocks.STONE).pattern(" I ").pattern("###").unlockedBy("has_stone", RecipeProvider.has(Blocks.STONE)).save(consumer);
         ShapedRecipeBuilder.shaped(Blocks.NETHERITE_BLOCK).define(Character.valueOf('#'), Items.NETHERITE_INGOT).pattern("###").pattern("###").pattern("###").unlockedBy("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer);
         ShapelessRecipeBuilder.shapeless(Items.NETHERITE_INGOT, 9).requires(Blocks.NETHERITE_BLOCK).group("netherite_ingot").unlockedBy("has_netherite_block", RecipeProvider.has(Blocks.NETHERITE_BLOCK)).save(consumer, "netherite_ingot_from_netherite_block");
-        ShapelessRecipeBuilder.shapeless(Items.NETHERITE_INGOT).requires(Items.NETHERITE_SCRAP, 4).requires(Items.GOLD_INGOT, 4).unlockedBy("has_netherite_scrap", RecipeProvider.has(Items.NETHERITE_SCRAP)).save(consumer);
+        ShapelessRecipeBuilder.shapeless(Items.NETHERITE_INGOT).requires(Items.NETHERITE_SCRAP, 4).requires(Items.GOLD_INGOT, 4).group("netherite_ingot").unlockedBy("has_netherite_scrap", RecipeProvider.has(Items.NETHERITE_SCRAP)).save(consumer);
+        ShapedRecipeBuilder.shaped(Blocks.RESPAWN_ANCHOR).define(Character.valueOf('O'), Blocks.CRYING_OBSIDIAN).define(Character.valueOf('G'), Blocks.GLOWSTONE).pattern("OOO").pattern("GGG").pattern("OOO").unlockedBy("has_obsidian", RecipeProvider.has(Blocks.CRYING_OBSIDIAN)).save(consumer);
         SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
         SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
         SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");
@@ -783,6 +784,7 @@ implements DataProvider {
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.WHITE_TERRACOTTA), Blocks.WHITE_GLAZED_TERRACOTTA.asItem(), 0.1f, 200).unlockedBy("has_white_terracotta", RecipeProvider.has(Blocks.WHITE_TERRACOTTA)).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.YELLOW_TERRACOTTA), Blocks.YELLOW_GLAZED_TERRACOTTA.asItem(), 0.1f, 200).unlockedBy("has_yellow_terracotta", RecipeProvider.has(Blocks.YELLOW_TERRACOTTA)).save(consumer);
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.ANCIENT_DEBRIS), Items.NETHERITE_SCRAP, 2.0f, 200).unlockedBy("has_ancient_debris", RecipeProvider.has(Blocks.ANCIENT_DEBRIS)).save(consumer);
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.BASALT), Blocks.POLISHED_BASALT.asItem(), 0.1f, 200).unlockedBy("has_basalt", RecipeProvider.has(Blocks.BASALT)).save(consumer);
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7f, 100).unlockedBy("has_iron_ore", RecipeProvider.has(Blocks.IRON_ORE.asItem())).save(consumer, "iron_ingot_from_blasting");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(ItemTags.GOLD_ORES), Items.GOLD_INGOT, 1.0f, 100).unlockedBy("has_gold_ore", RecipeProvider.has(ItemTags.GOLD_ORES)).save(consumer, "gold_ingot_from_blasting");
         SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.DIAMOND_ORE.asItem()), Items.DIAMOND, 1.0f, 100).unlockedBy("has_diamond_ore", RecipeProvider.has(Blocks.DIAMOND_ORE)).save(consumer, "diamond_from_blasting");
@@ -943,7 +945,7 @@ implements DataProvider {
 
     private static void woodenSign(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {
         String string = Registry.ITEM.getKey(itemLike2.asItem()).getPath();
-        ShapedRecipeBuilder.shaped(itemLike, 3).define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.STICK).pattern("###").pattern("###").pattern(" X ").unlockedBy("has_" + string, RecipeProvider.has(itemLike2)).save(consumer);
+        ShapedRecipeBuilder.shaped(itemLike, 3).group("sign").define(Character.valueOf('#'), itemLike2).define(Character.valueOf('X'), Items.STICK).pattern("###").pattern("###").pattern(" X ").unlockedBy("has_" + string, RecipeProvider.has(itemLike2)).save(consumer);
     }
 
     private static void coloredWoolFromWhiteWoolAndDye(Consumer<FinishedRecipe> consumer, ItemLike itemLike, ItemLike itemLike2) {

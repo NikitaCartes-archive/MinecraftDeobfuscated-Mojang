@@ -17,11 +17,11 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class SetWalkTargetFromAttackTargetIfTargetOutOfReach
 extends Behavior<Mob> {
-    private final float speed;
+    private final float speedModifier;
 
     public SetWalkTargetFromAttackTargetIfTargetOutOfReach(float f) {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.REGISTERED));
-        this.speed = f;
+        this.speedModifier = f;
     }
 
     @Override
@@ -38,7 +38,7 @@ extends Behavior<Mob> {
         Brain<?> brain = livingEntity.getBrain();
         EntityPosWrapper positionWrapper = new EntityPosWrapper(livingEntity2);
         brain.setMemory(MemoryModuleType.LOOK_TARGET, positionWrapper);
-        WalkTarget walkTarget = new WalkTarget(positionWrapper, this.speed, 0);
+        WalkTarget walkTarget = new WalkTarget(positionWrapper, this.speedModifier, 0);
         brain.setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 

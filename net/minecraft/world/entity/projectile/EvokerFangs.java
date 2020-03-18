@@ -62,8 +62,8 @@ extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
         this.warmupDelayTicks = compoundTag.getInt("Warmup");
-        if (compoundTag.hasUUID("OwnerUUID")) {
-            this.ownerUUID = compoundTag.getUUID("OwnerUUID");
+        if (compoundTag.hasUUID("Owner")) {
+            this.ownerUUID = compoundTag.getUUID("Owner");
         }
     }
 
@@ -71,7 +71,7 @@ extends Entity {
     protected void addAdditionalSaveData(CompoundTag compoundTag) {
         compoundTag.putInt("Warmup", this.warmupDelayTicks);
         if (this.ownerUUID != null) {
-            compoundTag.putUUID("OwnerUUID", this.ownerUUID);
+            compoundTag.putUUID("Owner", this.ownerUUID);
         }
     }
 

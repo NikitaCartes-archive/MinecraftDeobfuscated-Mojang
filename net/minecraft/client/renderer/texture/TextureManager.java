@@ -38,9 +38,9 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class TextureManager
-implements Tickable,
-AutoCloseable,
-PreparableReloadListener {
+implements PreparableReloadListener,
+Tickable,
+AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ResourceLocation INTENTIONAL_MISSING_TEXTURE = new ResourceLocation("");
     private final Map<ResourceLocation, AbstractTexture> byPath = Maps.newHashMap();

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.StemGrownBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -37,7 +38,7 @@ implements BonemealableBlock {
     protected static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(7.0, 0.0, 7.0, 9.0, 2.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 4.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 6.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 8.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 10.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 12.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 14.0, 9.0), Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0)};
     private final StemGrownBlock fruit;
 
-    protected StemBlock(StemGrownBlock stemGrownBlock, Block.Properties properties) {
+    protected StemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
         super(properties);
         this.fruit = stemGrownBlock;
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
@@ -54,8 +55,7 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        super.tick(blockState, serverLevel, blockPos, random);
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.getRawBrightness(blockPos, 0) < 9) {
             return;
         }
@@ -112,7 +112,7 @@ implements BonemealableBlock {
         BlockState blockState2 = (BlockState)blockState.setValue(AGE, i);
         serverLevel.setBlock(blockPos, blockState2, 2);
         if (i == 7) {
-            blockState2.tick(serverLevel, blockPos, serverLevel.random);
+            blockState2.randomTick(serverLevel, blockPos, serverLevel.random);
         }
     }
 

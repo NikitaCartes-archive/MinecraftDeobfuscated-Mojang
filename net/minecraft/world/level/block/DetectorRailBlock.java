@@ -17,12 +17,12 @@ import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -38,14 +38,9 @@ extends BaseRailBlock {
     public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE_STRAIGHT;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-    public DetectorRailBlock(Block.Properties properties) {
+    public DetectorRailBlock(BlockBehaviour.Properties properties) {
         super(true, properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(POWERED, false)).setValue(SHAPE, RailShape.NORTH_SOUTH));
-    }
-
-    @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 20;
     }
 
     @Override
@@ -110,7 +105,7 @@ extends BaseRailBlock {
             level.setBlocksDirty(blockPos, blockState, blockState2);
         }
         if (bl2) {
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(blockPos, this, 20);
         }
         level.updateNeighbourForOutputSignal(blockPos, this);
     }

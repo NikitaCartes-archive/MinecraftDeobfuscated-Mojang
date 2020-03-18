@@ -8,17 +8,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.WallSkullBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import org.jetbrains.annotations.Nullable;
 
 public class PlayerWallHeadBlock
 extends WallSkullBlock {
-    protected PlayerWallHeadBlock(Block.Properties properties) {
+    protected PlayerWallHeadBlock(BlockBehaviour.Properties properties) {
         super(SkullBlock.Types.PLAYER, properties);
     }
 

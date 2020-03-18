@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,7 +34,7 @@ extends AbstractBannerBlock {
     private static final Map<DyeColor, Block> BY_COLOR = Maps.newHashMap();
     private static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
 
-    public BannerBlock(DyeColor dyeColor, Block.Properties properties) {
+    public BannerBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
         super(dyeColor, properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(ROTATION, 0));
         BY_COLOR.put(dyeColor, this);

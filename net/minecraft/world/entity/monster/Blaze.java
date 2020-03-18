@@ -212,7 +212,9 @@ extends Monster {
                     }
                     if (this.attackStep > 1) {
                         float h = Mth.sqrt(Mth.sqrt(d)) * 0.5f;
-                        this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+                        if (!this.blaze.isSilent()) {
+                            this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+                        }
                         for (int i = 0; i < 1; ++i) {
                             SmallFireball smallFireball = new SmallFireball(this.blaze.level, this.blaze, e + this.blaze.getRandom().nextGaussian() * (double)h, f, g + this.blaze.getRandom().nextGaussian() * (double)h);
                             smallFireball.setPos(smallFireball.getX(), this.blaze.getY(0.5) + 0.5, smallFireball.getZ());

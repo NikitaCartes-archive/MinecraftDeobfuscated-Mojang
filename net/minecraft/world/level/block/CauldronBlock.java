@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -44,7 +45,7 @@ extends Block {
     private static final VoxelShape INSIDE = CauldronBlock.box(2.0, 4.0, 2.0, 14.0, 16.0, 14.0);
     protected static final VoxelShape SHAPE = Shapes.join(Shapes.block(), Shapes.or(CauldronBlock.box(0.0, 0.0, 4.0, 16.0, 3.0, 12.0), CauldronBlock.box(4.0, 0.0, 0.0, 12.0, 3.0, 16.0), CauldronBlock.box(2.0, 0.0, 2.0, 14.0, 3.0, 14.0), INSIDE), BooleanOp.ONLY_FIRST);
 
-    public CauldronBlock(Block.Properties properties) {
+    public CauldronBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LEVEL, 0));
     }

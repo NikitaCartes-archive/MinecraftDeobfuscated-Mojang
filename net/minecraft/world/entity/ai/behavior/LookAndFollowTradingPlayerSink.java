@@ -17,11 +17,11 @@ import net.minecraft.world.entity.player.Player;
 
 public class LookAndFollowTradingPlayerSink
 extends Behavior<Villager> {
-    private final float speed;
+    private final float speedModifier;
 
     public LookAndFollowTradingPlayerSink(float f) {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED), Integer.MAX_VALUE);
-        this.speed = f;
+        this.speedModifier = f;
     }
 
     @Override
@@ -60,7 +60,7 @@ extends Behavior<Villager> {
     private void followPlayer(Villager villager) {
         EntityPosWrapper entityPosWrapper = new EntityPosWrapper(villager.getTradingPlayer());
         Brain<Villager> brain = villager.getBrain();
-        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(entityPosWrapper, this.speed, 2));
+        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(entityPosWrapper, this.speedModifier, 2));
         brain.setMemory(MemoryModuleType.LOOK_TARGET, entityPosWrapper);
     }
 

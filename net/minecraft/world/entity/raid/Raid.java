@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -113,11 +114,9 @@ public class Raid {
         this.status = RaidStatus.getByName(compoundTag.getString("Status"));
         this.heroesOfTheVillage.clear();
         if (compoundTag.contains("HeroesOfTheVillage", 9)) {
-            ListTag listTag = compoundTag.getList("HeroesOfTheVillage", 10);
+            ListTag listTag = compoundTag.getList("HeroesOfTheVillage", 11);
             for (int i = 0; i < listTag.size(); ++i) {
-                CompoundTag compoundTag2 = listTag.getCompound(i);
-                UUID uUID = compoundTag2.getUUID("UUID");
-                this.heroesOfTheVillage.add(uUID);
+                this.heroesOfTheVillage.add(NbtUtils.loadUUID(listTag.get(i)));
             }
         }
     }
@@ -644,9 +643,7 @@ public class Raid {
         compoundTag.putInt("CZ", this.center.getZ());
         ListTag listTag = new ListTag();
         for (UUID uUID : this.heroesOfTheVillage) {
-            CompoundTag compoundTag2 = new CompoundTag();
-            compoundTag2.putUUID("UUID", uUID);
-            listTag.add(compoundTag2);
+            listTag.add(NbtUtils.createUUID(uUID));
         }
         compoundTag.put("HeroesOfTheVillage", listTag);
         return compoundTag;

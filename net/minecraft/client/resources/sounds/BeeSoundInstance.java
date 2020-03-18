@@ -73,6 +73,11 @@ extends AbstractTickableSoundInstance {
         return true;
     }
 
+    @Override
+    public boolean canPlaySound() {
+        return !this.bee.isSilent();
+    }
+
     protected abstract AbstractTickableSoundInstance getAlternativeSoundInstance();
 
     protected abstract boolean shouldSwitchSounds();

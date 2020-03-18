@@ -20,6 +20,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,7 +32,7 @@ public class TntBlock
 extends Block {
     public static final BooleanProperty UNSTABLE = BlockStateProperties.UNSTABLE;
 
-    public TntBlock(Block.Properties properties) {
+    public TntBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)this.defaultBlockState().setValue(UNSTABLE, false));
     }

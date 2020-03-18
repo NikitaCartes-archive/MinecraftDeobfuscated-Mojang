@@ -10,12 +10,13 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public class BushBlock
 extends Block {
-    protected BushBlock(Block.Properties properties) {
+    protected BushBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

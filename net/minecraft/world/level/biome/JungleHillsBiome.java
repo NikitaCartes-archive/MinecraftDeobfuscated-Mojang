@@ -3,9 +3,9 @@
  */
 package net.minecraft.world.level.biome;
 
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public final class JungleHillsBiome
 extends Biome {
     public JungleHillsBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.JUNGLE).depth(0.45f).scale(0.3f).temperature(0.95f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()).parent(null));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.JUNGLE).depth(0.45f).scale(0.3f).temperature(0.95f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null));
         this.addStructureStart(Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE));
         this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
         this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));

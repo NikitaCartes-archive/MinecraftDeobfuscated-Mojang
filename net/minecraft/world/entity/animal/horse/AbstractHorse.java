@@ -65,7 +65,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
@@ -700,7 +699,7 @@ PlayerRideableJumping {
         compoundTag.putInt("Temper", this.getTemper());
         compoundTag.putBoolean("Tame", this.isTamed());
         if (this.getOwnerUUID() != null) {
-            compoundTag.putString("OwnerUUID", this.getOwnerUUID().toString());
+            compoundTag.putUUID("Owner", this.getOwnerUUID());
         }
         if (!this.inventory.getItem(0).isEmpty()) {
             compoundTag.put("SaddleItem", this.inventory.getItem(0).save(new CompoundTag()));
@@ -711,20 +710,20 @@ PlayerRideableJumping {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         ItemStack itemStack;
         AttributeInstance attributeInstance;
-        String string;
+        UUID uUID;
         super.readAdditionalSaveData(compoundTag);
         this.setEating(compoundTag.getBoolean("EatingHaystack"));
         this.setBred(compoundTag.getBoolean("Bred"));
         this.setTemper(compoundTag.getInt("Temper"));
         this.setTamed(compoundTag.getBoolean("Tame"));
-        if (compoundTag.contains("OwnerUUID", 8)) {
-            string = compoundTag.getString("OwnerUUID");
+        if (compoundTag.hasUUID("Owner")) {
+            uUID = compoundTag.getUUID("Owner");
         } else {
-            String string2 = compoundTag.getString("Owner");
-            string = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string2);
+            String string = compoundTag.getString("Owner");
+            uUID = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string);
         }
-        if (!string.isEmpty()) {
-            this.setOwnerUUID(UUID.fromString(string));
+        if (uUID != null) {
+            this.setOwnerUUID(uUID);
         }
         if ((attributeInstance = this.getAttributes().getInstance("Speed")) != null) {
             this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(attributeInstance.getBaseValue() * 0.25);
@@ -918,13 +917,12 @@ PlayerRideableJumping {
         double d = this.getX() + vec3.x;
         double e = this.getBoundingBox().minY;
         double f = this.getZ() + vec3.z;
-        CollisionContext collisionContext = CollisionContext.of(livingEntity);
-        AABB aABB = livingEntity.getLocalBoundsForPose(Pose.SWIMMING).move(d, e, f);
+        AABB aABB = livingEntity.getLocalBoundsForPose(livingEntity.getShortestDismountPose()).move(d, e, f);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
         double g = this.getBoundingBox().maxY + 0.75;
         do {
             AABB aABB2;
-            double h = AbstractHorse.getDismountTargetFloorHeight(this.level, mutableBlockPos, collisionContext);
+            double h = this.level.getRelativeFloorHeight(mutableBlockPos);
             if ((double)mutableBlockPos.getY() + h > g) break;
             if (!Double.isInfinite(h) && h < 1.0 && this.level.getBlockCollisions(livingEntity, aABB2 = aABB.move(d, (double)mutableBlockPos.getY() + h, f)).allMatch(VoxelShape::isEmpty)) {
                 return new Vec3(d, (double)mutableBlockPos.getY() + h, f);

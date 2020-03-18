@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -27,7 +29,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public final class NetherWastesBiome
 extends Biome {
     protected NetherWastesBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.NETHER, SurfaceBuilder.CONFIG_HELL).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.NETHER).depth(0.1f).scale(0.2f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0x330808).ambientLoopSound(SoundEvents.AMBIENT_NETHER_WASTES_LOOP).ambientMoodSound(SoundEvents.AMBIENT_NETHER_WASTES_MOOD).ambientAdditionsSound(SoundEvents.AMBIENT_NETHER_WASTES_ADDITIONS).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, -0.5f, 1.0f))));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.NETHER, SurfaceBuilder.CONFIG_HELL).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.NETHER).depth(0.1f).scale(0.2f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0x330808).ambientLoopSound(SoundEvents.AMBIENT_NETHER_WASTES_LOOP).ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_NETHER_WASTES_MOOD, 6000, 8, 2.0)).ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_NETHER_WASTES_ADDITIONS, 0.0111)).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, -0.5f, 1.0f))));
         this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
         this.addCarver(GenerationStep.Carving.AIR, NetherWastesBiome.makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2f)));
         this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.LAVA_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256))));

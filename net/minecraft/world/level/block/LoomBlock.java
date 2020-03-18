@@ -17,6 +17,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
@@ -25,7 +26,7 @@ public class LoomBlock
 extends HorizontalDirectionalBlock {
     private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.loom", new Object[0]);
 
-    protected LoomBlock(Block.Properties properties) {
+    protected LoomBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

@@ -10,17 +10,17 @@ import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TrappedChestBlock
 extends ChestBlock {
-    public TrappedChestBlock(Block.Properties properties) {
+    public TrappedChestBlock(BlockBehaviour.Properties properties) {
         super(properties, () -> BlockEntityType.TRAPPED_CHEST);
     }
 

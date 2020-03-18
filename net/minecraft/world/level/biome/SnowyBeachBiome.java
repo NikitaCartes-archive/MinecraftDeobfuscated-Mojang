@@ -3,9 +3,9 @@
  */
 package net.minecraft.world.level.biome;
 
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public final class SnowyBeachBiome
 extends Biome {
     public SnowyBeachBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_DESERT).precipitation(Biome.Precipitation.SNOW).biomeCategory(Biome.BiomeCategory.BEACH).depth(0.0f).scale(0.025f).temperature(0.05f).downfall(0.3f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()).parent(null));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_DESERT).precipitation(Biome.Precipitation.SNOW).biomeCategory(Biome.BiomeCategory.BEACH).depth(0.0f).scale(0.025f).temperature(0.05f).downfall(0.3f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4020182).waterFogColor(329011).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null));
         this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
         this.addStructureStart(Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01f)));
         this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(true)));

@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
@@ -26,7 +27,7 @@ implements BonemealableBlock {
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 9.0, 12.0);
     private final Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> feature;
 
-    protected FungusBlock(Block.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
+    protected FungusBlock(BlockBehaviour.Properties properties, Supplier<ConfiguredFeature<HugeFungusConfiguration, ?>> supplier) {
         super(properties);
         this.feature = supplier;
     }

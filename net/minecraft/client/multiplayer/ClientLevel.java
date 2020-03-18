@@ -100,7 +100,7 @@ extends Level {
         super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
         this.connection = clientPacketListener;
         this.levelRenderer = levelRenderer;
-        this.setSpawnPos(new BlockPos(8, 64, 8));
+        this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
         this.updateSkyBrightness();
         this.prepareWeather();
     }

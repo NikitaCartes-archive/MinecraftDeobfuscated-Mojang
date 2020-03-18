@@ -28,7 +28,6 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -44,7 +43,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -609,15 +607,14 @@ extends Entity {
         if (!this.level.isWaterAt(blockPos2)) {
             AABB aABB3;
             double h;
-            CollisionContext collisionContext = CollisionContext.of(livingEntity);
-            AABB aABB = livingEntity.getLocalBoundsForPose(Pose.SWIMMING).move(d, e, f);
-            double g = Boat.getDismountTargetFloorHeight(this.level, blockPos, collisionContext);
+            AABB aABB = livingEntity.getLocalBoundsForPose(livingEntity.getShortestDismountPose()).move(d, e, f);
+            double g = this.level.getRelativeFloorHeight(blockPos);
             if (!Double.isInfinite(g) && g < 1.0) {
                 AABB aABB2 = aABB.move(d, (double)blockPos.getY() + g, f);
                 if (this.level.getBlockCollisions(livingEntity, aABB2).allMatch(VoxelShape::isEmpty)) {
                     return new Vec3(d, (double)blockPos.getY() + g, f);
                 }
-            } else if (g < 1.0 && !Double.isInfinite(h = Boat.getDismountTargetFloorHeight(this.level, blockPos2, collisionContext)) && h <= 0.5 && this.level.getBlockCollisions(livingEntity, aABB3 = aABB.move(d, (double)blockPos2.getY() + h, f)).allMatch(VoxelShape::isEmpty)) {
+            } else if (g < 1.0 && !Double.isInfinite(h = this.level.getRelativeFloorHeight(blockPos2)) && h <= 0.5 && this.level.getBlockCollisions(livingEntity, aABB3 = aABB.move(d, (double)blockPos2.getY() + h, f)).allMatch(VoxelShape::isEmpty)) {
                 return new Vec3(d, (double)blockPos2.getY() + h, f);
             }
         }

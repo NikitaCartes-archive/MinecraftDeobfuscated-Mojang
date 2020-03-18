@@ -188,14 +188,12 @@ implements ItemSupplier {
 
     @Override
     protected void onHitBlock(BlockHitResult blockHitResult) {
-        super.onHitBlock(blockHitResult);
-        if (this.collision) {
-            BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
-            this.level.getBlockState(blockPos).entityInside(this.level, blockPos, this);
-            if (this.hasExplosion()) {
-                this.explode();
-            }
+        BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
+        this.level.getBlockState(blockPos).entityInside(this.level, blockPos, this);
+        if (this.hasExplosion()) {
+            this.explode();
         }
+        super.onHitBlock(blockHitResult);
     }
 
     private boolean hasExplosion() {

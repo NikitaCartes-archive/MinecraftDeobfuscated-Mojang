@@ -5,9 +5,9 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 public final class SwampHillsBiome
 extends Biome {
     protected SwampHillsBiome() {
-        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.SWAMP, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.SWAMP).depth(-0.1f).scale(0.3f).temperature(0.8f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(6388580).waterFogColor(2302743).fogColor(12638463).ambientMoodSound(SoundEvents.AMBIENT_CAVE).build()).parent("swamp"));
+        super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.SWAMP, SurfaceBuilder.CONFIG_GRASS).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.SWAMP).depth(-0.1f).scale(0.3f).temperature(0.8f).downfall(0.9f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(6388580).waterFogColor(2302743).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent("swamp"));
         this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);

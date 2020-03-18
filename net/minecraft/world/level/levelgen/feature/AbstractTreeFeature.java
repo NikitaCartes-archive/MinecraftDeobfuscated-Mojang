@@ -22,6 +22,7 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -48,7 +49,7 @@ extends Feature<T> {
     }
 
     public static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, BlockState::isAir);
+        return levelSimulatedReader.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::isAir);
     }
 
     protected static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

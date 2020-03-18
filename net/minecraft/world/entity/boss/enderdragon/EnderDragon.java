@@ -467,7 +467,7 @@ implements Enemy {
             if (this.dragonDeathTime > 150 && this.dragonDeathTime % 5 == 0 && bl) {
                 this.dropExperience(Mth.floor((float)i * 0.08f));
             }
-            if (this.dragonDeathTime == 1) {
+            if (this.dragonDeathTime == 1 && !this.isSilent()) {
                 this.level.globalLevelEvent(1028, this.blockPosition(), 0);
             }
         }

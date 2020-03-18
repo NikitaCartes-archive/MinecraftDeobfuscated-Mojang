@@ -35,6 +35,8 @@ import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.AmbientAdditionsSettings;
+import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Blocks;
@@ -310,21 +312,6 @@ public abstract class Biome {
         return BiomeTempCategory.WARM;
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public Optional<SoundEvent> getAmbientLoopSoundEvent() {
-        return this.specialEffects.getAmbientLoopSoundEvent();
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Optional<SoundEvent> getAmbientMoodSoundEvent() {
-        return this.specialEffects.getAmbientMoodSoundEvent();
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public Optional<SoundEvent> getAmbientAdditionsSoundEvent() {
-        return this.specialEffects.getAmbientAdditionsSoundEvent();
-    }
-
     public final float getDepth() {
         return this.depth;
     }
@@ -369,6 +356,21 @@ public abstract class Biome {
     @Environment(value=EnvType.CLIENT)
     public Optional<AmbientParticleSettings> getAmbientParticle() {
         return this.specialEffects.getAmbientParticleSettings();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<SoundEvent> getAmbientLoop() {
+        return this.specialEffects.getAmbientLoopSoundEvent();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<AmbientMoodSettings> getAmbientMood() {
+        return this.specialEffects.getAmbientMoodSettings();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<AmbientAdditionsSettings> getAmbientAdditions() {
+        return this.specialEffects.getAmbientAdditionsSettings();
     }
 
     public final BiomeCategory getBiomeCategory() {

@@ -243,7 +243,6 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.RED_SAND);
         this.dropSelf(Blocks.GOLD_ORE);
         this.dropSelf(Blocks.IRON_ORE);
-        this.dropSelf(Blocks.NETHER_GOLD_ORE);
         this.dropSelf(Blocks.OAK_LOG);
         this.dropSelf(Blocks.SPRUCE_LOG);
         this.dropSelf(Blocks.BIRCH_LOG);
@@ -353,6 +352,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SOUL_SAND);
         this.dropSelf(Blocks.SOUL_SOIL);
         this.dropSelf(Blocks.BASALT);
+        this.dropSelf(Blocks.POLISHED_BASALT);
         this.dropSelf(Blocks.SOUL_FIRE_TORCH);
         this.dropSelf(Blocks.CARVED_PUMPKIN);
         this.dropSelf(Blocks.JACK_O_LANTERN);
@@ -573,6 +573,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.SCAFFOLDING);
         this.dropSelf(Blocks.HONEY_BLOCK);
         this.dropSelf(Blocks.HONEYCOMB_BLOCK);
+        this.dropSelf(Blocks.RESPAWN_ANCHOR);
         this.dropSelf(Blocks.WARPED_STEM);
         this.dropSelf(Blocks.WARPED_HYPHAE);
         this.dropSelf(Blocks.WARPED_NYLIUM);
@@ -775,7 +776,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.RED_BANNER, BlockLoot::createBannerDrop);
         this.add(Blocks.WHITE_BANNER, BlockLoot::createBannerDrop);
         this.add(Blocks.YELLOW_BANNER, BlockLoot::createBannerDrop);
-        this.add(Blocks.PLAYER_HEAD, (Block block) -> LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("Owner", "SkullOwner"))))));
+        this.add(Blocks.PLAYER_HEAD, (Block block) -> LootTable.lootTable().withPool(BlockLoot.applyExplosionCondition(block, LootPool.lootPool().setRolls(ConstantIntValue.exactly(1)).add((LootPoolEntryContainer.Builder<?>)LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(CopyNbtFunction.DataSource.BLOCK_ENTITY).copy("SkullOwner", "SkullOwner"))))));
         this.add(Blocks.BEE_NEST, BlockLoot::createBeeNestDrop);
         this.add(Blocks.BEEHIVE, BlockLoot::createBeeHiveDrop);
         this.add(Blocks.BIRCH_LEAVES, (Block block) -> BlockLoot.createLeavesDrops(block, Blocks.BIRCH_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
@@ -799,6 +800,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.EMERALD_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.EMERALD));
         this.add(Blocks.NETHER_QUARTZ_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.QUARTZ));
         this.add(Blocks.DIAMOND_ORE, (Block block) -> BlockLoot.createOreDrop(block, Items.DIAMOND));
+        this.add(Blocks.NETHER_GOLD_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.GOLD_NUGGET).apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0f, 6.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
         this.add(Blocks.LAPIS_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.LAPIS_LAZULI).apply(SetItemCountFunction.setCount(RandomValueBounds.between(4.0f, 9.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
         this.add(Blocks.COBWEB, (Block block) -> BlockLoot.createSilkTouchOrShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.STRING))));
         this.add(Blocks.DEAD_BUSH, (Block block) -> BlockLoot.createShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(RandomValueBounds.between(0.0f, 2.0f))))));

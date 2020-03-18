@@ -41,7 +41,7 @@ extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel serverLevel, Villager villager, long l) {
         Villager villager2 = (Villager)villager.getBrain().getMemory(MemoryModuleType.INTERACTION_TARGET).get();
-        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2);
+        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5f);
         this.trades = TradeWithVillager.figureOutWhatIAmWillingToTrade(villager, villager2);
     }
 
@@ -51,7 +51,7 @@ extends Behavior<Villager> {
         if (villager.distanceToSqr(villager2) > 5.0) {
             return;
         }
-        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2);
+        BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5f);
         villager.gossip(villager2, l);
         if (villager.hasExcessFood() && (villager.getVillagerData().getProfession() == VillagerProfession.FARMER || villager2.wantsMoreFood())) {
             TradeWithVillager.throwHalfStack(villager, Villager.FOOD_POINTS.keySet(), villager2);

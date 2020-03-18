@@ -156,6 +156,9 @@ extends HangingEntity {
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.fixed) {
+            if (damageSource == DamageSource.OUT_OF_WORLD || damageSource.isCreativePlayer()) {
+                return super.hurt(damageSource, f);
+            }
             return false;
         }
         if (this.isInvulnerableTo(damageSource)) {
@@ -200,6 +203,9 @@ extends HangingEntity {
     }
 
     private void dropItem(@Nullable Entity entity, boolean bl) {
+        if (this.fixed) {
+            return;
+        }
         if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             if (entity == null) {
                 this.removeFramedMap(this.getItem());

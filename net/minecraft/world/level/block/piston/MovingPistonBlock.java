@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -43,7 +44,7 @@ extends BaseEntityBlock {
     public static final DirectionProperty FACING = PistonHeadBlock.FACING;
     public static final EnumProperty<PistonType> TYPE = PistonHeadBlock.TYPE;
 
-    public MovingPistonBlock(Block.Properties properties) {
+    public MovingPistonBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(TYPE, PistonType.DEFAULT));
     }
@@ -76,16 +77,6 @@ extends BaseEntityBlock {
         if (blockState2.getBlock() instanceof PistonBaseBlock && blockState2.getValue(PistonBaseBlock.EXTENDED).booleanValue()) {
             levelAccessor.removeBlock(blockPos2, false);
         }
-    }
-
-    @Override
-    public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return false;
-    }
-
-    @Override
-    public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return false;
     }
 
     @Override

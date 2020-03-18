@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,21 +13,19 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BubbleColumnBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MagmaBlock
 extends Block {
-    public MagmaBlock(Block.Properties properties) {
+    public MagmaBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -42,12 +38,6 @@ extends Block {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean emissiveRendering(BlockState blockState) {
-        return true;
-    }
-
-    @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BubbleColumnBlock.growColumn(serverLevel, blockPos.above(), true);
     }
@@ -55,7 +45,7 @@ extends Block {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == Direction.UP && blockState2.getBlock() == Blocks.WATER) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(levelAccessor));
+            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 20);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
     }
@@ -70,23 +60,8 @@ extends Block {
     }
 
     @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 20;
-    }
-
-    @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
-    }
-
-    @Override
-    public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-        return entityType.fireImmune();
-    }
-
-    @Override
-    public boolean hasPostProcess(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return true;
+        level.getBlockTicks().scheduleTick(blockPos, this, 20);
     }
 }
 

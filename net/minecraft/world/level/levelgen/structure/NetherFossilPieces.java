@@ -6,15 +6,12 @@ package net.minecraft.world.level.levelgen.structure;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -72,15 +69,6 @@ public class NetherFossilPieces {
 
         @Override
         public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-            while (this.templatePosition.getY() > chunkGenerator.getSeaLevel()) {
-                BlockPos blockPos = this.templatePosition.below();
-                BlockState blockState = levelAccessor.getBlockState(blockPos);
-                if (levelAccessor.getBlockState(this.templatePosition).isAir() && (blockState.getBlock() == Blocks.SOUL_SAND || blockState.isFaceSturdy(levelAccessor, blockPos, Direction.UP))) break;
-                this.templatePosition = this.templatePosition.below();
-            }
-            if (this.templatePosition.getY() <= chunkGenerator.getSeaLevel()) {
-                return false;
-            }
             boundingBox.expand(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
             return super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
         }

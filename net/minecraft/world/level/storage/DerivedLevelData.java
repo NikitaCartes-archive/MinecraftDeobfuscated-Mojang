@@ -109,21 +109,6 @@ extends LevelData {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public void setXSpawn(int i) {
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public void setYSpawn(int i) {
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public void setZSpawn(int i) {
-    }
-
-    @Override
     public void setGameTime(long l) {
     }
 

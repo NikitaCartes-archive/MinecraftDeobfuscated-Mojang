@@ -14,6 +14,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +27,7 @@ extends CropBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
     private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0)};
 
-    public BeetrootBlock(Block.Properties properties) {
+    public BeetrootBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -47,9 +48,9 @@ extends CropBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (random.nextInt(3) != 0) {
-            super.tick(blockState, serverLevel, blockPos, random);
+            super.randomTick(blockState, serverLevel, blockPos, random);
         }
     }
 

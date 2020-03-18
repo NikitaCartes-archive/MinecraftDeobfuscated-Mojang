@@ -30,6 +30,11 @@ extends AbstractTickableSoundInstance {
     }
 
     @Override
+    public boolean canPlaySound() {
+        return !this.entity.isSilent();
+    }
+
+    @Override
     public void tick() {
         if (this.entity.removed) {
             this.stop();

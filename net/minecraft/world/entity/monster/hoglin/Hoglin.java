@@ -40,6 +40,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -75,8 +76,9 @@ implements Enemy {
     protected void registerAttributes() {
         super.registerAttributes();
         this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.4f);
+        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3f);
         this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0.5);
+        this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).setBaseValue(1.0);
         this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
     }
 
@@ -88,24 +90,46 @@ implements Enemy {
     public boolean doHurtTarget(Entity entity) {
         this.attackAnimationRemainingTicks = 10;
         this.level.broadcastEntityEvent(this, (byte)4);
+        if (!(entity instanceof LivingEntity)) {
+            return false;
+        }
+        LivingEntity livingEntity = (LivingEntity)entity;
         float f = this.getAttackDamage();
-        float g = this.isAdult() || (int)f > 0 ? f / 2.0f + (float)this.random.nextInt((int)f) : f;
+        float g = this.isAdult() && (int)f > 0 ? f / 2.0f + (float)this.random.nextInt((int)f) : f;
         boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
         if (bl) {
             this.doEnchantDamageEffects(this, entity);
             if (this.isAdult()) {
-                this.throwTarget(entity);
+                this.throwTarget(livingEntity);
             }
         }
         this.playSound(SoundEvents.HOGLIN_ATTACK, 1.0f, this.getVoicePitch());
-        if (entity instanceof LivingEntity) {
-            HoglinAi.onHitTarget(this, (LivingEntity)entity);
-        }
+        HoglinAi.onHitTarget(this, livingEntity);
         return bl;
     }
 
-    private void throwTarget(Entity entity) {
-        entity.setDeltaMovement(entity.getDeltaMovement().add((this.random.nextFloat() - 0.5f) * 0.5f, this.random.nextFloat() * 0.5f, this.random.nextFloat() * -0.5f));
+    private void throwTarget(LivingEntity livingEntity) {
+        double e;
+        double d = this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
+        double f = d - (e = livingEntity.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue());
+        if (f <= 0.0) {
+            return;
+        }
+        double g = livingEntity.getX() - this.getX();
+        double h = livingEntity.getZ() - this.getZ();
+        float i = this.random.nextInt(21) - 10;
+        double j = f * (double)(this.random.nextFloat() * 0.5f + 0.2f);
+        Vec3 vec3 = new Vec3(g, 0.0, h).normalize().scale(j).yRot(i);
+        double k = f * (double)this.random.nextFloat() * 0.5;
+        livingEntity.push(vec3.x, k, vec3.z);
+        livingEntity.hurtMarked = true;
+    }
+
+    @Override
+    protected void blockedByShield(LivingEntity livingEntity) {
+        if (this.isAdult()) {
+            this.throwTarget(livingEntity);
+        }
     }
 
     @Override
@@ -229,10 +253,6 @@ implements Enemy {
             hoglin.setPersistenceRequired();
         }
         return hoglin;
-    }
-
-    protected float getMovementSpeed() {
-        return (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
     }
 
     @Override

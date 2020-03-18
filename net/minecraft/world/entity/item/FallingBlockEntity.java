@@ -149,7 +149,7 @@ extends Entity {
                             if (this.level.setBlock(blockPos, this.blockState, 3)) {
                                 BlockEntity blockEntity;
                                 if (block instanceof FallingBlock) {
-                                    ((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState);
+                                    ((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState, this);
                                 }
                                 if (this.blockData != null && block instanceof EntityBlock && (blockEntity = this.level.getBlockEntity(blockPos)) != null) {
                                     CompoundTag compoundTag = blockEntity.save(new CompoundTag());
@@ -168,7 +168,7 @@ extends Entity {
                             this.spawnAtLocation(block);
                         }
                     } else if (block instanceof FallingBlock) {
-                        ((FallingBlock)block).onBroken(this.level, blockPos);
+                        ((FallingBlock)block).onBroken(this.level, blockPos, this);
                     }
                 }
             } else if (!(this.level.isClientSide || (this.time <= 100 || blockPos.getY() >= 1 && blockPos.getY() <= 256) && this.time <= 600)) {

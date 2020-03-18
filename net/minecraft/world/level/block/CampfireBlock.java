@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -64,7 +65,7 @@ implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
 
-    public CampfireBlock(Block.Properties properties) {
+    public CampfireBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(LIT, true)).setValue(SIGNAL_FIRE, false)).setValue(WATERLOGGED, false)).setValue(FACING, Direction.NORTH));
     }
@@ -127,11 +128,6 @@ implements SimpleWaterloggedBlock {
 
     private boolean isSmokeSource(BlockState blockState) {
         return blockState.getBlock() == Blocks.HAY_BLOCK;
-    }
-
-    @Override
-    public int getLightEmission(BlockState blockState) {
-        return blockState.getValue(LIT) != false ? super.getLightEmission(blockState) : 0;
     }
 
     @Override

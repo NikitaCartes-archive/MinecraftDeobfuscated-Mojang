@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -49,7 +50,7 @@ extends FallingBlock {
     private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
     private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.repair", new Object[0]);
 
-    public AnvilBlock(Block.Properties properties) {
+    public AnvilBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH));
     }
@@ -90,13 +91,17 @@ extends FallingBlock {
     }
 
     @Override
-    public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-        level.levelEvent(1031, blockPos, 0);
+    public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, FallingBlockEntity fallingBlockEntity) {
+        if (!fallingBlockEntity.isSilent()) {
+            level.levelEvent(1031, blockPos, 0);
+        }
     }
 
     @Override
-    public void onBroken(Level level, BlockPos blockPos) {
-        level.levelEvent(1029, blockPos, 0);
+    public void onBroken(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
+        if (!fallingBlockEntity.isSilent()) {
+            level.levelEvent(1029, blockPos, 0);
+        }
     }
 
     @Nullable
@@ -128,8 +133,8 @@ extends FallingBlock {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public int getDustColor(BlockState blockState) {
-        return this.materialColor.col;
+    public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+        return blockState.getMapColor((BlockGetter)blockGetter, (BlockPos)blockPos).col;
     }
 }
 

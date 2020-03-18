@@ -148,7 +148,9 @@ implements RangedAttackMob {
                     this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), potion));
                     this.usingTime = this.getMainHandItem().getUseDuration();
                     this.setUsingItem(true);
-                    this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+                    if (!this.isSilent()) {
+                        this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+                    }
                     AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
                     attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING);
                     attributeInstance.addModifier(SPEED_MODIFIER_DRINKING);
@@ -215,7 +217,9 @@ implements RangedAttackMob {
         thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), potion));
         thrownPotion.xRot -= -20.0f;
         thrownPotion.shoot(d, e + (double)(h * 0.2f), g, 0.75f, 8.0f);
-        this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+        if (!this.isSilent()) {
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_THROW, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
+        }
         this.level.addFreshEntity(thrownPotion);
     }
 

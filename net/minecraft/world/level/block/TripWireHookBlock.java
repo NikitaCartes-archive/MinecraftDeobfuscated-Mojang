@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -42,7 +43,7 @@ extends Block {
     protected static final VoxelShape WEST_AABB = Block.box(10.0, 0.0, 5.0, 16.0, 10.0, 11.0);
     protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 5.0, 6.0, 10.0, 11.0);
 
-    public TripWireHookBlock(Block.Properties properties) {
+    public TripWireHookBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(POWERED, false)).setValue(ATTACHED, false));
     }
@@ -126,7 +127,7 @@ extends Block {
                 bl6 |= bl7 && bl8;
                 blockStates[k] = blockState3;
                 if (k != i) continue;
-                level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+                level.getBlockTicks().scheduleTick(blockPos, this, 10);
                 bl5 &= bl7;
                 continue;
             }

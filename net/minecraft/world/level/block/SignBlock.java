@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -37,7 +38,7 @@ implements SimpleWaterloggedBlock {
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
     private final WoodType type;
 
-    protected SignBlock(Block.Properties properties, WoodType woodType) {
+    protected SignBlock(BlockBehaviour.Properties properties, WoodType woodType) {
         super(properties);
         this.type = woodType;
     }

@@ -4,8 +4,6 @@
 package net.minecraft.world.level.block;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,6 +24,7 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.piston.MovingPistonBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -39,7 +38,7 @@ extends Block {
     public static final IntegerProperty MOISTURE = BlockStateProperties.MOISTURE;
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 15.0, 16.0);
 
-    protected FarmBlock(Block.Properties properties) {
+    protected FarmBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(MOISTURE, 0));
     }
@@ -80,8 +79,11 @@ extends Block {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             FarmBlock.turnToDirt(blockState, serverLevel, blockPos);
-            return;
         }
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         int i = blockState.getValue(MOISTURE);
         if (FarmBlock.isNearWater(serverLevel, blockPos) || serverLevel.isRainingAt(blockPos.above())) {
             if (i < 7) {
@@ -127,12 +129,6 @@ extends Block {
     @Override
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean isViewBlocking(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return true;
     }
 }
 

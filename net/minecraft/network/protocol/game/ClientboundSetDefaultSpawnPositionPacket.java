@@ -11,14 +11,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 
-public class ClientboundSetSpawnPositionPacket
+public class ClientboundSetDefaultSpawnPositionPacket
 implements Packet<ClientGamePacketListener> {
     private BlockPos pos;
 
-    public ClientboundSetSpawnPositionPacket() {
+    public ClientboundSetDefaultSpawnPositionPacket() {
     }
 
-    public ClientboundSetSpawnPositionPacket(BlockPos blockPos) {
+    public ClientboundSetDefaultSpawnPositionPacket(BlockPos blockPos) {
         this.pos = blockPos;
     }
 

@@ -25,6 +25,11 @@ extends AbstractTickableSoundInstance {
     }
 
     @Override
+    public boolean canPlaySound() {
+        return !this.guardian.isSilent();
+    }
+
+    @Override
     public void tick() {
         if (this.guardian.removed || this.guardian.getTarget() != null) {
             this.stop();

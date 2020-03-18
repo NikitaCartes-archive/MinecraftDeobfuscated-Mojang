@@ -320,7 +320,6 @@ public class Mth {
         return l;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static float frac(float f) {
         return f - (float)Mth.floor(f);
     }

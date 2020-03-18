@@ -16,6 +16,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,7 +32,7 @@ extends Block {
     protected static final VoxelShape COLLISION_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
     protected static final VoxelShape OUTLINE_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 
-    protected CactusBlock(Block.Properties properties) {
+    protected CactusBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
     }
@@ -40,8 +41,11 @@ extends Block {
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
-            return;
         }
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         BlockPos blockPos2 = blockPos.above();
         if (!serverLevel.isEmptyBlock(blockPos2)) {
             return;

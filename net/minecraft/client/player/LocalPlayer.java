@@ -206,6 +206,14 @@ extends AbstractClientPlayer {
         }
     }
 
+    public float getCurrentMood() {
+        for (AmbientSoundHandler ambientSoundHandler : this.ambientSoundHandlers) {
+            if (!(ambientSoundHandler instanceof BiomeAmbientSoundsHandler)) continue;
+            return ((BiomeAmbientSoundsHandler)ambientSoundHandler).getMoodiness();
+        }
+        return 0.0f;
+    }
+
     private void sendPosition() {
         boolean bl2;
         boolean bl = this.isSprinting();

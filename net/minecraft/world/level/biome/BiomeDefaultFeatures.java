@@ -211,7 +211,7 @@ public class BiomeDefaultFeatures {
     public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK));
     public static final HugeMushroomFeatureConfiguration HUGE_RED_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_RED_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 2);
     public static final HugeMushroomFeatureConfiguration HUGE_BROWN_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_BROWN_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 3);
-    public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 2));
+    public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 1));
     public static final BlockPileConfiguration WARPED_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.WARPED_ROOTS.defaultBlockState(), 85).add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 1).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 13).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 1));
     public static final BlockPileConfiguration NETHER_SPROUTS_CONFIG = new BlockPileConfiguration(new SimpleStateProvider(Blocks.NETHER_SPROUTS.defaultBlockState()));
 

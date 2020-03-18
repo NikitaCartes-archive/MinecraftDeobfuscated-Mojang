@@ -20,7 +20,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 public class InteractWith<E extends LivingEntity, T extends LivingEntity>
 extends Behavior<E> {
     private final int maxDist;
-    private final float speed;
+    private final float speedModifier;
     private final EntityType<? extends T> type;
     private final int interactionRangeSqr;
     private final Predicate<T> targetFilter;
@@ -30,7 +30,7 @@ extends Behavior<E> {
     public InteractWith(EntityType<? extends T> entityType, int i, Predicate<E> predicate, Predicate<T> predicate2, MemoryModuleType<T> memoryModuleType, float f, int j) {
         super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryStatus.VALUE_PRESENT));
         this.type = entityType;
-        this.speed = f;
+        this.speedModifier = f;
         this.interactionRangeSqr = i * i;
         this.maxDist = j;
         this.targetFilter = predicate2;
@@ -62,7 +62,7 @@ extends Behavior<E> {
         brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(livingEntity -> this.type.equals(livingEntity.getType())).map(livingEntity -> livingEntity).filter(livingEntity2 -> livingEntity2.distanceToSqr((Entity)livingEntity) <= (double)this.interactionRangeSqr).filter(this.targetFilter).findFirst().ifPresent(livingEntity -> {
             brain.setMemory(this.memory, livingEntity);
             brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper((Entity)livingEntity));
-            brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper((Entity)livingEntity), this.speed, this.maxDist));
+            brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper((Entity)livingEntity), this.speedModifier, this.maxDist));
         }));
     }
 }

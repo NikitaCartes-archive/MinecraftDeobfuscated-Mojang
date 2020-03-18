@@ -91,7 +91,7 @@ extends Behavior<Villager> {
                 this.giftGivenDuringThisRun = true;
             }
         } else {
-            BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)villager, player, 5);
+            BehaviorUtils.setWalkAndLookTargetMemories((LivingEntity)villager, player, 0.5f, 5);
         }
     }
 

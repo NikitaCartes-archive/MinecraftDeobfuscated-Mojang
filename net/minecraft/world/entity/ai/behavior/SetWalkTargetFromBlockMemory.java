@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 public class SetWalkTargetFromBlockMemory
 extends Behavior<Villager> {
     private final MemoryModuleType<GlobalPos> memoryType;
-    private final float speed;
+    private final float speedModifier;
     private final int closeEnoughDist;
     private final int tooFarDistance;
     private final int tooLongUnreachableDuration;
@@ -28,7 +28,7 @@ extends Behavior<Villager> {
     public SetWalkTargetFromBlockMemory(MemoryModuleType<GlobalPos> memoryModuleType, float f, int i, int j, int k) {
         super(ImmutableMap.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, memoryModuleType, MemoryStatus.VALUE_PRESENT));
         this.memoryType = memoryModuleType;
-        this.speed = f;
+        this.speedModifier = f;
         this.closeEnoughDist = i;
         this.tooFarDistance = j;
         this.tooLongUnreachableDuration = k;
@@ -58,9 +58,9 @@ extends Behavior<Villager> {
                     this.dropPOI(villager, l);
                     return;
                 }
-                brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, this.speed, this.closeEnoughDist));
+                brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, this.speedModifier, this.closeEnoughDist));
             } else if (!this.closeEnough(serverLevel, villager, (GlobalPos)globalPos)) {
-                brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(globalPos.pos(), this.speed, this.closeEnoughDist));
+                brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(globalPos.pos(), this.speedModifier, this.closeEnoughDist));
             }
         });
     }

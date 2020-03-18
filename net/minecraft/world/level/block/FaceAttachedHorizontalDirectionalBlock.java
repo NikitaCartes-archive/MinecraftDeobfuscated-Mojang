@@ -8,9 +8,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -21,7 +21,7 @@ public class FaceAttachedHorizontalDirectionalBlock
 extends HorizontalDirectionalBlock {
     public static final EnumProperty<AttachFace> FACE = BlockStateProperties.ATTACH_FACE;
 
-    protected FaceAttachedHorizontalDirectionalBlock(Block.Properties properties) {
+    protected FaceAttachedHorizontalDirectionalBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.piston.PistonHeadBlock;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -51,15 +52,10 @@ extends DirectionalBlock {
     protected static final VoxelShape DOWN_AABB = Block.box(0.0, 4.0, 0.0, 16.0, 16.0, 16.0);
     private final boolean isSticky;
 
-    public PistonBaseBlock(boolean bl, Block.Properties properties) {
+    public PistonBaseBlock(boolean bl, BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(EXTENDED, false));
         this.isSticky = bl;
-    }
-
-    @Override
-    public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.getValue(EXTENDED) == false;
     }
 
     @Override
@@ -86,11 +82,6 @@ extends DirectionalBlock {
             return EAST_AABB;
         }
         return Shapes.block();
-    }
-
-    @Override
-    public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return false;
     }
 
     @Override
@@ -219,7 +210,7 @@ extends DirectionalBlock {
 
     public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
         Block block = blockState.getBlock();
-        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN) {
+        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN || block == Blocks.RESPAWN_ANCHOR) {
             return false;
         }
         if (!level.getWorldBorder().isWithinBounds(blockPos)) {

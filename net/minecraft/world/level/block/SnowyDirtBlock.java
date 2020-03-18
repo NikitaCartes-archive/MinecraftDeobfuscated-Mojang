@@ -9,6 +9,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -18,7 +19,7 @@ public class SnowyDirtBlock
 extends Block {
     public static final BooleanProperty SNOWY = BlockStateProperties.SNOWY;
 
-    protected SnowyDirtBlock(Block.Properties properties) {
+    protected SnowyDirtBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(SNOWY, false));
     }

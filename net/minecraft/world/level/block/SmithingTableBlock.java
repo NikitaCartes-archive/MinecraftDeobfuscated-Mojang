@@ -14,8 +14,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CraftingTableBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -23,7 +23,7 @@ public class SmithingTableBlock
 extends CraftingTableBlock {
     private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.upgrade", new Object[0]);
 
-    protected SmithingTableBlock(Block.Properties properties) {
+    protected SmithingTableBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

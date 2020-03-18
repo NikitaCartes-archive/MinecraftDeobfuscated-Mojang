@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -36,7 +37,7 @@ implements BonemealableBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_7;
     private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 10.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)};
 
-    protected CropBlock(Block.Properties properties) {
+    protected CropBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(this.getAgeProperty(), 0));
     }
@@ -72,10 +73,14 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return !this.isMaxAge(blockState);
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         float f;
         int i;
-        super.tick(blockState, serverLevel, blockPos, random);
         if (serverLevel.getRawBrightness(blockPos, 0) >= 9 && (i = this.getAge(blockState)) < this.getMaxAge() && random.nextInt((int)(25.0f / (f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos))) + 1) == 0) {
             serverLevel.setBlock(blockPos, this.getStateForAge(i + 1), 2);
         }

@@ -111,6 +111,7 @@ extends Item {
 
     @Environment(value=EnvType.CLIENT)
     public static void addGrowthParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+        double e;
         BlockState blockState;
         if (i == 0) {
             i = 15;
@@ -118,11 +119,30 @@ extends Item {
         if ((blockState = levelAccessor.getBlockState(blockPos)).isAir()) {
             return;
         }
+        double d = 0.5;
+        if (!blockState.getFluidState().isEmpty()) {
+            i *= 3;
+            e = 1.0;
+            d = 3.0;
+        } else if (blockState.isSolidRender(levelAccessor, blockPos)) {
+            blockPos = blockPos.above();
+            i *= 3;
+            d = 3.0;
+            e = 1.0;
+        } else {
+            e = blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
+        }
+        levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
         for (int j = 0; j < i; ++j) {
-            double d = random.nextGaussian() * 0.02;
-            double e = random.nextGaussian() * 0.02;
+            double n;
+            double m;
             double f = random.nextGaussian() * 0.02;
-            levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, (float)blockPos.getX() + random.nextFloat(), (double)blockPos.getY() + (double)random.nextFloat() * blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y), (float)blockPos.getZ() + random.nextFloat(), d, e, f);
+            double g = random.nextGaussian() * 0.02;
+            double h = random.nextGaussian() * 0.02;
+            double k = 0.5 - d;
+            double l = (double)blockPos.getX() + k + random.nextDouble() * d * 2.0;
+            if (levelAccessor.getBlockState(new BlockPos(l, m = (double)blockPos.getY() + random.nextDouble() * e, n = (double)blockPos.getZ() + k + random.nextDouble() * d * 2.0).below()).isAir()) continue;
+            levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
         }
     }
 }

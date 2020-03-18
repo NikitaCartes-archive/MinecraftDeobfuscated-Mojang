@@ -247,7 +247,9 @@ extends Monster {
 
     protected void doUnderWaterConversion() {
         this.convertTo(EntityType.DROWNED);
-        this.level.levelEvent(null, 1040, this.blockPosition(), 0);
+        if (!this.isSilent()) {
+            this.level.levelEvent(null, 1040, this.blockPosition(), 0);
+        }
     }
 
     protected void convertTo(EntityType<? extends Zombie> entityType) {
@@ -424,7 +426,9 @@ extends Monster {
             }
             zombieVillager.setInvulnerable(this.isInvulnerable());
             this.level.addFreshEntity(zombieVillager);
-            this.level.levelEvent(null, 1026, this.blockPosition(), 0);
+            if (!this.isSilent()) {
+                this.level.levelEvent(null, 1026, this.blockPosition(), 0);
+            }
         }
     }
 
@@ -545,11 +549,11 @@ extends Monster {
         }
     }
 
-    public class ZombieGroupData
+    public static class ZombieGroupData
     implements SpawnGroupData {
         public final boolean isBaby;
 
-        private ZombieGroupData(boolean bl) {
+        public ZombieGroupData(boolean bl) {
             this.isBaby = bl;
         }
     }

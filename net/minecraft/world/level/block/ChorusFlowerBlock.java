@@ -15,6 +15,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -27,7 +28,7 @@ extends Block {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_5;
     private final ChorusPlantBlock plant;
 
-    protected ChorusFlowerBlock(ChorusPlantBlock chorusPlantBlock, Block.Properties properties) {
+    protected ChorusFlowerBlock(ChorusPlantBlock chorusPlantBlock, BlockBehaviour.Properties properties) {
         super(properties);
         this.plant = chorusPlantBlock;
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
@@ -35,11 +36,19 @@ extends Block {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        int j;
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
-            return;
         }
+    }
+
+    @Override
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return blockState.getValue(AGE) < 5;
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        int j;
         BlockPos blockPos2 = blockPos.above();
         if (!serverLevel.isEmptyBlock(blockPos2) || blockPos2.getY() >= 256) {
             return;

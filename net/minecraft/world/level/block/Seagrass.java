@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.TallSeagrass;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluid;
@@ -33,7 +34,7 @@ implements BonemealableBlock,
 LiquidBlockContainer {
     protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0);
 
-    protected Seagrass(Block.Properties properties) {
+    protected Seagrass(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

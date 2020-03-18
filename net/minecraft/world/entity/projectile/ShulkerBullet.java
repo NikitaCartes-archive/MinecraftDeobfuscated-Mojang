@@ -5,7 +5,6 @@ package net.minecraft.world.entity.projectile;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +29,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -39,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ShulkerBullet
 extends Entity {
-    private LivingEntity owner;
+    private Entity owner;
     private Entity finalTarget;
     @Nullable
     private Direction currentMoveDirection;
@@ -49,10 +46,8 @@ extends Entity {
     private double targetDeltaZ;
     @Nullable
     private UUID ownerId;
-    private BlockPos lastKnownOwnerPos;
     @Nullable
     private UUID targetId;
-    private BlockPos lastKnownTargetPos;
 
     public ShulkerBullet(EntityType<? extends ShulkerBullet> entityType, Level level) {
         super(entityType, level);
@@ -86,23 +81,11 @@ extends Entity {
 
     @Override
     protected void addAdditionalSaveData(CompoundTag compoundTag) {
-        CompoundTag compoundTag2;
-        BlockPos blockPos;
         if (this.owner != null) {
-            blockPos = this.owner.blockPosition();
-            compoundTag2 = NbtUtils.createUUIDTag(this.owner.getUUID());
-            compoundTag2.putInt("X", blockPos.getX());
-            compoundTag2.putInt("Y", blockPos.getY());
-            compoundTag2.putInt("Z", blockPos.getZ());
-            compoundTag.put("Owner", compoundTag2);
+            compoundTag.putUUID("Owner", this.owner.getUUID());
         }
         if (this.finalTarget != null) {
-            blockPos = this.finalTarget.blockPosition();
-            compoundTag2 = NbtUtils.createUUIDTag(this.finalTarget.getUUID());
-            compoundTag2.putInt("X", blockPos.getX());
-            compoundTag2.putInt("Y", blockPos.getY());
-            compoundTag2.putInt("Z", blockPos.getZ());
-            compoundTag.put("Target", compoundTag2);
+            compoundTag.putUUID("Target", this.finalTarget.getUUID());
         }
         if (this.currentMoveDirection != null) {
             compoundTag.putInt("Dir", this.currentMoveDirection.get3DDataValue());
@@ -115,7 +98,6 @@ extends Entity {
 
     @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
-        CompoundTag compoundTag2;
         this.flightSteps = compoundTag.getInt("Steps");
         this.targetDeltaX = compoundTag.getDouble("TXD");
         this.targetDeltaY = compoundTag.getDouble("TYD");
@@ -123,15 +105,11 @@ extends Entity {
         if (compoundTag.contains("Dir", 99)) {
             this.currentMoveDirection = Direction.from3DDataValue(compoundTag.getInt("Dir"));
         }
-        if (compoundTag.contains("Owner", 10)) {
-            compoundTag2 = compoundTag.getCompound("Owner");
-            this.ownerId = NbtUtils.loadUUIDTag(compoundTag2);
-            this.lastKnownOwnerPos = new BlockPos(compoundTag2.getInt("X"), compoundTag2.getInt("Y"), compoundTag2.getInt("Z"));
+        if (compoundTag.hasUUID("Owner")) {
+            this.ownerId = compoundTag.getUUID("Owner");
         }
-        if (compoundTag.contains("Target", 10)) {
-            compoundTag2 = compoundTag.getCompound("Target");
-            this.targetId = NbtUtils.loadUUIDTag(compoundTag2);
-            this.lastKnownTargetPos = new BlockPos(compoundTag2.getInt("X"), compoundTag2.getInt("Y"), compoundTag2.getInt("Z"));
+        if (compoundTag.hasUUID("Target")) {
+            this.targetId = compoundTag.getUUID("Target");
         }
     }
 
@@ -222,24 +200,17 @@ extends Entity {
         Vec3 vec3;
         super.tick();
         if (!this.level.isClientSide) {
-            List<LivingEntity> list;
             if (this.finalTarget == null && this.targetId != null) {
-                list = this.level.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownTargetPos.offset(-2, -2, -2), this.lastKnownTargetPos.offset(2, 2, 2)));
-                for (LivingEntity livingEntity : list) {
-                    if (!livingEntity.getUUID().equals(this.targetId)) continue;
-                    this.finalTarget = livingEntity;
-                    break;
+                this.finalTarget = ((ServerLevel)this.level).getEntity(this.targetId);
+                if (this.finalTarget == null) {
+                    this.targetId = null;
                 }
-                this.targetId = null;
             }
             if (this.owner == null && this.ownerId != null) {
-                list = this.level.getEntitiesOfClass(LivingEntity.class, new AABB(this.lastKnownOwnerPos.offset(-2, -2, -2), this.lastKnownOwnerPos.offset(2, 2, 2)));
-                for (LivingEntity livingEntity : list) {
-                    if (!livingEntity.getUUID().equals(this.ownerId)) continue;
-                    this.owner = livingEntity;
-                    break;
+                this.owner = ((ServerLevel)this.level).getEntity(this.ownerId);
+                if (this.owner == null) {
+                    this.ownerId = null;
                 }
-                this.ownerId = null;
             }
             if (!(this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && ((Player)this.finalTarget).isSpectator())) {
                 this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
@@ -300,10 +271,11 @@ extends Entity {
 
     protected void onHit(HitResult hitResult) {
         if (hitResult.getType() == HitResult.Type.ENTITY) {
+            LivingEntity livingEntity;
             Entity entity = ((EntityHitResult)hitResult).getEntity();
-            boolean bl = entity.hurt(DamageSource.indirectMobAttack(this, this.owner).setProjectile(), 4.0f);
+            boolean bl = entity.hurt(DamageSource.indirectMobAttack(this, livingEntity = this.owner instanceof LivingEntity ? (LivingEntity)this.owner : null).setProjectile(), 4.0f);
             if (bl) {
-                this.doEnchantDamageEffects(this.owner, entity);
+                this.doEnchantDamageEffects(livingEntity, entity);
                 if (entity instanceof LivingEntity) {
                     ((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200));
                 }

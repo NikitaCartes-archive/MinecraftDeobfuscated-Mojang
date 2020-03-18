@@ -14,6 +14,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public class ChorusPlantBlock
 extends PipeBlock {
-    protected ChorusPlantBlock(Block.Properties properties) {
+    protected ChorusPlantBlock(BlockBehaviour.Properties properties) {
         super(0.3125f, properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(NORTH, false)).setValue(EAST, false)).setValue(SOUTH, false)).setValue(WEST, false)).setValue(UP, false)).setValue(DOWN, false));
     }

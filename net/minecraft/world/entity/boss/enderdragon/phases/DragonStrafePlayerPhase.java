@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -70,7 +71,9 @@ extends AbstractDragonPhaseInstance {
                     double o = this.attackTarget.getX() - l;
                     double p = this.attackTarget.getY(0.5) - m;
                     double q = this.attackTarget.getZ() - n;
-                    this.dragon.level.levelEvent(null, 1017, this.dragon.blockPosition(), 0);
+                    if (!this.dragon.isSilent()) {
+                        this.dragon.level.levelEvent(null, 1017, this.dragon.blockPosition(), 0);
+                    }
                     DragonFireball dragonFireball = new DragonFireball(this.dragon.level, this.dragon, o, p, q);
                     dragonFireball.moveTo(l, m, n, 0.0f, 0.0f);
                     this.dragon.level.addFreshEntity(dragonFireball);
@@ -117,11 +120,11 @@ extends AbstractDragonPhaseInstance {
     private void navigateToNextPathNode() {
         if (this.currentPath != null && !this.currentPath.isDone()) {
             double f;
-            Vec3 vec3 = this.currentPath.currentPos();
+            Vec3i vec3i = this.currentPath.currentPos();
             this.currentPath.next();
-            double d = vec3.x;
-            double e = vec3.z;
-            while ((f = vec3.y + (double)(this.dragon.getRandom().nextFloat() * 20.0f)) < vec3.y) {
+            double d = vec3i.getX();
+            double e = vec3i.getZ();
+            while ((f = (double)((float)vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0f)) < (double)vec3i.getY()) {
             }
             this.targetLocation = new Vec3(d, f, e);
         }

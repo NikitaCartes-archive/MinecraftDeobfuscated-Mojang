@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -43,7 +44,7 @@ extends Block {
     protected static final VoxelShape NOT_ATTACHED_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
     private final TripWireHookBlock hook;
 
-    public TripWireBlock(TripWireHookBlock tripWireHookBlock, Block.Properties properties) {
+    public TripWireBlock(TripWireHookBlock tripWireHookBlock, BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(POWERED, false)).setValue(ATTACHED, false)).setValue(DISARMED, false)).setValue(NORTH, false)).setValue(EAST, false)).setValue(SOUTH, false)).setValue(WEST, false));
         this.hook = tripWireHookBlock;
@@ -145,7 +146,7 @@ extends Block {
             this.updateSource(level, blockPos, blockState);
         }
         if (bl2) {
-            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, 10);
         }
     }
 

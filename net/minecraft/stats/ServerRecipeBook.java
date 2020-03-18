@@ -73,6 +73,10 @@ extends RecipeBook {
         compoundTag.putBoolean("isFilteringCraftable", this.filteringCraftable);
         compoundTag.putBoolean("isFurnaceGuiOpen", this.furnaceGuiOpen);
         compoundTag.putBoolean("isFurnaceFilteringCraftable", this.furnaceFilteringCraftable);
+        compoundTag.putBoolean("isBlastingFurnaceGuiOpen", this.blastingFurnaceGuiOpen);
+        compoundTag.putBoolean("isBlastingFurnaceFilteringCraftable", this.blastingFurnaceFilteringCraftable);
+        compoundTag.putBoolean("isSmokerGuiOpen", this.smokerGuiOpen);
+        compoundTag.putBoolean("isSmokerFilteringCraftable", this.smokerFilteringCraftable);
         ListTag listTag = new ListTag();
         for (ResourceLocation resourceLocation : this.known) {
             listTag.add(StringTag.valueOf(resourceLocation.toString()));
@@ -91,6 +95,10 @@ extends RecipeBook {
         this.filteringCraftable = compoundTag.getBoolean("isFilteringCraftable");
         this.furnaceGuiOpen = compoundTag.getBoolean("isFurnaceGuiOpen");
         this.furnaceFilteringCraftable = compoundTag.getBoolean("isFurnaceFilteringCraftable");
+        this.blastingFurnaceGuiOpen = compoundTag.getBoolean("isBlastingFurnaceGuiOpen");
+        this.blastingFurnaceFilteringCraftable = compoundTag.getBoolean("isBlastingFurnaceFilteringCraftable");
+        this.smokerGuiOpen = compoundTag.getBoolean("isSmokerGuiOpen");
+        this.smokerFilteringCraftable = compoundTag.getBoolean("isSmokerFilteringCraftable");
         ListTag listTag = compoundTag.getList("recipes", 8);
         this.loadRecipes(listTag, this::add);
         ListTag listTag2 = compoundTag.getList("toBeDisplayed", 8);

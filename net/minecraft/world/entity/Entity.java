@@ -148,7 +148,6 @@ CommandSource {
     protected boolean onGround;
     public boolean horizontalCollision;
     public boolean verticalCollision;
-    public boolean collision;
     public boolean hurtMarked;
     protected Vec3 stuckSpeedMultiplier = Vec3.ZERO;
     public boolean removed;
@@ -506,7 +505,6 @@ CommandSource {
         this.horizontalCollision = !Mth.equal(vec3.x, vec32.x) || !Mth.equal(vec3.z, vec32.z);
         this.verticalCollision = vec3.y != vec32.y;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
-        this.collision = this.horizontalCollision || this.verticalCollision;
         BlockPos blockPos = this.getOnPos();
         BlockState blockState = this.level.getBlockState(blockPos);
         this.checkFallDamage(vec32.y, this.onGround, blockState, blockPos);
@@ -2396,20 +2394,6 @@ CommandSource {
         return new Vec3((double)h * g / (double)j, 0.0, (double)i * g / (double)j);
     }
 
-    protected static double getDismountTargetFloorHeight(Level level, BlockPos blockPos, CollisionContext collisionContext) {
-        VoxelShape voxelShape = level.getBlockState(blockPos).getCollisionShape(level, blockPos, collisionContext);
-        if (voxelShape.isEmpty()) {
-            BlockPos blockPos2 = blockPos.below();
-            VoxelShape voxelShape2 = level.getBlockState(blockPos2).getCollisionShape(level, blockPos2, collisionContext);
-            double d = voxelShape2.max(Direction.Axis.Y);
-            if (d >= 1.0) {
-                return d - 1.0;
-            }
-            return Double.NEGATIVE_INFINITY;
-        }
-        return voxelShape.max(Direction.Axis.Y);
-    }
-
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
         Direction direction = this.getMotionDirection();
         if (direction.getAxis() == Direction.Axis.Y) {
@@ -2417,25 +2401,35 @@ CommandSource {
         }
         Direction direction2 = direction.getClockWise();
         int[][] is = new int[][]{{direction2.getStepX(), direction2.getStepZ()}, {-direction2.getStepX(), -direction2.getStepZ()}, {-direction.getStepX() + direction2.getStepX(), -direction.getStepZ() + direction2.getStepZ()}, {-direction.getStepX() - direction2.getStepX(), -direction.getStepZ() - direction2.getStepZ()}, {direction.getStepX() + direction2.getStepX(), direction.getStepZ() + direction2.getStepZ()}, {direction.getStepX() - direction2.getStepX(), direction.getStepZ() - direction2.getStepZ()}, {-direction.getStepX(), -direction.getStepZ()}, {direction.getStepX(), direction.getStepZ()}};
-        BlockPos blockPos = new BlockPos(this.getX(), this.getY(), this.getZ());
-        CollisionContext collisionContext = CollisionContext.of(livingEntity);
+        BlockPos blockPos = this.blockPosition();
         ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
         for (Pose pose : immutableList) {
+            double d = livingEntity.getDimensions((Pose)pose).height;
             Iterator iterator = POSE_DISMOUNT_HEIGHTS.get((Object)pose).iterator();
             while (iterator.hasNext()) {
                 int i = (Integer)iterator.next();
                 for (int[] js : is) {
                     BlockPos blockPos2 = blockPos.offset(js[0], i, js[1]);
-                    double d = Entity.getDismountTargetFloorHeight(this.level, blockPos2, collisionContext);
-                    if (Double.isInfinite(d) || d >= 1.0) continue;
-                    double e = (double)blockPos2.getY() + d;
-                    AABB aABB = new AABB(blockPos2.getX(), e, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, e + (double)livingEntity.getDimensions((Pose)pose).height, (double)blockPos2.getZ() + 1.0);
+                    double e = this.level.getRelativeFloorHeight(blockPos2);
+                    if (Double.isInfinite(e) || e >= 1.0) continue;
+                    double f = (double)blockPos2.getY() + e;
+                    AABB aABB = new AABB(blockPos2.getX(), f, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, f + d, (double)blockPos2.getZ() + 1.0);
                     if (!this.level.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty)) continue;
-                    return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + d, (double)blockPos2.getZ() + 0.5);
+                    livingEntity.setPose(pose);
+                    return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + e, (double)blockPos2.getZ() + 0.5);
                 }
             }
         }
-        return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());
+        double g = this.getBoundingBox().maxY;
+        BlockPos blockPos3 = new BlockPos((double)blockPos.getX(), g, (double)blockPos.getZ());
+        for (Pose pose2 : immutableList) {
+            double h = livingEntity.getDimensions((Pose)pose2).height;
+            double j = (double)blockPos3.getY() + this.level.getRelativeCeilingHeight(blockPos3, g - (double)blockPos3.getY() + h);
+            if (!(g + h <= j)) continue;
+            livingEntity.setPose(pose2);
+            break;
+        }
+        return new Vec3(this.getX(), g, this.getZ());
     }
 
     @Nullable

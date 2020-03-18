@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -14,7 +15,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class AirBlock
 extends Block {
-    protected AirBlock(Block.Properties properties) {
+    protected AirBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -26,11 +27,6 @@ extends Block {
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
         return Shapes.empty();
-    }
-
-    @Override
-    public boolean isAir(BlockState blockState) {
-        return true;
     }
 }
 

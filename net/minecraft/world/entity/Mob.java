@@ -1033,6 +1033,7 @@ extends LivingEntity {
                 this.leashHolder.forcedLoading = false;
             }
             this.leashHolder = null;
+            this.leashInfoTag = null;
             if (!this.level.isClientSide && bl2) {
                 this.spawnAtLocation(Items.LEAD);
             }
@@ -1060,6 +1061,7 @@ extends LivingEntity {
 
     public void setLeashedTo(Entity entity, boolean bl) {
         this.leashHolder = entity;
+        this.leashInfoTag = null;
         this.forcedLoading = true;
         if (!(this.leashHolder instanceof Player)) {
             this.leashHolder.forcedLoading = true;
@@ -1101,7 +1103,9 @@ extends LivingEntity {
             } else {
                 this.dropLeash(false, true);
             }
-            this.leashInfoTag = null;
+            if (this.tickCount > 100) {
+                this.leashInfoTag = null;
+            }
         }
     }
 

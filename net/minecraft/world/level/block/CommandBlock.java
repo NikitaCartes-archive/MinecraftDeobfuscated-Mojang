@@ -18,7 +18,6 @@ import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -43,7 +43,7 @@ extends BaseEntityBlock {
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
     public static final BooleanProperty CONDITIONAL = BlockStateProperties.CONDITIONAL;
 
-    public CommandBlock(Block.Properties properties) {
+    public CommandBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(CONDITIONAL, false));
     }
@@ -73,7 +73,7 @@ extends BaseEntityBlock {
         }
         if (bl2) {
             commandBlockEntity.markConditionMet();
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
     }
 
@@ -94,7 +94,7 @@ extends BaseEntityBlock {
                     baseCommandBlock.setSuccessCount(0);
                 }
                 if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-                    serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel));
+                    serverLevel.getBlockTicks().scheduleTick(blockPos, this, 1);
                 }
             } else if (mode == CommandBlockEntity.Mode.REDSTONE) {
                 if (bl2) {
@@ -114,11 +114,6 @@ extends BaseEntityBlock {
             baseCommandBlock.setSuccessCount(0);
         }
         CommandBlock.executeChain(level, blockPos, blockState.getValue(FACING));
-    }
-
-    @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 1;
     }
 
     @Override

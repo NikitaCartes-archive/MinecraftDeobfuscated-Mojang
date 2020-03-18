@@ -65,6 +65,7 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.PlayerCloudParticle;
 import net.minecraft.client.particle.PortalParticle;
+import net.minecraft.client.particle.ReversePortalParticle;
 import net.minecraft.client.particle.SmokeParticle;
 import net.minecraft.client.particle.SoulParticle;
 import net.minecraft.client.particle.SpellParticle;
@@ -199,6 +200,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.DRIPPING_OBSIDIAN_TEAR, DripParticle.ObsidianTearHangProvider::new);
         this.register(ParticleTypes.FALLING_OBSIDIAN_TEAR, DripParticle.ObsidianTearFallProvider::new);
         this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle.ObsidianTearLandProvider::new);
+        this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

@@ -12,7 +12,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -60,14 +59,14 @@ implements TickableBlockEntity {
     @Override
     public void load(CompoundTag compoundTag) {
         super.load(compoundTag);
-        this.destroyTargetUUID = compoundTag.contains("target_uuid") ? NbtUtils.loadUUIDTag(compoundTag.getCompound("target_uuid")) : null;
+        this.destroyTargetUUID = compoundTag.hasUUID("Target") ? compoundTag.getUUID("Target") : null;
     }
 
     @Override
     public CompoundTag save(CompoundTag compoundTag) {
         super.save(compoundTag);
         if (this.destroyTarget != null) {
-            compoundTag.put("target_uuid", NbtUtils.createUUIDTag(this.destroyTarget.getUUID()));
+            compoundTag.putUUID("Target", this.destroyTarget.getUUID());
         }
         return compoundTag;
     }

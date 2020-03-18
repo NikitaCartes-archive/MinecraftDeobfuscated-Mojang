@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -50,7 +51,7 @@ implements SimpleWaterloggedBlock {
     private static final VoxelShape WEST_TEST = Block.box(0.0, 0.0, 5.0, 11.0, 16.0, 11.0);
     private static final VoxelShape EAST_TEST = Block.box(5.0, 0.0, 5.0, 16.0, 16.0, 11.0);
 
-    public WallBlock(Block.Properties properties) {
+    public WallBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(UP, true)).setValue(NORTH_WALL, WallSide.NONE)).setValue(EAST_WALL, WallSide.NONE)).setValue(SOUTH_WALL, WallSide.NONE)).setValue(WEST_WALL, WallSide.NONE)).setValue(WATERLOGGED, false));
         this.shapeByIndex = this.makeShapes(4.0f, 3.0f, 16.0f, 0.0f, 14.0f, 16.0f);

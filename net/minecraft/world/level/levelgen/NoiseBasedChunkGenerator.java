@@ -7,13 +7,16 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,6 +39,7 @@ import net.minecraft.world.level.levelgen.synth.ImprovedNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 extends ChunkGenerator<T> {
@@ -143,6 +147,17 @@ extends ChunkGenerator<T> {
 
     @Override
     public int getBaseHeight(int i, int j, Heightmap.Types types) {
+        return this.iterateNoiseColumn(i, j, null, types.isOpaque());
+    }
+
+    @Override
+    public BlockGetter getBaseColumn(int i, int j) {
+        BlockState[] blockStates = new BlockState[this.chunkCountY * this.chunkHeight];
+        this.iterateNoiseColumn(i, j, blockStates, null);
+        return new NoiseColumn(blockStates);
+    }
+
+    private int iterateNoiseColumn(int i, int j, @Nullable BlockState[] blockStates, @Nullable Predicate<BlockState> predicate) {
         int k = Math.floorDiv(i, this.chunkWidth);
         int l = Math.floorDiv(j, this.chunkWidth);
         int m = Math.floorMod(i, this.chunkWidth);
@@ -150,27 +165,33 @@ extends ChunkGenerator<T> {
         double d = (double)m / (double)this.chunkWidth;
         double e = (double)n / (double)this.chunkWidth;
         double[][] ds = new double[][]{this.makeAndFillNoiseColumn(k, l), this.makeAndFillNoiseColumn(k, l + 1), this.makeAndFillNoiseColumn(k + 1, l), this.makeAndFillNoiseColumn(k + 1, l + 1)};
-        int o = this.getSeaLevel();
-        for (int p = this.chunkCountY - 1; p >= 0; --p) {
-            double f = ds[0][p];
-            double g = ds[1][p];
-            double h = ds[2][p];
-            double q = ds[3][p];
-            double r = ds[0][p + 1];
-            double s = ds[1][p + 1];
-            double t = ds[2][p + 1];
-            double u = ds[3][p + 1];
-            for (int v = this.chunkHeight - 1; v >= 0; --v) {
-                double w = (double)v / (double)this.chunkHeight;
-                double x = Mth.lerp3(w, d, e, f, r, h, t, g, s, q, u);
-                int y = p * this.chunkHeight + v;
-                if (!(x > 0.0) && y >= o) continue;
-                BlockState blockState = x > 0.0 ? this.defaultBlock : this.defaultFluid;
-                if (!types.isOpaque().test(blockState)) continue;
-                return y + 1;
+        for (int o = this.chunkCountY - 1; o >= 0; --o) {
+            double f = ds[0][o];
+            double g = ds[1][o];
+            double h = ds[2][o];
+            double p = ds[3][o];
+            double q = ds[0][o + 1];
+            double r = ds[1][o + 1];
+            double s = ds[2][o + 1];
+            double t = ds[3][o + 1];
+            for (int u = this.chunkHeight - 1; u >= 0; --u) {
+                double v = (double)u / (double)this.chunkHeight;
+                double w = Mth.lerp3(v, d, e, f, q, h, s, g, r, p, t);
+                int x = o * this.chunkHeight + u;
+                BlockState blockState = this.generateBaseState(w, x);
+                if (blockStates != null) {
+                    blockStates[x] = blockState;
+                }
+                if (predicate == null || !predicate.test(blockState)) continue;
+                return x + 1;
             }
         }
         return 0;
+    }
+
+    protected BlockState generateBaseState(double d, int i) {
+        BlockState blockState = d > 0.0 ? this.defaultBlock : (i < this.getSeaLevel() ? this.defaultFluid : AIR);
+        return blockState;
     }
 
     protected abstract void fillNoiseColumn(double[] var1, int var2, int var3);
@@ -228,20 +249,19 @@ extends ChunkGenerator<T> {
 
     @Override
     public void fillFromNoise(LevelAccessor levelAccessor, ChunkAccess chunkAccess) {
-        int i = this.getSeaLevel();
         ObjectArrayList objectList = new ObjectArrayList(10);
         ObjectArrayList objectList2 = new ObjectArrayList(32);
         ChunkPos chunkPos = chunkAccess.getPos();
-        int j = chunkPos.x;
-        int k = chunkPos.z;
+        int i = chunkPos.x;
+        int j = chunkPos.z;
+        int k = i << 4;
         int l = j << 4;
-        int m = k << 4;
         for (StructureFeature<?> structureFeature : Feature.NOISE_AFFECTING_FEATURES) {
             String string = structureFeature.getFeatureName();
             LongIterator longIterator = chunkAccess.getReferencesForFeature(string).iterator();
             while (longIterator.hasNext()) {
-                long n = longIterator.nextLong();
-                ChunkPos chunkPos2 = new ChunkPos(n);
+                long m = longIterator.nextLong();
+                ChunkPos chunkPos2 = new ChunkPos(m);
                 ChunkAccess chunkAccess2 = levelAccessor.getChunk(chunkPos2.x, chunkPos2.z);
                 StructureStart structureStart = chunkAccess2.getStartForFeature(string);
                 if (structureStart == null || !structureStart.isValid()) continue;
@@ -254,9 +274,9 @@ extends ChunkGenerator<T> {
                             objectList.add(poolElementStructurePiece);
                         }
                         for (JigsawJunction jigsawJunction : poolElementStructurePiece.getJunctions()) {
-                            int o = jigsawJunction.getSourceX();
-                            int p = jigsawJunction.getSourceZ();
-                            if (o <= l - 12 || p <= m - 12 || o >= l + 15 + 12 || p >= m + 15 + 12) continue;
+                            int n = jigsawJunction.getSourceX();
+                            int o = jigsawJunction.getSourceZ();
+                            if (n <= k - 12 || o <= l - 12 || n >= k + 15 + 12 || o >= l + 15 + 12) continue;
                             objectList2.add(jigsawJunction);
                         }
                         continue;
@@ -266,10 +286,10 @@ extends ChunkGenerator<T> {
             }
         }
         double[][][] ds = new double[2][this.chunkCountZ + 1][this.chunkCountY + 1];
-        for (int q = 0; q < this.chunkCountZ + 1; ++q) {
-            ds[0][q] = new double[this.chunkCountY + 1];
-            this.fillNoiseColumn(ds[0][q], j * this.chunkCountX, k * this.chunkCountZ + q);
-            ds[1][q] = new double[this.chunkCountY + 1];
+        for (int p = 0; p < this.chunkCountZ + 1; ++p) {
+            ds[0][p] = new double[this.chunkCountY + 1];
+            this.fillNoiseColumn(ds[0][p], i * this.chunkCountX, j * this.chunkCountZ + p);
+            ds[1][p] = new double[this.chunkCountY + 1];
         }
         ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
         Heightmap heightmap = protoChunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
@@ -277,78 +297,78 @@ extends ChunkGenerator<T> {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         Iterator objectListIterator = objectList.iterator();
         Iterator objectListIterator2 = objectList2.iterator();
-        for (int r = 0; r < this.chunkCountX; ++r) {
-            int s;
-            for (s = 0; s < this.chunkCountZ + 1; ++s) {
-                this.fillNoiseColumn(ds[1][s], j * this.chunkCountX + r + 1, k * this.chunkCountZ + s);
+        for (int q = 0; q < this.chunkCountX; ++q) {
+            int r;
+            for (r = 0; r < this.chunkCountZ + 1; ++r) {
+                this.fillNoiseColumn(ds[1][r], i * this.chunkCountX + q + 1, j * this.chunkCountZ + r);
             }
-            for (s = 0; s < this.chunkCountZ; ++s) {
+            for (r = 0; r < this.chunkCountZ; ++r) {
                 LevelChunkSection levelChunkSection = protoChunk.getOrCreateSection(15);
                 levelChunkSection.acquire();
-                for (int t = this.chunkCountY - 1; t >= 0; --t) {
-                    double d = ds[0][s][t];
-                    double e = ds[0][s + 1][t];
-                    double f = ds[1][s][t];
-                    double g = ds[1][s + 1][t];
-                    double h = ds[0][s][t + 1];
-                    double u = ds[0][s + 1][t + 1];
-                    double v = ds[1][s][t + 1];
-                    double w = ds[1][s + 1][t + 1];
-                    for (int x = this.chunkHeight - 1; x >= 0; --x) {
-                        int y = t * this.chunkHeight + x;
-                        int z = y & 0xF;
-                        int aa = y >> 4;
-                        if (levelChunkSection.bottomBlockY() >> 4 != aa) {
+                for (int s = this.chunkCountY - 1; s >= 0; --s) {
+                    double d = ds[0][r][s];
+                    double e = ds[0][r + 1][s];
+                    double f = ds[1][r][s];
+                    double g = ds[1][r + 1][s];
+                    double h = ds[0][r][s + 1];
+                    double t = ds[0][r + 1][s + 1];
+                    double u = ds[1][r][s + 1];
+                    double v = ds[1][r + 1][s + 1];
+                    for (int w = this.chunkHeight - 1; w >= 0; --w) {
+                        int x = s * this.chunkHeight + w;
+                        int y = x & 0xF;
+                        int z = x >> 4;
+                        if (levelChunkSection.bottomBlockY() >> 4 != z) {
                             levelChunkSection.release();
-                            levelChunkSection = protoChunk.getOrCreateSection(aa);
+                            levelChunkSection = protoChunk.getOrCreateSection(z);
                             levelChunkSection.acquire();
                         }
-                        double ab = (double)x / (double)this.chunkHeight;
-                        double ac = Mth.lerp(ab, d, h);
-                        double ad = Mth.lerp(ab, f, v);
-                        double ae = Mth.lerp(ab, e, u);
-                        double af = Mth.lerp(ab, g, w);
-                        for (int ag = 0; ag < this.chunkWidth; ++ag) {
-                            int ah = l + r * this.chunkWidth + ag;
-                            int ai = ah & 0xF;
-                            double aj = (double)ag / (double)this.chunkWidth;
-                            double ak = Mth.lerp(aj, ac, ad);
-                            double al = Mth.lerp(aj, ae, af);
-                            for (int am = 0; am < this.chunkWidth; ++am) {
-                                int at;
+                        double aa = (double)w / (double)this.chunkHeight;
+                        double ab = Mth.lerp(aa, d, h);
+                        double ac = Mth.lerp(aa, f, u);
+                        double ad = Mth.lerp(aa, e, t);
+                        double ae = Mth.lerp(aa, g, v);
+                        for (int af = 0; af < this.chunkWidth; ++af) {
+                            int ag = k + q * this.chunkWidth + af;
+                            int ah = ag & 0xF;
+                            double ai = (double)af / (double)this.chunkWidth;
+                            double aj = Mth.lerp(ai, ab, ac);
+                            double ak = Mth.lerp(ai, ad, ae);
+                            for (int al = 0; al < this.chunkWidth; ++al) {
                                 int as;
-                                int an = m + s * this.chunkWidth + am;
-                                int ao = an & 0xF;
-                                double ap = (double)am / (double)this.chunkWidth;
-                                double aq = Mth.lerp(ap, ak, al);
-                                double ar = Mth.clamp(aq / 200.0, -1.0, 1.0);
-                                ar = ar / 2.0 - ar * ar * ar / 24.0;
+                                int ar;
+                                int am = l + r * this.chunkWidth + al;
+                                int an = am & 0xF;
+                                double ao = (double)al / (double)this.chunkWidth;
+                                double ap = Mth.lerp(ao, aj, ak);
+                                double aq = Mth.clamp(ap / 200.0, -1.0, 1.0);
+                                aq = aq / 2.0 - aq * aq * aq / 24.0;
                                 while (objectListIterator.hasNext()) {
                                     StructurePiece structurePiece2 = (StructurePiece)objectListIterator.next();
                                     BoundingBox boundingBox = structurePiece2.getBoundingBox();
-                                    as = Math.max(0, Math.max(boundingBox.x0 - ah, ah - boundingBox.x1));
-                                    at = y - (boundingBox.y0 + (structurePiece2 instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece2).getGroundLevelDelta() : 0));
-                                    int au = Math.max(0, Math.max(boundingBox.z0 - an, an - boundingBox.z1));
-                                    ar += NoiseBasedChunkGenerator.getContribution(as, at, au) * 0.8;
+                                    ar = Math.max(0, Math.max(boundingBox.x0 - ag, ag - boundingBox.x1));
+                                    as = x - (boundingBox.y0 + (structurePiece2 instanceof PoolElementStructurePiece ? ((PoolElementStructurePiece)structurePiece2).getGroundLevelDelta() : 0));
+                                    int at = Math.max(0, Math.max(boundingBox.z0 - am, am - boundingBox.z1));
+                                    aq += NoiseBasedChunkGenerator.getContribution(ar, as, at) * 0.8;
                                 }
                                 objectListIterator.back(objectList.size());
                                 while (objectListIterator2.hasNext()) {
                                     JigsawJunction jigsawJunction2 = (JigsawJunction)objectListIterator2.next();
-                                    int av = ah - jigsawJunction2.getSourceX();
-                                    as = y - jigsawJunction2.getSourceGroundY();
-                                    at = an - jigsawJunction2.getSourceZ();
-                                    ar += NoiseBasedChunkGenerator.getContribution(av, as, at) * 0.4;
+                                    int au = ag - jigsawJunction2.getSourceX();
+                                    ar = x - jigsawJunction2.getSourceGroundY();
+                                    as = am - jigsawJunction2.getSourceZ();
+                                    aq += NoiseBasedChunkGenerator.getContribution(au, ar, as) * 0.4;
                                 }
                                 objectListIterator2.back(objectList2.size());
-                                BlockState blockState = ar > 0.0 ? this.defaultBlock : (y < i ? this.defaultFluid : AIR);
+                                BlockState blockState = this.generateBaseState(aq, x);
                                 if (blockState == AIR) continue;
                                 if (blockState.getLightEmission() != 0) {
-                                    mutableBlockPos.set(ah, y, an);
+                                    mutableBlockPos.set(ag, x, am);
                                     protoChunk.addLight(mutableBlockPos);
                                 }
-                                levelChunkSection.setBlockState(ai, z, ao, blockState, false);
-                                heightmap.update(ai, y, ao, blockState);
-                                heightmap2.update(ai, y, ao, blockState);
+                                levelChunkSection.setBlockState(ah, y, an, blockState, false);
+                                heightmap.update(ah, x, an, blockState);
+                                heightmap2.update(ah, x, an, blockState);
                             }
                         }
                     }

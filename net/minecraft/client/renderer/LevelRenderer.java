@@ -2130,6 +2130,7 @@ AutoCloseable {
                     if (particle2 == null) continue;
                     particle2.setPower(ac);
                 }
+                if (j != 1) break;
                 this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
@@ -2333,7 +2334,7 @@ AutoCloseable {
 
     public static int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos) {
         int k;
-        if (blockState.emissiveRendering()) {
+        if (blockState.emissiveRendering(blockAndTintGetter, blockPos)) {
             return 0xF000F0;
         }
         int i = blockAndTintGetter.getBrightness(LightLayer.SKY, blockPos);

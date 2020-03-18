@@ -135,7 +135,7 @@ import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.saveddata.SaveDataDirtyRunnable;
@@ -1569,7 +1569,7 @@ Runnable {
     }
 
     private void refreshRegistries() {
-        Block.BLOCK_STATE_REGISTRY.forEach(BlockState::initCache);
+        Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
     }
 
     private void startProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {

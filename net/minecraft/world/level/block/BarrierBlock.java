@@ -6,15 +6,15 @@ package net.minecraft.world.level.block;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BarrierBlock
 extends Block {
-    protected BarrierBlock(Block.Properties properties) {
+    protected BarrierBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -32,11 +32,6 @@ extends Block {
     @Environment(value=EnvType.CLIENT)
     public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
         return 1.0f;
-    }
-
-    @Override
-    public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-        return false;
     }
 }
 

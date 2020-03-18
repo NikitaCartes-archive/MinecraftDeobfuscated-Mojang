@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,7 +53,7 @@ extends Block {
     private boolean shouldSignal = true;
     private final Set<BlockPos> toUpdate = Sets.newHashSet();
 
-    public RedStoneWireBlock(Block.Properties properties) {
+    public RedStoneWireBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(NORTH, RedstoneSide.NONE)).setValue(EAST, RedstoneSide.NONE)).setValue(SOUTH, RedstoneSide.NONE)).setValue(WEST, RedstoneSide.NONE)).setValue(POWER, 0));
     }

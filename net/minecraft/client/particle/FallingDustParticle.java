@@ -88,9 +88,10 @@ extends TextureSheetParticle {
             if (!blockState.isAir() && blockState.getRenderShape() == RenderShape.INVISIBLE) {
                 return null;
             }
-            int j = Minecraft.getInstance().getBlockColors().getColor(blockState, level, new BlockPos(d, e, f));
+            BlockPos blockPos = new BlockPos(d, e, f);
+            int j = Minecraft.getInstance().getBlockColors().getColor(blockState, level, blockPos);
             if (blockState.getBlock() instanceof FallingBlock) {
-                j = ((FallingBlock)blockState.getBlock()).getDustColor(blockState);
+                j = ((FallingBlock)blockState.getBlock()).getDustColor(blockState, level, blockPos);
             }
             float k = (float)(j >> 16 & 0xFF) / 255.0f;
             float l = (float)(j >> 8 & 0xFF) / 255.0f;

@@ -18,9 +18,9 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -52,14 +52,13 @@ extends FaceAttachedHorizontalDirectionalBlock {
     protected static final VoxelShape PRESSED_EAST_AABB = Block.box(0.0, 6.0, 5.0, 1.0, 10.0, 11.0);
     private final boolean sensitive;
 
-    protected ButtonBlock(boolean bl, Block.Properties properties) {
+    protected ButtonBlock(boolean bl, BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(POWERED, false)).setValue(FACE, AttachFace.WALL));
         this.sensitive = bl;
     }
 
-    @Override
-    public int getTickDelay(LevelReader levelReader) {
+    private int getPressDuration() {
         return this.sensitive ? 30 : 20;
     }
 
@@ -108,7 +107,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
     public void press(BlockState blockState, Level level, BlockPos blockPos) {
         level.setBlock(blockPos, (BlockState)blockState.setValue(POWERED, true), 3);
         this.updateNeighbours(blockState, level, blockPos);
-        level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+        level.getBlockTicks().scheduleTick(blockPos, this, this.getPressDuration());
     }
 
     protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
@@ -178,7 +177,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
             this.playSound(null, level, blockPos, bl);
         }
         if (bl) {
-            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getPressDuration());
         }
     }
 

@@ -18,6 +18,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -41,7 +42,7 @@ implements BonemealableBlock {
     public static final EnumProperty<BambooLeaves> LEAVES = BlockStateProperties.BAMBOO_LEAVES;
     public static final IntegerProperty STAGE = BlockStateProperties.STAGE;
 
-    public BambooBlock(Block.Properties properties) {
+    public BambooBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0)).setValue(LEAVES, BambooLeaves.NONE)).setValue(STAGE, 0));
     }
@@ -52,8 +53,8 @@ implements BonemealableBlock {
     }
 
     @Override
-    public Block.OffsetType getOffsetType() {
-        return Block.OffsetType.XZ;
+    public BlockBehaviour.OffsetType getOffsetType() {
+        return BlockBehaviour.OffsetType.XZ;
     }
 
     @Override
@@ -103,11 +104,19 @@ implements BonemealableBlock {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        int i;
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.destroyBlock(blockPos, true);
-            return;
         }
+    }
+
+    @Override
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return blockState.getValue(STAGE) == 0;
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        int i;
         if (blockState.getValue(STAGE) != 0) {
             return;
         }

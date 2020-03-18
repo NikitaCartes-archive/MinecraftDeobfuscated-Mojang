@@ -15,6 +15,7 @@ import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -30,7 +31,7 @@ extends Block {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     public static final IntegerProperty NOTE = BlockStateProperties.NOTE;
 
-    public NoteBlock(Block.Properties properties) {
+    public NoteBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(INSTRUMENT, NoteBlockInstrument.HARP)).setValue(NOTE, 0)).setValue(POWERED, false));
     }

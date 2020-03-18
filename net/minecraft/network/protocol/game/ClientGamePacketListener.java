@@ -68,6 +68,7 @@ import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
@@ -79,7 +80,6 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
-import net.minecraft.network.protocol.game.ClientboundSetSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
@@ -205,7 +205,7 @@ extends PacketListener {
 
     public void handleSetScore(ClientboundSetScorePacket var1);
 
-    public void handleSetSpawn(ClientboundSetSpawnPositionPacket var1);
+    public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket var1);
 
     public void handleSetTime(ClientboundSetTimePacket var1);
 

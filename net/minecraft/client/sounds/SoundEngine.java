@@ -176,9 +176,12 @@ public class SoundEngine {
 
     private void tickNonPaused() {
         ++this.tickCount;
-        this.queuedTickableSounds.forEach(this::play);
+        this.queuedTickableSounds.stream().filter(SoundInstance::canPlaySound).forEach(this::play);
         this.queuedTickableSounds.clear();
         for (TickableSoundInstance tickableSoundInstance : this.tickingSounds) {
+            if (!tickableSoundInstance.canPlaySound()) {
+                this.stop(tickableSoundInstance);
+            }
             tickableSoundInstance.tick();
             if (tickableSoundInstance.isStopped()) {
                 this.stop(tickableSoundInstance);
@@ -259,6 +262,9 @@ public class SoundEngine {
 
     public void play(SoundInstance soundInstance) {
         if (!this.loaded) {
+            return;
+        }
+        if (!soundInstance.canPlaySound()) {
             return;
         }
         WeighedSoundEvents weighedSoundEvents = soundInstance.resolve(this.soundManager);

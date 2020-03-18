@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -37,7 +38,7 @@ extends Block
 implements BucketPickup {
     public static final BooleanProperty DRAG_DOWN = BlockStateProperties.DRAG;
 
-    public BubbleColumnBlock(Block.Properties properties) {
+    public BubbleColumnBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(DRAG_DOWN, true));
     }
@@ -95,11 +96,6 @@ implements BucketPickup {
     }
 
     @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 5;
-    }
-
-    @Override
     @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
         double d = blockPos.getX();
@@ -127,7 +123,7 @@ implements BucketPickup {
         if (direction == Direction.DOWN) {
             levelAccessor.setBlock(blockPos, (BlockState)Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, BubbleColumnBlock.getDrag(levelAccessor, blockPos2)), 2);
         } else if (direction == Direction.UP && blockState2.getBlock() != Blocks.BUBBLE_COLUMN && BubbleColumnBlock.canExistIn(levelAccessor, blockPos2)) {
-            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(levelAccessor));
+            levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 5);
         }
         levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

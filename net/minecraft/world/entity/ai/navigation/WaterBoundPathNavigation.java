@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.navigation;
 
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
@@ -81,7 +82,7 @@ extends PathNavigation {
             g = (float)((double)g * (vec32.length() * 6.0));
         }
         int i = 6;
-        Vec3 vec33 = this.path.currentPos();
+        Vec3 vec33 = Vec3.atCenterOf(this.path.currentPos());
         if (Math.abs(this.mob.getX() - (vec33.x + 0.5)) < (double)g && Math.abs(this.mob.getZ() - (vec33.z + 0.5)) < (double)g && Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0f)) {
             this.path.next();
         }
@@ -104,16 +105,16 @@ extends PathNavigation {
             this.lastStuckCheckPos = vec3;
         }
         if (this.path != null && !this.path.isDone()) {
-            Vec3 vec32 = this.path.currentPos();
-            if (vec32.equals(this.timeoutCachedNode)) {
+            Vec3i vec3i = this.path.currentPos();
+            if (vec3i.equals(this.timeoutCachedNode)) {
                 this.timeoutTimer += Util.getMillis() - this.lastTimeoutCheck;
             } else {
-                this.timeoutCachedNode = vec32;
-                double d = vec3.distanceTo(this.timeoutCachedNode);
+                this.timeoutCachedNode = vec3i;
+                double d = vec3.distanceTo(Vec3.atCenterOf(this.timeoutCachedNode));
                 double d2 = this.timeoutLimit = this.mob.getSpeed() > 0.0f ? d / (double)this.mob.getSpeed() * 100.0 : 0.0;
             }
             if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 2.0) {
-                this.timeoutCachedNode = Vec3.ZERO;
+                this.timeoutCachedNode = Vec3i.ZERO;
                 this.timeoutTimer = 0L;
                 this.timeoutLimit = 0.0;
                 this.stop();

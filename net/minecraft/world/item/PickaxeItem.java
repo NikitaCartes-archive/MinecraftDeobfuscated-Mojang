@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,17 +26,17 @@ extends DiggerItem {
     public boolean canDestroySpecial(BlockState blockState) {
         Block block = blockState.getBlock();
         int i = this.getTier().getLevel();
-        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN || block == Blocks.NETHERITE_BLOCK || block == Blocks.ANCIENT_DEBRIS) {
+        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN || block == Blocks.NETHERITE_BLOCK || block == Blocks.RESPAWN_ANCHOR || block == Blocks.ANCIENT_DEBRIS) {
             return i >= 3;
         }
-        if (block == Blocks.DIAMOND_BLOCK || block == Blocks.DIAMOND_ORE || block == Blocks.EMERALD_ORE || block == Blocks.EMERALD_BLOCK || block == Blocks.GOLD_BLOCK || block.is(BlockTags.GOLD_ORES) || block == Blocks.REDSTONE_ORE) {
+        if (block == Blocks.DIAMOND_BLOCK || block == Blocks.DIAMOND_ORE || block == Blocks.EMERALD_ORE || block == Blocks.EMERALD_BLOCK || block == Blocks.GOLD_BLOCK || block == Blocks.GOLD_ORE || block == Blocks.REDSTONE_ORE) {
             return i >= 2;
         }
         if (block == Blocks.IRON_BLOCK || block == Blocks.IRON_ORE || block == Blocks.LAPIS_BLOCK || block == Blocks.LAPIS_ORE) {
             return i >= 1;
         }
         Material material = blockState.getMaterial();
-        return material == Material.STONE || material == Material.METAL || material == Material.HEAVY_METAL;
+        return material == Material.STONE || material == Material.METAL || material == Material.HEAVY_METAL || block == Blocks.NETHER_GOLD_ORE;
     }
 
     @Override

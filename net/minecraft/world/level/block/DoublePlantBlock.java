@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -30,7 +31,7 @@ public class DoublePlantBlock
 extends BushBlock {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
 
-    public DoublePlantBlock(Block.Properties properties) {
+    public DoublePlantBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(HALF, DoubleBlockHalf.LOWER));
     }
@@ -103,8 +104,8 @@ extends BushBlock {
     }
 
     @Override
-    public Block.OffsetType getOffsetType() {
-        return Block.OffsetType.XZ;
+    public BlockBehaviour.OffsetType getOffsetType() {
+        return BlockBehaviour.OffsetType.XZ;
     }
 
     @Override

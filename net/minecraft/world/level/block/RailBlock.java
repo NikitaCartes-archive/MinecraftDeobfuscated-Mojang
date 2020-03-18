@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RailState;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -21,7 +22,7 @@ public class RailBlock
 extends BaseRailBlock {
     public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE;
 
-    protected RailBlock(Block.Properties properties) {
+    protected RailBlock(BlockBehaviour.Properties properties) {
         super(false, properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(SHAPE, RailShape.NORTH_SOUTH));
     }

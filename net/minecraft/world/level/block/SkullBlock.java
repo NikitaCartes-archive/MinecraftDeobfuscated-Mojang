@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,7 +25,7 @@ extends AbstractSkullBlock {
     public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
     protected static final VoxelShape SHAPE = Block.box(4.0, 0.0, 4.0, 12.0, 8.0, 12.0);
 
-    protected SkullBlock(Type type, Block.Properties properties) {
+    protected SkullBlock(Type type, BlockBehaviour.Properties properties) {
         super(type, properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(ROTATION, 0));
     }

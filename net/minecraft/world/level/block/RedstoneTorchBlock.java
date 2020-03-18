@@ -16,9 +16,9 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,14 +29,9 @@ extends TorchBlock {
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     private static final Map<BlockGetter, List<Toggle>> RECENT_TOGGLES = new WeakHashMap<BlockGetter, List<Toggle>>();
 
-    protected RedstoneTorchBlock(Block.Properties properties) {
+    protected RedstoneTorchBlock(BlockBehaviour.Properties properties) {
         super(properties, DustParticleOptions.REDSTONE);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LIT, true));
-    }
-
-    @Override
-    public int getTickDelay(LevelReader levelReader) {
-        return 2;
     }
 
     @Override
@@ -70,31 +65,28 @@ extends TorchBlock {
 
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        RedstoneTorchBlock.handleTick(blockState, serverLevel, blockPos, random, this.hasNeighborSignal(serverLevel, blockPos, blockState));
-    }
-
-    public static void handleTick(BlockState blockState, Level level, BlockPos blockPos, Random random, boolean bl) {
-        List<Toggle> list = RECENT_TOGGLES.get(level);
-        while (list != null && !list.isEmpty() && level.getGameTime() - list.get(0).when > 60L) {
+        boolean bl = this.hasNeighborSignal(serverLevel, blockPos, blockState);
+        List<Toggle> list = RECENT_TOGGLES.get(serverLevel);
+        while (list != null && !list.isEmpty() && serverLevel.getGameTime() - list.get(0).when > 60L) {
             list.remove(0);
         }
         if (blockState.getValue(LIT).booleanValue()) {
             if (bl) {
-                level.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
-                if (RedstoneTorchBlock.isToggledTooFrequently(level, blockPos, true)) {
-                    level.levelEvent(1502, blockPos, 0);
-                    level.getBlockTicks().scheduleTick(blockPos, level.getBlockState(blockPos).getBlock(), 160);
+                serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(LIT, false), 3);
+                if (RedstoneTorchBlock.isToggledTooFrequently(serverLevel, blockPos, true)) {
+                    serverLevel.levelEvent(1502, blockPos, 0);
+                    serverLevel.getBlockTicks().scheduleTick(blockPos, serverLevel.getBlockState(blockPos).getBlock(), 160);
                 }
             }
-        } else if (!bl && !RedstoneTorchBlock.isToggledTooFrequently(level, blockPos, false)) {
-            level.setBlock(blockPos, (BlockState)blockState.setValue(LIT, true), 3);
+        } else if (!bl && !RedstoneTorchBlock.isToggledTooFrequently(serverLevel, blockPos, false)) {
+            serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(LIT, true), 3);
         }
     }
 
     @Override
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
         if (blockState.getValue(LIT).booleanValue() == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
-            level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+            level.getBlockTicks().scheduleTick(blockPos, this, 2);
         }
     }
 
@@ -121,11 +113,6 @@ extends TorchBlock {
         double e = (double)blockPos.getY() + 0.7 + (random.nextDouble() - 0.5) * 0.2;
         double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
         level.addParticle(this.flameParticle, d, e, f, 0.0, 0.0, 0.0);
-    }
-
-    @Override
-    public int getLightEmission(BlockState blockState) {
-        return blockState.getValue(LIT) != false ? super.getLightEmission(blockState) : 0;
     }
 
     @Override

@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.ShearableDoublePlantBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
@@ -33,7 +34,7 @@ implements LiquidBlockContainer {
     public static final EnumProperty<DoubleBlockHalf> HALF = ShearableDoublePlantBlock.HALF;
     protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 
-    public TallSeagrass(Block.Properties properties) {
+    public TallSeagrass(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

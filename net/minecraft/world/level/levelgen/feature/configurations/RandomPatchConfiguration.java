@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacer;
 import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacerType;
@@ -58,7 +59,7 @@ implements FeatureConfiguration {
     public static <T> RandomPatchConfiguration deserialize(Dynamic<T> dynamic) {
         BlockStateProviderType<T> blockStateProviderType = Registry.BLOCKSTATE_PROVIDER_TYPES.get(new ResourceLocation(dynamic.get("state_provider").get("type").asString().orElseThrow(RuntimeException::new)));
         BlockPlacerType<T> blockPlacerType = Registry.BLOCK_PLACER_TYPES.get(new ResourceLocation(dynamic.get("block_placer").get("type").asString().orElseThrow(RuntimeException::new)));
-        return new RandomPatchConfiguration((BlockStateProvider)blockStateProviderType.deserialize(dynamic.get("state_provider").orElseEmptyMap()), (BlockPlacer)blockPlacerType.deserialize(dynamic.get("block_placer").orElseEmptyMap()), dynamic.get("whitelist").asList(BlockState::deserialize).stream().map(BlockState::getBlock).collect(Collectors.toSet()), (Set<BlockState>)Sets.newHashSet(dynamic.get("blacklist").asList(BlockState::deserialize)), dynamic.get("tries").asInt(128), dynamic.get("xspread").asInt(7), dynamic.get("yspread").asInt(3), dynamic.get("zspread").asInt(7), dynamic.get("can_replace").asBoolean(false), dynamic.get("project").asBoolean(true), dynamic.get("need_water").asBoolean(false));
+        return new RandomPatchConfiguration((BlockStateProvider)blockStateProviderType.deserialize(dynamic.get("state_provider").orElseEmptyMap()), (BlockPlacer)blockPlacerType.deserialize(dynamic.get("block_placer").orElseEmptyMap()), dynamic.get("whitelist").asList(BlockState::deserialize).stream().map(BlockBehaviour.BlockStateBase::getBlock).collect(Collectors.toSet()), (Set<BlockState>)Sets.newHashSet(dynamic.get("blacklist").asList(BlockState::deserialize)), dynamic.get("tries").asInt(128), dynamic.get("xspread").asInt(7), dynamic.get("yspread").asInt(3), dynamic.get("zspread").asInt(7), dynamic.get("can_replace").asBoolean(false), dynamic.get("project").asBoolean(true), dynamic.get("need_water").asBoolean(false));
     }
 
     public static class GrassConfigurationBuilder {

@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.material.Material;
 
 public class SpongeBlock
 extends Block {
-    protected SpongeBlock(Block.Properties properties) {
+    protected SpongeBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

@@ -20,7 +20,7 @@ public class StrollToPoiList
 extends Behavior<Villager> {
     private final MemoryModuleType<List<GlobalPos>> strollToMemoryType;
     private final MemoryModuleType<GlobalPos> mustBeCloseToMemoryType;
-    private final float speed;
+    private final float speedModifier;
     private final int closeEnoughDist;
     private final int maxDistanceFromPoi;
     private long nextOkStartTime;
@@ -30,7 +30,7 @@ extends Behavior<Villager> {
     public StrollToPoiList(MemoryModuleType<List<GlobalPos>> memoryModuleType, float f, int i, int j, MemoryModuleType<GlobalPos> memoryModuleType2) {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, memoryModuleType, MemoryStatus.VALUE_PRESENT, memoryModuleType2, MemoryStatus.VALUE_PRESENT));
         this.strollToMemoryType = memoryModuleType;
-        this.speed = f;
+        this.speedModifier = f;
         this.closeEnoughDist = i;
         this.maxDistanceFromPoi = j;
         this.mustBeCloseToMemoryType = memoryModuleType2;
@@ -51,7 +51,7 @@ extends Behavior<Villager> {
     @Override
     protected void start(ServerLevel serverLevel, Villager villager, long l) {
         if (l > this.nextOkStartTime && this.targetPos != null) {
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speed, this.closeEnoughDist));
+            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speedModifier, this.closeEnoughDist));
             this.nextOkStartTime = l + 100L;
         }
     }

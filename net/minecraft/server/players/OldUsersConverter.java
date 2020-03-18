@@ -38,6 +38,7 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class OldUsersConverter {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -240,16 +241,21 @@ public class OldUsersConverter {
         return true;
     }
 
-    public static String convertMobOwnerIfNecessary(final MinecraftServer minecraftServer, String string) {
+    @Nullable
+    public static UUID convertMobOwnerIfNecessary(final MinecraftServer minecraftServer, String string) {
         if (StringUtil.isNullOrEmpty(string) || string.length() > 16) {
-            return string;
+            try {
+                return UUID.fromString(string);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                return null;
+            }
         }
         GameProfile gameProfile = minecraftServer.getProfileCache().get(string);
         if (gameProfile != null && gameProfile.getId() != null) {
-            return gameProfile.getId().toString();
+            return gameProfile.getId();
         }
         if (minecraftServer.isSingleplayer() || !minecraftServer.usesAuthentication()) {
-            return Player.createPlayerUUID(new GameProfile(null, string)).toString();
+            return Player.createPlayerUUID(new GameProfile(null, string));
         }
         final ArrayList list = Lists.newArrayList();
         ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback(){
@@ -267,9 +273,9 @@ public class OldUsersConverter {
         };
         OldUsersConverter.lookupPlayers(minecraftServer, Lists.newArrayList(string), profileLookupCallback);
         if (!list.isEmpty() && ((GameProfile)list.get(0)).getId() != null) {
-            return ((GameProfile)list.get(0)).getId().toString();
+            return ((GameProfile)list.get(0)).getId();
         }
-        return "";
+        return null;
     }
 
     public static boolean convertPlayers(final DedicatedServer dedicatedServer) {

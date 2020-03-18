@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -55,7 +56,7 @@ extends BaseEntityBlock {
     public static final VoxelShape SHAPE_EAST = Shapes.or(Block.box(15.0, 10.0, 0.0, 10.666667, 14.0, 16.0), Block.box(10.666667, 12.0, 0.0, 6.333333, 16.0, 16.0), Block.box(6.333333, 14.0, 0.0, 2.0, 18.0, 16.0), SHAPE_COMMON);
     public static final VoxelShape SHAPE_SOUTH = Shapes.or(Block.box(0.0, 10.0, 15.0, 16.0, 14.0, 10.666667), Block.box(0.0, 12.0, 10.666667, 16.0, 16.0, 6.333333), Block.box(0.0, 14.0, 6.333333, 16.0, 18.0, 2.0), SHAPE_COMMON);
 
-    protected LecternBlock(Block.Properties properties) {
+    protected LecternBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH)).setValue(POWERED, false)).setValue(HAS_BOOK, false));
     }

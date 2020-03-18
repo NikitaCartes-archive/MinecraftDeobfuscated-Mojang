@@ -24,24 +24,28 @@ extends Feature<BlockPileConfiguration> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration) {
+        return NetherForestVegetationFeature.place(levelAccessor, random, blockPos, blockPileConfiguration, 8, 4);
+    }
+
+    public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration, int i, int j) {
         Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
         while (!block.is(BlockTags.NYLIUM) && blockPos.getY() > 0) {
             blockPos = blockPos.below();
             block = levelAccessor.getBlockState(blockPos).getBlock();
         }
-        int i = blockPos.getY();
-        if (i < 1 || i + 1 >= 256) {
+        int k = blockPos.getY();
+        if (k < 1 || k + 1 >= 256) {
             return false;
         }
-        int j = 0;
-        for (int k = 0; k < 64; ++k) {
-            BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
+        int l = 0;
+        for (int m = 0; m < i * i; ++m) {
+            BlockPos blockPos2 = blockPos.offset(random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
             BlockState blockState = blockPileConfiguration.stateProvider.getState(random, blockPos2);
             if (!levelAccessor.isEmptyBlock(blockPos2) || blockPos2.getY() <= 0 || !blockState.canSurvive(levelAccessor, blockPos2)) continue;
             levelAccessor.setBlock(blockPos2, blockState, 2);
-            ++j;
+            ++l;
         }
-        return j > 0;
+        return l > 0;
     }
 }
 

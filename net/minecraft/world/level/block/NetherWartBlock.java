@@ -14,6 +14,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,7 +27,7 @@ extends BushBlock {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
     private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[]{Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 11.0, 16.0), Block.box(0.0, 0.0, 0.0, 16.0, 14.0, 16.0)};
 
-    protected NetherWartBlock(Block.Properties properties) {
+    protected NetherWartBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
     }
@@ -42,13 +43,17 @@ extends BushBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public boolean isRandomlyTicking(BlockState blockState) {
+        return blockState.getValue(AGE) < 3;
+    }
+
+    @Override
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         int i = blockState.getValue(AGE);
         if (i < 3 && random.nextInt(10) == 0) {
             blockState = (BlockState)blockState.setValue(AGE, i + 1);
             serverLevel.setBlock(blockPos, blockState, 2);
         }
-        super.tick(blockState, serverLevel, blockPos, random);
     }
 
     @Override

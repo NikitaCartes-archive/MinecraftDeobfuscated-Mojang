@@ -6,18 +6,16 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
@@ -25,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class IceBlock
 extends HalfTransparentBlock {
-    public IceBlock(Block.Properties properties) {
+    public IceBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 
@@ -45,7 +43,7 @@ extends HalfTransparentBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+    public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.getBrightness(LightLayer.BLOCK, blockPos) > 11 - blockState.getLightBlock(serverLevel, blockPos)) {
             this.melt(blockState, serverLevel, blockPos);
         }
@@ -63,11 +61,6 @@ extends HalfTransparentBlock {
     @Override
     public PushReaction getPistonPushReaction(BlockState blockState) {
         return PushReaction.NORMAL;
-    }
-
-    @Override
-    public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-        return entityType == EntityType.POLAR_BEAR;
     }
 }
 

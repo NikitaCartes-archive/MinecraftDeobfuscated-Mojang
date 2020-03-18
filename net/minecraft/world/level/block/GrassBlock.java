@@ -9,10 +9,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatur
 public class GrassBlock
 extends SpreadingSnowyDirtBlock
 implements BonemealableBlock {
-    public GrassBlock(Block.Properties properties) {
+    public GrassBlock(BlockBehaviour.Properties properties) {
         super(properties);
     }
 

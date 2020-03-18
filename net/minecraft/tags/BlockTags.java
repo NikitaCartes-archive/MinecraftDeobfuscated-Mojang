@@ -82,6 +82,7 @@ public class BlockTags {
     public static final Tag<Block> CLIMBABLE;
     public static final Tag<Block> SHULKER_BOXES;
     public static final Tag<Block> HOGLIN_REPELLENTS;
+    public static final Tag<Block> SOUL_FIRE_BASE_BLOCKS;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -166,6 +167,7 @@ public class BlockTags {
         CLIMBABLE = BlockTags.bind("climbable");
         SHULKER_BOXES = BlockTags.bind("shulker_boxes");
         HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
+        SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");
     }
 
     static class Wrapper

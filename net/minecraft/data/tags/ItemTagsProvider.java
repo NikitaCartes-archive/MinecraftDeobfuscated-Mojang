@@ -66,7 +66,6 @@ extends TagsProvider<Item> {
         this.copy(BlockTags.FENCES, ItemTags.FENCES);
         this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
         this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
-        this.copy(BlockTags.PIGLIN_REPELLENTS, ItemTags.PIGLIN_REPELLENTS);
         this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
         this.tag(ItemTags.BANNERS).add((Item[])new Item[]{Items.WHITE_BANNER, Items.ORANGE_BANNER, Items.MAGENTA_BANNER, Items.LIGHT_BLUE_BANNER, Items.YELLOW_BANNER, Items.LIME_BANNER, Items.PINK_BANNER, Items.GRAY_BANNER, Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER, Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER});
         this.tag(ItemTags.BOATS).add((Item[])new Item[]{Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT});
@@ -77,6 +76,7 @@ extends TagsProvider<Item> {
         this.tag(ItemTags.ARROWS).add((Item[])new Item[]{Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW});
         this.tag(ItemTags.LECTERN_BOOKS).add((Item[])new Item[]{Items.WRITTEN_BOOK, Items.WRITABLE_BOOK});
         this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add((Item[])new Item[]{Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT});
+        this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_FIRE_TORCH).add(Items.SOUL_FIRE_LANTERN);
     }
 
     protected void copy(Tag<Block> tag, Tag<Item> tag2) {

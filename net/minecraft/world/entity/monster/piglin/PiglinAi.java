@@ -87,7 +87,7 @@ public class PiglinAi {
     private static final IntRange RIDE_DURATION = TimeUtil.rangeOfSeconds(10, 30);
     private static final IntRange RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
     private static final Set FOOD_ITEMS = ImmutableSet.of(Items.PORKCHOP, Items.COOKED_PORKCHOP);
-    private static final Set<Item> LOVED_ITEMS_IN_ADDITION_TO_GOLD_TIER_AND_GOLD_MATERIAL = ImmutableSet.of(Items.GOLD_INGOT, Items.GOLDEN_APPLE, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_CARROT, Items.GOLD_BLOCK, Items.GOLD_ORE, new Item[]{Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HORSE_ARMOR, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.BELL, Items.GLISTERING_MELON_SLICE, Items.CLOCK});
+    private static final Set<Item> LOVED_ITEMS_IN_ADDITION_TO_GOLD_TIER_AND_GOLD_MATERIAL = ImmutableSet.of(Items.GOLD_INGOT, Items.GOLDEN_APPLE, Items.GOLDEN_HORSE_ARMOR, Items.GOLDEN_CARROT, Items.GOLD_BLOCK, Items.GOLD_ORE, new Item[]{Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_HORSE_ARMOR, Items.LIGHT_WEIGHTED_PRESSURE_PLATE, Items.BELL, Items.GLISTERING_MELON_SLICE, Items.CLOCK, Items.NETHER_GOLD_ORE});
 
     protected static Brain<?> makeBrain(Piglin piglin, Dynamic<?> dynamic) {
         Brain<Piglin> brain = new Brain<Piglin>(Piglin.MEMORY_TYPES, Piglin.SENSOR_TYPES, dynamic);
@@ -114,52 +114,47 @@ public class PiglinAi {
     }
 
     private static void initIdleActivity(Piglin piglin, Brain<Piglin> brain) {
-        float f = piglin.getMovementSpeed();
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new StartHuntingHoglin(), PiglinAi.avoidZombifiedPiglin(f), PiglinAi.avoidRepellent(f), PiglinAi.babySometimesRideBabyHoglin(), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(f), new SetLookAndInteract(EntityType.PLAYER, 4)));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new StartHuntingHoglin(), PiglinAi.avoidZombifiedPiglin(), PiglinAi.avoidRepellent(), PiglinAi.babySometimesRideBabyHoglin(), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(), new SetLookAndInteract(EntityType.PLAYER, 4)));
     }
 
     private static void initFightActivity(Piglin piglin, Brain<Piglin> brain) {
-        float f = piglin.getMovementSpeed();
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new StopAttackingIfTargetInvalid(livingEntity -> !PiglinAi.isNearestValidAttackTarget(piglin, livingEntity)), new RunIf<Piglin>(PiglinAi::hasCrossbow, new BackUpIfTooClose(5, 0.75f)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(f * 1.2f), new MeleeAttack(20), new CrossbowAttack(), new RememberIfHoglinWasKilled()), MemoryModuleType.ATTACK_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new StopAttackingIfTargetInvalid(livingEntity -> !PiglinAi.isNearestValidAttackTarget(piglin, livingEntity)), new RunIf<Piglin>(PiglinAi::hasCrossbow, new BackUpIfTooClose(5, 0.75f)), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0f), new MeleeAttack(20), new CrossbowAttack(), new RememberIfHoglinWasKilled()), MemoryModuleType.ATTACK_TARGET);
     }
 
     private static void initCelebrateActivity(Piglin piglin, Brain<Piglin> brain) {
-        float f = piglin.getMovementSpeed();
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 10, ImmutableList.of(PiglinAi.avoidZombifiedPiglin(f), PiglinAi.avoidRepellent(f), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new GoToCelebrateLocation(2), new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new RandomStroll(f, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1)))), MemoryModuleType.CELEBRATE_LOCATION);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 10, ImmutableList.of(PiglinAi.avoidZombifiedPiglin(), PiglinAi.avoidRepellent(), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new GoToCelebrateLocation(2, 1.0f), new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new RandomStroll(0.6f, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1)))), MemoryModuleType.CELEBRATE_LOCATION);
     }
 
     private static void initAdmireItemActivity(Piglin piglin, Brain<Piglin> brain) {
-        float f = piglin.getMovementSpeed();
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ADMIRE_ITEM, 10, ImmutableList.of(new GoToWantedItem<Piglin>(PiglinAi::isNotHoldingLovedItemInOffHand, 9, true), new RunIf<Piglin>(PiglinAi::isHoldingItemInOffHand, PiglinAi.admireHeldItem(f)), new StopAdmiringIfItemTooFarAway(9)), MemoryModuleType.ADMIRING_ITEM);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ADMIRE_ITEM, 10, ImmutableList.of(new GoToWantedItem<Piglin>(PiglinAi::isNotHoldingLovedItemInOffHand, 1.0f, true, 9), new RunIf<Piglin>(PiglinAi::isHoldingItemInOffHand, PiglinAi.admireHeldItem()), new StopAdmiringIfItemTooFarAway(9)), MemoryModuleType.ADMIRING_ITEM);
     }
 
     private static void initRetreatActivity(Piglin piglin, Brain<Piglin> brain) {
-        float f = piglin.getMovementSpeed() * 1.3f;
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, f, 6, false), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(piglin.getMovementSpeed()), new EraseMemoryIf<Piglin>(PiglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.1f, 6, false), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(), new EraseMemoryIf<Piglin>(PiglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
     }
 
     private static void initRideHoglinActivity(Piglin piglin, Brain<Piglin> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.RIDE, 10, ImmutableList.of(new Mount(), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 8.0f), new RunIf<Piglin>(Entity::isPassenger, PiglinAi.createIdleLookBehaviors()), new DismountOrSkipMounting(8, PiglinAi::wantsToStopRiding)), MemoryModuleType.RIDE_TARGET);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.RIDE, 10, ImmutableList.of(new Mount(0.8f), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 8.0f), new RunIf<Piglin>(Entity::isPassenger, PiglinAi.createIdleLookBehaviors()), new DismountOrSkipMounting(8, PiglinAi::wantsToStopRiding)), MemoryModuleType.RIDE_TARGET);
     }
 
     private static RunOne<Piglin> createIdleLookBehaviors() {
         return new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PLAYER, 8.0f), 1), Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new SetEntityLookTarget(8.0f), 1), Pair.of(new DoNothing(30, 60), 1)));
     }
 
-    private static RunOne<Piglin> createIdleMovementBehaviors(float f) {
-        return new RunOne(ImmutableList.of(Pair.of(new RandomStroll(f), 2), Pair.of(InteractWith.of(EntityType.PIGLIN, 8, MemoryModuleType.INTERACTION_TARGET, f, 2), 2), Pair.of(new RunIf<LivingEntity>(PiglinAi::doesntSeeAnyPlayerHoldingLovedItem, new SetWalkTargetFromLookTarget(f, 3)), 2), Pair.of(new DoNothing(30, 60), 1)));
+    private static RunOne<Piglin> createIdleMovementBehaviors() {
+        return new RunOne(ImmutableList.of(Pair.of(new RandomStroll(0.6f), 2), Pair.of(InteractWith.of(EntityType.PIGLIN, 8, MemoryModuleType.INTERACTION_TARGET, 0.6f, 2), 2), Pair.of(new RunIf<LivingEntity>(PiglinAi::doesntSeeAnyPlayerHoldingLovedItem, new SetWalkTargetFromLookTarget(0.6f, 3)), 2), Pair.of(new DoNothing(30, 60), 1)));
     }
 
-    private static Behavior<Piglin> admireHeldItem(float f) {
-        return new RunSometimes<PathfinderMob>(new RandomStroll(f * 0.5f, 1, 0), RANDOM_STROLL_INTERVAL_WHEN_ADMIRING);
+    private static Behavior<Piglin> admireHeldItem() {
+        return new RunSometimes<PathfinderMob>(new RandomStroll(0.3f, 1, 0), RANDOM_STROLL_INTERVAL_WHEN_ADMIRING);
     }
 
-    private static SetWalkTargetAwayFrom<BlockPos> avoidRepellent(float f) {
-        return SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, f * 1.5f, 8, false);
+    private static SetWalkTargetAwayFrom<BlockPos> avoidRepellent() {
+        return SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, 1.1f, 8, false);
     }
 
-    private static SetWalkTargetAwayFrom<?> avoidZombifiedPiglin(float f) {
-        return SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN, f * 1.5f, 10, false);
+    private static SetWalkTargetAwayFrom<?> avoidZombifiedPiglin() {
+        return SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN, 1.1f, 10, false);
     }
 
     protected static void updateActivity(Piglin piglin) {
