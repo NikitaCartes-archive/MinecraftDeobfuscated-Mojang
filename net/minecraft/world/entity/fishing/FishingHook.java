@@ -5,6 +5,7 @@ package net.minecraft.world.entity.fishing;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -50,7 +51,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class FishingHook
 extends Entity {
+    private final Random syncronizedRandom = new Random();
+    private boolean biting;
+    private int outOfWaterTime;
     private static final EntityDataAccessor<Integer> DATA_HOOKED_ENTITY = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_BITING = SynchedEntityData.defineId(FishingHook.class, EntityDataSerializers.BOOLEAN);
     private int life;
     private final Player owner;
     private int flightTime;
@@ -107,13 +112,20 @@ extends Entity {
     @Override
     protected void defineSynchedData() {
         this.getEntityData().define(DATA_HOOKED_ENTITY, 0);
+        this.getEntityData().define(DATA_BITING, false);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
         if (DATA_HOOKED_ENTITY.equals(entityDataAccessor)) {
             int i = this.getEntityData().get(DATA_HOOKED_ENTITY);
-            this.hookedIn = i > 0 ? this.level.getEntity(i - 1) : null;
+            Entity entity = this.hookedIn = i > 0 ? this.level.getEntity(i - 1) : null;
+        }
+        if (DATA_BITING.equals(entityDataAccessor)) {
+            this.biting = this.getEntityData().get(DATA_BITING);
+            if (this.biting) {
+                this.setDeltaMovement(this.getDeltaMovement().x, -0.4f * Mth.nextFloat(this.syncronizedRandom, 0.6f, 1.0f), this.getDeltaMovement().z);
+            }
         }
         super.onSyncedDataUpdated(entityDataAccessor);
     }
@@ -132,6 +144,8 @@ extends Entity {
 
     @Override
     public void tick() {
+        boolean bl;
+        this.syncronizedRandom.setSeed(this.getUUID().getLeastSignificantBits() ^ this.level.getGameTime());
         super.tick();
         if (this.owner == null) {
             this.remove();
@@ -146,6 +160,8 @@ extends Entity {
                 this.remove();
                 return;
             }
+        } else {
+            this.life = 0;
         }
         float f = 0.0f;
         BlockPos blockPos = this.blockPosition();
@@ -153,13 +169,14 @@ extends Entity {
         if (fluidState.is(FluidTags.WATER)) {
             f = fluidState.getHeight(this.level, blockPos);
         }
+        boolean bl2 = bl = f > 0.0f;
         if (this.currentState == FishHookState.FLYING) {
             if (this.hookedIn != null) {
                 this.setDeltaMovement(Vec3.ZERO);
                 this.currentState = FishHookState.HOOKED_IN_ENTITY;
                 return;
             }
-            if (f > 0.0f) {
+            if (bl) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.3, 0.2, 0.3));
                 this.currentState = FishHookState.BOBBING;
                 return;
@@ -184,9 +201,17 @@ extends Entity {
                     d += Math.signum(d) * 0.1;
                 }
                 this.setDeltaMovement(vec3.x * 0.9, vec3.y - d * (double)this.random.nextFloat() * 0.2, vec3.z * 0.9);
-                boolean bl = this.openWater = this.openWater && this.calculateOpenWater(blockPos);
-                if (!this.level.isClientSide && f > 0.0f) {
-                    this.catchingFish(blockPos);
+                this.openWater = this.nibble > 0 || this.timeUntilHooked > 0 ? this.openWater && this.outOfWaterTime < 10 && this.calculateOpenWater(blockPos) : true;
+                if (bl) {
+                    this.outOfWaterTime = Math.max(0, this.outOfWaterTime - 1);
+                    if (this.biting) {
+                        this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.1 * (double)this.syncronizedRandom.nextFloat() * (double)this.syncronizedRandom.nextFloat(), 0.0));
+                    }
+                    if (!this.level.isClientSide) {
+                        this.catchingFish(blockPos);
+                    }
+                } else {
+                    this.outOfWaterTime = Math.min(10, this.outOfWaterTime + 1);
                 }
             }
         }
@@ -243,7 +268,7 @@ extends Entity {
     }
 
     private void checkCollision() {
-        HitResult hitResult = ProjectileUtil.getHitResult(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entity -> !(entity.isSpectator() || !entity.isPickable() && !(entity instanceof ItemEntity) || entity == this.owner && this.flightTime < 5), ClipContext.Block.COLLIDER, true);
+        HitResult hitResult = ProjectileUtil.getHitResult(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), this::canBeHooked, ClipContext.Block.COLLIDER, true);
         if (hitResult.getType() != HitResult.Type.MISS) {
             if (hitResult.getType() == HitResult.Type.ENTITY) {
                 if (!this.level.isClientSide) {
@@ -254,6 +279,10 @@ extends Entity {
                 this.setDeltaMovement(this.getDeltaMovement().normalize().scale(hitResult.distanceTo(this)));
             }
         }
+    }
+
+    private boolean canBeHooked(Entity entity) {
+        return !(entity.isSpectator() || !entity.isPickable() && !(entity instanceof ItemEntity) || entity == this.owner && this.flightTime < 5);
     }
 
     private void setHookedEntity() {
@@ -275,8 +304,7 @@ extends Entity {
             if (this.nibble <= 0) {
                 this.timeUntilLured = 0;
                 this.timeUntilHooked = 0;
-            } else {
-                this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.2 * (double)this.random.nextFloat() * (double)this.random.nextFloat(), 0.0));
+                this.getEntityData().set(DATA_BITING, false);
             }
         } else if (this.timeUntilHooked > 0) {
             this.timeUntilHooked -= i;
@@ -299,13 +327,12 @@ extends Entity {
                     serverLevel.sendParticles(ParticleTypes.FISHING, d, e, j, 0, -l, 0.01, k, 1.0);
                 }
             } else {
-                Vec3 vec3 = this.getDeltaMovement();
-                this.setDeltaMovement(vec3.x, -0.4f * Mth.nextFloat(this.random, 0.6f, 1.0f), vec3.z);
                 this.playSound(SoundEvents.FISHING_BOBBER_SPLASH, 0.25f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
                 double m = this.getY() + 0.5;
                 serverLevel.sendParticles(ParticleTypes.BUBBLE, this.getX(), m, this.getZ(), (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
                 serverLevel.sendParticles(ParticleTypes.FISHING, this.getX(), m, this.getZ(), (int)(1.0f + this.getBbWidth() * 20.0f), this.getBbWidth(), 0.0, this.getBbWidth(), 0.2f);
                 this.nibble = Mth.nextInt(this.random, 20, 40);
+                this.getEntityData().set(DATA_BITING, true);
             }
         } else if (this.timeUntilLured > 0) {
             this.timeUntilLured -= i;
@@ -339,16 +366,41 @@ extends Entity {
     }
 
     private boolean calculateOpenWater(BlockPos blockPos) {
-        return BlockPos.betweenClosedStream(blockPos.offset(-2, -1, -2), blockPos.offset(2, 2, 2)).allMatch(this::validOpenWaterBlockAt);
+        OpenWaterType openWaterType = OpenWaterType.INVALID;
+        for (int i = -1; i <= 2; ++i) {
+            OpenWaterType openWaterType2 = this.getOpenWaterTypeForArea(blockPos.offset(-2, i, -2), blockPos.offset(2, i, 2));
+            switch (openWaterType2) {
+                case INVALID: {
+                    return false;
+                }
+                case ABOVE_WATER: {
+                    if (openWaterType != OpenWaterType.INVALID) break;
+                    return false;
+                }
+                case INSIDE_WATER: {
+                    if (openWaterType != OpenWaterType.ABOVE_WATER) break;
+                    return false;
+                }
+            }
+            openWaterType = openWaterType2;
+        }
+        return true;
     }
 
-    private boolean validOpenWaterBlockAt(BlockPos blockPos) {
+    private OpenWaterType getOpenWaterTypeForArea(BlockPos blockPos, BlockPos blockPos2) {
+        return BlockPos.betweenClosedStream(blockPos, blockPos2).map(this::getOpenWaterTypeForBlock).reduce((openWaterType, openWaterType2) -> openWaterType == openWaterType2 ? openWaterType : OpenWaterType.INVALID).orElse(OpenWaterType.INVALID);
+    }
+
+    private OpenWaterType getOpenWaterTypeForBlock(BlockPos blockPos) {
         BlockState blockState = this.level.getBlockState(blockPos);
-        if (blockState.isAir()) {
-            return true;
+        if (blockState.isAir() || blockState.getBlock() == Blocks.LILY_PAD) {
+            return OpenWaterType.ABOVE_WATER;
         }
         FluidState fluidState = blockState.getFluidState();
-        return fluidState.is(FluidTags.WATER) && fluidState.isSource() && blockState.getBlock() != Blocks.BUBBLE_COLUMN && blockState.getCollisionShape(this.level, blockPos).isEmpty();
+        if (fluidState.is(FluidTags.WATER) && fluidState.isSource() && blockState.getCollisionShape(this.level, blockPos).isEmpty()) {
+            return OpenWaterType.INSIDE_WATER;
+        }
+        return OpenWaterType.INVALID;
     }
 
     public boolean isOpenWaterFishing() {
@@ -443,6 +495,13 @@ extends Entity {
     public Packet<?> getAddEntityPacket() {
         Player entity = this.getOwner();
         return new ClientboundAddEntityPacket(this, entity == null ? this.getId() : entity.getId());
+    }
+
+    static enum OpenWaterType {
+        ABOVE_WATER,
+        INSIDE_WATER,
+        INVALID;
+
     }
 
     static enum FishHookState {

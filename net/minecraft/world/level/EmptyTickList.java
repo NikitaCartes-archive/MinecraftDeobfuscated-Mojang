@@ -3,10 +3,8 @@
  */
 package net.minecraft.world.level;
 
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.TickPriority;
 
 public class EmptyTickList<T>
@@ -33,10 +31,6 @@ implements TickList<T> {
     @Override
     public boolean willTickThisTick(BlockPos blockPos, T object) {
         return false;
-    }
-
-    @Override
-    public void addAll(Stream<TickNextTickData<T>> stream) {
     }
 }
 

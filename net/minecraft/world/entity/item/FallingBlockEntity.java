@@ -158,7 +158,7 @@ extends Entity {
                                         if ("x".equals(string) || "y".equals(string) || "z".equals(string)) continue;
                                         compoundTag.put(string, tag.copy());
                                     }
-                                    blockEntity.load(compoundTag);
+                                    blockEntity.load(this.blockState, compoundTag);
                                     blockEntity.setChanged();
                                 }
                             } else if (this.dropItem && this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {

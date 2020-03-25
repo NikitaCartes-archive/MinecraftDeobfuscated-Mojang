@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class CampfireBlockEntity
@@ -106,9 +107,9 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
+    public void load(BlockState blockState, CompoundTag compoundTag) {
         int[] is;
-        super.load(compoundTag);
+        super.load(blockState, compoundTag);
         this.items.clear();
         ContainerHelper.loadAllItems(compoundTag, this.items);
         if (compoundTag.contains("CookingTimes", 11)) {

@@ -47,7 +47,7 @@ extends Block
 implements WorldlyContainerHolder {
     public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_COMPOSTER;
     public static final Object2FloatMap<ItemLike> COMPOSTABLES = new Object2FloatOpenHashMap<ItemLike>();
-    public static final VoxelShape OUTER_SHAPE = Shapes.block();
+    private static final VoxelShape OUTER_SHAPE = Shapes.block();
     private static final VoxelShape[] SHAPES = Util.make(new VoxelShape[9], voxelShapes -> {
         for (int i = 0; i < 8; ++i) {
             voxelShapes[i] = Shapes.join(OUTER_SHAPE, Block.box(2.0, Math.max(2, 1 + i * 2), 2.0, 14.0, 16.0, 14.0), BooleanOp.ONLY_FIRST);
@@ -185,8 +185,8 @@ implements WorldlyContainerHolder {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (i < 8 && COMPOSTABLES.containsKey(itemStack.getItem())) {
             if (i < 7 && !level.isClientSide) {
-                boolean bl = ComposterBlock.addItem(blockState, level, blockPos, itemStack);
-                level.levelEvent(1500, blockPos, bl ? 1 : 0);
+                BlockState blockState2 = ComposterBlock.addItem(blockState, level, blockPos, itemStack);
+                level.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
                 if (!player.abilities.instabuild) {
                     itemStack.shrink(1);
                 }
@@ -194,38 +194,57 @@ implements WorldlyContainerHolder {
             return InteractionResult.SUCCESS;
         }
         if (i == 8) {
-            if (!level.isClientSide) {
-                float f = 0.7f;
-                double d = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-                double e = (double)(level.random.nextFloat() * 0.7f) + 0.06000000238418579 + 0.6;
-                double g = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
-                ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, new ItemStack(Items.BONE_MEAL));
-                itemEntity.setDefaultPickUpDelay();
-                level.addFreshEntity(itemEntity);
-            }
-            ComposterBlock.empty(blockState, level, blockPos);
-            level.playSound(null, blockPos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+            ComposterBlock.extractProduce(blockState, level, blockPos);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
-    private static void empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
-        levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(LEVEL, 0), 3);
+    public static BlockState insertItem(BlockState blockState, ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
+        int i = blockState.getValue(LEVEL);
+        if (i < 7 && COMPOSTABLES.containsKey(itemStack.getItem())) {
+            BlockState blockState2 = ComposterBlock.addItem(blockState, serverLevel, blockPos, itemStack);
+            itemStack.shrink(1);
+            serverLevel.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
+            return blockState2;
+        }
+        return blockState;
     }
 
-    private static boolean addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+    public static BlockState extractProduce(BlockState blockState, Level level, BlockPos blockPos) {
+        if (!level.isClientSide) {
+            float f = 0.7f;
+            double d = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
+            double e = (double)(level.random.nextFloat() * 0.7f) + 0.06000000238418579 + 0.6;
+            double g = (double)(level.random.nextFloat() * 0.7f) + (double)0.15f;
+            ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + g, new ItemStack(Items.BONE_MEAL));
+            itemEntity.setDefaultPickUpDelay();
+            level.addFreshEntity(itemEntity);
+        }
+        BlockState blockState2 = ComposterBlock.empty(blockState, level, blockPos);
+        level.playSound(null, blockPos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+        return blockState2;
+    }
+
+    private static BlockState empty(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
+        BlockState blockState2 = (BlockState)blockState.setValue(LEVEL, 0);
+        levelAccessor.setBlock(blockPos, blockState2, 3);
+        return blockState2;
+    }
+
+    private static BlockState addItem(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
         int i = blockState.getValue(LEVEL);
         float f = COMPOSTABLES.getFloat(itemStack.getItem());
         if (i == 0 && f > 0.0f || levelAccessor.getRandom().nextDouble() < (double)f) {
             int j = i + 1;
-            levelAccessor.setBlock(blockPos, (BlockState)blockState.setValue(LEVEL, j), 3);
+            BlockState blockState2 = (BlockState)blockState.setValue(LEVEL, j);
+            levelAccessor.setBlock(blockPos, blockState2, 3);
             if (j == 7) {
                 levelAccessor.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 20);
             }
-            return true;
+            return blockState2;
         }
-        return false;
+        return blockState;
     }
 
     @Override
@@ -316,7 +335,8 @@ implements WorldlyContainerHolder {
             ItemStack itemStack = this.getItem(0);
             if (!itemStack.isEmpty()) {
                 this.changed = true;
-                this.level.levelEvent(1500, this.pos, ComposterBlock.addItem(this.state, this.level, this.pos, itemStack) ? 1 : 0);
+                BlockState blockState = ComposterBlock.addItem(this.state, this.level, this.pos, itemStack);
+                this.level.levelEvent(1500, this.pos, blockState != this.state ? 1 : 0);
                 this.removeItemNoUpdate(0);
             }
         }

@@ -17,6 +17,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
 import net.minecraft.data.models.blockstates.BlockStateGenerator;
 import net.minecraft.data.models.blockstates.Condition;
 import net.minecraft.data.models.blockstates.MultiPartGenerator;
@@ -485,11 +486,6 @@ public class BlockModelGenerators {
 
     private PropertyDispatch createColumnWithFacing() {
         return PropertyDispatch.property(BlockStateProperties.FACING).select(Direction.DOWN, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)).select(Direction.UP, Variant.variant()).select(Direction.NORTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)).select(Direction.SOUTH, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)).select(Direction.WEST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)).select(Direction.EAST, Variant.variant().with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90));
-    }
-
-    private void createOrientableBlock(Block block, TexturedModel.Provider provider) {
-        ResourceLocation resourceLocation = provider.create(block, this.modelOutput);
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).with(this.createColumnWithFacing()));
     }
 
     private void createBarrel() {
@@ -1033,6 +1029,58 @@ public class BlockModelGenerators {
         this.delegateItemModel(Items.RESPAWN_ANCHOR, resourceLocations[0]);
     }
 
+    private Variant applyRotation(FrontAndTop frontAndTop, Variant variant) {
+        switch (frontAndTop) {
+            case DOWN_NORTH: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90);
+            }
+            case DOWN_SOUTH: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180);
+            }
+            case DOWN_WEST: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+            }
+            case DOWN_EAST: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90);
+            }
+            case UP_NORTH: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180);
+            }
+            case UP_SOUTH: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270);
+            }
+            case UP_WEST: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90);
+            }
+            case UP_EAST: {
+                return variant.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+            }
+            case NORTH_UP: {
+                return variant;
+            }
+            case SOUTH_UP: {
+                return variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180);
+            }
+            case WEST_UP: {
+                return variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+            }
+            case EAST_UP: {
+                return variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90);
+            }
+        }
+        throw new UnsupportedOperationException("Rotation " + frontAndTop + " can't be expressed with existing x and y values");
+    }
+
+    private void createJigsaw() {
+        ResourceLocation resourceLocation = TextureMapping.getBlockTexture(Blocks.JIGSAW, "_top");
+        ResourceLocation resourceLocation2 = TextureMapping.getBlockTexture(Blocks.JIGSAW, "_bottom");
+        ResourceLocation resourceLocation3 = TextureMapping.getBlockTexture(Blocks.JIGSAW, "_side");
+        ResourceLocation resourceLocation4 = TextureMapping.getBlockTexture(Blocks.JIGSAW, "_lock");
+        TextureMapping textureMapping = new TextureMapping().put(TextureSlot.DOWN, resourceLocation3).put(TextureSlot.WEST, resourceLocation3).put(TextureSlot.EAST, resourceLocation3).put(TextureSlot.PARTICLE, resourceLocation).put(TextureSlot.NORTH, resourceLocation).put(TextureSlot.SOUTH, resourceLocation2).put(TextureSlot.UP, resourceLocation4);
+        ResourceLocation resourceLocation5 = ModelTemplates.CUBE_DIRECTIONAL.create(Blocks.JIGSAW, textureMapping, this.modelOutput);
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.JIGSAW, Variant.variant().with(VariantProperties.MODEL, resourceLocation5)).with(PropertyDispatch.property(BlockStateProperties.ORIENTATION).generate(frontAndTop -> this.applyRotation((FrontAndTop)frontAndTop, Variant.variant()))));
+    }
+
     public void run() {
         this.createNonTemplateModelBlock(Blocks.AIR);
         this.createNonTemplateModelBlock(Blocks.CAVE_AIR, Blocks.AIR);
@@ -1085,6 +1133,7 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.HONEYCOMB_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.ICE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.JUKEBOX, TexturedModel.CUBE_TOP);
+        this.createTrivialBlock(Blocks.LODESTONE, TexturedModel.COLUMN);
         this.createTrivialBlock(Blocks.MELON, TexturedModel.COLUMN);
         this.createTrivialBlock(Blocks.NETHER_WART_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.NOTE_BLOCK, TexturedModel.CUBE);
@@ -1152,6 +1201,7 @@ public class BlockModelGenerators {
         this.createTurtleEgg();
         this.createVine();
         this.createMagmaBlock();
+        this.createJigsaw();
         this.createNonTemplateHorizontalBlock(Blocks.LADDER);
         this.createSimpleFlatItemModel(Blocks.LADDER);
         this.createNonTemplateHorizontalBlock(Blocks.LECTERN);
@@ -1175,7 +1225,6 @@ public class BlockModelGenerators {
         this.createRotatedPillarWithHorizontalVariant(Blocks.HAY_BLOCK, TexturedModel.COLUMN, TexturedModel.COLUMN_HORIZONTAL);
         this.createRotatedPillarWithHorizontalVariant(Blocks.PURPUR_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
         this.createRotatedPillarWithHorizontalVariant(Blocks.QUARTZ_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
-        this.createOrientableBlock(Blocks.JIGSAW, TexturedModel.CUBE_TOP_BOTTOM);
         this.createHorizontallyRotatedBlock(Blocks.LOOM, TexturedModel.ORIENTABLE);
         this.createPumpkins();
         this.createBeeNest(Blocks.BEE_NEST, TextureMapping::orientableCube);

@@ -6,27 +6,33 @@ package net.minecraft.world.item;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ItemSteerableMount;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
-public class CarrotOnAStickItem
+public class FoodOnAStickItem<T extends Entity>
 extends Item {
-    public CarrotOnAStickItem(Item.Properties properties) {
+    private final EntityType<T> canInteractWith;
+
+    public FoodOnAStickItem(Item.Properties properties, EntityType<T> entityType) {
         super(properties);
+        this.canInteractWith = entityType;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player2, InteractionHand interactionHand) {
-        Pig pig;
+        ItemSteerableMount itemSteerableMount;
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (level.isClientSide) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (player2.isPassenger() && player2.getVehicle() instanceof Pig && (pig = (Pig)player2.getVehicle()).boost()) {
+        Entity entity = player2.getVehicle();
+        if (player2.isPassenger() && entity instanceof ItemSteerableMount && entity.getType() == this.canInteractWith && (itemSteerableMount = (ItemSteerableMount)((Object)entity)).boost()) {
             itemStack.hurtAndBreak(7, player2, player -> player.broadcastBreakEvent(interactionHand));
             player2.swing(interactionHand, true);
             if (itemStack.isEmpty()) {

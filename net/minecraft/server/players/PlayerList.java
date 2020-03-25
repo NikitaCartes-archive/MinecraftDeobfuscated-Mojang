@@ -377,16 +377,14 @@ public abstract class PlayerList {
         }
         ServerLevel serverLevel = this.server.getLevel(serverPlayer.dimension);
         this.updatePlayerGameMode(serverPlayer2, serverPlayer, serverLevel);
+        boolean bl3 = false;
         if (blockPos != null) {
-            Optional<Vec3> optional = Player.findRespawnPositionAndUseSpawnBlock(this.server.getLevel(serverPlayer.dimension), blockPos, bl2);
+            Optional<Vec3> optional = Player.findRespawnPositionAndUseSpawnBlock(this.server.getLevel(serverPlayer.dimension), blockPos, bl2, bl);
             if (optional.isPresent()) {
                 Vec3 vec3 = optional.get();
                 serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, 0.0f, 0.0f);
                 serverPlayer2.setRespawnPosition(serverPlayer.dimension, blockPos, bl2, false);
-                BlockState blockState = serverLevel.getBlockState(blockPos);
-                if (blockState.getBlock() instanceof RespawnAnchorBlock) {
-                    serverPlayer2.connection.send(new ClientboundSoundPacket(SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.BLOCKS, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0f, 1.0f));
-                }
+                bl3 = !bl;
             } else {
                 serverPlayer2.connection.send(new ClientboundGameEventPacket(0, 0.0f));
                 serverPlayer2.dimension = DimensionType.OVERWORLD;
@@ -410,6 +408,10 @@ public abstract class PlayerList {
         this.playersByUUID.put(serverPlayer2.getUUID(), serverPlayer2);
         serverPlayer2.initMenu();
         serverPlayer2.setHealth(serverPlayer2.getHealth());
+        BlockState blockState = serverLevel.getBlockState(blockPos);
+        if (bl3 && blockState.getBlock() instanceof RespawnAnchorBlock) {
+            serverPlayer2.connection.send(new ClientboundSoundPacket(SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.BLOCKS, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0f, 1.0f));
+        }
         return serverPlayer2;
     }
 

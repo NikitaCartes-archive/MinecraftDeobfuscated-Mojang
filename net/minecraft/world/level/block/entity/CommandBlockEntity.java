@@ -73,8 +73,8 @@ extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         this.commandBlock.load(compoundTag);
         this.powered = compoundTag.getBoolean("powered");
         this.conditionMet = compoundTag.getBoolean("conditionMet");

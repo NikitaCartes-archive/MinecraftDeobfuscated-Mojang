@@ -12,12 +12,14 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -39,7 +41,7 @@ extends StructurePoolElement {
         this(configuredFeature, StructureTemplatePool.Projection.RIGID);
     }
 
-    public FeaturePoolElement(ConfiguredFeature<?, ?> configuredFeature, StructureTemplatePool.Projection projection) {
+    private FeaturePoolElement(ConfiguredFeature<?, ?> configuredFeature, StructureTemplatePool.Projection projection) {
         super(projection);
         this.feature = configuredFeature;
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
@@ -51,11 +53,13 @@ extends StructurePoolElement {
         this.defaultJigsawNBT = this.fillDefaultJigsawNBT();
     }
 
-    public CompoundTag fillDefaultJigsawNBT() {
+    private CompoundTag fillDefaultJigsawNBT() {
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("target_pool", "minecraft:empty");
-        compoundTag.putString("attachement_type", "minecraft:bottom");
+        compoundTag.putString("name", "minecraft:bottom");
         compoundTag.putString("final_state", "minecraft:air");
+        compoundTag.putString("pool", "minecraft:empty");
+        compoundTag.putString("target", "minecraft:empty");
+        compoundTag.putString("joint", JigsawBlockEntity.JointType.ROLLABLE.getSerializedName());
         return compoundTag;
     }
 
@@ -66,7 +70,7 @@ extends StructurePoolElement {
     @Override
     public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random) {
         ArrayList<StructureTemplate.StructureBlockInfo> list = Lists.newArrayList();
-        list.add(new StructureTemplate.StructureBlockInfo(blockPos, (BlockState)Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.FACING, Direction.DOWN), this.defaultJigsawNBT));
+        list.add(new StructureTemplate.StructureBlockInfo(blockPos, (BlockState)Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.ORIENTATION, FrontAndTop.fromFrontAndTop(Direction.DOWN, Direction.SOUTH)), this.defaultJigsawNBT));
         return list;
     }
 
@@ -77,7 +81,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
         return this.feature.place(levelAccessor, chunkGenerator, random, blockPos);
     }
 

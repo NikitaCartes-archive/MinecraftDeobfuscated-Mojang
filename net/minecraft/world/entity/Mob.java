@@ -60,6 +60,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -140,8 +141,13 @@ extends LivingEntity {
         return new GroundPathNavigation(this, level);
     }
 
+    protected boolean shouldPassengersInheritMalus() {
+        return false;
+    }
+
     public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
-        Float float_ = this.pathfindingMalus.get((Object)blockPathTypes);
+        Mob mob = this.getVehicle() instanceof Mob && ((Mob)this.getVehicle()).shouldPassengersInheritMalus() ? (Mob)this.getVehicle() : this;
+        Float float_ = mob.pathfindingMalus.get((Object)blockPathTypes);
         return float_ == null ? blockPathTypes.getMalus() : float_.floatValue();
     }
 
@@ -479,7 +485,7 @@ extends LivingEntity {
     public boolean equipItemIfPossible(ItemStack itemStack) {
         EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
         ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-        boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+        boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2);
         if (bl && this.canHoldItem(itemStack)) {
             double d = this.getEquipmentDropChance(equipmentSlot);
             if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
@@ -509,37 +515,63 @@ extends LivingEntity {
         }
     }
 
-    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
         if (itemStack2.isEmpty()) {
             return true;
         }
-        if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
-            if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
+        if (itemStack.getItem() instanceof SwordItem) {
+            if (!(itemStack2.getItem() instanceof SwordItem)) {
                 return true;
             }
-            if (itemStack.getItem() instanceof SwordItem) {
-                SwordItem swordItem = (SwordItem)itemStack.getItem();
-                SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
-                if (swordItem.getDamage() == swordItem2.getDamage()) {
-                    return itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
-                }
+            SwordItem swordItem = (SwordItem)itemStack.getItem();
+            SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
+            if (swordItem.getDamage() != swordItem2.getDamage()) {
                 return swordItem.getDamage() > swordItem2.getDamage();
             }
-            if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
-                return itemStack.hasTag() && !itemStack2.hasTag();
+            return this.canReplaceEqualItem(itemStack, itemStack2);
+        }
+        if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
+            return this.canReplaceEqualItem(itemStack, itemStack2);
+        }
+        if (itemStack.getItem() instanceof ArmorItem) {
+            if (!(itemStack2.getItem() instanceof ArmorItem)) {
+                return true;
             }
-            return false;
-        }
-        if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
-            return true;
-        }
-        if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
+            if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
+                return false;
+            }
             ArmorItem armorItem = (ArmorItem)itemStack.getItem();
             ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
-            if (armorItem.getDefense() == armorItem2.getDefense()) {
-                return itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+            if (armorItem.getDefense() != armorItem2.getDefense()) {
+                return armorItem.getDefense() > armorItem2.getDefense();
             }
-            return armorItem.getDefense() > armorItem2.getDefense();
+            if (armorItem.getToughness() != armorItem2.getToughness()) {
+                return armorItem.getToughness() > armorItem2.getToughness();
+            }
+            return this.canReplaceEqualItem(itemStack, itemStack2);
+        }
+        if (itemStack.getItem() instanceof DiggerItem) {
+            if (itemStack2.getItem() instanceof BlockItem) {
+                return true;
+            }
+            if (itemStack2.getItem() instanceof DiggerItem) {
+                DiggerItem diggerItem = (DiggerItem)itemStack.getItem();
+                DiggerItem diggerItem2 = (DiggerItem)itemStack2.getItem();
+                if (diggerItem.getAttackDamage() != diggerItem2.getAttackDamage()) {
+                    return diggerItem.getAttackDamage() > diggerItem2.getAttackDamage();
+                }
+                return this.canReplaceEqualItem(itemStack, itemStack2);
+            }
+        }
+        return false;
+    }
+
+    private boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
+        if (itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag()) {
+            return true;
+        }
+        if (itemStack.hasTag() && itemStack2.hasTag()) {
+            return itemStack.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage")) && !itemStack2.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage"));
         }
         return false;
     }

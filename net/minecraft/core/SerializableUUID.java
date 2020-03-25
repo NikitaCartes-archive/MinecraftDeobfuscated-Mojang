@@ -23,15 +23,11 @@ implements Serializable {
 
     @Override
     public <T> T serialize(DynamicOps<T> dynamicOps) {
-        return dynamicOps.createIntList(Arrays.stream(SerializableUUID.uuidToIntArray(this.value)));
+        return SerializableUUID.serialize(dynamicOps, this.value);
     }
 
     public static SerializableUUID of(Dynamic<?> dynamic) {
-        int[] is = dynamic.asIntStream().toArray();
-        if (is.length != 4) {
-            throw new IllegalArgumentException("Could not read UUID. Expected int-array of length 4, got " + is.length + ".");
-        }
-        return new SerializableUUID(SerializableUUID.uuidFromIntArray(is));
+        return new SerializableUUID(SerializableUUID.readUUID(dynamic));
     }
 
     public String toString() {
@@ -50,6 +46,18 @@ implements Serializable {
 
     public static int[] leastMostToIntArray(long l, long m) {
         return new int[]{(int)(l >> 32), (int)l, (int)(m >> 32), (int)m};
+    }
+
+    public static UUID readUUID(Dynamic<?> dynamic) {
+        int[] is = dynamic.asIntStream().toArray();
+        if (is.length != 4) {
+            throw new IllegalArgumentException("Could not read UUID. Expected int-array of length 4, got " + is.length + ".");
+        }
+        return SerializableUUID.uuidFromIntArray(is);
+    }
+
+    public static <T> T serialize(DynamicOps<T> dynamicOps, UUID uUID) {
+        return dynamicOps.createIntList(Arrays.stream(SerializableUUID.uuidToIntArray(uUID)));
     }
 }
 

@@ -7,7 +7,6 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import it.unimi.dsi.fastutil.Hash;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
@@ -258,14 +256,6 @@ public class Util {
 
     public static Runnable name(Runnable runnable, Supplier<String> supplier) {
         return runnable;
-    }
-
-    public static Optional<UUID> readUUID(String string, Dynamic<?> dynamic) {
-        return dynamic.get(string + "Most").asNumber().flatMap(number -> dynamic.get(string + "Least").asNumber().map(number2 -> new UUID(number.longValue(), number2.longValue())));
-    }
-
-    public static <T> Dynamic<T> writeUUID(String string, UUID uUID, Dynamic<T> dynamic) {
-        return dynamic.set(string + "Most", dynamic.createLong(uUID.getMostSignificantBits())).set(string + "Least", dynamic.createLong(uUID.getLeastSignificantBits()));
     }
 
     public static <T extends Throwable> T pauseInIde(T throwable) {

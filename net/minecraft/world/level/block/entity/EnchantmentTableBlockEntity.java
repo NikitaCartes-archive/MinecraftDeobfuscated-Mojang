@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class EnchantmentTableBlockEntity
@@ -46,8 +47,8 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         if (compoundTag.contains("CustomName", 8)) {
             this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
         }

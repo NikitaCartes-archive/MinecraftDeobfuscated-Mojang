@@ -70,6 +70,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
@@ -157,11 +158,18 @@ AutoCloseable {
     }
 
     public double getRelativeFloorHeight(BlockPos blockPos) {
-        VoxelShape voxelShape = this.getBlockState(blockPos).getCollisionShape(this, blockPos);
+        return this.getRelativeFloorHeight(blockPos, blockState -> false);
+    }
+
+    public double getRelativeFloorHeight(BlockPos blockPos, Predicate<BlockState> predicate) {
+        VoxelShape voxelShape;
+        BlockState blockState = this.getBlockState(blockPos);
+        VoxelShape voxelShape2 = voxelShape = predicate.test(blockState) ? Shapes.empty() : blockState.getCollisionShape(this, blockPos);
         if (voxelShape.isEmpty()) {
             BlockPos blockPos2 = blockPos.below();
-            VoxelShape voxelShape2 = this.getBlockState(blockPos2).getCollisionShape(this, blockPos2);
-            double d = voxelShape2.max(Direction.Axis.Y);
+            BlockState blockState2 = this.getBlockState(blockPos2);
+            VoxelShape voxelShape22 = predicate.test(blockState2) ? Shapes.empty() : blockState2.getCollisionShape(this, blockPos2);
+            double d = voxelShape22.max(Direction.Axis.Y);
             if (d >= 1.0) {
                 return d - 1.0;
             }
@@ -912,7 +920,6 @@ AutoCloseable {
         }
     }
 
-    @Override
     public BlockPos getSharedSpawnPos() {
         BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
         if (!this.getWorldBorder().isWithinBounds(blockPos)) {

@@ -61,5 +61,9 @@ extends TieredItem {
         }
         return multimap;
     }
+
+    public float getAttackDamage() {
+        return this.attackDamageBaseline;
+    }
 }
 

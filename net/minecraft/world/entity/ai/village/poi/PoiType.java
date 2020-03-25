@@ -47,6 +47,7 @@ public class PoiType {
     public static final PoiType BEEHIVE = PoiType.register("beehive", PoiType.getBlockStates(Blocks.BEEHIVE), 0, 1);
     public static final PoiType BEE_NEST = PoiType.register("bee_nest", PoiType.getBlockStates(Blocks.BEE_NEST), 0, 1);
     public static final PoiType NETHER_PORTAL = PoiType.register("nether_portal", PoiType.getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
+    public static final PoiType LODESTONE = PoiType.register("lodestone", PoiType.getBlockStates(Blocks.LODESTONE), 0, 1);
     private final String name;
     private final Set<BlockState> matchingStates;
     private final int maxTickets;

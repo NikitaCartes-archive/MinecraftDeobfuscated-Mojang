@@ -66,9 +66,9 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
         for (StructurePoolElement structurePoolElement : this.elements) {
-            if (structurePoolElement.place(structureManager, levelAccessor, chunkGenerator, blockPos, rotation, boundingBox, random)) continue;
+            if (structurePoolElement.place(structureManager, levelAccessor, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, random)) continue;
             return false;
         }
         return true;

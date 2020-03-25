@@ -29,7 +29,7 @@ extends StructureProcessor {
 
     @Override
     @Nullable
-    public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
+    public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, BlockPos blockPos2, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
         Random random = structurePlaceSettings.getRandom(structureBlockInfo2.pos);
         if (this.integrity >= 1.0f || random.nextFloat() <= this.integrity) {
             return structureBlockInfo2;

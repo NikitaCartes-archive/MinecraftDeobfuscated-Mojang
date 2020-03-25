@@ -96,6 +96,7 @@ import net.minecraft.client.renderer.entity.SpectralArrowRenderer;
 import net.minecraft.client.renderer.entity.SpiderRenderer;
 import net.minecraft.client.renderer.entity.SquidRenderer;
 import net.minecraft.client.renderer.entity.StrayRenderer;
+import net.minecraft.client.renderer.entity.StriderRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.entity.ThrownTridentRenderer;
 import net.minecraft.client.renderer.entity.TippableArrowRenderer;
@@ -269,6 +270,7 @@ public class EntityRenderDispatcher {
         this.register(EntityType.ZOMBIE, new ZombieRenderer(this));
         this.register(EntityType.ZOMBIFIED_PIGLIN, new PiglinRenderer(this, true));
         this.register(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerRenderer(this, reloadableResourceManager));
+        this.register(EntityType.STRIDER, new StriderRenderer(this));
     }
 
     public EntityRenderDispatcher(TextureManager textureManager, ItemRenderer itemRenderer, ReloadableResourceManager reloadableResourceManager, Font font, Options options) {

@@ -574,6 +574,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.HONEY_BLOCK);
         this.dropSelf(Blocks.HONEYCOMB_BLOCK);
         this.dropSelf(Blocks.RESPAWN_ANCHOR);
+        this.dropSelf(Blocks.LODESTONE);
         this.dropSelf(Blocks.WARPED_STEM);
         this.dropSelf(Blocks.WARPED_HYPHAE);
         this.dropSelf(Blocks.WARPED_NYLIUM);

@@ -6,12 +6,10 @@ package net.minecraft.world.level.chunk;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -66,11 +64,6 @@ implements TickList<T> {
     @Override
     public boolean willTickThisTick(BlockPos blockPos, T object) {
         return false;
-    }
-
-    @Override
-    public void addAll(Stream<TickNextTickData<T>> stream) {
-        stream.forEach(tickNextTickData -> this.scheduleTick(tickNextTickData.pos, tickNextTickData.getType(), 0, tickNextTickData.priority));
     }
 }
 

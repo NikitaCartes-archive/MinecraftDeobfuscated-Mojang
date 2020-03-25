@@ -52,12 +52,23 @@ extends NodeEvaluator {
     @Override
     public Node getStart() {
         BlockPos blockPos;
+        BlockState blockState;
+        BlockPos.MutableBlockPos mutableBlockPos;
         int i;
         if (this.canFloat() && this.mob.isInWater()) {
             i = Mth.floor(this.mob.getY());
-            BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
-            BlockState blockState = this.level.getBlockState(mutableBlockPos);
+            mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
+            blockState = this.level.getBlockState(mutableBlockPos);
             while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
+                mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
+                blockState = this.level.getBlockState(mutableBlockPos);
+            }
+            --i;
+        } else if (this.mob.isInLava() && this.mob.canFloatInLava()) {
+            i = Mth.floor(this.mob.getY());
+            mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
+            blockState = this.level.getBlockState(mutableBlockPos);
+            while (blockState.getBlock() == Blocks.LAVA || blockState.getFluidState() == Fluids.LAVA.getSource(false)) {
                 mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
                 blockState = this.level.getBlockState(mutableBlockPos);
             }

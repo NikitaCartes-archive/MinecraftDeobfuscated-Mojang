@@ -44,7 +44,7 @@ extends BasePressurePlateBlock {
 
     @Override
     protected void playOnSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-        if (this.material == Material.WOOD) {
+        if (this.material == Material.WOOD || this.material == Material.NETHER_WOOD) {
             levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_ON, SoundSource.BLOCKS, 0.3f, 0.8f);
         } else {
             levelAccessor.playSound(null, blockPos, SoundEvents.STONE_PRESSURE_PLATE_CLICK_ON, SoundSource.BLOCKS, 0.3f, 0.6f);
@@ -53,7 +53,7 @@ extends BasePressurePlateBlock {
 
     @Override
     protected void playOffSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-        if (this.material == Material.WOOD) {
+        if (this.material == Material.WOOD || this.material == Material.NETHER_WOOD) {
             levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3f, 0.7f);
         } else {
             levelAccessor.playSound(null, blockPos, SoundEvents.STONE_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3f, 0.5f);

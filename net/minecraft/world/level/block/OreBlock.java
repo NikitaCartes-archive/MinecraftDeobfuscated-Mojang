@@ -37,6 +37,9 @@ extends Block {
         if (this == Blocks.NETHER_QUARTZ_ORE) {
             return Mth.nextInt(random, 2, 5);
         }
+        if (this == Blocks.NETHER_GOLD_ORE) {
+            return Mth.nextInt(random, 0, 1);
+        }
         return 0;
     }
 

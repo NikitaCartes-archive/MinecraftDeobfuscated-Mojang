@@ -37,7 +37,7 @@ public class BuriedTreasurePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int i = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.x0, this.boundingBox.z0);
             BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.x0, i, this.boundingBox.z0);
             while (mutableBlockPos.getY() > 0) {
@@ -46,16 +46,16 @@ public class BuriedTreasurePieces {
                 if (blockState2 == Blocks.SANDSTONE.defaultBlockState() || blockState2 == Blocks.STONE.defaultBlockState() || blockState2 == Blocks.ANDESITE.defaultBlockState() || blockState2 == Blocks.GRANITE.defaultBlockState() || blockState2 == Blocks.DIORITE.defaultBlockState()) {
                     BlockState blockState3 = blockState.isAir() || this.isLiquid(blockState) ? Blocks.SAND.defaultBlockState() : blockState;
                     for (Direction direction : Direction.values()) {
-                        BlockPos blockPos = mutableBlockPos.relative(direction);
-                        BlockState blockState4 = levelAccessor.getBlockState(blockPos);
+                        BlockPos blockPos2 = mutableBlockPos.relative(direction);
+                        BlockState blockState4 = levelAccessor.getBlockState(blockPos2);
                         if (!blockState4.isAir() && !this.isLiquid(blockState4)) continue;
-                        BlockPos blockPos2 = blockPos.below();
-                        BlockState blockState5 = levelAccessor.getBlockState(blockPos2);
+                        BlockPos blockPos3 = blockPos2.below();
+                        BlockState blockState5 = levelAccessor.getBlockState(blockPos3);
                         if ((blockState5.isAir() || this.isLiquid(blockState5)) && direction != Direction.UP) {
-                            levelAccessor.setBlock(blockPos, blockState2, 3);
+                            levelAccessor.setBlock(blockPos2, blockState2, 3);
                             continue;
                         }
-                        levelAccessor.setBlock(blockPos, blockState3, 3);
+                        levelAccessor.setBlock(blockPos2, blockState3, 3);
                     }
                     this.boundingBox = new BoundingBox(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ(), mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ());
                     return this.createChest(levelAccessor, boundingBox, random, mutableBlockPos, BuiltInLootTables.BURIED_TREASURE, null);

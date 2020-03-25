@@ -21,6 +21,7 @@ extends Goal {
     protected double posX;
     protected double posY;
     protected double posZ;
+    protected boolean isRunning;
 
     public PanicGoal(PathfinderMob pathfinderMob, double d) {
         this.mob = pathfinderMob;
@@ -54,9 +55,19 @@ extends Goal {
         return true;
     }
 
+    public boolean isRunning() {
+        return this.isRunning;
+    }
+
     @Override
     public void start() {
         this.mob.getNavigation().moveTo(this.posX, this.posY, this.posZ, this.speedModifier);
+        this.isRunning = true;
+    }
+
+    @Override
+    public void stop() {
+        this.isRunning = false;
     }
 
     @Override

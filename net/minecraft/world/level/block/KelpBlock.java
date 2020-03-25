@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
@@ -53,6 +54,11 @@ implements LiquidBlockContainer {
     @Override
     public boolean placeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
         return false;
+    }
+
+    @Override
+    protected int getBlocksToGrowWhenBonemealed(Random random) {
+        return 1;
     }
 
     @Override

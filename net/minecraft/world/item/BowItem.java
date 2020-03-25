@@ -31,7 +31,7 @@ extends ProjectileWeaponItem {
             if (livingEntity == null) {
                 return 0.0f;
             }
-            if (livingEntity.getUseItem().getItem() != Items.BOW) {
+            if (livingEntity.getUseItem() != itemStack) {
                 return 0.0f;
             }
             return (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0f;

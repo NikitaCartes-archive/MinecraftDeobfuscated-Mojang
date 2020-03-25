@@ -222,8 +222,8 @@ implements TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         this.stored.clear();
         ListTag listTag = compoundTag.getList("Bees", 10);
         for (int i = 0; i < listTag.size(); ++i) {

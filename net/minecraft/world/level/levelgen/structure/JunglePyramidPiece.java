@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import java.util.Random;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
@@ -58,7 +59,7 @@ extends ScatteredFeaturePiece {
     }
 
     @Override
-    public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+    public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         int k;
         int i;
         if (!this.updateAverageGroundHeight(levelAccessor, boundingBox, 0)) {

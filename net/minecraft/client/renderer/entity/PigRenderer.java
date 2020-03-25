@@ -8,7 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.PigModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.layers.PigSaddleLayer;
+import net.minecraft.client.renderer.entity.layers.SaddleLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Pig;
 
@@ -19,7 +19,7 @@ extends MobRenderer<Pig, PigModel<Pig>> {
 
     public PigRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new PigModel(), 0.7f);
-        this.addLayer(new PigSaddleLayer(this));
+        this.addLayer(new SaddleLayer(this, new PigModel(0.5f), new ResourceLocation("textures/entity/pig/pig_saddle.png")));
     }
 
     @Override

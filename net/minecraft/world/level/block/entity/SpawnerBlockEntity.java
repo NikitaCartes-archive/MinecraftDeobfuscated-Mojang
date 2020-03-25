@@ -51,8 +51,8 @@ implements TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         this.spawner.load(compoundTag);
     }
 

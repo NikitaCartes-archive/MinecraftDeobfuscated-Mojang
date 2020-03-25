@@ -19,6 +19,7 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class TradeWithVillager
 extends Behavior<Villager> {
@@ -55,6 +56,9 @@ extends Behavior<Villager> {
         villager.gossip(villager2, l);
         if (villager.hasExcessFood() && (villager.getVillagerData().getProfession() == VillagerProfession.FARMER || villager2.wantsMoreFood())) {
             TradeWithVillager.throwHalfStack(villager, Villager.FOOD_POINTS.keySet(), villager2);
+        }
+        if (villager2.getVillagerData().getProfession() == VillagerProfession.FARMER && villager.getInventory().countItem(Items.WHEAT) > Items.WHEAT.getMaxStackSize() / 2) {
+            TradeWithVillager.throwHalfStack(villager, ImmutableSet.of(Items.WHEAT), villager2);
         }
         if (!this.trades.isEmpty() && villager.getInventory().hasAnyOf(this.trades)) {
             TradeWithVillager.throwHalfStack(villager, this.trades, villager2);

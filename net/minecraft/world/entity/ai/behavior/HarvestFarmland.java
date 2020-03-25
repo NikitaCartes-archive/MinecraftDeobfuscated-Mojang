@@ -57,11 +57,7 @@ extends Behavior<Villager> {
         int i = simpleContainer.getContainerSize();
         for (int j = 0; j < i; ++j) {
             ItemStack itemStack = simpleContainer.getItem(j);
-            if (itemStack.isEmpty()) {
-                this.wantsToReapStuff = true;
-                break;
-            }
-            if (itemStack.getItem() != Items.WHEAT_SEEDS && itemStack.getItem() != Items.BEETROOT_SEEDS) continue;
+            if (!itemStack.isEmpty()) continue;
             this.wantsToReapStuff = true;
             break;
         }
@@ -110,6 +106,9 @@ extends Behavior<Villager> {
 
     @Override
     protected void tick(ServerLevel serverLevel, Villager villager, long l) {
+        if (this.aboveFarmlandPos != null && !this.aboveFarmlandPos.closerThan(villager.position(), 1.0)) {
+            return;
+        }
         if (this.aboveFarmlandPos != null && l > this.nextOkStartTime) {
             BlockState blockState = serverLevel.getBlockState(this.aboveFarmlandPos);
             Block block = blockState.getBlock();

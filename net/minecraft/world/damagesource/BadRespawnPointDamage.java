@@ -12,18 +12,18 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
-public class NetherBedDamage
+public class BadRespawnPointDamage
 extends DamageSource {
-    protected NetherBedDamage() {
-        super("netherBed");
+    protected BadRespawnPointDamage() {
+        super("badRespawnPoint");
         this.setScalesWithDifficulty();
         this.setExplosion();
     }
 
     @Override
     public Component getLocalizedDeathMessage(LivingEntity livingEntity) {
-        Component component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("death.attack.netherBed.link", new Object[0])).withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://bugs.mojang.com/browse/MCPE-28723")).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("MCPE-28723"))));
-        return new TranslatableComponent("death.attack.netherBed.message", livingEntity.getDisplayName(), component);
+        Component component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("death.attack.badRespawnPoint.link", new Object[0])).withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://bugs.mojang.com/browse/MCPE-28723")).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("MCPE-28723"))));
+        return new TranslatableComponent("death.attack.badRespawnPoint.message", livingEntity.getDisplayName(), component);
     }
 }
 

@@ -168,7 +168,7 @@ implements RangedAttackMob {
     }
 
     @Override
-    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+    protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
         if (itemStack2.getItem() == Items.NAUTILUS_SHELL) {
             return false;
         }
@@ -181,7 +181,7 @@ implements RangedAttackMob {
         if (itemStack.getItem() == Items.TRIDENT) {
             return true;
         }
-        return super.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+        return super.canReplaceCurrentItem(itemStack, itemStack2);
     }
 
     @Override

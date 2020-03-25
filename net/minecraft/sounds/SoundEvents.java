@@ -423,6 +423,12 @@ public class SoundEvents {
     public static final SoundEvent LLAMA_STEP = SoundEvents.register("entity.llama.step");
     public static final SoundEvent LLAMA_SWAG = SoundEvents.register("entity.llama.swag");
     public static final SoundEvent MAGMA_CUBE_DEATH_SMALL = SoundEvents.register("entity.magma_cube.death_small");
+    public static final SoundEvent LODESTONE_BREAK = SoundEvents.register("block.lodestone.break");
+    public static final SoundEvent LODESTONE_STEP = SoundEvents.register("block.lodestone.step");
+    public static final SoundEvent LODESTONE_PLACE = SoundEvents.register("block.lodestone.place");
+    public static final SoundEvent LODESTONE_HIT = SoundEvents.register("block.lodestone.hit");
+    public static final SoundEvent LODESTONE_FALL = SoundEvents.register("block.lodestone.fall");
+    public static final SoundEvent LODESTONE_COMPASS_LOCK = SoundEvents.register("item.lodestone_compass.lock");
     public static final SoundEvent MAGMA_CUBE_DEATH = SoundEvents.register("entity.magma_cube.death");
     public static final SoundEvent MAGMA_CUBE_HURT = SoundEvents.register("entity.magma_cube.hurt");
     public static final SoundEvent MAGMA_CUBE_HURT_SMALL = SoundEvents.register("entity.magma_cube.hurt_small");
@@ -744,6 +750,14 @@ public class SoundEvents {
     public static final SoundEvent SOUL_SOIL_HIT = SoundEvents.register("block.soul_soil.hit");
     public static final SoundEvent SOUL_SOIL_FALL = SoundEvents.register("block.soul_soil.fall");
     public static final SoundEvent SOUL_ESCAPE = SoundEvents.register("particle.soul_escape");
+    public static final SoundEvent STRIDER_AMBIENT = SoundEvents.register("entity.strider.ambient");
+    public static final SoundEvent STRIDER_HAPPY = SoundEvents.register("entity.strider.happy");
+    public static final SoundEvent STRIDER_RETREAT = SoundEvents.register("entity.strider.retreat");
+    public static final SoundEvent STRIDER_DEATH = SoundEvents.register("entity.strider.death");
+    public static final SoundEvent STRIDER_HURT = SoundEvents.register("entity.strider.hurt");
+    public static final SoundEvent STRIDER_STEP = SoundEvents.register("entity.strider.step");
+    public static final SoundEvent STRIDER_STEP_LAVA = SoundEvents.register("entity.strider.step_lava");
+    public static final SoundEvent STRIDER_EAT = SoundEvents.register("entity.strider.eat");
     public static final SoundEvent SLIME_DEATH_SMALL = SoundEvents.register("entity.slime.death_small");
     public static final SoundEvent SLIME_HURT_SMALL = SoundEvents.register("entity.slime.hurt_small");
     public static final SoundEvent SLIME_JUMP_SMALL = SoundEvents.register("entity.slime.jump_small");

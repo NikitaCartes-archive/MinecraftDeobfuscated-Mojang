@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -175,14 +177,26 @@ TickableBlockEntity {
         return map;
     }
 
+    private static boolean isNeverAFurnaceFuel(Item item) {
+        return ItemTags.NON_FLAMMABLE_WOOD.contains(item);
+    }
+
     private static void add(Map<Item, Integer> map, Tag<Item> tag, int i) {
         for (Item item : tag.getValues()) {
+            if (AbstractFurnaceBlockEntity.isNeverAFurnaceFuel(item)) continue;
             map.put(item, i);
         }
     }
 
     private static void add(Map<Item, Integer> map, ItemLike itemLike, int i) {
-        map.put(itemLike.asItem(), i);
+        Item item = itemLike.asItem();
+        if (AbstractFurnaceBlockEntity.isNeverAFurnaceFuel(item)) {
+            if (SharedConstants.IS_RUNNING_IN_IDE) {
+                throw Util.pauseInIde(new IllegalStateException("A developer tried to explicitly make fire resistant item " + item.getName(null).getString() + " a furnace fuel. That will not work!"));
+            }
+            return;
+        }
+        map.put(item, i);
     }
 
     private boolean isLit() {
@@ -190,8 +204,8 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(compoundTag, this.items);
         this.litTime = compoundTag.getShort("BurnTime");

@@ -5,9 +5,9 @@ package net.minecraft.world.damagesource;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.damagesource.BadRespawnPointDamage;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.damagesource.NetherBedDamage;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -112,8 +112,8 @@ public class DamageSource {
         return new DamageSource("explosion").setScalesWithDifficulty().setExplosion();
     }
 
-    public static DamageSource netherBedExplosion() {
-        return new NetherBedDamage();
+    public static DamageSource badRespawnPointExplosion() {
+        return new BadRespawnPointDamage();
     }
 
     public String toString() {

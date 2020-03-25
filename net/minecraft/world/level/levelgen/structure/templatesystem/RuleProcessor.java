@@ -34,11 +34,11 @@ extends StructureProcessor {
 
     @Override
     @Nullable
-    public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
+    public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, BlockPos blockPos2, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
         Random random = new Random(Mth.getSeed(structureBlockInfo2.pos));
         BlockState blockState = levelReader.getBlockState(structureBlockInfo2.pos);
         for (ProcessorRule processorRule : this.rules) {
-            if (!processorRule.test(structureBlockInfo2.state, blockState, random)) continue;
+            if (!processorRule.test(structureBlockInfo2.state, blockState, structureBlockInfo.pos, structureBlockInfo2.pos, blockPos2, random)) continue;
             return new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos, processorRule.getOutputState(), processorRule.getOutputTag());
         }
         return structureBlockInfo2;

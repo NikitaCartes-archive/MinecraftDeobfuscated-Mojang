@@ -51,6 +51,7 @@ public class SoundType {
     public static final SoundType BONE_BLOCK = new SoundType(1.0f, 1.0f, SoundEvents.BONE_BLOCK_BREAK, SoundEvents.BONE_BLOCK_STEP, SoundEvents.BONE_BLOCK_PLACE, SoundEvents.BONE_BLOCK_HIT, SoundEvents.BONE_BLOCK_FALL);
     public static final SoundType NETHERITE_BLOCK = new SoundType(1.0f, 1.0f, SoundEvents.NETHERITE_BLOCK_BREAK, SoundEvents.NETHERITE_BLOCK_STEP, SoundEvents.NETHERITE_BLOCK_PLACE, SoundEvents.NETHERITE_BLOCK_HIT, SoundEvents.NETHERITE_BLOCK_FALL);
     public static final SoundType ANCIENT_DEBRIS = new SoundType(1.0f, 1.0f, SoundEvents.ANCIENT_DEBRIS_BREAK, SoundEvents.ANCIENT_DEBRIS_STEP, SoundEvents.ANCIENT_DEBRIS_PLACE, SoundEvents.ANCIENT_DEBRIS_HIT, SoundEvents.ANCIENT_DEBRIS_FALL);
+    public static final SoundType LODESTONE = new SoundType(1.0f, 1.0f, SoundEvents.LODESTONE_BREAK, SoundEvents.LODESTONE_STEP, SoundEvents.LODESTONE_PLACE, SoundEvents.LODESTONE_HIT, SoundEvents.LODESTONE_FALL);
     public final float volume;
     public final float pitch;
     private final SoundEvent breakSound;

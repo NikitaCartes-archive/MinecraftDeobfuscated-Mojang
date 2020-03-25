@@ -23,7 +23,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 @Unmodifiable
@@ -231,26 +230,29 @@ implements Serializable {
         return new MutableBlockPos(this.getX(), this.getY(), this.getZ());
     }
 
-    public static Iterable<BlockPos> withinManhattan(final BlockPos blockPos, final int i, final int j, final int k) {
+    public static Iterable<BlockPos> withinManhattan(BlockPos blockPos, final int i, final int j, final int k) {
         final int l = i + j + k;
+        final int m = blockPos.getX();
+        final int n = blockPos.getY();
+        final int o = blockPos.getZ();
         return () -> new AbstractIterator<BlockPos>(){
+            private final MutableBlockPos cursor = new MutableBlockPos();
             private int currentDepth;
             private int maxX;
             private int maxY;
             private int x;
             private int y;
-            @Nullable
-            private BlockPos pendingBlockPos;
+            private boolean zMirror;
 
             @Override
             protected BlockPos computeNext() {
-                if (this.pendingBlockPos != null) {
-                    BlockPos blockPos2 = this.pendingBlockPos;
-                    this.pendingBlockPos = null;
-                    return blockPos2;
+                if (this.zMirror) {
+                    this.zMirror = false;
+                    this.cursor.setZ(o - (this.cursor.getZ() - o));
+                    return this.cursor;
                 }
-                BlockPos blockPos3 = null;
-                while (blockPos3 == null) {
+                MutableBlockPos blockPos = null;
+                while (blockPos == null) {
                     if (this.y > this.maxY) {
                         ++this.x;
                         if (this.x > this.maxX) {
@@ -268,14 +270,12 @@ implements Serializable {
                     int j2 = this.y;
                     int k2 = this.currentDepth - Math.abs(i2) - Math.abs(j2);
                     if (k2 <= k) {
-                        if (k2 != 0) {
-                            this.pendingBlockPos = blockPos.offset(i2, j2, -k2);
-                        }
-                        blockPos3 = blockPos.offset(i2, j2, k2);
+                        this.zMirror = k2 != 0;
+                        blockPos = this.cursor.set(m + i2, n + j2, o + k2);
                     }
                     ++this.y;
                 }
-                return blockPos3;
+                return blockPos;
             }
 
             @Override
@@ -315,6 +315,7 @@ implements Serializable {
         int q = n - k + 1;
         final int r = o * p * q;
         return () -> new AbstractIterator<BlockPos>(){
+            private final MutableBlockPos cursor = new MutableBlockPos();
             private int index;
 
             @Override
@@ -327,7 +328,7 @@ implements Serializable {
                 int k2 = j2 % p;
                 int l = j2 / p;
                 ++this.index;
-                return new BlockPos(i + i2, j + k2, k + l);
+                return this.cursor.set(i + i2, j + k2, k + l);
             }
 
             @Override

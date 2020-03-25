@@ -58,10 +58,10 @@ extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+    public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         this.placeSettings.setBoundingBox(boundingBox);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-        if (this.template.placeInWorld(levelAccessor, this.templatePosition, this.placeSettings, 2)) {
+        if (this.template.placeInWorld(levelAccessor, this.templatePosition, blockPos, this.placeSettings, 2)) {
             List<StructureTemplate.StructureBlockInfo> list = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
                 StructureMode structureMode;

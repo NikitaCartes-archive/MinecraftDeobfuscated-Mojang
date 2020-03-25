@@ -96,20 +96,20 @@ public class IglooPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-            BlockPos blockPos4;
+        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            BlockPos blockPos5;
             BlockState blockState;
             StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(this.rotation).setMirror(Mirror.NONE).setRotationPivot((BlockPos)PIVOTS.get(this.templateLocation)).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-            BlockPos blockPos = (BlockPos)OFFSETS.get(this.templateLocation);
-            BlockPos blockPos2 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos.getX(), 0, 0 - blockPos.getZ())));
-            int i = levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos2.getX(), blockPos2.getZ());
-            BlockPos blockPos3 = this.templatePosition;
+            BlockPos blockPos2 = (BlockPos)OFFSETS.get(this.templateLocation);
+            BlockPos blockPos3 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos2.getX(), 0, 0 - blockPos2.getZ())));
+            int i = levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
+            BlockPos blockPos4 = this.templatePosition;
             this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-            boolean bl = super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
-            if (this.templateLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = levelAccessor.getBlockState((blockPos4 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && blockState.getBlock() != Blocks.LADDER) {
-                levelAccessor.setBlock(blockPos4, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
+            boolean bl = super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            if (this.templateLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = levelAccessor.getBlockState((blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && blockState.getBlock() != Blocks.LADDER) {
+                levelAccessor.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
             }
-            this.templatePosition = blockPos3;
+            this.templatePosition = blockPos4;
             return bl;
         }
     }

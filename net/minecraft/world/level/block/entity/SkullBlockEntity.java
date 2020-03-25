@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class SkullBlockEntity
@@ -54,9 +55,9 @@ implements TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
+    public void load(BlockState blockState, CompoundTag compoundTag) {
         String string;
-        super.load(compoundTag);
+        super.load(blockState, compoundTag);
         if (compoundTag.contains("SkullOwner", 10)) {
             this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
         } else if (compoundTag.contains("ExtraType", 8) && !StringUtil.isNullOrEmpty(string = compoundTag.getString("ExtraType"))) {

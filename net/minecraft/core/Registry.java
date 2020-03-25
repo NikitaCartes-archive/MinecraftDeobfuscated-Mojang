@@ -65,6 +65,7 @@ import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElemen
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
+import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -108,6 +109,7 @@ implements IdMap<T> {
     public static final Registry<StructureFeature<?>> STRUCTURE_FEATURE = Registry.registerSimple("structure_feature", () -> StructureFeatureIO.MINESHAFT);
     public static final Registry<StructurePieceType> STRUCTURE_PIECE = Registry.registerSimple("structure_piece", () -> StructurePieceType.MINE_SHAFT_ROOM);
     public static final Registry<RuleTestType> RULE_TEST = Registry.registerSimple("rule_test", () -> RuleTestType.ALWAYS_TRUE_TEST);
+    public static final Registry<PosRuleTestType> POS_RULE_TEST = Registry.registerSimple("pos_rule_test", () -> PosRuleTestType.ALWAYS_TRUE_TEST);
     public static final Registry<StructureProcessorType> STRUCTURE_PROCESSOR = Registry.registerSimple("structure_processor", () -> StructureProcessorType.BLOCK_IGNORE);
     public static final Registry<StructurePoolElementType> STRUCTURE_POOL_ELEMENT = Registry.registerSimple("structure_pool_element", () -> StructurePoolElementType.EMPTY);
     public static final Registry<MenuType<?>> MENU = Registry.registerSimple("menu", () -> MenuType.ANVIL);

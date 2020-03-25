@@ -76,9 +76,6 @@ LevelSimulatedRW {
     default public void blockUpdated(BlockPos blockPos, Block block) {
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public BlockPos getSharedSpawnPos();
-
     public void playSound(@Nullable Player var1, BlockPos var2, SoundEvent var3, SoundSource var4, float var5, float var6);
 
     public void addParticle(ParticleOptions var1, double var2, double var4, double var6, double var8, double var10, double var12);

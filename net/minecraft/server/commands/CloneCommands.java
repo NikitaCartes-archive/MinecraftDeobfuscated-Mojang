@@ -118,7 +118,7 @@ public class CloneCommands {
                 cloneBlockInfo2.tag.putInt("x", cloneBlockInfo2.pos.getX());
                 cloneBlockInfo2.tag.putInt("y", cloneBlockInfo2.pos.getY());
                 cloneBlockInfo2.tag.putInt("z", cloneBlockInfo2.pos.getZ());
-                blockEntity4.load(cloneBlockInfo2.tag);
+                blockEntity4.load(cloneBlockInfo2.state, cloneBlockInfo2.tag);
                 blockEntity4.setChanged();
             }
             serverLevel.setBlock(cloneBlockInfo2.pos, cloneBlockInfo2.state, 2);

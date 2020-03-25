@@ -274,8 +274,8 @@ TickableBlockEntity {
     }
 
     @Override
-    public void load(CompoundTag compoundTag) {
-        super.load(compoundTag);
+    public void load(BlockState blockState, CompoundTag compoundTag) {
+        super.load(blockState, compoundTag);
         this.primaryPower = BeaconBlockEntity.getValidEffectById(compoundTag.getInt("Primary"));
         this.secondaryPower = BeaconBlockEntity.getValidEffectById(compoundTag.getInt("Secondary"));
         if (compoundTag.contains("CustomName", 8)) {

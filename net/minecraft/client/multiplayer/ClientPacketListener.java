@@ -678,7 +678,7 @@ implements ClientGamePacketListener {
             BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
             BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
             if (blockEntity == null) continue;
-            blockEntity.load(compoundTag);
+            blockEntity.load(this.level.getBlockState(blockPos), compoundTag);
         }
     }
 
@@ -1039,18 +1039,17 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleBlockEntityData(ClientboundBlockEntityDataPacket clientboundBlockEntityDataPacket) {
+        boolean bl;
         PacketUtils.ensureRunningOnSameThread(clientboundBlockEntityDataPacket, this, this.minecraft);
-        if (this.minecraft.level.hasChunkAt(clientboundBlockEntityDataPacket.getPos())) {
-            boolean bl;
-            BlockEntity blockEntity = this.minecraft.level.getBlockEntity(clientboundBlockEntityDataPacket.getPos());
-            int i = clientboundBlockEntityDataPacket.getType();
-            boolean bl2 = bl = i == 2 && blockEntity instanceof CommandBlockEntity;
-            if (i == 1 && blockEntity instanceof SpawnerBlockEntity || bl || i == 3 && blockEntity instanceof BeaconBlockEntity || i == 4 && blockEntity instanceof SkullBlockEntity || i == 6 && blockEntity instanceof BannerBlockEntity || i == 7 && blockEntity instanceof StructureBlockEntity || i == 8 && blockEntity instanceof TheEndGatewayBlockEntity || i == 9 && blockEntity instanceof SignBlockEntity || i == 11 && blockEntity instanceof BedBlockEntity || i == 5 && blockEntity instanceof ConduitBlockEntity || i == 12 && blockEntity instanceof JigsawBlockEntity || i == 13 && blockEntity instanceof CampfireBlockEntity || i == 14 && blockEntity instanceof BeehiveBlockEntity) {
-                blockEntity.load(clientboundBlockEntityDataPacket.getTag());
-            }
-            if (bl && this.minecraft.screen instanceof CommandBlockEditScreen) {
-                ((CommandBlockEditScreen)this.minecraft.screen).updateGui();
-            }
+        BlockPos blockPos = clientboundBlockEntityDataPacket.getPos();
+        BlockEntity blockEntity = this.minecraft.level.getBlockEntity(blockPos);
+        int i = clientboundBlockEntityDataPacket.getType();
+        boolean bl2 = bl = i == 2 && blockEntity instanceof CommandBlockEntity;
+        if (i == 1 && blockEntity instanceof SpawnerBlockEntity || bl || i == 3 && blockEntity instanceof BeaconBlockEntity || i == 4 && blockEntity instanceof SkullBlockEntity || i == 6 && blockEntity instanceof BannerBlockEntity || i == 7 && blockEntity instanceof StructureBlockEntity || i == 8 && blockEntity instanceof TheEndGatewayBlockEntity || i == 9 && blockEntity instanceof SignBlockEntity || i == 11 && blockEntity instanceof BedBlockEntity || i == 5 && blockEntity instanceof ConduitBlockEntity || i == 12 && blockEntity instanceof JigsawBlockEntity || i == 13 && blockEntity instanceof CampfireBlockEntity || i == 14 && blockEntity instanceof BeehiveBlockEntity) {
+            blockEntity.load(this.minecraft.level.getBlockState(blockPos), clientboundBlockEntityDataPacket.getTag());
+        }
+        if (bl && this.minecraft.screen instanceof CommandBlockEditScreen) {
+            ((CommandBlockEditScreen)this.minecraft.screen).updateGui();
         }
     }
 

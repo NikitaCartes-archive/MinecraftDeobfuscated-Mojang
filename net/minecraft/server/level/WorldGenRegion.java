@@ -200,22 +200,23 @@ implements LevelAccessor {
             return blockEntity;
         }
         CompoundTag compoundTag = chunkAccess.getBlockEntityNbt(blockPos);
+        BlockState blockState = chunkAccess.getBlockState(blockPos);
         if (compoundTag != null) {
             if ("DUMMY".equals(compoundTag.getString("id"))) {
-                Block block = this.getBlockState(blockPos).getBlock();
+                Block block = blockState.getBlock();
                 if (!(block instanceof EntityBlock)) {
                     return null;
                 }
                 blockEntity = ((EntityBlock)((Object)block)).newBlockEntity(this.level);
             } else {
-                blockEntity = BlockEntity.loadStatic(compoundTag);
+                blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
             }
             if (blockEntity != null) {
                 chunkAccess.setBlockEntity(blockPos, blockEntity);
                 return blockEntity;
             }
         }
-        if (chunkAccess.getBlockState(blockPos).getBlock() instanceof EntityBlock) {
+        if (blockState.getBlock() instanceof EntityBlock) {
             LOGGER.warn("Tried to access a block entity before it was created. {}", (Object)blockPos);
         }
         return null;
@@ -340,12 +341,6 @@ implements LevelAccessor {
 
     @Override
     public void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j) {
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public BlockPos getSharedSpawnPos() {
-        return this.level.getSharedSpawnPos();
     }
 
     @Override

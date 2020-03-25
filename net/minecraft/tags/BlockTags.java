@@ -27,6 +27,7 @@ public class BlockTags {
     public static final Tag<Block> WOODEN_TRAPDOORS;
     public static final Tag<Block> DOORS;
     public static final Tag<Block> SAPLINGS;
+    public static final Tag<Block> LOGS_THAT_BURN;
     public static final Tag<Block> LOGS;
     public static final Tag<Block> DARK_OAK_LOGS;
     public static final Tag<Block> OAK_LOGS;
@@ -52,6 +53,7 @@ public class BlockTags {
     public static final Tag<Block> FLOWERS;
     public static final Tag<Block> PIGLIN_REPELLENTS;
     public static final Tag<Block> GOLD_ORES;
+    public static final Tag<Block> NON_FLAMMABLE_WOOD;
     public static final Tag<Block> FLOWER_POTS;
     public static final Tag<Block> ENDERMAN_HOLDABLE;
     public static final Tag<Block> ICE;
@@ -83,6 +85,7 @@ public class BlockTags {
     public static final Tag<Block> SHULKER_BOXES;
     public static final Tag<Block> HOGLIN_REPELLENTS;
     public static final Tag<Block> SOUL_FIRE_BASE_BLOCKS;
+    public static final Tag<Block> STRIDER_WARM_BLOCKS;
 
     public static void reset(TagCollection<Block> tagCollection) {
         source = tagCollection;
@@ -112,6 +115,7 @@ public class BlockTags {
         WOODEN_TRAPDOORS = BlockTags.bind("wooden_trapdoors");
         DOORS = BlockTags.bind("doors");
         SAPLINGS = BlockTags.bind("saplings");
+        LOGS_THAT_BURN = BlockTags.bind("logs_that_burn");
         LOGS = BlockTags.bind("logs");
         DARK_OAK_LOGS = BlockTags.bind("dark_oak_logs");
         OAK_LOGS = BlockTags.bind("oak_logs");
@@ -137,6 +141,7 @@ public class BlockTags {
         FLOWERS = BlockTags.bind("flowers");
         PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
         GOLD_ORES = BlockTags.bind("gold_ores");
+        NON_FLAMMABLE_WOOD = BlockTags.bind("non_flammable_wood");
         FLOWER_POTS = BlockTags.bind("flower_pots");
         ENDERMAN_HOLDABLE = BlockTags.bind("enderman_holdable");
         ICE = BlockTags.bind("ice");
@@ -168,6 +173,7 @@ public class BlockTags {
         SHULKER_BOXES = BlockTags.bind("shulker_boxes");
         HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
         SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");
+        STRIDER_WARM_BLOCKS = BlockTags.bind("strider_warm_blocks");
     }
 
     static class Wrapper

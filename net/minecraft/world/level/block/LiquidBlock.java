@@ -125,26 +125,22 @@ implements BucketPickup {
         }
     }
 
-    public boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
+    private boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
         if (this.fluid.is(FluidTags.LAVA)) {
-            boolean bl = false;
+            boolean bl = level.getBlockState(blockPos.below()).getBlock() == Blocks.SOUL_SOIL;
             for (Direction direction : Direction.values()) {
-                if (direction == Direction.DOWN || !level.getFluidState(blockPos.relative(direction)).is(FluidTags.WATER)) continue;
-                bl = true;
-                break;
-            }
-            if (bl) {
-                FluidState fluidState = level.getFluidState(blockPos);
-                if (fluidState.isSource()) {
-                    level.setBlockAndUpdate(blockPos, Blocks.OBSIDIAN.defaultBlockState());
+                if (direction == Direction.DOWN) continue;
+                BlockPos blockPos2 = blockPos.relative(direction);
+                if (level.getFluidState(blockPos2).is(FluidTags.WATER)) {
+                    Block block = level.getFluidState(blockPos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+                    level.setBlockAndUpdate(blockPos, block.defaultBlockState());
                     this.fizz(level, blockPos);
                     return false;
                 }
-                if (fluidState.getHeight(level, blockPos) >= 0.44444445f) {
-                    level.setBlockAndUpdate(blockPos, Blocks.COBBLESTONE.defaultBlockState());
-                    this.fizz(level, blockPos);
-                    return false;
-                }
+                if (!bl || level.getBlockState(blockPos2).getBlock() != Blocks.BLUE_ICE) continue;
+                level.setBlockAndUpdate(blockPos, Blocks.BASALT.defaultBlockState());
+                this.fizz(level, blockPos);
+                return false;
             }
         }
         return true;

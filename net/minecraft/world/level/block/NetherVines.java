@@ -3,15 +3,22 @@
  */
 package net.minecraft.world.level.block;
 
-import net.minecraft.world.level.block.Block;
+import java.util.Random;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class NetherVines {
-    public static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
-
     public static boolean isValidGrowthState(BlockState blockState) {
         return blockState.isAir();
+    }
+
+    public static int getBlocksToGrowWhenBonemealed(Random random) {
+        double d = 1.0;
+        int i = 0;
+        while (random.nextDouble() < d) {
+            d *= 0.94;
+            ++i;
+        }
+        return i;
     }
 }
 

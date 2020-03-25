@@ -21,7 +21,7 @@ public class VillagerProfession {
     public static final VillagerProfession BUTCHER = VillagerProfession.register("butcher", PoiType.BUTCHER, SoundEvents.VILLAGER_WORK_BUTCHER);
     public static final VillagerProfession CARTOGRAPHER = VillagerProfession.register("cartographer", PoiType.CARTOGRAPHER, SoundEvents.VILLAGER_WORK_CARTOGRAPHER);
     public static final VillagerProfession CLERIC = VillagerProfession.register("cleric", PoiType.CLERIC, SoundEvents.VILLAGER_WORK_CLERIC);
-    public static final VillagerProfession FARMER = VillagerProfession.register("farmer", PoiType.FARMER, ImmutableSet.of(Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS), ImmutableSet.of(Blocks.FARMLAND), SoundEvents.VILLAGER_WORK_FARMER);
+    public static final VillagerProfession FARMER = VillagerProfession.register("farmer", PoiType.FARMER, ImmutableSet.of(Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.BONE_MEAL), ImmutableSet.of(Blocks.FARMLAND), SoundEvents.VILLAGER_WORK_FARMER);
     public static final VillagerProfession FISHERMAN = VillagerProfession.register("fisherman", PoiType.FISHERMAN, SoundEvents.VILLAGER_WORK_FISHERMAN);
     public static final VillagerProfession FLETCHER = VillagerProfession.register("fletcher", PoiType.FLETCHER, SoundEvents.VILLAGER_WORK_FLETCHER);
     public static final VillagerProfession LEATHERWORKER = VillagerProfession.register("leatherworker", PoiType.LEATHERWORKER, SoundEvents.VILLAGER_WORK_LEATHERWORKER);

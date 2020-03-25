@@ -16,7 +16,6 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -37,7 +36,6 @@ public class ServerTickList<T>
 implements TickList<T> {
     protected final Predicate<T> ignore;
     private final Function<T, ResourceLocation> toId;
-    private final Function<ResourceLocation, T> fromId;
     private final Set<TickNextTickData<T>> tickNextTickSet = Sets.newHashSet();
     private final TreeSet<TickNextTickData<T>> tickNextTickList = Sets.newTreeSet(TickNextTickData.createTimeComparator());
     private final ServerLevel level;
@@ -45,10 +43,9 @@ implements TickList<T> {
     private final List<TickNextTickData<T>> alreadyTicked = Lists.newArrayList();
     private final Consumer<TickNextTickData<T>> ticker;
 
-    public ServerTickList(ServerLevel serverLevel, Predicate<T> predicate, Function<T, ResourceLocation> function, Function<ResourceLocation, T> function2, Consumer<TickNextTickData<T>> consumer) {
+    public ServerTickList(ServerLevel serverLevel, Predicate<T> predicate, Function<T, ResourceLocation> function, Consumer<TickNextTickData<T>> consumer) {
         this.ignore = predicate;
         this.toId = function;
-        this.fromId = function2;
         this.level = serverLevel;
         this.ticker = consumer;
     }
@@ -67,7 +64,7 @@ implements TickList<T> {
         this.level.getProfiler().push("cleaning");
         while (i > 0 && iterator.hasNext()) {
             tickNextTickData = iterator.next();
-            if (tickNextTickData.delay > this.level.getGameTime()) break;
+            if (tickNextTickData.triggerTick > this.level.getGameTime()) break;
             if (!serverChunkCache.isTickingChunk(tickNextTickData.pos)) continue;
             iterator.remove();
             this.tickNextTickSet.remove(tickNextTickData);
@@ -98,11 +95,6 @@ implements TickList<T> {
     @Override
     public boolean willTickThisTick(BlockPos blockPos, T object) {
         return this.currentlyTicking.contains(new TickNextTickData<T>(blockPos, object));
-    }
-
-    @Override
-    public void addAll(Stream<TickNextTickData<T>> stream) {
-        stream.forEach(this::addTickData);
     }
 
     public List<TickNextTickData<T>> fetchTicksInChunk(ChunkPos chunkPos, boolean bl, boolean bl2) {
@@ -149,7 +141,7 @@ implements TickList<T> {
             if (!boundingBox.isInside(tickNextTickData.pos)) continue;
             BlockPos blockPos2 = tickNextTickData.pos.offset(blockPos);
             T object = tickNextTickData.getType();
-            this.addTickData(new TickNextTickData<T>(blockPos2, object, tickNextTickData.delay, tickNextTickData.priority));
+            this.addTickData(new TickNextTickData<T>(blockPos2, object, tickNextTickData.triggerTick, tickNextTickData.priority));
         }
     }
 
@@ -158,7 +150,7 @@ implements TickList<T> {
         return ServerTickList.saveTickList(this.toId, list, this.level.getGameTime());
     }
 
-    public static <T> ListTag saveTickList(Function<T, ResourceLocation> function, Iterable<TickNextTickData<T>> iterable, long l) {
+    private static <T> ListTag saveTickList(Function<T, ResourceLocation> function, Iterable<TickNextTickData<T>> iterable, long l) {
         ListTag listTag = new ListTag();
         for (TickNextTickData<T> tickNextTickData : iterable) {
             CompoundTag compoundTag = new CompoundTag();
@@ -166,7 +158,7 @@ implements TickList<T> {
             compoundTag.putInt("x", tickNextTickData.pos.getX());
             compoundTag.putInt("y", tickNextTickData.pos.getY());
             compoundTag.putInt("z", tickNextTickData.pos.getZ());
-            compoundTag.putInt("t", (int)(tickNextTickData.delay - l));
+            compoundTag.putInt("t", (int)(tickNextTickData.triggerTick - l));
             compoundTag.putInt("p", tickNextTickData.priority.getValue());
             listTag.add(compoundTag);
         }

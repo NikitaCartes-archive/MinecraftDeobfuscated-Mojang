@@ -265,7 +265,7 @@ public class ChunkSerializer {
         if (tickList instanceof ProtoTickList) {
             compoundTag2.put("ToBeTicked", ((ProtoTickList)tickList).save());
         } else if (tickList instanceof ChunkTickList) {
-            compoundTag2.put("TileTicks", ((ChunkTickList)tickList).save(serverLevel.getGameTime()));
+            compoundTag2.put("TileTicks", ((ChunkTickList)tickList).save());
         } else {
             compoundTag2.put("TileTicks", ((ServerTickList)serverLevel.getBlockTicks()).save(chunkPos));
         }
@@ -273,7 +273,7 @@ public class ChunkSerializer {
         if (tickList2 instanceof ProtoTickList) {
             compoundTag2.put("LiquidsToBeTicked", ((ProtoTickList)tickList2).save());
         } else if (tickList2 instanceof ChunkTickList) {
-            compoundTag2.put("LiquidTicks", ((ChunkTickList)tickList2).save(serverLevel.getGameTime()));
+            compoundTag2.put("LiquidTicks", ((ChunkTickList)tickList2).save());
         } else {
             compoundTag2.put("LiquidTicks", ((ServerTickList)serverLevel.getLiquidTicks()).save(chunkPos));
         }
@@ -315,7 +315,8 @@ public class ChunkSerializer {
                 levelChunk.setBlockEntityNbt(compoundTag3);
                 continue;
             }
-            BlockEntity blockEntity = BlockEntity.loadStatic(compoundTag3);
+            BlockPos blockPos = new BlockPos(compoundTag3.getInt("x"), compoundTag3.getInt("y"), compoundTag3.getInt("z"));
+            BlockEntity blockEntity = BlockEntity.loadStatic(levelChunk.getBlockState(blockPos), compoundTag3);
             if (blockEntity == null) continue;
             levelChunk.addBlockEntity(blockEntity);
         }

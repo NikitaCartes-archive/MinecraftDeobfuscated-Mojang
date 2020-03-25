@@ -93,7 +93,7 @@ public enum NoteBlockInstrument implements StringRepresentable
         if (material == Material.GLASS) {
             return HAT;
         }
-        if (material == Material.WOOD) {
+        if (material == Material.WOOD || material == Material.NETHER_WOOD) {
             return BASS;
         }
         return HARP;

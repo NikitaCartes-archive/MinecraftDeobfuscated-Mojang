@@ -425,6 +425,10 @@ public class PiglinAi {
         return piglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS).orElse(ImmutableList.of());
     }
 
+    private static List<Piglin> getAdultPiglins(Piglin piglin) {
+        return piglin.getBrain().getMemory(MemoryModuleType.NEAREST_ADULT_PIGLINS).orElse(ImmutableList.of());
+    }
+
     public static boolean isWearingGold(LivingEntity livingEntity) {
         Iterable<ItemStack> iterable = livingEntity.getArmorSlots();
         for (ItemStack itemStack : iterable) {
@@ -445,7 +449,7 @@ public class PiglinAi {
     }
 
     protected static void broadcastAngerTarget(Piglin piglin2, LivingEntity livingEntity) {
-        PiglinAi.getVisibleAdultPiglins(piglin2).forEach(piglin -> PiglinAi.setAngerTargetIfCloserThanCurrent(piglin, livingEntity));
+        PiglinAi.getAdultPiglins(piglin2).forEach(piglin -> PiglinAi.setAngerTargetIfCloserThanCurrent(piglin, livingEntity));
     }
 
     protected static void broadcastDontKillAnyMoreHoglinsForAWhile(Piglin piglin) {

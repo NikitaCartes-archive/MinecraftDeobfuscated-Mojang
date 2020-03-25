@@ -147,6 +147,9 @@ extends Item {
             return Optional.empty();
         }
         mob.setBaby(true);
+        if (!mob.isBaby()) {
+            return Optional.empty();
+        }
         mob.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0f, 0.0f);
         level.addFreshEntity(mob);
         if (itemStack.hasCustomHoverName()) {

@@ -166,13 +166,7 @@ extends PathNavigation {
                 double g = (double)r + 0.5 - vec3.z;
                 if (f * d + g * e < 0.0) continue;
                 BlockPathTypes blockPathTypes = this.nodeEvaluator.getBlockPathType(this.level, q, j - 1, r, this.mob, l, m, n, true, true);
-                if (blockPathTypes == BlockPathTypes.WATER) {
-                    return false;
-                }
-                if (blockPathTypes == BlockPathTypes.LAVA) {
-                    return false;
-                }
-                if (blockPathTypes == BlockPathTypes.OPEN) {
+                if (!this.hasValidPathType(blockPathTypes)) {
                     return false;
                 }
                 blockPathTypes = this.nodeEvaluator.getBlockPathType(this.level, q, j, r, this.mob, l, m, n, true, true);
@@ -185,6 +179,16 @@ extends PathNavigation {
             }
         }
         return true;
+    }
+
+    protected boolean hasValidPathType(BlockPathTypes blockPathTypes) {
+        if (blockPathTypes == BlockPathTypes.WATER) {
+            return false;
+        }
+        if (blockPathTypes == BlockPathTypes.LAVA) {
+            return false;
+        }
+        return blockPathTypes != BlockPathTypes.OPEN;
     }
 
     private boolean canWalkAbove(int i, int j, int k, int l, int m, int n, Vec3 vec3, double d, double e) {

@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ModelTemplates {
     public static final ModelTemplate CUBE = ModelTemplates.create("cube", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN);
+    public static final ModelTemplate CUBE_DIRECTIONAL = ModelTemplates.create("cube_directional", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN);
     public static final ModelTemplate CUBE_ALL = ModelTemplates.create("cube_all", TextureSlot.ALL);
     public static final ModelTemplate CUBE_MIRRORED_ALL = ModelTemplates.create("cube_mirrored_all", "_mirrored", TextureSlot.ALL);
     public static final ModelTemplate CUBE_COLUMN = ModelTemplates.create("cube_column", TextureSlot.END, TextureSlot.SIDE);

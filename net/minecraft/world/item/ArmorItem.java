@@ -118,5 +118,9 @@ extends Item {
     public int getDefense() {
         return this.defense;
     }
+
+    public float getToughness() {
+        return this.toughness;
+    }
 }
 

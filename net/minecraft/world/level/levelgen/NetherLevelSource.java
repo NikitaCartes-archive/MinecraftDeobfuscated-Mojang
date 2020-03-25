@@ -10,6 +10,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NetherGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -85,6 +86,11 @@ extends NoiseBasedChunkGenerator<NetherGeneratorSettings> {
     @Override
     public int getSeaLevel() {
         return 32;
+    }
+
+    @Override
+    public int getBaseHeight(int i, int j, Heightmap.Types types) {
+        return this.getGenDepth() / 2;
     }
 }
 

@@ -95,6 +95,7 @@ import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -2402,34 +2403,43 @@ CommandSource {
         Direction direction2 = direction.getClockWise();
         int[][] is = new int[][]{{direction2.getStepX(), direction2.getStepZ()}, {-direction2.getStepX(), -direction2.getStepZ()}, {-direction.getStepX() + direction2.getStepX(), -direction.getStepZ() + direction2.getStepZ()}, {-direction.getStepX() - direction2.getStepX(), -direction.getStepZ() - direction2.getStepZ()}, {direction.getStepX() + direction2.getStepX(), direction.getStepZ() + direction2.getStepZ()}, {direction.getStepX() - direction2.getStepX(), direction.getStepZ() - direction2.getStepZ()}, {-direction.getStepX(), -direction.getStepZ()}, {direction.getStepX(), direction.getStepZ()}};
         BlockPos blockPos = this.blockPosition();
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
         for (Pose pose : immutableList) {
-            double d = livingEntity.getDimensions((Pose)pose).height;
+            EntityDimensions entityDimensions = livingEntity.getDimensions(pose);
+            float f = Math.min(entityDimensions.width, 1.0f) / 2.0f;
+            float g = 0.5f - f;
+            float h = 0.5f + f;
             Iterator iterator = POSE_DISMOUNT_HEIGHTS.get((Object)pose).iterator();
             while (iterator.hasNext()) {
                 int i = (Integer)iterator.next();
                 for (int[] js : is) {
-                    BlockPos blockPos2 = blockPos.offset(js[0], i, js[1]);
-                    double e = this.level.getRelativeFloorHeight(blockPos2);
-                    if (Double.isInfinite(e) || e >= 1.0) continue;
-                    double f = (double)blockPos2.getY() + e;
-                    AABB aABB = new AABB(blockPos2.getX(), f, blockPos2.getZ(), (double)blockPos2.getX() + 1.0, f + d, (double)blockPos2.getZ() + 1.0);
+                    mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY() + i, blockPos.getZ() + js[1]);
+                    double d = this.level.getRelativeFloorHeight(mutableBlockPos, blockState -> {
+                        if (blockState.is(BlockTags.CLIMBABLE)) {
+                            return true;
+                        }
+                        return blockState.getBlock() instanceof TrapDoorBlock && blockState.getValue(TrapDoorBlock.OPEN) != false;
+                    });
+                    if (Double.isInfinite(d) || d >= 1.0) continue;
+                    double e = (double)mutableBlockPos.getY() + d;
+                    AABB aABB = new AABB((float)mutableBlockPos.getX() + g, e, (float)mutableBlockPos.getZ() + g, (float)mutableBlockPos.getX() + h, e + (double)entityDimensions.height, (float)mutableBlockPos.getZ() + h);
                     if (!this.level.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty)) continue;
                     livingEntity.setPose(pose);
-                    return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + e, (double)blockPos2.getZ() + 0.5);
+                    return Vec3.upFromBottomCenterOf(mutableBlockPos, d);
                 }
             }
         }
-        double g = this.getBoundingBox().maxY;
-        BlockPos blockPos3 = new BlockPos((double)blockPos.getX(), g, (double)blockPos.getZ());
+        double j = this.getBoundingBox().maxY;
+        mutableBlockPos.set((double)blockPos.getX(), j, (double)blockPos.getZ());
         for (Pose pose2 : immutableList) {
-            double h = livingEntity.getDimensions((Pose)pose2).height;
-            double j = (double)blockPos3.getY() + this.level.getRelativeCeilingHeight(blockPos3, g - (double)blockPos3.getY() + h);
-            if (!(g + h <= j)) continue;
+            double k = livingEntity.getDimensions((Pose)pose2).height;
+            double l = (double)mutableBlockPos.getY() + this.level.getRelativeCeilingHeight(mutableBlockPos, j - (double)mutableBlockPos.getY() + k);
+            if (!(j + k <= l)) continue;
             livingEntity.setPose(pose2);
             break;
         }
-        return new Vec3(this.getX(), g, this.getZ());
+        return new Vec3(this.getX(), j, this.getZ());
     }
 
     @Nullable
