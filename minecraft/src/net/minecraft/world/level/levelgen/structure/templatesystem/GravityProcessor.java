@@ -26,6 +26,7 @@ public class GravityProcessor extends StructureProcessor {
 	public StructureTemplate.StructureBlockInfo processBlock(
 		LevelReader levelReader,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings

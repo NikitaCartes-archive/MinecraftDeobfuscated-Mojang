@@ -147,6 +147,9 @@ public class Items {
 	public static final Item NETHER_SPROUTS = registerBlock(Blocks.NETHER_SPROUTS, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item WEEPING_VINES = registerBlock(Blocks.WEEPING_VINES, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item TWISTING_VINES = registerBlock(Blocks.TWISTING_VINES, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item SUGAR_CANE = registerBlock(Blocks.SUGAR_CANE, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item KELP = registerBlock(Blocks.KELP, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item BAMBOO = registerBlock(Blocks.BAMBOO, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GOLD_BLOCK = registerBlock(Blocks.GOLD_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item IRON_BLOCK = registerBlock(Blocks.IRON_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item OAK_SLAB = registerBlock(Blocks.OAK_SLAB, CreativeModeTab.TAB_BUILDING_BLOCKS);
@@ -875,10 +878,7 @@ public class Items {
 	);
 	public static final Item BRICK = registerItem("brick", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item CLAY_BALL = registerItem("clay_ball", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item SUGAR_CANE = registerBlock(Blocks.SUGAR_CANE, CreativeModeTab.TAB_MISC);
-	public static final Item KELP = registerBlock(Blocks.KELP, CreativeModeTab.TAB_MISC);
 	public static final Item DRIED_KELP_BLOCK = registerBlock(Blocks.DRIED_KELP_BLOCK, CreativeModeTab.TAB_BUILDING_BLOCKS);
-	public static final Item BAMBOO = registerBlock(Blocks.BAMBOO, CreativeModeTab.TAB_MATERIALS);
 	public static final Item PAPER = registerItem("paper", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item BOOK = registerItem("book", new BookItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item SLIME_BALL = registerItem("slime_ball", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -1124,6 +1124,9 @@ public class Items {
 	public static final Item STRAY_SPAWN_EGG = registerItem(
 		"stray_spawn_egg", new SpawnEggItem(EntityType.STRAY, 6387319, 14543594, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item STRIDER_SPAWN_EGG = registerItem(
+		"strider_spawn_egg", new SpawnEggItem(EntityType.STRIDER, 10236982, 5065037, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item TRADER_LLAMA_SPAWN_EGG = registerItem(
 		"trader_llama_spawn_egg", new SpawnEggItem(EntityType.TRADER_LLAMA, 15377456, 4547222, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
@@ -1214,7 +1217,10 @@ public class Items {
 		new StandingAndWallBlockItem(Blocks.DRAGON_HEAD, Blocks.DRAGON_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item CARROT_ON_A_STICK = registerItem(
-		"carrot_on_a_stick", new CarrotOnAStickItem(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION))
+		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG)
+	);
+	public static final Item WARPED_FUNGUS_ON_A_STICK = registerItem(
+		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER)
 	);
 	public static final Item NETHER_STAR = registerItem(
 		"nether_star", new SimpleFoiledItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON))
@@ -1452,6 +1458,7 @@ public class Items {
 	);
 	public static final Item HONEY_BLOCK = registerBlock(Blocks.HONEY_BLOCK, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item HONEYCOMB_BLOCK = registerBlock(Blocks.HONEYCOMB_BLOCK, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item LODESTONE = registerBlock(Blocks.LODESTONE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item NETHERITE_BLOCK = registerBlock(
 		new BlockItem(Blocks.NETHERITE_BLOCK, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant())
 	);

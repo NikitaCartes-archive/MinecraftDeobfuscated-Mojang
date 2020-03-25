@@ -204,6 +204,9 @@ public class SoundType {
 		SoundEvents.ANCIENT_DEBRIS_HIT,
 		SoundEvents.ANCIENT_DEBRIS_FALL
 	);
+	public static final SoundType LODESTONE = new SoundType(
+		1.0F, 1.0F, SoundEvents.LODESTONE_BREAK, SoundEvents.LODESTONE_STEP, SoundEvents.LODESTONE_PLACE, SoundEvents.LODESTONE_HIT, SoundEvents.LODESTONE_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

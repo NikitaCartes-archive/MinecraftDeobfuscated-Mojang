@@ -8,6 +8,9 @@ public class ModelTemplates {
 	public static final ModelTemplate CUBE = create(
 		"cube", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN
 	);
+	public static final ModelTemplate CUBE_DIRECTIONAL = create(
+		"cube_directional", TextureSlot.PARTICLE, TextureSlot.NORTH, TextureSlot.SOUTH, TextureSlot.EAST, TextureSlot.WEST, TextureSlot.UP, TextureSlot.DOWN
+	);
 	public static final ModelTemplate CUBE_ALL = create("cube_all", TextureSlot.ALL);
 	public static final ModelTemplate CUBE_MIRRORED_ALL = create("cube_mirrored_all", "_mirrored", TextureSlot.ALL);
 	public static final ModelTemplate CUBE_COLUMN = create("cube_column", TextureSlot.END, TextureSlot.SIDE);

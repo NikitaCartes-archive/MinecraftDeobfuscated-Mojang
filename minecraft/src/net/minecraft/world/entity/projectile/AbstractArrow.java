@@ -29,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -158,13 +159,8 @@ public abstract class AbstractArrow extends Projectile {
 		}
 
 		if (this.inGround && !bl) {
-			if (this.lastState != blockState && this.level.noCollision(this.getBoundingBox().inflate(0.06))) {
-				this.inGround = false;
-				this.setDeltaMovement(
-					vec3.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F))
-				);
-				this.life = 0;
-				this.flightTime = 0;
+			if (this.lastState != blockState && this.shouldFall()) {
+				this.startFalling();
 			} else if (!this.level.isClientSide) {
 				this.tickDespawn();
 			}
@@ -269,6 +265,28 @@ public abstract class AbstractArrow extends Projectile {
 
 			this.setPos(h, j, k);
 			this.checkInsideBlocks();
+		}
+	}
+
+	private boolean shouldFall() {
+		return this.inGround && this.level.noCollision(new AABB(this.position(), this.position()).inflate(0.06));
+	}
+
+	private void startFalling() {
+		this.inGround = false;
+		Vec3 vec3 = this.getDeltaMovement();
+		this.setDeltaMovement(
+			vec3.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F))
+		);
+		this.life = 0;
+		this.flightTime = 0;
+	}
+
+	@Override
+	public void move(MoverType moverType, Vec3 vec3) {
+		super.move(moverType, vec3);
+		if (moverType != MoverType.SELF && this.shouldFall()) {
+			this.startFalling();
 		}
 	}
 

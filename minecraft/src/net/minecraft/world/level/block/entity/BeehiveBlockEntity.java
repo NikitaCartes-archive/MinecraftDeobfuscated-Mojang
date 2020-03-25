@@ -238,8 +238,8 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.stored.clear();
 		ListTag listTag = compoundTag.getList("Bees", 10);
 

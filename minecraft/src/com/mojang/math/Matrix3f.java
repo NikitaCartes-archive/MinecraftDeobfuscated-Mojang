@@ -6,7 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.Triple;
 
-@Environment(EnvType.CLIENT)
 public final class Matrix3f {
 	private static final float G = 3.0F + 2.0F * (float)Math.sqrt(2.0);
 	private static final float CS = (float)Math.cos(Math.PI / 8);
@@ -50,6 +49,7 @@ public final class Matrix3f {
 		this.m12 = 2.0F * (n - p);
 	}
 
+	@Environment(EnvType.CLIENT)
 	public static Matrix3f createScaleMatrix(float f, float g, float h) {
 		Matrix3f matrix3f = new Matrix3f();
 		matrix3f.m00 = f;
@@ -82,6 +82,7 @@ public final class Matrix3f {
 		this.m22 = matrix3f.m22;
 	}
 
+	@Environment(EnvType.CLIENT)
 	private static Pair<Float, Float> approxGivensQuat(float f, float g, float h) {
 		float i = 2.0F * (f - h);
 		if (G * g * g < i * i) {
@@ -92,6 +93,7 @@ public final class Matrix3f {
 		}
 	}
 
+	@Environment(EnvType.CLIENT)
 	private static Pair<Float, Float> qrGivensQuat(float f, float g) {
 		float h = (float)Math.hypot((double)f, (double)g);
 		float i = h > 1.0E-6F ? g : 0.0F;
@@ -108,6 +110,7 @@ public final class Matrix3f {
 		return Pair.of(i, j);
 	}
 
+	@Environment(EnvType.CLIENT)
 	private static Quaternion stepJacobi(Matrix3f matrix3f) {
 		Matrix3f matrix3f2 = new Matrix3f();
 		Quaternion quaternion = Quaternion.ONE.copy();
@@ -177,6 +180,7 @@ public final class Matrix3f {
 		return quaternion;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public void transpose() {
 		float f = this.m01;
 		this.m01 = this.m10;
@@ -189,6 +193,7 @@ public final class Matrix3f {
 		this.m21 = f;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public Triple<Quaternion, Vector3f, Quaternion> svdDecompose() {
 		Quaternion quaternion = Quaternion.ONE.copy();
 		Quaternion quaternion2 = Quaternion.ONE.copy();
@@ -292,6 +297,7 @@ public final class Matrix3f {
 		return 31 * i + (this.m22 != 0.0F ? Float.floatToIntBits(this.m22) : 0);
 	}
 
+	@Environment(EnvType.CLIENT)
 	public void load(Matrix3f matrix3f) {
 		this.m00 = matrix3f.m00;
 		this.m01 = matrix3f.m01;
@@ -328,6 +334,7 @@ public final class Matrix3f {
 		return stringBuilder.toString();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public void setIdentity() {
 		this.m00 = 1.0F;
 		this.m01 = 0.0F;
@@ -340,6 +347,7 @@ public final class Matrix3f {
 		this.m22 = 1.0F;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public float adjugateAndDet() {
 		float f = this.m11 * this.m22 - this.m12 * this.m21;
 		float g = -(this.m10 * this.m22 - this.m12 * this.m20);
@@ -363,6 +371,7 @@ public final class Matrix3f {
 		return o;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean invert() {
 		float f = this.adjugateAndDet();
 		if (Math.abs(f) > 1.0E-6F) {
@@ -370,6 +379,32 @@ public final class Matrix3f {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	public void set(int i, int j, float f) {
+		if (i == 0) {
+			if (j == 0) {
+				this.m00 = f;
+			} else if (j == 1) {
+				this.m01 = f;
+			} else {
+				this.m02 = f;
+			}
+		} else if (i == 1) {
+			if (j == 0) {
+				this.m10 = f;
+			} else if (j == 1) {
+				this.m11 = f;
+			} else {
+				this.m12 = f;
+			}
+		} else if (j == 0) {
+			this.m20 = f;
+		} else if (j == 1) {
+			this.m21 = f;
+		} else {
+			this.m22 = f;
 		}
 	}
 
@@ -394,10 +429,12 @@ public final class Matrix3f {
 		this.m22 = n;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public void mul(Quaternion quaternion) {
 		this.mul(new Matrix3f(quaternion));
 	}
 
+	@Environment(EnvType.CLIENT)
 	public void mul(float f) {
 		this.m00 *= f;
 		this.m01 *= f;
@@ -410,6 +447,7 @@ public final class Matrix3f {
 		this.m22 *= f;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public Matrix3f copy() {
 		return new Matrix3f(this);
 	}

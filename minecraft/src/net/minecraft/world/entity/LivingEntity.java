@@ -1775,7 +1775,7 @@ public abstract class LivingEntity extends Entity {
 
 	private void dismountVehicle(Entity entity) {
 		Vec3 vec3;
-		if (!this.removed && !this.level.getBlockState(entity.blockPosition()).getBlock().is(BlockTags.PORTALS)) {
+		if (!entity.removed && !this.level.getBlockState(entity.blockPosition()).getBlock().is(BlockTags.PORTALS)) {
 			vec3 = entity.getDismountLocationForPassenger(this);
 		} else {
 			vec3 = new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ());
@@ -1823,6 +1823,10 @@ public abstract class LivingEntity extends Entity {
 		return 0.8F;
 	}
 
+	public boolean canFloatInLava() {
+		return false;
+	}
+
 	public void travel(Vec3 vec3) {
 		if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
 			double d = 0.08;
@@ -1842,35 +1846,35 @@ public abstract class LivingEntity extends Entity {
 
 						Vec3 vec36 = this.getLookAngle();
 						float f = this.xRot * (float) (Math.PI / 180.0);
-						double j = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-						double k = Math.sqrt(getHorizontalDistanceSqr(vec35));
-						double i = vec36.length();
-						float l = Mth.cos(f);
-						l = (float)((double)l * (double)l * Math.min(1.0, i / 0.4));
-						vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + (double)l * 0.75), 0.0);
-						if (vec35.y < 0.0 && j > 0.0) {
-							double m = vec35.y * -0.1 * (double)l;
-							vec35 = vec35.add(vec36.x * m / j, m, vec36.z * m / j);
+						double k = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
+						double l = Math.sqrt(getHorizontalDistanceSqr(vec35));
+						double m = vec36.length();
+						float n = Mth.cos(f);
+						n = (float)((double)n * (double)n * Math.min(1.0, m / 0.4));
+						vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + (double)n * 0.75), 0.0);
+						if (vec35.y < 0.0 && k > 0.0) {
+							double o = vec35.y * -0.1 * (double)n;
+							vec35 = vec35.add(vec36.x * o / k, o, vec36.z * o / k);
 						}
 
-						if (f < 0.0F && j > 0.0) {
-							double m = k * (double)(-Mth.sin(f)) * 0.04;
-							vec35 = vec35.add(-vec36.x * m / j, m * 3.2, -vec36.z * m / j);
+						if (f < 0.0F && k > 0.0) {
+							double o = l * (double)(-Mth.sin(f)) * 0.04;
+							vec35 = vec35.add(-vec36.x * o / k, o * 3.2, -vec36.z * o / k);
 						}
 
-						if (j > 0.0) {
-							vec35 = vec35.add((vec36.x / j * k - vec35.x) * 0.1, 0.0, (vec36.z / j * k - vec35.z) * 0.1);
+						if (k > 0.0) {
+							vec35 = vec35.add((vec36.x / k * l - vec35.x) * 0.1, 0.0, (vec36.z / k * l - vec35.z) * 0.1);
 						}
 
 						this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
 						this.move(MoverType.SELF, this.getDeltaMovement());
 						if (this.horizontalCollision && !this.level.isClientSide) {
-							double m = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
-							double n = k - m;
-							float o = (float)(n * 10.0 - 3.0);
-							if (o > 0.0F) {
-								this.playSound(this.getFallDamageSound((int)o), 1.0F, 1.0F);
-								this.hurt(DamageSource.FLY_INTO_WALL, o);
+							double o = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
+							double p = l - o;
+							float q = (float)(p * 10.0 - 3.0);
+							if (q > 0.0F) {
+								this.playSound(this.getFallDamageSound((int)q), 1.0F, 1.0F);
+								this.hurt(DamageSource.FLY_INTO_WALL, q);
 							}
 						}
 
@@ -1879,31 +1883,34 @@ public abstract class LivingEntity extends Entity {
 						}
 					} else {
 						BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
-						float p = this.level.getBlockState(blockPos).getBlock().getFriction();
-						float fx = this.onGround ? p * 0.91F : 0.91F;
-						this.moveRelative(this.getFrictionInfluencedSpeed(p), vec3);
-						this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
-						this.move(MoverType.SELF, this.getDeltaMovement());
-						Vec3 vec37 = this.getDeltaMovement();
-						if ((this.horizontalCollision || this.jumping) && this.onClimbable()) {
-							vec37 = new Vec3(vec37.x, 0.2, vec37.z);
-						}
-
-						double q = vec37.y;
+						float j = this.level.getBlockState(blockPos).getBlock().getFriction();
+						float fx = this.onGround ? j * 0.91F : 0.91F;
+						Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, j);
+						double r = vec37.y;
 						if (this.hasEffect(MobEffects.LEVITATION)) {
-							q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
+							r += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
 							this.fallDistance = 0.0F;
 						} else if (this.level.isClientSide && !this.level.hasChunkAt(blockPos)) {
 							if (this.getY() > 0.0) {
-								q = -0.1;
+								r = -0.1;
 							} else {
-								q = 0.0;
+								r = 0.0;
 							}
 						} else if (!this.isNoGravity()) {
-							q -= d;
+							r -= d;
 						}
 
-						this.setDeltaMovement(vec37.x * (double)fx, q * 0.98F, vec37.z * (double)fx);
+						this.setDeltaMovement(vec37.x * (double)fx, r * 0.98F, vec37.z * (double)fx);
+					}
+				} else if (this.canFloatInLava()) {
+					float i = 0.6F;
+					float j = 0.54600006F;
+					Vec3 vec34 = this.handleRelativeFrictionAndCalculateMovement(vec3, 0.54600006F);
+					vec34 = vec34.multiply(1.0, 0.8F, 1.0);
+					vec34 = this.getFluidFallingAdjustedMovement(d, bl, vec34);
+					this.setDeltaMovement(vec34.x * 0.54600006F, vec34.y, vec34.z * 0.54600006F);
+					if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + this.yo, vec34.z)) {
+						this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
 					}
 				} else {
 					double e = this.getY();
@@ -1921,7 +1928,7 @@ public abstract class LivingEntity extends Entity {
 				}
 			} else {
 				double ex = this.getY();
-				float fxx = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
+				float fx = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
 				float g = 0.02F;
 				float h = (float)EnchantmentHelper.getDepthStrider(this);
 				if (h > 3.0F) {
@@ -1933,12 +1940,12 @@ public abstract class LivingEntity extends Entity {
 				}
 
 				if (h > 0.0F) {
-					fxx += (0.54600006F - fxx) * h / 3.0F;
+					fx += (0.54600006F - fx) * h / 3.0F;
 					g += (this.getSpeed() - g) * h / 3.0F;
 				}
 
 				if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
-					fxx = 0.96F;
+					fx = 0.96F;
 				}
 
 				this.moveRelative(g, vec3);
@@ -1948,20 +1955,9 @@ public abstract class LivingEntity extends Entity {
 					vec32 = new Vec3(vec32.x, 0.2, vec32.z);
 				}
 
-				this.setDeltaMovement(vec32.multiply((double)fxx, 0.8F, (double)fxx));
-				if (!this.isNoGravity() && !this.isSprinting()) {
-					Vec3 vec33 = this.getDeltaMovement();
-					double ix;
-					if (bl && Math.abs(vec33.y - 0.005) >= 0.003 && Math.abs(vec33.y - d / 16.0) < 0.003) {
-						ix = -0.003;
-					} else {
-						ix = vec33.y - d / 16.0;
-					}
-
-					this.setDeltaMovement(vec33.x, ix, vec33.z);
-				}
-
-				Vec3 vec33 = this.getDeltaMovement();
+				this.setDeltaMovement(vec32.multiply((double)fx, 0.8F, (double)fx));
+				Vec3 vec33 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
+				this.setDeltaMovement(vec33);
 				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + ex, vec33.z)) {
 					this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
 				}
@@ -1970,15 +1966,42 @@ public abstract class LivingEntity extends Entity {
 
 		this.animationSpeedOld = this.animationSpeed;
 		double dx = this.getX() - this.xo;
-		double r = this.getZ() - this.zo;
-		double s = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0;
-		float gx = Mth.sqrt(dx * dx + s * s + r * r) * 4.0F;
+		double s = this.getZ() - this.zo;
+		double t = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0;
+		float gx = Mth.sqrt(dx * dx + t * t + s * s) * 4.0F;
 		if (gx > 1.0F) {
 			gx = 1.0F;
 		}
 
 		this.animationSpeed = this.animationSpeed + (gx - this.animationSpeed) * 0.4F;
 		this.animationPosition = this.animationPosition + this.animationSpeed;
+	}
+
+	public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
+		this.moveRelative(this.getFrictionInfluencedSpeed(f), vec3);
+		this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
+		this.move(MoverType.SELF, this.getDeltaMovement());
+		Vec3 vec32 = this.getDeltaMovement();
+		if ((this.horizontalCollision || this.jumping) && this.onClimbable()) {
+			vec32 = new Vec3(vec32.x, 0.2, vec32.z);
+		}
+
+		return vec32;
+	}
+
+	public Vec3 getFluidFallingAdjustedMovement(double d, boolean bl, Vec3 vec3) {
+		if (!this.isNoGravity() && !this.isSprinting()) {
+			double e;
+			if (bl && Math.abs(vec3.y - 0.005) >= 0.003 && Math.abs(vec3.y - d / 16.0) < 0.003) {
+				e = -0.003;
+			} else {
+				e = vec3.y - d / 16.0;
+			}
+
+			return new Vec3(vec3.x, e, vec3.z);
+		} else {
+			return vec3;
+		}
 	}
 
 	private Vec3 handleOnClimbable(Vec3 vec3) {
@@ -2516,6 +2539,7 @@ public abstract class LivingEntity extends Entity {
 	private void updatingUsingItem() {
 		if (this.isUsingItem()) {
 			if (ItemStack.isSameIgnoreDurability(this.getItemInHand(this.getUsedItemHand()), this.useItem)) {
+				this.useItem = this.getItemInHand(this.getUsedItemHand());
 				this.useItem.onUseTick(this.level, this, this.getUseItemRemainingTicks());
 				if (this.shouldTriggerItemUseEffects()) {
 					this.triggerItemUseEffects(this.useItem, 5);

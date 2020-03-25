@@ -50,6 +50,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -128,8 +129,19 @@ public abstract class Mob extends LivingEntity {
 		return new GroundPathNavigation(this, level);
 	}
 
+	protected boolean shouldPassengersInheritMalus() {
+		return false;
+	}
+
 	public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
-		Float float_ = (Float)this.pathfindingMalus.get(blockPathTypes);
+		Mob mob;
+		if (this.getVehicle() instanceof Mob && ((Mob)this.getVehicle()).shouldPassengersInheritMalus()) {
+			mob = (Mob)this.getVehicle();
+		} else {
+			mob = this;
+		}
+
+		Float float_ = (Float)mob.pathfindingMalus.get(blockPathTypes);
 		return float_ == null ? blockPathTypes.getMalus() : float_;
 	}
 
@@ -498,7 +510,7 @@ public abstract class Mob extends LivingEntity {
 	public boolean equipItemIfPossible(ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-		boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+		boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2);
 		if (bl && this.canHoldItem(itemStack)) {
 			double d = (double)this.getEquipmentDropChance(equipmentSlot);
 			if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1F, 0.0F) < d) {
@@ -528,31 +540,64 @@ public abstract class Mob extends LivingEntity {
 		}
 	}
 
-	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
 		if (itemStack2.isEmpty()) {
 			return true;
-		} else if (equipmentSlot.getType() == EquipmentSlot.Type.HAND) {
-			if (itemStack.getItem() instanceof SwordItem && !(itemStack2.getItem() instanceof SwordItem)) {
+		} else if (itemStack.getItem() instanceof SwordItem) {
+			if (!(itemStack2.getItem() instanceof SwordItem)) {
 				return true;
-			} else if (itemStack.getItem() instanceof SwordItem) {
+			} else {
 				SwordItem swordItem = (SwordItem)itemStack.getItem();
 				SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
-				return swordItem.getDamage() != swordItem2.getDamage()
-					? swordItem.getDamage() > swordItem2.getDamage()
-					: itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
-			} else {
-				return itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem ? itemStack.hasTag() && !itemStack2.hasTag() : false;
+				return swordItem.getDamage() != swordItem2.getDamage() ? swordItem.getDamage() > swordItem2.getDamage() : this.canReplaceEqualItem(itemStack, itemStack2);
 			}
-		} else if (itemStack.getItem() instanceof ArmorItem && !(itemStack2.getItem() instanceof ArmorItem)) {
-			return true;
-		} else if (itemStack.getItem() instanceof ArmorItem && itemStack2.getItem() instanceof ArmorItem && !EnchantmentHelper.hasBindingCurse(itemStack2)) {
-			ArmorItem armorItem = (ArmorItem)itemStack.getItem();
-			ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
-			return armorItem.getDefense() != armorItem2.getDefense()
-				? armorItem.getDefense() > armorItem2.getDefense()
-				: itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag();
+		} else if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
+			return this.canReplaceEqualItem(itemStack, itemStack2);
+		} else if (itemStack.getItem() instanceof ArmorItem) {
+			if (!(itemStack2.getItem() instanceof ArmorItem)) {
+				return true;
+			} else if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
+				return false;
+			} else {
+				ArmorItem armorItem = (ArmorItem)itemStack.getItem();
+				ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
+				if (armorItem.getDefense() != armorItem2.getDefense()) {
+					return armorItem.getDefense() > armorItem2.getDefense();
+				} else {
+					return armorItem.getToughness() != armorItem2.getToughness()
+						? armorItem.getToughness() > armorItem2.getToughness()
+						: this.canReplaceEqualItem(itemStack, itemStack2);
+				}
+			}
 		} else {
+			if (itemStack.getItem() instanceof DiggerItem) {
+				if (itemStack2.getItem() instanceof BlockItem) {
+					return true;
+				}
+
+				if (itemStack2.getItem() instanceof DiggerItem) {
+					DiggerItem diggerItem = (DiggerItem)itemStack.getItem();
+					DiggerItem diggerItem2 = (DiggerItem)itemStack2.getItem();
+					if (diggerItem.getAttackDamage() != diggerItem2.getAttackDamage()) {
+						return diggerItem.getAttackDamage() > diggerItem2.getAttackDamage();
+					}
+
+					return this.canReplaceEqualItem(itemStack, itemStack2);
+				}
+			}
+
 			return false;
+		}
+	}
+
+	private boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
+		if (itemStack.getDamageValue() >= itemStack2.getDamageValue() && (!itemStack.hasTag() || itemStack2.hasTag())) {
+			return itemStack.hasTag() && itemStack2.hasTag()
+				? itemStack.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage"))
+					&& !itemStack2.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage"))
+				: false;
+		} else {
+			return true;
 		}
 	}
 

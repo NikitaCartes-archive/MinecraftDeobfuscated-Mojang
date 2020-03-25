@@ -22,6 +22,7 @@ public class ItemTags {
 	public static final Tag<Item> WOODEN_TRAPDOORS = bind("wooden_trapdoors");
 	public static final Tag<Item> DOORS = bind("doors");
 	public static final Tag<Item> SAPLINGS = bind("saplings");
+	public static final Tag<Item> LOGS_THAT_BURN = bind("logs_that_burn");
 	public static final Tag<Item> LOGS = bind("logs");
 	public static final Tag<Item> DARK_OAK_LOGS = bind("dark_oak_logs");
 	public static final Tag<Item> OAK_LOGS = bind("oak_logs");
@@ -47,6 +48,7 @@ public class ItemTags {
 	public static final Tag<Item> FLOWERS = bind("flowers");
 	public static final Tag<Item> PIGLIN_REPELLENTS = bind("piglin_repellents");
 	public static final Tag<Item> GOLD_ORES = bind("gold_ores");
+	public static final Tag<Item> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag<Item> BOATS = bind("boats");
 	public static final Tag<Item> FISHES = bind("fishes");
 	public static final Tag<Item> SIGNS = bind("signs");

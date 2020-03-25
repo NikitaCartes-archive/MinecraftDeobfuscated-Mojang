@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.core.SerializableUUID;
 
 public class GossipContainer {
 	private final Map<UUID, GossipContainer.EntityGossips> gossips = Maps.<UUID, GossipContainer.EntityGossips>newHashMap();
@@ -190,15 +191,16 @@ public class GossipContainer {
 		}
 
 		public <T> Dynamic<T> store(DynamicOps<T> dynamicOps) {
-			return Util.writeUUID(
-				"Target",
-				this.target,
-				new Dynamic<>(
-					dynamicOps,
-					dynamicOps.createMap(
-						ImmutableMap.of(
-							dynamicOps.createString("Type"), dynamicOps.createString(this.type.id), dynamicOps.createString("Value"), dynamicOps.createInt(this.value)
-						)
+			return new Dynamic<>(
+				dynamicOps,
+				dynamicOps.createMap(
+					ImmutableMap.of(
+						dynamicOps.createString("Target"),
+						SerializableUUID.serialize(dynamicOps, this.target),
+						dynamicOps.createString("Type"),
+						dynamicOps.createString(this.type.id),
+						dynamicOps.createString("Value"),
+						dynamicOps.createInt(this.value)
 					)
 				)
 			);
@@ -209,7 +211,8 @@ public class GossipContainer {
 				.asString()
 				.map(GossipType::byId)
 				.flatMap(
-					gossipType -> Util.readUUID("Target", dynamic)
+					gossipType -> dynamic.get("Target")
+							.map(SerializableUUID::readUUID)
 							.flatMap(uUID -> dynamic.get("Value").asNumber().map(number -> new GossipContainer.GossipEntry(uUID, gossipType, number.intValue())))
 				);
 		}

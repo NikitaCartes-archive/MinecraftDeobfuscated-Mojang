@@ -36,7 +36,7 @@ public class BushBlock extends Block {
 
 	@Override
 	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
+		return blockState.getFluidState().isEmpty();
 	}
 
 	@Override

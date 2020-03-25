@@ -22,6 +22,7 @@ public class BlockTags {
 	public static final Tag<Block> WOODEN_TRAPDOORS = bind("wooden_trapdoors");
 	public static final Tag<Block> DOORS = bind("doors");
 	public static final Tag<Block> SAPLINGS = bind("saplings");
+	public static final Tag<Block> LOGS_THAT_BURN = bind("logs_that_burn");
 	public static final Tag<Block> LOGS = bind("logs");
 	public static final Tag<Block> DARK_OAK_LOGS = bind("dark_oak_logs");
 	public static final Tag<Block> OAK_LOGS = bind("oak_logs");
@@ -47,6 +48,7 @@ public class BlockTags {
 	public static final Tag<Block> FLOWERS = bind("flowers");
 	public static final Tag<Block> PIGLIN_REPELLENTS = bind("piglin_repellents");
 	public static final Tag<Block> GOLD_ORES = bind("gold_ores");
+	public static final Tag<Block> NON_FLAMMABLE_WOOD = bind("non_flammable_wood");
 	public static final Tag<Block> FLOWER_POTS = bind("flower_pots");
 	public static final Tag<Block> ENDERMAN_HOLDABLE = bind("enderman_holdable");
 	public static final Tag<Block> ICE = bind("ice");
@@ -78,6 +80,7 @@ public class BlockTags {
 	public static final Tag<Block> SHULKER_BOXES = bind("shulker_boxes");
 	public static final Tag<Block> HOGLIN_REPELLENTS = bind("hoglin_repellents");
 	public static final Tag<Block> SOUL_FIRE_BASE_BLOCKS = bind("soul_fire_base_blocks");
+	public static final Tag<Block> STRIDER_WARM_BLOCKS = bind("strider_warm_blocks");
 
 	public static void reset(TagCollection<Block> tagCollection) {
 		source = tagCollection;

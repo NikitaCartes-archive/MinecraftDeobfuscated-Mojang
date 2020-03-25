@@ -117,7 +117,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 7, 3, 0, 11, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 3, 7, 18, 4, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 8, 5, 0, 10, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
@@ -187,7 +189,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			Random random2 = new Random((long)this.selfSeed);
 
 			for (int i = 0; i <= 4; i++) {
@@ -242,7 +246,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 4, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 1, 5, 0, 3, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 0, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -301,7 +307,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			BlockState blockState = Blocks.NETHER_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
 			BlockState blockState2 = Blocks.NETHER_BRICK_FENCE
 				.defaultBlockState()
@@ -372,7 +380,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			BlockState blockState = Blocks.NETHER_BRICK_FENCE
 				.defaultBlockState()
 				.setValue(FenceBlock.NORTH, Boolean.valueOf(true))
@@ -451,7 +461,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -579,9 +591,9 @@ public class NetherBridgePieces {
 			this.generateBox(levelAccessor, boundingBox, 6, 1, 6, 6, 4, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 6, 0, 6, boundingBox);
 			this.placeBlock(levelAccessor, Blocks.LAVA.defaultBlockState(), 6, 5, 6, boundingBox);
-			BlockPos blockPos = new BlockPos(this.getWorldX(6, 6), this.getWorldY(5), this.getWorldZ(6, 6));
-			if (boundingBox.isInside(blockPos)) {
-				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.LAVA, 0);
+			BlockPos blockPos2 = new BlockPos(this.getWorldX(6, 6), this.getWorldY(5), this.getWorldZ(6, 6));
+			if (boundingBox.isInside(blockPos2)) {
+				levelAccessor.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
 			}
 
 			return true;
@@ -614,7 +626,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -669,7 +683,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			BlockState blockState = Blocks.NETHER_BRICK_FENCE
@@ -728,7 +744,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			BlockState blockState = Blocks.NETHER_BRICK_FENCE
@@ -789,7 +807,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			BlockState blockState = Blocks.NETHER_BRICK_FENCE
@@ -849,7 +869,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -1031,7 +1053,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 7, 7, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 1, 2, 1, 5, 2, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -1096,11 +1120,11 @@ public class NetherBridgePieces {
 			this.placeBlock(levelAccessor, blockState, 3, 8, 8, boundingBox);
 			this.placeBlock(levelAccessor, Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, Boolean.valueOf(true)), 4, 8, 8, boundingBox);
 			if (!this.hasPlacedSpawner) {
-				BlockPos blockPos = new BlockPos(this.getWorldX(3, 5), this.getWorldY(5), this.getWorldZ(3, 5));
-				if (boundingBox.isInside(blockPos)) {
+				BlockPos blockPos2 = new BlockPos(this.getWorldX(3, 5), this.getWorldY(5), this.getWorldZ(3, 5));
+				if (boundingBox.isInside(blockPos2)) {
 					this.hasPlacedSpawner = true;
-					levelAccessor.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
-					BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+					levelAccessor.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
+					BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
 					if (blockEntity instanceof SpawnerBlockEntity) {
 						((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.BLAZE);
 					}
@@ -1350,7 +1374,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 7, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
@@ -1412,7 +1438,9 @@ public class NetherBridgePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 10, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);

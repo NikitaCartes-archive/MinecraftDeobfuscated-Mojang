@@ -221,8 +221,8 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.loadFromTag(compoundTag);
 	}
 

@@ -28,6 +28,7 @@ public class RuleProcessor extends StructureProcessor {
 	public StructureTemplate.StructureBlockInfo processBlock(
 		LevelReader levelReader,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
@@ -36,7 +37,7 @@ public class RuleProcessor extends StructureProcessor {
 		BlockState blockState = levelReader.getBlockState(structureBlockInfo2.pos);
 
 		for (ProcessorRule processorRule : this.rules) {
-			if (processorRule.test(structureBlockInfo2.state, blockState, random)) {
+			if (processorRule.test(structureBlockInfo2.state, blockState, structureBlockInfo.pos, structureBlockInfo2.pos, blockPos2, random)) {
 				return new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos, processorRule.getOutputState(), processorRule.getOutputTag());
 			}
 		}

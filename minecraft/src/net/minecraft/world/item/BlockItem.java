@@ -161,7 +161,7 @@ public class BlockItem extends Item {
 					compoundTag2.putInt("y", blockPos.getY());
 					compoundTag2.putInt("z", blockPos.getZ());
 					if (!compoundTag2.equals(compoundTag3)) {
-						blockEntity.load(compoundTag2);
+						blockEntity.load(level.getBlockState(blockPos), compoundTag2);
 						blockEntity.setChanged();
 						return true;
 					}

@@ -79,8 +79,10 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-		return this.element.place(this.structureManager, levelAccessor, chunkGenerator, this.position, this.rotation, boundingBox, random);
+	public boolean postProcess(
+		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+	) {
+		return this.element.place(this.structureManager, levelAccessor, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random);
 	}
 
 	@Override

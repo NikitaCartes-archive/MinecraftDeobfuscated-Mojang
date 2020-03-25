@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Serializable;
@@ -210,20 +209,23 @@ public class BlockPos extends Vec3i implements Serializable {
 
 	public static Iterable<BlockPos> withinManhattan(BlockPos blockPos, int i, int j, int k) {
 		int l = i + j + k;
+		int m = blockPos.getX();
+		int n = blockPos.getY();
+		int o = blockPos.getZ();
 		return () -> new AbstractIterator<BlockPos>() {
+				private final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 				private int currentDepth;
 				private int maxX;
 				private int maxY;
 				private int x;
 				private int y;
-				@Nullable
-				private BlockPos pendingBlockPos;
+				private boolean zMirror;
 
 				protected BlockPos computeNext() {
-					if (this.pendingBlockPos != null) {
-						BlockPos blockPos = this.pendingBlockPos;
-						this.pendingBlockPos = null;
-						return blockPos;
+					if (this.zMirror) {
+						this.zMirror = false;
+						this.cursor.setZ(o - (this.cursor.getZ() - o));
+						return this.cursor;
 					} else {
 						BlockPos blockPos;
 						for (blockPos = null; blockPos == null; this.y++) {
@@ -247,11 +249,8 @@ public class BlockPos extends Vec3i implements Serializable {
 							int j = this.y;
 							int k = this.currentDepth - Math.abs(i) - Math.abs(j);
 							if (k <= k) {
-								if (k != 0) {
-									this.pendingBlockPos = blockPos.offset(i, j, -k);
-								}
-
-								blockPos = blockPos.offset(i, j, k);
+								this.zMirror = k != 0;
+								blockPos = this.cursor.set(m + i, n + j, o + k);
 							}
 						}
 
@@ -305,6 +304,7 @@ public class BlockPos extends Vec3i implements Serializable {
 		int q = n - k + 1;
 		int r = o * p * q;
 		return () -> new AbstractIterator<BlockPos>() {
+				private final BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
 				private int index;
 
 				protected BlockPos computeNext() {
@@ -316,7 +316,7 @@ public class BlockPos extends Vec3i implements Serializable {
 						int k = j % p;
 						int l = j / p;
 						this.index++;
-						return new BlockPos(i + i, j + k, k + l);
+						return this.cursor.set(i + i, j + k, k + l);
 					}
 				}
 			};

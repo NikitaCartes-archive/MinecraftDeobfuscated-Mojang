@@ -252,7 +252,9 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -292,11 +294,11 @@ public class MineShaftPieces {
 						int q = o - 1 + random.nextInt(3);
 						int r = this.getWorldX(1, q);
 						int s = this.getWorldZ(1, q);
-						BlockPos blockPos = new BlockPos(r, p, s);
-						if (boundingBox.isInside(blockPos) && this.isInterior(levelAccessor, 1, 0, q, boundingBox)) {
+						BlockPos blockPos2 = new BlockPos(r, p, s);
+						if (boundingBox.isInside(blockPos2) && this.isInterior(levelAccessor, 1, 0, q, boundingBox)) {
 							this.hasPlacedSpider = true;
-							levelAccessor.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
-							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+							levelAccessor.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
+							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
 							if (blockEntity instanceof SpawnerBlockEntity) {
 								((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.CAVE_SPIDER);
 							}
@@ -481,7 +483,9 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -759,7 +763,9 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {
@@ -902,7 +908,9 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			if (this.edgesLiquid(levelAccessor, boundingBox)) {
 				return false;
 			} else {

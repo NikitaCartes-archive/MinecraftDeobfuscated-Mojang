@@ -77,8 +77,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
@@ -93,19 +93,19 @@ public class StructureBlockEntity extends BlockEntity {
 
 		try {
 			this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
-		} catch (IllegalArgumentException var11) {
+		} catch (IllegalArgumentException var12) {
 			this.rotation = Rotation.NONE;
 		}
 
 		try {
 			this.mirror = Mirror.valueOf(compoundTag.getString("mirror"));
-		} catch (IllegalArgumentException var10) {
+		} catch (IllegalArgumentException var11) {
 			this.mirror = Mirror.NONE;
 		}
 
 		try {
 			this.mode = StructureMode.valueOf(compoundTag.getString("mode"));
-		} catch (IllegalArgumentException var9) {
+		} catch (IllegalArgumentException var10) {
 			this.mode = StructureMode.DATA;
 		}
 

@@ -24,8 +24,10 @@ public class OreBlock extends Block {
 			return Mth.nextInt(random, 3, 7);
 		} else if (this == Blocks.LAPIS_ORE) {
 			return Mth.nextInt(random, 2, 5);
+		} else if (this == Blocks.NETHER_QUARTZ_ORE) {
+			return Mth.nextInt(random, 2, 5);
 		} else {
-			return this == Blocks.NETHER_QUARTZ_ORE ? Mth.nextInt(random, 2, 5) : 0;
+			return this == Blocks.NETHER_GOLD_ORE ? Mth.nextInt(random, 0, 1) : 0;
 		}
 	}
 

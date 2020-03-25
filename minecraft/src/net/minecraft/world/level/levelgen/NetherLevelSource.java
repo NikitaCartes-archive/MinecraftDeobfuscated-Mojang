@@ -85,4 +85,9 @@ public class NetherLevelSource extends NoiseBasedChunkGenerator<NetherGeneratorS
 	public int getSeaLevel() {
 		return 32;
 	}
+
+	@Override
+	public int getBaseHeight(int i, int j, Heightmap.Types types) {
+		return this.getGenDepth() / 2;
+	}
 }

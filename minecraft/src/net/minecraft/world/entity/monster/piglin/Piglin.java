@@ -91,6 +91,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
 		MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS,
+		MemoryModuleType.NEAREST_ADULT_PIGLINS,
 		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
 		MemoryModuleType.HURT_BY,
 		MemoryModuleType.HURT_BY_ENTITY,
@@ -109,6 +110,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN,
 		MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN,
 		MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN,
+		MemoryModuleType.NEAREST_VISIBLE_WITHER_SKELETON,
 		MemoryModuleType.RIDE_TARGET,
 		MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT,
 		MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT,
@@ -450,17 +452,17 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-		return this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+		return this.canReplaceCurrentItem(itemStack, itemStack2);
 	}
 
 	@Override
-	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
 		if (PiglinAi.isLovedItem(itemStack2.getItem())) {
 			return false;
 		} else if (this.isAdult() && itemStack2.getItem() == Items.CROSSBOW) {
 			return false;
 		} else {
-			return PiglinAi.isLovedItem(itemStack.getItem()) ? true : super.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+			return PiglinAi.isLovedItem(itemStack.getItem()) ? true : super.canReplaceCurrentItem(itemStack, itemStack2);
 		}
 	}
 

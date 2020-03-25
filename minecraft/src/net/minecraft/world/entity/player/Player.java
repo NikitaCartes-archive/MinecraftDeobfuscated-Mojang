@@ -1292,22 +1292,26 @@ public abstract class Player extends LivingEntity {
 		this.stopSleepInBed(true, true);
 	}
 
-	public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+	public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl, boolean bl2) {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		Block block = blockState.getBlock();
 		if (block instanceof RespawnAnchorBlock && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) {
-			serverLevel.setBlock(
-				blockPos, blockState.setValue(RespawnAnchorBlock.CHARGE, Integer.valueOf((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) - 1)), 3
-			);
-			return RespawnAnchorBlock.findStandUpPosition(serverLevel, blockPos);
+			Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
+			if (!bl2 && optional.isPresent()) {
+				serverLevel.setBlock(
+					blockPos, blockState.setValue(RespawnAnchorBlock.CHARGE, Integer.valueOf((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) - 1)), 3
+				);
+			}
+
+			return optional;
 		} else if (block instanceof BedBlock) {
 			return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
 		} else if (!bl) {
 			return Optional.empty();
 		} else {
-			boolean bl2 = block.isPossibleToRespawnInThis();
-			boolean bl3 = serverLevel.getBlockState(blockPos.above()).getBlock().isPossibleToRespawnInThis();
-			return bl2 && bl3 ? Optional.of(new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5)) : Optional.empty();
+			boolean bl3 = block.isPossibleToRespawnInThis();
+			boolean bl4 = serverLevel.getBlockState(blockPos.above()).getBlock().isPossibleToRespawnInThis();
+			return bl3 && bl4 ? Optional.of(new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.1, (double)blockPos.getZ() + 0.5)) : Optional.empty();
 		}
 	}
 

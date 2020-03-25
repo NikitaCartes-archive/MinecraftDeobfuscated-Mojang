@@ -201,16 +201,17 @@ public class WorldGenRegion implements LevelAccessor {
 			return blockEntity;
 		} else {
 			CompoundTag compoundTag = chunkAccess.getBlockEntityNbt(blockPos);
+			BlockState blockState = chunkAccess.getBlockState(blockPos);
 			if (compoundTag != null) {
 				if ("DUMMY".equals(compoundTag.getString("id"))) {
-					Block block = this.getBlockState(blockPos).getBlock();
+					Block block = blockState.getBlock();
 					if (!(block instanceof EntityBlock)) {
 						return null;
 					}
 
 					blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
 				} else {
-					blockEntity = BlockEntity.loadStatic(compoundTag);
+					blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
 				}
 
 				if (blockEntity != null) {
@@ -219,7 +220,7 @@ public class WorldGenRegion implements LevelAccessor {
 				}
 			}
 
-			if (chunkAccess.getBlockState(blockPos).getBlock() instanceof EntityBlock) {
+			if (blockState.getBlock() instanceof EntityBlock) {
 				LOGGER.warn("Tried to access a block entity before it was created. {}", blockPos);
 			}
 
@@ -349,12 +350,6 @@ public class WorldGenRegion implements LevelAccessor {
 
 	@Override
 	public void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j) {
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public BlockPos getSharedSpawnPos() {
-		return this.level.getSharedSpawnPos();
 	}
 
 	@Override

@@ -158,13 +158,13 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	}
 
 	@Override
-	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
+	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
 		if (itemStack2.getItem() == Items.NAUTILUS_SHELL) {
 			return false;
 		} else if (itemStack2.getItem() == Items.TRIDENT) {
 			return itemStack.getItem() == Items.TRIDENT ? itemStack.getDamageValue() < itemStack2.getDamageValue() : false;
 		} else {
-			return itemStack.getItem() == Items.TRIDENT ? true : super.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
+			return itemStack.getItem() == Items.TRIDENT ? true : super.canReplaceCurrentItem(itemStack, itemStack2);
 		}
 	}
 

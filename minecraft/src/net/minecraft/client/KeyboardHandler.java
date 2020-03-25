@@ -256,8 +256,7 @@ public class KeyboardHandler {
 	private void copyCreateEntityCommand(ResourceLocation resourceLocation, Vec3 vec3, @Nullable CompoundTag compoundTag) {
 		String string2;
 		if (compoundTag != null) {
-			compoundTag.remove("UUIDMost");
-			compoundTag.remove("UUIDLeast");
+			compoundTag.remove("UUID");
 			compoundTag.remove("Pos");
 			compoundTag.remove("Dimension");
 			String string = compoundTag.getPrettyDisplay().getString();

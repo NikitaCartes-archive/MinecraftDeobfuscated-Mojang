@@ -1,5 +1,6 @@
 package net.minecraft.client.resources.model;
 
+import com.mojang.math.OctahedralGroup;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Transformation;
 import com.mojang.math.Vector3f;
@@ -31,10 +32,9 @@ public enum BlockModelRotation implements ModelState {
 
 	private static final Map<Integer, BlockModelRotation> BY_INDEX = (Map<Integer, BlockModelRotation>)Arrays.stream(values())
 		.collect(Collectors.toMap(blockModelRotation -> blockModelRotation.index, blockModelRotation -> blockModelRotation));
+	private final Transformation transformation;
+	private final OctahedralGroup actualRotation;
 	private final int index;
-	private final Quaternion rotation;
-	private final int xSteps;
-	private final int ySteps;
 
 	private static int getIndex(int i, int j) {
 		return i * 360 + j;
@@ -44,14 +44,23 @@ public enum BlockModelRotation implements ModelState {
 		this.index = getIndex(j, k);
 		Quaternion quaternion = new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (float)(-k), true);
 		quaternion.mul(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (float)(-j), true));
-		this.rotation = quaternion;
-		this.xSteps = Mth.abs(j / 90);
-		this.ySteps = Mth.abs(k / 90);
+		OctahedralGroup octahedralGroup = OctahedralGroup.IDENTITY;
+
+		for (int l = 0; l < k; l += 90) {
+			octahedralGroup = octahedralGroup.compose(OctahedralGroup.ROT_90_Y_NEG);
+		}
+
+		for (int l = 0; l < j; l += 90) {
+			octahedralGroup = octahedralGroup.compose(OctahedralGroup.ROT_90_X_NEG);
+		}
+
+		this.transformation = new Transformation(null, quaternion, null, null);
+		this.actualRotation = octahedralGroup;
 	}
 
 	@Override
 	public Transformation getRotation() {
-		return new Transformation(null, this.rotation, null, null);
+		return this.transformation;
 	}
 
 	public static BlockModelRotation by(int i, int j) {

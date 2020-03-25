@@ -40,7 +40,9 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 	}
 
 	@Override
-	public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+	public boolean postProcess(
+		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+	) {
 		if (!this.updateAverageGroundHeight(levelAccessor, boundingBox, 0)) {
 			return false;
 		} else {

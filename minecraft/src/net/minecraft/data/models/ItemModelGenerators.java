@@ -53,6 +53,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BROWN_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CARROT_ON_A_STICK, ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
+		this.generateFlatItem(Items.WARPED_FUNGUS_ON_A_STICK, ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
 		this.generateFlatItem(Items.CHAINMAIL_BOOTS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CHAINMAIL_CHESTPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CHAINMAIL_HELMET, ModelTemplates.FLAT_ITEM);

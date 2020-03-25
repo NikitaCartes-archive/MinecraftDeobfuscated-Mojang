@@ -14,6 +14,7 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity {
 	private GameProfile owner;
@@ -47,8 +48,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		if (compoundTag.contains("SkullOwner", 10)) {
 			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
 		} else if (compoundTag.contains("ExtraType", 8)) {

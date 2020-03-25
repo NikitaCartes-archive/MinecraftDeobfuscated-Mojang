@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import java.util.Random;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
@@ -38,7 +39,9 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 	}
 
 	@Override
-	public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+	public boolean postProcess(
+		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+	) {
 		this.generateBox(
 			levelAccessor, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false
 		);

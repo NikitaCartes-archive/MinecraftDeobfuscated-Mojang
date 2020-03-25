@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class JukeboxBlockEntity extends BlockEntity implements Clearable {
 	private ItemStack record = ItemStack.EMPTY;
@@ -12,8 +13,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		if (compoundTag.contains("RecordItem", 10)) {
 			this.setRecord(ItemStack.of(compoundTag.getCompound("RecordItem")));
 		}

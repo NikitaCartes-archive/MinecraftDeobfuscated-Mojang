@@ -55,6 +55,18 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			}
 
 			i--;
+		} else if (this.mob.isInLava() && this.mob.canFloatInLava()) {
+			i = Mth.floor(this.mob.getY());
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
+
+			for (BlockState blockState = this.level.getBlockState(mutableBlockPos);
+				blockState.getBlock() == Blocks.LAVA || blockState.getFluidState() == Fluids.LAVA.getSource(false);
+				blockState = this.level.getBlockState(mutableBlockPos)
+			) {
+				mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
+			}
+
+			i--;
 		} else if (this.mob.isOnGround()) {
 			i = Mth.floor(this.mob.getY() + 0.5);
 		} else {

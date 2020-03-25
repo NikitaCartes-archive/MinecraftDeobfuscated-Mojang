@@ -56,9 +56,9 @@ public class BlockDataAccessor implements DataAccessor {
 		compoundTag.putInt("x", this.pos.getX());
 		compoundTag.putInt("y", this.pos.getY());
 		compoundTag.putInt("z", this.pos.getZ());
-		this.entity.load(compoundTag);
-		this.entity.setChanged();
 		BlockState blockState = this.entity.getLevel().getBlockState(this.pos);
+		this.entity.load(blockState, compoundTag);
+		this.entity.setChanged();
 		this.entity.getLevel().sendBlockUpdated(this.pos, blockState, blockState, 3);
 	}
 

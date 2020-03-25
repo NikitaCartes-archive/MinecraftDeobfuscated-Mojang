@@ -103,8 +103,8 @@ public class DamageSource {
 			: new DamageSource("explosion").setScalesWithDifficulty().setExplosion();
 	}
 
-	public static DamageSource netherBedExplosion() {
-		return new NetherBedDamage();
+	public static DamageSource badRespawnPointExplosion() {
+		return new BadRespawnPointDamage();
 	}
 
 	public String toString() {

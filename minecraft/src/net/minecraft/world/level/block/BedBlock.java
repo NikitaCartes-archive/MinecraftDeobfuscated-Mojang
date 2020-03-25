@@ -96,7 +96,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 
 				level.explode(
 					null,
-					DamageSource.netherBedExplosion(),
+					DamageSource.badRespawnPointExplosion(),
 					(double)blockPos.getX() + 0.5,
 					(double)blockPos.getY() + 0.5,
 					(double)blockPos.getZ() + 0.5,
@@ -261,7 +261,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		return Optional.empty();
 	}
 
-	protected static Optional<Vec3> getStandingLocationAtOrBelow(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos) {
+	public static Optional<Vec3> getStandingLocationAtOrBelow(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos) {
 		VoxelShape voxelShape = levelReader.getBlockState(blockPos).getCollisionShape(levelReader, blockPos);
 		if (voxelShape.max(Direction.Axis.Y) > 0.4375) {
 			return Optional.empty();

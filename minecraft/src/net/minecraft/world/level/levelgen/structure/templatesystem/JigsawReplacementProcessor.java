@@ -22,6 +22,7 @@ public class JigsawReplacementProcessor extends StructureProcessor {
 	public StructureTemplate.StructureBlockInfo processBlock(
 		LevelReader levelReader,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
@@ -35,8 +36,8 @@ public class JigsawReplacementProcessor extends StructureProcessor {
 
 			try {
 				blockStateParser.parse(true);
-			} catch (CommandSyntaxException var10) {
-				throw new RuntimeException(var10);
+			} catch (CommandSyntaxException var11) {
+				throw new RuntimeException(var11);
 			}
 
 			return blockStateParser.getState().getBlock() == Blocks.STRUCTURE_VOID

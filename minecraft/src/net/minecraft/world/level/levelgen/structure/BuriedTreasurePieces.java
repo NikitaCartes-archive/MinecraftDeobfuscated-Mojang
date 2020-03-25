@@ -30,7 +30,9 @@ public class BuriedTreasurePieces {
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		) {
 			int i = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.boundingBox.x0, this.boundingBox.z0);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.boundingBox.x0, i, this.boundingBox.z0);
 
@@ -45,15 +47,15 @@ public class BuriedTreasurePieces {
 					BlockState blockState3 = !blockState.isAir() && !this.isLiquid(blockState) ? blockState : Blocks.SAND.defaultBlockState();
 
 					for (Direction direction : Direction.values()) {
-						BlockPos blockPos = mutableBlockPos.relative(direction);
-						BlockState blockState4 = levelAccessor.getBlockState(blockPos);
+						BlockPos blockPos2 = mutableBlockPos.relative(direction);
+						BlockState blockState4 = levelAccessor.getBlockState(blockPos2);
 						if (blockState4.isAir() || this.isLiquid(blockState4)) {
-							BlockPos blockPos2 = blockPos.below();
-							BlockState blockState5 = levelAccessor.getBlockState(blockPos2);
+							BlockPos blockPos3 = blockPos2.below();
+							BlockState blockState5 = levelAccessor.getBlockState(blockPos3);
 							if ((blockState5.isAir() || this.isLiquid(blockState5)) && direction != Direction.UP) {
-								levelAccessor.setBlock(blockPos, blockState2, 3);
+								levelAccessor.setBlock(blockPos2, blockState2, 3);
 							} else {
-								levelAccessor.setBlock(blockPos, blockState3, 3);
+								levelAccessor.setBlock(blockPos2, blockState3, 3);
 							}
 						}
 					}

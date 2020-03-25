@@ -5,7 +5,6 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -14,7 +13,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
@@ -39,67 +40,67 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		super.onPlace(blockState, level, blockPos, blockState2, bl);
-		level.getBlockTicks().scheduleTick(blockPos, blockState.getBlock(), 20);
-	}
-
-	@Override
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		int i = (Integer)blockState.getValue(CHARGE);
-		if (player.getItemInHand(interactionHand).getItem() == Items.GLOWSTONE) {
-			if (i < 4) {
-				level.setBlock(blockPos, blockState.setValue(CHARGE, Integer.valueOf(i + 1)), 3);
-				level.playLocalSound(
-					(double)blockPos.getX() + 0.5,
-					(double)blockPos.getY() + 0.5,
-					(double)blockPos.getZ() + 0.5,
-					SoundEvents.RESPAWN_ANCHOR_CHARGE,
-					SoundSource.BLOCKS,
-					1.0F,
-					1.0F,
-					false
-				);
-				return InteractionResult.SUCCESS;
-			} else {
-				return InteractionResult.CONSUME;
-			}
-		} else if (i == 0) {
-			return InteractionResult.CONSUME;
-		} else {
-			if (level.dimension.getType() == DimensionType.NETHER) {
-				if (!level.isClientSide) {
-					((ServerPlayer)player).setRespawnPosition(level.dimension.getType(), blockPos, false, true);
-				}
-
-				level.playLocalSound(
-					(double)blockPos.getX() + 0.5,
-					(double)blockPos.getY() + 0.5,
-					(double)blockPos.getZ() + 0.5,
-					SoundEvents.RESPAWN_ANCHOR_SET_SPAWN,
-					SoundSource.BLOCKS,
-					1.0F,
-					1.0F,
-					false
-				);
-			} else {
-				level.removeBlock(blockPos, false);
-				level.explode(
-					null,
-					DamageSource.netherBedExplosion(),
-					(double)blockPos.getX() + 0.5,
-					(double)blockPos.getY() + 0.5,
-					(double)blockPos.getZ() + 0.5,
-					5.0F,
-					true,
-					Explosion.BlockInteraction.DESTROY
-				);
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		if (itemStack.getItem() == Items.GLOWSTONE && (Integer)blockState.getValue(CHARGE) < 4) {
+			charge(level, blockPos, blockState);
+			if (!player.abilities.instabuild) {
+				itemStack.shrink(1);
 			}
 
 			return InteractionResult.SUCCESS;
+		} else if ((Integer)blockState.getValue(CHARGE) == 0) {
+			return InteractionResult.PASS;
+		} else if (level.dimension.getType() != DimensionType.NETHER) {
+			level.removeBlock(blockPos, false);
+			level.explode(
+				null,
+				DamageSource.badRespawnPointExplosion(),
+				(double)blockPos.getX() + 0.5,
+				(double)blockPos.getY() + 0.5,
+				(double)blockPos.getZ() + 0.5,
+				5.0F,
+				true,
+				Explosion.BlockInteraction.DESTROY
+			);
+			return InteractionResult.SUCCESS;
+		} else {
+			if (!level.isClientSide) {
+				ServerPlayer serverPlayer = (ServerPlayer)player;
+				if (serverPlayer.getRespawnDimension() != level.dimension.getType() || !serverPlayer.getRespawnPosition().equals(blockPos)) {
+					serverPlayer.setRespawnPosition(level.dimension.getType(), blockPos, false, true);
+					level.playSound(
+						null,
+						(double)blockPos.getX() + 0.5,
+						(double)blockPos.getY() + 0.5,
+						(double)blockPos.getZ() + 0.5,
+						SoundEvents.RESPAWN_ANCHOR_SET_SPAWN,
+						SoundSource.BLOCKS,
+						1.0F,
+						1.0F
+					);
+					return InteractionResult.SUCCESS;
+				}
+			}
+
+			return blockState.getValue(CHARGE) < 4 ? InteractionResult.PASS : InteractionResult.CONSUME;
 		}
+	}
+
+	public static void charge(Level level, BlockPos blockPos, BlockState blockState) {
+		level.setBlock(blockPos, blockState.setValue(CHARGE, Integer.valueOf((Integer)blockState.getValue(CHARGE) + 1)), 3);
+		level.playSound(
+			null,
+			(double)blockPos.getX() + 0.5,
+			(double)blockPos.getY() + 0.5,
+			(double)blockPos.getZ() + 0.5,
+			SoundEvents.RESPAWN_ANCHOR_CHARGE,
+			SoundSource.BLOCKS,
+			1.0F,
+			1.0F
+		);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -107,15 +108,15 @@ public class RespawnAnchorBlock extends Block {
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Integer)blockState.getValue(CHARGE) != 0) {
 			if (random.nextInt(100) == 0) {
-				level.playLocalSound(
+				level.playSound(
+					null,
 					(double)blockPos.getX() + 0.5,
 					(double)blockPos.getY() + 0.5,
 					(double)blockPos.getZ() + 0.5,
 					SoundEvents.RESPAWN_ANCHOR_AMBIENT,
 					SoundSource.BLOCKS,
-					0.5F,
-					random.nextFloat() * 0.4F + 0.8F,
-					false
+					1.0F,
+					1.0F
 				);
 			}
 
@@ -146,14 +147,11 @@ public class RespawnAnchorBlock extends Block {
 		return getScaledChargeLevel(blockState, 15);
 	}
 
-	public static Optional<Vec3> findStandUpPosition(LevelReader levelReader, BlockPos blockPos) {
-		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-1, 0, -1), blockPos.offset(1, 0, 1))) {
-			BlockPos blockPos3 = blockPos2.below();
-			BlockPos blockPos4 = blockPos2.above();
-			if (levelReader.getBlockState(blockPos3).isFaceSturdy(levelReader, blockPos3, Direction.DOWN)
-				&& levelReader.getBlockState(blockPos2).getCollisionShape(levelReader, blockPos2).isEmpty()
-				&& levelReader.getBlockState(blockPos4).getCollisionShape(levelReader, blockPos4).isEmpty()) {
-				return Optional.of(Vec3.atBottomCenterOf(blockPos2));
+	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos) {
+		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1))) {
+			Optional<Vec3> optional = BedBlock.getStandingLocationAtOrBelow(entityType, levelReader, blockPos2);
+			if (optional.isPresent()) {
+				return optional;
 			}
 		}
 

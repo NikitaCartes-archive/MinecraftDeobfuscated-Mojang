@@ -59,8 +59,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.age = compoundTag.getLong("Age");
 		if (compoundTag.contains("ExitPortal", 10)) {
 			this.exitPortal = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));

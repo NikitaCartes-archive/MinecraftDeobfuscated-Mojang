@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -46,9 +47,9 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
+	public void load(BlockState blockState, CompoundTag compoundTag) {
 		this.isEditable = false;
-		super.load(compoundTag);
+		super.load(blockState, compoundTag);
 		this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
 
 		for (int i = 0; i < 4; i++) {
@@ -57,7 +58,7 @@ public class SignBlockEntity extends BlockEntity {
 			if (this.level instanceof ServerLevel) {
 				try {
 					this.messages[i] = ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
-				} catch (CommandSyntaxException var6) {
+				} catch (CommandSyntaxException var7) {
 					this.messages[i] = component;
 				}
 			} else {

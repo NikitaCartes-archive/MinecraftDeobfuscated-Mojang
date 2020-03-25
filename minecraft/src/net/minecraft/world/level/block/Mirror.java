@@ -1,11 +1,18 @@
 package net.minecraft.world.level.block;
 
+import com.mojang.math.OctahedralGroup;
 import net.minecraft.core.Direction;
 
 public enum Mirror {
-	NONE,
-	LEFT_RIGHT,
-	FRONT_BACK;
+	NONE(OctahedralGroup.IDENTITY),
+	LEFT_RIGHT(OctahedralGroup.INVERT_Z),
+	FRONT_BACK(OctahedralGroup.INVERT_X);
+
+	private final OctahedralGroup rotation;
+
+	private Mirror(OctahedralGroup octahedralGroup) {
+		this.rotation = octahedralGroup;
+	}
 
 	public int mirror(int i, int j) {
 		int k = j / 2;
@@ -31,5 +38,9 @@ public enum Mirror {
 		} else {
 			return this == LEFT_RIGHT && direction.getAxis() == Direction.Axis.Z ? direction.getOpposite() : direction;
 		}
+	}
+
+	public OctahedralGroup rotation() {
+		return this.rotation;
 	}
 }

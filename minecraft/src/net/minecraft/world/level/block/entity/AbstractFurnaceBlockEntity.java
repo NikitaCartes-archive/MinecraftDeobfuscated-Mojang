@@ -7,6 +7,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -31,6 +33,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class AbstractFurnaceBlockEntity
 	extends BaseContainerBlockEntity
@@ -158,14 +161,31 @@ public abstract class AbstractFurnaceBlockEntity
 		return map;
 	}
 
+	private static boolean isNeverAFurnaceFuel(Item item) {
+		return ItemTags.NON_FLAMMABLE_WOOD.contains(item);
+	}
+
 	private static void add(Map<Item, Integer> map, Tag<Item> tag, int i) {
 		for (Item item : tag.getValues()) {
-			map.put(item, i);
+			if (!isNeverAFurnaceFuel(item)) {
+				map.put(item, i);
+			}
 		}
 	}
 
 	private static void add(Map<Item, Integer> map, ItemLike itemLike, int i) {
-		map.put(itemLike.asItem(), i);
+		Item item = itemLike.asItem();
+		if (isNeverAFurnaceFuel(item)) {
+			if (SharedConstants.IS_RUNNING_IN_IDE) {
+				throw (IllegalStateException)Util.pauseInIde(
+					new IllegalStateException(
+						"A developer tried to explicitly make fire resistant item " + item.getName(null).getString() + " a furnace fuel. That will not work!"
+					)
+				);
+			}
+		} else {
+			map.put(item, i);
+		}
 	}
 
 	private boolean isLit() {
@@ -173,8 +193,8 @@ public abstract class AbstractFurnaceBlockEntity
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		this.litTime = compoundTag.getShort("BurnTime");

@@ -785,6 +785,19 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
+			EntityType.STRIDER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.STRING)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 5.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+		);
+		this.add(
 			EntityType.TRADER_LLAMA,
 			LootTable.lootTable()
 				.withPool(

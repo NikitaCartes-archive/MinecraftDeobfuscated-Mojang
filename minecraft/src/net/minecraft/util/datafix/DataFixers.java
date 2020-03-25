@@ -71,6 +71,7 @@ import net.minecraft.util.datafix.fixes.EntityZombieVillagerTypeFix;
 import net.minecraft.util.datafix.fixes.EntityZombifiedPiglinRenameFix;
 import net.minecraft.util.datafix.fixes.ForcePoiRebuild;
 import net.minecraft.util.datafix.fixes.FurnaceRecipeFix;
+import net.minecraft.util.datafix.fixes.GossipUUIDFix;
 import net.minecraft.util.datafix.fixes.HeightmapRenamingFix;
 import net.minecraft.util.datafix.fixes.IglooMetadataRemovalFix;
 import net.minecraft.util.datafix.fixes.ItemBannerColorFix;
@@ -88,6 +89,8 @@ import net.minecraft.util.datafix.fixes.ItemStackTheFlatteningFix;
 import net.minecraft.util.datafix.fixes.ItemStackUUIDFix;
 import net.minecraft.util.datafix.fixes.ItemWaterPotionFix;
 import net.minecraft.util.datafix.fixes.ItemWrittenBookPagesStrictJsonFix;
+import net.minecraft.util.datafix.fixes.JigsawPropertiesFix;
+import net.minecraft.util.datafix.fixes.JigsawRotationFix;
 import net.minecraft.util.datafix.fixes.LeavesFix;
 import net.minecraft.util.datafix.fixes.LevelDataGeneratorOptionsFix;
 import net.minecraft.util.datafix.fixes.LevelFlatGeneratorInfoFix;
@@ -164,6 +167,7 @@ import net.minecraft.util.datafix.schemas.V2501;
 import net.minecraft.util.datafix.schemas.V2502;
 import net.minecraft.util.datafix.schemas.V2505;
 import net.minecraft.util.datafix.schemas.V2509;
+import net.minecraft.util.datafix.schemas.V2519;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -605,5 +609,13 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new LevelUUIDFix(schema108));
 		dataFixerBuilder.addFixer(new SavedDataUUIDFix(schema108));
 		dataFixerBuilder.addFixer(new ItemStackUUIDFix(schema108));
+		Schema schema109 = dataFixerBuilder.addSchema(2516, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new GossipUUIDFix(schema109, "minecraft:villager"));
+		dataFixerBuilder.addFixer(new GossipUUIDFix(schema109, "minecraft:zombie_villager"));
+		Schema schema110 = dataFixerBuilder.addSchema(2518, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new JigsawPropertiesFix(schema110, false));
+		dataFixerBuilder.addFixer(new JigsawRotationFix(schema110, false));
+		Schema schema111 = dataFixerBuilder.addSchema(2519, V2519::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema111, "Added Strider", References.ENTITY));
 	}
 }

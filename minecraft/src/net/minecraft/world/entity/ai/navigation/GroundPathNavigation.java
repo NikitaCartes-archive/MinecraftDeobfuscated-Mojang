@@ -188,15 +188,7 @@ public class GroundPathNavigation extends PathNavigation {
 					double g = (double)r + 0.5 - vec3.z;
 					if (!(f * d + g * e < 0.0)) {
 						BlockPathTypes blockPathTypes = this.nodeEvaluator.getBlockPathType(this.level, q, j - 1, r, this.mob, l, m, n, true, true);
-						if (blockPathTypes == BlockPathTypes.WATER) {
-							return false;
-						}
-
-						if (blockPathTypes == BlockPathTypes.LAVA) {
-							return false;
-						}
-
-						if (blockPathTypes == BlockPathTypes.OPEN) {
+						if (!this.hasValidPathType(blockPathTypes)) {
 							return false;
 						}
 
@@ -214,6 +206,14 @@ public class GroundPathNavigation extends PathNavigation {
 			}
 
 			return true;
+		}
+	}
+
+	protected boolean hasValidPathType(BlockPathTypes blockPathTypes) {
+		if (blockPathTypes == BlockPathTypes.WATER) {
+			return false;
+		} else {
+			return blockPathTypes == BlockPathTypes.LAVA ? false : blockPathTypes != BlockPathTypes.OPEN;
 		}
 	}
 

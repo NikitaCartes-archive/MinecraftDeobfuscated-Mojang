@@ -613,6 +613,13 @@ public class RecipeProvider implements DataProvider {
 			.pattern(" X")
 			.unlockedBy("has_carrot", has(Items.CARROT))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Items.WARPED_FUNGUS_ON_A_STICK)
+			.define('#', Items.FISHING_ROD)
+			.define('X', Items.WARPED_FUNGUS)
+			.pattern("# ")
+			.pattern(" X")
+			.unlockedBy("has_warped_fungus", has(Items.WARPED_FUNGUS))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.CAULDRON)
 			.define('#', Items.IRON_INGOT)
 			.pattern("# #")
@@ -1643,6 +1650,12 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#R#")
 			.unlockedBy("has_redstone", has(Items.REDSTONE))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BASALT, 4)
+			.define('S', Blocks.BASALT)
+			.pattern("SS")
+			.pattern("SS")
+			.unlockedBy("has_basalt", has(Blocks.BASALT))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.POLISHED_GRANITE, 4)
 			.define('S', Blocks.GRANITE)
 			.pattern("SS")
@@ -2535,6 +2548,14 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.unlockedBy("has_stone", has(Blocks.STONE))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.LODESTONE)
+			.define('S', Items.CHISELED_STONE_BRICKS)
+			.define('#', Items.NETHERITE_INGOT)
+			.pattern("SSS")
+			.pattern("S#S")
+			.pattern("SSS")
+			.unlockedBy("has_netherite_ingot", has(Items.NETHERITE_INGOT))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.NETHERITE_BLOCK)
 			.define('#', Items.NETHERITE_INGOT)
 			.pattern("###")
@@ -2576,7 +2597,9 @@ public class RecipeProvider implements DataProvider {
 		SpecialRecipeBuilder.special(RecipeSerializer.SUSPICIOUS_STEW).save(consumer, "suspicious_stew");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POTATO), Items.BAKED_POTATO, 0.35F, 200).unlockedBy("has_potato", has(Items.POTATO)).save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CLAY_BALL), Items.BRICK, 0.3F, 200).unlockedBy("has_clay_ball", has(Items.CLAY_BALL)).save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.LOGS), Items.CHARCOAL, 0.15F, 200).unlockedBy("has_log", has(ItemTags.LOGS)).save(consumer);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.LOGS_THAT_BURN), Items.CHARCOAL, 0.15F, 200)
+			.unlockedBy("has_log", has(ItemTags.LOGS_THAT_BURN))
+			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CHORUS_FRUIT), Items.POPPED_CHORUS_FRUIT, 0.1F, 200)
 			.unlockedBy("has_chorus_fruit", has(Items.CHORUS_FRUIT))
 			.save(consumer);
@@ -2766,9 +2789,6 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.ANCIENT_DEBRIS), Items.NETHERITE_SCRAP, 2.0F, 200)
 			.unlockedBy("has_ancient_debris", has(Blocks.ANCIENT_DEBRIS))
-			.save(consumer);
-		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.BASALT), Blocks.POLISHED_BASALT.asItem(), 0.1F, 200)
-			.unlockedBy("has_basalt", has(Blocks.BASALT))
 			.save(consumer);
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7F, 100)
 			.unlockedBy("has_iron_ore", has(Blocks.IRON_ORE.asItem()))
@@ -3040,6 +3060,9 @@ public class RecipeProvider implements DataProvider {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_ANDESITE), Blocks.POLISHED_ANDESITE_STAIRS)
 			.unlocks("has_polished_andesite", has(Blocks.POLISHED_ANDESITE))
 			.save(consumer, "polished_andesite_stairs_from_polished_andesite_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BASALT), Blocks.POLISHED_BASALT)
+			.unlocks("has_basalt", has(Blocks.BASALT))
+			.save(consumer, "polished_basalt_from_basalt_stonecutting");
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.GRANITE), Blocks.GRANITE_SLAB, 2)
 			.unlocks("has_granite", has(Blocks.GRANITE))
 			.save(consumer, "granite_slab_from_granite_stonecutting");

@@ -160,10 +160,10 @@ public class StructureTemplate {
 	}
 
 	public void placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings) {
-		this.placeInWorld(levelAccessor, blockPos, structurePlaceSettings, 2);
+		this.placeInWorld(levelAccessor, blockPos, blockPos, structurePlaceSettings, 2);
 	}
 
-	public boolean placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, int i) {
+	public boolean placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, int i) {
 		if (this.palettes.isEmpty()) {
 			return false;
 		} else {
@@ -182,41 +182,41 @@ public class StructureTemplate {
 				int n = Integer.MIN_VALUE;
 				int o = Integer.MIN_VALUE;
 
-				for (StructureTemplate.StructureBlockInfo structureBlockInfo : processBlockInfos(levelAccessor, blockPos, structurePlaceSettings, list)) {
-					BlockPos blockPos2 = structureBlockInfo.pos;
-					if (boundingBox == null || boundingBox.isInside(blockPos2)) {
-						FluidState fluidState = structurePlaceSettings.shouldKeepLiquids() ? levelAccessor.getFluidState(blockPos2) : null;
+				for (StructureTemplate.StructureBlockInfo structureBlockInfo : processBlockInfos(levelAccessor, blockPos, blockPos2, structurePlaceSettings, list)) {
+					BlockPos blockPos3 = structureBlockInfo.pos;
+					if (boundingBox == null || boundingBox.isInside(blockPos3)) {
+						FluidState fluidState = structurePlaceSettings.shouldKeepLiquids() ? levelAccessor.getFluidState(blockPos3) : null;
 						BlockState blockState = structureBlockInfo.state.mirror(structurePlaceSettings.getMirror()).rotate(structurePlaceSettings.getRotation());
 						if (structureBlockInfo.nbt != null) {
-							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
+							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
 							Clearable.tryClear(blockEntity);
-							levelAccessor.setBlock(blockPos2, Blocks.BARRIER.defaultBlockState(), 20);
+							levelAccessor.setBlock(blockPos3, Blocks.BARRIER.defaultBlockState(), 20);
 						}
 
-						if (levelAccessor.setBlock(blockPos2, blockState, i)) {
-							j = Math.min(j, blockPos2.getX());
-							k = Math.min(k, blockPos2.getY());
-							l = Math.min(l, blockPos2.getZ());
-							m = Math.max(m, blockPos2.getX());
-							n = Math.max(n, blockPos2.getY());
-							o = Math.max(o, blockPos2.getZ());
-							list3.add(Pair.of(blockPos2, structureBlockInfo.nbt));
+						if (levelAccessor.setBlock(blockPos3, blockState, i)) {
+							j = Math.min(j, blockPos3.getX());
+							k = Math.min(k, blockPos3.getY());
+							l = Math.min(l, blockPos3.getZ());
+							m = Math.max(m, blockPos3.getX());
+							n = Math.max(n, blockPos3.getY());
+							o = Math.max(o, blockPos3.getZ());
+							list3.add(Pair.of(blockPos3, structureBlockInfo.nbt));
 							if (structureBlockInfo.nbt != null) {
-								BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
+								BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
 								if (blockEntity != null) {
-									structureBlockInfo.nbt.putInt("x", blockPos2.getX());
-									structureBlockInfo.nbt.putInt("y", blockPos2.getY());
-									structureBlockInfo.nbt.putInt("z", blockPos2.getZ());
-									blockEntity.load(structureBlockInfo.nbt);
+									structureBlockInfo.nbt.putInt("x", blockPos3.getX());
+									structureBlockInfo.nbt.putInt("y", blockPos3.getY());
+									structureBlockInfo.nbt.putInt("z", blockPos3.getZ());
+									blockEntity.load(structureBlockInfo.state, structureBlockInfo.nbt);
 									blockEntity.mirror(structurePlaceSettings.getMirror());
 									blockEntity.rotate(structurePlaceSettings.getRotation());
 								}
 							}
 
 							if (fluidState != null && blockState.getBlock() instanceof LiquidBlockContainer) {
-								((LiquidBlockContainer)blockState.getBlock()).placeLiquid(levelAccessor, blockPos2, blockState, fluidState);
+								((LiquidBlockContainer)blockState.getBlock()).placeLiquid(levelAccessor, blockPos3, blockState, fluidState);
 								if (!fluidState.isSource()) {
-									list2.add(blockPos2);
+									list2.add(blockPos3);
 								}
 							}
 						}
@@ -231,25 +231,25 @@ public class StructureTemplate {
 					Iterator<BlockPos> iterator = list2.iterator();
 
 					while (iterator.hasNext()) {
-						BlockPos blockPos3 = (BlockPos)iterator.next();
-						BlockPos blockPos4 = blockPos3;
-						FluidState fluidState2 = levelAccessor.getFluidState(blockPos3);
+						BlockPos blockPos4 = (BlockPos)iterator.next();
+						BlockPos blockPos5 = blockPos4;
+						FluidState fluidState2 = levelAccessor.getFluidState(blockPos4);
 
 						for (int p = 0; p < directions.length && !fluidState2.isSource(); p++) {
-							BlockPos blockPos5 = blockPos4.relative(directions[p]);
-							FluidState fluidState3 = levelAccessor.getFluidState(blockPos5);
-							if (fluidState3.getHeight(levelAccessor, blockPos5) > fluidState2.getHeight(levelAccessor, blockPos4)
+							BlockPos blockPos6 = blockPos5.relative(directions[p]);
+							FluidState fluidState3 = levelAccessor.getFluidState(blockPos6);
+							if (fluidState3.getHeight(levelAccessor, blockPos6) > fluidState2.getHeight(levelAccessor, blockPos5)
 								|| fluidState3.isSource() && !fluidState2.isSource()) {
 								fluidState2 = fluidState3;
-								blockPos4 = blockPos5;
+								blockPos5 = blockPos6;
 							}
 						}
 
 						if (fluidState2.isSource()) {
-							BlockState blockState2 = levelAccessor.getBlockState(blockPos3);
+							BlockState blockState2 = levelAccessor.getBlockState(blockPos4);
 							Block block = blockState2.getBlock();
 							if (block instanceof LiquidBlockContainer) {
-								((LiquidBlockContainer)block).placeLiquid(levelAccessor, blockPos3, blockState2, fluidState2);
+								((LiquidBlockContainer)block).placeLiquid(levelAccessor, blockPos4, blockState2, fluidState2);
 								bl = true;
 								iterator.remove();
 							}
@@ -265,27 +265,27 @@ public class StructureTemplate {
 						int s = l;
 
 						for (Pair<BlockPos, CompoundTag> pair : list3) {
-							BlockPos blockPos6 = pair.getFirst();
-							discreteVoxelShape.setFull(blockPos6.getX() - q, blockPos6.getY() - r, blockPos6.getZ() - s, true, true);
+							BlockPos blockPos7 = pair.getFirst();
+							discreteVoxelShape.setFull(blockPos7.getX() - q, blockPos7.getY() - r, blockPos7.getZ() - s, true, true);
 						}
 
 						updateShapeAtEdge(levelAccessor, i, discreteVoxelShape, q, r, s);
 					}
 
 					for (Pair<BlockPos, CompoundTag> pair2 : list3) {
-						BlockPos blockPos4 = pair2.getFirst();
+						BlockPos blockPos5 = pair2.getFirst();
 						if (!structurePlaceSettings.getKnownShape()) {
-							BlockState blockState3 = levelAccessor.getBlockState(blockPos4);
-							BlockState blockState2 = Block.updateFromNeighbourShapes(blockState3, levelAccessor, blockPos4);
+							BlockState blockState3 = levelAccessor.getBlockState(blockPos5);
+							BlockState blockState2 = Block.updateFromNeighbourShapes(blockState3, levelAccessor, blockPos5);
 							if (blockState3 != blockState2) {
-								levelAccessor.setBlock(blockPos4, blockState2, i & -2 | 16);
+								levelAccessor.setBlock(blockPos5, blockState2, i & -2 | 16);
 							}
 
-							levelAccessor.blockUpdated(blockPos4, blockState2.getBlock());
+							levelAccessor.blockUpdated(blockPos5, blockState2.getBlock());
 						}
 
 						if (pair2.getSecond() != null) {
-							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos4);
+							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos5);
 							if (blockEntity != null) {
 								blockEntity.setChanged();
 							}
@@ -325,20 +325,24 @@ public class StructureTemplate {
 	}
 
 	public static List<StructureTemplate.StructureBlockInfo> processBlockInfos(
-		LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, List<StructureTemplate.StructureBlockInfo> list
+		LevelAccessor levelAccessor,
+		BlockPos blockPos,
+		BlockPos blockPos2,
+		StructurePlaceSettings structurePlaceSettings,
+		List<StructureTemplate.StructureBlockInfo> list
 	) {
 		List<StructureTemplate.StructureBlockInfo> list2 = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
 
 		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
-			BlockPos blockPos2 = calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos);
+			BlockPos blockPos3 = calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos);
 			StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(
-				blockPos2, structureBlockInfo.state, structureBlockInfo.nbt
+				blockPos3, structureBlockInfo.state, structureBlockInfo.nbt
 			);
 			Iterator<StructureProcessor> iterator = structurePlaceSettings.getProcessors().iterator();
 
 			while (structureBlockInfo2 != null && iterator.hasNext()) {
 				structureBlockInfo2 = ((StructureProcessor)iterator.next())
-					.processBlock(levelAccessor, blockPos, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
+					.processBlock(levelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
 			}
 
 			if (structureBlockInfo2 != null) {
@@ -363,8 +367,7 @@ public class StructureTemplate {
 				listTag.add(DoubleTag.valueOf(vec32.y));
 				listTag.add(DoubleTag.valueOf(vec32.z));
 				compoundTag.put("Pos", listTag);
-				compoundTag.remove("UUIDMost");
-				compoundTag.remove("UUIDLeast");
+				compoundTag.remove("UUID");
 				createEntityIgnoreException(levelAccessor, compoundTag).ifPresent(entity -> {
 					float f = entity.mirror(mirror);
 					f += entity.yRot - entity.rotate(rotation);

@@ -730,24 +730,25 @@ public class LevelChunk implements ChunkAccess {
 
 	@Nullable
 	private BlockEntity promotePendingBlockEntity(BlockPos blockPos, CompoundTag compoundTag) {
+		BlockState blockState = this.getBlockState(blockPos);
 		BlockEntity blockEntity;
 		if ("DUMMY".equals(compoundTag.getString("id"))) {
-			Block block = this.getBlockState(blockPos).getBlock();
+			Block block = blockState.getBlock();
 			if (block instanceof EntityBlock) {
 				blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
 			} else {
 				blockEntity = null;
-				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, this.getBlockState(blockPos));
+				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, blockState);
 			}
 		} else {
-			blockEntity = BlockEntity.loadStatic(compoundTag);
+			blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
 		}
 
 		if (blockEntity != null) {
 			blockEntity.setLevelAndPosition(this.level, blockPos);
 			this.addBlockEntity(blockEntity);
 		} else {
-			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", this.getBlockState(blockPos), blockPos);
+			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", blockState, blockPos);
 		}
 
 		return blockEntity;
@@ -768,7 +769,7 @@ public class LevelChunk implements ChunkAccess {
 			((ProtoTickList)this.blockTicks).copyOut(this.level.getBlockTicks(), blockPos -> this.getBlockState(blockPos).getBlock());
 			this.blockTicks = EmptyTickList.empty();
 		} else if (this.blockTicks instanceof ChunkTickList) {
-			this.level.getBlockTicks().addAll(((ChunkTickList)this.blockTicks).ticks());
+			((ChunkTickList)this.blockTicks).copyOut(this.level.getBlockTicks());
 			this.blockTicks = EmptyTickList.empty();
 		}
 
@@ -776,19 +777,23 @@ public class LevelChunk implements ChunkAccess {
 			((ProtoTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks(), blockPos -> this.getFluidState(blockPos).getType());
 			this.liquidTicks = EmptyTickList.empty();
 		} else if (this.liquidTicks instanceof ChunkTickList) {
-			this.level.getLiquidTicks().addAll(((ChunkTickList)this.liquidTicks).ticks());
+			((ChunkTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks());
 			this.liquidTicks = EmptyTickList.empty();
 		}
 	}
 
 	public void packTicks(ServerLevel serverLevel) {
 		if (this.blockTicks == EmptyTickList.empty()) {
-			this.blockTicks = new ChunkTickList<>(Registry.BLOCK::getKey, serverLevel.getBlockTicks().fetchTicksInChunk(this.chunkPos, true, false));
+			this.blockTicks = new ChunkTickList<>(
+				Registry.BLOCK::getKey, serverLevel.getBlockTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
+			);
 			this.setUnsaved(true);
 		}
 
 		if (this.liquidTicks == EmptyTickList.empty()) {
-			this.liquidTicks = new ChunkTickList<>(Registry.FLUID::getKey, serverLevel.getLiquidTicks().fetchTicksInChunk(this.chunkPos, true, false));
+			this.liquidTicks = new ChunkTickList<>(
+				Registry.FLUID::getKey, serverLevel.getLiquidTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
+			);
 			this.setUnsaved(true);
 		}
 	}

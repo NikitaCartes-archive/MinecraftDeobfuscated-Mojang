@@ -158,10 +158,10 @@ public class ServerLevel extends Level {
 	private int emptyTime;
 	private final PortalForcer portalForcer;
 	private final ServerTickList<Block> blockTicks = new ServerTickList<>(
-		this, block -> block == null || block.defaultBlockState().isAir(), Registry.BLOCK::getKey, Registry.BLOCK::get, this::tickBlock
+		this, block -> block == null || block.defaultBlockState().isAir(), Registry.BLOCK::getKey, this::tickBlock
 	);
 	private final ServerTickList<Fluid> liquidTicks = new ServerTickList<>(
-		this, fluid -> fluid == null || fluid == Fluids.EMPTY, Registry.FLUID::getKey, Registry.FLUID::get, this::tickLiquid
+		this, fluid -> fluid == null || fluid == Fluids.EMPTY, Registry.FLUID::getKey, this::tickLiquid
 	);
 	private final Set<PathNavigation> navigations = Sets.<PathNavigation>newHashSet();
 	protected final Raids raids;

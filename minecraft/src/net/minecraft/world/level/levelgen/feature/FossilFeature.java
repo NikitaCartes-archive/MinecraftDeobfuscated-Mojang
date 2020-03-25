@@ -83,11 +83,11 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
 		BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9F);
 		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);
-		structureTemplate.placeInWorld(levelAccessor, blockPos3, structurePlaceSettings, 4);
+		structureTemplate.placeInWorld(levelAccessor, blockPos3, blockPos3, structurePlaceSettings, 4);
 		structurePlaceSettings.popProcessor(blockRotProcessor);
 		BlockRotProcessor blockRotProcessor2 = new BlockRotProcessor(0.1F);
 		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor2);
-		structureTemplate2.placeInWorld(levelAccessor, blockPos3, structurePlaceSettings, 4);
+		structureTemplate2.placeInWorld(levelAccessor, blockPos3, blockPos3, structurePlaceSettings, 4);
 		return true;
 	}
 }

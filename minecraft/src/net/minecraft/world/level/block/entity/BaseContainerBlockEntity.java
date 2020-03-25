@@ -13,6 +13,7 @@ import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class BaseContainerBlockEntity extends BlockEntity implements Container, MenuProvider, Nameable {
 	private LockCode lockKey = LockCode.NO_LOCK;
@@ -23,8 +24,8 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.lockKey = LockCode.fromTag(compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));

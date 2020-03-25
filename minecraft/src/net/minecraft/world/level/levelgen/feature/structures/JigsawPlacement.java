@@ -141,12 +141,12 @@ public class JigsawPlacement {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
 				this.structureManager, blockPos, rotation, this.random
 			)) {
-				Direction direction = structureBlockInfo.state.getValue(JigsawBlock.FACING);
+				Direction direction = JigsawBlock.getFrontFacing(structureBlockInfo.state);
 				BlockPos blockPos2 = structureBlockInfo.pos;
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int l = blockPos2.getY() - k;
 				int m = -1;
-				StructureTemplatePool structureTemplatePool = JigsawPlacement.POOLS.getPool(new ResourceLocation(structureBlockInfo.nbt.getString("target_pool")));
+				StructureTemplatePool structureTemplatePool = JigsawPlacement.POOLS.getPool(new ResourceLocation(structureBlockInfo.nbt.getString("pool")));
 				StructureTemplatePool structureTemplatePool2 = JigsawPlacement.POOLS.getPool(structureTemplatePool.getFallback());
 				if (structureTemplatePool != StructureTemplatePool.INVALID && (structureTemplatePool.size() != 0 || structureTemplatePool == StructureTemplatePool.EMPTY)) {
 					boolean bl2 = boundingBox.isInside(blockPos3);
@@ -185,10 +185,10 @@ public class JigsawPlacement {
 								o = 0;
 							} else {
 								o = list2.stream().mapToInt(structureBlockInfox -> {
-									if (!boundingBox2.isInside(structureBlockInfox.pos.relative(structureBlockInfox.state.getValue(JigsawBlock.FACING)))) {
+									if (!boundingBox2.isInside(structureBlockInfox.pos.relative(JigsawBlock.getFrontFacing(structureBlockInfox.state)))) {
 										return 0;
 									} else {
-										ResourceLocation resourceLocation = new ResourceLocation(structureBlockInfox.nbt.getString("target_pool"));
+										ResourceLocation resourceLocation = new ResourceLocation(structureBlockInfox.nbt.getString("pool"));
 										StructureTemplatePool structureTemplatePoolx = JigsawPlacement.POOLS.getPool(resourceLocation);
 										StructureTemplatePool structureTemplatePool2x = JigsawPlacement.POOLS.getPool(structureTemplatePoolx.getFallback());
 										return Math.max(structureTemplatePoolx.getMaxSize(this.structureManager), structureTemplatePool2x.getMaxSize(this.structureManager));
@@ -205,7 +205,7 @@ public class JigsawPlacement {
 									StructureTemplatePool.Projection projection2 = structurePoolElement2.getProjection();
 									boolean bl3 = projection2 == StructureTemplatePool.Projection.RIGID;
 									int q = blockPos4.getY();
-									int r = l - q + ((Direction)structureBlockInfo.state.getValue(JigsawBlock.FACING)).getStepY();
+									int r = l - q + JigsawBlock.getFrontFacing(structureBlockInfo.state).getStepY();
 									int s;
 									if (bl && bl3) {
 										s = k + r;
@@ -263,7 +263,7 @@ public class JigsawPlacement {
 						}
 					}
 				} else {
-					JigsawPlacement.LOGGER.warn("Empty or none existent pool: {}", structureBlockInfo.nbt.getString("target_pool"));
+					JigsawPlacement.LOGGER.warn("Empty or none existent pool: {}", structureBlockInfo.nbt.getString("pool"));
 				}
 			}
 		}

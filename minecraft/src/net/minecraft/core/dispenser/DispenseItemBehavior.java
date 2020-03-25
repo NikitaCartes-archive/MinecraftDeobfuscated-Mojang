@@ -46,6 +46,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.TntBlock;
@@ -506,5 +507,20 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
+		DispenserBlock.registerBehavior(Items.GLOWSTONE, new DefaultDispenseItemBehavior() {
+			@Override
+			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.getPos().relative(direction);
+				Level level = blockSource.getLevel();
+				BlockState blockState = level.getBlockState(blockPos);
+				if (blockState.getBlock() == Blocks.RESPAWN_ANCHOR && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
+					RespawnAnchorBlock.charge(level, blockPos, blockState);
+					itemStack.shrink(1);
+				}
+
+				return itemStack;
+			}
+		});
 	}
 }

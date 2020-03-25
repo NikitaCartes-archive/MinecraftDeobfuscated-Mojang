@@ -46,7 +46,7 @@ public abstract class BlockEntity {
 		return this.level != null;
 	}
 
-	public void load(CompoundTag compoundTag) {
+	public void load(BlockState blockState, CompoundTag compoundTag) {
 		this.worldPosition = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
 	}
 
@@ -68,7 +68,7 @@ public abstract class BlockEntity {
 	}
 
 	@Nullable
-	public static BlockEntity loadStatic(CompoundTag compoundTag) {
+	public static BlockEntity loadStatic(BlockState blockState, CompoundTag compoundTag) {
 		String string = compoundTag.getString("id");
 		return (BlockEntity)Registry.BLOCK_ENTITY_TYPE.getOptional(new ResourceLocation(string)).map(blockEntityType -> {
 			try {
@@ -79,10 +79,10 @@ public abstract class BlockEntity {
 			}
 		}).map(blockEntity -> {
 			try {
-				blockEntity.load(compoundTag);
+				blockEntity.load(blockState, compoundTag);
 				return blockEntity;
-			} catch (Throwable var4) {
-				LOGGER.error("Failed to load data for block entity {}", string, var4);
+			} catch (Throwable var5) {
+				LOGGER.error("Failed to load data for block entity {}", string, var5);
 				return null;
 			}
 		}).orElseGet(() -> {

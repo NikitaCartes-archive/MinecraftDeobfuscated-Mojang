@@ -433,14 +433,21 @@ public class ItemInHandRenderer {
 		LocalPlayer localPlayer = this.minecraft.player;
 		ItemStack itemStack = localPlayer.getMainHandItem();
 		ItemStack itemStack2 = localPlayer.getOffhandItem();
+		if (ItemStack.matches(this.mainHandItem, itemStack)) {
+			this.mainHandItem = itemStack;
+		}
+
+		if (ItemStack.matches(this.offHandItem, itemStack2)) {
+			this.offHandItem = itemStack2;
+		}
+
 		if (localPlayer.isHandsBusy()) {
 			this.mainHandHeight = Mth.clamp(this.mainHandHeight - 0.4F, 0.0F, 1.0F);
 			this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4F, 0.0F, 1.0F);
 		} else {
 			float f = localPlayer.getAttackStrengthScale(1.0F);
-			this.mainHandHeight = this.mainHandHeight
-				+ Mth.clamp((ItemStack.matches(this.mainHandItem, itemStack) ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
-			this.offHandHeight = this.offHandHeight + Mth.clamp((float)(ItemStack.matches(this.offHandItem, itemStack2) ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
+			this.mainHandHeight = this.mainHandHeight + Mth.clamp((this.mainHandItem == itemStack ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
+			this.offHandHeight = this.offHandHeight + Mth.clamp((float)(this.offHandItem == itemStack2 ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
 		}
 
 		if (this.mainHandHeight < 0.1F) {

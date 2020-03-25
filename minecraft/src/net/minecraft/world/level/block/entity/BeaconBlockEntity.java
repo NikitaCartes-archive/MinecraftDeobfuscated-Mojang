@@ -273,8 +273,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.primaryPower = getValidEffectById(compoundTag.getInt("Primary"));
 		this.secondaryPower = getValidEffectById(compoundTag.getInt("Secondary"));
 		if (compoundTag.contains("CustomName", 8)) {

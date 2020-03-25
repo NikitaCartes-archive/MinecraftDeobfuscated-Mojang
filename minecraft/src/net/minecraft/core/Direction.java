@@ -328,7 +328,6 @@ public enum Direction implements StringRepresentable {
 		}
 
 		@Nullable
-		@Environment(EnvType.CLIENT)
 		public static Direction.Axis byName(String string) {
 			return (Direction.Axis)BY_NAME.get(string.toLowerCase(Locale.ROOT));
 		}
@@ -397,6 +396,10 @@ public enum Direction implements StringRepresentable {
 
 		public String toString() {
 			return this.name;
+		}
+
+		public Direction.AxisDirection opposite() {
+			return this == POSITIVE ? NEGATIVE : POSITIVE;
 		}
 	}
 

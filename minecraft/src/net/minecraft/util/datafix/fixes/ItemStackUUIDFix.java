@@ -15,22 +15,27 @@ public class ItemStackUUIDFix extends AbstractUUIDFix {
 	@Override
 	public TypeRewriteRule makeRule() {
 		OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), DSL.namespacedString()));
-		return this.fixTypeEverywhereTyped(
-			"ItemStackUUIDFix",
-			this.getInputSchema().getType(this.typeReference),
-			typed -> {
-				if ((Boolean)typed.getOptional(opticFinder).map(pair -> "minecraft:player_head".equals(pair.getSecond())).orElse(false)) {
-					OpticFinder<?> opticFinder2 = typed.getType().findField("tag");
-					return typed.updateTyped(
-						opticFinder2,
-						typedx -> typedx.update(
-								DSL.remainderFinder(), dynamic -> dynamic.update("SkullOwner", dynamicx -> (Dynamic)replaceUUIDString(dynamicx, "Id", "Id").orElse(dynamicx))
-							)
-					);
-				} else {
-					return typed;
-				}
-			}
+		return this.fixTypeEverywhereTyped("ItemStackUUIDFix", this.getInputSchema().getType(this.typeReference), typed -> {
+			OpticFinder<?> opticFinder2 = typed.getType().findField("tag");
+			return typed.updateTyped(opticFinder2, typed2 -> typed2.update(DSL.remainderFinder(), dynamic -> {
+					dynamic = this.updateAttributeModifiers(dynamic);
+					if ((Boolean)typed.getOptional(opticFinder).map(pair -> "minecraft:player_head".equals(pair.getSecond())).orElse(false)) {
+						dynamic = this.updateSkullOwner(dynamic);
+					}
+
+					return dynamic;
+				}));
+		});
+	}
+
+	private Dynamic<?> updateAttributeModifiers(Dynamic<?> dynamic) {
+		return dynamic.update(
+			"AttributeModifiers",
+			dynamic2 -> dynamic.createList(dynamic2.asStream().map(dynamicxx -> (Dynamic)replaceUUIDLeastMost(dynamicxx, "UUID", "UUID").orElse(dynamicxx)))
 		);
+	}
+
+	private Dynamic<?> updateSkullOwner(Dynamic<?> dynamic) {
+		return dynamic.update("SkullOwner", dynamicx -> (Dynamic)replaceUUIDString(dynamicx, "Id", "Id").orElse(dynamicx));
 	}
 }

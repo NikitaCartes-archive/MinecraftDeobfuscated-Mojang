@@ -37,6 +37,7 @@ public abstract class StructurePoolElement {
 		LevelAccessor levelAccessor,
 		ChunkGenerator<?> chunkGenerator,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
 		Random random

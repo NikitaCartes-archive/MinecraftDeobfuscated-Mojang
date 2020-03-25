@@ -83,7 +83,9 @@ public abstract class StructurePiece {
 	public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
 	}
 
-	public abstract boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos);
+	public abstract boolean postProcess(
+		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+	);
 
 	public BoundingBox getBoundingBox() {
 		return this.boundingBox;

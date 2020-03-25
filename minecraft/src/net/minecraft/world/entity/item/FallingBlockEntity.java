@@ -163,7 +163,7 @@ public class FallingBlockEntity extends Entity {
 												}
 											}
 
-											blockEntity.load(compoundTag);
+											blockEntity.load(this.blockState, compoundTag);
 											blockEntity.setChanged();
 										}
 									}

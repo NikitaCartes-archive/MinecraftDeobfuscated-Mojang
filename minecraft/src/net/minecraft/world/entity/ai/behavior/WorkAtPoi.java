@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.SerializableLong;
 import net.minecraft.server.level.ServerLevel;
@@ -34,8 +35,22 @@ public class WorkAtPoi extends Behavior<Villager> {
 		brain.setMemory(MemoryModuleType.LAST_WORKED_AT_POI, SerializableLong.of(l));
 		brain.getMemory(MemoryModuleType.JOB_SITE).ifPresent(globalPos -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosWrapper(globalPos.pos())));
 		villager.playWorkSound();
+		this.useWorkstation(serverLevel, villager);
 		if (villager.shouldRestock()) {
 			villager.restock();
+		}
+	}
+
+	protected void useWorkstation(ServerLevel serverLevel, Villager villager) {
+	}
+
+	protected boolean canStillUse(ServerLevel serverLevel, Villager villager, long l) {
+		Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
+		if (!optional.isPresent()) {
+			return false;
+		} else {
+			GlobalPos globalPos = (GlobalPos)optional.get();
+			return Objects.equals(globalPos.dimension(), serverLevel.getDimension().getType()) && globalPos.pos().closerThan(villager.position(), 1.73);
 		}
 	}
 }

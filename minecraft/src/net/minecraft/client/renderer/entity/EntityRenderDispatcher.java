@@ -176,6 +176,7 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.ZOMBIE, new ZombieRenderer(this));
 		this.register(EntityType.ZOMBIFIED_PIGLIN, new PiglinRenderer(this, true));
 		this.register(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerRenderer(this, reloadableResourceManager));
+		this.register(EntityType.STRIDER, new StriderRenderer(this));
 	}
 
 	public EntityRenderDispatcher(

@@ -97,17 +97,18 @@ public class SinglePoolElement extends StructurePoolElement {
 		LevelAccessor levelAccessor,
 		ChunkGenerator<?> chunkGenerator,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
 		Random random
 	) {
 		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
 		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox);
-		if (!structureTemplate.placeInWorld(levelAccessor, blockPos, structurePlaceSettings, 18)) {
+		if (!structureTemplate.placeInWorld(levelAccessor, blockPos, blockPos2, structurePlaceSettings, 18)) {
 			return false;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : StructureTemplate.processBlockInfos(
-				levelAccessor, blockPos, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
+				levelAccessor, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
 			)) {
 				this.handleDataMarker(levelAccessor, structureBlockInfo, blockPos, rotation, random, boundingBox);
 			}

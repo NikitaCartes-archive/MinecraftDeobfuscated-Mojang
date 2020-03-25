@@ -20,6 +20,7 @@ import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class CampfireBlockEntity extends BlockEntity implements Clearable, TickableBlockEntity {
 	private final NonNullList<ItemStack> items = NonNullList.withSize(4, ItemStack.EMPTY);
@@ -112,8 +113,8 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable, Ticka
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		if (compoundTag.contains("CookingTimes", 11)) {

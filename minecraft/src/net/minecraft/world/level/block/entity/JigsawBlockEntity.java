@@ -1,15 +1,22 @@
 package net.minecraft.world.level.block.entity;
 
+import java.util.Arrays;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.JigsawBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class JigsawBlockEntity extends BlockEntity {
-	private ResourceLocation attachementType = new ResourceLocation("empty");
-	private ResourceLocation targetPool = new ResourceLocation("empty");
+	private ResourceLocation name = new ResourceLocation("empty");
+	private ResourceLocation target = new ResourceLocation("empty");
+	private ResourceLocation pool = new ResourceLocation("empty");
+	private JigsawBlockEntity.JointType joint = JigsawBlockEntity.JointType.ROLLABLE;
 	private String finalState = "minecraft:air";
 
 	public JigsawBlockEntity(BlockEntityType<?> blockEntityType) {
@@ -21,13 +28,18 @@ public class JigsawBlockEntity extends BlockEntity {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ResourceLocation getAttachementType() {
-		return this.attachementType;
+	public ResourceLocation getName() {
+		return this.name;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ResourceLocation getTargetPool() {
-		return this.targetPool;
+	public ResourceLocation getTarget() {
+		return this.target;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ResourceLocation getPool() {
+		return this.pool;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -35,33 +47,53 @@ public class JigsawBlockEntity extends BlockEntity {
 		return this.finalState;
 	}
 
-	public void setAttachementType(ResourceLocation resourceLocation) {
-		this.attachementType = resourceLocation;
+	@Environment(EnvType.CLIENT)
+	public JigsawBlockEntity.JointType getJoint() {
+		return this.joint;
 	}
 
-	public void setTargetPool(ResourceLocation resourceLocation) {
-		this.targetPool = resourceLocation;
+	public void setName(ResourceLocation resourceLocation) {
+		this.name = resourceLocation;
+	}
+
+	public void setTarget(ResourceLocation resourceLocation) {
+		this.target = resourceLocation;
+	}
+
+	public void setPool(ResourceLocation resourceLocation) {
+		this.pool = resourceLocation;
 	}
 
 	public void setFinalState(String string) {
 		this.finalState = string;
 	}
 
+	public void setJoint(JigsawBlockEntity.JointType jointType) {
+		this.joint = jointType;
+	}
+
 	@Override
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
-		compoundTag.putString("attachement_type", this.attachementType.toString());
-		compoundTag.putString("target_pool", this.targetPool.toString());
+		compoundTag.putString("name", this.name.toString());
+		compoundTag.putString("target", this.target.toString());
+		compoundTag.putString("pool", this.pool.toString());
 		compoundTag.putString("final_state", this.finalState);
+		compoundTag.putString("joint", this.joint.getSerializedName());
 		return compoundTag;
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
-		this.attachementType = new ResourceLocation(compoundTag.getString("attachement_type"));
-		this.targetPool = new ResourceLocation(compoundTag.getString("target_pool"));
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
+		this.name = new ResourceLocation(compoundTag.getString("name"));
+		this.target = new ResourceLocation(compoundTag.getString("target"));
+		this.pool = new ResourceLocation(compoundTag.getString("pool"));
 		this.finalState = compoundTag.getString("final_state");
+		this.joint = (JigsawBlockEntity.JointType)JigsawBlockEntity.JointType.byName(compoundTag.getString("joint"))
+			.orElseGet(
+				() -> JigsawBlock.getFrontFacing(blockState).getAxis().isHorizontal() ? JigsawBlockEntity.JointType.ALIGNED : JigsawBlockEntity.JointType.ROLLABLE
+			);
 	}
 
 	@Nullable
@@ -73,5 +105,25 @@ public class JigsawBlockEntity extends BlockEntity {
 	@Override
 	public CompoundTag getUpdateTag() {
 		return this.save(new CompoundTag());
+	}
+
+	public static enum JointType implements StringRepresentable {
+		ROLLABLE("rollable"),
+		ALIGNED("aligned");
+
+		private final String name;
+
+		private JointType(String string2) {
+			this.name = string2;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
+		}
+
+		public static Optional<JigsawBlockEntity.JointType> byName(String string) {
+			return Arrays.stream(values()).filter(jointType -> jointType.getSerializedName().equals(string)).findFirst();
+		}
 	}
 }

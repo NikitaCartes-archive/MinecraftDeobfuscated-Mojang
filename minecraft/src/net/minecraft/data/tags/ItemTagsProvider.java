@@ -46,6 +46,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.JUNGLE_LOGS, ItemTags.JUNGLE_LOGS);
 		this.copy(BlockTags.CRIMSON_STEMS, ItemTags.CRIMSON_STEMS);
 		this.copy(BlockTags.WARPED_STEMS, ItemTags.WARPED_STEMS);
+		this.copy(BlockTags.LOGS_THAT_BURN, ItemTags.LOGS_THAT_BURN);
 		this.copy(BlockTags.LOGS, ItemTags.LOGS);
 		this.copy(BlockTags.SAND, ItemTags.SAND);
 		this.copy(BlockTags.SLABS, ItemTags.SLABS);
@@ -62,6 +63,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
+		this.copy(BlockTags.NON_FLAMMABLE_WOOD, ItemTags.NON_FLAMMABLE_WOOD);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,

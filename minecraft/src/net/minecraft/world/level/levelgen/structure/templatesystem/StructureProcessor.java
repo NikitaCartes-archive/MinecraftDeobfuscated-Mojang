@@ -12,6 +12,7 @@ public abstract class StructureProcessor {
 	public abstract StructureTemplate.StructureBlockInfo processBlock(
 		LevelReader levelReader,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		StructureTemplate.StructureBlockInfo structureBlockInfo,
 		StructureTemplate.StructureBlockInfo structureBlockInfo2,
 		StructurePlaceSettings structurePlaceSettings
