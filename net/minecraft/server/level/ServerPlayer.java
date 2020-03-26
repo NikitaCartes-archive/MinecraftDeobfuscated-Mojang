@@ -1278,6 +1278,7 @@ implements ContainerListener {
         }
     }
 
+    @Nullable
     public BlockPos getRespawnPosition() {
         return this.respawnPosition;
     }
