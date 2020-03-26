@@ -1357,6 +1357,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 		}
 	}
 
+	@Nullable
 	public BlockPos getRespawnPosition() {
 		return this.respawnPosition;
 	}
