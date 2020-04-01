@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class GroundBushFeature extends AbstractTreeFeature<TreeConfiguration> {
-	public GroundBushFeature(Function<Dynamic<?>, ? extends TreeConfiguration> function) {
-		super(function);
+	public GroundBushFeature(Function<Dynamic<?>, ? extends TreeConfiguration> function, Function<Random, ? extends TreeConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

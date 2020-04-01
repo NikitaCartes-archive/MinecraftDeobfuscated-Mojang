@@ -108,7 +108,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -1439,9 +1439,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public void renderSky(PoseStack poseStack, float f) {
-		if (this.minecraft.level.dimension.getType() == DimensionType.THE_END) {
+		Dimension dimension = this.minecraft.level.dimension;
+		if (dimension.isEndSky()) {
 			this.renderEndSky(poseStack);
-		} else if (this.minecraft.level.dimension.isNaturalDimension()) {
+		} else if (dimension.isNaturalDimension()) {
 			RenderSystem.disableTexture();
 			Vec3 vec3 = this.level.getSkyColor(this.minecraft.gameRenderer.getMainCamera().getBlockPosition(), f);
 			float g = (float)vec3.x;
@@ -1501,29 +1502,31 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(-90.0F));
 			poseStack.mulPose(Vector3f.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0F));
 			Matrix4f matrix4f2 = poseStack.last().pose();
-			float l = 30.0F;
+			float l = dimension.getSunSize();
+			Vector3f vector3f = dimension.getSunTint();
 			this.textureManager.bind(SUN_LOCATION);
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-			bufferBuilder.vertex(matrix4f2, -l, 100.0F, -l).uv(0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(matrix4f2, l, 100.0F, -l).uv(1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(matrix4f2, l, 100.0F, l).uv(1.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(matrix4f2, -l, 100.0F, l).uv(0.0F, 1.0F).endVertex();
+			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
+			bufferBuilder.vertex(matrix4f2, -l, 100.0F, -l).color(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F).uv(0.0F, 0.0F).endVertex();
+			bufferBuilder.vertex(matrix4f2, l, 100.0F, -l).color(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F).uv(1.0F, 0.0F).endVertex();
+			bufferBuilder.vertex(matrix4f2, l, 100.0F, l).color(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F).uv(1.0F, 1.0F).endVertex();
+			bufferBuilder.vertex(matrix4f2, -l, 100.0F, l).color(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F).uv(0.0F, 1.0F).endVertex();
 			bufferBuilder.end();
 			BufferUploader.end(bufferBuilder);
-			l = 20.0F;
+			l = dimension.getMoonSize();
+			Vector3f vector3f2 = dimension.getMoonTint();
 			this.textureManager.bind(MOON_LOCATION);
-			int s = this.level.getMoonPhase();
-			int t = s % 4;
-			int n = s / 4 % 2;
-			float u = (float)(t + 0) / 4.0F;
-			float p = (float)(n + 0) / 2.0F;
-			float q = (float)(t + 1) / 4.0F;
-			float r = (float)(n + 1) / 2.0F;
-			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-			bufferBuilder.vertex(matrix4f2, -l, -100.0F, l).uv(q, r).endVertex();
-			bufferBuilder.vertex(matrix4f2, l, -100.0F, l).uv(u, r).endVertex();
-			bufferBuilder.vertex(matrix4f2, l, -100.0F, -l).uv(u, p).endVertex();
-			bufferBuilder.vertex(matrix4f2, -l, -100.0F, -l).uv(q, p).endVertex();
+			int n = this.level.getMoonPhase();
+			int o = n % 4;
+			int s = n / 4 % 2;
+			float q = (float)(o + 0) / 4.0F;
+			float r = (float)(s + 0) / 2.0F;
+			float t = (float)(o + 1) / 4.0F;
+			float u = (float)(s + 1) / 2.0F;
+			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR_TEX);
+			bufferBuilder.vertex(matrix4f2, -l, -100.0F, l).color(vector3f2.x(), vector3f2.y(), vector3f2.z(), 1.0F).uv(t, u).endVertex();
+			bufferBuilder.vertex(matrix4f2, l, -100.0F, l).color(vector3f2.x(), vector3f2.y(), vector3f2.z(), 1.0F).uv(q, u).endVertex();
+			bufferBuilder.vertex(matrix4f2, l, -100.0F, -l).color(vector3f2.x(), vector3f2.y(), vector3f2.z(), 1.0F).uv(q, r).endVertex();
+			bufferBuilder.vertex(matrix4f2, -l, -100.0F, -l).color(vector3f2.x(), vector3f2.y(), vector3f2.z(), 1.0F).uv(t, r).endVertex();
 			bufferBuilder.end();
 			BufferUploader.end(bufferBuilder);
 			RenderSystem.disableTexture();

@@ -14,8 +14,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
-	public IceSpikeFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public IceSpikeFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

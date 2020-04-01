@@ -1,10 +1,18 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.Lists;
 import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.special.G03;
+import net.minecraft.world.level.dimension.special.G06;
+import net.minecraft.world.level.dimension.special.G33;
 
 public abstract class Biomes {
+	private static final List<Biome> VANILLA_BIOMES = Lists.<Biome>newArrayList();
 	public static final Biome OCEAN = register(0, "ocean", new OceanBiome());
 	public static final Biome DEFAULT = OCEAN;
 	public static final Biome PLAINS = register(1, "plains", new PlainsBiome());
@@ -84,6 +92,9 @@ public abstract class Biomes {
 	public static final Biome SOUL_SAND_VALLEY = register(170, "soul_sand_valley", new SoulSandValleyBiome());
 	public static final Biome CRIMSON_FOREST = register(171, "crimson_forest", new CrimsonForestBiome());
 	public static final Biome WARPED_FOREST = register(172, "warped_forest", new WarpedForestBiome());
+	public static final Biome BETWEEN = register(173, "between", new G03.BetweenBiome());
+	public static final Biome SHAPES = register(174, "shapes", new G06.ShapesBiome());
+	public static final Biome BUSY = register(175, "busy", new G33.BusyBiome());
 
 	private static Biome register(int i, String string, Biome biome) {
 		Registry.registerMapping(Registry.BIOME, i, string, biome);
@@ -91,7 +102,12 @@ public abstract class Biomes {
 			Biome.MUTATED_BIOMES.addMapping(biome, Registry.BIOME.getId(Registry.BIOME.get(new ResourceLocation(biome.parent))));
 		}
 
+		VANILLA_BIOMES.add(biome);
 		return biome;
+	}
+
+	public static Biome getRandomVanillaBiome(Random random) {
+		return Util.randomObject(random, VANILLA_BIOMES);
 	}
 
 	static {

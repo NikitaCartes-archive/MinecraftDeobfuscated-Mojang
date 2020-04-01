@@ -22,11 +22,6 @@ public class NormalDimension extends Dimension {
 	}
 
 	@Override
-	public DimensionType getType() {
-		return DimensionType.OVERWORLD;
-	}
-
-	@Override
 	public ChunkGenerator<? extends ChunkGeneratorSettings> createRandomLevelGenerator() {
 		return (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getLevelData().getGeneratorProvider().create(this.level);
 	}
@@ -34,9 +29,14 @@ public class NormalDimension extends Dimension {
 	@Nullable
 	@Override
 	public BlockPos getSpawnPosInChunk(ChunkPos chunkPos, boolean bl) {
+		return getSpawnPosInChunkI(this.level, chunkPos, bl);
+	}
+
+	@Nullable
+	public static BlockPos getSpawnPosInChunkI(Level level, ChunkPos chunkPos, boolean bl) {
 		for (int i = chunkPos.getMinBlockX(); i <= chunkPos.getMaxBlockX(); i++) {
 			for (int j = chunkPos.getMinBlockZ(); j <= chunkPos.getMaxBlockZ(); j++) {
-				BlockPos blockPos = this.getValidSpawnPosition(i, j, bl);
+				BlockPos blockPos = getValidSpawnPositionI(level, i, j, bl);
 				if (blockPos != null) {
 					return blockPos;
 				}
@@ -49,13 +49,18 @@ public class NormalDimension extends Dimension {
 	@Nullable
 	@Override
 	public BlockPos getValidSpawnPosition(int i, int j, boolean bl) {
+		return getValidSpawnPositionI(this.level, i, j, bl);
+	}
+
+	@Nullable
+	public static BlockPos getValidSpawnPositionI(Level level, int i, int j, boolean bl) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, 0, j);
-		Biome biome = this.level.getBiome(mutableBlockPos);
+		Biome biome = level.getBiome(mutableBlockPos);
 		BlockState blockState = biome.getSurfaceBuilderConfig().getTopMaterial();
 		if (bl && !blockState.getBlock().is(BlockTags.VALID_SPAWN)) {
 			return null;
 		} else {
-			LevelChunk levelChunk = this.level.getChunk(i >> 4, j >> 4);
+			LevelChunk levelChunk = level.getChunk(i >> 4, j >> 4);
 			int k = levelChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i & 15, j & 15);
 			if (k < 0) {
 				return null;
@@ -64,7 +69,7 @@ public class NormalDimension extends Dimension {
 			} else {
 				for (int l = k + 1; l >= 0; l--) {
 					mutableBlockPos.set(i, l, j);
-					BlockState blockState2 = this.level.getBlockState(mutableBlockPos);
+					BlockState blockState2 = level.getBlockState(mutableBlockPos);
 					if (!blockState2.getFluidState().isEmpty()) {
 						break;
 					}
@@ -81,9 +86,13 @@ public class NormalDimension extends Dimension {
 
 	@Override
 	public float getTimeOfDay(long l, float f) {
-		double d = Mth.frac((double)l / 24000.0 - 0.25);
-		double e = 0.5 - Math.cos(d * Math.PI) / 2.0;
-		return (float)(d * 2.0 + e) / 3.0F;
+		return getTimeOfDayI(l, 24000.0);
+	}
+
+	public static float getTimeOfDayI(long l, double d) {
+		double e = Mth.frac((double)l / d - 0.25);
+		double f = 0.5 - Math.cos(e * Math.PI) / 2.0;
+		return (float)(e * 2.0 + f) / 3.0F;
 	}
 
 	@Override

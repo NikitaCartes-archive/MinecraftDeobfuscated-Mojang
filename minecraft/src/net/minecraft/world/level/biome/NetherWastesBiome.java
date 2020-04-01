@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -40,7 +39,6 @@ public final class NetherWastesBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, 0.0F, -0.5F, 1.0F)))
 		);
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));

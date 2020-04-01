@@ -89,6 +89,7 @@ public class Stats {
 	public static final ResourceLocation INTERACT_WITH_GRINDSTONE = makeCustomStat("interact_with_grindstone", StatFormatter.DEFAULT);
 	public static final ResourceLocation TARGET_HIT = makeCustomStat("target_hit", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_SMITHING_TABLE = makeCustomStat("interact_with_smithing_table", StatFormatter.DEFAULT);
+	public static final ResourceLocation CHANGE_DIMENSION = makeCustomStat("change_dimension", StatFormatter.DEFAULT);
 
 	private static ResourceLocation makeCustomStat(String string, StatFormatter statFormatter) {
 		ResourceLocation resourceLocation = new ResourceLocation(string);

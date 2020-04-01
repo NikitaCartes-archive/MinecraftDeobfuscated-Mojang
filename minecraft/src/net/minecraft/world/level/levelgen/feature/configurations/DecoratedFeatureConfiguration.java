@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
@@ -41,5 +42,9 @@ public class DecoratedFeatureConfiguration implements FeatureConfiguration {
 		ConfiguredFeature<?, ?> configuredFeature = ConfiguredFeature.deserialize(dynamic.get("feature").orElseEmptyMap());
 		ConfiguredDecorator<?> configuredDecorator = ConfiguredDecorator.deserialize(dynamic.get("decorator").orElseEmptyMap());
 		return new DecoratedFeatureConfiguration(configuredFeature, configuredDecorator);
+	}
+
+	public static DecoratedFeatureConfiguration random(Random random) {
+		return new DecoratedFeatureConfiguration(Registry.FEATURE.getRandom(random).random(random), Registry.DECORATOR.getRandom(random).random(random));
 	}
 }

@@ -11,8 +11,10 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
 public class MonsterRoomPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
-	public MonsterRoomPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
-		super(function);
+	public MonsterRoomPlacementDecorator(
+		Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function, Function<Random, ? extends ChanceDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

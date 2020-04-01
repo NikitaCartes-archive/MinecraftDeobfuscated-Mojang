@@ -33,6 +33,11 @@ public abstract class AbstractBannerBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		if (itemStack.hasCustomHoverName()) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);

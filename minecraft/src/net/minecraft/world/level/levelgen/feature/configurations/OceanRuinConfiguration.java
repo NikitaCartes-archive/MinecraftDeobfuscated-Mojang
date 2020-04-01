@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 
 public class OceanRuinConfiguration implements FeatureConfiguration {
@@ -38,5 +40,9 @@ public class OceanRuinConfiguration implements FeatureConfiguration {
 		float f = dynamic.get("large_probability").asFloat(0.0F);
 		float g = dynamic.get("cluster_probability").asFloat(0.0F);
 		return new OceanRuinConfiguration(type, f, g);
+	}
+
+	public static OceanRuinConfiguration random(Random random) {
+		return new OceanRuinConfiguration(Util.randomEnum(OceanRuinFeature.Type.class, random), random.nextFloat() / 5.0F, random.nextFloat() / 10.0F);
 	}
 }

@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen.placement;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
@@ -34,5 +36,9 @@ public class CarvingMaskDecoratorConfiguration implements DecoratorConfiguration
 		GenerationStep.Carving carving = GenerationStep.Carving.valueOf(dynamic.get("step").asString(""));
 		float f = dynamic.get("probability").asFloat(0.0F);
 		return new CarvingMaskDecoratorConfiguration(carving, f);
+	}
+
+	public static CarvingMaskDecoratorConfiguration random(Random random) {
+		return new CarvingMaskDecoratorConfiguration(Util.randomEnum(GenerationStep.Carving.class, random), random.nextFloat() / 2.0F);
 	}
 }

@@ -235,7 +235,7 @@ public class TeleportCommand {
 		return collection.size();
 	}
 
-	private static void performTeleport(
+	public static void performTeleport(
 		CommandSourceStack commandSourceStack,
 		Entity entity,
 		ServerLevel serverLevel,

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
@@ -34,22 +33,13 @@ public class CrimsonForestBiome extends Biome {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(3343107)
-						.ambientParticle(
-							new AmbientParticleSettings(
-								ParticleTypes.CRIMSON_SPORE,
-								0.025F,
-								random -> random.nextGaussian() * 1.0E-6F,
-								random -> random.nextGaussian() * 1.0E-4F,
-								random -> random.nextGaussian() * 1.0E-6F
-							)
-						)
+						.ambientParticle(new AmbientParticleSettings(ParticleTypes.CRIMSON_SPORE, 0.025F, 1.0E-6F, 1.0E-4F, 1.0E-6F))
 						.ambientLoopSound(SoundEvents.AMBIENT_CRIMSON_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_ADDITIONS, 0.0111))
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, -0.5F, 0.0F, 0.0F, 1.0F)))
 		);
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
 		this.addFeature(

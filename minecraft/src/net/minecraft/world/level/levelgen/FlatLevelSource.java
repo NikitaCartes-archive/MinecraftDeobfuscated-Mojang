@@ -21,6 +21,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -184,6 +185,11 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 		return !this.settings.getStructuresOptions().keySet().contains(string.toLowerCase(Locale.ROOT))
 			? null
 			: super.findNearestMapFeature(level, string, blockPos, i, bl);
+	}
+
+	@Override
+	public ChunkGeneratorType<?, ?> getType() {
+		return ChunkGeneratorType.FLAT;
 	}
 
 	class FlatLevelBiomeWrapper extends Biome {

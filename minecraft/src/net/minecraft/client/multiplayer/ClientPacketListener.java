@@ -192,6 +192,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagManager;
+import net.minecraft.util.BookAccess;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -746,7 +747,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				clientboundLevelChunkPacket.getBiomes(),
 				clientboundLevelChunkPacket.getReadBuffer(),
 				clientboundLevelChunkPacket.getHeightmaps(),
-				clientboundLevelChunkPacket.getAvailableSections()
+				clientboundLevelChunkPacket.getAvailableSections(),
+				clientboundLevelChunkPacket.isFullChunk()
 			);
 		if (levelChunk != null && clientboundLevelChunkPacket.isFullChunk()) {
 			this.level.reAddEntitiesToChunk(levelChunk);
@@ -1850,7 +1852,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(clientboundOpenBookPacket, this, this.minecraft);
 		ItemStack itemStack = this.minecraft.player.getItemInHand(clientboundOpenBookPacket.getHand());
 		if (itemStack.getItem() == Items.WRITTEN_BOOK) {
-			this.minecraft.setScreen(new BookViewScreen(new BookViewScreen.WrittenBookAccess(itemStack)));
+			this.minecraft.setScreen(new BookViewScreen(new BookAccess.WrittenBookAccess(itemStack)));
 		}
 	}
 

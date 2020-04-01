@@ -9,8 +9,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 
 public class DefaultFlowerFeature extends AbstractFlowerFeature<RandomPatchConfiguration> {
-	public DefaultFlowerFeature(Function<Dynamic<?>, ? extends RandomPatchConfiguration> function) {
-		super(function);
+	public DefaultFlowerFeature(Function<Dynamic<?>, ? extends RandomPatchConfiguration> function, Function<Random, ? extends RandomPatchConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean isValid(LevelAccessor levelAccessor, BlockPos blockPos, RandomPatchConfiguration randomPatchConfiguration) {

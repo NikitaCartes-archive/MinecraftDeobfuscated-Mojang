@@ -63,4 +63,8 @@ public class TrunkVineDecorator extends TreeDecorator {
 			)
 			.getValue();
 	}
+
+	public static TrunkVineDecorator random(Random random) {
+		return new TrunkVineDecorator();
+	}
 }

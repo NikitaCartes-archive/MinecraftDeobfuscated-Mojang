@@ -15,8 +15,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 
 public class SeagrassFeature extends Feature<SeagrassFeatureConfiguration> {
-	public SeagrassFeature(Function<Dynamic<?>, ? extends SeagrassFeatureConfiguration> function) {
-		super(function);
+	public SeagrassFeature(
+		Function<Dynamic<?>, ? extends SeagrassFeatureConfiguration> function, Function<Random, ? extends SeagrassFeatureConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public boolean place(

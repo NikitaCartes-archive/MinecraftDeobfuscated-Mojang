@@ -13,8 +13,10 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
 public class NetherForestVegetationFeature extends Feature<BlockPileConfiguration> {
-	public NetherForestVegetationFeature(Function<Dynamic<?>, ? extends BlockPileConfiguration> function) {
-		super(function);
+	public NetherForestVegetationFeature(
+		Function<Dynamic<?>, ? extends BlockPileConfiguration> function, Function<Random, ? extends BlockPileConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public boolean place(

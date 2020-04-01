@@ -59,6 +59,11 @@ public class Lantern extends Block {
 		return Block.canSupportCenter(levelReader, blockPos.relative(direction), direction.getOpposite());
 	}
 
+	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
 	protected static Direction getConnectedDirection(BlockState blockState) {
 		return blockState.getValue(HANGING) ? Direction.DOWN : Direction.UP;
 	}

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -27,5 +28,9 @@ public class BlockPileConfiguration implements FeatureConfiguration {
 		BlockStateProviderType<?> blockStateProviderType = Registry.BLOCKSTATE_PROVIDER_TYPES
 			.get(new ResourceLocation((String)dynamic.get("state_provider").get("type").asString().orElseThrow(RuntimeException::new)));
 		return new BlockPileConfiguration(blockStateProviderType.deserialize(dynamic.get("state_provider").orElseEmptyMap()));
+	}
+
+	public static BlockPileConfiguration random(Random random) {
+		return new BlockPileConfiguration(BlockStateProvider.random(random));
 	}
 }

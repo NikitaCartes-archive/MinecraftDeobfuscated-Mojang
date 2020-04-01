@@ -1,30 +1,28 @@
 package net.minecraft.world.level.biome;
 
 import java.util.Random;
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
 
 public class AmbientParticleSettings {
-	private final SimpleParticleType particleType;
+	private final ParticleOptions particleType;
 	private final float probability;
-	private final Function<Random, Double> xVelocity;
-	private final Function<Random, Double> yVelocity;
-	private final Function<Random, Double> zVelocity;
+	private final double xVelocity;
+	private final double yVelocity;
+	private final double zVelocity;
 
-	public AmbientParticleSettings(
-		SimpleParticleType simpleParticleType, float f, Function<Random, Double> function, Function<Random, Double> function2, Function<Random, Double> function3
-	) {
-		this.particleType = simpleParticleType;
+	public AmbientParticleSettings(ParticleOptions particleOptions, float f, double d, double e, double g) {
+		this.particleType = particleOptions;
 		this.probability = f;
-		this.xVelocity = function;
-		this.yVelocity = function2;
-		this.zVelocity = function3;
+		this.xVelocity = d;
+		this.yVelocity = e;
+		this.zVelocity = g;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public SimpleParticleType getParticleType() {
+	public ParticleOptions getParticleType() {
 		return this.particleType;
 	}
 
@@ -34,17 +32,23 @@ public class AmbientParticleSettings {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public double getXVelocity(Random random) {
-		return (Double)this.xVelocity.apply(random);
+	public double getXVelocity() {
+		return this.xVelocity;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public double getYVelocity(Random random) {
-		return (Double)this.yVelocity.apply(random);
+	public double getYVelocity() {
+		return this.yVelocity;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public double getZVelocity(Random random) {
-		return (Double)this.zVelocity.apply(random);
+	public double getZVelocity() {
+		return this.zVelocity;
+	}
+
+	public static AmbientParticleSettings random(Random random) {
+		return new AmbientParticleSettings(
+			Registry.PARTICLE_TYPE.getRandom(random).getRandom(random), random.nextFloat() * 0.2F, random.nextDouble(), random.nextDouble(), random.nextDouble()
+		);
 	}
 }

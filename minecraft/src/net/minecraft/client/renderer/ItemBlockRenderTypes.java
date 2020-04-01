@@ -219,6 +219,7 @@ public class ItemBlockRenderTypes {
 		RenderType renderType3 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType3);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType3);
+		hashMap.put(Blocks.NEITHER_PORTAL, renderType3);
 		hashMap.put(Blocks.WHITE_STAINED_GLASS, renderType3);
 		hashMap.put(Blocks.ORANGE_STAINED_GLASS, renderType3);
 		hashMap.put(Blocks.MAGENTA_STAINED_GLASS, renderType3);

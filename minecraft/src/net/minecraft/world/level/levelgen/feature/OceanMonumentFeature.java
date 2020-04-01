@@ -22,8 +22,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 public class OceanMonumentFeature extends StructureFeature<NoneFeatureConfiguration> {
 	private static final List<Biome.SpawnerData> MONUMENT_ENEMIES = Lists.<Biome.SpawnerData>newArrayList(new Biome.SpawnerData(EntityType.GUARDIAN, 1, 2, 4));
 
-	public OceanMonumentFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public OceanMonumentFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

@@ -10,8 +10,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class NoOpFeature extends Feature<NoneFeatureConfiguration> {
-	public NoOpFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public NoOpFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

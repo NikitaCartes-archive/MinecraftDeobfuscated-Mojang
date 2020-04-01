@@ -12,8 +12,11 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class CountWithExtraChanceHeightmapDecorator extends FeatureDecorator<FrequencyWithExtraChanceDecoratorConfiguration> {
-	public CountWithExtraChanceHeightmapDecorator(Function<Dynamic<?>, ? extends FrequencyWithExtraChanceDecoratorConfiguration> function) {
-		super(function);
+	public CountWithExtraChanceHeightmapDecorator(
+		Function<Dynamic<?>, ? extends FrequencyWithExtraChanceDecoratorConfiguration> function,
+		Function<Random, ? extends FrequencyWithExtraChanceDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

@@ -17,8 +17,10 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 	protected long seed;
 	private PerlinNoise decorationNoise;
 
-	public NetherForestSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public NetherForestSurfaceBuilder(
+		Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function, Function<Random, ? extends SurfaceBuilderBaseConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public void apply(

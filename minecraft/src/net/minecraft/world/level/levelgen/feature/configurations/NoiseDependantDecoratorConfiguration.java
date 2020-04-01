@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 
 public class NoiseDependantDecoratorConfiguration implements DecoratorConfiguration {
 	public final double noiseLevel;
@@ -37,5 +38,10 @@ public class NoiseDependantDecoratorConfiguration implements DecoratorConfigurat
 		int i = dynamic.get("below_noise").asInt(0);
 		int j = dynamic.get("above_noise").asInt(0);
 		return new NoiseDependantDecoratorConfiguration(d, i, j);
+	}
+
+	public static NoiseDependantDecoratorConfiguration random(Random random) {
+		int i = random.nextInt(10);
+		return new NoiseDependantDecoratorConfiguration(random.nextDouble() * 2.0 - 1.0, i, i + random.nextInt(10));
 	}
 }

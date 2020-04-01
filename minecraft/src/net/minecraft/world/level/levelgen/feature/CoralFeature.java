@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public abstract class CoralFeature extends Feature<NoneFeatureConfiguration> {
-	public CoralFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public CoralFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

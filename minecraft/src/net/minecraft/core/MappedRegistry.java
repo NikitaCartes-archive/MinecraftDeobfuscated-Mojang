@@ -2,6 +2,10 @@ package net.minecraft.core;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -12,21 +16,22 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MappedRegistry<T> extends WritableRegistry<T> {
 	protected static final Logger LOGGER = LogManager.getLogger();
-	protected final CrudeIncrementalIntIdentityHashBiMap<T> map = new CrudeIncrementalIntIdentityHashBiMap<>(256);
+	protected final Int2ObjectMap<T> idMap = new Int2ObjectOpenHashMap<>(256);
+	protected final Object2IntMap<T> inverseIdMap = new Object2IntOpenHashMap<>(256);
 	protected final BiMap<ResourceLocation, T> storage = HashBiMap.create();
 	protected Object[] randomCache;
 	private int nextId;
 
 	@Override
 	public <V extends T> V registerMapping(int i, ResourceLocation resourceLocation, V object) {
-		this.map.addMapping((T)object, i);
+		this.idMap.put(i, (T)object);
+		this.inverseIdMap.put((T)object, i);
 		Validate.notNull(resourceLocation);
 		Validate.notNull(object);
 		this.randomCache = null;
@@ -55,17 +60,17 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 
 	@Override
 	public int getId(@Nullable T object) {
-		return this.map.getId(object);
+		return this.inverseIdMap.getInt(object);
 	}
 
 	@Nullable
 	@Override
 	public T byId(int i) {
-		return this.map.byId(i);
+		return this.idMap.get(i);
 	}
 
 	public Iterator<T> iterator() {
-		return this.map.iterator();
+		return this.idMap.values().iterator();
 	}
 
 	@Nullable
@@ -90,6 +95,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Nullable
+	@Override
 	public T getRandom(Random random) {
 		if (this.randomCache == null) {
 			Collection<?> collection = this.storage.values();

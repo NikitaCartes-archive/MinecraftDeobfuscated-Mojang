@@ -64,6 +64,7 @@ import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.client.gui.screens.LogoOverlay;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.OutOfMemoryScreen;
 import net.minecraft.client.gui.screens.Overlay;
@@ -459,13 +460,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			if (string != null) {
 				this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
 			} else {
-				this.setScreen(new TitleScreen(true));
+				this.setScreen(new TitleScreen());
 			}
 
 			LoadingOverlay.registerTextures(this);
 			List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
 			this.setOverlay(
-				new LoadingOverlay(
+				new LogoOverlay(
 					this,
 					this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
 					optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
@@ -473,8 +474,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 							if (SharedConstants.IS_RUNNING_IN_IDE) {
 								this.selfTest();
 							}
-						}),
-					false
+						})
 				)
 			);
 		}
@@ -1393,7 +1393,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.gameRenderer.shutdownEffect();
 		}
 
-		if (!this.pause) {
+		if (!this.pause && !(this.overlay instanceof LogoOverlay)) {
 			this.musicManager.tick();
 		}
 

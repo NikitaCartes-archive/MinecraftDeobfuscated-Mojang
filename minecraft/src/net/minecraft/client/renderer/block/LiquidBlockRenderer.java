@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -59,10 +60,11 @@ public class LiquidBlockRenderer {
 	public boolean tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, FluidState fluidState) {
 		boolean bl = fluidState.is(FluidTags.LAVA);
 		TextureAtlasSprite[] textureAtlasSprites = bl ? this.lavaIcons : this.waterIcons;
+		Vector3f vector3f = blockAndTintGetter.getExtraTint(Blocks.WATER.defaultBlockState(), blockPos);
 		int i = bl ? 16777215 : BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
-		float f = (float)(i >> 16 & 0xFF) / 255.0F;
-		float g = (float)(i >> 8 & 0xFF) / 255.0F;
-		float h = (float)(i & 0xFF) / 255.0F;
+		float f = vector3f.x() * (float)(i >> 16 & 0xFF) / 255.0F;
+		float g = vector3f.x() * (float)(i >> 8 & 0xFF) / 255.0F;
+		float h = vector3f.x() * (float)(i & 0xFF) / 255.0F;
 		boolean bl2 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.UP, fluidState);
 		boolean bl3 = !isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.DOWN, fluidState)
 			&& !isFaceOccluded(blockAndTintGetter, blockPos, Direction.DOWN, 0.8888889F);

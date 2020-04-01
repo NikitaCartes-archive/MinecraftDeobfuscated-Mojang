@@ -13,8 +13,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 
 public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
-	public EndGatewayFeature(Function<Dynamic<?>, ? extends EndGatewayConfiguration> function) {
-		super(function);
+	public EndGatewayFeature(Function<Dynamic<?>, ? extends EndGatewayConfiguration> function, Function<Random, ? extends EndGatewayConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

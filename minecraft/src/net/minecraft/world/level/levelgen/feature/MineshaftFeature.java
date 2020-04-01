@@ -18,8 +18,8 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
-	public MineshaftFeature(Function<Dynamic<?>, ? extends MineshaftConfiguration> function) {
-		super(function);
+	public MineshaftFeature(Function<Dynamic<?>, ? extends MineshaftConfiguration> function, Function<Random, ? extends MineshaftConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

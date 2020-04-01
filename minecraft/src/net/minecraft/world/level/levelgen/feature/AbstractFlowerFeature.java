@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public abstract class AbstractFlowerFeature<U extends FeatureConfiguration> extends Feature<U> {
-	public AbstractFlowerFeature(Function<Dynamic<?>, ? extends U> function) {
-		super(function);
+	public AbstractFlowerFeature(Function<Dynamic<?>, ? extends U> function, Function<Random, ? extends U> function2) {
+		super(function, function2);
 	}
 
 	@Override

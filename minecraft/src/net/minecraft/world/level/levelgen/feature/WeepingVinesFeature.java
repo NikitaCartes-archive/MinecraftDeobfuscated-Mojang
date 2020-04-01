@@ -17,8 +17,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 	private static final Direction[] DIRECTIONS = Direction.values();
 
-	public WeepingVinesFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public WeepingVinesFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

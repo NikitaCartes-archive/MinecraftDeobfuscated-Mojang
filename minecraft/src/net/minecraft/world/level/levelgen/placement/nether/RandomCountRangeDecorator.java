@@ -10,8 +10,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecor
 import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
 public class RandomCountRangeDecorator extends SimpleFeatureDecorator<CountRangeDecoratorConfiguration> {
-	public RandomCountRangeDecorator(Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function) {
-		super(function);
+	public RandomCountRangeDecorator(
+		Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function, Function<Random, ? extends CountRangeDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> place(Random random, CountRangeDecoratorConfiguration countRangeDecoratorConfiguration, BlockPos blockPos) {

@@ -202,6 +202,9 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
 		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE)
 	);
+	public static final BlockEntityType<NeitherPortalEntity> NEITHER = register(
+		"neither", BlockEntityType.Builder.of(NeitherPortalEntity::new, Blocks.NEITHER_PORTAL)
+	);
 	private final Supplier<? extends T> factory;
 	private final Set<Block> validBlocks;
 	private final Type<?> dataType;

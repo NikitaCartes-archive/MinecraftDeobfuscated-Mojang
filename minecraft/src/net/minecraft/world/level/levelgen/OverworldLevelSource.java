@@ -16,6 +16,7 @@ import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 
@@ -173,5 +174,10 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	@Override
 	public int getSeaLevel() {
 		return 63;
+	}
+
+	@Override
+	public ChunkGeneratorType<?, ?> getType() {
+		return ChunkGeneratorType.SURFACE;
 	}
 }

@@ -15,8 +15,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 
 public class NoiseHeightmapDoubleDecorator extends FeatureDecorator<NoiseDependantDecoratorConfiguration> {
-	public NoiseHeightmapDoubleDecorator(Function<Dynamic<?>, ? extends NoiseDependantDecoratorConfiguration> function) {
-		super(function);
+	public NoiseHeightmapDoubleDecorator(
+		Function<Dynamic<?>, ? extends NoiseDependantDecoratorConfiguration> function, Function<Random, ? extends NoiseDependantDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

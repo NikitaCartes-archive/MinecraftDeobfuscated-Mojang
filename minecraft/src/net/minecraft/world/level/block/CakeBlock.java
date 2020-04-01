@@ -93,6 +93,11 @@ public class CakeBlock extends Block {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(BITES);
 	}

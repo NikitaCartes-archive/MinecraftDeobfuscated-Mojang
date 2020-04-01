@@ -471,6 +471,51 @@ public class FishingHook extends Entity {
 
 	public int retrieve(ItemStack itemStack) {
 		if (!this.level.isClientSide && this.owner != null) {
+			if (this.nibble > 0 && this.random.nextInt(5) == 0) {
+				EntityType[] entityTypes = new EntityType[]{
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.SALMON,
+					EntityType.COD,
+					EntityType.TROPICAL_FISH,
+					EntityType.SQUID,
+					EntityType.PUFFERFISH,
+					EntityType.PUFFERFISH,
+					EntityType.GUARDIAN,
+					EntityType.BOAT,
+					EntityType.TROPICAL_FISH,
+					EntityType.SQUID,
+					EntityType.PUFFERFISH,
+					EntityType.PUFFERFISH,
+					EntityType.GUARDIAN,
+					EntityType.BOAT,
+					EntityType.ELDER_GUARDIAN
+				};
+				Entity entity = entityTypes[this.random.nextInt(entityTypes.length)].create(this.level, null, null, null, this.blockPosition(), null, false, false);
+				if (entity != null) {
+					this.setPos(this.getX(), this.getY() + 1.0, this.getZ());
+					entity.setPos(this.getX(), this.getY(), this.getZ());
+					entity.yRot = 0.0F;
+					if (this.owner != null) {
+						entity.xRot = (this.owner.xRot + 180.0F) % 180.0F;
+					}
+
+					entity.setPos(this.getX(), this.getY(), this.getZ());
+					this.level.addFreshEntity(entity);
+					this.hookedIn = entity;
+				}
+			}
+
 			int i = 0;
 			if (this.hookedIn != null) {
 				this.bringInHookedEntity();
@@ -530,7 +575,10 @@ public class FishingHook extends Entity {
 
 	protected void bringInHookedEntity() {
 		if (this.owner != null) {
-			Vec3 vec3 = new Vec3(this.owner.getX() - this.getX(), this.owner.getY() - this.getY(), this.owner.getZ() - this.getZ()).scale(0.1);
+			Vec3 vec3 = new Vec3(
+					this.owner.getX() - this.getX(), this.owner.getY() - this.getY() + (double)this.owner.getEyeHeight() + 1.0, this.owner.getZ() - this.getZ()
+				)
+				.scale(0.15);
 			this.hookedIn.setDeltaMovement(this.hookedIn.getDeltaMovement().add(vec3));
 		}
 	}

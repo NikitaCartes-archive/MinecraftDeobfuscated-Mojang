@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfig
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration> {
-	public FancyTreeFeature(Function<Dynamic<?>, ? extends SmallTreeConfiguration> function) {
-		super(function);
+	public FancyTreeFeature(Function<Dynamic<?>, ? extends SmallTreeConfiguration> function, Function<Random, ? extends SmallTreeConfiguration> function2) {
+		super(function, function2);
 	}
 
 	private void crossSection(

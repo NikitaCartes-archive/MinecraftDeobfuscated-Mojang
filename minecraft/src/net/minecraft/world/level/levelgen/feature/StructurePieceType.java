@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.dimension.special.G03;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -78,6 +79,7 @@ public interface StructurePieceType {
 	StructurePieceType BURIED_TREASURE_PIECE = setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
 	StructurePieceType SHIPWRECK_PIECE = setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
 	StructurePieceType NETHER_FOSSIL = setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
+	StructurePieceType FLEET_PIECE = setPieceId(G03.ShipPiece::new, "FP");
 
 	StructurePiece load(StructureManager structureManager, CompoundTag compoundTag);
 

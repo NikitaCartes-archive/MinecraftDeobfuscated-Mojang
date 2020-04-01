@@ -1,47 +1,27 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.BookAccess;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.WrittenBookItem;
 
 @Environment(EnvType.CLIENT)
 public class BookViewScreen extends Screen {
-	public static final BookViewScreen.BookAccess EMPTY_ACCESS = new BookViewScreen.BookAccess() {
-		@Override
-		public int getPageCount() {
-			return 0;
-		}
-
-		@Override
-		public Component getPageRaw(int i) {
-			return new TextComponent("");
-		}
-	};
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
-	private BookViewScreen.BookAccess bookAccess;
+	private BookAccess bookAccess;
 	private int currentPage;
 	private List<Component> cachedPageComponents = Collections.emptyList();
 	private int cachedPage = -1;
@@ -49,21 +29,21 @@ public class BookViewScreen extends Screen {
 	private PageButton backButton;
 	private final boolean playTurnSound;
 
-	public BookViewScreen(BookViewScreen.BookAccess bookAccess) {
+	public BookViewScreen(BookAccess bookAccess) {
 		this(bookAccess, true);
 	}
 
 	public BookViewScreen() {
-		this(EMPTY_ACCESS, false);
+		this(BookAccess.EMPTY_ACCESS, false);
 	}
 
-	private BookViewScreen(BookViewScreen.BookAccess bookAccess, boolean bl) {
+	private BookViewScreen(BookAccess bookAccess, boolean bl) {
 		super(NarratorChatListener.NO_TITLE);
 		this.bookAccess = bookAccess;
 		this.playTurnSound = bl;
 	}
 
-	public void setBookAccess(BookViewScreen.BookAccess bookAccess) {
+	public void setBookAccess(BookAccess bookAccess) {
 		this.bookAccess = bookAccess;
 		this.currentPage = Mth.clamp(this.currentPage, 0, bookAccess.getPageCount());
 		this.updateButtonVisibility();
@@ -251,97 +231,6 @@ public class BookViewScreen extends Screen {
 			} else {
 				return null;
 			}
-		}
-	}
-
-	public static List<String> convertPages(CompoundTag compoundTag) {
-		ListTag listTag = compoundTag.getList("pages", 8).copy();
-		Builder<String> builder = ImmutableList.builder();
-
-		for (int i = 0; i < listTag.size(); i++) {
-			builder.add(listTag.getString(i));
-		}
-
-		return builder.build();
-	}
-
-	@Environment(EnvType.CLIENT)
-	public interface BookAccess {
-		int getPageCount();
-
-		Component getPageRaw(int i);
-
-		default Component getPage(int i) {
-			return (Component)(i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : new TextComponent(""));
-		}
-
-		static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
-			Item item = itemStack.getItem();
-			if (item == Items.WRITTEN_BOOK) {
-				return new BookViewScreen.WrittenBookAccess(itemStack);
-			} else {
-				return (BookViewScreen.BookAccess)(item == Items.WRITABLE_BOOK ? new BookViewScreen.WritableBookAccess(itemStack) : BookViewScreen.EMPTY_ACCESS);
-			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class WritableBookAccess implements BookViewScreen.BookAccess {
-		private final List<String> pages;
-
-		public WritableBookAccess(ItemStack itemStack) {
-			this.pages = readPages(itemStack);
-		}
-
-		private static List<String> readPages(ItemStack itemStack) {
-			CompoundTag compoundTag = itemStack.getTag();
-			return (List<String>)(compoundTag != null ? BookViewScreen.convertPages(compoundTag) : ImmutableList.of());
-		}
-
-		@Override
-		public int getPageCount() {
-			return this.pages.size();
-		}
-
-		@Override
-		public Component getPageRaw(int i) {
-			return new TextComponent((String)this.pages.get(i));
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class WrittenBookAccess implements BookViewScreen.BookAccess {
-		private final List<String> pages;
-
-		public WrittenBookAccess(ItemStack itemStack) {
-			this.pages = readPages(itemStack);
-		}
-
-		private static List<String> readPages(ItemStack itemStack) {
-			CompoundTag compoundTag = itemStack.getTag();
-			return (List<String>)(compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)
-				? BookViewScreen.convertPages(compoundTag)
-				: ImmutableList.of(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED).getColoredString()));
-		}
-
-		@Override
-		public int getPageCount() {
-			return this.pages.size();
-		}
-
-		@Override
-		public Component getPageRaw(int i) {
-			String string = (String)this.pages.get(i);
-
-			try {
-				Component component = Component.Serializer.fromJson(string);
-				if (component != null) {
-					return component;
-				}
-			} catch (Exception var4) {
-			}
-
-			return new TextComponent(string);
 		}
 	}
 }

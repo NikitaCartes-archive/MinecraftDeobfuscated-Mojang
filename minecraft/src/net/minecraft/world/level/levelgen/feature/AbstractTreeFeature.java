@@ -31,8 +31,8 @@ import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 public abstract class AbstractTreeFeature<T extends TreeConfiguration> extends Feature<T> {
-	public AbstractTreeFeature(Function<Dynamic<?>, ? extends T> function) {
-		super(function);
+	public AbstractTreeFeature(Function<Dynamic<?>, ? extends T> function, Function<Random, ? extends T> function2) {
+		super(function, function2);
 	}
 
 	protected static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

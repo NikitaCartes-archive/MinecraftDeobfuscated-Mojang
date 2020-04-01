@@ -6,14 +6,13 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 
-public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
-	public EndIslandFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+public class EndIslandFeature extends Feature<BlockStateConfiguration> {
+	public EndIslandFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function, Function<Random, ? extends BlockStateConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(
@@ -21,7 +20,7 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		BlockStateConfiguration blockStateConfiguration
 	) {
 		float f = (float)(random.nextInt(3) + 4);
 
@@ -29,7 +28,7 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 			for (int j = Mth.floor(-f); j <= Mth.ceil(f); j++) {
 				for (int k = Mth.floor(-f); k <= Mth.ceil(f); k++) {
 					if ((float)(j * j + k * k) <= (f + 1.0F) * (f + 1.0F)) {
-						this.setBlock(levelAccessor, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
+						this.setBlock(levelAccessor, blockPos.offset(j, i, k), blockStateConfiguration.state);
 					}
 				}
 			}

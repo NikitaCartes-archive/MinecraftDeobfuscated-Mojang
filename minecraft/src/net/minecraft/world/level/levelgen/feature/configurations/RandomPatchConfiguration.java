@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
@@ -97,6 +98,22 @@ public class RandomPatchConfiguration implements FeatureConfiguration {
 			dynamic.get("can_replace").asBoolean(false),
 			dynamic.get("project").asBoolean(true),
 			dynamic.get("need_water").asBoolean(false)
+		);
+	}
+
+	public static RandomPatchConfiguration random(Random random) {
+		return new RandomPatchConfiguration(
+			BlockStateProvider.random(random),
+			BlockPlacer.random(random),
+			ImmutableSet.of(),
+			ImmutableSet.of(),
+			random.nextInt(50),
+			1 + random.nextInt(20),
+			1 + random.nextInt(20),
+			1 + random.nextInt(20),
+			random.nextBoolean(),
+			random.nextBoolean(),
+			random.nextInt(7) == 0
 		);
 	}
 

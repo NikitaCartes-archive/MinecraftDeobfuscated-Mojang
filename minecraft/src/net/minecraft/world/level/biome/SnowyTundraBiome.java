@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -30,7 +29,6 @@ public final class SnowyTundraBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.5F, -0.5F, 0.0F, 0.0F, 1.0F)))
 		);
 		this.addStructureStart(Feature.VILLAGE.configured(new VillageConfiguration("village/snowy/town_centers", 6)));
 		this.addStructureStart(Feature.IGLOO.configured(FeatureConfiguration.NONE));

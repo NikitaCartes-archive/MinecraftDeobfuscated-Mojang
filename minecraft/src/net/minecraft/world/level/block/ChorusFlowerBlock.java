@@ -139,6 +139,11 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
 		Block block = blockState2.getBlock();

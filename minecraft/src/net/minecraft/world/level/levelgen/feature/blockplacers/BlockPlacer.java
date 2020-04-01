@@ -14,4 +14,8 @@ public abstract class BlockPlacer implements Serializable {
 	}
 
 	public abstract void place(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, Random random);
+
+	public static BlockPlacer random(Random random) {
+		return (BlockPlacer)(random.nextBoolean() ? new SimpleBlockPlacer() : new ColumnPlacer(random.nextInt(10), random.nextInt(5)));
+	}
 }

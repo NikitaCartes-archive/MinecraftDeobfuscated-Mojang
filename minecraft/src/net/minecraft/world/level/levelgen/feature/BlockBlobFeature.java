@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration;
 
 public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
-	public BlockBlobFeature(Function<Dynamic<?>, ? extends BlockBlobConfiguration> function) {
-		super(function);
+	public BlockBlobFeature(Function<Dynamic<?>, ? extends BlockBlobConfiguration> function, Function<Random, ? extends BlockBlobConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

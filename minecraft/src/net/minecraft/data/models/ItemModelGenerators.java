@@ -63,6 +63,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.CHICKEN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CHORUS_FRUIT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CLAY_BALL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.AN_ITEM, ModelTemplates.FLAT_ITEM);
 
 		for (int i = 1; i < 64; i++) {
 			this.generateFlatItem(Items.CLOCK, String.format("_%02d", i), ModelTemplates.FLAT_ITEM);

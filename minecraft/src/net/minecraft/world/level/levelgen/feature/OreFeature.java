@@ -13,8 +13,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class OreFeature extends Feature<OreConfiguration> {
-	public OreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function) {
-		super(function);
+	public OreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function, Function<Random, ? extends OreConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

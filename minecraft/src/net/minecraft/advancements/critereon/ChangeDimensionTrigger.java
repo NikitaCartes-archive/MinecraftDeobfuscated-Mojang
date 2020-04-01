@@ -18,13 +18,14 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 	}
 
 	public ChangeDimensionTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+		EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("player"));
 		DimensionType dimensionType = jsonObject.has("from") ? DimensionType.getByName(new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
 		DimensionType dimensionType2 = jsonObject.has("to") ? DimensionType.getByName(new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
-		return new ChangeDimensionTrigger.TriggerInstance(dimensionType, dimensionType2);
+		return new ChangeDimensionTrigger.TriggerInstance(dimensionType, dimensionType2, entityPredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, DimensionType dimensionType, DimensionType dimensionType2) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(dimensionType, dimensionType2));
+		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, dimensionType, dimensionType2));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
@@ -32,19 +33,29 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 		private final DimensionType from;
 		@Nullable
 		private final DimensionType to;
+		private final EntityPredicate entity;
 
-		public TriggerInstance(@Nullable DimensionType dimensionType, @Nullable DimensionType dimensionType2) {
+		public TriggerInstance(@Nullable DimensionType dimensionType, @Nullable DimensionType dimensionType2, EntityPredicate entityPredicate) {
 			super(ChangeDimensionTrigger.ID);
 			this.from = dimensionType;
 			this.to = dimensionType2;
+			this.entity = entityPredicate;
+		}
+
+		public static ChangeDimensionTrigger.TriggerInstance changedDimension(EntityPredicate entityPredicate) {
+			return new ChangeDimensionTrigger.TriggerInstance(null, null, entityPredicate);
 		}
 
 		public static ChangeDimensionTrigger.TriggerInstance changedDimensionTo(DimensionType dimensionType) {
-			return new ChangeDimensionTrigger.TriggerInstance(null, dimensionType);
+			return new ChangeDimensionTrigger.TriggerInstance(null, dimensionType, EntityPredicate.ANY);
 		}
 
-		public boolean matches(DimensionType dimensionType, DimensionType dimensionType2) {
-			return this.from != null && this.from != dimensionType ? false : this.to == null || this.to == dimensionType2;
+		public boolean matches(ServerPlayer serverPlayer, DimensionType dimensionType, DimensionType dimensionType2) {
+			if (!this.entity.matches(serverPlayer, serverPlayer)) {
+				return false;
+			} else {
+				return this.from != null && this.from != dimensionType ? false : this.to == null || this.to == dimensionType2;
+			}
 		}
 
 		@Override
@@ -58,6 +69,7 @@ public class ChangeDimensionTrigger extends SimpleCriterionTrigger<ChangeDimensi
 				jsonObject.addProperty("to", DimensionType.getName(this.to).toString());
 			}
 
+			jsonObject.add("player", this.entity.serializeToJson());
 			return jsonObject;
 		}
 	}

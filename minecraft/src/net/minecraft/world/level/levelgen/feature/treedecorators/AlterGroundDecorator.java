@@ -90,4 +90,8 @@ public class AlterGroundDecorator extends TreeDecorator {
 			)
 			.getValue();
 	}
+
+	public static AlterGroundDecorator random(Random random) {
+		return new AlterGroundDecorator(BlockStateProvider.random(random));
+	}
 }

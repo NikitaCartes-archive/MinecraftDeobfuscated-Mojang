@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.placement;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class FrequencyChanceDecoratorConfiguration implements DecoratorConfiguration {
@@ -28,5 +29,9 @@ public class FrequencyChanceDecoratorConfiguration implements DecoratorConfigura
 		int i = dynamic.get("count").asInt(0);
 		float f = dynamic.get("chance").asFloat(0.0F);
 		return new FrequencyChanceDecoratorConfiguration(i, f);
+	}
+
+	public static FrequencyChanceDecoratorConfiguration random(Random random) {
+		return new FrequencyChanceDecoratorConfiguration(random.nextInt(10) + 1, random.nextFloat() / 1.2F);
 	}
 }

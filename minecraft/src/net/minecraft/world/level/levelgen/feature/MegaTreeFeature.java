@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class MegaTreeFeature<T extends TreeConfiguration> extends AbstractTreeFeature<T> {
-	public MegaTreeFeature(Function<Dynamic<?>, ? extends T> function) {
-		super(function);
+	public MegaTreeFeature(Function<Dynamic<?>, ? extends T> function, Function<Random, ? extends T> function2) {
+		super(function, function2);
 	}
 
 	protected int calcTreeHeigth(Random random, MegaTreeConfiguration megaTreeConfiguration) {

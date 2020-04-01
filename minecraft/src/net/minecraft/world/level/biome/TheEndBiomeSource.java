@@ -1,6 +1,9 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.DynamicOps;
 import java.util.Set;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -63,5 +66,15 @@ public class TheEndBiomeSource extends BiomeSource {
 		}
 
 		return f;
+	}
+
+	@Override
+	public BiomeSourceType<?, ?> getType() {
+		return BiomeSourceType.THE_END;
+	}
+
+	@Override
+	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
+		return new Dynamic<>(dynamicOps, dynamicOps.createMap(ImmutableMap.of()));
 	}
 }

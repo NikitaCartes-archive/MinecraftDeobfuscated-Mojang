@@ -23,8 +23,10 @@ import net.minecraft.world.level.levelgen.structure.WoodlandMansionPieces;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfiguration> {
-	public WoodlandMansionFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public WoodlandMansionFeature(
+		Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	@Override

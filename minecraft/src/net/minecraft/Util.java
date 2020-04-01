@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -35,10 +36,12 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
@@ -146,6 +149,26 @@ public class Util {
 	@Environment(EnvType.CLIENT)
 	public static void throwAsRuntime(Throwable throwable) {
 		throw throwable instanceof RuntimeException ? (RuntimeException)throwable : new RuntimeException(throwable);
+	}
+
+	public static <T> Stream<T> randomObjectStream(Random random, int i, Registry<T> registry) {
+		return randomObjectStream(random, 0, i, registry);
+	}
+
+	public static <T> Stream<T> randomObjectStream(Random random, int i, int j, Registry<T> registry) {
+		return IntStream.range(0, i + random.nextInt(j)).mapToObj(ix -> registry.getRandom(random)).distinct();
+	}
+
+	public static <T> Stream<T> randomObjectStream(Random random, int i, int j, List<T> list) {
+		return IntStream.range(0, i + random.nextInt(j)).mapToObj(ix -> randomObject(random, list)).distinct();
+	}
+
+	public static <T> T randomObject(Random random, List<T> list) {
+		return (T)list.get(random.nextInt(list.size()));
+	}
+
+	public static <T> T randomObject(Random random, T[] objects) {
+		return objects[random.nextInt(objects.length)];
 	}
 
 	public static Util.OS getPlatform() {
@@ -285,6 +308,11 @@ public class Util {
 		} else {
 			return throwable.getMessage() != null ? throwable.getMessage() : throwable.toString();
 		}
+	}
+
+	public static <T extends Enum<T>> T randomEnum(Class<T> class_, Random random) {
+		T[] enums = (T[])class_.getEnumConstants();
+		return enums[random.nextInt(enums.length)];
 	}
 
 	static enum IdentityStrategy implements Strategy<Object> {

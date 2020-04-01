@@ -39,7 +39,6 @@ public class WarmOceanBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, -0.25F, 0.0F, 1.0F)))
 		);
 		this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3F, 0.9F)));
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));

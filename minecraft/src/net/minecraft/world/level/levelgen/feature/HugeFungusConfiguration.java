@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -66,6 +68,16 @@ public class HugeFungusConfiguration implements FeatureConfiguration {
 		BlockState blockState4 = (BlockState)dynamic.get("decor_state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
 		boolean bl = dynamic.get("planted").asBoolean(false);
 		return new HugeFungusConfiguration(blockState, blockState2, blockState3, blockState4, bl);
+	}
+
+	public static <T> HugeFungusConfiguration random(Random random) {
+		return new HugeFungusConfiguration(
+			Registry.BLOCK.getRandom(random).defaultBlockState(),
+			Registry.BLOCK.getRandom(random).defaultBlockState(),
+			Registry.BLOCK.getRandom(random).defaultBlockState(),
+			Registry.BLOCK.getRandom(random).defaultBlockState(),
+			false
+		);
 	}
 
 	static {

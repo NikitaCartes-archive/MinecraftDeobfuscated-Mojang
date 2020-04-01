@@ -6,6 +6,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -13,8 +14,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
-	public BasaltPillarFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public BasaltPillarFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(
@@ -33,6 +34,10 @@ public class BasaltPillarFeature extends Feature<NoneFeatureConfiguration> {
 			boolean bl4 = true;
 
 			while (levelAccessor.isEmptyBlock(mutableBlockPos)) {
+				if (Level.isOutsideBuildHeight(mutableBlockPos)) {
+					return true;
+				}
+
 				levelAccessor.setBlock(mutableBlockPos, Blocks.BASALT.defaultBlockState(), 2);
 				bl = bl && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
 				bl2 = bl2 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));

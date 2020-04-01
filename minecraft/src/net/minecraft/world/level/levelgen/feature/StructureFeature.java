@@ -29,13 +29,17 @@ import org.apache.logging.log4j.Logger;
 public abstract class StructureFeature<C extends FeatureConfiguration> extends Feature<C> {
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	public StructureFeature(Function<Dynamic<?>, ? extends C> function) {
-		super(function);
+	public StructureFeature(Function<Dynamic<?>, ? extends C> function, Function<Random, ? extends C> function2) {
+		super(function, function2);
 	}
 
 	@Override
 	public ConfiguredFeature<C, ? extends StructureFeature<C>> configured(C featureConfiguration) {
 		return new ConfiguredFeature<>(this, featureConfiguration);
+	}
+
+	public ConfiguredFeature<C, ? extends StructureFeature<C>> random2(Random random) {
+		return new ConfiguredFeature<>(this, (C)this.randomConfigurationFactory.apply(random));
 	}
 
 	@Override

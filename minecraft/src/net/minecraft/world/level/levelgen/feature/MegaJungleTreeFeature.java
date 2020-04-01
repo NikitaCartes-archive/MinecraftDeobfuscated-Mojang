@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class MegaJungleTreeFeature extends MegaTreeFeature<MegaTreeConfiguration> {
-	public MegaJungleTreeFeature(Function<Dynamic<?>, ? extends MegaTreeConfiguration> function) {
-		super(function);
+	public MegaJungleTreeFeature(Function<Dynamic<?>, ? extends MegaTreeConfiguration> function, Function<Random, ? extends MegaTreeConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean doPlace(

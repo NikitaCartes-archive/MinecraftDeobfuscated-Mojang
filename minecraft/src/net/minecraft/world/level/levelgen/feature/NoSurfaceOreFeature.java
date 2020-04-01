@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
-	NoSurfaceOreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function) {
-		super(function);
+	NoSurfaceOreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function, Function<Random, ? extends OreConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

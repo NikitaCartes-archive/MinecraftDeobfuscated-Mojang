@@ -3,6 +3,8 @@ package net.minecraft.core.particles;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Locale;
+import java.util.Random;
+import java.util.function.BiFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -32,6 +34,9 @@ public class DustParticleOptions implements ParticleOptions {
 	private final float g;
 	private final float b;
 	private final float scale;
+	public static final BiFunction<Random, ParticleType<DustParticleOptions>, DustParticleOptions> RANDOM_PROVIDER = (random, particleType) -> new DustParticleOptions(
+			random.nextFloat(), random.nextFloat(), random.nextFloat(), random.nextFloat() * 2.0F
+		);
 
 	public DustParticleOptions(float f, float g, float h, float i) {
 		this.r = f;

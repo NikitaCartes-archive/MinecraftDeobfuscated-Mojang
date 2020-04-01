@@ -13,8 +13,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
 public class BlockPileFeature extends Feature<BlockPileConfiguration> {
-	public BlockPileFeature(Function<Dynamic<?>, ? extends BlockPileConfiguration> function) {
-		super(function);
+	public BlockPileFeature(Function<Dynamic<?>, ? extends BlockPileConfiguration> function, Function<Random, ? extends BlockPileConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

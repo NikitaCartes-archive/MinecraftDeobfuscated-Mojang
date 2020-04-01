@@ -52,9 +52,9 @@ public class LevelStorage implements PlayerIO {
 		compoundTag3.put("Data", compoundTag2);
 
 		try {
-			File file = new File(this.worldDir, "level.dat_new");
-			File file2 = new File(this.worldDir, "level.dat_old");
-			File file3 = new File(this.worldDir, "level.dat");
+			File file = new File(this.worldDir, "special_level.dat_new");
+			File file2 = new File(this.worldDir, "special_level.dat_old");
+			File file3 = new File(this.worldDir, "special_level.dat");
 			NbtIo.writeCompressed(compoundTag3, new FileOutputStream(file));
 			if (file2.exists()) {
 				file2.delete();
@@ -113,7 +113,7 @@ public class LevelStorage implements PlayerIO {
 
 	@Nullable
 	public LevelData prepareLevel() {
-		File file = new File(this.worldDir, "level.dat");
+		File file = new File(this.worldDir, "special_level.dat");
 		if (file.exists()) {
 			LevelData levelData = LevelStorageSource.getLevelData(file, this.fixerUpper);
 			if (levelData != null) {
@@ -121,7 +121,7 @@ public class LevelStorage implements PlayerIO {
 			}
 		}
 
-		file = new File(this.worldDir, "level.dat_old");
+		file = new File(this.worldDir, "special_level.dat_old");
 		return file.exists() ? LevelStorageSource.getLevelData(file, this.fixerUpper) : null;
 	}
 

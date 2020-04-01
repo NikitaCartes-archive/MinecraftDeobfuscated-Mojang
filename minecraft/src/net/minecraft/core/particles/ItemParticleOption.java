@@ -2,6 +2,8 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.Random;
+import java.util.function.BiFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.arguments.item.ItemInput;
@@ -25,6 +27,9 @@ public class ItemParticleOption implements ParticleOptions {
 	};
 	private final ParticleType<ItemParticleOption> type;
 	private final ItemStack itemStack;
+	public static final BiFunction<Random, ParticleType<ItemParticleOption>, ItemParticleOption> RANDOM_PROVIDER = (random, particleType) -> new ItemParticleOption(
+			particleType, new ItemStack(Registry.ITEM.getRandom(random))
+		);
 
 	public ItemParticleOption(ParticleType<ItemParticleOption> particleType, ItemStack itemStack) {
 		this.type = particleType;

@@ -28,6 +28,7 @@ public class TexturedModel {
 	public static final TexturedModel.Provider TORCH = createDefault(TextureMapping::torch, ModelTemplates.TORCH);
 	public static final TexturedModel.Provider WALL_TORCH = createDefault(TextureMapping::torch, ModelTemplates.WALL_TORCH);
 	public static final TexturedModel.Provider SEAGRASS = createDefault(TextureMapping::defaultTexture, ModelTemplates.SEAGRASS);
+	public static final TexturedModel.Provider COMMAND_BLOCK = createDefault(TextureMapping::commandBlock, ModelTemplates.COMMAND_BLOCK);
 	public static final TexturedModel.Provider COLUMN_ALT = createDefault(TextureMapping::logColumn, ModelTemplates.CUBE_COLUMN);
 	public static final TexturedModel.Provider COLUMN_HORIZONTAL_ALT = createDefault(TextureMapping::logColumn, ModelTemplates.CUBE_COLUMN_HORIZONTAL);
 	public static final TexturedModel.Provider TOP_BOTTOM_WITH_WALL = createDefault(TextureMapping::cubeBottomTopWithWall, ModelTemplates.CUBE_BOTTOM_TOP);

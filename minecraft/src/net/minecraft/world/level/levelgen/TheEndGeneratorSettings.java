@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
+import java.util.Random;
 import net.minecraft.core.BlockPos;
 
 public class TheEndGeneratorSettings extends ChunkGeneratorSettings {
@@ -12,5 +13,13 @@ public class TheEndGeneratorSettings extends ChunkGeneratorSettings {
 
 	public BlockPos getSpawnPosition() {
 		return this.spawnPosition;
+	}
+
+	public TheEndGeneratorSettings() {
+	}
+
+	public TheEndGeneratorSettings(Random random) {
+		this.defaultBlock = this.randomGroundBlock(random);
+		this.defaultFluid = this.randomLiquidBlock(random);
 	}
 }

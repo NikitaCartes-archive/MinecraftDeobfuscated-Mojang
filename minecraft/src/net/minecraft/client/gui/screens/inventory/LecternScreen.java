@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.BookAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -101,7 +102,7 @@ public class LecternScreen extends BookViewScreen implements MenuAccess<LecternM
 
 	private void bookChanged() {
 		ItemStack itemStack = this.menu.getBook();
-		this.setBookAccess(BookViewScreen.BookAccess.fromItem(itemStack));
+		this.setBookAccess(BookAccess.fromItem(itemStack));
 	}
 
 	private void pageChanged() {

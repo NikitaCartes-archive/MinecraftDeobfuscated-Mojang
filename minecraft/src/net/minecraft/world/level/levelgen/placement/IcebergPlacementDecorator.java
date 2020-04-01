@@ -11,8 +11,10 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class IcebergPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
-	public IcebergPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
-		super(function);
+	public IcebergPlacementDecorator(
+		Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function, Function<Random, ? extends ChanceDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

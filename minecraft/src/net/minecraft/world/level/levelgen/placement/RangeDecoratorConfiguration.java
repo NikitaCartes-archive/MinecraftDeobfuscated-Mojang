@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.placement;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class RangeDecoratorConfiguration implements DecoratorConfiguration {
@@ -27,6 +28,12 @@ public class RangeDecoratorConfiguration implements DecoratorConfiguration {
 	public static RangeDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
 		int i = dynamic.get("min").asInt(0);
 		int j = dynamic.get("max").asInt(0);
+		return new RangeDecoratorConfiguration(i, j);
+	}
+
+	public static RangeDecoratorConfiguration random(Random random) {
+		int i = random.nextInt(10);
+		int j = i + random.nextInt(20) + 1;
 		return new RangeDecoratorConfiguration(i, j);
 	}
 }

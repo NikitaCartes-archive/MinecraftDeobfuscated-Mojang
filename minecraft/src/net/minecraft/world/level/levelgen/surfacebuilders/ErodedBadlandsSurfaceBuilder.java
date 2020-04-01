@@ -15,8 +15,10 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 	private static final BlockState ORANGE_TERRACOTTA = Blocks.ORANGE_TERRACOTTA.defaultBlockState();
 	private static final BlockState TERRACOTTA = Blocks.TERRACOTTA.defaultBlockState();
 
-	public ErodedBadlandsSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public ErodedBadlandsSurfaceBuilder(
+		Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function, Function<Random, ? extends SurfaceBuilderBaseConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	@Override

@@ -29,8 +29,10 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 	protected PerlinSimplexNoise pillarRoofNoise;
 	protected PerlinSimplexNoise clayBandsOffsetNoise;
 
-	public BadlandsSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public BadlandsSurfaceBuilder(
+		Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function, Function<Random, ? extends SurfaceBuilderBaseConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public void apply(

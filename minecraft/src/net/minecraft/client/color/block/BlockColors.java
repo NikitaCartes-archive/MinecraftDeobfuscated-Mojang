@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.ShearableDoublePlantBlock;
 import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.NeitherPortalEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -92,6 +94,17 @@ public class BlockColors {
 		}, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
 		blockColors.addColoringState(StemBlock.AGE, Blocks.MELON_STEM, Blocks.PUMPKIN_STEM);
 		blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null ? 2129968 : 7455580, Blocks.LILY_PAD);
+		blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
+			if (blockAndTintGetter != null && blockPos != null) {
+				BlockEntity blockEntity = blockAndTintGetter.getBlockEntity(blockPos);
+				if (blockEntity instanceof NeitherPortalEntity) {
+					int j = ((NeitherPortalEntity)blockEntity).getDimension();
+					return j & 16777215;
+				}
+			}
+
+			return 16777215;
+		}, Blocks.NEITHER_PORTAL);
 		return blockColors;
 	}
 

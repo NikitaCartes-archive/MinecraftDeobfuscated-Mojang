@@ -505,6 +505,10 @@ public class ServerChunkCache extends ChunkSource {
 		return this.chunkMap.getPoiManager();
 	}
 
+	public void execute(Runnable runnable) {
+		this.mainThreadProcessor.tell(runnable);
+	}
+
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {
 		private MainThreadExecutor(Level level) {
 			super("Chunk source main thread executor for " + Registry.DIMENSION_TYPE.getKey(level.getDimension().getType()));

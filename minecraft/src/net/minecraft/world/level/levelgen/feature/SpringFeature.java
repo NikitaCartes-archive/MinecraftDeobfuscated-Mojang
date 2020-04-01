@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 
 public class SpringFeature extends Feature<SpringConfiguration> {
-	public SpringFeature(Function<Dynamic<?>, ? extends SpringConfiguration> function) {
-		super(function);
+	public SpringFeature(Function<Dynamic<?>, ? extends SpringConfiguration> function, Function<Random, ? extends SpringConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
 import java.util.List;
+import java.util.Random;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 
@@ -32,6 +33,18 @@ public class MegaTreeConfiguration extends TreeConfiguration {
 			)
 		);
 		return dynamic.merge(super.serialize(dynamicOps));
+	}
+
+	public static MegaTreeConfiguration random(Random random) {
+		TreeConfiguration treeConfiguration = TreeConfiguration.random(random);
+		return new MegaTreeConfiguration(
+			treeConfiguration.trunkProvider,
+			treeConfiguration.leavesProvider,
+			treeConfiguration.decorators,
+			treeConfiguration.baseHeight,
+			random.nextInt(50),
+			random.nextInt(20)
+		);
 	}
 
 	public static <T> MegaTreeConfiguration deserialize(Dynamic<T> dynamic) {

@@ -19,8 +19,8 @@ public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
 	private final BlockState sandstone = Blocks.SANDSTONE.defaultBlockState();
 	private final BlockState water = Blocks.WATER.defaultBlockState();
 
-	public DesertWellFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public DesertWellFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

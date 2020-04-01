@@ -242,6 +242,11 @@ public class DoorBlock extends Block {
 		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) : blockState2.getBlock() == this;
 	}
 
+	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
 	private void playSound(Level level, BlockPos blockPos, boolean bl) {
 		level.levelEvent(null, bl ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
 	}

@@ -24,8 +24,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
@@ -186,7 +186,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 			this.exitPortal = new BlockPos(vec32.x + 0.5, 75.0, vec32.z + 0.5);
 			LOGGER.debug("Failed to find suitable block, settling on {}", this.exitPortal);
 			Feature.END_ISLAND
-				.configured(FeatureConfiguration.NONE)
+				.configured(new BlockStateConfiguration(Blocks.END_STONE.defaultBlockState()))
 				.place(
 					serverLevel,
 					(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),

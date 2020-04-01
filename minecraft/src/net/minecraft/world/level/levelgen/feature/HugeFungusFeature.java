@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.material.Material;
 
 public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
-	public HugeFungusFeature(Function<Dynamic<?>, ? extends HugeFungusConfiguration> function) {
-		super(function);
+	public HugeFungusFeature(Function<Dynamic<?>, ? extends HugeFungusConfiguration> function, Function<Random, ? extends HugeFungusConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

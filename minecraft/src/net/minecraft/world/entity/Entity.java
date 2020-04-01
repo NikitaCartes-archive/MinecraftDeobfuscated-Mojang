@@ -30,6 +30,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -82,11 +83,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.NetherPortalBlock;
+import net.minecraft.world.level.block.PortalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.NeitherPortalEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -185,6 +188,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int changingDimensionDelay;
 	protected boolean isInsidePortal;
 	protected int portalTime;
+	private int portalDimension = 0;
 	public DimensionType dimension;
 	protected BlockPos portalEntranceBlock;
 	protected Vec3 portalEntranceOffset;
@@ -1684,13 +1688,13 @@ public abstract class Entity implements Nameable, CommandSource {
 		return Vec3.directionFromRotation(this.getRotationVector());
 	}
 
-	public void handleInsidePortal(BlockPos blockPos) {
+	public void handleInsidePortal(BlockPos blockPos, Block block) {
 		if (this.changingDimensionDelay > 0) {
 			this.changingDimensionDelay = this.getDimensionChangingDelay();
 		} else {
 			if (!this.level.isClientSide && !blockPos.equals(this.portalEntranceBlock)) {
 				this.portalEntranceBlock = new BlockPos(blockPos);
-				BlockPattern.BlockPatternMatch blockPatternMatch = NetherPortalBlock.getPortalShape(this.level, this.portalEntranceBlock);
+				BlockPattern.BlockPatternMatch blockPatternMatch = PortalBlock.getPortalShape(this.level, this.portalEntranceBlock, block);
 				double d = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X
 					? (double)blockPatternMatch.getFrontTopLeft().getZ()
 					: (double)blockPatternMatch.getFrontTopLeft().getX();
@@ -1709,6 +1713,13 @@ public abstract class Entity implements Nameable, CommandSource {
 				);
 				this.portalEntranceOffset = new Vec3(e, f, 0.0);
 				this.portalEntranceForwards = blockPatternMatch.getForwards();
+				this.portalDimension = 0;
+				if (block == Blocks.NEITHER_PORTAL) {
+					BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
+					if (blockEntity instanceof NeitherPortalEntity) {
+						this.portalDimension = ((NeitherPortalEntity)blockEntity).getDimension();
+					}
+				}
 			}
 
 			this.isInsidePortal = true;
@@ -1723,7 +1734,19 @@ public abstract class Entity implements Nameable, CommandSource {
 					this.level.getProfiler().push("portal");
 					this.portalTime = i;
 					this.changingDimensionDelay = this.getDimensionChangingDelay();
-					this.changeDimension(this.level.dimension.getType() == DimensionType.NETHER ? DimensionType.OVERWORLD : DimensionType.NETHER);
+					if (this.portalDimension != 0) {
+						DimensionType dimensionType = Registry.DIMENSION_TYPE.byId(this.portalDimension);
+						this.changeDimension(dimensionType);
+						this.portalDimension = 0;
+					} else {
+						boolean bl = Registry.DIMENSION_TYPE.getKey(this.level.dimension.getType()).getNamespace().equals("_generated");
+						if (bl) {
+							this.changeDimension(DimensionType.OVERWORLD);
+						} else {
+							this.changeDimension(this.level.dimension.getType() == DimensionType.NETHER ? DimensionType.OVERWORLD : DimensionType.NETHER);
+						}
+					}
+
 					this.level.getProfiler().pop();
 				}
 

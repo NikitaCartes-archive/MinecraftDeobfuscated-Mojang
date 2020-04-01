@@ -1293,11 +1293,11 @@ public class ServerLevel extends Level {
 		Optional<PoiType> optional2 = PoiType.forState(blockState2);
 		if (!Objects.equals(optional, optional2)) {
 			BlockPos blockPos2 = blockPos.immutable();
-			optional.ifPresent(poiType -> this.getServer().execute(() -> {
+			optional.ifPresent(poiType -> this.getChunkSource().execute(() -> {
 					this.getPoiManager().remove(blockPos2);
 					DebugPackets.sendPoiRemovedPacket(this, blockPos2);
 				}));
-			optional2.ifPresent(poiType -> this.getServer().execute(() -> {
+			optional2.ifPresent(poiType -> this.getChunkSource().execute(() -> {
 					this.getPoiManager().add(blockPos2, poiType);
 					DebugPackets.sendPoiAddedPacket(this, blockPos2);
 				}));

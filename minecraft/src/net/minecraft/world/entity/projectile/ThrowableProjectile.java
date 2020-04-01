@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -90,8 +91,13 @@ public abstract class ThrowableProjectile extends Projectile {
 		Predicate<Entity> predicate = entity2x -> !entity2x.isSpectator() && entity2x.isPickable() && (this.leftOwner || !this.isEntityOrVehicle(entity2x, entity));
 		HitResult hitResult = ProjectileUtil.getHitResult(this, aABB, predicate, ClipContext.Block.OUTLINE, true);
 		if (hitResult.getType() != HitResult.Type.MISS) {
-			if (hitResult.getType() == HitResult.Type.BLOCK && this.level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.NETHER_PORTAL) {
-				this.handleInsidePortal(((BlockHitResult)hitResult).getBlockPos());
+			if (hitResult.getType() == HitResult.Type.BLOCK) {
+				Block block = this.level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock();
+				if (block != Blocks.NETHER_PORTAL && block != Blocks.NEITHER_PORTAL) {
+					this.onHit(hitResult);
+				} else {
+					this.handleInsidePortal(((BlockHitResult)hitResult).getBlockPos(), block);
+				}
 			} else {
 				this.onHit(hitResult);
 			}

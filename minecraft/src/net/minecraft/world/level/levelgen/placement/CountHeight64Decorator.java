@@ -11,8 +11,10 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
 public class CountHeight64Decorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
-	public CountHeight64Decorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-		super(function);
+	public CountHeight64Decorator(
+		Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function, Function<Random, ? extends FrequencyDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

@@ -12,8 +12,10 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class CountTopSolidDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
-	public CountTopSolidDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-		super(function);
+	public CountTopSolidDecorator(
+		Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function, Function<Random, ? extends FrequencyDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

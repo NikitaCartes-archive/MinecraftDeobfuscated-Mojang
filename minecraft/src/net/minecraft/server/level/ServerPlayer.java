@@ -696,6 +696,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	}
 
 	private void triggerDimensionChangeTriggers(ServerLevel serverLevel) {
+		this.awardStat(Stats.CHANGE_DIMENSION);
 		DimensionType dimensionType = serverLevel.dimension.getType();
 		DimensionType dimensionType2 = this.level.dimension.getType();
 		CriteriaTriggers.CHANGED_DIMENSION.trigger(this, dimensionType, dimensionType2);

@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer.chunk;
 
+import com.mojang.math.Vector3f;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -118,7 +119,7 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 	@Nullable
 	@Override
 	public BlockEntity getBlockEntity(BlockPos blockPos) {
-		return this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
+		return this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
 	}
 
 	@Nullable
@@ -131,5 +132,10 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 	@Override
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		return this.level.getBlockTint(blockPos, colorResolver);
+	}
+
+	@Override
+	public Vector3f getExtraTint(BlockState blockState, BlockPos blockPos) {
+		return this.level.getExtraTint(blockState, blockPos);
 	}
 }

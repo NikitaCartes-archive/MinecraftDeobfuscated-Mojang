@@ -9,8 +9,10 @@ import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public class HugeBrownMushroomFeature extends AbstractHugeMushroomFeature {
-	public HugeBrownMushroomFeature(Function<Dynamic<?>, ? extends HugeMushroomFeatureConfiguration> function) {
-		super(function);
+	public HugeBrownMushroomFeature(
+		Function<Dynamic<?>, ? extends HugeMushroomFeatureConfiguration> function, Function<Random, ? extends HugeMushroomFeatureConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	@Override

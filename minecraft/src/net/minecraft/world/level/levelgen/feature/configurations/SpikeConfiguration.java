@@ -1,9 +1,11 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -67,5 +69,9 @@ public class SpikeConfiguration implements FeatureConfiguration {
 	@Nullable
 	public BlockPos getCrystalBeamTarget() {
 		return this.crystalBeamTarget;
+	}
+
+	public static SpikeConfiguration random(Random random) {
+		return new SpikeConfiguration(false, ImmutableList.of(), null);
 	}
 }

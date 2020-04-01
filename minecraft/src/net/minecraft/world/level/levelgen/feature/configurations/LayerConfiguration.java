@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -34,5 +36,9 @@ public class LayerConfiguration implements FeatureConfiguration {
 		int i = dynamic.get("height").asInt(0);
 		BlockState blockState = (BlockState)dynamic.get("state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
 		return new LayerConfiguration(i, blockState);
+	}
+
+	public static LayerConfiguration random(Random random) {
+		return new LayerConfiguration(random.nextInt(5), Registry.BLOCK.getRandom(random).defaultBlockState());
 	}
 }

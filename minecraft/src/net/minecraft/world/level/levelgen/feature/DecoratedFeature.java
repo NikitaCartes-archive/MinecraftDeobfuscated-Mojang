@@ -11,8 +11,10 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 
 public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
-	public DecoratedFeature(Function<Dynamic<?>, ? extends DecoratedFeatureConfiguration> function) {
-		super(function);
+	public DecoratedFeature(
+		Function<Dynamic<?>, ? extends DecoratedFeatureConfiguration> function, Function<Random, ? extends DecoratedFeatureConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public boolean place(

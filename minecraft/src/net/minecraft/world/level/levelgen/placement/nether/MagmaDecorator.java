@@ -13,8 +13,10 @@ import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 
 public class MagmaDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
-	public MagmaDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-		super(function);
+	public MagmaDecorator(
+		Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function, Function<Random, ? extends FrequencyDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

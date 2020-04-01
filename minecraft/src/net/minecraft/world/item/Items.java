@@ -1462,6 +1462,9 @@ public class Items {
 	public static final Item NETHERITE_BLOCK = registerBlock(
 		new BlockItem(Blocks.NETHERITE_BLOCK, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant())
 	);
+	public static final Item NETHERITE_STAIRS = registerBlock(
+		new BlockItem(Blocks.NETHERITE_STAIRS, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant())
+	);
 	public static final Item ANCIENT_DEBRIS = registerBlock(
 		new BlockItem(Blocks.ANCIENT_DEBRIS, new Item.Properties().tab(CreativeModeTab.TAB_BUILDING_BLOCKS).fireResistant())
 	);
@@ -1469,7 +1472,11 @@ public class Items {
 	public static final Item NETHERITE_SCRAP = registerItem("netherite_scrap", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).fireResistant()));
 	public static final Item TARGET = registerBlock(Blocks.TARGET, CreativeModeTab.TAB_REDSTONE);
 	public static final Item CRYING_OBSIDIAN = registerBlock(Blocks.CRYING_OBSIDIAN, CreativeModeTab.TAB_BUILDING_BLOCKS);
+	public static final Item BOOK_BOX = registerBlock(Blocks.BOOK_BOX, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item RESPAWN_ANCHOR = registerBlock(Blocks.RESPAWN_ANCHOR, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item FOOTPRINT = registerItem("footprint", new Item(new Item.Properties()));
+	public static final Item CURSOR = registerBlock(Blocks.CURSOR, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item AN_ITEM = registerItem("fine_item", new Item(new Item.Properties()));
 
 	private static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

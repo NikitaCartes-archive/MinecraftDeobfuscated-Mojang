@@ -15,7 +15,7 @@ public class EndPodiumFeature extends Feature<NoneFeatureConfiguration> {
 	private final boolean active;
 
 	public EndPodiumFeature(boolean bl) {
-		super(NoneFeatureConfiguration::deserialize);
+		super(NoneFeatureConfiguration::deserialize, NoneFeatureConfiguration::random);
 		this.active = bl;
 	}
 

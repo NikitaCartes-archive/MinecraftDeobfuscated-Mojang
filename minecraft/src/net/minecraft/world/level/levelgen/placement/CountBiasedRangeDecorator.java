@@ -9,8 +9,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 
 public class CountBiasedRangeDecorator extends SimpleFeatureDecorator<CountRangeDecoratorConfiguration> {
-	public CountBiasedRangeDecorator(Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function) {
-		super(function);
+	public CountBiasedRangeDecorator(
+		Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function, Function<Random, ? extends CountRangeDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> place(Random random, CountRangeDecoratorConfiguration countRangeDecoratorConfiguration, BlockPos blockPos) {

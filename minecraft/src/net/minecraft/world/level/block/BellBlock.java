@@ -235,6 +235,11 @@ public class BellBlock extends BaseEntityBlock {
 		return FaceAttachedHorizontalDirectionalBlock.canAttach(levelReader, blockPos, getConnectedDirection(blockState).getOpposite());
 	}
 
+	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
 	private static Direction getConnectedDirection(BlockState blockState) {
 		switch ((BellAttachType)blockState.getValue(ATTACHMENT)) {
 			case FLOOR:

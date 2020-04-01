@@ -1,5 +1,10 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.DynamicOps;
+import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -114,5 +119,27 @@ public class ChunkGeneratorSettings {
 
 	public int getBedrockFloorPosition() {
 		return 256;
+	}
+
+	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
+		return new Dynamic<>(
+			dynamicOps,
+			dynamicOps.createMap(
+				ImmutableMap.<T, T>builder()
+					.put(dynamicOps.createString("defaultBlock"), BlockState.serialize(dynamicOps, this.defaultBlock).getValue())
+					.put(dynamicOps.createString("defaultFluid"), BlockState.serialize(dynamicOps, this.defaultFluid).getValue())
+					.build()
+			)
+		);
+	}
+
+	public BlockState randomLiquidBlock(Random random) {
+		return random.nextInt(5) != 2
+			? (random.nextBoolean() ? Blocks.WATER : Blocks.LAVA).defaultBlockState()
+			: Util.randomObject(random, OverworldGeneratorSettings.GROUND_BLOCKS);
+	}
+
+	public BlockState randomGroundBlock(Random random) {
+		return Util.randomObject(random, OverworldGeneratorSettings.GROUND_BLOCKS);
 	}
 }

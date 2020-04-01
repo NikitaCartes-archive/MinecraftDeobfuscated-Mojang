@@ -168,6 +168,7 @@ import net.minecraft.util.datafix.schemas.V2502;
 import net.minecraft.util.datafix.schemas.V2505;
 import net.minecraft.util.datafix.schemas.V2509;
 import net.minecraft.util.datafix.schemas.V2519;
+import net.minecraft.util.datafix.schemas.V2522;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -617,5 +618,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new JigsawRotationFix(schema110, false));
 		Schema schema111 = dataFixerBuilder.addSchema(2519, V2519::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema111, "Added Strider", References.ENTITY));
+		Schema schema112 = dataFixerBuilder.addSchema(2522, V2522::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema112, "Add funkiest of the portals", References.BLOCK_ENTITY));
 	}
 }

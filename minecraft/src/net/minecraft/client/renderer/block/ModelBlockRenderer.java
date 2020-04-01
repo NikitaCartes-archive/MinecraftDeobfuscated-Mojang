@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import it.unimi.dsi.fastutil.longs.Long2FloatLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2IntLinkedOpenHashMap;
 import java.util.BitSet;
@@ -202,6 +203,10 @@ public class ModelBlockRenderer {
 			r = 1.0F;
 		}
 
+		Vector3f vector3f = blockAndTintGetter.getExtraTint(blockState, blockPos);
+		p *= vector3f.x();
+		q *= vector3f.y();
+		r *= vector3f.z();
 		vertexConsumer.putBulkData(pose, bakedQuad, new float[]{f, g, h, i}, p, q, r, new int[]{j, k, l, m}, n, true);
 	}
 

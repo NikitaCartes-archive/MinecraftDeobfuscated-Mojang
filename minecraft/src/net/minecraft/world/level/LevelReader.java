@@ -1,5 +1,6 @@
 package net.minecraft.world.level;
 
+import com.mojang.math.Vector3f;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -175,5 +176,11 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 		} else {
 			return false;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	default Vector3f getExtraTint(BlockState blockState, BlockPos blockPos) {
+		return this.getDimension().getExtraTint(blockState, blockPos);
 	}
 }

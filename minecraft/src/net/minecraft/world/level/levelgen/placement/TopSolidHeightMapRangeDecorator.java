@@ -12,8 +12,10 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class TopSolidHeightMapRangeDecorator extends FeatureDecorator<RangeDecoratorConfiguration> {
-	public TopSolidHeightMapRangeDecorator(Function<Dynamic<?>, ? extends RangeDecoratorConfiguration> function) {
-		super(function);
+	public TopSolidHeightMapRangeDecorator(
+		Function<Dynamic<?>, ? extends RangeDecoratorConfiguration> function, Function<Random, ? extends RangeDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfig
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class TreeFeature extends AbstractSmallTreeFeature<SmallTreeConfiguration> {
-	public TreeFeature(Function<Dynamic<?>, ? extends SmallTreeConfiguration> function) {
-		super(function);
+	public TreeFeature(Function<Dynamic<?>, ? extends SmallTreeConfiguration> function, Function<Random, ? extends SmallTreeConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean doPlace(

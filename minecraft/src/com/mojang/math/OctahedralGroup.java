@@ -1,12 +1,15 @@
 package com.mojang.math;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
@@ -71,6 +74,8 @@ public enum OctahedralGroup implements StringRepresentable {
 	private final boolean invertY;
 	private final boolean invertZ;
 	private final SymmetricGroup3 permutation;
+	private static final Map<String, OctahedralGroup> byName = (Map<String, OctahedralGroup>)Stream.of(values())
+		.collect(ImmutableMap.toImmutableMap(OctahedralGroup::getSerializedName, octahedralGroup -> octahedralGroup));
 	private static final OctahedralGroup[][] cayleyTable = Util.make(
 		new OctahedralGroup[values().length][values().length],
 		octahedralGroups -> {
@@ -103,6 +108,10 @@ public enum OctahedralGroup implements StringRepresentable {
 					.get()
 		)
 		.toArray(OctahedralGroup[]::new);
+
+	public static Optional<OctahedralGroup> byName(String string) {
+		return Optional.ofNullable(byName.get(string));
+	}
 
 	private OctahedralGroup(String string2, SymmetricGroup3 symmetricGroup3, boolean bl, boolean bl2, boolean bl3) {
 		this.name = string2;

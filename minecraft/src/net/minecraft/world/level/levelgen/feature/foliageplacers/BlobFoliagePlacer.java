@@ -40,4 +40,8 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 	public int getTreeRadiusForHeight(int i, int j, int k, int l) {
 		return l == 0 ? 0 : 1;
 	}
+
+	public static BlobFoliagePlacer random(Random random) {
+		return new BlobFoliagePlacer(random.nextInt(10) + 1, random.nextInt(5));
+	}
 }

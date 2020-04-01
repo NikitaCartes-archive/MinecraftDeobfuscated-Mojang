@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkGeneratorType;
 
 public class TheEndLevelSource extends NoiseBasedChunkGenerator<TheEndGeneratorSettings> {
 	private final BlockPos dimensionSpawnPosition;
@@ -51,5 +52,10 @@ public class TheEndLevelSource extends NoiseBasedChunkGenerator<TheEndGeneratorS
 	@Override
 	public int getSeaLevel() {
 		return 0;
+	}
+
+	@Override
+	public ChunkGeneratorType<?, ?> getType() {
+		return ChunkGeneratorType.FLOATING_ISLANDS;
 	}
 }

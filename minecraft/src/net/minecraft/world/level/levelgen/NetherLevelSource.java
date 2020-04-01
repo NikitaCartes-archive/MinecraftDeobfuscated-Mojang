@@ -7,6 +7,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.feature.Feature;
 
 public class NetherLevelSource extends NoiseBasedChunkGenerator<NetherGeneratorSettings> {
@@ -89,5 +90,10 @@ public class NetherLevelSource extends NoiseBasedChunkGenerator<NetherGeneratorS
 	@Override
 	public int getBaseHeight(int i, int j, Heightmap.Types types) {
 		return this.getGenDepth() / 2;
+	}
+
+	@Override
+	public ChunkGeneratorType<?, ?> getType() {
+		return ChunkGeneratorType.CAVES;
 	}
 }

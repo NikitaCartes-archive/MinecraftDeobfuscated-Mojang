@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -126,6 +127,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 	}
 
+	private static String getTranslationKey(Stat<ResourceLocation> stat) {
+		return "stat." + stat.getValue().toString().replace(':', '.');
+	}
+
 	private int getColumnX(int i) {
 		return 115 + 40 * i;
 	}
@@ -147,8 +152,10 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
 		public GeneralStatisticsList(Minecraft minecraft) {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
+			ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<>(Stats.CUSTOM.iterator());
+			objectArrayList.sort(Comparator.comparing(statx -> I18n.get(StatsScreen.getTranslationKey(statx))));
 
-			for (Stat<ResourceLocation> stat : Stats.CUSTOM) {
+			for (Stat<ResourceLocation> stat : objectArrayList) {
 				this.addEntry(new StatsScreen.GeneralStatisticsList.Entry(stat));
 			}
 		}
@@ -168,7 +175,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 
 			@Override
 			public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				Component component = new TranslatableComponent("stat." + this.stat.getValue().toString().replace(':', '.')).withStyle(ChatFormatting.GRAY);
+				Component component = new TranslatableComponent(StatsScreen.getTranslationKey(this.stat)).withStyle(ChatFormatting.GRAY);
 				GeneralStatisticsList.this.drawString(StatsScreen.this.font, component.getString(), k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
 				String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
 				GeneralStatisticsList.this.drawString(

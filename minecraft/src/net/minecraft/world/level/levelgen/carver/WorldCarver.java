@@ -241,4 +241,6 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	}
 
 	protected abstract boolean skip(double d, double e, double f, int i);
+
+	public abstract C randomConfig(Random random);
 }

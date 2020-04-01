@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
@@ -31,7 +30,6 @@ public final class BadlandsPlateauBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.25F, -0.5F, 0.65F, 0.2F, 1.0F)))
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.MESA)));
 		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));

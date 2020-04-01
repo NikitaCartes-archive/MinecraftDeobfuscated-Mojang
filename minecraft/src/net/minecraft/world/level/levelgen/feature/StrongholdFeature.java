@@ -27,8 +27,8 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 	private final List<StructureStart> discoveredStarts = Lists.<StructureStart>newArrayList();
 	private long currentSeed;
 
-	public StrongholdFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public StrongholdFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

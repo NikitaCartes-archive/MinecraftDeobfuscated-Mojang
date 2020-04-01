@@ -2,8 +2,10 @@ package net.minecraft.world.level.biome;
 
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.sounds.SoundEvent;
 
 public class BiomeSpecialEffects {
@@ -66,6 +68,26 @@ public class BiomeSpecialEffects {
 	@Environment(EnvType.CLIENT)
 	public Optional<AmbientAdditionsSettings> getAmbientAdditionsSettings() {
 		return this.ambientAdditionsSettings;
+	}
+
+	public static BiomeSpecialEffects random(Random random) {
+		BiomeSpecialEffects.Builder builder = new BiomeSpecialEffects.Builder()
+			.fogColor(random.nextInt())
+			.waterColor(random.nextInt())
+			.waterFogColor(random.nextInt());
+		if (random.nextInt(5) == 0) {
+			builder.ambientParticle(AmbientParticleSettings.random(random));
+		}
+
+		if (random.nextInt(10) == 0) {
+			builder.ambientAdditionsSound(new AmbientAdditionsSettings(Registry.SOUND_EVENT.getRandom(random), (double)(random.nextFloat() / 3.0F)));
+		}
+
+		if (random.nextInt(10) == 0) {
+			builder.ambientAdditionsSound(new AmbientAdditionsSettings(Registry.SOUND_EVENT.getRandom(random), (double)(random.nextFloat() / 2.0F)));
+		}
+
+		return builder.build();
 	}
 
 	public static class Builder {

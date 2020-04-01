@@ -66,6 +66,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -93,6 +94,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected boolean updatingBlockEntities;
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
+	private static final ThreadLocal<MutableInt> depth = ThreadLocal.withInitial(MutableInt::new);
 
 	protected Level(
 		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl
@@ -212,54 +214,68 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		} else if (!this.isClientSide && this.levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
 			return false;
 		} else {
-			LevelChunk levelChunk = this.getChunkAt(blockPos);
-			Block block = blockState.getBlock();
-			BlockState blockState2 = levelChunk.setBlockState(blockPos, blockState, (i & 64) != 0);
-			if (blockState2 == null) {
+			MutableInt mutableInt = (MutableInt)depth.get();
+			if (mutableInt.getValue() > 64) {
 				return false;
 			} else {
-				BlockState blockState3 = this.getBlockState(blockPos);
-				if (blockState3 != blockState2
-					&& (
-						blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)
-							|| blockState3.getLightEmission() != blockState2.getLightEmission()
-							|| blockState3.useShapeForLightOcclusion()
-							|| blockState2.useShapeForLightOcclusion()
-					)) {
-					this.getProfiler().push("queueCheckLight");
-					this.getChunkSource().getLightEngine().checkBlock(blockPos);
-					this.getProfiler().pop();
-				}
+				mutableInt.increment();
 
-				if (blockState3 == blockState) {
-					if (blockState2 != blockState3) {
-						this.setBlocksDirty(blockPos, blockState2, blockState3);
+				int j;
+				try {
+					LevelChunk levelChunk = this.getChunkAt(blockPos);
+					Block block = blockState.getBlock();
+					BlockState blockState2 = levelChunk.setBlockState(blockPos, blockState, (i & 64) != 0);
+					if (blockState2 == null) {
+						return false;
 					}
 
-					if ((i & 2) != 0
-						&& (!this.isClientSide || (i & 4) == 0)
-						&& (this.isClientSide || levelChunk.getFullStatus() != null && levelChunk.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING))) {
-						this.sendBlockUpdated(blockPos, blockState2, blockState, i);
+					BlockState blockState3 = this.getBlockState(blockPos);
+					if (blockState3 != blockState2
+						&& (
+							blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)
+								|| blockState3.getLightEmission() != blockState2.getLightEmission()
+								|| blockState3.useShapeForLightOcclusion()
+								|| blockState2.useShapeForLightOcclusion()
+						)) {
+						this.getProfiler().push("queueCheckLight");
+						this.getChunkSource().getLightEngine().checkBlock(blockPos);
+						this.getProfiler().pop();
 					}
 
-					if ((i & 1) != 0) {
-						this.blockUpdated(blockPos, blockState2.getBlock());
-						if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
-							this.updateNeighbourForOutputSignal(blockPos, block);
+					if (blockState3 == blockState) {
+						if (blockState2 != blockState3) {
+							this.setBlocksDirty(blockPos, blockState2, blockState3);
 						}
+
+						if ((i & 2) != 0
+							&& (!this.isClientSide || (i & 4) == 0)
+							&& (this.isClientSide || levelChunk.getFullStatus() != null && levelChunk.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING))) {
+							this.sendBlockUpdated(blockPos, blockState2, blockState, i);
+						}
+
+						if ((i & 1) != 0) {
+							this.blockUpdated(blockPos, blockState2.getBlock());
+							if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
+								this.updateNeighbourForOutputSignal(blockPos, block);
+							}
+						}
+
+						if ((i & 16) == 0) {
+							j = i & -2;
+							blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
+							blockState.updateNeighbourShapes(this, blockPos, j);
+							blockState.updateIndirectNeighbourShapes(this, blockPos, j);
+						}
+
+						this.onBlockStateChange(blockPos, blockState2, blockState3);
 					}
 
-					if ((i & 16) == 0) {
-						int j = i & -2;
-						blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
-						blockState.updateNeighbourShapes(this, blockPos, j);
-						blockState.updateIndirectNeighbourShapes(this, blockPos, j);
-					}
-
-					this.onBlockStateChange(blockPos, blockState2, blockState3);
+					j = 1;
+				} finally {
+					mutableInt.decrement();
 				}
 
-				return true;
+				return (boolean)j;
 			}
 		}
 	}
@@ -440,22 +456,26 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean addBlockEntity(BlockEntity blockEntity) {
-		if (this.updatingBlockEntities) {
-			LOGGER.error("Adding block entity while ticking: {} @ {}", () -> Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()), blockEntity::getBlockPos);
-		}
+		if (blockEntity == null) {
+			return false;
+		} else {
+			if (this.updatingBlockEntities) {
+				LOGGER.error("Adding block entity while ticking: {} @ {}", () -> Registry.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType()), blockEntity::getBlockPos);
+			}
 
-		boolean bl = this.blockEntityList.add(blockEntity);
-		if (bl && blockEntity instanceof TickableBlockEntity) {
-			this.tickableBlockEntities.add(blockEntity);
-		}
+			boolean bl = this.blockEntityList.add(blockEntity);
+			if (bl && blockEntity instanceof TickableBlockEntity) {
+				this.tickableBlockEntities.add(blockEntity);
+			}
 
-		if (this.isClientSide) {
-			BlockPos blockPos = blockEntity.getBlockPos();
-			BlockState blockState = this.getBlockState(blockPos);
-			this.sendBlockUpdated(blockPos, blockState, blockState, 2);
-		}
+			if (this.isClientSide) {
+				BlockPos blockPos = blockEntity.getBlockPos();
+				BlockState blockState = this.getBlockState(blockPos);
+				this.sendBlockUpdated(blockPos, blockState, blockState, 2);
+			}
 
-		return bl;
+			return bl;
+		}
 	}
 
 	public void addAllPendingBlockEntities(Collection<BlockEntity> collection) {
@@ -482,32 +502,34 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 		while (iterator.hasNext()) {
 			BlockEntity blockEntity = (BlockEntity)iterator.next();
-			if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
-				BlockPos blockPos = blockEntity.getBlockPos();
-				if (this.chunkSource.isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
-					try {
-						profilerFiller.push((Supplier<String>)(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType()))));
-						if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
-							((TickableBlockEntity)blockEntity).tick();
-						} else {
-							blockEntity.logInvalidState();
-						}
+			if (blockEntity != null) {
+				if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
+					BlockPos blockPos = blockEntity.getBlockPos();
+					if (this.chunkSource.isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
+						try {
+							profilerFiller.push((Supplier<String>)(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType()))));
+							if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
+								((TickableBlockEntity)blockEntity).tick();
+							} else {
+								blockEntity.logInvalidState();
+							}
 
-						profilerFiller.pop();
-					} catch (Throwable var8) {
-						CrashReport crashReport = CrashReport.forThrowable(var8, "Ticking block entity");
-						CrashReportCategory crashReportCategory = crashReport.addCategory("Block entity being ticked");
-						blockEntity.fillCrashReportCategory(crashReportCategory);
-						throw new ReportedException(crashReport);
+							profilerFiller.pop();
+						} catch (Throwable var8) {
+							CrashReport crashReport = CrashReport.forThrowable(var8, "Ticking block entity");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Block entity being ticked");
+							blockEntity.fillCrashReportCategory(crashReportCategory);
+							throw new ReportedException(crashReport);
+						}
 					}
 				}
-			}
 
-			if (blockEntity.isRemoved()) {
-				iterator.remove();
-				this.blockEntityList.remove(blockEntity);
-				if (this.hasChunkAt(blockEntity.getBlockPos())) {
-					this.getChunkAt(blockEntity.getBlockPos()).removeBlockEntity(blockEntity.getBlockPos());
+				if (blockEntity.isRemoved()) {
+					iterator.remove();
+					this.blockEntityList.remove(blockEntity);
+					if (this.hasChunkAt(blockEntity.getBlockPos())) {
+						this.getChunkAt(blockEntity.getBlockPos()).removeBlockEntity(blockEntity.getBlockPos());
+					}
 				}
 			}
 		}

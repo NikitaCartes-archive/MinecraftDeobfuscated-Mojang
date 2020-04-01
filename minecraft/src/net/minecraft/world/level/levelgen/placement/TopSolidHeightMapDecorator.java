@@ -12,8 +12,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 
 public class TopSolidHeightMapDecorator extends FeatureDecorator<NoneDecoratorConfiguration> {
-	public TopSolidHeightMapDecorator(Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function) {
-		super(function);
+	public TopSolidHeightMapDecorator(
+		Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function, Function<Random, ? extends NoneDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

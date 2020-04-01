@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
@@ -2612,14 +2613,14 @@ public class BlockModelGenerators {
 		this.blockStateOutput.accept(createRotatedVariant(Blocks.LILY_PAD, ModelLocationUtils.getModelLocation(Blocks.LILY_PAD)));
 	}
 
-	private void createNetherPortalBlock() {
+	private void createNetherPortalBlock(Block block) {
 		this.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(Blocks.NETHER_PORTAL)
+				MultiVariantGenerator.multiVariant(block)
 					.with(
 						PropertyDispatch.property(BlockStateProperties.HORIZONTAL_AXIS)
-							.select(Direction.Axis.X, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.NETHER_PORTAL, "_ns")))
-							.select(Direction.Axis.Z, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.NETHER_PORTAL, "_ew")))
+							.select(Direction.Axis.X, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_ns")))
+							.select(Direction.Axis.Z, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block, "_ew")))
 					)
 			);
 	}
@@ -3577,6 +3578,7 @@ public class BlockModelGenerators {
 		this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
 		this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
+		this.createAirLikeBlock(Blocks.ZONE, Items.BARRIER);
 		this.createSimpleFlatItemModel(Items.BARRIER);
 		this.createAirLikeBlock(Blocks.STRUCTURE_VOID, Items.STRUCTURE_VOID);
 		this.createSimpleFlatItemModel(Items.STRUCTURE_VOID);
@@ -3593,7 +3595,6 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.IRON_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.IRON_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.ANCIENT_DEBRIS, TexturedModel.COLUMN);
-		this.createTrivialBlock(Blocks.NETHERITE_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.LAPIS_ORE, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.LAPIS_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.NETHER_QUARTZ_ORE, TexturedModel.CUBE);
@@ -3628,6 +3629,7 @@ public class BlockModelGenerators {
 		this.createTrivialBlock(Blocks.TARGET, TexturedModel.COLUMN);
 		this.createTrivialBlock(Blocks.WARPED_WART_BLOCK, TexturedModel.CUBE);
 		this.createTrivialBlock(Blocks.WET_SPONGE, TexturedModel.CUBE);
+		this.createTrivialBlock(Blocks.CURSOR, TexturedModel.CUBE);
 		this.createTrivialBlock(
 			Blocks.CHISELED_QUARTZ_BLOCK,
 			TexturedModel.COLUMN.updateTexture(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_QUARTZ_BLOCK)))
@@ -3661,7 +3663,8 @@ public class BlockModelGenerators {
 		this.createIronBars();
 		this.createLever();
 		this.createLilyPad();
-		this.createNetherPortalBlock();
+		this.createNetherPortalBlock(Blocks.NETHER_PORTAL);
+		this.createNetherPortalBlock(Blocks.NEITHER_PORTAL);
 		this.createNetherrack();
 		this.createObserver();
 		this.createPistons();
@@ -3706,6 +3709,7 @@ public class BlockModelGenerators {
 		this.createRotatedPillarWithHorizontalVariant(Blocks.PURPUR_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
 		this.createRotatedPillarWithHorizontalVariant(Blocks.QUARTZ_PILLAR, TexturedModel.COLUMN_ALT, TexturedModel.COLUMN_HORIZONTAL_ALT);
 		this.createHorizontallyRotatedBlock(Blocks.LOOM, TexturedModel.ORIENTABLE);
+		this.createHorizontallyRotatedBlock(Blocks.ANT, TexturedModel.COMMAND_BLOCK);
 		this.createPumpkins();
 		this.createBeeNest(Blocks.BEE_NEST, TextureMapping::orientableCube);
 		this.createBeeNest(Blocks.BEEHIVE, TextureMapping::orientableCubeSameEnds);
@@ -4036,6 +4040,7 @@ public class BlockModelGenerators {
 		this.woodProvider(Blocks.STRIPPED_ACACIA_LOG).logWithHorizontal(Blocks.STRIPPED_ACACIA_LOG).wood(Blocks.STRIPPED_ACACIA_WOOD);
 		this.createPlant(Blocks.ACACIA_SAPLING, Blocks.POTTED_ACACIA_SAPLING, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createTrivialBlock(Blocks.ACACIA_LEAVES, TexturedModel.LEAVES);
+		this.family(Blocks.NETHERITE_BLOCK).stairs(Blocks.NETHERITE_STAIRS);
 		this.family(Blocks.BIRCH_PLANKS)
 			.button(Blocks.BIRCH_BUTTON)
 			.fence(Blocks.BIRCH_FENCE)
@@ -4221,6 +4226,19 @@ public class BlockModelGenerators {
 		this.createInfestedStone();
 		this.copyModel(Blocks.STONE_BRICKS, Blocks.INFESTED_STONE_BRICKS);
 		SpawnEggItem.eggs().forEach(spawnEggItem -> this.delegateItemModel(spawnEggItem, ModelLocationUtils.decorateItemModelLocation("template_spawn_egg")));
+		this.createBookBox();
+	}
+
+	private void createBookBox() {
+		List<ResourceLocation> list = (List<ResourceLocation>)Stream.of("_a", "_b", "_c", "_d").map(string -> {
+			TextureMapping textureMapping = TextureMapping.cube(Blocks.OAK_PLANKS).put(TextureSlot.FRONT, TextureMapping.getBlockTexture(Blocks.BOOK_BOX, string));
+			return ModelTemplates.COMMAND_BLOCK.createWithSuffix(Blocks.BOOK_BOX, string, textureMapping, this.modelOutput);
+		}).collect(Collectors.toList());
+		Variant[] variants = (Variant[])list.stream()
+			.map(resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+			.toArray(Variant[]::new);
+		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.BOOK_BOX, variants).with(createHorizontalFacingDispatch()));
+		this.delegateItemModel(Blocks.BOOK_BOX, (ResourceLocation)list.get(1));
 	}
 
 	class BlockEntityModelGenerator {

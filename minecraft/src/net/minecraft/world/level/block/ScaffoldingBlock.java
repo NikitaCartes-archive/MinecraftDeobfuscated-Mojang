@@ -124,6 +124,11 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		if (collisionContext.isAbove(Shapes.block(), blockPos, true) && !collisionContext.isDescending()) {
 			return STABLE_SHAPE;

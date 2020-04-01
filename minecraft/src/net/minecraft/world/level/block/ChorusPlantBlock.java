@@ -72,6 +72,11 @@ public class ChorusPlantBlock extends PipeBlock {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
 		boolean bl = !levelReader.getBlockState(blockPos.above()).isAir() && !blockState2.isAir();

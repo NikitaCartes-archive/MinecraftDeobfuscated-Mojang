@@ -32,6 +32,7 @@ public class StructureFeatureIO {
 	public static final StructureFeature<?> SHIPWRECK = register("Shipwreck", Feature.SHIPWRECK);
 	public static final StructureFeature<?> VILLAGE = register("Village", Feature.VILLAGE);
 	public static final StructureFeature<?> NETHER_FOSSIL = register("Nether_Fossil", Feature.NETHER_FOSSIL);
+	public static final StructureFeature<?> SHIP = register("Ship", Feature.SHIP);
 
 	private static StructureFeature<?> register(String string, StructureFeature<?> structureFeature) {
 		return Registry.register(Registry.STRUCTURE_FEATURE, string.toLowerCase(Locale.ROOT), structureFeature);

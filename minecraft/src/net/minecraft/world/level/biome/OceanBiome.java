@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -35,7 +34,6 @@ public final class OceanBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, -0.5F, 0.0F, 1.0F)))
 		);
 		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
 		this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));

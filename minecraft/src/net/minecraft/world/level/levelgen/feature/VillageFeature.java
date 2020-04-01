@@ -15,8 +15,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class VillageFeature extends StructureFeature<VillageConfiguration> {
-	public VillageFeature(Function<Dynamic<?>, ? extends VillageConfiguration> function) {
-		super(function);
+	public VillageFeature(Function<Dynamic<?>, ? extends VillageConfiguration> function, Function<Random, ? extends VillageConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

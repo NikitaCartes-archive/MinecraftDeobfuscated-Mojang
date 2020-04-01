@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public abstract class SimpleFeatureDecorator<DC extends DecoratorConfiguration> extends FeatureDecorator<DC> {
-	public SimpleFeatureDecorator(Function<Dynamic<?>, ? extends DC> function) {
-		super(function);
+	public SimpleFeatureDecorator(Function<Dynamic<?>, ? extends DC> function, Function<Random, ? extends DC> function2) {
+		super(function, function2);
 	}
 
 	@Override

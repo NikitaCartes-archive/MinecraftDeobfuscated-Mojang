@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorType;
 
 public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 	private static final List<BlockState> ALL_BLOCKS = (List<BlockState>)StreamSupport.stream(Registry.BLOCK.spliterator(), false)
@@ -90,5 +91,10 @@ public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 		}
 
 		return blockState;
+	}
+
+	@Override
+	public ChunkGeneratorType<?, ?> getType() {
+		return ChunkGeneratorType.DEBUG;
 	}
 }

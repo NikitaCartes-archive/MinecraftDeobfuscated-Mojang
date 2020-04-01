@@ -5,6 +5,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
 import net.minecraft.advancements.critereon.ChanneledLightningTrigger;
 import net.minecraft.advancements.critereon.DamagePredicate;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
@@ -17,6 +18,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LocationTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.critereon.PlayerPredicate;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
@@ -26,6 +28,7 @@ import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.raid.Raid;
@@ -423,6 +426,27 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("bullseye", TargetBlockTrigger.TriggerInstance.targetHit(MinMaxBounds.Ints.exactly(15)))
 			.save(consumer, "adventure/bullseye");
+		Advancement advancement21 = Advancement.Builder.advancement()
+			.parent(advancement)
+			.display(
+				Items.FLINT_AND_STEEL,
+				new TranslatableComponent("advancements.adventure.almost_there.title"),
+				new TranslatableComponent("advancements.adventure.almost_there.description"),
+				null,
+				FrameType.CHALLENGE,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"count",
+				ChangeDimensionTrigger.TriggerInstance.changedDimension(
+					EntityPredicate.Builder.entity()
+						.player(new PlayerPredicate.Builder().addStat(Stats.CUSTOM.get(Stats.CHANGE_DIMENSION), MinMaxBounds.Ints.exactly(1000000000)).build())
+						.build()
+				)
+			)
+			.save(consumer, "adventure/almost_there");
 	}
 
 	private Advancement.Builder addMobsToKill(Advancement.Builder builder) {

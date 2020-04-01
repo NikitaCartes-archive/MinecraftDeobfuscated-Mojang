@@ -1,8 +1,13 @@
 package net.minecraft.world.level.block;
 
+import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -46,6 +51,33 @@ public class NoteBlock extends Block {
 		return direction == Direction.DOWN
 			? blockState.setValue(INSTRUMENT, NoteBlockInstrument.byState(blockState2))
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (serverLevel.random.nextInt(10) == 0) {
+			this.tick(blockState, serverLevel, blockPos, random);
+		}
+	}
+
+	@Override
+	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		this.playNote(serverLevel, blockPos);
+		if (serverLevel.random.nextInt(5) != 0) {
+			List<Direction> list = Lists.<Direction>newArrayList(Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST);
+			Collections.shuffle(list, serverLevel.random);
+
+			for (Direction direction : list) {
+				BlockPos blockPos2 = blockPos.relative(direction);
+				if (serverLevel.isLoaded(blockPos2)) {
+					BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+					if (blockState2.getBlock() == this) {
+						serverLevel.getBlockTicks().scheduleTick(blockPos2, this, 1 + serverLevel.random.nextInt(6));
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	@Override

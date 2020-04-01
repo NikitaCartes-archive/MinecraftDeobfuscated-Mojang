@@ -68,7 +68,7 @@ public class PoiType {
 	public static final PoiType MEETING = register("meeting", getBlockStates(Blocks.BELL), 32, 6);
 	public static final PoiType BEEHIVE = register("beehive", getBlockStates(Blocks.BEEHIVE), 0, 1);
 	public static final PoiType BEE_NEST = register("bee_nest", getBlockStates(Blocks.BEE_NEST), 0, 1);
-	public static final PoiType NETHER_PORTAL = register("nether_portal", getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
+	public static final PoiType NETHER_PORTAL = register("nether_portal", getBlockStates(Blocks.NETHER_PORTAL, Blocks.NEITHER_PORTAL), 0, 1);
 	public static final PoiType LODESTONE = register("lodestone", getBlockStates(Blocks.LODESTONE), 0, 1);
 	private final String name;
 	private final Set<BlockState> matchingStates;
@@ -76,8 +76,8 @@ public class PoiType {
 	private final Predicate<PoiType> predicate;
 	private final int validRange;
 
-	private static Set<BlockState> getBlockStates(Block block) {
-		return ImmutableSet.copyOf(block.getStateDefinition().getPossibleStates());
+	private static Set<BlockState> getBlockStates(Block... blocks) {
+		return (Set<BlockState>)Stream.of(blocks).flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(ImmutableSet.toImmutableSet());
 	}
 
 	private PoiType(String string, Set<BlockState> set, int i, Predicate<PoiType> predicate, int j) {
@@ -132,6 +132,10 @@ public class PoiType {
 
 	public static Optional<PoiType> forState(BlockState blockState) {
 		return Optional.ofNullable(TYPE_BY_STATE.get(blockState));
+	}
+
+	public static boolean isPoi(BlockState blockState) {
+		return TYPE_BY_STATE.containsKey(blockState);
 	}
 
 	public static Stream<BlockState> allPoiStates() {

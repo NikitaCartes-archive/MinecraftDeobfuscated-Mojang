@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -146,8 +147,10 @@ public abstract class BaseFireBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (blockState2.getBlock() != blockState.getBlock()) {
-			if (level.dimension.getType() != DimensionType.OVERWORLD && level.dimension.getType() != DimensionType.NETHER
-				|| !NetherPortalBlock.trySpawnPortal(level, blockPos)) {
+			if (level.dimension.getType() != DimensionType.OVERWORLD
+					&& level.dimension.getType() != DimensionType.NETHER
+					&& !Registry.DIMENSION_TYPE.getKey(level.dimension.getType()).getNamespace().equals("_generated")
+				|| !NetherPortalBlock.trySpawnPortal(level, blockPos, Blocks.NETHER_PORTAL)) {
 				if (!blockState.canSurvive(level, blockPos)) {
 					level.removeBlock(blockPos, false);
 				}

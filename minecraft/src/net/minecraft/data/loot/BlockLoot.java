@@ -860,7 +860,10 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.CRIMSON_BUTTON);
 		this.dropSelf(Blocks.CRIMSON_SIGN);
 		this.dropSelf(Blocks.NETHERITE_BLOCK);
+		this.dropSelf(Blocks.NETHERITE_STAIRS);
 		this.dropSelf(Blocks.ANCIENT_DEBRIS);
+		this.dropSelf(Blocks.BOOK_BOX);
+		this.dropSelf(Blocks.CURSOR);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);

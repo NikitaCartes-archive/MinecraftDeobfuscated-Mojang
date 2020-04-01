@@ -47,6 +47,11 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		return SHAPE;
 	}

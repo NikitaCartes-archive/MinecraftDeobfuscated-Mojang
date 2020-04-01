@@ -19,8 +19,10 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 	protected long seed;
 	protected PerlinNoise decorationNoise;
 
-	public NetherSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public NetherSurfaceBuilder(
+		Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function, Function<Random, ? extends SurfaceBuilderBaseConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public void apply(

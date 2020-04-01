@@ -19,8 +19,8 @@ import net.minecraft.world.level.material.Material;
 public class LakeFeature extends Feature<BlockStateConfiguration> {
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-		super(function);
+	public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function, Function<Random, ? extends BlockStateConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

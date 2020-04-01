@@ -140,6 +140,7 @@ public class LightTexture implements AutoCloseable {
 						vector3f5.map(this::notGamma);
 						vector3f2.lerp(vector3f5, t);
 						vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
+						clientLevel.dimension.modifyLightmapColor(m, l, vector3f2);
 						vector3f2.clamp(0.0F, 1.0F);
 						vector3f2.mul(255.0F);
 						int u = 255;

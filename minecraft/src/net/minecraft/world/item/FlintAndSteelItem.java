@@ -64,7 +64,8 @@ public class FlintAndSteelItem extends Item {
 		boolean bl = false;
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
-			if (levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() == Blocks.OBSIDIAN && NetherPortalBlock.isPortal(levelAccessor, blockPos) != null) {
+			if (levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() == Blocks.OBSIDIAN
+				&& NetherPortalBlock.isPortal(levelAccessor, blockPos, Blocks.NETHER_PORTAL) != null) {
 				bl = true;
 			}
 		}

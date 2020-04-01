@@ -9,6 +9,7 @@ public class BuiltInLootTables {
 	private static final Set<ResourceLocation> LOCATIONS = Sets.<ResourceLocation>newHashSet();
 	private static final Set<ResourceLocation> IMMUTABLE_LOCATIONS = Collections.unmodifiableSet(LOCATIONS);
 	public static final ResourceLocation EMPTY = new ResourceLocation("empty");
+	public static final ResourceLocation FLEET_ORDERS = register("chests/fleet_orders");
 	public static final ResourceLocation SPAWN_BONUS_CHEST = register("chests/spawn_bonus_chest");
 	public static final ResourceLocation END_CITY_TREASURE = register("chests/end_city_treasure");
 	public static final ResourceLocation SIMPLE_DUNGEON = register("chests/simple_dungeon");

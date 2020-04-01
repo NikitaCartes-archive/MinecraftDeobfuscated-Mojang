@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
@@ -35,14 +34,13 @@ public class SoulSandValleyBiome extends Biome {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(1787717)
-						.ambientParticle(new AmbientParticleSettings(ParticleTypes.ASH, 0.00625F, random -> 0.0, random -> 0.0, random -> 0.0))
+						.ambientParticle(new AmbientParticleSettings(ParticleTypes.ASH, 0.00625F, 0.0, 0.0, 0.0))
 						.ambientLoopSound(SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_SOUL_SAND_VALLEY_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_SOUL_SAND_VALLEY_ADDITIONS, 0.0111))
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, 0.0F, 0.5F, 1.0F)))
 		);
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addStructureStart(Feature.NETHER_FOSSIL.configured(FeatureConfiguration.NONE));

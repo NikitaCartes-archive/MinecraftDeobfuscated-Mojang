@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.datafixers.Dynamic;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
@@ -16,8 +17,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfig
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfiguration> {
-	public OceanRuinFeature(Function<Dynamic<?>, ? extends OceanRuinConfiguration> function) {
-		super(function);
+	public OceanRuinFeature(Function<Dynamic<?>, ? extends OceanRuinConfiguration> function, Function<Random, ? extends OceanRuinConfiguration> function2) {
+		super(function, function2);
 	}
 
 	@Override

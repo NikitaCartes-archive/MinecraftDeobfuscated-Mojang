@@ -16,8 +16,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfi
 import net.minecraft.world.level.material.Material;
 
 public class IcebergFeature extends Feature<BlockStateConfiguration> {
-	public IcebergFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-		super(function);
+	public IcebergFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function, Function<Random, ? extends BlockStateConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

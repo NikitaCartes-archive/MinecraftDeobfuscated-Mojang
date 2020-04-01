@@ -13,8 +13,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.CountFeatureConfiguration;
 
 public class SeaPickleFeature extends Feature<CountFeatureConfiguration> {
-	public SeaPickleFeature(Function<Dynamic<?>, ? extends CountFeatureConfiguration> function) {
-		super(function);
+	public SeaPickleFeature(Function<Dynamic<?>, ? extends CountFeatureConfiguration> function, Function<Random, ? extends CountFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

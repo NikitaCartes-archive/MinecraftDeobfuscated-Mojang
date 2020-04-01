@@ -65,6 +65,11 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
+	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);

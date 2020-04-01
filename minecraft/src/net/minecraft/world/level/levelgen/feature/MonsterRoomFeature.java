@@ -26,8 +26,8 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 	private static final EntityType<?>[] MOBS = new EntityType[]{EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.SPIDER};
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public MonsterRoomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public MonsterRoomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function, Function<Random, ? extends NoneFeatureConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public boolean place(

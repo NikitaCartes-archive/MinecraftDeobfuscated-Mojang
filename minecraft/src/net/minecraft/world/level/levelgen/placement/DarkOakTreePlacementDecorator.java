@@ -13,8 +13,10 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 
 public class DarkOakTreePlacementDecorator extends FeatureDecorator<NoneDecoratorConfiguration> {
-	public DarkOakTreePlacementDecorator(Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function) {
-		super(function);
+	public DarkOakTreePlacementDecorator(
+		Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function, Function<Random, ? extends NoneDecoratorConfiguration> function2
+	) {
+		super(function, function2);
 	}
 
 	public Stream<BlockPos> getPositions(

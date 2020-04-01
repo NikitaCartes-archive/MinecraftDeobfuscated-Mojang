@@ -738,7 +738,6 @@ public class LevelChunk implements ChunkAccess {
 				blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
 			} else {
 				blockEntity = null;
-				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, blockState);
 			}
 		} else {
 			blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
@@ -747,8 +746,6 @@ public class LevelChunk implements ChunkAccess {
 		if (blockEntity != null) {
 			blockEntity.setLevelAndPosition(this.level, blockPos);
 			this.addBlockEntity(blockEntity);
-		} else {
-			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", blockState, blockPos);
 		}
 
 		return blockEntity;

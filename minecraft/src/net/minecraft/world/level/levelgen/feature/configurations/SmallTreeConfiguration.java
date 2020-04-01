@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
 import java.util.List;
+import java.util.Random;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
@@ -95,6 +96,48 @@ public class SmallTreeConfiguration extends TreeConfiguration {
 			dynamic.get("foliage_height_random").asInt(0),
 			dynamic.get("max_water_depth").asInt(0),
 			dynamic.get("ignore_vines").asBoolean(false)
+		);
+	}
+
+	public static SmallTreeConfiguration random(Random random) {
+		TreeConfiguration treeConfiguration = TreeConfiguration.random(random);
+		return new SmallTreeConfiguration(
+			treeConfiguration.trunkProvider,
+			treeConfiguration.leavesProvider,
+			Registry.FOLIAGE_PLACER_TYPES.getRandom(random).random(random),
+			treeConfiguration.decorators,
+			treeConfiguration.baseHeight,
+			random.nextInt(10) + 1,
+			random.nextInt(10) + 1,
+			Math.max(2, treeConfiguration.baseHeight - random.nextInt(20)),
+			random.nextInt(5),
+			random.nextInt(10) + 1,
+			random.nextInt(10) + 1,
+			random.nextInt(10) + 1,
+			random.nextInt(10) + 1,
+			random.nextInt(10),
+			random.nextBoolean()
+		);
+	}
+
+	public static SmallTreeConfiguration fancyRandom(Random random) {
+		SmallTreeConfiguration smallTreeConfiguration = random(random);
+		return new SmallTreeConfiguration(
+			BlockStateProvider.random(random, BlockStateProvider.ROTATABLE_BLOCKS),
+			smallTreeConfiguration.leavesProvider,
+			smallTreeConfiguration.foliagePlacer,
+			smallTreeConfiguration.decorators,
+			smallTreeConfiguration.baseHeight,
+			smallTreeConfiguration.heightRandA,
+			smallTreeConfiguration.heightRandB,
+			smallTreeConfiguration.trunkHeight,
+			smallTreeConfiguration.trunkHeightRandom,
+			smallTreeConfiguration.trunkTopOffset,
+			smallTreeConfiguration.trunkTopOffsetRandom,
+			smallTreeConfiguration.foliageHeight,
+			smallTreeConfiguration.foliageHeightRandom,
+			smallTreeConfiguration.maxWaterDepth,
+			smallTreeConfiguration.ignoreVines
 		);
 	}
 

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
@@ -34,18 +33,13 @@ public class WarpedForestBiome extends Biome {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(1705242)
-						.ambientParticle(
-							new AmbientParticleSettings(
-								ParticleTypes.WARPED_SPORE, 0.01428F, random -> 0.0, random -> (double)random.nextFloat() * -1.9 * (double)random.nextFloat() * 0.1, random -> 0.0
-							)
-						)
+						.ambientParticle(new AmbientParticleSettings(ParticleTypes.WARPED_SPORE, 0.01428F, 0.0, -0.19, 0.0))
 						.ambientLoopSound(SoundEvents.AMBIENT_WARPED_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_WARPED_FOREST_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_WARPED_FOREST_ADDITIONS, 0.0111))
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.5F, 0.0F, 0.0F, 1.0F)))
 		);
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
 		this.addFeature(

@@ -33,8 +33,8 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		.expireAfterWrite(5L, TimeUnit.MINUTES)
 		.build(new SpikeFeature.SpikeCacheLoader());
 
-	public SpikeFeature(Function<Dynamic<?>, ? extends SpikeConfiguration> function) {
-		super(function);
+	public SpikeFeature(Function<Dynamic<?>, ? extends SpikeConfiguration> function, Function<Random, ? extends SpikeConfiguration> function2) {
+		super(function, function2);
 	}
 
 	public static List<SpikeFeature.EndSpike> getSpikesForLevel(LevelAccessor levelAccessor) {

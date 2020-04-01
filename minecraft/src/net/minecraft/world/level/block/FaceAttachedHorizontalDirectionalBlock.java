@@ -24,6 +24,11 @@ public class FaceAttachedHorizontalDirectionalBlock extends HorizontalDirectiona
 		return canAttach(levelReader, blockPos, getConnectedDirection(blockState).getOpposite());
 	}
 
+	@Override
+	public boolean isUnstable() {
+		return true;
+	}
+
 	public static boolean canAttach(LevelReader levelReader, BlockPos blockPos, Direction direction) {
 		BlockPos blockPos2 = blockPos.relative(direction);
 		return levelReader.getBlockState(blockPos2).isFaceSturdy(levelReader, blockPos2, direction.getOpposite());
