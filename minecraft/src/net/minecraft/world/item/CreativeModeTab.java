@@ -69,7 +69,7 @@ public abstract class CreativeModeTab {
 			}
 		})
 		.setEnchantmentCategories(
-			new EnchantmentCategory[]{EnchantmentCategory.ALL, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.BREAKABLE}
+			new EnchantmentCategory[]{EnchantmentCategory.VANISHABLE, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.BREAKABLE}
 		);
 	public static final CreativeModeTab TAB_COMBAT = (new CreativeModeTab(9, "combat") {
 			@Environment(EnvType.CLIENT)
@@ -80,7 +80,7 @@ public abstract class CreativeModeTab {
 		})
 		.setEnchantmentCategories(
 			new EnchantmentCategory[]{
-				EnchantmentCategory.ALL,
+				EnchantmentCategory.VANISHABLE,
 				EnchantmentCategory.ARMOR,
 				EnchantmentCategory.ARMOR_FEET,
 				EnchantmentCategory.ARMOR_HEAD,

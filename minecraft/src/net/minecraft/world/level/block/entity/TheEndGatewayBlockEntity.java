@@ -189,6 +189,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 				.configured(FeatureConfiguration.NONE)
 				.place(
 					serverLevel,
+					serverLevel.structureFeatureManager(),
 					(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
 					new Random(this.exitPortal.asLong()),
 					this.exitPortal
@@ -259,7 +260,13 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	private void createExitPortal(ServerLevel serverLevel, BlockPos blockPos) {
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.knownExit(this.getBlockPos(), false))
-			.place(serverLevel, (ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
+			.place(
+				serverLevel,
+				serverLevel.structureFeatureManager(),
+				(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
+				new Random(),
+				blockPos
+			);
 	}
 
 	@Environment(EnvType.CLIENT)

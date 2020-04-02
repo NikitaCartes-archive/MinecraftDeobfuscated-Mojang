@@ -17,10 +17,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.behavior.PositionWrapper;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +38,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Player> NEAREST_VISIBLE_PLAYER = register("nearest_visible_player");
 	public static final MemoryModuleType<Player> NEAREST_VISIBLE_TARGETABLE_PLAYER = register("nearest_visible_targetable_player");
 	public static final MemoryModuleType<WalkTarget> WALK_TARGET = register("walk_target");
-	public static final MemoryModuleType<PositionWrapper> LOOK_TARGET = register("look_target");
+	public static final MemoryModuleType<PositionTracker> LOOK_TARGET = register("look_target");
 	public static final MemoryModuleType<LivingEntity> ATTACK_TARGET = register("attack_target");
 	public static final MemoryModuleType<Boolean> ATTACK_COOLING_DOWN = register("attack_cooling_down");
 	public static final MemoryModuleType<LivingEntity> INTERACTION_TARGET = register("interaction_target");
@@ -67,7 +66,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<SerializableBoolean> HUNTED_RECENTLY = register("hunted_recently", Optional.of(SerializableBoolean::of));
 	public static final MemoryModuleType<BlockPos> CELEBRATE_LOCATION = register("celebrate_location");
 	public static final MemoryModuleType<WitherSkeleton> NEAREST_VISIBLE_WITHER_SKELETON = register("nearest_visible_wither_skeleton");
-	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_ADULT_HOGLIN = register("nearest_visible_adult_hoglin");
+	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_HUNTABLE_HOGLIN = register("nearest_visible_huntable_hoglin");
 	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_BABY_HOGLIN = register("nearest_visible_baby_hoglin");
 	public static final MemoryModuleType<Piglin> NEAREST_VISIBLE_BABY_PIGLIN = register("nearest_visible_baby_piglin");
 	public static final MemoryModuleType<Player> NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD = register("nearest_targetable_player_not_wearing_gold");
@@ -75,7 +74,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<List<Piglin>> NEAREST_VISIBLE_ADULT_PIGLINS = register("nearest_visible_adult_piglins");
 	public static final MemoryModuleType<List<Hoglin>> NEAREST_VISIBLE_ADULT_HOGLINS = register("nearest_visible_adult_hoglins");
 	public static final MemoryModuleType<Piglin> NEAREST_VISIBLE_ADULT_PIGLIN = register("nearest_visible_adult_piglin");
-	public static final MemoryModuleType<ZombifiedPiglin> NEAREST_VISIBLE_ZOMBIFIED_PIGLIN = register("nearest_visible_zombified_piglin");
+	public static final MemoryModuleType<LivingEntity> NEAREST_VISIBLE_ZOMBIFIED = register("nearest_visible_zombified");
 	public static final MemoryModuleType<Integer> VISIBLE_ADULT_PIGLIN_COUNT = register("visible_adult_piglin_count");
 	public static final MemoryModuleType<Integer> VISIBLE_ADULT_HOGLIN_COUNT = register("visible_adult_hoglin_count");
 	public static final MemoryModuleType<Player> NEAREST_PLAYER_HOLDING_WANTED_ITEM = register("nearest_player_holding_wanted_item");

@@ -22,6 +22,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.MoveBackToVillage;
@@ -35,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -80,13 +81,12 @@ public class IronGolem extends AbstractGolem {
 		this.entityData.define(DATA_FLAGS_ID, (byte)0);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
-		this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(15.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 100.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.25)
+			.add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
+			.add(Attributes.ATTACK_DAMAGE, 15.0);
 	}
 
 	@Override
@@ -156,7 +156,7 @@ public class IronGolem extends AbstractGolem {
 	}
 
 	private float getAttackDamage() {
-		return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+		return (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
 
 	@Override

@@ -2544,10 +2544,13 @@ public class Blocks {
 		return Registry.register(Registry.BLOCK, string, block);
 	}
 
+	public static void rebuildCache() {
+		Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
+	}
+
 	static {
 		for (Block block : Registry.BLOCK) {
 			for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
-				blockState.initCache();
 				Block.BLOCK_STATE_REGISTRY.add(blockState);
 			}
 

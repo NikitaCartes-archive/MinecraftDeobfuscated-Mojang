@@ -165,23 +165,20 @@ public class NbtOps implements DynamicOps<Tag> {
 			return tag2;
 		} else if (tag2 instanceof EndTag) {
 			return tag;
+		} else if (tag instanceof CompoundTag && tag2 instanceof CompoundTag) {
+			CompoundTag compoundTag = (CompoundTag)tag;
+			CompoundTag compoundTag2 = (CompoundTag)tag2;
+			CompoundTag compoundTag3 = new CompoundTag();
+			compoundTag.getAllKeys().forEach(string -> compoundTag3.put(string, compoundTag.get(string)));
+			compoundTag2.getAllKeys().forEach(string -> compoundTag3.put(string, compoundTag2.get(string)));
+			return compoundTag3;
+		} else if (tag instanceof CollectionTag && tag2 instanceof CollectionTag) {
+			ListTag listTag = new ListTag();
+			listTag.addAll((CollectionTag)tag);
+			listTag.addAll((CollectionTag)tag2);
+			return listTag;
 		} else {
-			if (tag instanceof CompoundTag && tag2 instanceof CompoundTag) {
-				CompoundTag compoundTag = (CompoundTag)tag;
-				CompoundTag compoundTag2 = (CompoundTag)tag2;
-				CompoundTag compoundTag3 = new CompoundTag();
-				compoundTag.getAllKeys().forEach(string -> compoundTag3.put(string, compoundTag.get(string)));
-				compoundTag2.getAllKeys().forEach(string -> compoundTag3.put(string, compoundTag2.get(string)));
-			}
-
-			if (tag instanceof CollectionTag && tag2 instanceof CollectionTag) {
-				ListTag listTag = new ListTag();
-				listTag.addAll((CollectionTag)tag);
-				listTag.addAll((CollectionTag)tag2);
-				return listTag;
-			} else {
-				throw new IllegalArgumentException("Could not merge " + tag + " and " + tag2);
-			}
+			throw new IllegalArgumentException("Could not merge " + tag + " and " + tag2);
 		}
 	}
 

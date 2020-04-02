@@ -57,10 +57,10 @@ public class DarkOakFeature extends AbstractTreeFeature<MegaTreeConfiguration> {
 					int s = k + r;
 					BlockPos blockPos3 = new BlockPos(o, s, p);
 					if (isAirOrLeaves(levelSimulatedRW, blockPos3)) {
-						this.placeLog(levelSimulatedRW, random, blockPos3, set, boundingBox, megaTreeConfiguration);
-						this.placeLog(levelSimulatedRW, random, blockPos3.east(), set, boundingBox, megaTreeConfiguration);
-						this.placeLog(levelSimulatedRW, random, blockPos3.south(), set, boundingBox, megaTreeConfiguration);
-						this.placeLog(levelSimulatedRW, random, blockPos3.east().south(), set, boundingBox, megaTreeConfiguration);
+						placeLog(levelSimulatedRW, random, blockPos3, set, boundingBox, megaTreeConfiguration);
+						placeLog(levelSimulatedRW, random, blockPos3.east(), set, boundingBox, megaTreeConfiguration);
+						placeLog(levelSimulatedRW, random, blockPos3.south(), set, boundingBox, megaTreeConfiguration);
+						placeLog(levelSimulatedRW, random, blockPos3.east().south(), set, boundingBox, megaTreeConfiguration);
 					}
 				}
 
@@ -102,7 +102,7 @@ public class DarkOakFeature extends AbstractTreeFeature<MegaTreeConfiguration> {
 							int t = random.nextInt(3) + 2;
 
 							for (int u = 0; u < t; u++) {
-								this.placeLog(levelSimulatedRW, random, new BlockPos(j + r, q - u - 1, l + sxx), set, boundingBox, megaTreeConfiguration);
+								placeLog(levelSimulatedRW, random, new BlockPos(j + r, q - u - 1, l + sxx), set, boundingBox, megaTreeConfiguration);
 							}
 
 							for (int u = -1; u <= 1; u++) {

@@ -66,8 +66,8 @@ public class PlayTagWithOtherKids extends Behavior<PathfinderMob> {
 	private static void chaseKid(PathfinderMob pathfinderMob, LivingEntity livingEntity) {
 		Brain<?> brain = pathfinderMob.getBrain();
 		brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
-		brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntity));
-		brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper(livingEntity), 0.6F, 1));
+		brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity));
+		brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntity), 0.6F, 1));
 	}
 
 	private Optional<LivingEntity> findSomeoneToChase(PathfinderMob pathfinderMob) {

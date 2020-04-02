@@ -105,7 +105,7 @@ public class LocationPredicate {
 			BlockPos blockPos = new BlockPos((double)f, (double)g, (double)h);
 			boolean bl = serverLevel.isLoaded(blockPos);
 			if (this.biome == null || bl && this.biome == serverLevel.getBiome(blockPos)) {
-				if (this.feature == null || bl && this.feature.isInsideFeature(serverLevel, blockPos)) {
+				if (this.feature == null || bl && this.feature.isInsideFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos)) {
 					if (!this.light.matches(serverLevel, blockPos)) {
 						return false;
 					} else {

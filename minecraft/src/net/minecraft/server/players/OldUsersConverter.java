@@ -426,9 +426,7 @@ public class OldUsersConverter {
 	}
 
 	private static File getWorldPlayersDirectory(MinecraftServer minecraftServer) {
-		String string = minecraftServer.getLevelIdName();
-		File file = new File(string);
-		return new File(file, "players");
+		return minecraftServer.getWorldPath().resolve("players").toFile();
 	}
 
 	private static void renameOldFile(File file) {

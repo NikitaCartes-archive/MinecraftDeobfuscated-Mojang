@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,6 +28,7 @@ public class BonusChestFeature extends Feature<NoneFeatureConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,

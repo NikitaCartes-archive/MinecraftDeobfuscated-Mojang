@@ -120,27 +120,8 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 		double e = this.getY() + vec3.y;
 		double f = this.getZ() + vec3.z;
 		float g = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)g) * 180.0F / (float)Math.PI);
-
-		while (this.xRot - this.xRotO < -180.0F) {
-			this.xRotO -= 360.0F;
-		}
-
-		while (this.xRot - this.xRotO >= 180.0F) {
-			this.xRotO += 360.0F;
-		}
-
-		while (this.yRot - this.yRotO < -180.0F) {
-			this.yRotO -= 360.0F;
-		}
-
-		while (this.yRot - this.yRotO >= 180.0F) {
-			this.yRotO += 360.0F;
-		}
-
-		this.xRot = Mth.lerp(0.2F, this.xRotO, this.xRot);
-		this.yRot = Mth.lerp(0.2F, this.yRotO, this.yRot);
+		this.xRot = Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, (double)g) * 180.0F / (float)Math.PI));
+		this.yRot = Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
 		if (!this.level.isClientSide) {
 			double h = this.tx - d;
 			double i = this.tz - f;

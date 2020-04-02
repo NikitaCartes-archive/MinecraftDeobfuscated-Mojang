@@ -5,7 +5,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -510,7 +509,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.CLIMBABLE)
 			.add(Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
 		this.tag(BlockTags.PIGLIN_REPELLENTS).add(Blocks.SOUL_FIRE).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.SOUL_FIRE_WALL_TORCH);
-		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS);
+		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS).add(Blocks.NETHER_PORTAL).add(Blocks.RESPAWN_ANCHOR);
 		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE);
 		this.tag(BlockTags.SOUL_FIRE_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
 		this.tag(BlockTags.NON_FLAMMABLE_WOOD)
@@ -557,10 +556,5 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 	@Override
 	public String getName() {
 		return "Block Tags";
-	}
-
-	@Override
-	protected void useTags(TagCollection<Block> tagCollection) {
-		BlockTags.reset(tagCollection);
 	}
 }

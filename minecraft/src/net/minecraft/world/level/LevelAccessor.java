@@ -1,7 +1,7 @@
 package net.minecraft.world.level;
 
 import java.util.Random;
-import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -80,8 +80,8 @@ public interface LevelAccessor extends EntityGetter, LevelReader, LevelSimulated
 	}
 
 	@Override
-	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-		return EntityGetter.super.getEntityCollisions(entity, aABB, set);
+	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+		return EntityGetter.super.getEntityCollisions(entity, aABB, predicate);
 	}
 
 	@Override

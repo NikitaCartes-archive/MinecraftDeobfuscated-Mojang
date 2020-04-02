@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.RedStoneWireBlock;
@@ -53,7 +54,13 @@ public class JunglePyramidPiece extends ScatteredFeaturePiece {
 
 	@Override
 	public boolean postProcess(
-		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<?> chunkGenerator,
+		Random random,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos,
+		BlockPos blockPos
 	) {
 		if (!this.updateAverageGroundHeight(levelAccessor, boundingBox, 0)) {
 			return false;

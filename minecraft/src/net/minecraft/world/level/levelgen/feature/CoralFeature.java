@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
@@ -22,6 +23,7 @@ public abstract class CoralFeature extends Feature<NoneFeatureConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,

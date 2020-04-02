@@ -1157,6 +1157,9 @@ public class Items {
 	public static final Item WOLF_SPAWN_EGG = registerItem(
 		"wolf_spawn_egg", new SpawnEggItem(EntityType.WOLF, 14144467, 13545366, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item ZOGLIN_SPAWN_EGG = registerItem(
+		"zoglin_spawn_egg", new SpawnEggItem(EntityType.ZOGLIN, 13004373, 15132390, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item ZOMBIE_SPAWN_EGG = registerItem(
 		"zombie_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE, 44975, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
@@ -1217,10 +1220,10 @@ public class Items {
 		new StandingAndWallBlockItem(Blocks.DRAGON_HEAD, Blocks.DRAGON_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item CARROT_ON_A_STICK = registerItem(
-		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG)
+		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG, 7)
 	);
 	public static final Item WARPED_FUNGUS_ON_A_STICK = registerItem(
-		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER)
+		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(100).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER, 1)
 	);
 	public static final Item NETHER_STAR = registerItem(
 		"nether_star", new SimpleFoiledItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON))

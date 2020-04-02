@@ -42,7 +42,7 @@ public class ServerFunctionManager implements ResourceManagerReloadListener {
 	private boolean isInFunction;
 	private final ArrayDeque<ServerFunctionManager.QueuedCommand> commandQueue = new ArrayDeque();
 	private final List<ServerFunctionManager.QueuedCommand> nestedCalls = Lists.<ServerFunctionManager.QueuedCommand>newArrayList();
-	private final TagCollection<CommandFunction> tags = new TagCollection<>(this::get, "tags/functions", true, "function");
+	private final TagCollection<CommandFunction> tags = new TagCollection<>(this::get, "tags/functions", "function");
 	private final List<CommandFunction> ticking = Lists.<CommandFunction>newArrayList();
 	private boolean postReload;
 
@@ -163,7 +163,7 @@ public class ServerFunctionManager implements ResourceManagerReloadListener {
 			LOGGER.info("Loaded {} custom command functions", this.functions.size());
 		}
 
-		this.tags.load((Map<ResourceLocation, Tag.Builder<CommandFunction>>)this.tags.prepare(resourceManager, this.server.getBackgroundTaskExecutor()).join());
+		this.tags.load((Map<ResourceLocation, Tag.Builder>)this.tags.prepare(resourceManager, this.server.getBackgroundTaskExecutor()).join());
 		this.ticking.addAll(this.tags.getTagOrEmpty(TICK_FUNCTION_TAG).getValues());
 		this.postReload = true;
 	}

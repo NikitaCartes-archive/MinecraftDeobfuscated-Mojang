@@ -25,6 +25,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
@@ -75,13 +77,12 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, true));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35F);
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(24.0);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(5.0);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(32.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes()
+			.add(Attributes.MOVEMENT_SPEED, 0.35F)
+			.add(Attributes.MAX_HEALTH, 24.0)
+			.add(Attributes.ATTACK_DAMAGE, 5.0)
+			.add(Attributes.FOLLOW_RANGE, 32.0);
 	}
 
 	@Override

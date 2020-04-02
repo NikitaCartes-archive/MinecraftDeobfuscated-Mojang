@@ -31,6 +31,8 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -54,9 +56,8 @@ import net.minecraft.world.phys.Vec3;
 public class Shulker extends AbstractGolem implements Enemy {
 	private static final UUID COVERED_ARMOR_MODIFIER_UUID = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF27F");
 	private static final AttributeModifier COVERED_ARMOR_MODIFIER = new AttributeModifier(
-			COVERED_ARMOR_MODIFIER_UUID, "Covered armor bonus", 20.0, AttributeModifier.Operation.ADDITION
-		)
-		.setSerialize(false);
+		COVERED_ARMOR_MODIFIER_UUID, "Covered armor bonus", 20.0, AttributeModifier.Operation.ADDITION
+	);
 	protected static final EntityDataAccessor<Direction> DATA_ATTACH_FACE_ID = SynchedEntityData.defineId(Shulker.class, EntityDataSerializers.DIRECTION);
 	protected static final EntityDataAccessor<Optional<BlockPos>> DATA_ATTACH_POS_ID = SynchedEntityData.defineId(
 		Shulker.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
@@ -146,10 +147,8 @@ public class Shulker extends AbstractGolem implements Enemy {
 		this.entityData.define(DATA_COLOR_ID, (byte)16);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 30.0);
 	}
 
 	@Override
@@ -426,9 +425,9 @@ public class Shulker extends AbstractGolem implements Enemy {
 
 	public void setRawPeekAmount(int i) {
 		if (!this.level.isClientSide) {
-			this.getAttribute(SharedMonsterAttributes.ARMOR).removeModifier(COVERED_ARMOR_MODIFIER);
+			this.getAttribute(Attributes.ARMOR).removeModifier(COVERED_ARMOR_MODIFIER);
 			if (i == 0) {
-				this.getAttribute(SharedMonsterAttributes.ARMOR).addModifier(COVERED_ARMOR_MODIFIER);
+				this.getAttribute(Attributes.ARMOR).addPermanentModifier(COVERED_ARMOR_MODIFIER);
 				this.playSound(SoundEvents.SHULKER_CLOSE, 1.0F, 1.0F);
 			} else {
 				this.playSound(SoundEvents.SHULKER_OPEN, 1.0F, 1.0F);

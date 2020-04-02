@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -49,6 +50,7 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,

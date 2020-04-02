@@ -6,6 +6,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -18,6 +19,7 @@ public class DiskReplaceFeature extends Feature<DiskConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,

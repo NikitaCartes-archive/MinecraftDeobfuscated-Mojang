@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.datafixers.Dynamic;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -24,27 +25,21 @@ public class TreeFeature extends AbstractSmallTreeFeature<SmallTreeConfiguration
 		BoundingBox boundingBox,
 		SmallTreeConfiguration smallTreeConfiguration
 	) {
-		int i = smallTreeConfiguration.baseHeight + random.nextInt(smallTreeConfiguration.heightRandA + 1) + random.nextInt(smallTreeConfiguration.heightRandB + 1);
-		int j = smallTreeConfiguration.trunkHeight >= 0
-			? smallTreeConfiguration.trunkHeight + random.nextInt(smallTreeConfiguration.trunkHeightRandom + 1)
-			: i - (smallTreeConfiguration.foliageHeight + random.nextInt(smallTreeConfiguration.foliageHeightRandom + 1));
-		int k = smallTreeConfiguration.foliagePlacer.foliageRadius(random, j, i, smallTreeConfiguration);
-		Optional<BlockPos> optional = this.getProjectedOrigin(levelSimulatedRW, i, j, k, blockPos, smallTreeConfiguration);
+		int i = smallTreeConfiguration.trunkPlacer.getTreeHeight(random, smallTreeConfiguration);
+		int j = smallTreeConfiguration.foliagePlacer.foliageHeight(random, i);
+		int k = i - j;
+		int l = smallTreeConfiguration.foliagePlacer.foliageRadius(random, k, smallTreeConfiguration);
+		Optional<BlockPos> optional = this.getProjectedOrigin(levelSimulatedRW, i, l, blockPos, smallTreeConfiguration);
 		if (!optional.isPresent()) {
 			return false;
 		} else {
 			BlockPos blockPos2 = (BlockPos)optional.get();
 			this.setDirtAt(levelSimulatedRW, blockPos2.below());
-			smallTreeConfiguration.foliagePlacer.createFoliage(levelSimulatedRW, random, smallTreeConfiguration, i, j, k, blockPos2, set2);
-			this.placeTrunk(
-				levelSimulatedRW,
-				random,
-				i,
-				blockPos2,
-				smallTreeConfiguration.trunkTopOffset + random.nextInt(smallTreeConfiguration.trunkTopOffsetRandom + 1),
-				set,
-				boundingBox,
-				smallTreeConfiguration
+			Map<BlockPos, Integer> map = smallTreeConfiguration.trunkPlacer
+				.placeTrunk(levelSimulatedRW, random, i, blockPos2, l, set, boundingBox, smallTreeConfiguration);
+			map.forEach(
+				(blockPosx, integer) -> smallTreeConfiguration.foliagePlacer
+						.createFoliage(levelSimulatedRW, random, smallTreeConfiguration, i, blockPosx, j, integer, set2)
 			);
 			return true;
 		}

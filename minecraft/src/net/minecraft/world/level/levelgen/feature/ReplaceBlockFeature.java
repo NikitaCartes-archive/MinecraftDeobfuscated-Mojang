@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
@@ -16,6 +17,7 @@ public class ReplaceBlockFeature extends Feature<ReplaceBlockConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,

@@ -21,8 +21,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BegGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -44,7 +47,6 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.DyeColor;
@@ -97,17 +99,8 @@ public class Wolf extends TamableAnimal {
 		this.targetSelector.addGoal(5, new NearestAttackableTargetGoal(this, AbstractSkeleton.class, false));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
-		if (this.isTame()) {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0);
-		} else {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
-		}
-
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 2.0);
 	}
 
 	@Override
@@ -297,7 +290,7 @@ public class Wolf extends TamableAnimal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(DamageSource.mobAttack(this), (float)((int)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue()));
+		boolean bl = entity.hurt(DamageSource.mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
 			this.doEnchantDamageEffects(this, entity);
 		}
@@ -309,13 +302,13 @@ public class Wolf extends TamableAnimal {
 	public void setTame(boolean bl) {
 		super.setTame(bl);
 		if (bl) {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0);
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
 			this.setHealth(20.0F);
 		} else {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0);
 		}
 
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0);
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0);
 	}
 
 	@Override

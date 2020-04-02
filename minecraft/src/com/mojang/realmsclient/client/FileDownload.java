@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -256,8 +257,8 @@ public class FileDownload {
 					}
 				}
 			}
-		} catch (Exception var38) {
-			LOGGER.error("Error getting level list", (Throwable)var38);
+		} catch (Exception var128) {
+			LOGGER.error("Error getting level list", (Throwable)var128);
 			this.error = true;
 			return;
 		}
@@ -301,16 +302,16 @@ public class FileDownload {
 
 					try {
 						IOUtils.copy(tarArchiveInputStream, fileOutputStream);
-					} catch (Throwable var34) {
-						var12 = var34;
-						throw var34;
+					} catch (Throwable var122) {
+						var12 = var122;
+						throw var122;
 					} finally {
 						if (fileOutputStream != null) {
 							if (var12 != null) {
 								try {
 									fileOutputStream.close();
-								} catch (Throwable var33) {
-									var12.addSuppressed(var33);
+								} catch (Throwable var121) {
+									var12.addSuppressed(var121);
 								}
 							} else {
 								fileOutputStream.close();
@@ -319,8 +320,8 @@ public class FileDownload {
 					}
 				}
 			}
-		} catch (Exception var36) {
-			LOGGER.error("Error extracting world", (Throwable)var36);
+		} catch (Exception var126) {
+			LOGGER.error("Error extracting world", (Throwable)var126);
 			this.error = true;
 		} finally {
 			if (tarArchiveInputStream != null) {
@@ -331,9 +332,14 @@ public class FileDownload {
 				file.delete();
 			}
 
-			levelStorageSource.renameLevel(string2, string2.trim());
-			File file4 = new File(file2, string2 + File.separator + "level.dat");
-			deletePlayerTag(file4);
+			try (LevelStorageSource.LevelStorageAccess levelStorageAccess2 = levelStorageSource.createAccess(string2)) {
+				levelStorageAccess2.renameLevel(string2.trim());
+				Path path2 = levelStorageAccess2.getLevelPath().resolve("level.dat");
+				deletePlayerTag(path2.toFile());
+			} catch (IOException var124) {
+				LOGGER.error("Failed to rename unpacked realms level {}", string2, var124);
+			}
+
 			this.resourcePackPath = new File(file2, string2 + File.separator + "resources.zip");
 		}
 	}

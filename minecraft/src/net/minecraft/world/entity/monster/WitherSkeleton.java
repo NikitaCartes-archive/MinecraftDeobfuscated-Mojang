@@ -16,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -89,7 +90,7 @@ public class WitherSkeleton extends AbstractSkeleton {
 		@Nullable CompoundTag compoundTag
 	) {
 		SpawnGroupData spawnGroupData2 = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0);
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0);
 		this.reassessWeaponGoal();
 		return spawnGroupData2;
 	}

@@ -47,7 +47,7 @@ public class SetEntityLookTarget extends Behavior<LivingEntity> {
 						.filter(this.predicate)
 						.filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr)
 						.findFirst()
-						.ifPresent(livingEntityxx -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntityxx)))
+						.ifPresent(livingEntityxx -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx)))
 			);
 	}
 }

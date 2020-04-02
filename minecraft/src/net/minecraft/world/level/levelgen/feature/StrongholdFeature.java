@@ -8,8 +8,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -74,11 +74,13 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 
 	@Nullable
 	@Override
-	public BlockPos getNearestGeneratedFeature(Level level, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
+	public BlockPos getNearestGeneratedFeature(
+		ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl
+	) {
 		if (!chunkGenerator.getBiomeSource().canGenerateStructure(this)) {
 			return null;
 		} else {
-			if (this.currentSeed != level.getSeed()) {
+			if (this.currentSeed != serverLevel.getSeed()) {
 				this.reset();
 			}
 

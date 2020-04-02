@@ -30,6 +30,8 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -43,7 +45,6 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
@@ -118,11 +119,8 @@ public abstract class Mob extends LivingEntity {
 	protected void registerGoals() {
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK);
+	public static AttributeSupplier.Builder createMobAttributes() {
+		return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, 16.0).add(Attributes.ATTACK_KNOCKBACK);
 	}
 
 	protected PathNavigation createNavigation(Level level) {
@@ -969,8 +967,8 @@ public abstract class Mob extends LivingEntity {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE)
-			.addModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+		this.getAttribute(Attributes.FOLLOW_RANGE)
+			.addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
 		if (this.random.nextFloat() < 0.05F) {
 			this.setLeftHanded(true);
 		} else {
@@ -1265,8 +1263,8 @@ public abstract class Mob extends LivingEntity {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
-		float g = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
+		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 		if (entity instanceof LivingEntity) {
 			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
 			g += (float)EnchantmentHelper.getKnockbackBonus(this);

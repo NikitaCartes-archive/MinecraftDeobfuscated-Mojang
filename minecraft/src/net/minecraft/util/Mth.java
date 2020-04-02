@@ -331,7 +331,7 @@ public class Mth {
 		return createInsecureUUID(RANDOM);
 	}
 
-	public static double pct(double d, double e, double f) {
+	public static double inverseLerp(double d, double e, double f) {
 		return (d - e) / (f - e);
 	}
 

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -125,7 +126,13 @@ public class ShipwreckPieces {
 
 		@Override
 		public boolean postProcess(
-			LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+			LevelAccessor levelAccessor,
+			StructureFeatureManager structureFeatureManager,
+			ChunkGenerator<?> chunkGenerator,
+			Random random,
+			BoundingBox boundingBox,
+			ChunkPos chunkPos,
+			BlockPos blockPos
 		) {
 			int i = 256;
 			int j = 0;
@@ -148,7 +155,7 @@ public class ShipwreckPieces {
 
 			int m = this.isBeached ? i - blockPos2.getY() / 2 - random.nextInt(3) : j;
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
-			return super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			return super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 	}
 }

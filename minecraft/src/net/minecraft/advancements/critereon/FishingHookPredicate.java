@@ -7,7 +7,7 @@ import com.google.gson.JsonPrimitive;
 import javax.annotation.Nullable;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.fishing.FishingHook;
+import net.minecraft.world.entity.projectile.FishingHook;
 
 public class FishingHookPredicate {
 	public static final FishingHookPredicate ANY = new FishingHookPredicate(false);

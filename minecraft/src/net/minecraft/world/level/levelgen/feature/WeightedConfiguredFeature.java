@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -36,8 +37,14 @@ public class WeightedConfiguredFeature<FC extends FeatureConfiguration> {
 		);
 	}
 
-	public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos) {
-		return this.feature.place(levelAccessor, chunkGenerator, random, blockPos);
+	public boolean place(
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		BlockPos blockPos
+	) {
+		return this.feature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos);
 	}
 
 	public static <T> WeightedConfiguredFeature<?> deserialize(Dynamic<T> dynamic) {

@@ -25,7 +25,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.ModifiableAttributeMap;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
@@ -205,8 +204,7 @@ public class ServerEntity {
 
 		boolean bl = this.trackDelta;
 		if (this.entity instanceof LivingEntity) {
-			ModifiableAttributeMap modifiableAttributeMap = (ModifiableAttributeMap)((LivingEntity)this.entity).getAttributes();
-			Collection<AttributeInstance> collection = modifiableAttributeMap.getSyncableAttributes();
+			Collection<AttributeInstance> collection = ((LivingEntity)this.entity).getAttributes().getSyncableAttributes();
 			if (!collection.isEmpty()) {
 				consumer.accept(new ClientboundUpdateAttributesPacket(this.entity.getId(), collection));
 			}
@@ -261,8 +259,7 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
-			ModifiableAttributeMap modifiableAttributeMap = (ModifiableAttributeMap)((LivingEntity)this.entity).getAttributes();
-			Set<AttributeInstance> set = modifiableAttributeMap.getDirtyAttributes();
+			Set<AttributeInstance> set = ((LivingEntity)this.entity).getAttributes().getDirtyAttributes();
 			if (!set.isEmpty()) {
 				this.broadcastAndSend(new ClientboundUpdateAttributesPacket(this.entity.getId(), set));
 			}

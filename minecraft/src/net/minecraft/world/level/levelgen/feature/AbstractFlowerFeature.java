@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -17,7 +18,12 @@ public abstract class AbstractFlowerFeature<U extends FeatureConfiguration> exte
 
 	@Override
 	public boolean place(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, U featureConfiguration
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		BlockPos blockPos,
+		U featureConfiguration
 	) {
 		BlockState blockState = this.getRandomFlower(random, blockPos, featureConfiguration);
 		int i = 0;

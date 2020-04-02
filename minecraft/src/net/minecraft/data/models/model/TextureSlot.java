@@ -2,53 +2,55 @@ package net.minecraft.data.models.model;
 
 import javax.annotation.Nullable;
 
-public enum TextureSlot {
-	ALL("all"),
-	TEXTURE("texture", ALL),
-	PARTICLE("particle", TEXTURE),
-	END("end", ALL),
-	BOTTOM("bottom", END),
-	TOP("top", END),
-	FRONT("front", ALL),
-	BACK("back", ALL),
-	SIDE("side", ALL),
-	NORTH("north", SIDE),
-	SOUTH("south", SIDE),
-	EAST("east", SIDE),
-	WEST("west", SIDE),
-	UP("up"),
-	DOWN("down"),
-	CROSS("cross"),
-	PLANT("plant"),
-	WALL("wall", ALL),
-	RAIL("rail"),
-	WOOL("wool"),
-	PATTERN("pattern"),
-	PANE("pane"),
-	EDGE("edge"),
-	FAN("fan"),
-	STEM("stem"),
-	UPPER_STEM("upperstem"),
-	CROP("crop"),
-	DIRT("dirt"),
-	FIRE("fire"),
-	LANTERN("lantern"),
-	PLATFORM("platform"),
-	UNSTICKY("unsticky"),
-	TORCH("torch"),
-	LAYER0("layer0");
-
+public final class TextureSlot {
+	public static final TextureSlot ALL = create("all");
+	public static final TextureSlot TEXTURE = create("texture", ALL);
+	public static final TextureSlot PARTICLE = create("particle", TEXTURE);
+	public static final TextureSlot END = create("end", ALL);
+	public static final TextureSlot BOTTOM = create("bottom", END);
+	public static final TextureSlot TOP = create("top", END);
+	public static final TextureSlot FRONT = create("front", ALL);
+	public static final TextureSlot BACK = create("back", ALL);
+	public static final TextureSlot SIDE = create("side", ALL);
+	public static final TextureSlot NORTH = create("north", SIDE);
+	public static final TextureSlot SOUTH = create("south", SIDE);
+	public static final TextureSlot EAST = create("east", SIDE);
+	public static final TextureSlot WEST = create("west", SIDE);
+	public static final TextureSlot UP = create("up");
+	public static final TextureSlot DOWN = create("down");
+	public static final TextureSlot CROSS = create("cross");
+	public static final TextureSlot PLANT = create("plant");
+	public static final TextureSlot WALL = create("wall", ALL);
+	public static final TextureSlot RAIL = create("rail");
+	public static final TextureSlot WOOL = create("wool");
+	public static final TextureSlot PATTERN = create("pattern");
+	public static final TextureSlot PANE = create("pane");
+	public static final TextureSlot EDGE = create("edge");
+	public static final TextureSlot FAN = create("fan");
+	public static final TextureSlot STEM = create("stem");
+	public static final TextureSlot UPPER_STEM = create("upperstem");
+	public static final TextureSlot CROP = create("crop");
+	public static final TextureSlot DIRT = create("dirt");
+	public static final TextureSlot FIRE = create("fire");
+	public static final TextureSlot LANTERN = create("lantern");
+	public static final TextureSlot PLATFORM = create("platform");
+	public static final TextureSlot UNSTICKY = create("unsticky");
+	public static final TextureSlot TORCH = create("torch");
+	public static final TextureSlot LAYER0 = create("layer0");
 	private final String id;
 	@Nullable
 	private final TextureSlot parent;
 
-	private TextureSlot(String string2) {
-		this.id = string2;
-		this.parent = null;
+	private static TextureSlot create(String string) {
+		return new TextureSlot(string, null);
 	}
 
-	private TextureSlot(String string2, TextureSlot textureSlot) {
-		this.id = string2;
+	private static TextureSlot create(String string, TextureSlot textureSlot) {
+		return new TextureSlot(string, textureSlot);
+	}
+
+	private TextureSlot(String string, @Nullable TextureSlot textureSlot) {
+		this.id = string;
 		this.parent = textureSlot;
 	}
 
@@ -59,5 +61,9 @@ public enum TextureSlot {
 	@Nullable
 	public TextureSlot getParent() {
 		return this.parent;
+	}
+
+	public String toString() {
+		return "#" + this.id;
 	}
 }

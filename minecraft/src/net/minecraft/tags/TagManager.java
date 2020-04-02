@@ -1,6 +1,5 @@
 package net.minecraft.tags;
 
-import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -64,49 +63,21 @@ public class TagManager implements PreparableReloadListener {
 		Executor executor,
 		Executor executor2
 	) {
-		CompletableFuture<Map<ResourceLocation, Tag.Builder<Block>>> completableFuture = this.blocks.prepare(resourceManager, executor);
-		CompletableFuture<Map<ResourceLocation, Tag.Builder<Item>>> completableFuture2 = this.items.prepare(resourceManager, executor);
-		CompletableFuture<Map<ResourceLocation, Tag.Builder<Fluid>>> completableFuture3 = this.fluids.prepare(resourceManager, executor);
-		CompletableFuture<Map<ResourceLocation, Tag.Builder<EntityType<?>>>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
-		return completableFuture.thenCombine(completableFuture2, Pair::of)
-			.thenCombine(
-				completableFuture3.thenCombine(completableFuture4, Pair::of),
-				(pair, pair2) -> new TagManager.Preparations(
-						(Map<ResourceLocation, Tag.Builder<Block>>)pair.getFirst(),
-						(Map<ResourceLocation, Tag.Builder<Item>>)pair.getSecond(),
-						(Map<ResourceLocation, Tag.Builder<Fluid>>)pair2.getFirst(),
-						(Map<ResourceLocation, Tag.Builder<EntityType<?>>>)pair2.getSecond()
-					)
-			)
+		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.blocks.prepare(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture2 = this.items.prepare(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture3 = this.fluids.prepare(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
+		return CompletableFuture.allOf(completableFuture, completableFuture2, completableFuture3, completableFuture4)
 			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(preparations -> {
-				this.blocks.load(preparations.blocks);
-				this.items.load(preparations.items);
-				this.fluids.load(preparations.fluids);
-				this.entityTypes.load(preparations.entityTypes);
+			.thenAcceptAsync(void_ -> {
+				this.blocks.load((Map<ResourceLocation, Tag.Builder>)completableFuture.join());
+				this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
+				this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
+				this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
 				BlockTags.reset(this.blocks);
 				ItemTags.reset(this.items);
 				FluidTags.reset(this.fluids);
 				EntityTypeTags.reset(this.entityTypes);
 			}, executor2);
-	}
-
-	public static class Preparations {
-		final Map<ResourceLocation, Tag.Builder<Block>> blocks;
-		final Map<ResourceLocation, Tag.Builder<Item>> items;
-		final Map<ResourceLocation, Tag.Builder<Fluid>> fluids;
-		final Map<ResourceLocation, Tag.Builder<EntityType<?>>> entityTypes;
-
-		public Preparations(
-			Map<ResourceLocation, Tag.Builder<Block>> map,
-			Map<ResourceLocation, Tag.Builder<Item>> map2,
-			Map<ResourceLocation, Tag.Builder<Fluid>> map3,
-			Map<ResourceLocation, Tag.Builder<EntityType<?>>> map4
-		) {
-			this.blocks = map;
-			this.items = map2;
-			this.fluids = map3;
-			this.entityTypes = map4;
-		}
 	}
 }

@@ -76,6 +76,7 @@ public enum DragonRespawnAnimation {
 							.configured(spikeConfiguration)
 							.place(
 								serverLevel,
+								serverLevel.structureFeatureManager(),
 								(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
 								new Random(),
 								new BlockPos(endSpike.getCenterX(), 45, endSpike.getCenterZ())

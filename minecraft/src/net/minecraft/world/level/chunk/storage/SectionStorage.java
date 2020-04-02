@@ -23,31 +23,39 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.util.Serializable;
+import net.minecraft.util.Serializer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SectionStorage<R extends Serializable> implements AutoCloseable {
+public class SectionStorage<R> implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final IOWorker worker;
 	private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<>();
 	private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
+	private final Serializer<R> serializer;
 	private final BiFunction<Runnable, Dynamic<?>, R> deserializer;
 	private final Function<Runnable, R> factory;
 	private final DataFixer fixerUpper;
 	private final DataFixTypes type;
 
 	public SectionStorage(
-		File file, BiFunction<Runnable, Dynamic<?>, R> biFunction, Function<Runnable, R> function, DataFixer dataFixer, DataFixTypes dataFixTypes
+		File file,
+		Serializer<R> serializer,
+		BiFunction<Runnable, Dynamic<?>, R> biFunction,
+		Function<Runnable, R> function,
+		DataFixer dataFixer,
+		DataFixTypes dataFixTypes,
+		boolean bl
 	) {
+		this.serializer = serializer;
 		this.deserializer = biFunction;
 		this.factory = function;
 		this.fixerUpper = dataFixer;
 		this.type = dataFixTypes;
-		this.worker = new IOWorker(new RegionFileStorage(file), file.getName());
+		this.worker = new IOWorker(new RegionFileStorage(file, bl), file.getName());
 	}
 
 	protected void tick(BooleanSupplier booleanSupplier) {
@@ -91,9 +99,9 @@ public class SectionStorage<R extends Serializable> implements AutoCloseable {
 		if (optional.isPresent()) {
 			return (R)optional.get();
 		} else {
-			R serializable = (R)this.factory.apply((Runnable)() -> this.setDirty(l));
-			this.storage.put(l, Optional.of(serializable));
-			return serializable;
+			R object = (R)this.factory.apply((Runnable)() -> this.setDirty(l));
+			this.storage.put(l, Optional.of(object));
+			return object;
 		}
 	}
 
@@ -126,11 +134,9 @@ public class SectionStorage<R extends Serializable> implements AutoCloseable {
 
 			for (int l = 0; l < 16; l++) {
 				long m = SectionPos.of(chunkPos, l).asLong();
-				Optional<R> optional = optionalDynamic.get(Integer.toString(l))
-					.get()
-					.map(dynamicx -> (Serializable)this.deserializer.apply((Runnable)() -> this.setDirty(m), dynamicx));
+				Optional<R> optional = optionalDynamic.get(Integer.toString(l)).get().map(dynamicx -> this.deserializer.apply((Runnable)() -> this.setDirty(m), dynamicx));
 				this.storage.put(m, optional);
-				optional.ifPresent(serializable -> {
+				optional.ifPresent(objectx -> {
 					this.onSectionLoad(m);
 					if (bl) {
 						this.setDirty(m);
@@ -158,7 +164,7 @@ public class SectionStorage<R extends Serializable> implements AutoCloseable {
 			this.dirty.remove(l);
 			Optional<R> optional = this.storage.get(l);
 			if (optional != null && optional.isPresent()) {
-				map.put(dynamicOps.createString(Integer.toString(i)), ((Serializable)optional.get()).serialize(dynamicOps));
+				map.put(dynamicOps.createString(Integer.toString(i)), this.serializer.serialize((R)optional.get(), dynamicOps));
 			}
 		}
 

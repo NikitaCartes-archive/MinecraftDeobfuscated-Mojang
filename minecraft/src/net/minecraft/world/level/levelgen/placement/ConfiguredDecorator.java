@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -30,12 +31,13 @@ public class ConfiguredDecorator<DC extends DecoratorConfiguration> {
 
 	public <FC extends FeatureConfiguration, F extends Feature<FC>> boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		ConfiguredFeature<FC, F> configuredFeature
 	) {
-		return this.decorator.placeFeature(levelAccessor, chunkGenerator, random, blockPos, this.config, configuredFeature);
+		return this.decorator.placeFeature(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos, this.config, configuredFeature);
 	}
 
 	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {

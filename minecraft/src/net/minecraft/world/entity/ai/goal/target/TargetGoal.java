@@ -4,10 +4,9 @@ import javax.annotation.Nullable;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -74,8 +73,7 @@ public abstract class TargetGoal extends Goal {
 	}
 
 	protected double getFollowDistance() {
-		AttributeInstance attributeInstance = this.mob.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-		return attributeInstance == null ? 16.0 : attributeInstance.getValue();
+		return this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
 	}
 
 	@Override

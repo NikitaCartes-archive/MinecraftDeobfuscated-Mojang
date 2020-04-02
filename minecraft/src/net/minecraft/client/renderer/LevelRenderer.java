@@ -151,7 +151,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	private boolean generateClouds = true;
 	@Nullable
 	private VertexBuffer cloudBuffer;
-	private RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
+	private final RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
 	private int ticks;
 	private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<>();
@@ -973,7 +973,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 
 				MultiBufferSource multiBufferSource;
-				if (this.shouldShowEntityOutlines() && entity.isGlowing()) {
+				if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
 					bl4 = true;
 					OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
 					multiBufferSource = outlineBufferSource;
@@ -1230,8 +1230,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					RenderSystem.lineWidth(10.0F);
 					int i = 0;
 
-					for (Direction direction : Direction.values()) {
-						for (Direction direction2 : Direction.values()) {
+					for (Direction direction : DIRECTIONS) {
+						for (Direction direction2 : DIRECTIONS) {
 							boolean bl = renderChunk.getCompiledChunk().facesCanSeeEachother(direction, direction2);
 							if (!bl) {
 								i++;

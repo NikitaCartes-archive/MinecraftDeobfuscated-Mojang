@@ -1,6 +1,8 @@
 package net.minecraft.tags;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet.Builder;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.core.Registry;
@@ -11,7 +13,7 @@ public class SynchronizableTagCollection<T> extends TagCollection<T> {
 	private final Registry<T> registry;
 
 	public SynchronizableTagCollection(Registry<T> registry, String string, String string2) {
-		super(registry::getOptional, string, false, string2);
+		super(registry::getOptional, string, string2);
 		this.registry = registry;
 	}
 
@@ -36,13 +38,13 @@ public class SynchronizableTagCollection<T> extends TagCollection<T> {
 		for (int j = 0; j < i; j++) {
 			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
 			int k = friendlyByteBuf.readVarInt();
-			Tag.Builder<T> builder = Tag.Builder.tag();
+			Builder<T> builder = ImmutableSet.builder();
 
 			for (int l = 0; l < k; l++) {
 				builder.add(this.registry.byId(friendlyByteBuf.readVarInt()));
 			}
 
-			map.put(resourceLocation, builder.build(resourceLocation));
+			map.put(resourceLocation, Tag.fromSet(builder.build()));
 		}
 
 		this.replace(map);

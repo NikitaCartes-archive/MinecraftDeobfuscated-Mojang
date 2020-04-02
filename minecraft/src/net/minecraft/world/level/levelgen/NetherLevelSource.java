@@ -4,6 +4,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
@@ -57,18 +58,19 @@ public class NetherLevelSource extends NoiseBasedChunkGenerator<NetherGeneratorS
 	}
 
 	@Override
-	public List<Biome.SpawnerData> getMobsAt(MobCategory mobCategory, BlockPos blockPos) {
+	public List<Biome.SpawnerData> getMobsAt(StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
 		if (mobCategory == MobCategory.MONSTER) {
-			if (Feature.NETHER_BRIDGE.isInsideFeature(this.level, blockPos)) {
+			if (Feature.NETHER_BRIDGE.isInsideFeature(this.level, structureFeatureManager, blockPos)) {
 				return Feature.NETHER_BRIDGE.getSpecialEnemies();
 			}
 
-			if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, blockPos) && this.level.getBlockState(blockPos.below()).getBlock() == Blocks.NETHER_BRICKS) {
+			if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos)
+				&& this.level.getBlockState(blockPos.below()).getBlock() == Blocks.NETHER_BRICKS) {
 				return Feature.NETHER_BRIDGE.getSpecialEnemies();
 			}
 		}
 
-		return super.getMobsAt(mobCategory, blockPos);
+		return super.getMobsAt(structureFeatureManager, mobCategory, blockPos);
 	}
 
 	@Override

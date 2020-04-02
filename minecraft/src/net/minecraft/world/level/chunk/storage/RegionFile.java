@@ -34,11 +34,11 @@ public class RegionFile implements AutoCloseable {
 	private final IntBuffer timestamps;
 	private final RegionBitmap usedSectors = new RegionBitmap();
 
-	public RegionFile(File file, File file2) throws IOException {
-		this(file.toPath(), file2.toPath(), RegionFileVersion.VERSION_DEFLATE);
+	public RegionFile(File file, File file2, boolean bl) throws IOException {
+		this(file.toPath(), file2.toPath(), RegionFileVersion.VERSION_DEFLATE, bl);
 	}
 
-	public RegionFile(Path path, Path path2, RegionFileVersion regionFileVersion) throws IOException {
+	public RegionFile(Path path, Path path2, RegionFileVersion regionFileVersion, boolean bl) throws IOException {
 		this.version = regionFileVersion;
 		if (!Files.isDirectory(path2, new LinkOption[0])) {
 			throw new IllegalArgumentException("Expected directory, got " + path2.toAbsolutePath());
@@ -48,7 +48,12 @@ public class RegionFile implements AutoCloseable {
 			this.offsets.limit(1024);
 			this.header.position(4096);
 			this.timestamps = this.header.asIntBuffer();
-			this.file = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+			if (bl) {
+				this.file = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.DSYNC);
+			} else {
+				this.file = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
+			}
+
 			this.usedSectors.force(0, 2);
 			this.header.position(0);
 			int i = this.file.read(this.header, 0L);
@@ -219,6 +224,10 @@ public class RegionFile implements AutoCloseable {
 		return new DataOutputStream(new BufferedOutputStream(this.version.wrap(new RegionFile.ChunkBuffer(chunkPos))));
 	}
 
+	public void flush() throws IOException {
+		this.file.force(true);
+	}
+
 	protected synchronized void write(ChunkPos chunkPos, ByteBuffer byteBuffer) throws IOException {
 		int i = getOffsetIndex(chunkPos);
 		int j = this.offsets.get(i);
@@ -310,13 +319,9 @@ public class RegionFile implements AutoCloseable {
 			this.padToFullSector();
 		} finally {
 			try {
-				this.writeHeader();
+				this.file.force(true);
 			} finally {
-				try {
-					this.file.force(true);
-				} finally {
-					this.file.close();
-				}
+				this.file.close();
 			}
 		}
 	}

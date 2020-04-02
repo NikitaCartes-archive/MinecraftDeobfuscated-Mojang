@@ -72,6 +72,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.PositionImpl;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -204,9 +205,8 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.BaseAttributeMap;
-import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
@@ -216,7 +216,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -230,6 +229,7 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -266,6 +266,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
@@ -746,7 +747,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				clientboundLevelChunkPacket.getBiomes(),
 				clientboundLevelChunkPacket.getReadBuffer(),
 				clientboundLevelChunkPacket.getHeightmaps(),
-				clientboundLevelChunkPacket.getAvailableSections()
+				clientboundLevelChunkPacket.getAvailableSections(),
+				clientboundLevelChunkPacket.isFullChunk()
 			);
 		if (levelChunk != null && clientboundLevelChunkPacket.isFullChunk()) {
 			this.level.reAddEntitiesToChunk(levelChunk);
@@ -1534,6 +1536,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			ItemTags.reset(this.tags.getItems());
 			FluidTags.reset(this.tags.getFluids());
 			EntityTypeTags.reset(this.tags.getEntityTypes());
+			Blocks.rebuildCache();
 		}
 
 		this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS).refresh();
@@ -2248,19 +2251,19 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			if (!(entity instanceof LivingEntity)) {
 				throw new IllegalStateException("Server tried to update attributes of a non-living entity (actually: " + entity + ")");
 			} else {
-				BaseAttributeMap baseAttributeMap = ((LivingEntity)entity).getAttributes();
+				AttributeMap attributeMap = ((LivingEntity)entity).getAttributes();
 
 				for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : clientboundUpdateAttributesPacket.getValues()) {
-					AttributeInstance attributeInstance = baseAttributeMap.getInstance(attributeSnapshot.getName());
+					AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.getAttribute());
 					if (attributeInstance == null) {
-						attributeInstance = baseAttributeMap.registerAttribute(new RangedAttribute(null, attributeSnapshot.getName(), 0.0, Double.MIN_NORMAL, Double.MAX_VALUE));
-					}
+						LOGGER.warn("Entity {} does not have attribute {}", entity, Registry.ATTRIBUTES.getKey(attributeSnapshot.getAttribute()));
+					} else {
+						attributeInstance.setBaseValue(attributeSnapshot.getBase());
+						attributeInstance.removeModifiers();
 
-					attributeInstance.setBaseValue(attributeSnapshot.getBase());
-					attributeInstance.removeModifiers();
-
-					for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {
-						attributeInstance.addModifier(attributeModifier);
+						for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {
+							attributeInstance.addTransientModifier(attributeModifier);
+						}
 					}
 				}
 			}

@@ -9,6 +9,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -16,6 +19,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -23,12 +28,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zoglin;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,13 +46,16 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Hoglin extends Animal implements Enemy {
+public class Hoglin extends Animal implements Enemy, HoglinBase {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Hoglin.class, EntityDataSerializers.BOOLEAN);
 	private int attackAnimationRemainingTicks;
+	private int timeInOverworld = 0;
+	private boolean cannotBeHunted = false;
 	private static int createCounter = 0;
 	private static int dieCounter = 0;
 	private static int killedByPiglinCounter = 0;
@@ -88,69 +100,36 @@ public class Hoglin extends Animal implements Enemy {
 	}
 
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(40.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
-		this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0.5);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).setBaseValue(1.0);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
+	public boolean canBeLeashed(Player player) {
+		return !this.isLeashed();
 	}
 
-	private float getAttackDamage() {
-		return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes()
+			.add(Attributes.MAX_HEALTH, 40.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.3F)
+			.add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
+			.add(Attributes.ATTACK_KNOCKBACK, 1.0)
+			.add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		this.attackAnimationRemainingTicks = 10;
-		this.level.broadcastEntityEvent(this, (byte)4);
 		if (!(entity instanceof LivingEntity)) {
 			return false;
 		} else {
-			LivingEntity livingEntity = (LivingEntity)entity;
-			float f = this.getAttackDamage();
-			float g;
-			if (this.isAdult() && (int)f > 0) {
-				g = f / 2.0F + (float)this.random.nextInt((int)f);
-			} else {
-				g = f;
-			}
-
-			boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
-			if (bl) {
-				this.doEnchantDamageEffects(this, entity);
-				if (this.isAdult()) {
-					this.throwTarget(livingEntity);
-				}
-			}
-
+			this.attackAnimationRemainingTicks = 10;
+			this.level.broadcastEntityEvent(this, (byte)4);
 			this.playSound(SoundEvents.HOGLIN_ATTACK, 1.0F, this.getVoicePitch());
-			HoglinAi.onHitTarget(this, livingEntity);
-			return bl;
-		}
-	}
-
-	private void throwTarget(LivingEntity livingEntity) {
-		double d = this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
-		double e = livingEntity.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getValue();
-		double f = d - e;
-		if (!(f <= 0.0)) {
-			double g = livingEntity.getX() - this.getX();
-			double h = livingEntity.getZ() - this.getZ();
-			float i = (float)(this.random.nextInt(21) - 10);
-			double j = f * (double)(this.random.nextFloat() * 0.5F + 0.2F);
-			Vec3 vec3 = new Vec3(g, 0.0, h).normalize().scale(j).yRot(i);
-			double k = f * (double)this.random.nextFloat() * 0.5;
-			livingEntity.push(vec3.x, k, vec3.z);
-			livingEntity.hurtMarked = true;
+			HoglinAi.onHitTarget(this, (LivingEntity)entity);
+			return HoglinBase.hurtAndThrowTarget(this, (LivingEntity)entity);
 		}
 	}
 
 	@Override
 	protected void blockedByShield(LivingEntity livingEntity) {
 		if (this.isAdult()) {
-			this.throwTarget(livingEntity);
+			HoglinBase.throwTarget(this, livingEntity);
 		}
 	}
 
@@ -185,6 +164,15 @@ public class Hoglin extends Animal implements Enemy {
 		this.level.getProfiler().pop();
 		HoglinAi.updateActivity(this);
 		HoglinAi.maybePlayActivitySound(this);
+		if (this.isConverting()) {
+			this.timeInOverworld++;
+			if (this.timeInOverworld > 300) {
+				this.playConvertedSound();
+				this.finishConversion((ServerLevel)this.level);
+			}
+		} else {
+			this.timeInOverworld = 0;
+		}
 	}
 
 	@Override
@@ -214,7 +202,7 @@ public class Hoglin extends Animal implements Enemy {
 		if (levelAccessor.getRandom().nextFloat() < 0.2F) {
 			this.setBaby(true);
 			this.xpReward = 3;
-			this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(0.5);
+			this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.5);
 		}
 
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
@@ -256,6 +244,7 @@ public class Hoglin extends Animal implements Enemy {
 	}
 
 	@Environment(EnvType.CLIENT)
+	@Override
 	public int getAttackAnimationRemainingTicks() {
 		return this.attackAnimationRemainingTicks;
 	}
@@ -270,6 +259,30 @@ public class Hoglin extends Animal implements Enemy {
 		return this.xpReward;
 	}
 
+	private void finishConversion(ServerLevel serverLevel) {
+		Zoglin zoglin = EntityType.ZOGLIN.create(serverLevel);
+		if (zoglin != null) {
+			zoglin.copyPosition(this);
+			zoglin.finalizeSpawn(
+				serverLevel, serverLevel.getCurrentDifficultyAt(zoglin.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(this.isBaby()), null
+			);
+			zoglin.setBaby(this.isBaby());
+			zoglin.setNoAi(this.isNoAi());
+			if (this.hasCustomName()) {
+				zoglin.setCustomName(this.getCustomName());
+				zoglin.setCustomNameVisible(this.isCustomNameVisible());
+			}
+
+			if (this.isPersistenceRequired()) {
+				zoglin.setPersistenceRequired();
+			}
+
+			this.remove();
+			serverLevel.addFreshEntity(zoglin);
+			zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+		}
+	}
+
 	@Override
 	public boolean isFood(ItemStack itemStack) {
 		return itemStack.getItem() == Items.CRIMSON_FUNGUS;
@@ -277,6 +290,53 @@ public class Hoglin extends Animal implements Enemy {
 
 	public boolean isAdult() {
 		return !this.isBaby();
+	}
+
+	@Override
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		this.entityData.define(DATA_IMMUNE_TO_ZOMBIFICATION, false);
+	}
+
+	@Override
+	public void addAdditionalSaveData(CompoundTag compoundTag) {
+		super.addAdditionalSaveData(compoundTag);
+		if (this.isImmuneToZombification()) {
+			compoundTag.putBoolean("IsImmuneToZombification", true);
+		}
+
+		compoundTag.putInt("TimeInOverworld", this.timeInOverworld);
+		if (this.cannotBeHunted) {
+			compoundTag.putBoolean("CannotBeHunted", true);
+		}
+	}
+
+	@Override
+	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
+		this.setImmuneToZombification(compoundTag.getBoolean("IsImmuneToZombification"));
+		this.timeInOverworld = compoundTag.getInt("TimeInOverworld");
+		this.setCannotBeHunted(compoundTag.getBoolean("CannotBeHunted"));
+	}
+
+	private void setImmuneToZombification(boolean bl) {
+		this.getEntityData().set(DATA_IMMUNE_TO_ZOMBIFICATION, bl);
+	}
+
+	private boolean isImmuneToZombification() {
+		return this.getEntityData().get(DATA_IMMUNE_TO_ZOMBIFICATION);
+	}
+
+	public boolean isConverting() {
+		return this.level.getDimension().getType() == DimensionType.OVERWORLD && !this.isImmuneToZombification() && !this.isNoAi();
+	}
+
+	private void setCannotBeHunted(boolean bl) {
+		this.cannotBeHunted = bl;
+	}
+
+	public boolean canBeHunted() {
+		return this.isAdult() && !this.cannotBeHunted;
 	}
 
 	@Nullable
@@ -343,6 +403,10 @@ public class Hoglin extends Animal implements Enemy {
 
 	protected void playRetreatSound() {
 		this.playSound(SoundEvents.HOGLIN_RETREAT, 1.0F, this.getVoicePitch());
+	}
+
+	private void playConvertedSound() {
+		this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED, 1.0F, this.getVoicePitch());
 	}
 
 	@Override

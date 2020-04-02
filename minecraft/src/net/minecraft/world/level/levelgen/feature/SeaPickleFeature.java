@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,7 +19,12 @@ public class SeaPickleFeature extends Feature<CountFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BlockPos blockPos, CountFeatureConfiguration countFeatureConfiguration
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<?> chunkGenerator,
+		Random random,
+		BlockPos blockPos,
+		CountFeatureConfiguration countFeatureConfiguration
 	) {
 		int i = 0;
 

@@ -35,6 +35,8 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -42,7 +44,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
@@ -70,6 +71,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	);
 	private int timeInOverworld = 0;
 	private final SimpleContainer inventory = new SimpleContainer(8);
+	private boolean cannotHunt = false;
 	private static int createCounter = 0;
 	private static int dieCounter = 0;
 	private static int killedByHoglinCounter = 0;
@@ -109,8 +111,8 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		MemoryModuleType.HUNTED_RECENTLY,
 		MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN,
 		MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN,
-		MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN,
 		MemoryModuleType.NEAREST_VISIBLE_WITHER_SKELETON,
+		MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED,
 		MemoryModuleType.RIDE_TARGET,
 		MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT,
 		MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT,
@@ -148,6 +150,10 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 			compoundTag.putBoolean("IsImmuneToZombification", true);
 		}
 
+		if (this.cannotHunt) {
+			compoundTag.putBoolean("CannotHunt", true);
+		}
+
 		compoundTag.putInt("TimeInOverworld", this.timeInOverworld);
 		compoundTag.put("Inventory", this.inventory.createTag());
 	}
@@ -157,6 +163,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		super.readAdditionalSaveData(compoundTag);
 		this.setBaby(compoundTag.getBoolean("IsBaby"));
 		this.setImmuneToZombification(compoundTag.getBoolean("IsImmuneToZombification"));
+		this.setCannotHunt(compoundTag.getBoolean("CannotHunt"));
 		this.timeInOverworld = compoundTag.getInt("TimeInOverworld");
 		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
 	}
@@ -187,12 +194,8 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(16.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35F);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(5.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 16.0).add(Attributes.MOVEMENT_SPEED, 0.35F).add(Attributes.ATTACK_DAMAGE, 5.0);
 	}
 
 	public static boolean checkPiglinSpawnRules(
@@ -274,10 +277,10 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	public void setBaby(boolean bl) {
 		this.getEntityData().set(DATA_BABY_ID, bl);
 		if (!this.level.isClientSide) {
-			AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+			AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
 			attributeInstance.removeModifier(SPEED_MODIFIER_BABY);
 			if (bl) {
-				attributeInstance.addModifier(SPEED_MODIFIER_BABY);
+				attributeInstance.addTransientModifier(SPEED_MODIFIER_BABY);
 			}
 		}
 	}
@@ -297,6 +300,14 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 
 	private boolean isImmuneToZombification() {
 		return this.getEntityData().get(DATA_IMMUNE_TO_ZOMBIFICATION);
+	}
+
+	private void setCannotHunt(boolean bl) {
+		this.cannotHunt = bl;
+	}
+
+	public boolean canHunt() {
+		return !this.cannotHunt;
 	}
 
 	public boolean isConverting() {

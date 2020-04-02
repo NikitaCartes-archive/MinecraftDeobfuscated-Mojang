@@ -69,7 +69,10 @@ public class EnderEyeItem extends Item {
 		} else {
 			player.startUsingItem(interactionHand);
 			if (level instanceof ServerLevel) {
-				BlockPos blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", player.blockPosition(), 100, false);
+				BlockPos blockPos = ((ServerLevel)level)
+					.getChunkSource()
+					.getGenerator()
+					.findNearestMapFeature((ServerLevel)level, "Stronghold", player.blockPosition(), 100, false);
 				if (blockPos != null) {
 					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
 					eyeOfEnder.setItem(itemStack);

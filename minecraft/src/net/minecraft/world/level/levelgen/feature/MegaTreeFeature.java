@@ -112,23 +112,23 @@ public abstract class MegaTreeFeature<T extends TreeConfiguration> extends Abstr
 		for (int j = 0; j < i; j++) {
 			mutableBlockPos.setWithOffset(blockPos, 0, j, 0);
 			if (isFree(levelSimulatedRW, mutableBlockPos)) {
-				this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+				placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
 			}
 
 			if (j < i - 1) {
 				mutableBlockPos.setWithOffset(blockPos, 1, j, 0);
 				if (isFree(levelSimulatedRW, mutableBlockPos)) {
-					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+					placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
 				}
 
 				mutableBlockPos.setWithOffset(blockPos, 1, j, 1);
 				if (isFree(levelSimulatedRW, mutableBlockPos)) {
-					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+					placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
 				}
 
 				mutableBlockPos.setWithOffset(blockPos, 0, j, 1);
 				if (isFree(levelSimulatedRW, mutableBlockPos)) {
-					this.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
+					placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, megaTreeConfiguration);
 				}
 			}
 		}

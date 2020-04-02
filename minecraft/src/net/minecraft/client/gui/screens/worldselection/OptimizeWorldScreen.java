@@ -13,6 +13,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 
 @Environment(EnvType.CLIENT)
@@ -28,10 +29,15 @@ public class OptimizeWorldScreen extends Screen {
 	private final BooleanConsumer callback;
 	private final WorldUpgrader upgrader;
 
-	public OptimizeWorldScreen(BooleanConsumer booleanConsumer, String string, LevelStorageSource levelStorageSource, boolean bl) {
-		super(new TranslatableComponent("optimizeWorld.title", levelStorageSource.getDataTagFor(string).getLevelName()));
+	public static OptimizeWorldScreen create(BooleanConsumer booleanConsumer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
+		LevelData levelData = levelStorageAccess.getDataTag();
+		return new OptimizeWorldScreen(booleanConsumer, levelStorageAccess, levelData, bl);
+	}
+
+	private OptimizeWorldScreen(BooleanConsumer booleanConsumer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, boolean bl) {
+		super(new TranslatableComponent("optimizeWorld.title", levelData.getLevelName()));
 		this.callback = booleanConsumer;
-		this.upgrader = new WorldUpgrader(string, levelStorageSource, levelStorageSource.getDataTagFor(string), bl);
+		this.upgrader = new WorldUpgrader(levelStorageAccess, levelData, bl);
 	}
 
 	@Override
@@ -48,6 +54,11 @@ public class OptimizeWorldScreen extends Screen {
 		if (this.upgrader.isFinished()) {
 			this.callback.accept(true);
 		}
+	}
+
+	@Override
+	public void onClose() {
+		this.callback.accept(false);
 	}
 
 	@Override

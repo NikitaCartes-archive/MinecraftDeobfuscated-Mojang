@@ -1,12 +1,15 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -16,12 +19,17 @@ import net.minecraft.world.level.material.Material;
 
 public class SwordItem extends TieredItem {
 	private final float attackDamage;
-	private final float attackSpeed;
+	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
 	public SwordItem(Tier tier, int i, float f, Item.Properties properties) {
 		super(tier, properties);
-		this.attackSpeed = f;
 		this.attackDamage = (float)i + tier.getAttackDamageBonus();
+		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		builder.put(
+			Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
+		);
+		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION));
+		this.defaultModifiers = builder.build();
 	}
 
 	public float getDamage() {
@@ -71,19 +79,7 @@ public class SwordItem extends TieredItem {
 	}
 
 	@Override
-	public Multimap<String, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<String, AttributeModifier> multimap = super.getDefaultAttributeModifiers(equipmentSlot);
-		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			multimap.put(
-				SharedMonsterAttributes.ATTACK_DAMAGE.getName(),
-				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
-			);
-			multimap.put(
-				SharedMonsterAttributes.ATTACK_SPEED.getName(),
-				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)this.attackSpeed, AttributeModifier.Operation.ADDITION)
-			);
-		}
-
-		return multimap;
+	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 }

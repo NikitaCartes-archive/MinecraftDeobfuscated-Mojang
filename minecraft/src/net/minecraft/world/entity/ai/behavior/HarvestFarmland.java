@@ -100,8 +100,8 @@ public class HarvestFarmland extends Behavior<Villager> {
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
 		if (l > this.nextOkStartTime && this.aboveFarmlandPos != null) {
-			villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosWrapper(this.aboveFarmlandPos));
-			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new BlockPosWrapper(this.aboveFarmlandPos), 0.5F, 1));
+			villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(this.aboveFarmlandPos));
+			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new BlockPosTracker(this.aboveFarmlandPos), 0.5F, 1));
 		}
 	}
 
@@ -169,8 +169,8 @@ public class HarvestFarmland extends Behavior<Villager> {
 					this.aboveFarmlandPos = this.getValidFarmland(serverLevel);
 					if (this.aboveFarmlandPos != null) {
 						this.nextOkStartTime = l + 20L;
-						villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new BlockPosWrapper(this.aboveFarmlandPos), 0.5F, 1));
-						villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosWrapper(this.aboveFarmlandPos));
+						villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new BlockPosTracker(this.aboveFarmlandPos), 0.5F, 1));
+						villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(this.aboveFarmlandPos));
 					}
 				}
 			}

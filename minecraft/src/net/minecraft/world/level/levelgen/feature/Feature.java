@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -92,7 +93,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	);
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> NORMAL_TREE = register("normal_tree", new TreeFeature(SmallTreeConfiguration::deserialize));
-	public static final Feature<SmallTreeConfiguration> ACACIA_TREE = register("acacia_tree", new AcaciaFeature(SmallTreeConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> FANCY_TREE = register("fancy_tree", new FancyTreeFeature(SmallTreeConfiguration::deserialize));
 	public static final Feature<TreeConfiguration> JUNGLE_GROUND_BUSH = register("jungle_ground_bush", new GroundBushFeature(TreeConfiguration::deserialize));
 	public static final Feature<MegaTreeConfiguration> DARK_OAK_TREE = register("dark_oak_tree", new DarkOakFeature(MegaTreeConfiguration::deserialize));
@@ -216,7 +216,12 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	}
 
 	public abstract boolean place(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FC featureConfiguration
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		Random random,
+		BlockPos blockPos,
+		FC featureConfiguration
 	);
 
 	public List<Biome.SpawnerData> getSpecialEnemies() {

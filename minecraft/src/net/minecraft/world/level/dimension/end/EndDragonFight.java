@@ -381,7 +381,13 @@ public class EndDragonFight {
 		this.level.levelEvent(3000, blockPos, 0);
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.delayedExitSearch())
-			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), blockPos);
+			.place(
+				this.level,
+				this.level.structureFeatureManager(),
+				(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
+				new Random(),
+				blockPos
+			);
 	}
 
 	private void spawnExitPortal(boolean bl) {
@@ -395,7 +401,13 @@ public class EndDragonFight {
 		}
 
 		endPodiumFeature.configured(FeatureConfiguration.NONE)
-			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
+			.place(
+				this.level,
+				this.level.structureFeatureManager(),
+				(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
+				new Random(),
+				this.portalLocation
+			);
 	}
 
 	private EnderDragon createNewDragon() {

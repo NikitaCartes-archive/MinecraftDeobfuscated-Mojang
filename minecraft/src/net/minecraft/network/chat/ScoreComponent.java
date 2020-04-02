@@ -55,7 +55,7 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 
 	private void resolve(CommandSourceStack commandSourceStack) {
 		MinecraftServer minecraftServer = commandSourceStack.getServer();
-		if (minecraftServer != null && minecraftServer.isInitialized() && StringUtil.isNullOrEmpty(this.value)) {
+		if (minecraftServer != null && StringUtil.isNullOrEmpty(this.value)) {
 			Scoreboard scoreboard = minecraftServer.getScoreboard();
 			Objective objective = scoreboard.getObjective(this.objective);
 			if (scoreboard.hasPlayerScore(this.name, objective)) {

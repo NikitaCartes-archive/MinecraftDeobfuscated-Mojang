@@ -55,7 +55,6 @@ public abstract class AbstractArrow extends Projectile {
 	public AbstractArrow.Pickup pickup = AbstractArrow.Pickup.DISALLOWED;
 	public int shakeTime;
 	private int life;
-	private int flightTime;
 	private double baseDamage = 2.0;
 	private int knockback;
 	private SoundEvent soundEvent = this.getDefaultHitGroundSoundEvent();
@@ -168,7 +167,6 @@ public abstract class AbstractArrow extends Projectile {
 			this.inGroundTime++;
 		} else {
 			this.inGroundTime = 0;
-			this.flightTime++;
 			Vec3 vec33 = this.position();
 			Vec3 vec32 = vec33.add(vec3);
 			HitResult hitResult = this.level.clip(new ClipContext(vec33, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
@@ -227,25 +225,8 @@ public abstract class AbstractArrow extends Projectile {
 			}
 
 			this.xRot = (float)(Mth.atan2(e, (double)l) * 180.0F / (float)Math.PI);
-
-			while (this.xRot - this.xRotO < -180.0F) {
-				this.xRotO -= 360.0F;
-			}
-
-			while (this.xRot - this.xRotO >= 180.0F) {
-				this.xRotO += 360.0F;
-			}
-
-			while (this.yRot - this.yRotO < -180.0F) {
-				this.yRotO -= 360.0F;
-			}
-
-			while (this.yRot - this.yRotO >= 180.0F) {
-				this.yRotO += 360.0F;
-			}
-
-			this.xRot = Mth.lerp(0.2F, this.xRotO, this.xRot);
-			this.yRot = Mth.lerp(0.2F, this.yRotO, this.yRot);
+			this.xRot = lerpRotation(this.xRotO, this.xRot);
+			this.yRot = lerpRotation(this.yRotO, this.yRot);
 			float m = 0.99F;
 			float n = 0.05F;
 			if (this.isInWater()) {
@@ -279,7 +260,6 @@ public abstract class AbstractArrow extends Projectile {
 			vec3.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F))
 		);
 		this.life = 0;
-		this.flightTime = 0;
 	}
 
 	@Override
@@ -402,7 +382,6 @@ public abstract class AbstractArrow extends Projectile {
 			this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
 			this.yRot += 180.0F;
 			this.yRotO += 180.0F;
-			this.flightTime = 0;
 			if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
 				if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
 					this.spawnAtLocation(this.getPickupItem(), 0.1F);
@@ -444,18 +423,14 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Nullable
 	protected EntityHitResult findHitEntity(Vec3 vec3, Vec3 vec32) {
-		return ProjectileUtil.getHitResult(
-			this.level,
-			this,
-			vec3,
-			vec32,
-			this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0),
-			entity -> !entity.isSpectator()
-					&& entity.isAlive()
-					&& entity.isPickable()
-					&& (entity != this.getOwner() || this.flightTime >= 5)
-					&& (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()))
+		return ProjectileUtil.getEntityHitResult(
+			this.level, this, vec3, vec32, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), this::canHitEntity
 		);
+	}
+
+	@Override
+	protected boolean canHitEntity(Entity entity) {
+		return super.canHitEntity(entity) && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()));
 	}
 
 	@Override

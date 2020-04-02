@@ -23,6 +23,8 @@ import net.minecraft.world.entity.ItemSteerableMount;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -187,12 +189,12 @@ public class Strider extends Animal implements ItemSteerableMount {
 	}
 
 	public float getMoveSpeed() {
-		return this.isSuffocating() ? 0.1F : (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * (this.isSuffocating() ? 0.66F : 1.0F);
 	}
 
 	@Override
 	public float getSteeringSpeed() {
-		return this.getMoveSpeed() * 0.35F;
+		return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED) * (this.isSuffocating() ? 0.23F : 0.55F);
 	}
 
 	@Override
@@ -267,11 +269,8 @@ public class Strider extends Animal implements ItemSteerableMount {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15F);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.15F).add(Attributes.FOLLOW_RANGE, 16.0);
 	}
 
 	@Override

@@ -83,7 +83,7 @@ public class ClientChunkCache extends ChunkSource {
 
 	@Nullable
 	public LevelChunk replaceWithPacketData(
-		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k
+		int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k, boolean bl
 	) {
 		if (!this.storage.inRange(i, j)) {
 			LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", i, j);
@@ -91,7 +91,9 @@ public class ClientChunkCache extends ChunkSource {
 		} else {
 			int l = this.storage.getIndex(i, j);
 			LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
-			if (!isValidChunk(levelChunk, i, j)) {
+			if (!bl && isValidChunk(levelChunk, i, j)) {
+				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
+			} else {
 				if (chunkBiomeContainer == null) {
 					LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", i, j);
 					return null;
@@ -100,8 +102,6 @@ public class ClientChunkCache extends ChunkSource {
 				levelChunk = new LevelChunk(this.level, new ChunkPos(i, j), chunkBiomeContainer);
 				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
 				this.storage.replace(l, levelChunk);
-			} else {
-				levelChunk.replaceWithPacketData(chunkBiomeContainer, friendlyByteBuf, compoundTag, k);
 			}
 
 			LevelChunkSection[] levelChunkSections = levelChunk.getSections();

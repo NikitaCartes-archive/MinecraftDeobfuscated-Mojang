@@ -35,7 +35,7 @@ public class BackUpIfTooClose<E extends Mob> extends Behavior<E> {
 	}
 
 	protected void start(ServerLevel serverLevel, E mob, long l) {
-		mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(this.getTarget(mob)));
+		mob.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(this.getTarget(mob)));
 		mob.getMoveControl().strafe(-this.strafeSpeed, 0.0F);
 		mob.yRot = Mth.rotateIfNecessary(mob.yRot, mob.yHeadRot, 0.0F);
 	}

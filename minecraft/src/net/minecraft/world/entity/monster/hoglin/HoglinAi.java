@@ -47,21 +47,21 @@ public class HoglinAi {
 		Brain<Hoglin> brain = new Brain<>(
 			(Collection<MemoryModuleType<?>>)Hoglin.MEMORY_TYPES, (Collection<SensorType<? extends Sensor<? super Hoglin>>>)Hoglin.SENSOR_TYPES, dynamic
 		);
-		initCoreActivity(hoglin, brain);
-		initIdleActivity(hoglin, brain);
-		initFightActivity(hoglin, brain);
-		initRetreatActivity(hoglin, brain);
+		initCoreActivity(brain);
+		initIdleActivity(brain);
+		initFightActivity(brain);
+		initRetreatActivity(brain);
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
 		brain.useDefaultActivity();
 		return brain;
 	}
 
-	private static void initCoreActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+	private static void initCoreActivity(Brain<Hoglin> brain) {
 		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(200)));
 	}
 
-	private static void initIdleActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+	private static void initIdleActivity(Brain<Hoglin> brain) {
 		brain.addActivity(
 			Activity.IDLE,
 			10,
@@ -79,7 +79,7 @@ public class HoglinAi {
 		);
 	}
 
-	private static void initFightActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+	private static void initFightActivity(Brain<Hoglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.FIGHT,
 			10,
@@ -96,7 +96,7 @@ public class HoglinAi {
 		);
 	}
 
-	private static void initRetreatActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+	private static void initRetreatActivity(Brain<Hoglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.AVOID,
 			10,
@@ -221,7 +221,7 @@ public class HoglinAi {
 
 	private static void playActivitySound(Hoglin hoglin) {
 		hoglin.getBrain().getActiveNonCoreActivity().ifPresent(activity -> {
-			if (activity == Activity.AVOID) {
+			if (activity == Activity.AVOID || hoglin.isConverting()) {
 				hoglin.playRetreatSound();
 			} else if (activity == Activity.FIGHT) {
 				hoglin.playAngrySound();

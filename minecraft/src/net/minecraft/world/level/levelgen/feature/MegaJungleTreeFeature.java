@@ -40,7 +40,7 @@ public class MegaJungleTreeFeature extends MegaTreeFeature<MegaTreeConfiguration
 					k = blockPos.getX() + (int)(1.5F + Mth.cos(f) * (float)m);
 					l = blockPos.getZ() + (int)(1.5F + Mth.sin(f) * (float)m);
 					BlockPos blockPos2 = new BlockPos(k, j - 3 + m / 2, l);
-					this.placeLog(levelSimulatedRW, random, blockPos2, set, boundingBox, megaTreeConfiguration);
+					placeLog(levelSimulatedRW, random, blockPos2, set, boundingBox, megaTreeConfiguration);
 				}
 
 				int m = 1 + random.nextInt(2);

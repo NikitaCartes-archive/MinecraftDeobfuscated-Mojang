@@ -1,7 +1,7 @@
 package net.minecraft.world.effect;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.BaseAttributeMap;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 
 public class AbsoptionMobEffect extends MobEffect {
 	protected AbsoptionMobEffect(MobEffectCategory mobEffectCategory, int i) {
@@ -9,14 +9,14 @@ public class AbsoptionMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void removeAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+	public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
 		livingEntity.setAbsorptionAmount(livingEntity.getAbsorptionAmount() - (float)(4 * (i + 1)));
-		super.removeAttributeModifiers(livingEntity, baseAttributeMap, i);
+		super.removeAttributeModifiers(livingEntity, attributeMap, i);
 	}
 
 	@Override
-	public void addAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+	public void addAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
 		livingEntity.setAbsorptionAmount(livingEntity.getAbsorptionAmount() + (float)(4 * (i + 1)));
-		super.addAttributeModifiers(livingEntity, baseAttributeMap, i);
+		super.addAttributeModifiers(livingEntity, attributeMap, i);
 	}
 }

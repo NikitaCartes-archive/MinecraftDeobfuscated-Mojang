@@ -27,6 +27,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -66,12 +67,6 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-	}
-
-	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(ID_SIZE, 0);
@@ -83,7 +78,7 @@ public class Phantom extends FlyingMob implements Enemy {
 
 	private void updatePhantomSizeInfo() {
 		this.refreshDimensions();
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double)(6 + this.getPhantomSize()));
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue((double)(6 + this.getPhantomSize()));
 	}
 
 	public int getPhantomSize() {

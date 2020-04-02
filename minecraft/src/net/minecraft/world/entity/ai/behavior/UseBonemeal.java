@@ -80,9 +80,9 @@ public class UseBonemeal extends Behavior<Villager> {
 
 	private void setCurrentCropAsTarget(Villager villager) {
 		this.cropPos.ifPresent(blockPos -> {
-			BlockPosWrapper blockPosWrapper = new BlockPosWrapper(blockPos);
-			villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, blockPosWrapper);
-			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosWrapper, 0.5F, 1));
+			BlockPosTracker blockPosTracker = new BlockPosTracker(blockPos);
+			villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, blockPosTracker);
+			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosTracker, 0.5F, 1));
 		});
 	}
 

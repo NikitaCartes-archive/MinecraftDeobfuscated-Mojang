@@ -10,9 +10,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -122,7 +122,7 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 	}
 
 	@Override
-	public void fillFromNoise(LevelAccessor levelAccessor, ChunkAccess chunkAccess) {
+	public void fillFromNoise(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 		BlockState[] blockStates = this.settings.getLayers();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
@@ -180,10 +180,10 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 
 	@Nullable
 	@Override
-	public BlockPos findNearestMapFeature(Level level, String string, BlockPos blockPos, int i, boolean bl) {
+	public BlockPos findNearestMapFeature(ServerLevel serverLevel, String string, BlockPos blockPos, int i, boolean bl) {
 		return !this.settings.getStructuresOptions().keySet().contains(string.toLowerCase(Locale.ROOT))
 			? null
-			: super.findNearestMapFeature(level, string, blockPos, i, bl);
+			: super.findNearestMapFeature(serverLevel, string, blockPos, i, bl);
 	}
 
 	class FlatLevelBiomeWrapper extends Biome {

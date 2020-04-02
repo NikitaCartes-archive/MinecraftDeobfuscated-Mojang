@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Sheep;
@@ -198,28 +199,28 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
-		DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior() {
-			@Override
-			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-				double d = (double)direction.getStepX();
-				double e = (double)direction.getStepY();
-				double f = (double)direction.getStepZ();
-				double g = blockSource.x() + d;
-				double h = (double)((float)blockSource.getPos().getY() + 0.2F);
-				double i = blockSource.z() + f;
-				FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.getLevel(), itemStack, g, h, i, true);
-				fireworkRocketEntity.shoot(d, e, f, 0.5F, 1.0F);
-				blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
-				itemStack.shrink(1);
-				return itemStack;
-			}
+		DispenserBlock.registerBehavior(
+			Items.FIREWORK_ROCKET,
+			new DefaultDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+					FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
+						blockSource.getLevel(), itemStack, blockSource.x(), blockSource.y(), blockSource.x(), true
+					);
+					DispenseItemBehavior.setEntityPokingOutOfBlock(blockSource, fireworkRocketEntity, direction);
+					fireworkRocketEntity.shoot((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), 0.5F, 1.0F);
+					blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
+					itemStack.shrink(1);
+					return itemStack;
+				}
 
-			@Override
-			protected void playSound(BlockSource blockSource) {
-				blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
+				@Override
+				protected void playSound(BlockSource blockSource) {
+					blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
+				}
 			}
-		});
+		);
 		DispenserBlock.registerBehavior(Items.FIRE_CHARGE, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -522,5 +523,13 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
+	}
+
+	static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {
+		entity.setPos(
+			blockSource.x() + (double)direction.getStepX() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0),
+			blockSource.y() + (double)direction.getStepY() * (0.5000099999997474 - (double)entity.getBbHeight() / 2.0) - (double)entity.getBbHeight() / 2.0,
+			blockSource.z() + (double)direction.getStepZ() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0)
+		);
 	}
 }

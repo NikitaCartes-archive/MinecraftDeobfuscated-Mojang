@@ -13,6 +13,7 @@ import net.minecraft.Util;
 import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
+import net.minecraft.util.datafix.fixes.AttributesRename;
 import net.minecraft.util.datafix.fixes.BedBlockEntityInjecter;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BeehivePoiRenameFix;
@@ -168,6 +169,7 @@ import net.minecraft.util.datafix.schemas.V2502;
 import net.minecraft.util.datafix.schemas.V2505;
 import net.minecraft.util.datafix.schemas.V2509;
 import net.minecraft.util.datafix.schemas.V2519;
+import net.minecraft.util.datafix.schemas.V2522;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -617,5 +619,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new JigsawRotationFix(schema110, false));
 		Schema schema111 = dataFixerBuilder.addSchema(2519, V2519::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema111, "Added Strider", References.ENTITY));
+		Schema schema112 = dataFixerBuilder.addSchema(2522, V2522::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema112, "Added Zoglin", References.ENTITY));
+		Schema schema113 = dataFixerBuilder.addSchema(2523, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new AttributesRename(schema113));
 	}
 }

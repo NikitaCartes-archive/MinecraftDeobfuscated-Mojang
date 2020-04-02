@@ -1,7 +1,6 @@
 package net.minecraft.world.entity;
 
 import com.mojang.datafixers.DataFixUtils;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -62,7 +61,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -95,6 +93,7 @@ import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
@@ -108,6 +107,7 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -244,9 +244,6 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<Pufferfish> PUFFERFISH = register(
 		"pufferfish", EntityType.Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7F, 0.7F).instantDespawnDistance(64)
 	);
-	public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = register(
-		"zombified_piglin", EntityType.Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F)
-	);
 	public static final EntityType<PolarBear> POLAR_BEAR = register("polar_bear", EntityType.Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4F, 1.4F));
 	public static final EntityType<PrimedTnt> TNT = register(
 		"tnt", EntityType.Builder.<PrimedTnt>of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F)
@@ -321,6 +318,9 @@ public class EntityType<T extends Entity> {
 	);
 	public static final EntityType<Wolf> WOLF = register("wolf", EntityType.Builder.of(Wolf::new, MobCategory.CREATURE).sized(0.6F, 0.85F));
 	public static final EntityType<Zombie> ZOMBIE = register("zombie", EntityType.Builder.<Zombie>of(Zombie::new, MobCategory.MONSTER).sized(0.6F, 1.95F));
+	public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = register(
+		"zombified_piglin", EntityType.Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F)
+	);
 	public static final EntityType<ZombieHorse> ZOMBIE_HORSE = register(
 		"zombie_horse", EntityType.Builder.of(ZombieHorse::new, MobCategory.CREATURE).sized(1.3964844F, 1.6F)
 	);
@@ -332,6 +332,9 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<Hoglin> HOGLIN = register("hoglin", EntityType.Builder.of(Hoglin::new, MobCategory.MONSTER).sized(1.3964844F, 1.4F));
 	public static final EntityType<Piglin> PIGLIN = register("piglin", EntityType.Builder.of(Piglin::new, MobCategory.MONSTER).sized(0.6F, 1.95F));
 	public static final EntityType<Strider> STRIDER = register("strider", EntityType.Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9F, 1.7F));
+	public static final EntityType<Zoglin> ZOGLIN = register(
+		"zoglin", EntityType.Builder.of(Zoglin::new, MobCategory.MONSTER).fireImmune().sized(1.3964844F, 1.4F)
+	);
 	public static final EntityType<LightningBolt> LIGHTNING_BOLT = register(
 		"lightning_bolt", EntityType.Builder.<LightningBolt>createNothing(MobCategory.MISC).noSave().sized(0.0F, 0.0F)
 	);
@@ -470,7 +473,7 @@ public class EntityType<T extends Entity> {
 			aABB2 = aABB2.expandTowards(0.0, -1.0, 0.0);
 		}
 
-		Stream<VoxelShape> stream = levelReader.getCollisions(null, aABB2, Collections.emptySet());
+		Stream<VoxelShape> stream = levelReader.getCollisions(null, aABB2, entity -> true);
 		return 1.0 + Shapes.collide(Direction.Axis.Y, aABB, stream, bl ? -2.0 : -1.0);
 	}
 

@@ -1,26 +1,23 @@
 package net.minecraft.data.tags;
 
-import com.google.common.collect.Lists;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ItemTagsProvider extends TagsProvider<Item> {
-	private static final Logger LOGGER = LogManager.getLogger();
+	private final Function<ResourceLocation, Tag.Builder> blockTags;
 
-	public ItemTagsProvider(DataGenerator dataGenerator) {
+	public ItemTagsProvider(DataGenerator dataGenerator, BlockTagsProvider blockTagsProvider) {
 		super(dataGenerator, Registry.ITEM);
+		this.blockTags = blockTagsProvider::tag;
 	}
 
 	@Override
@@ -63,7 +60,6 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.copy(BlockTags.TALL_FLOWERS, ItemTags.TALL_FLOWERS);
 		this.copy(BlockTags.FLOWERS, ItemTags.FLOWERS);
 		this.copy(BlockTags.GOLD_ORES, ItemTags.GOLD_ORES);
-		this.copy(BlockTags.NON_FLAMMABLE_WOOD, ItemTags.NON_FLAMMABLE_WOOD);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,
@@ -106,36 +102,43 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
 		this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
 		this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_FIRE_TORCH).add(Items.SOUL_FIRE_LANTERN);
+		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
+			.add(
+				Items.WARPED_STEM,
+				Items.STRIPPED_WARPED_STEM,
+				Items.WARPED_HYPHAE,
+				Items.STRIPPED_WARPED_HYPHAE,
+				Items.CRIMSON_STEM,
+				Items.STRIPPED_CRIMSON_STEM,
+				Items.CRIMSON_HYPHAE,
+				Items.STRIPPED_CRIMSON_HYPHAE,
+				Items.CRIMSON_PLANKS,
+				Items.WARPED_PLANKS,
+				Items.CRIMSON_SLAB,
+				Items.WARPED_SLAB,
+				Items.CRIMSON_PRESSURE_PLATE,
+				Items.WARPED_PRESSURE_PLATE,
+				Items.CRIMSON_FENCE,
+				Items.WARPED_FENCE,
+				Items.CRIMSON_TRAPDOOR,
+				Items.WARPED_TRAPDOOR,
+				Items.CRIMSON_FENCE_GATE,
+				Items.WARPED_FENCE_GATE,
+				Items.CRIMSON_STAIRS,
+				Items.WARPED_STAIRS,
+				Items.CRIMSON_BUTTON,
+				Items.WARPED_BUTTON,
+				Items.CRIMSON_DOOR,
+				Items.WARPED_DOOR,
+				Items.CRIMSON_SIGN,
+				Items.WARPED_SIGN
+			);
 	}
 
-	protected void copy(Tag<Block> tag, Tag<Item> tag2) {
-		Tag.Builder<Item> builder = this.tag(tag2);
-
-		for (Tag.Entry<Block> entry : tag.getSource()) {
-			Tag.Entry<Item> entry2 = this.copy(entry);
-			builder.add(entry2);
-		}
-	}
-
-	private Tag.Entry<Item> copy(Tag.Entry<Block> entry) {
-		if (entry instanceof Tag.TagEntry) {
-			return new Tag.TagEntry<>(((Tag.TagEntry)entry).getId());
-		} else if (entry instanceof Tag.ValuesEntry) {
-			List<Item> list = Lists.<Item>newArrayList();
-
-			for (Block block : ((Tag.ValuesEntry)entry).getValues()) {
-				Item item = block.asItem();
-				if (item == Items.AIR) {
-					LOGGER.warn("Itemless block copied to item tag: {}", Registry.BLOCK.getKey(block));
-				} else {
-					list.add(item);
-				}
-			}
-
-			return new Tag.ValuesEntry<>(list);
-		} else {
-			throw new UnsupportedOperationException("Unknown tag entry " + entry);
-		}
+	protected void copy(Tag.Named<Block> named, Tag.Named<Item> named2) {
+		Tag.Builder builder = this.tag(named2);
+		Tag.Builder builder2 = (Tag.Builder)this.blockTags.apply(named.getName());
+		builder2.getEntries().forEach(builder::add);
 	}
 
 	@Override
@@ -146,10 +149,5 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 	@Override
 	public String getName() {
 		return "Item Tags";
-	}
-
-	@Override
-	protected void useTags(TagCollection<Item> tagCollection) {
-		ItemTags.reset(tagCollection);
 	}
 }

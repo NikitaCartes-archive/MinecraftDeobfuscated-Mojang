@@ -80,7 +80,7 @@ public class FluidPredicate {
 			}
 
 			if (this.tag != null) {
-				jsonObject.addProperty("tag", this.tag.getId().toString());
+				jsonObject.addProperty("tag", FluidTags.getAllTags().getIdOrThrow(this.tag).toString());
 			}
 
 			jsonObject.add("state", this.properties.serializeToJson());

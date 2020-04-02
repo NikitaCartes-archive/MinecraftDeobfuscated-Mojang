@@ -1,6 +1,9 @@
 package net.minecraft.tags;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -15,15 +18,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,16 +40,15 @@ public class TagCollection<T> {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Gson GSON = new Gson();
 	private static final int PATH_SUFFIX_LENGTH = ".json".length();
-	private Map<ResourceLocation, Tag<T>> tags = ImmutableMap.of();
+	private final Tag<T> empty = Tag.fromSet(ImmutableSet.of());
+	private BiMap<ResourceLocation, Tag<T>> tags = HashBiMap.create();
 	private final Function<ResourceLocation, Optional<T>> idToValue;
 	private final String directory;
-	private final boolean ordered;
 	private final String name;
 
-	public TagCollection(Function<ResourceLocation, Optional<T>> function, String string, boolean bl, String string2) {
+	public TagCollection(Function<ResourceLocation, Optional<T>> function, String string, String string2) {
 		this.idToValue = function;
 		this.directory = string;
-		this.ordered = bl;
 		this.name = string2;
 	}
 
@@ -55,8 +58,21 @@ public class TagCollection<T> {
 	}
 
 	public Tag<T> getTagOrEmpty(ResourceLocation resourceLocation) {
-		Tag<T> tag = (Tag<T>)this.tags.get(resourceLocation);
-		return tag == null ? new Tag<>(resourceLocation) : tag;
+		return (Tag<T>)this.tags.getOrDefault(resourceLocation, this.empty);
+	}
+
+	@Nullable
+	public ResourceLocation getId(Tag<T> tag) {
+		return tag instanceof Tag.Named ? ((Tag.Named)tag).getName() : (ResourceLocation)this.tags.inverse().get(tag);
+	}
+
+	public ResourceLocation getIdOrThrow(Tag<T> tag) {
+		ResourceLocation resourceLocation = this.getId(tag);
+		if (resourceLocation == null) {
+			throw new IllegalStateException("Unrecognized tag");
+		} else {
+			return resourceLocation;
+		}
 	}
 
 	public Collection<ResourceLocation> getAvailableTags() {
@@ -76,10 +92,10 @@ public class TagCollection<T> {
 		return list;
 	}
 
-	public CompletableFuture<Map<ResourceLocation, Tag.Builder<T>>> prepare(ResourceManager resourceManager, Executor executor) {
+	public CompletableFuture<Map<ResourceLocation, Tag.Builder>> prepare(ResourceManager resourceManager, Executor executor) {
 		return CompletableFuture.supplyAsync(
 			() -> {
-				Map<ResourceLocation, Tag.Builder<T>> map = Maps.<ResourceLocation, Tag.Builder<T>>newHashMap();
+				Map<ResourceLocation, Tag.Builder> map = Maps.<ResourceLocation, Tag.Builder>newHashMap();
 
 				for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, stringx -> stringx.endsWith(".json"))) {
 					String string = resourceLocation.getPath();
@@ -101,15 +117,14 @@ public class TagCollection<T> {
 										JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
 										if (jsonObject == null) {
 											LOGGER.error(
-												"Couldn't load {} tag list {} from {} in data pack {} as it's empty or null",
+												"Couldn't load {} tag list {} from {} in data pack {} as it is empty or null",
 												this.name,
 												resourceLocation2,
 												resourceLocation,
 												resource.getSourceName()
 											);
 										} else {
-											((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Util.make(Tag.Builder.tag(), builder -> builder.keepOrder(this.ordered))))
-												.addFromJson(this.idToValue, jsonObject);
+											((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject);
 										}
 									} catch (Throwable var53) {
 										var12 = var53;
@@ -160,42 +175,43 @@ public class TagCollection<T> {
 		);
 	}
 
-	public void load(Map<ResourceLocation, Tag.Builder<T>> map) {
+	public void load(Map<ResourceLocation, Tag.Builder> map) {
 		Map<ResourceLocation, Tag<T>> map2 = Maps.<ResourceLocation, Tag<T>>newHashMap();
+		Function<ResourceLocation, Tag<T>> function = map2::get;
+		Function<ResourceLocation, T> function2 = resourceLocation -> ((Optional)this.idToValue.apply(resourceLocation)).orElse(null);
 
 		while (!map.isEmpty()) {
 			boolean bl = false;
-			Iterator<Entry<ResourceLocation, Tag.Builder<T>>> iterator = map.entrySet().iterator();
+			Iterator<Entry<ResourceLocation, Tag.Builder>> iterator = map.entrySet().iterator();
 
 			while (iterator.hasNext()) {
-				Entry<ResourceLocation, Tag.Builder<T>> entry = (Entry<ResourceLocation, Tag.Builder<T>>)iterator.next();
-				Tag.Builder<T> builder = (Tag.Builder<T>)entry.getValue();
-				if (builder.canBuild(map2::get)) {
-					bl = true;
-					ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
-					map2.put(resourceLocation, builder.build(resourceLocation));
+				Entry<ResourceLocation, Tag.Builder> entry = (Entry<ResourceLocation, Tag.Builder>)iterator.next();
+				Optional<Tag<T>> optional = ((Tag.Builder)entry.getValue()).build(function, function2);
+				if (optional.isPresent()) {
+					map2.put(entry.getKey(), optional.get());
 					iterator.remove();
+					bl = true;
 				}
 			}
 
 			if (!bl) {
-				map.forEach(
-					(resourceLocationx, builderx) -> LOGGER.error(
-							"Couldn't load {} tag {} as it either references another tag that doesn't exist, or ultimately references itself", this.name, resourceLocationx
-						)
-				);
 				break;
 			}
 		}
 
-		map.forEach((resourceLocationx, builderx) -> {
-			Tag var10000 = (Tag)map2.put(resourceLocationx, builderx.build(resourceLocationx));
-		});
+		map.forEach(
+			(resourceLocation, builder) -> LOGGER.error(
+					"Couldn't load {} tag {} as it is missing following references: {}",
+					this.name,
+					resourceLocation,
+					builder.getUnresolvedEntries(function, function2).map(Objects::toString).collect(Collectors.joining(","))
+				)
+		);
 		this.replace(map2);
 	}
 
 	protected void replace(Map<ResourceLocation, Tag<T>> map) {
-		this.tags = ImmutableMap.copyOf(map);
+		this.tags = ImmutableBiMap.copyOf(map);
 	}
 
 	public Map<ResourceLocation, Tag<T>> getAllTags() {

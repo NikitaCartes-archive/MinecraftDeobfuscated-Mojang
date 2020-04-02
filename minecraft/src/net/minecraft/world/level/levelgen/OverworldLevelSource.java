@@ -14,6 +14,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -135,8 +136,8 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 	}
 
 	@Override
-	public List<Biome.SpawnerData> getMobsAt(MobCategory mobCategory, BlockPos blockPos) {
-		if (Feature.SWAMP_HUT.isSwamphut(this.level, blockPos)) {
+	public List<Biome.SpawnerData> getMobsAt(StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
+		if (Feature.SWAMP_HUT.isSwamphut(this.level, structureFeatureManager, blockPos)) {
 			if (mobCategory == MobCategory.MONSTER) {
 				return Feature.SWAMP_HUT.getSpecialEnemies();
 			}
@@ -145,16 +146,16 @@ public class OverworldLevelSource extends NoiseBasedChunkGenerator<OverworldGene
 				return Feature.SWAMP_HUT.getSpecialAnimals();
 			}
 		} else if (mobCategory == MobCategory.MONSTER) {
-			if (Feature.PILLAGER_OUTPOST.isInsideBoundingFeature(this.level, blockPos)) {
+			if (Feature.PILLAGER_OUTPOST.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos)) {
 				return Feature.PILLAGER_OUTPOST.getSpecialEnemies();
 			}
 
-			if (Feature.OCEAN_MONUMENT.isInsideBoundingFeature(this.level, blockPos)) {
+			if (Feature.OCEAN_MONUMENT.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos)) {
 				return Feature.OCEAN_MONUMENT.getSpecialEnemies();
 			}
 		}
 
-		return super.getMobsAt(mobCategory, blockPos);
+		return super.getMobsAt(structureFeatureManager, mobCategory, blockPos);
 	}
 
 	@Override

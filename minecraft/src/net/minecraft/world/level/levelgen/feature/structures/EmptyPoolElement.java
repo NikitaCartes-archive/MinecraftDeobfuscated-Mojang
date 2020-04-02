@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -36,6 +37,7 @@ public class EmptyPoolElement extends StructurePoolElement {
 	public boolean place(
 		StructureManager structureManager,
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<?> chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,

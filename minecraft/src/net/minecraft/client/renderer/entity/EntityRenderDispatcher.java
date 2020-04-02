@@ -172,6 +172,7 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.WITHER_SKELETON, new WitherSkeletonRenderer(this));
 		this.register(EntityType.WITHER_SKULL, new WitherSkullRenderer(this));
 		this.register(EntityType.WOLF, new WolfRenderer(this));
+		this.register(EntityType.ZOGLIN, new ZoglinRenderer(this));
 		this.register(EntityType.ZOMBIE_HORSE, new UndeadHorseRenderer(this));
 		this.register(EntityType.ZOMBIE, new ZombieRenderer(this));
 		this.register(EntityType.ZOMBIFIED_PIGLIN, new PiglinRenderer(this, true));
@@ -283,9 +284,9 @@ public class EntityRenderDispatcher {
 		float g = entity.getBbWidth() / 2.0F;
 		this.renderBox(poseStack, vertexConsumer, entity, 1.0F, 1.0F, 1.0F);
 		if (entity instanceof EnderDragon) {
-			double d = entity.getX() - Mth.lerp((double)f, entity.xOld, entity.getX());
-			double e = entity.getY() - Mth.lerp((double)f, entity.yOld, entity.getY());
-			double h = entity.getZ() - Mth.lerp((double)f, entity.zOld, entity.getZ());
+			double d = -Mth.lerp((double)f, entity.xOld, entity.getX());
+			double e = -Mth.lerp((double)f, entity.yOld, entity.getY());
+			double h = -Mth.lerp((double)f, entity.zOld, entity.getZ());
 
 			for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
 				poseStack.pushPose();

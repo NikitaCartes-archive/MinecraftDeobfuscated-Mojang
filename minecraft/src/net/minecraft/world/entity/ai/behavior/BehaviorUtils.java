@@ -49,7 +49,7 @@ public class BehaviorUtils {
 	}
 
 	public static void lookAtEntity(LivingEntity livingEntity, LivingEntity livingEntity2) {
-		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntity2));
+		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity2));
 	}
 
 	private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
@@ -59,18 +59,18 @@ public class BehaviorUtils {
 	}
 
 	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {
-		PositionWrapper positionWrapper = new EntityPosWrapper(entity);
-		setWalkAndLookTargetMemories(livingEntity, positionWrapper, f, i);
+		PositionTracker positionTracker = new EntityTracker(entity);
+		setWalkAndLookTargetMemories(livingEntity, positionTracker, f, i);
 	}
 
 	public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, float f, int i) {
-		PositionWrapper positionWrapper = new BlockPosWrapper(blockPos);
-		setWalkAndLookTargetMemories(livingEntity, positionWrapper, f, i);
+		PositionTracker positionTracker = new BlockPosTracker(blockPos);
+		setWalkAndLookTargetMemories(livingEntity, positionTracker, f, i);
 	}
 
-	private static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionWrapper positionWrapper, float f, int i) {
-		WalkTarget walkTarget = new WalkTarget(positionWrapper, f, i);
-		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionWrapper);
+	private static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionTracker positionTracker, float f, int i) {
+		WalkTarget walkTarget = new WalkTarget(positionTracker, f, i);
+		livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionTracker);
 		livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
 	}
 

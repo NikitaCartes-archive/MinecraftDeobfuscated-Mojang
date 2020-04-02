@@ -1,7 +1,6 @@
 package net.minecraft.client.player;
 
 import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -130,11 +129,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 		this.ambientSoundHandlers.add(new UnderwaterAmbientSoundHandler(this, minecraft.getSoundManager()));
 		this.ambientSoundHandlers.add(new BubbleColumnAmbientSoundHandler(this));
 		this.ambientSoundHandlers.add(new BiomeAmbientSoundsHandler(this, minecraft.getSoundManager(), clientLevel.getBiomeManager()));
-	}
-
-	@Override
-	public boolean isGlowing() {
-		return super.isGlowing() || this.minecraft.player.isSpectator() && this.minecraft.options.keySpectatorOutlines.isDown();
 	}
 
 	@Override
@@ -926,7 +920,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 						Vec3 vec311 = vec37.subtract(vec39);
 						Vec3 vec312 = vec36.add(vec39);
 						Vec3 vec313 = vec37.add(vec39);
-						Iterator<AABB> iterator = this.level.getCollisions(this, aABB, Collections.emptySet()).flatMap(voxelShapex -> voxelShapex.toAabbs().stream()).iterator();
+						Iterator<AABB> iterator = this.level.getCollisions(this, aABB, entity -> true).flatMap(voxelShapex -> voxelShapex.toAabbs().stream()).iterator();
 						float t = Float.MIN_VALUE;
 
 						while (iterator.hasNext()) {

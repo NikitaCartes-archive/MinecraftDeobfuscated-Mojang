@@ -938,6 +938,19 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 		);
 		this.add(EntityType.WOLF, LootTable.lootTable());
 		this.add(
+			EntityType.ZOGLIN,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.ROTTEN_FLESH)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(1.0F, 3.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+		);
+		this.add(
 			EntityType.ZOMBIE,
 			LootTable.lootTable()
 				.withPool(

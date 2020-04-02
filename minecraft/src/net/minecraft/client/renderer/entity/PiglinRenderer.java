@@ -20,7 +20,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 	}
 
 	private static PiglinModel<Mob> createModel(boolean bl) {
-		PiglinModel<Mob> piglinModel = new PiglinModel<>(0.0F, 128, 64);
+		PiglinModel<Mob> piglinModel = new PiglinModel<>(0.0F, 64, 64);
 		if (bl) {
 			piglinModel.earLeft.visible = false;
 		}
@@ -28,7 +28,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 		return piglinModel;
 	}
 
-	private static <T extends Piglin> PiglinModel<T> makeHelmetHeadModel() {
+	private static <T extends Mob> PiglinModel<T> makeHelmetHeadModel() {
 		PiglinModel<T> piglinModel = new PiglinModel<>(1.0F, 64, 16);
 		piglinModel.earLeft.visible = false;
 		piglinModel.earRight.visible = false;

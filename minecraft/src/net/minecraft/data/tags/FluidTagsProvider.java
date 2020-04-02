@@ -5,7 +5,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
@@ -28,10 +27,5 @@ public class FluidTagsProvider extends TagsProvider<Fluid> {
 	@Override
 	public String getName() {
 		return "Fluid Tags";
-	}
-
-	@Override
-	protected void useTags(TagCollection<Fluid> tagCollection) {
-		FluidTags.reset(tagCollection);
 	}
 }

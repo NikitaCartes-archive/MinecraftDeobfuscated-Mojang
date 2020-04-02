@@ -65,8 +65,9 @@ public class Main {
 
 		if (bl2) {
 			dataGenerator.addProvider(new FluidTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new BlockTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new ItemTagsProvider(dataGenerator));
+			BlockTagsProvider blockTagsProvider = new BlockTagsProvider(dataGenerator);
+			dataGenerator.addProvider(blockTagsProvider);
+			dataGenerator.addProvider(new ItemTagsProvider(dataGenerator, blockTagsProvider));
 			dataGenerator.addProvider(new EntityTypeTagsProvider(dataGenerator));
 			dataGenerator.addProvider(new RecipeProvider(dataGenerator));
 			dataGenerator.addProvider(new AdvancementProvider(dataGenerator));

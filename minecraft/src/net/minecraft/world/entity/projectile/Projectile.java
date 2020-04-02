@@ -18,24 +18,37 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class Projectile extends Entity {
 	private UUID ownerUUID;
+	private int ownerNetworkId;
+	private boolean leftOwner;
 
 	Projectile(EntityType<? extends Projectile> entityType, Level level) {
 		super(entityType, level);
 	}
 
 	public void setOwner(@Nullable Entity entity) {
-		this.ownerUUID = entity == null ? null : entity.getUUID();
+		if (entity != null) {
+			this.ownerUUID = entity.getUUID();
+			this.ownerNetworkId = entity.getId();
+		}
 	}
 
 	@Nullable
 	public Entity getOwner() {
-		return this.ownerUUID != null && this.level instanceof ServerLevel ? ((ServerLevel)this.level).getEntity(this.ownerUUID) : null;
+		if (this.ownerUUID != null && this.level instanceof ServerLevel) {
+			return ((ServerLevel)this.level).getEntity(this.ownerUUID);
+		} else {
+			return this.ownerNetworkId != 0 ? this.level.getEntity(this.ownerNetworkId) : null;
+		}
 	}
 
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		if (this.ownerUUID != null) {
 			compoundTag.putUUID("Owner", this.ownerUUID);
+		}
+
+		if (this.leftOwner) {
+			compoundTag.putBoolean("LeftOwner", true);
 		}
 	}
 
@@ -44,6 +57,30 @@ public abstract class Projectile extends Entity {
 		if (compoundTag.hasUUID("Owner")) {
 			this.ownerUUID = compoundTag.getUUID("Owner");
 		}
+
+		this.leftOwner = compoundTag.getBoolean("LeftOwner");
+	}
+
+	@Override
+	public void tick() {
+		if (!this.leftOwner) {
+			this.leftOwner = this.checkLeftOwner();
+		}
+
+		super.tick();
+	}
+
+	private boolean checkLeftOwner() {
+		Entity entity = this.getOwner();
+		if (entity != null) {
+			for (Entity entity2 : this.level.getEntities(this, this.getBoundingBox().inflate(1.0), entityx -> !entityx.isSpectator() && entityx.isPickable())) {
+				if (entity2.getRootVehicle() == entity.getRootVehicle()) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	public void shoot(double d, double e, double f, float g, float h) {
@@ -97,5 +134,33 @@ public abstract class Projectile extends Entity {
 			this.yRotO = this.yRot;
 			this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
 		}
+	}
+
+	protected boolean canHitEntity(Entity entity) {
+		if (!entity.isSpectator() && entity.isAlive() && entity.isPickable()) {
+			Entity entity2 = this.getOwner();
+			return entity2 == null || this.leftOwner || !entity2.isPassengerOfSameVehicle(entity);
+		} else {
+			return false;
+		}
+	}
+
+	protected void updateRotation() {
+		Vec3 vec3 = this.getDeltaMovement();
+		float f = Mth.sqrt(getHorizontalDistanceSqr(vec3));
+		this.xRot = lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, (double)f) * 180.0F / (float)Math.PI));
+		this.yRot = lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+	}
+
+	protected static float lerpRotation(float f, float g) {
+		while (g - f < -180.0F) {
+			f -= 360.0F;
+		}
+
+		while (g - f >= 180.0F) {
+			f += 360.0F;
+		}
+
+		return Mth.lerp(0.2F, f, g);
 	}
 }

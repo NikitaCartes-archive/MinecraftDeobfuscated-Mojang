@@ -1,12 +1,10 @@
 package net.minecraft.world.level.storage;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.DataFixer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +29,12 @@ import org.apache.logging.log4j.Logger;
 public class McRegionUpgrader {
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	static boolean convertLevel(Path path, DataFixer dataFixer, String string, ProgressListener progressListener) {
+	static boolean convertLevel(LevelStorageSource.LevelStorageAccess levelStorageAccess, ProgressListener progressListener) {
 		progressListener.progressStagePercentage(0);
 		List<File> list = Lists.<File>newArrayList();
 		List<File> list2 = Lists.<File>newArrayList();
 		List<File> list3 = Lists.<File>newArrayList();
-		File file = new File(path.toFile(), string);
+		File file = levelStorageAccess.getLevelPath().toFile();
 		File file2 = DimensionType.NETHER.getStorageFolder(file);
 		File file3 = DimensionType.THE_END.getStorageFolder(file);
 		LOGGER.info("Scanning folders...");
@@ -51,7 +49,7 @@ public class McRegionUpgrader {
 
 		int i = list.size() + list2.size() + list3.size();
 		LOGGER.info("Total conversion count is {}", i);
-		LevelData levelData = LevelStorageSource.getDataTagFor(path, dataFixer, string);
+		LevelData levelData = levelStorageAccess.getDataTag();
 		long l = levelData != null ? levelData.getSeed() : 0L;
 		BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
 		BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
@@ -79,14 +77,13 @@ public class McRegionUpgrader {
 			levelData.setGeneratorProvider(LevelType.NORMAL.getDefaultProvider());
 		}
 
-		makeMcrLevelDatBackup(path, string);
-		LevelStorage levelStorage = LevelStorageSource.selectLevel(path, dataFixer, string, null);
+		makeMcrLevelDatBackup(file);
+		LevelStorage levelStorage = levelStorageAccess.selectLevel(null);
 		levelStorage.saveLevelData(levelData);
 		return true;
 	}
 
-	private static void makeMcrLevelDatBackup(Path path, String string) {
-		File file = new File(path.toFile(), string);
+	private static void makeMcrLevelDatBackup(File file) {
 		if (!file.exists()) {
 			LOGGER.warn("Unable to create level.dat_mcr backup");
 		} else {
@@ -115,8 +112,8 @@ public class McRegionUpgrader {
 		String string = file2.getName();
 
 		try (
-			RegionFile regionFile = new RegionFile(file2, file);
-			RegionFile regionFile2 = new RegionFile(new File(file, string.substring(0, string.length() - ".mcr".length()) + ".mca"), file);
+			RegionFile regionFile = new RegionFile(file2, file, true);
+			RegionFile regionFile2 = new RegionFile(new File(file, string.substring(0, string.length() - ".mcr".length()) + ".mca"), file, true);
 		) {
 			for (int k = 0; k < 32; k++) {
 				for (int l = 0; l < 32; l++) {

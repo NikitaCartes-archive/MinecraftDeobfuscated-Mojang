@@ -28,7 +28,7 @@ public class GroundBushFeature extends AbstractTreeFeature<TreeConfiguration> {
 		blockPos = levelSimulatedRW.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos).below();
 		if (isGrassOrDirt(levelSimulatedRW, blockPos)) {
 			blockPos = blockPos.above();
-			this.placeLog(levelSimulatedRW, random, blockPos, set, boundingBox, treeConfiguration);
+			placeLog(levelSimulatedRW, random, blockPos, set, boundingBox, treeConfiguration);
 
 			for (int i = 0; i <= 2; i++) {
 				int j = 2 - i;

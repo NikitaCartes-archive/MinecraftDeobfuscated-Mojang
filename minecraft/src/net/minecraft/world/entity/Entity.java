@@ -2,7 +2,6 @@ package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -661,7 +660,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		CollisionContext collisionContext = CollisionContext.of(this);
 		VoxelShape voxelShape = this.level.getWorldBorder().getCollisionShape();
 		Stream<VoxelShape> stream = Shapes.joinIsNotEmpty(voxelShape, Shapes.create(aABB.deflate(1.0E-7)), BooleanOp.AND) ? Stream.empty() : Stream.of(voxelShape);
-		Stream<VoxelShape> stream2 = this.level.getEntityCollisions(this, aABB.expandTowards(vec3), ImmutableSet.of());
+		Stream<VoxelShape> stream2 = this.level.getEntityCollisions(this, aABB.expandTowards(vec3), entity -> true);
 		RewindableStream<VoxelShape> rewindableStream = new RewindableStream<>(Stream.concat(stream2, stream));
 		Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : collideBoundingBoxHeuristically(this, vec3, aABB, this.level, collisionContext, rewindableStream);
 		boolean bl = vec3.x != vec32.x;
@@ -1694,18 +1693,26 @@ public abstract class Entity implements Nameable, CommandSource {
 				double d = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X
 					? (double)blockPatternMatch.getFrontTopLeft().getZ()
 					: (double)blockPatternMatch.getFrontTopLeft().getX();
-				double e = Math.abs(
-					Mth.pct(
-						(blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? this.getZ() : this.getX())
-							- (double)(blockPatternMatch.getForwards().getClockWise().getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 1 : 0),
-						d,
-						d - (double)blockPatternMatch.getWidth()
-					)
+				double e = Mth.clamp(
+					Math.abs(
+						Mth.inverseLerp(
+							(blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? this.getZ() : this.getX())
+								- (double)(blockPatternMatch.getForwards().getClockWise().getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 1 : 0),
+							d,
+							d - (double)blockPatternMatch.getWidth()
+						)
+					),
+					0.0,
+					1.0
 				);
-				double f = Mth.pct(
-					this.getY() - 1.0,
-					(double)blockPatternMatch.getFrontTopLeft().getY(),
-					(double)(blockPatternMatch.getFrontTopLeft().getY() - blockPatternMatch.getHeight())
+				double f = Mth.clamp(
+					Mth.inverseLerp(
+						this.getY() - 1.0,
+						(double)blockPatternMatch.getFrontTopLeft().getY(),
+						(double)(blockPatternMatch.getFrontTopLeft().getY() - blockPatternMatch.getHeight())
+					),
+					0.0,
+					1.0
 				);
 				this.portalEntranceOffset = new Vec3(e, f, 0.0);
 				this.portalEntranceForwards = blockPatternMatch.getForwards();
@@ -2395,7 +2402,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		return false;
 	}
 
-	protected void doEnchantDamageEffects(LivingEntity livingEntity, Entity entity) {
+	public void doEnchantDamageEffects(LivingEntity livingEntity, Entity entity) {
 		if (entity instanceof LivingEntity) {
 			EnchantmentHelper.doPostHurtEffects((LivingEntity)entity, livingEntity);
 		}
@@ -2519,6 +2526,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.getRootVehicle() == entity.getRootVehicle();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean hasIndirectPassenger(Entity entity) {
 		for (Entity entity2 : this.getPassengers()) {
 			if (entity2.equals(entity)) {

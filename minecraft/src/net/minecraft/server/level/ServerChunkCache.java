@@ -71,6 +71,7 @@ public class ServerChunkCache extends ChunkSource {
 		Executor executor,
 		ChunkGenerator<?> chunkGenerator,
 		int i,
+		boolean bl,
 		ChunkProgressListener chunkProgressListener,
 		Supplier<DimensionDataStorage> supplier
 	) {
@@ -83,7 +84,7 @@ public class ServerChunkCache extends ChunkSource {
 		file3.mkdirs();
 		this.dataStorage = new DimensionDataStorage(file3, dataFixer);
 		this.chunkMap = new ChunkMap(
-			serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i
+			serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl
 		);
 		this.lightEngine = this.chunkMap.getLightEngine();
 		this.distanceManager = this.chunkMap.getDistanceManager();

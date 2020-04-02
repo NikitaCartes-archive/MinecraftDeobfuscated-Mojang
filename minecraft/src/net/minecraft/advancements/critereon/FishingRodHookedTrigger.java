@@ -6,8 +6,9 @@ import com.google.gson.JsonObject;
 import java.util.Collection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.fishing.FishingHook;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 
 public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHookedTrigger.TriggerInstance> {
@@ -48,31 +49,34 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 		public boolean matches(ServerPlayer serverPlayer, ItemStack itemStack, FishingHook fishingHook, Collection<ItemStack> collection) {
 			if (!this.rod.matches(itemStack)) {
 				return false;
-			} else if (!this.entity.matches(serverPlayer, fishingHook.hookedIn)) {
-				return false;
 			} else {
-				if (this.item != ItemPredicate.ANY) {
-					boolean bl = false;
-					if (fishingHook.hookedIn instanceof ItemEntity) {
-						ItemEntity itemEntity = (ItemEntity)fishingHook.hookedIn;
-						if (this.item.matches(itemEntity.getItem())) {
-							bl = true;
+				Entity entity = fishingHook.getHookedIn();
+				if (!this.entity.matches(serverPlayer, entity)) {
+					return false;
+				} else {
+					if (this.item != ItemPredicate.ANY) {
+						boolean bl = false;
+						if (entity instanceof ItemEntity) {
+							ItemEntity itemEntity = (ItemEntity)entity;
+							if (this.item.matches(itemEntity.getItem())) {
+								bl = true;
+							}
+						}
+
+						for (ItemStack itemStack2 : collection) {
+							if (this.item.matches(itemStack2)) {
+								bl = true;
+								break;
+							}
+						}
+
+						if (!bl) {
+							return false;
 						}
 					}
 
-					for (ItemStack itemStack2 : collection) {
-						if (this.item.matches(itemStack2)) {
-							bl = true;
-							break;
-						}
-					}
-
-					if (!bl) {
-						return false;
-					}
+					return true;
 				}
-
-				return true;
 			}
 		}
 

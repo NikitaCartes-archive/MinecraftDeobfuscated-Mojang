@@ -57,6 +57,8 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorato
 import net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.DepthAverageConfigation;
@@ -151,156 +153,105 @@ public class BiomeDefaultFeatures {
 	private static final BlockState CRIMSON_STEM = Blocks.CRIMSON_STEM.defaultBlockState();
 	private static final BlockState SHROOMLIGHT = Blocks.SHROOMLIGHT.defaultBlockState();
 	public static final SmallTreeConfiguration NORMAL_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration JUNGLE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(8)
-		.foliageHeight(3)
 		.decorators(ImmutableList.of(new CocoaDecorator(0.2F), new TrunkVineDecorator(), new LeaveVineDecorator()))
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration JUNGLE_TREE_NOVINE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(8)
-		.foliageHeight(3)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration PINE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new PineFoliagePlacer(1, 0)
+			new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new PineFoliagePlacer(1, 0, 1, 0, 3, 1), new StraightTrunkPlacer(6, 4, 0)
 		)
-		.baseHeight(7)
-		.heightRandA(4)
-		.trunkTopOffset(1)
-		.foliageHeight(3)
-		.foliageHeightRandom(1)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration SPRUCE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1)
+			new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1), new StraightTrunkPlacer(4, 3, 2)
 		)
-		.baseHeight(6)
-		.heightRandA(3)
-		.trunkHeight(1)
-		.trunkHeightRandom(1)
-		.trunkTopOffsetRandom(2)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration ACACIA_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(ACACIA_LOG), new SimpleStateProvider(ACACIA_LEAVES), new AcaciaFoliagePlacer(2, 0)
+			new SimpleStateProvider(ACACIA_LOG), new SimpleStateProvider(ACACIA_LEAVES), new AcaciaFoliagePlacer(2, 0, 0, 0), new ForkingTrunkPlacer(5, 2, 2)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.heightRandB(2)
-		.trunkHeight(0)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration BIRCH_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.build();
 	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
 	public static final SmallTreeConfiguration SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 6)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.heightRandB(6)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
 	public static final SmallTreeConfiguration SWAMP_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(3, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(3, 0, 0, 0, 3), new StraightTrunkPlacer(5, 3, 0)
 		)
-		.baseHeight(5)
-		.heightRandA(3)
-		.foliageHeight(3)
 		.maxWaterDepth(1)
 		.decorators(ImmutableList.of(new LeaveVineDecorator()))
 		.build();
 	public static final SmallTreeConfiguration FANCY_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)
 		)
 		.build();
 	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
 	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)
 		)
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
 	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)
 		)
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
 	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.002F)))
 		.build();
 	public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)
 		)
-		.baseHeight(4)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
 		.build();
 	public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0)
+			new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)
 		)
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
 		.build();
 	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.02F)))
 		.build();
 	public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(
-			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0)
+			new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)
 		)
-		.baseHeight(5)
-		.heightRandA(2)
-		.foliageHeight(3)
 		.ignoreVines()
 		.decorators(ImmutableList.of(new BeehiveDecorator(0.05F)))
 		.build();
@@ -902,7 +853,7 @@ public class BiomeDefaultFeatures {
 			Feature.RANDOM_SELECTOR
 				.configured(
 					new RandomFeatureConfiguration(
-						ImmutableList.of(Feature.ACACIA_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8F)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG)
+						ImmutableList.of(Feature.NORMAL_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8F)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG)
 					)
 				)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(1, 0.1F, 1)))
@@ -915,7 +866,7 @@ public class BiomeDefaultFeatures {
 			Feature.RANDOM_SELECTOR
 				.configured(
 					new RandomFeatureConfiguration(
-						ImmutableList.of(Feature.ACACIA_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8F)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG)
+						ImmutableList.of(Feature.NORMAL_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8F)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG)
 					)
 				)
 				.decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1F, 1)))

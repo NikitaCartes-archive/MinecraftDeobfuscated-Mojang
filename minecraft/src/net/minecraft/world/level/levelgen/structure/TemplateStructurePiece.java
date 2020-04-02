@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +53,13 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 
 	@Override
 	public boolean postProcess(
-		LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos
+		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator<?> chunkGenerator,
+		Random random,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos,
+		BlockPos blockPos
 	) {
 		this.placeSettings.setBoundingBox(boundingBox);
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
@@ -80,7 +87,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 						} else {
 							LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
 						}
-					} catch (CommandSyntaxException var15) {
+					} catch (CommandSyntaxException var16) {
 						LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
 					}
 

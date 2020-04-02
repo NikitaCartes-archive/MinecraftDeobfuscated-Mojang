@@ -23,6 +23,7 @@ import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class CommandsReport implements DataProvider {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -40,16 +41,15 @@ public class CommandsReport implements DataProvider {
 		File file = new File(this.generator.getOutputFolder().toFile(), "tmp");
 		GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(file, MinecraftServer.USERID_CACHE_FILE.getName()));
 		DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(Paths.get("server.properties"));
+		LevelStorageSource.LevelStorageAccess levelStorageAccess = LevelStorageSource.createDefault(file.toPath()).createAccess("world");
 		MinecraftServer minecraftServer = new DedicatedServer(
-			file,
+			levelStorageAccess,
 			dedicatedServerSettings,
 			DataFixers.getDataFixer(),
-			yggdrasilAuthenticationService,
 			minecraftSessionService,
 			gameProfileRepository,
 			gameProfileCache,
-			LoggerChunkProgressListener::new,
-			dedicatedServerSettings.getProperties().levelName
+			LoggerChunkProgressListener::new
 		);
 		Path path = this.generator.getOutputFolder().resolve("reports/commands.json");
 		CommandDispatcher<CommandSourceStack> commandDispatcher = minecraftServer.getCommands().getDispatcher();

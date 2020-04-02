@@ -54,7 +54,7 @@ public class SetLookAndInteract extends Behavior<LivingEntity> {
 						.findFirst()
 						.ifPresent(livingEntityxx -> {
 							brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntityxx);
-							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntityxx));
+							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx));
 						})
 			);
 	}

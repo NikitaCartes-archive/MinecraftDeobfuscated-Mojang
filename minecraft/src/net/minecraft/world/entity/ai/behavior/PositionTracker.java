@@ -4,10 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
-public interface PositionWrapper {
-	BlockPos getPos();
+public interface PositionTracker {
+	Vec3 currentPosition();
 
-	Vec3 getLookAtPos();
+	BlockPos currentBlockPosition();
 
-	boolean isVisible(LivingEntity livingEntity);
+	boolean isVisibleBy(LivingEntity livingEntity);
 }

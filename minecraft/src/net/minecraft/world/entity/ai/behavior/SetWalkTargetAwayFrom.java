@@ -50,8 +50,8 @@ public class SetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
 			return false;
 		} else {
 			Optional<WalkTarget> optional = pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
-			PositionWrapper positionWrapper = ((WalkTarget)optional.get()).getTarget();
-			return optional.isPresent() && !positionWrapper.getPos().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
+			PositionTracker positionTracker = ((WalkTarget)optional.get()).getTarget();
+			return optional.isPresent() && !positionTracker.currentBlockPosition().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
 		}
 	}
 

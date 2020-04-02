@@ -102,11 +102,11 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -169,6 +169,7 @@ public class ServerLevel extends Level {
 	private boolean handlingTick;
 	@Nullable
 	private final WanderingTraderSpawner wanderingTraderSpawner;
+	private final StructureFeatureManager structureFeatureManager = new StructureFeatureManager();
 
 	public ServerLevel(
 		MinecraftServer minecraftServer,
@@ -189,6 +190,7 @@ public class ServerLevel extends Level {
 					executor,
 					dimension.createRandomLevelGenerator(),
 					minecraftServer.getPlayerList().getViewDistance(),
+					minecraftServer.forceSynchronousWrites(),
 					chunkProgressListener,
 					() -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()
 				),
@@ -212,6 +214,10 @@ public class ServerLevel extends Level {
 	@Override
 	public Biome getUncachedNoiseBiome(int i, int j, int k) {
 		return this.getChunkSource().getGenerator().getBiomeSource().getNoiseBiome(i, j, k);
+	}
+
+	public StructureFeatureManager structureFeatureManager() {
+		return this.structureFeatureManager;
 	}
 
 	public void tick(BooleanSupplier booleanSupplier) {
@@ -694,6 +700,7 @@ public class ServerLevel extends Level {
 		ConfiguredFeature<?, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
 		configuredFeature.place(
 			this,
+			this.structureFeatureManager(),
 			(ChunkGenerator<? extends ChunkGeneratorSettings>)this.getChunkSource().getGenerator(),
 			this.random,
 			new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn())
@@ -705,7 +712,7 @@ public class ServerLevel extends Level {
 		return this.dimension.getDimensionSpecificSpawn();
 	}
 
-	public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) throws LevelConflictException {
+	public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) {
 		ServerChunkCache serverChunkCache = this.getChunkSource();
 		if (!bl2) {
 			if (progressListener != null) {
@@ -721,8 +728,7 @@ public class ServerLevel extends Level {
 		}
 	}
 
-	protected void saveLevelData() throws LevelConflictException {
-		this.checkSession();
+	protected void saveLevelData() {
 		this.dimension.saveData();
 		this.getChunkSource().getDataStorage().save();
 	}
@@ -1216,10 +1222,6 @@ public class ServerLevel extends Level {
 	@Override
 	public boolean noSave() {
 		return this.noSave;
-	}
-
-	public void checkSession() throws LevelConflictException {
-		this.levelStorage.checkSession();
 	}
 
 	public LevelStorage getLevelStorage() {

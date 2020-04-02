@@ -4,7 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
@@ -50,13 +53,29 @@ public class SystemToast implements Toast {
 		return this.id;
 	}
 
+	public static void add(ToastComponent toastComponent, SystemToast.SystemToastIds systemToastIds, Component component, @Nullable Component component2) {
+		toastComponent.addToast(new SystemToast(systemToastIds, component, component2));
+	}
+
 	public static void addOrUpdate(ToastComponent toastComponent, SystemToast.SystemToastIds systemToastIds, Component component, @Nullable Component component2) {
 		SystemToast systemToast = toastComponent.getToast(SystemToast.class, systemToastIds);
 		if (systemToast == null) {
-			toastComponent.addToast(new SystemToast(systemToastIds, component, component2));
+			add(toastComponent, systemToastIds, component, component2);
 		} else {
 			systemToast.reset(component, component2);
 		}
+	}
+
+	public static void onWorldAccessFailure(Minecraft minecraft, String string) {
+		add(
+			minecraft.getToasts(), SystemToast.SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.access_failure"), new TextComponent(string)
+		);
+	}
+
+	public static void onWorldDeleteFailure(Minecraft minecraft, String string) {
+		add(
+			minecraft.getToasts(), SystemToast.SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.delete_failure"), new TextComponent(string)
+		);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -64,6 +83,7 @@ public class SystemToast implements Toast {
 		TUTORIAL_HINT,
 		NARRATOR_TOGGLE,
 		WORLD_BACKUP,
-		PACK_LOAD_FAILURE;
+		PACK_LOAD_FAILURE,
+		WORLD_ACCESS_FAILURE;
 	}
 }

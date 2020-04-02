@@ -55,8 +55,8 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 						.findFirst()
 						.ifPresent(livingEntityxx -> {
 							brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntityxx);
-							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntityxx));
-							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper(livingEntityxx), 0.3F, 1));
+							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx));
+							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntityxx), 0.3F, 1));
 						})
 			);
 	}

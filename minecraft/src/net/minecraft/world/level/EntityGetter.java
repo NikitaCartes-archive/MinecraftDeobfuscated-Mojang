@@ -3,7 +3,6 @@ package net.minecraft.world.level;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -50,14 +49,14 @@ public interface EntityGetter {
 		return this.getLoadedEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
 	}
 
-	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
+	default Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
 		if (aABB.getSize() < 1.0E-7) {
 			return Stream.empty();
 		} else {
 			AABB aABB2 = aABB.inflate(1.0E-7);
 			return this.getEntities(entity, aABB2)
 				.stream()
-				.filter(entityx -> !set.contains(entityx))
+				.filter(predicate)
 				.filter(entity2 -> entity == null || !entity.isPassengerOfSameVehicle(entity2))
 				.flatMap(entity2 -> Stream.of(entity2.getCollideBox(), entity == null ? null : entity.getCollideAgainstBox(entity2)))
 				.filter(Objects::nonNull)

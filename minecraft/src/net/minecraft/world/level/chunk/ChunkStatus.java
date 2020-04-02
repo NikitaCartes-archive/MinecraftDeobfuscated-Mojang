@@ -48,7 +48,11 @@ public class ChunkStatus {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
 				if (serverLevel.getLevelData().isGenerateMapFeatures()) {
 					chunkGenerator.createStructures(
-						serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()), chunkAccess, chunkGenerator, structureManager
+						serverLevel.structureFeatureManager(),
+						serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()),
+						chunkAccess,
+						chunkGenerator,
+						structureManager
 					);
 				}
 
@@ -66,7 +70,9 @@ public class ChunkStatus {
 		8,
 		PRE_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
-		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createReferences(new WorldGenRegion(serverLevel, list), chunkAccess)
+		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createReferences(
+				new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager(), chunkAccess
+			)
 	);
 	public static final ChunkStatus BIOMES = registerSimple(
 		"biomes",
@@ -82,7 +88,9 @@ public class ChunkStatus {
 		8,
 		PRE_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
-		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.fillFromNoise(new WorldGenRegion(serverLevel, list), chunkAccess)
+		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.fillFromNoise(
+				new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager(), chunkAccess
+			)
 	);
 	public static final ChunkStatus SURFACE = registerSimple(
 		"surface",
@@ -126,7 +134,7 @@ public class ChunkStatus {
 					chunkAccess,
 					EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE)
 				);
-				chunkGenerator.applyBiomeDecoration(new WorldGenRegion(serverLevel, list));
+				chunkGenerator.applyBiomeDecoration(new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager());
 				protoChunk.setStatus(chunkStatus);
 			}
 

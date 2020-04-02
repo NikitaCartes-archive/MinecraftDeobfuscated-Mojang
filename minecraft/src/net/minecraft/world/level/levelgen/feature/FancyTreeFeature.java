@@ -20,26 +20,6 @@ public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration
 		super(function);
 	}
 
-	private void crossSection(
-		LevelSimulatedRW levelSimulatedRW,
-		Random random,
-		BlockPos blockPos,
-		float f,
-		Set<BlockPos> set,
-		BoundingBox boundingBox,
-		SmallTreeConfiguration smallTreeConfiguration
-	) {
-		int i = (int)((double)f + 0.618);
-
-		for (int j = -i; j <= i; j++) {
-			for (int k = -i; k <= i; k++) {
-				if (Math.pow((double)Math.abs(j) + 0.5, 2.0) + Math.pow((double)Math.abs(k) + 0.5, 2.0) <= (double)(f * f)) {
-					this.placeLeaf(levelSimulatedRW, random, blockPos.offset(j, 0, k), set, boundingBox, smallTreeConfiguration);
-				}
-			}
-		}
-	}
-
 	private float treeShape(int i, int j) {
 		if ((float)j < (float)i * 0.3F) {
 			return -1.0F;
@@ -65,19 +45,6 @@ public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration
 		}
 	}
 
-	private void foliageCluster(
-		LevelSimulatedRW levelSimulatedRW,
-		Random random,
-		BlockPos blockPos,
-		Set<BlockPos> set,
-		BoundingBox boundingBox,
-		SmallTreeConfiguration smallTreeConfiguration
-	) {
-		for (int i = 0; i < 5; i++) {
-			this.crossSection(levelSimulatedRW, random, blockPos.above(i), this.foliageShape(i), set, boundingBox, smallTreeConfiguration);
-		}
-	}
-
 	private int makeLimb(
 		LevelSimulatedRW levelSimulatedRW,
 		Random random,
@@ -100,7 +67,7 @@ public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration
 			for (int j = 0; j <= i; j++) {
 				BlockPos blockPos4 = blockPos.offset((double)(0.5F + (float)j * f), (double)(0.5F + (float)j * g), (double)(0.5F + (float)j * h));
 				if (bl) {
-					this.setBlock(
+					setBlock(
 						levelSimulatedRW,
 						blockPos4,
 						smallTreeConfiguration.trunkProvider.getState(random, blockPos4).setValue(RotatedPillarBlock.AXIS, this.getLogAxis(blockPos, blockPos4)),
@@ -155,7 +122,18 @@ public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration
 	) {
 		for (FancyTreeFeature.FoliageCoords foliageCoords : list) {
 			if (this.trimBranches(i, foliageCoords.getBranchBase() - blockPos.getY())) {
-				this.foliageCluster(levelSimulatedRW, random, foliageCoords, set, boundingBox, smallTreeConfiguration);
+				for (int j = 0; j < 5; j++) {
+					float f = this.foliageShape(j);
+					int k = (int)((double)f + 0.618);
+
+					for (int l = -k; l <= k; l++) {
+						for (int m = -k; m <= k; m++) {
+							if (Math.pow((double)Math.abs(l) + 0.5, 2.0) + Math.pow((double)Math.abs(m) + 0.5, 2.0) <= (double)(f * f)) {
+								this.placeLeaf(levelSimulatedRW, random, foliageCoords.above(j).offset(l, 0, m), set, boundingBox, smallTreeConfiguration);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -210,17 +188,9 @@ public class FancyTreeFeature extends AbstractTreeFeature<SmallTreeConfiguration
 			return false;
 		} else {
 			this.setDirtAt(levelSimulatedRW, blockPos.below());
-			int j = (int)((double)i * 0.618);
-			if (j >= i) {
-				j = i - 1;
-			}
-
+			int j = Mth.floor((double)i * 0.618);
 			double d = 1.0;
-			int k = (int)(1.382 + Math.pow(1.0 * (double)i / 13.0, 2.0));
-			if (k < 1) {
-				k = 1;
-			}
-
+			int k = Math.min(1, Mth.floor(1.382 + Math.pow(1.0 * (double)i / 13.0, 2.0)));
 			int l = blockPos.getY() + j;
 			int m = i - 5;
 			List<FancyTreeFeature.FoliageCoords> list = Lists.<FancyTreeFeature.FoliageCoords>newArrayList();

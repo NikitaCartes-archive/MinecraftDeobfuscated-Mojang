@@ -20,6 +20,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
@@ -398,7 +399,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
 				this.drowned.yRot = this.rotlerp(this.drowned.yRot, h, 90.0F);
 				this.drowned.yBodyRot = this.drowned.yRot;
-				float i = (float)(this.speedModifier * this.drowned.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+				float i = (float)(this.speedModifier * this.drowned.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				float j = Mth.lerp(0.125F, this.drowned.getSpeed(), i);
 				this.drowned.setSpeed(j);
 				this.drowned.setDeltaMovement(this.drowned.getDeltaMovement().add((double)j * d * 0.005, (double)j * e * 0.1, (double)j * f * 0.005));

@@ -51,9 +51,7 @@ public class LlamaSpit extends Projectile {
 	public void tick() {
 		super.tick();
 		Vec3 vec3 = this.getDeltaMovement();
-		HitResult hitResult = ProjectileUtil.getHitResult(
-			this, this.getBoundingBox().expandTowards(vec3).inflate(1.0), entity -> !entity.isSpectator() && entity != this.getOwner(), ClipContext.Block.OUTLINE, true
-		);
+		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.OUTLINE);
 		if (hitResult != null) {
 			this.onHit(hitResult);
 		}
@@ -61,30 +59,9 @@ public class LlamaSpit extends Projectile {
 		double d = this.getX() + vec3.x;
 		double e = this.getY() + vec3.y;
 		double f = this.getZ() + vec3.z;
-		float g = Mth.sqrt(getHorizontalDistanceSqr(vec3));
-		this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
-		this.xRot = (float)(Mth.atan2(vec3.y, (double)g) * 180.0F / (float)Math.PI);
-
-		while (this.xRot - this.xRotO < -180.0F) {
-			this.xRotO -= 360.0F;
-		}
-
-		while (this.xRot - this.xRotO >= 180.0F) {
-			this.xRotO += 360.0F;
-		}
-
-		while (this.yRot - this.yRotO < -180.0F) {
-			this.yRotO -= 360.0F;
-		}
-
-		while (this.yRot - this.yRotO >= 180.0F) {
-			this.yRotO += 360.0F;
-		}
-
-		this.xRot = Mth.lerp(0.2F, this.xRotO, this.xRot);
-		this.yRot = Mth.lerp(0.2F, this.yRotO, this.yRot);
-		float h = 0.99F;
-		float i = 0.06F;
+		this.updateRotation();
+		float g = 0.99F;
+		float h = 0.06F;
 		if (!this.level.containsMaterial(this.getBoundingBox(), Material.AIR)) {
 			this.remove();
 		} else if (this.isInWaterOrBubble()) {

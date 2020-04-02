@@ -4,14 +4,14 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
@@ -25,6 +25,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
@@ -38,8 +39,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);
-			ChunkPos chunkPos = new ChunkPos(blockPos);
-			if (!levelAccessor.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(Feature.VILLAGE.getFeatureName()).isEmpty()) {
+			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), Feature.VILLAGE, levelAccessor).findAny().isPresent()) {
 				return false;
 			} else {
 				boolean[] bls = new boolean[2048];

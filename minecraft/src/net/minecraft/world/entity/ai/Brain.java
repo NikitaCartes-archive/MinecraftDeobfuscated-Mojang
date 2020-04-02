@@ -87,7 +87,7 @@ public class Brain<E extends LivingEntity> implements Serializable {
 		this.setMemoryInternal(memoryModuleType, Optional.of(ExpirableValue.of(object, l)));
 	}
 
-	public <U> void setMemory(MemoryModuleType<U> memoryModuleType, Optional<U> optional) {
+	public <U> void setMemory(MemoryModuleType<U> memoryModuleType, Optional<? extends U> optional) {
 		this.setMemoryInternal(memoryModuleType, optional.map(ExpirableValue::of));
 	}
 

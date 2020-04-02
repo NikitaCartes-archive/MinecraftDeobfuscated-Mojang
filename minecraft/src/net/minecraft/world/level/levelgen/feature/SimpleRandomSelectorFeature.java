@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
@@ -16,6 +17,7 @@ public class SimpleRandomSelectorFeature extends Feature<SimpleRandomFeatureConf
 
 	public boolean place(
 		LevelAccessor levelAccessor,
+		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
 		Random random,
 		BlockPos blockPos,
@@ -23,6 +25,6 @@ public class SimpleRandomSelectorFeature extends Feature<SimpleRandomFeatureConf
 	) {
 		int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
 		ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)simpleRandomFeatureConfiguration.features.get(i);
-		return configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos);
+		return configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos);
 	}
 }

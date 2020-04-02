@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -33,6 +32,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,29 +48,26 @@ public class IntegratedServer extends MinecraftServer {
 
 	public IntegratedServer(
 		Minecraft minecraft,
+		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		String string,
-		String string2,
 		LevelSettings levelSettings,
-		YggdrasilAuthenticationService yggdrasilAuthenticationService,
 		MinecraftSessionService minecraftSessionService,
 		GameProfileRepository gameProfileRepository,
 		GameProfileCache gameProfileCache,
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
 		super(
-			new File(minecraft.gameDirectory, "saves"),
+			levelStorageAccess,
 			minecraft.getProxy(),
 			minecraft.getFixerUpper(),
 			new Commands(false),
-			yggdrasilAuthenticationService,
 			minecraftSessionService,
 			gameProfileRepository,
 			gameProfileCache,
-			chunkProgressListenerFactory,
-			string
+			chunkProgressListenerFactory
 		);
 		this.setSingleplayerName(minecraft.getUser().getName());
-		this.setLevelName(string2);
+		this.setLevelName(string);
 		this.setDemo(minecraft.isDemo());
 		this.setBonusChest(levelSettings.hasStartingBonusItems());
 		this.setMaxBuildHeight(256);
@@ -80,15 +77,15 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public void loadLevel(String string, String string2, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
-		this.ensureLevelConversion(string);
-		LevelStorage levelStorage = this.getStorageSource().selectLevel(string, this);
-		this.detectBundledResources(this.getLevelIdName(), levelStorage);
+	public void loadLevel(String string, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
+		this.ensureLevelConversion();
+		LevelStorage levelStorage = this.storageSource.selectLevel(this);
+		this.detectBundledResources(this.storageSource.getLevelId(), levelStorage);
 		LevelData levelData = levelStorage.prepareLevel();
 		if (levelData == null) {
-			levelData = new LevelData(this.settings, string2);
+			levelData = new LevelData(this.settings, string);
 		} else {
-			levelData.setLevelName(string2);
+			levelData.setLevelName(string);
 		}
 
 		levelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
@@ -103,7 +100,7 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public boolean initServer() throws IOException {
+	public boolean initServer() {
 		LOGGER.info("Starting integrated minecraft server version " + SharedConstants.getCurrentVersion().getName());
 		this.setUsesAuthentication(true);
 		this.setAnimals(true);
@@ -112,7 +109,7 @@ public class IntegratedServer extends MinecraftServer {
 		this.setFlightAllowed(true);
 		LOGGER.info("Generating keypair");
 		this.setKeyPair(Crypt.generateKeyPair());
-		this.loadLevel(this.getLevelIdName(), this.getLevelName(), this.settings.getSeed(), this.settings.getGeneratorProvider());
+		this.loadLevel(this.getLevelName(), this.settings.getSeed(), this.settings.getGeneratorProvider());
 		this.setMotd(this.getSingleplayerName() + " - " + this.getLevel(DimensionType.OVERWORLD).getLevelData().getLevelName());
 		return true;
 	}

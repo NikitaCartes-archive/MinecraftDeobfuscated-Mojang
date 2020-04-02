@@ -8,6 +8,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
@@ -112,8 +113,15 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 		}
 
 		@Override
-		public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
-			super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
+		public void postProcess(
+			LevelAccessor levelAccessor,
+			StructureFeatureManager structureFeatureManager,
+			ChunkGenerator<?> chunkGenerator,
+			Random random,
+			BoundingBox boundingBox,
+			ChunkPos chunkPos
+		) {
+			super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
 			int i = this.boundingBox.y0;
 
 			for (int j = boundingBox.x0; j <= boundingBox.x1; j++) {

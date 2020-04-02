@@ -31,6 +31,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -47,7 +49,6 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -261,11 +262,8 @@ public class Panda extends Animal {
 		this.targetSelector.addGoal(1, new Panda.PandaHurtByTargetGoal(this).setAlertOthers(new Class[0]));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15F);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.15F).add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
 
 	public Panda.Gene getVariant() {
@@ -570,11 +568,11 @@ public class Panda extends Animal {
 
 	public void setAttributes() {
 		if (this.isWeak()) {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10.0);
 		}
 
 		if (this.isLazy()) {
-			this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.07F);
+			this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.07F);
 		}
 	}
 

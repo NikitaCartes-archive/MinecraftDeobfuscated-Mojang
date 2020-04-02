@@ -8,12 +8,14 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 
 @Environment(EnvType.CLIENT)
-public class PiglinModel<T extends Mob> extends HumanoidModel<T> {
+public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 	public final ModelPart earRight;
 	public final ModelPart earLeft;
 
 	public PiglinModel(float f, int i, int j) {
-		super(f, 0.0F, i, j);
+		super(f, false);
+		this.texWidth = i;
+		this.texHeight = j;
 		this.body = new ModelPart(this, 16, 16);
 		this.body.addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, f);
 		this.head = new ModelPart(this);
@@ -23,25 +25,13 @@ public class PiglinModel<T extends Mob> extends HumanoidModel<T> {
 		this.head.texOffs(2, 0).addBox(-3.0F, -2.0F, -5.0F, 1.0F, 2.0F, 1.0F, f);
 		this.earRight = new ModelPart(this);
 		this.earRight.setPos(4.5F, -6.0F, 0.0F);
-		this.earRight.texOffs(57, 38).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
+		this.earRight.texOffs(51, 6).addBox(0.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
 		this.head.addChild(this.earRight);
 		this.earLeft = new ModelPart(this);
 		this.earLeft.setPos(-4.5F, -6.0F, 0.0F);
+		this.earLeft.texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
 		this.head.addChild(this.earLeft);
-		this.earLeft.texOffs(57, 22).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
 		this.hat = new ModelPart(this);
-		this.rightArm = new ModelPart(this);
-		this.rightArm.setPos(-5.0F, 2.0F, 0.0F);
-		this.rightArm.texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.leftArm = new ModelPart(this);
-		this.leftArm.setPos(5.0F, 2.0F, 0.0F);
-		this.leftArm.texOffs(40, 16).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.rightLeg = new ModelPart(this);
-		this.rightLeg.setPos(-1.9F, 12.0F, 0.0F);
-		this.rightLeg.texOffs(0, 16).addBox(-2.1F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
-		this.leftLeg = new ModelPart(this);
-		this.leftLeg.setPos(1.9F, 12.0F, 0.0F);
-		this.leftLeg.texOffs(0, 16).addBox(-1.9F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, f);
 	}
 
 	public void setupAnim(T mob, float f, float g, float h, float i, float j) {

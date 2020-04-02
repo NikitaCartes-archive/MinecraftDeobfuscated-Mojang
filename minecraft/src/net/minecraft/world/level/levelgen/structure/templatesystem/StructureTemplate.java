@@ -314,12 +314,12 @@ public class StructureTemplate {
 			BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
 			BlockState blockState3 = blockState.updateShape(direction, blockState2, levelAccessor, blockPos, blockPos2);
 			if (blockState != blockState3) {
-				levelAccessor.setBlock(blockPos, blockState3, i & -2 | 16);
+				levelAccessor.setBlock(blockPos, blockState3, i & -2);
 			}
 
 			BlockState blockState4 = blockState2.updateShape(direction.getOpposite(), blockState3, levelAccessor, blockPos2, blockPos);
 			if (blockState2 != blockState4) {
-				levelAccessor.setBlock(blockPos2, blockState4, i & -2 | 16);
+				levelAccessor.setBlock(blockPos2, blockState4, i & -2);
 			}
 		});
 	}

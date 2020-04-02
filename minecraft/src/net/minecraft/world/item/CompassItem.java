@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -53,13 +54,15 @@ public class CompassItem extends Item {
 					if (blockPos != null) {
 						double d = bl ? (double)entity.yRot : CompassItem.getFrameRotation((ItemFrame)entity);
 						d = Mth.positiveModulo(d / 360.0, 1.0);
-						double e = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / (float) (Math.PI * 2);
-						f = 0.5 - (d - 0.25 - e);
+						boolean bl3 = !bl && entity.getDirection().getAxis().isVertical();
+						boolean bl4 = bl3 && entity.getDirection() == Direction.UP;
+						double e = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / (float) (Math.PI * 2) * (double)(bl4 ? -1 : 1);
+						f = 0.5 - (d - 0.25 - e) * (double)(bl3 ? -1 : 1);
 					} else {
 						f = Math.random();
 					}
 
-					if (bl && !bl2) {
+					if (bl) {
 						f = this.wobble(level, f);
 					}
 
@@ -93,7 +96,7 @@ public class CompassItem extends Item {
 
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
-		return isLodestoneCompass(itemStack);
+		return isLodestoneCompass(itemStack) || super.isFoil(itemStack);
 	}
 
 	private static Optional<DimensionType> getLodestoneDimension(CompoundTag compoundTag) {
@@ -124,7 +127,8 @@ public class CompassItem extends Item {
 
 	@Environment(EnvType.CLIENT)
 	private static double getFrameRotation(ItemFrame itemFrame) {
-		return (double)Mth.wrapDegrees(180 + itemFrame.getDirection().get2DDataValue() * 90);
+		Direction direction = itemFrame.getDirection();
+		return direction.getAxis().isVertical() ? 0.0 : (double)Mth.wrapDegrees(180 + itemFrame.getDirection().get2DDataValue() * 90);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -137,6 +141,10 @@ public class CompassItem extends Item {
 		if (!level.isClientSide) {
 			CompoundTag compoundTag = itemStack.getOrCreateTag();
 			if (hasLodestoneData(compoundTag)) {
+				if (compoundTag.contains("LodestoneTracked") && !compoundTag.getBoolean("LodestoneTracked")) {
+					return;
+				}
+
 				Optional<DimensionType> optional = getLodestoneDimension(compoundTag);
 				if (optional.isPresent()
 					&& ((DimensionType)optional.get()).equals(level.dimension.getType())
@@ -152,13 +160,15 @@ public class CompassItem extends Item {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		BlockPos blockPos = useOnContext.hitResult.getBlockPos();
 		if (useOnContext.level.getBlockState(blockPos).getBlock() == Blocks.LODESTONE) {
-			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.NEUTRAL, 1.0F, 1.0F);
+			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
 			CompoundTag compoundTag = useOnContext.itemStack.getOrCreateTag();
 			compoundTag.put("LodestonePos", NbtUtils.writeBlockPos(blockPos));
 			compoundTag.putString("LodestoneDimension", DimensionType.getName(useOnContext.level.dimension.getType()).toString());
+			compoundTag.putBoolean("LodestoneTracked", true);
+			return InteractionResult.SUCCESS;
+		} else {
+			return super.useOn(useOnContext);
 		}
-
-		return super.useOn(useOnContext);
 	}
 
 	@Override

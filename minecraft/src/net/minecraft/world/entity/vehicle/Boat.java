@@ -20,7 +20,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -133,11 +132,7 @@ public class Boat extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (this.level.isClientSide || this.removed) {
-			return true;
-		} else if (damageSource instanceof IndirectEntityDamageSource && damageSource.getEntity() != null && this.hasPassenger(damageSource.getEntity())) {
-			return false;
-		} else {
+		} else if (!this.level.isClientSide && !this.removed) {
 			this.setHurtDir(-this.getHurtDir());
 			this.setHurtTime(10);
 			this.setDamage(this.getDamage() + f * 10.0F);
@@ -151,6 +146,8 @@ public class Boat extends Entity {
 				this.remove();
 			}
 
+			return true;
+		} else {
 			return true;
 		}
 	}

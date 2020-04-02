@@ -31,9 +31,7 @@ public class CollisionBoxRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (g - this.lastUpdateTime > 1.0E8) {
 			this.lastUpdateTime = g;
 			Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
-			this.shapes = (List<VoxelShape>)entity.level
-				.getCollisions(entity, entity.getBoundingBox().inflate(6.0), Collections.emptySet())
-				.collect(Collectors.toList());
+			this.shapes = (List<VoxelShape>)entity.level.getCollisions(entity, entity.getBoundingBox().inflate(6.0), entityx -> true).collect(Collectors.toList());
 		}
 
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());

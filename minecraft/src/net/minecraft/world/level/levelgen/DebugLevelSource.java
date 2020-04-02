@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
@@ -44,7 +45,7 @@ public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 	}
 
 	@Override
-	public void applyBiomeDecoration(WorldGenRegion worldGenRegion) {
+	public void applyBiomeDecoration(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		int i = worldGenRegion.getCenterX();
 		int j = worldGenRegion.getCenterZ();
@@ -63,7 +64,7 @@ public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 	}
 
 	@Override
-	public void fillFromNoise(LevelAccessor levelAccessor, ChunkAccess chunkAccess) {
+	public void fillFromNoise(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 	}
 
 	@Override
