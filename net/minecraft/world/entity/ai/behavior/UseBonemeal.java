@@ -11,7 +11,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.BlockPosWrapper;
+import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -83,9 +83,9 @@ extends Behavior<Villager> {
 
     private void setCurrentCropAsTarget(Villager villager) {
         this.cropPos.ifPresent(blockPos -> {
-            BlockPosWrapper blockPosWrapper = new BlockPosWrapper((BlockPos)blockPos);
-            villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, blockPosWrapper);
-            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosWrapper, 0.5f, 1));
+            BlockPosTracker blockPosTracker = new BlockPosTracker((BlockPos)blockPos);
+            villager.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, blockPosTracker);
+            villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosTracker, 0.5f, 1));
         });
     }
 

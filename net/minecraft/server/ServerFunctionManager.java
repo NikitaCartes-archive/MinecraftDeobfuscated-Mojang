@@ -48,7 +48,7 @@ implements ResourceManagerReloadListener {
     private boolean isInFunction;
     private final ArrayDeque<QueuedCommand> commandQueue = new ArrayDeque();
     private final List<QueuedCommand> nestedCalls = Lists.newArrayList();
-    private final TagCollection<CommandFunction> tags = new TagCollection(this::get, "tags/functions", true, "function");
+    private final TagCollection<CommandFunction> tags = new TagCollection(this::get, "tags/functions", "function");
     private final List<CommandFunction> ticking = Lists.newArrayList();
     private boolean postReload;
 
@@ -84,7 +84,7 @@ implements ResourceManagerReloadListener {
         this.server.getProfiler().pop();
         if (this.postReload) {
             this.postReload = false;
-            Collection<CommandFunction> collection = this.getTags().getTagOrEmpty(LOAD_FUNCTION_TAG).getValues();
+            List<CommandFunction> collection = this.getTags().getTagOrEmpty(LOAD_FUNCTION_TAG).getValues();
             this.server.getProfiler().push(LOAD_FUNCTION_TAG::toString);
             for (CommandFunction commandFunction2 : collection) {
                 this.execute(commandFunction2, this.getGameLoopSender());

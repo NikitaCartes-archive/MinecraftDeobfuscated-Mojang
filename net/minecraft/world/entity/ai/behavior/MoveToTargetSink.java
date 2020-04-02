@@ -39,7 +39,7 @@ extends Behavior<Mob> {
         Brain<?> brain = mob.getBrain();
         WalkTarget walkTarget = brain.getMemory(MemoryModuleType.WALK_TARGET).get();
         if (!this.reachedTarget(mob, walkTarget) && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-            this.lastTargetPos = walkTarget.getTarget().getPos();
+            this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
             return true;
         }
         brain.eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -87,14 +87,14 @@ extends Behavior<Mob> {
             return;
         }
         WalkTarget walkTarget = brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-        if (walkTarget.getTarget().getPos().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-            this.lastTargetPos = walkTarget.getTarget().getPos();
+        if (walkTarget.getTarget().currentBlockPosition().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+            this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
             this.start(serverLevel, mob, l);
         }
     }
 
     private boolean tryComputePath(Mob mob, WalkTarget walkTarget, long l) {
-        BlockPos blockPos = walkTarget.getTarget().getPos();
+        BlockPos blockPos = walkTarget.getTarget().currentBlockPosition();
         this.path = mob.getNavigation().createPath(blockPos, 0);
         this.speedModifier = walkTarget.getSpeedModifier();
         Brain<Long> brain = mob.getBrain();
@@ -121,7 +121,7 @@ extends Behavior<Mob> {
     }
 
     private boolean reachedTarget(Mob mob, WalkTarget walkTarget) {
-        return walkTarget.getTarget().getPos().distManhattan(mob.blockPosition()) <= walkTarget.getCloseEnoughDist();
+        return walkTarget.getTarget().currentBlockPosition().distManhattan(mob.blockPosition()) <= walkTarget.getCloseEnoughDist();
     }
 
     @Override

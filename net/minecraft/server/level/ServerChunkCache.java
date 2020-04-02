@@ -76,7 +76,7 @@ extends ChunkSource {
     private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
     private final ChunkAccess[] lastChunk = new ChunkAccess[4];
 
-    public ServerChunkCache(ServerLevel serverLevel, File file, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator<?> chunkGenerator, int i, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier) {
+    public ServerChunkCache(ServerLevel serverLevel, File file, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator<?> chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
         this.generator = chunkGenerator;
@@ -85,7 +85,7 @@ extends ChunkSource {
         File file3 = new File(file2, "data");
         file3.mkdirs();
         this.dataStorage = new DimensionDataStorage(file3, dataFixer);
-        this.chunkMap = new ChunkMap(serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i);
+        this.chunkMap = new ChunkMap(serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
         this.clearCache();

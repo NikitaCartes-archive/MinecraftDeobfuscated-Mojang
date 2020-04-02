@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,7 +48,7 @@ extends Feature<SpikeConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
         List<EndSpike> list = spikeConfiguration.getSpikes();
         if (list.isEmpty()) {
             list = SpikeFeature.getSpikesForLevel(levelAccessor);

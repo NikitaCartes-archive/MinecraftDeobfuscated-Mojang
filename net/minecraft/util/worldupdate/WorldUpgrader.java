@@ -56,10 +56,10 @@ public class WorldUpgrader {
     private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
     private final DimensionDataStorage overworldDataStorage;
 
-    public WorldUpgrader(String string, LevelStorageSource levelStorageSource, LevelData levelData, boolean bl) {
+    public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, boolean bl) {
         this.levelName = levelData.getLevelName();
         this.eraseCache = bl;
-        this.levelStorage = levelStorageSource.selectLevel(string, null);
+        this.levelStorage = levelStorageAccess.selectLevel(null);
         this.levelStorage.saveLevelData(levelData);
         this.overworldDataStorage = new DimensionDataStorage(new File(DimensionType.OVERWORLD.getStorageFolder(this.levelStorage.getFolder()), "data"), this.levelStorage.getFixerUpper());
         this.pathToWorld = this.levelStorage.getFolder();
@@ -99,7 +99,7 @@ public class WorldUpgrader {
         ImmutableMap.Builder<DimensionType, ChunkStorage> builder2 = ImmutableMap.builder();
         for (DimensionType dimensionType2 : DimensionType.getAllTypes()) {
             File file2 = dimensionType2.getStorageFolder(file);
-            builder2.put(dimensionType2, new ChunkStorage(new File(file2, "region"), this.levelStorage.getFixerUpper()));
+            builder2.put(dimensionType2, new ChunkStorage(new File(file2, "region"), this.levelStorage.getFixerUpper(), true));
         }
         ImmutableMap immutableMap2 = builder2.build();
         long l = Util.getMillis();
@@ -187,7 +187,7 @@ public class WorldUpgrader {
             if (!matcher.matches()) continue;
             int i = Integer.parseInt(matcher.group(1)) << 5;
             int j = Integer.parseInt(matcher.group(2)) << 5;
-            try (RegionFile regionFile = new RegionFile(file3, file22);){
+            try (RegionFile regionFile = new RegionFile(file3, file22, true);){
                 for (int k = 0; k < 32; ++k) {
                     for (int l = 0; l < 32; ++l) {
                         ChunkPos chunkPos = new ChunkPos(k + i, l + j);

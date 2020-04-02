@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -24,7 +25,7 @@ extends Feature<FeatureRadiusConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FeatureRadiusConfiguration featureRadiusConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, FeatureRadiusConfiguration featureRadiusConfiguration) {
         while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
             blockPos = blockPos.below();
         }

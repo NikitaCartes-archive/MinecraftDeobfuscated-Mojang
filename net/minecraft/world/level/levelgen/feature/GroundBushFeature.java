@@ -24,7 +24,7 @@ extends AbstractTreeFeature<TreeConfiguration> {
     public boolean doPlace(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, Set<BlockPos> set2, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
         if (GroundBushFeature.isGrassOrDirt(levelSimulatedRW, blockPos = levelSimulatedRW.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos).below())) {
             blockPos = blockPos.above();
-            this.placeLog(levelSimulatedRW, random, blockPos, set, boundingBox, treeConfiguration);
+            GroundBushFeature.placeLog(levelSimulatedRW, random, blockPos, set, boundingBox, treeConfiguration);
             for (int i = 0; i <= 2; ++i) {
                 int j = 2 - i;
                 for (int k = -j; k <= j; ++k) {

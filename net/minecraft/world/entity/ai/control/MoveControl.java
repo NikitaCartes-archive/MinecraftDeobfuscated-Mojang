@@ -8,8 +8,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -58,7 +58,7 @@ public class MoveControl {
     public void tick() {
         if (this.operation == Operation.STRAFE) {
             float n;
-            float f = (float)this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+            float f = (float)this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
             float g = (float)this.speedModifier * f;
             float h = this.strafeForwards;
             float i = this.strafeRight;
@@ -90,7 +90,7 @@ public class MoveControl {
             }
             float n = (float)(Mth.atan2(e, d) * 57.2957763671875) - 90.0f;
             this.mob.yRot = this.rotlerp(this.mob.yRot, n, 90.0f);
-            this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+            this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             BlockPos blockPos = this.mob.blockPosition();
             BlockState blockState = this.mob.level.getBlockState(blockPos);
             Block block = blockState.getBlock();
@@ -100,7 +100,7 @@ public class MoveControl {
                 this.operation = Operation.JUMPING;
             }
         } else if (this.operation == Operation.JUMPING) {
-            this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+            this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             if (this.mob.isOnGround()) {
                 this.operation = Operation.WAIT;
             }

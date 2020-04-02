@@ -114,12 +114,16 @@ extends DirectionalBlock {
         return bl ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB;
     }
 
+    private boolean isFittingBase(BlockState blockState, BlockState blockState2) {
+        Block block = blockState.getValue(TYPE) == PistonType.DEFAULT ? Blocks.PISTON : Blocks.STICKY_PISTON;
+        return blockState2.getBlock() == block && blockState2.getValue(PistonBaseBlock.EXTENDED) != false && blockState2.getValue(FACING) == blockState.getValue(FACING);
+    }
+
     @Override
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
         BlockPos blockPos2;
-        Block block;
-        if (!level.isClientSide && player.abilities.instabuild && ((block = level.getBlockState(blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite())).getBlock()) == Blocks.PISTON || block == Blocks.STICKY_PISTON)) {
-            level.removeBlock(blockPos2, false);
+        if (!level.isClientSide && player.abilities.instabuild && this.isFittingBase(blockState, level.getBlockState(blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite())))) {
+            level.destroyBlock(blockPos2, false);
         }
         super.playerWillDestroy(level, blockPos, blockState, player);
     }
@@ -130,12 +134,9 @@ extends DirectionalBlock {
             return;
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);
-        Direction direction = blockState.getValue(FACING).getOpposite();
-        blockPos = blockPos.relative(direction);
-        BlockState blockState3 = level.getBlockState(blockPos);
-        if ((blockState3.getBlock() == Blocks.PISTON || blockState3.getBlock() == Blocks.STICKY_PISTON) && blockState3.getValue(PistonBaseBlock.EXTENDED).booleanValue()) {
-            PistonHeadBlock.dropResources(blockState3, level, blockPos);
-            level.removeBlock(blockPos, false);
+        BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite());
+        if (this.isFittingBase(blockState, level.getBlockState(blockPos2))) {
+            level.destroyBlock(blockPos2, true);
         }
     }
 
@@ -149,8 +150,8 @@ extends DirectionalBlock {
 
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-        Block block = levelReader.getBlockState(blockPos.relative(blockState.getValue(FACING).getOpposite())).getBlock();
-        return block == Blocks.PISTON || block == Blocks.STICKY_PISTON || block == Blocks.MOVING_PISTON;
+        BlockState blockState2 = levelReader.getBlockState(blockPos.relative(blockState.getValue(FACING).getOpposite()));
+        return this.isFittingBase(blockState, blockState2) || blockState2.getBlock() == Blocks.MOVING_PISTON && blockState2.getValue(FACING) == blockState.getValue(FACING);
     }
 
     @Override

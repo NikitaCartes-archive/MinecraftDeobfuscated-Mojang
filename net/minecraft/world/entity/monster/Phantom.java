@@ -30,6 +30,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -37,7 +38,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -74,12 +74,6 @@ implements Enemy {
     }
 
     @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-    }
-
-    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ID_SIZE, 0);
@@ -91,7 +85,7 @@ implements Enemy {
 
     private void updatePhantomSizeInfo() {
         this.refreshDimensions();
-        this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6 + this.getPhantomSize());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(6 + this.getPhantomSize());
     }
 
     public int getPhantomSize() {

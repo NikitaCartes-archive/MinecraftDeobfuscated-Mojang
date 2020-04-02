@@ -60,7 +60,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BeehiveBlock
 extends BaseEntityBlock {
-    public static final Direction[] SPAWN_DIRECTIONS = new Direction[]{Direction.WEST, Direction.EAST, Direction.SOUTH};
+    private static final Direction[] SPAWN_DIRECTIONS = new Direction[]{Direction.WEST, Direction.EAST, Direction.SOUTH};
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty HONEY_LEVEL = BlockStateProperties.LEVEL_HONEY;
 
@@ -282,6 +282,10 @@ extends BaseEntityBlock {
             beehiveBlockEntity.emptyAllLivingFromHive(null, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+    }
+
+    public static Direction getRandomOffset(Random random) {
+        return SPAWN_DIRECTIONS[random.nextInt(SPAWN_DIRECTIONS.length)];
     }
 }
 

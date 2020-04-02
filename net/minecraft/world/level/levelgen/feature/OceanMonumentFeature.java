@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -111,12 +112,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+        public void postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
             if (!this.isCreated) {
                 this.pieces.clear();
                 this.generatePieces(this.getChunkX(), this.getChunkZ());
             }
-            super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
+            super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
         }
     }
 }

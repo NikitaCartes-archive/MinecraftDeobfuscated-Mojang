@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
@@ -38,7 +39,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
         return true;
     }
 

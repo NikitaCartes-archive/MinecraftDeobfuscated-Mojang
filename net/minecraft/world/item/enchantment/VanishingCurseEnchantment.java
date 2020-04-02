@@ -10,7 +10,7 @@ import net.minecraft.world.item.enchantment.EnchantmentCategory;
 public class VanishingCurseEnchantment
 extends Enchantment {
     public VanishingCurseEnchantment(Enchantment.Rarity rarity, EquipmentSlot ... equipmentSlots) {
-        super(rarity, EnchantmentCategory.ALL, equipmentSlots);
+        super(rarity, EnchantmentCategory.VANISHABLE, equipmentSlots);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +24,7 @@ extends Feature<CountFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BlockPos blockPos, CountFeatureConfiguration countFeatureConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BlockPos blockPos, CountFeatureConfiguration countFeatureConfiguration) {
         int i = 0;
         for (int j = 0; j < countFeatureConfiguration.count; ++j) {
             int k = random.nextInt(8) - random.nextInt(8);

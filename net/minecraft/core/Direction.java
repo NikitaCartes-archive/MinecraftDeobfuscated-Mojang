@@ -254,7 +254,7 @@ public enum Direction implements StringRepresentable
     }
 
     public static Direction getRandomFace(Random random) {
-        return Direction.values()[random.nextInt(Direction.values().length)];
+        return VALUES[random.nextInt(VALUES.length)];
     }
 
     public static Direction getNearest(double d, double e, double f) {
@@ -283,7 +283,7 @@ public enum Direction implements StringRepresentable
     }
 
     public static Direction get(AxisDirection axisDirection, Axis axis) {
-        for (Direction direction : Direction.values()) {
+        for (Direction direction : VALUES) {
             if (direction.getAxisDirection() != axisDirection || direction.getAxis() != axis) continue;
             return direction;
         }
@@ -420,6 +420,7 @@ public enum Direction implements StringRepresentable
             }
         };
 
+        private static final Axis[] VALUES;
         private static final Map<String, Axis> BY_NAME;
         private final String name;
 
@@ -449,7 +450,7 @@ public enum Direction implements StringRepresentable
         }
 
         public static Axis getRandomAxis(Random random) {
-            return Axis.values()[random.nextInt(Axis.values().length)];
+            return VALUES[random.nextInt(VALUES.length)];
         }
 
         @Override
@@ -485,7 +486,8 @@ public enum Direction implements StringRepresentable
         }
 
         static {
-            BY_NAME = Arrays.stream(Axis.values()).collect(Collectors.toMap(Axis::getName, axis -> axis));
+            VALUES = Axis.values();
+            BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Axis::getName, axis -> axis));
         }
     }
 }

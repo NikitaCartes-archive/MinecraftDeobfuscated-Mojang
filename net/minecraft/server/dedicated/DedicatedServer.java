@@ -9,12 +9,10 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.JsonOps;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -66,6 +64,7 @@ import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -84,8 +83,8 @@ implements ServerInterface {
     @Nullable
     private MinecraftServerGui gui;
 
-    public DedicatedServer(File file, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, YggdrasilAuthenticationService yggdrasilAuthenticationService, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory, String string) {
-        super(file, Proxy.NO_PROXY, dataFixer, new Commands(true), yggdrasilAuthenticationService, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory, string);
+    public DedicatedServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+        super(levelStorageAccess, Proxy.NO_PROXY, dataFixer, new Commands(true), minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
         new Thread("Server Infinisleeper"){
@@ -208,7 +207,7 @@ implements ServerInterface {
         LOGGER.info("Preparing level \"{}\"", (Object)this.getLevelIdName());
         JsonObject jsonObject = !string2.isEmpty() ? GsonHelper.parse(string2) : new JsonObject();
         ChunkGeneratorProvider chunkGeneratorProvider = levelType.createProvider(new Dynamic<JsonObject>(JsonOps.INSTANCE, jsonObject));
-        this.loadLevel(this.getLevelIdName(), this.getLevelIdName(), m, chunkGeneratorProvider);
+        this.loadLevel(this.storageSource.getLevelId(), m, chunkGeneratorProvider);
         long o = Util.getNanos() - l;
         String string3 = String.format(Locale.ROOT, "%.3fs", (double)o / 1.0E9);
         LOGGER.info("Done ({})! For help, type \"help\"", (Object)string3);
@@ -554,6 +553,16 @@ implements ServerInterface {
     @Override
     public boolean isSingleplayerOwner(GameProfile gameProfile) {
         return false;
+    }
+
+    @Override
+    public String getLevelIdName() {
+        return this.storageSource.getLevelId();
+    }
+
+    @Override
+    public boolean forceSynchronousWrites() {
+        return this.settings.getProperties().syncChunkWrites;
     }
 
     @Override

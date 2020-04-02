@@ -66,17 +66,18 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.food.FoodData;
@@ -182,13 +183,8 @@ extends LivingEntity {
         return itemStack.isEmpty() || !itemStack.hasAdventureModeBreakTagForBlock(level.getTagManager(), new BlockInWorld(level, blockPos, false));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.1f);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
+    public static AttributeSupplier.Builder createAttributes() {
+        return LivingEntity.createLivingAttributes().add(Attributes.ATTACK_DAMAGE, 1.0).add(Attributes.MOVEMENT_SPEED, 0.1f).add(Attributes.ATTACK_SPEED).add(Attributes.LUCK);
     }
 
     @Override
@@ -463,7 +459,7 @@ extends LivingEntity {
         this.inventory.tick();
         this.oBob = this.bob;
         super.aiStep();
-        AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+        AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
         if (!this.level.isClientSide) {
             attributeInstance.setBaseValue(this.abilities.getWalkingSpeed());
         }
@@ -951,7 +947,7 @@ extends LivingEntity {
         if (entity.skipAttackInteraction(this)) {
             return;
         }
-        float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float g = entity instanceof LivingEntity ? EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType()) : EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
         float h = this.getAttackStrengthScale(0.5f);
         g *= h;
@@ -1259,7 +1255,7 @@ extends LivingEntity {
 
     @Override
     public float getSpeed() {
-        return (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+        return (float)this.getAttributeValue(Attributes.MOVEMENT_SPEED);
     }
 
     public void checkMovementStatistics(double d, double e, double f) {
@@ -1751,7 +1747,7 @@ extends LivingEntity {
     }
 
     public float getCurrentItemAttackStrengthDelay() {
-        return (float)(1.0 / this.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getValue() * 20.0);
+        return (float)(1.0 / this.getAttributeValue(Attributes.ATTACK_SPEED) * 20.0);
     }
 
     public float getAttackStrengthScale(float f) {
@@ -1772,7 +1768,7 @@ extends LivingEntity {
     }
 
     public float getLuck() {
-        return (float)this.getAttribute(SharedMonsterAttributes.LUCK).getValue();
+        return (float)this.getAttributeValue(Attributes.LUCK);
     }
 
     public boolean canUseGameMasterBlocks() {

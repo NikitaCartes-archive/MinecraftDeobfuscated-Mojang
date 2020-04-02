@@ -268,10 +268,10 @@ public class StructureTemplate {
             BlockPos blockPos2 = blockPos.relative(direction);
             BlockState blockState = levelAccessor.getBlockState(blockPos);
             if (blockState != (blockState3 = blockState.updateShape(direction, blockState2 = levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos, blockPos2))) {
-                levelAccessor.setBlock(blockPos, blockState3, i & 0xFFFFFFFE | 0x10);
+                levelAccessor.setBlock(blockPos, blockState3, i & 0xFFFFFFFE);
             }
             if (blockState2 != (blockState4 = blockState2.updateShape(direction.getOpposite(), blockState3, levelAccessor, blockPos2, blockPos))) {
-                levelAccessor.setBlock(blockPos2, blockState4, i & 0xFFFFFFFE | 0x10);
+                levelAccessor.setBlock(blockPos2, blockState4, i & 0xFFFFFFFE);
             }
         });
     }

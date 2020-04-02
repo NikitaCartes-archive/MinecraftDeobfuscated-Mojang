@@ -3,6 +3,7 @@
  */
 package net.minecraft.tags;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ extends TagCollection<T> {
     private final Registry<T> registry;
 
     public SynchronizableTagCollection(Registry<T> registry, String string, String string2) {
-        super(registry::getOptional, string, false, string2);
+        super(registry::getOptional, string, string2);
         this.registry = registry;
     }
 
@@ -39,11 +40,11 @@ extends TagCollection<T> {
         for (int j = 0; j < i; ++j) {
             ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
             int k = friendlyByteBuf.readVarInt();
-            Tag.Builder builder = Tag.Builder.tag();
+            ImmutableSet.Builder builder = ImmutableSet.builder();
             for (int l = 0; l < k; ++l) {
                 builder.add(this.registry.byId(friendlyByteBuf.readVarInt()));
             }
-            map.put(resourceLocation, builder.build(resourceLocation));
+            map.put(resourceLocation, Tag.fromSet(builder.build()));
         }
         this.replace(map);
     }

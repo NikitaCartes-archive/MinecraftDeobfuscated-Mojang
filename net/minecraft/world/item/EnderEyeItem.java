@@ -73,7 +73,7 @@ extends Item {
             return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);
-        if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", player.blockPosition(), 100, false)) != null) {
+        if (level instanceof ServerLevel && (blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature((ServerLevel)level, "Stronghold", player.blockPosition(), 100, false)) != null) {
             EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
             eyeOfEnder.setItem(itemStack);
             eyeOfEnder.signalTo(blockPos);

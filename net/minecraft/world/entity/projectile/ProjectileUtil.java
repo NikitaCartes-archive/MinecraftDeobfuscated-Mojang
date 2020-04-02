@@ -3,13 +3,10 @@
  */
 package net.minecraft.world.entity.projectile;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -23,43 +20,24 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public final class ProjectileUtil {
-    public static HitResult forwardsRaycast(Entity entity, boolean bl, boolean bl2, @Nullable Entity entity22, ClipContext.Block block) {
-        return ProjectileUtil.forwardsRaycast(entity, bl, bl2, entity22, block, true, entity2 -> !entity2.isSpectator() && entity2.isPickable() && (bl2 || !entity2.is(entity22)) && !entity2.noPhysics, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0));
-    }
-
-    public static HitResult getHitResult(Entity entity, AABB aABB, Predicate<Entity> predicate, ClipContext.Block block, boolean bl) {
-        return ProjectileUtil.forwardsRaycast(entity, bl, false, null, block, false, predicate, aABB);
-    }
-
-    @Nullable
-    public static EntityHitResult getHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate) {
-        return ProjectileUtil.getHitResult(level, entity, vec3, vec32, aABB, predicate, Double.MAX_VALUE);
-    }
-
-    private static HitResult forwardsRaycast(Entity entity, boolean bl, boolean bl2, @Nullable Entity entity2, ClipContext.Block block, boolean bl3, Predicate<Entity> predicate, AABB aABB) {
+    public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate, ClipContext.Block block) {
+        EntityHitResult hitResult2;
+        Vec3 vec33;
         Vec3 vec3 = entity.getDeltaMovement();
         Level level = entity.level;
         Vec3 vec32 = entity.position();
-        if (bl3 && !level.noCollision(entity, entity.getBoundingBox(), bl2 || entity2 == null ? ImmutableSet.of() : ProjectileUtil.getIgnoredEntities(entity2))) {
-            return new BlockHitResult(vec32, Direction.getNearest(vec3.x, vec3.y, vec3.z), entity.blockPosition(), false);
+        HitResult hitResult = level.clip(new ClipContext(vec32, vec33 = vec32.add(vec3), block, ClipContext.Fluid.NONE, entity));
+        if (((HitResult)hitResult).getType() != HitResult.Type.MISS) {
+            vec33 = hitResult.getLocation();
         }
-        Vec3 vec33 = vec32.add(vec3);
-        HitResult hitResult = level.clip(new ClipContext(vec32, vec33, block, ClipContext.Fluid.NONE, entity));
-        if (bl) {
-            EntityHitResult hitResult2;
-            if (((HitResult)hitResult).getType() != HitResult.Type.MISS) {
-                vec33 = hitResult.getLocation();
-            }
-            if ((hitResult2 = ProjectileUtil.getHitResult(level, entity, vec32, vec33, aABB, predicate)) != null) {
-                hitResult = hitResult2;
-            }
+        if ((hitResult2 = ProjectileUtil.getEntityHitResult(level, entity, vec32, vec33, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0), predicate)) != null) {
+            hitResult = hitResult2;
         }
         return hitResult;
     }
@@ -101,26 +79,21 @@ public final class ProjectileUtil {
     }
 
     @Nullable
-    public static EntityHitResult getHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, double d) {
-        double e = d;
+    public static EntityHitResult getEntityHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate) {
+        double d = Double.MAX_VALUE;
         Entity entity2 = null;
         for (Entity entity3 : level.getEntities(entity, aABB, predicate)) {
-            double f;
+            double e;
             AABB aABB2 = entity3.getBoundingBox().inflate(0.3f);
             Optional<Vec3> optional = aABB2.clip(vec3, vec32);
-            if (!optional.isPresent() || !((f = vec3.distanceToSqr(optional.get())) < e)) continue;
+            if (!optional.isPresent() || !((e = vec3.distanceToSqr(optional.get())) < d)) continue;
             entity2 = entity3;
-            e = f;
+            d = e;
         }
         if (entity2 == null) {
             return null;
         }
         return new EntityHitResult(entity2);
-    }
-
-    private static Set<Entity> getIgnoredEntities(Entity entity) {
-        Entity entity2 = entity.getVehicle();
-        return entity2 != null ? ImmutableSet.of(entity, entity2) : ImmutableSet.of(entity);
     }
 
     public static final void rotateTowardsMovement(Entity entity, float f) {

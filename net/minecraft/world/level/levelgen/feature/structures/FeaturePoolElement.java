@@ -16,6 +16,7 @@ import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -81,8 +82,8 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
-        return this.feature.place(levelAccessor, chunkGenerator, random, blockPos);
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
+        return this.feature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos);
     }
 
     @Override

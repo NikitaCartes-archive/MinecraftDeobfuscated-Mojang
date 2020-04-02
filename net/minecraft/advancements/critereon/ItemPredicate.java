@@ -152,7 +152,7 @@ public class ItemPredicate {
             jsonObject.addProperty("item", Registry.ITEM.getKey(this.item).toString());
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", this.tag.getId().toString());
+            jsonObject.addProperty("tag", ItemTags.getAllTags().getIdOrThrow(this.tag).toString());
         }
         jsonObject.add("count", this.count.serializeToJson());
         jsonObject.add("durability", this.durability.serializeToJson());

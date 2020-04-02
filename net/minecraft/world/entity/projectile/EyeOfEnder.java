@@ -22,6 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -120,22 +121,8 @@ implements ItemSupplier {
         double e = this.getY() + vec3.y;
         double f = this.getZ() + vec3.z;
         float g = Mth.sqrt(EyeOfEnder.getHorizontalDistanceSqr(vec3));
-        this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, g) * 57.2957763671875);
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
-        this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
-        this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
+        this.xRot = Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, g) * 57.2957763671875));
+        this.yRot = Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
         if (!this.level.isClientSide) {
             double h = this.tx - d;
             double i = this.tz - f;

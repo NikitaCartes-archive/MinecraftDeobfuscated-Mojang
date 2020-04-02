@@ -62,7 +62,7 @@ implements ContextAwareComponent {
 
     private void resolve(CommandSourceStack commandSourceStack) {
         MinecraftServer minecraftServer = commandSourceStack.getServer();
-        if (minecraftServer != null && minecraftServer.isInitialized() && StringUtil.isNullOrEmpty(this.value)) {
+        if (minecraftServer != null && StringUtil.isNullOrEmpty(this.value)) {
             Objective objective;
             ServerScoreboard scoreboard = minecraftServer.getScoreboard();
             if (scoreboard.hasPlayerScore(this.name, objective = scoreboard.getObjective(this.objective))) {

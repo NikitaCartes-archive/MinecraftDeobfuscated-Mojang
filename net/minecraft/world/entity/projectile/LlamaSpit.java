@@ -51,32 +51,16 @@ extends Projectile {
     public void tick() {
         super.tick();
         Vec3 vec3 = this.getDeltaMovement();
-        HitResult hitResult = ProjectileUtil.getHitResult(this, this.getBoundingBox().expandTowards(vec3).inflate(1.0), entity -> !entity.isSpectator() && entity != this.getOwner(), ClipContext.Block.OUTLINE, true);
+        HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.OUTLINE);
         if (hitResult != null) {
             this.onHit(hitResult);
         }
         double d = this.getX() + vec3.x;
         double e = this.getY() + vec3.y;
         double f = this.getZ() + vec3.z;
-        float g = Mth.sqrt(LlamaSpit.getHorizontalDistanceSqr(vec3));
-        this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, g) * 57.2957763671875);
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
-        this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
-        this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
-        float h = 0.99f;
-        float i = 0.06f;
+        this.updateRotation();
+        float g = 0.99f;
+        float h = 0.06f;
         if (!this.level.containsMaterial(this.getBoundingBox(), Material.AIR)) {
             this.remove();
             return;

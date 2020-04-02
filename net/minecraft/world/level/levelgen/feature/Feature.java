@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -24,7 +25,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
-import net.minecraft.world.level.levelgen.feature.AcaciaFeature;
 import net.minecraft.world.level.levelgen.feature.BambooFeature;
 import net.minecraft.world.level.levelgen.feature.BasaltPillarFeature;
 import net.minecraft.world.level.levelgen.feature.BlockBlobFeature;
@@ -151,7 +151,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final StructureFeature<NoneFeatureConfiguration> NETHER_FOSSIL = Feature.register("nether_fossil", new NetherFossilFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<NoneFeatureConfiguration> NO_OP = Feature.register("no_op", new NoOpFeature((Function<Dynamic<?>, ? extends NoneFeatureConfiguration>)((Function<Dynamic<?>, NoneFeatureConfiguration>)NoneFeatureConfiguration::deserialize)));
     public static final Feature<SmallTreeConfiguration> NORMAL_TREE = Feature.register("normal_tree", new TreeFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));
-    public static final Feature<SmallTreeConfiguration> ACACIA_TREE = Feature.register("acacia_tree", new AcaciaFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));
     public static final Feature<SmallTreeConfiguration> FANCY_TREE = Feature.register("fancy_tree", new FancyTreeFeature((Function<Dynamic<?>, ? extends SmallTreeConfiguration>)((Function<Dynamic<?>, SmallTreeConfiguration>)SmallTreeConfiguration::deserialize)));
     public static final Feature<TreeConfiguration> JUNGLE_GROUND_BUSH = Feature.register("jungle_ground_bush", new GroundBushFeature((Function<Dynamic<?>, ? extends TreeConfiguration>)((Function<Dynamic<?>, TreeConfiguration>)TreeConfiguration::deserialize)));
     public static final Feature<MegaTreeConfiguration> DARK_OAK_TREE = Feature.register("dark_oak_tree", new DarkOakFeature((Function<Dynamic<?>, ? extends MegaTreeConfiguration>)((Function<Dynamic<?>, MegaTreeConfiguration>)MegaTreeConfiguration::deserialize)));
@@ -246,7 +245,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
         levelWriter.setBlock(blockPos, blockState, 3);
     }
 
-    public abstract boolean place(LevelAccessor var1, ChunkGenerator<? extends ChunkGeneratorSettings> var2, Random var3, BlockPos var4, FC var5);
+    public abstract boolean place(LevelAccessor var1, StructureFeatureManager var2, ChunkGenerator<? extends ChunkGeneratorSettings> var3, Random var4, BlockPos var5, FC var6);
 
     public List<Biome.SpawnerData> getSpecialEnemies() {
         return Collections.emptyList();

@@ -186,7 +186,7 @@ implements TickableBlockEntity {
         if (this.exitPortal == null) {
             this.exitPortal = new BlockPos(vec32.x + 0.5, 75.0, vec32.z + 0.5);
             LOGGER.debug("Failed to find suitable block, settling on {}", (Object)this.exitPortal);
-            Feature.END_ISLAND.configured(FeatureConfiguration.NONE).place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
+            Feature.END_ISLAND.configured(FeatureConfiguration.NONE).place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
         } else {
             LOGGER.debug("Found block at {}", (Object)this.exitPortal);
         }
@@ -240,7 +240,7 @@ implements TickableBlockEntity {
     }
 
     private void createExitPortal(ServerLevel serverLevel, BlockPos blockPos) {
-        Feature.END_GATEWAY.configured(EndGatewayConfiguration.knownExit(this.getBlockPos(), false)).place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
+        Feature.END_GATEWAY.configured(EndGatewayConfiguration.knownExit(this.getBlockPos(), false)).place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
     }
 
     @Override

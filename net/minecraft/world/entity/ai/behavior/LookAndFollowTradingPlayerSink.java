@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.EntityPosWrapper;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -58,10 +58,10 @@ extends Behavior<Villager> {
     }
 
     private void followPlayer(Villager villager) {
-        EntityPosWrapper entityPosWrapper = new EntityPosWrapper(villager.getTradingPlayer());
+        EntityTracker entityTracker = new EntityTracker(villager.getTradingPlayer());
         Brain<Villager> brain = villager.getBrain();
-        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(entityPosWrapper, this.speedModifier, 2));
-        brain.setMemory(MemoryModuleType.LOOK_TARGET, entityPosWrapper);
+        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(entityTracker, this.speedModifier, 2));
+        brain.setMemory(MemoryModuleType.LOOK_TARGET, entityTracker);
     }
 
     @Override

@@ -4,7 +4,7 @@
 package net.minecraft.world.level;
 
 import java.util.Random;
-import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -91,8 +91,8 @@ LevelSimulatedRW {
     }
 
     @Override
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-        return EntityGetter.super.getEntityCollisions(entity, aABB, set);
+    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+        return EntityGetter.super.getEntityCollisions(entity, aABB, predicate);
     }
 
     @Override

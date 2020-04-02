@@ -19,8 +19,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -149,21 +149,21 @@ public class MobEffect {
         return this.attributeModifiers;
     }
 
-    public void removeAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+    public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
         for (Map.Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
-            AttributeInstance attributeInstance = baseAttributeMap.getInstance(entry.getKey());
+            AttributeInstance attributeInstance = attributeMap.getInstance(entry.getKey());
             if (attributeInstance == null) continue;
             attributeInstance.removeModifier(entry.getValue());
         }
     }
 
-    public void addAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+    public void addAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
         for (Map.Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
-            AttributeInstance attributeInstance = baseAttributeMap.getInstance(entry.getKey());
+            AttributeInstance attributeInstance = attributeMap.getInstance(entry.getKey());
             if (attributeInstance == null) continue;
             AttributeModifier attributeModifier = entry.getValue();
             attributeInstance.removeModifier(attributeModifier);
-            attributeInstance.addModifier(new AttributeModifier(attributeModifier.getId(), this.getDescriptionId() + " " + i, this.getAttributeModifierValue(i, attributeModifier), attributeModifier.getOperation()));
+            attributeInstance.addPermanentModifier(new AttributeModifier(attributeModifier.getId(), this.getDescriptionId() + " " + i, this.getAttributeModifierValue(i, attributeModifier), attributeModifier.getOperation()));
         }
     }
 

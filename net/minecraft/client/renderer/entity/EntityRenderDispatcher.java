@@ -114,6 +114,7 @@ import net.minecraft.client.renderer.entity.WitherBossRenderer;
 import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
 import net.minecraft.client.renderer.entity.WitherSkullRenderer;
 import net.minecraft.client.renderer.entity.WolfRenderer;
+import net.minecraft.client.renderer.entity.ZoglinRenderer;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.client.renderer.entity.ZombieVillagerRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -266,6 +267,7 @@ public class EntityRenderDispatcher {
         this.register(EntityType.WITHER_SKELETON, new WitherSkeletonRenderer(this));
         this.register(EntityType.WITHER_SKULL, new WitherSkullRenderer(this));
         this.register(EntityType.WOLF, new WolfRenderer(this));
+        this.register(EntityType.ZOGLIN, new ZoglinRenderer(this));
         this.register(EntityType.ZOMBIE_HORSE, new UndeadHorseRenderer(this));
         this.register(EntityType.ZOMBIE, new ZombieRenderer(this));
         this.register(EntityType.ZOMBIFIED_PIGLIN, new PiglinRenderer(this, true));
@@ -367,9 +369,9 @@ public class EntityRenderDispatcher {
         float g = entity.getBbWidth() / 2.0f;
         this.renderBox(poseStack, vertexConsumer, entity, 1.0f, 1.0f, 1.0f);
         if (entity instanceof EnderDragon) {
-            double d = entity.getX() - Mth.lerp((double)f, entity.xOld, entity.getX());
-            double e = entity.getY() - Mth.lerp((double)f, entity.yOld, entity.getY());
-            double h = entity.getZ() - Mth.lerp((double)f, entity.zOld, entity.getZ());
+            double d = -Mth.lerp((double)f, entity.xOld, entity.getX());
+            double e = -Mth.lerp((double)f, entity.yOld, entity.getY());
+            double h = -Mth.lerp((double)f, entity.zOld, entity.getZ());
             for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
                 poseStack.pushPose();
                 double i = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());

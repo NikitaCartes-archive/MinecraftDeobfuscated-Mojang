@@ -40,6 +40,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -53,7 +55,6 @@ import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
@@ -130,11 +131,8 @@ extends LivingEntity {
     protected void registerGoals() {
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16.0);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK);
+    public static AttributeSupplier.Builder createMobAttributes() {
+        return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, 16.0).add(Attributes.ATTACK_KNOCKBACK);
     }
 
     protected PathNavigation createNavigation(Level level) {
@@ -936,7 +934,7 @@ extends LivingEntity {
 
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).addModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+        this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
         if (this.random.nextFloat() < 0.05f) {
             this.setLeftHanded(true);
         } else {
@@ -1228,8 +1226,8 @@ extends LivingEntity {
     public boolean doHurtTarget(Entity entity) {
         boolean bl;
         int i;
-        float f = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
-        float g = (float)this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).getValue();
+        float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+        float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
         if (entity instanceof LivingEntity) {
             f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
             g += (float)EnchantmentHelper.getKnockbackBonus(this);

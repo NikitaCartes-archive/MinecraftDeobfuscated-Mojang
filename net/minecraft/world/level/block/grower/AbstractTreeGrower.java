@@ -5,30 +5,31 @@ package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTreeGrower {
     @Nullable
-    protected abstract ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random var1, boolean var2);
+    protected abstract ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random var1, boolean var2);
 
-    public boolean growTree(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-        ConfiguredFeature<SmallTreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(levelAccessor, blockPos));
+    public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
+        ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
         if (configuredFeature == null) {
             return false;
         }
-        levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-        ((SmallTreeConfiguration)configuredFeature.config).setFromSapling();
-        if (configuredFeature.place(levelAccessor, chunkGenerator, random, blockPos)) {
+        serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+        ((TreeConfiguration)configuredFeature.config).setFromSapling();
+        if (configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), chunkGenerator, random, blockPos)) {
             return true;
         }
-        levelAccessor.setBlock(blockPos, blockState, 4);
+        serverLevel.setBlock(blockPos, blockState, 4);
         return false;
     }
 

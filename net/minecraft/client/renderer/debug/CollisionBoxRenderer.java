@@ -35,8 +35,8 @@ implements DebugRenderer.SimpleDebugRenderer {
         double g = Util.getNanos();
         if (g - this.lastUpdateTime > 1.0E8) {
             this.lastUpdateTime = g;
-            Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
-            this.shapes = entity.level.getCollisions(entity, entity.getBoundingBox().inflate(6.0), Collections.emptySet()).collect(Collectors.toList());
+            Entity entity2 = this.minecraft.gameRenderer.getMainCamera().getEntity();
+            this.shapes = entity2.level.getCollisions(entity2, entity2.getBoundingBox().inflate(6.0), entity -> true).collect(Collectors.toList());
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
         for (VoxelShape voxelShape : this.shapes) {

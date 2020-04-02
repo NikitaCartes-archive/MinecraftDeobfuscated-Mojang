@@ -9,7 +9,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.entity.EntityType;
 
 public class EntityTypeTagsProvider
@@ -35,11 +34,6 @@ extends TagsProvider<EntityType<?>> {
     @Override
     public String getName() {
         return "Entity Type Tags";
-    }
-
-    @Override
-    protected void useTags(TagCollection<EntityType<?>> tagCollection) {
-        EntityTypeTags.reset(tagCollection);
     }
 }
 

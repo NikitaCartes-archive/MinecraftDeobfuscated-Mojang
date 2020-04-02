@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -126,10 +127,10 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
         return new ConfiguredDecorator<DC>(this, decoratorConfiguration);
     }
 
-    protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos2, DC decoratorConfiguration, ConfiguredFeature<FC, F> configuredFeature) {
+    protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos2, DC decoratorConfiguration, ConfiguredFeature<FC, F> configuredFeature) {
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         this.getPositions(levelAccessor, chunkGenerator, random, decoratorConfiguration, blockPos2).forEach(blockPos -> {
-            boolean bl = configuredFeature.place(levelAccessor, (ChunkGenerator<ChunkGeneratorSettings>)chunkGenerator, random, (BlockPos)blockPos);
+            boolean bl = configuredFeature.place(levelAccessor, structureFeatureManager, (ChunkGenerator<ChunkGeneratorSettings>)chunkGenerator, random, (BlockPos)blockPos);
             atomicBoolean.set(atomicBoolean.get() || bl);
         });
         return atomicBoolean.get();

@@ -4,10 +4,9 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.Streams;
-import java.util.Collections;
-import java.util.Set;
 import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
@@ -46,27 +45,27 @@ extends BlockGetter {
     }
 
     default public boolean noCollision(AABB aABB) {
-        return this.noCollision(null, aABB, Collections.emptySet());
+        return this.noCollision(null, aABB, entity -> true);
     }
 
-    default public boolean noCollision(Entity entity) {
-        return this.noCollision(entity, entity.getBoundingBox(), Collections.emptySet());
+    default public boolean noCollision(Entity entity2) {
+        return this.noCollision(entity2, entity2.getBoundingBox(), entity -> true);
     }
 
-    default public boolean noCollision(Entity entity, AABB aABB) {
-        return this.noCollision(entity, aABB, Collections.emptySet());
+    default public boolean noCollision(Entity entity2, AABB aABB) {
+        return this.noCollision(entity2, aABB, entity -> true);
     }
 
-    default public boolean noCollision(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-        return this.getCollisions(entity, aABB, set).allMatch(VoxelShape::isEmpty);
+    default public boolean noCollision(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+        return this.getCollisions(entity, aABB, predicate).allMatch(VoxelShape::isEmpty);
     }
 
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
+    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
         return Stream.empty();
     }
 
-    default public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Set<Entity> set) {
-        return Streams.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, set));
+    default public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+        return Streams.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, predicate));
     }
 
     default public Stream<VoxelShape> getBlockCollisions(final @Nullable Entity entity, AABB aABB) {

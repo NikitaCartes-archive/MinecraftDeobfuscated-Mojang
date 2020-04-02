@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.util.ExceptionCollector;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +19,11 @@ public final class RegionFileStorage
 implements AutoCloseable {
     private final Long2ObjectLinkedOpenHashMap<RegionFile> regionCache = new Long2ObjectLinkedOpenHashMap();
     private final File folder;
+    private final boolean sync;
 
-    RegionFileStorage(File file) {
+    RegionFileStorage(File file, boolean bl) {
         this.folder = file;
+        this.sync = bl;
     }
 
     private RegionFile getRegionFile(ChunkPos chunkPos) throws IOException {
@@ -36,7 +39,7 @@ implements AutoCloseable {
             this.folder.mkdirs();
         }
         File file = new File(this.folder, "r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
-        RegionFile regionFile2 = new RegionFile(file, this.folder);
+        RegionFile regionFile2 = new RegionFile(file, this.folder, this.sync);
         this.regionCache.putAndMoveToFirst(l, regionFile2);
         return regionFile2;
     }
@@ -63,8 +66,20 @@ implements AutoCloseable {
 
     @Override
     public void close() throws IOException {
+        ExceptionCollector<IOException> exceptionCollector = new ExceptionCollector<IOException>();
         for (RegionFile regionFile : this.regionCache.values()) {
-            regionFile.close();
+            try {
+                regionFile.close();
+            } catch (IOException iOException) {
+                exceptionCollector.add(iOException);
+            }
+        }
+        exceptionCollector.throwIfPresent();
+    }
+
+    public void flush() throws IOException {
+        for (RegionFile regionFile : this.regionCache.values()) {
+            regionFile.flush();
         }
     }
 }

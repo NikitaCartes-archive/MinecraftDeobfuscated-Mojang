@@ -25,6 +25,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -33,8 +35,8 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableWitchTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestHealableRaiderTargetGoal;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.raid.Raider;
@@ -50,7 +52,7 @@ public class Witch
 extends Raider
 implements RangedAttackMob {
     private static final UUID SPEED_MODIFIER_DRINKING_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
-    private static final AttributeModifier SPEED_MODIFIER_DRINKING = new AttributeModifier(SPEED_MODIFIER_DRINKING_UUID, "Drinking speed penalty", -0.25, AttributeModifier.Operation.ADDITION).setSerialize(false);
+    private static final AttributeModifier SPEED_MODIFIER_DRINKING = new AttributeModifier(SPEED_MODIFIER_DRINKING_UUID, "Drinking speed penalty", -0.25, AttributeModifier.Operation.ADDITION);
     private static final EntityDataAccessor<Boolean> DATA_USING_ITEM = SynchedEntityData.defineId(Witch.class, EntityDataSerializers.BOOLEAN);
     private int usingTime;
     private NearestHealableRaiderTargetGoal<Raider> healRaidersGoal;
@@ -104,11 +106,8 @@ implements RangedAttackMob {
         return this.getEntityData().get(DATA_USING_ITEM);
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(26.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 26.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
     @Override
@@ -131,7 +130,7 @@ implements RangedAttackMob {
                             this.addEffect(new MobEffectInstance(mobEffectInstance));
                         }
                     }
-                    this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING);
+                    this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING);
                 }
             } else {
                 Potion potion = null;
@@ -151,9 +150,9 @@ implements RangedAttackMob {
                     if (!this.isSilent()) {
                         this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.WITCH_DRINK, this.getSoundSource(), 1.0f, 0.8f + this.random.nextFloat() * 0.4f);
                     }
-                    AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
+                    AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
                     attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING);
-                    attributeInstance.addModifier(SPEED_MODIFIER_DRINKING);
+                    attributeInstance.addTransientModifier(SPEED_MODIFIER_DRINKING);
                 }
             }
             if (this.random.nextFloat() < 7.5E-4f) {

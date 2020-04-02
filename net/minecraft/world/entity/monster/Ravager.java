@@ -19,6 +19,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -30,7 +32,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raider;
@@ -86,15 +88,8 @@ extends Raider {
         this.goalSelector.setControlFlag(Goal.Flag.TARGET, bl);
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(100.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3);
-        this.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).setBaseValue(0.5);
-        this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(12.0);
-        this.getAttribute(SharedMonsterAttributes.ATTACK_KNOCKBACK).setBaseValue(1.5);
-        this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(32.0);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 100.0).add(Attributes.MOVEMENT_SPEED, 0.3).add(Attributes.KNOCKBACK_RESISTANCE, 0.5).add(Attributes.ATTACK_DAMAGE, 12.0).add(Attributes.ATTACK_KNOCKBACK, 1.5).add(Attributes.FOLLOW_RANGE, 32.0);
     }
 
     @Override
@@ -154,11 +149,11 @@ extends Raider {
             return;
         }
         if (this.isImmobile()) {
-            this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.0);
+            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
         } else {
             double d = this.getTarget() != null ? 0.35 : 0.3;
-            double e = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getBaseValue();
-            this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(Mth.lerp(0.1, e, d));
+            double e = this.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
+            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Mth.lerp(0.1, e, d));
         }
         if (this.horizontalCollision && this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             boolean bl = false;

@@ -37,8 +37,10 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelStorageException;
@@ -67,6 +69,10 @@ public class LevelStorageSource {
         this.backupDir = path2;
     }
 
+    public static LevelStorageSource createDefault(Path path) {
+        return new LevelStorageSource(path, path.resolve("../backups"), DataFixers.getDataFixer());
+    }
+
     @Environment(value=EnvType.CLIENT)
     public List<LevelSummary> getLevelList() throws LevelStorageException {
         File[] files;
@@ -75,16 +81,25 @@ public class LevelStorageSource {
         }
         ArrayList<LevelSummary> list = Lists.newArrayList();
         for (File file : files = this.baseDir.toFile().listFiles()) {
-            String string;
-            LevelData levelData;
-            if (!file.isDirectory() || (levelData = this.getDataTagFor(string = file.getName())) == null || levelData.getVersion() != 19132 && levelData.getVersion() != 19133) continue;
-            boolean bl = levelData.getVersion() != this.getStorageVersion();
+            boolean bl;
+            if (!file.isDirectory()) continue;
+            String string = file.getName();
+            try {
+                bl = DirectoryLock.isLocked(file.toPath());
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to read {} lock", (Object)file, (Object)exception);
+                continue;
+            }
+            LevelData levelData = this.getLevelData(file);
+            if (levelData == null || levelData.getVersion() != 19132 && levelData.getVersion() != 19133) continue;
+            boolean bl2 = levelData.getVersion() != this.getStorageVersion();
             String string2 = levelData.getLevelName();
             if (StringUtils.isEmpty(string2)) {
                 string2 = string;
             }
             long l = 0L;
-            list.add(new LevelSummary(levelData, string, string2, 0L, bl));
+            File file2 = new File(file, "icon.png");
+            list.add(new LevelSummary(levelData, string, string2, 0L, bl2, bl, file2));
         }
         return list;
     }
@@ -93,42 +108,19 @@ public class LevelStorageSource {
         return 19133;
     }
 
-    public LevelStorage selectLevel(String string, @Nullable MinecraftServer minecraftServer) {
-        return LevelStorageSource.selectLevel(this.baseDir, this.fixerUpper, string, minecraftServer);
-    }
-
-    protected static LevelStorage selectLevel(Path path, DataFixer dataFixer, String string, @Nullable MinecraftServer minecraftServer) {
-        return new LevelStorage(path.toFile(), string, minecraftServer, dataFixer);
-    }
-
-    public boolean requiresConversion(String string) {
-        LevelData levelData = this.getDataTagFor(string);
-        return levelData != null && levelData.getVersion() != this.getStorageVersion();
-    }
-
-    public boolean convertLevel(String string, ProgressListener progressListener) {
-        return McRegionUpgrader.convertLevel(this.baseDir, this.fixerUpper, string, progressListener);
-    }
-
     @Nullable
-    public LevelData getDataTagFor(String string) {
-        return LevelStorageSource.getDataTagFor(this.baseDir, this.fixerUpper, string);
-    }
-
-    @Nullable
-    protected static LevelData getDataTagFor(Path path, DataFixer dataFixer, String string) {
+    private LevelData getLevelData(File file) {
         LevelData levelData;
-        File file = new File(path.toFile(), string);
         if (!file.exists()) {
             return null;
         }
         File file2 = new File(file, "level.dat");
-        if (file2.exists() && (levelData = LevelStorageSource.getLevelData(file2, dataFixer)) != null) {
+        if (file2.exists() && (levelData = LevelStorageSource.getLevelData(file2, this.fixerUpper)) != null) {
             return levelData;
         }
         file2 = new File(file, "level.dat_old");
         if (file2.exists()) {
-            return LevelStorageSource.getLevelData(file2, dataFixer);
+            return LevelStorageSource.getLevelData(file2, this.fixerUpper);
         }
         return null;
     }
@@ -149,25 +141,6 @@ public class LevelStorageSource {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public void renameLevel(String string, String string2) {
-        File file = new File(this.baseDir.toFile(), string);
-        if (!file.exists()) {
-            return;
-        }
-        File file2 = new File(file, "level.dat");
-        if (file2.exists()) {
-            try {
-                CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file2));
-                CompoundTag compoundTag2 = compoundTag.getCompound("Data");
-                compoundTag2.putString("LevelName", string2);
-                NbtIo.writeCompressed(compoundTag, new FileOutputStream(file2));
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public boolean isNewLevelIdAcceptable(String string) {
         try {
             Path path = this.baseDir.resolve(string);
@@ -180,43 +153,6 @@ public class LevelStorageSource {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public boolean deleteLevel(String string) {
-        File file = new File(this.baseDir.toFile(), string);
-        if (!file.exists()) {
-            return true;
-        }
-        LOGGER.info("Deleting level {}", (Object)string);
-        for (int i = 1; i <= 5; ++i) {
-            LOGGER.info("Attempt {}...", (Object)i);
-            if (LevelStorageSource.deleteRecursive(file.listFiles())) break;
-            LOGGER.warn("Unsuccessful in deleting contents.");
-            if (i >= 5) continue;
-            try {
-                Thread.sleep(500L);
-                continue;
-            } catch (InterruptedException interruptedException) {
-                // empty catch block
-            }
-        }
-        return file.delete();
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    private static boolean deleteRecursive(File[] files) {
-        for (File file : files) {
-            LOGGER.debug("Deleting {}", (Object)file);
-            if (file.isDirectory() && !LevelStorageSource.deleteRecursive(file.listFiles())) {
-                LOGGER.warn("Couldn't delete directory {}", (Object)file);
-                return false;
-            }
-            if (file.delete()) continue;
-            LOGGER.warn("Couldn't delete file {}", (Object)file);
-            return false;
-        }
-        return true;
-    }
-
-    @Environment(value=EnvType.CLIENT)
     public boolean levelExists(String string) {
         return Files.isDirectory(this.baseDir.resolve(string), new LinkOption[0]);
     }
@@ -226,52 +162,180 @@ public class LevelStorageSource {
         return this.baseDir;
     }
 
-    public File getFile(String string, String string2) {
-        return this.baseDir.resolve(string).resolve(string2).toFile();
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    private Path getLevelPath(String string) {
-        return this.baseDir.resolve(string);
-    }
-
     @Environment(value=EnvType.CLIENT)
     public Path getBackupPath() {
         return this.backupDir;
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public long makeWorldBackup(String string) throws IOException {
-        final Path path = this.getLevelPath(string);
-        String string2 = LocalDateTime.now().format(FORMATTER) + "_" + string;
-        Path path2 = this.getBackupPath();
-        try {
-            Files.createDirectories(Files.exists(path2, new LinkOption[0]) ? path2.toRealPath(new LinkOption[0]) : path2, new FileAttribute[0]);
-        } catch (IOException iOException) {
-            throw new RuntimeException(iOException);
-        }
-        Path path3 = path2.resolve(FileUtil.findAvailableName(path2, string2, ".zip"));
-        try (final ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path3, new OpenOption[0])));){
-            final Path path4 = Paths.get(string, new String[0]);
-            Files.walkFileTree(path, (FileVisitor<? super Path>)new SimpleFileVisitor<Path>(){
+    public LevelStorageAccess createAccess(String string) throws IOException {
+        return new LevelStorageAccess(string);
+    }
 
-                @Override
-                public FileVisitResult visitFile(Path path2, BasicFileAttributes basicFileAttributes) throws IOException {
-                    String string = path4.resolve(path.relativize(path2)).toString().replace('\\', '/');
-                    ZipEntry zipEntry = new ZipEntry(string);
-                    zipOutputStream.putNextEntry(zipEntry);
-                    com.google.common.io.Files.asByteSource(path2.toFile()).copyTo(zipOutputStream);
-                    zipOutputStream.closeEntry();
-                    return FileVisitResult.CONTINUE;
-                }
+    public class LevelStorageAccess
+    implements AutoCloseable {
+        private final DirectoryLock lock;
+        private final Path levelPath;
+        private final String levelId;
 
-                @Override
-                public /* synthetic */ FileVisitResult visitFile(Object object, BasicFileAttributes basicFileAttributes) throws IOException {
-                    return this.visitFile((Path)object, basicFileAttributes);
-                }
-            });
+        public LevelStorageAccess(String string) throws IOException {
+            this.levelId = string;
+            this.levelPath = LevelStorageSource.this.baseDir.resolve(string);
+            this.lock = DirectoryLock.create(this.levelPath);
         }
-        return Files.size(path3);
+
+        public String getLevelId() {
+            return this.levelId;
+        }
+
+        public Path getLevelPath() {
+            return this.levelPath;
+        }
+
+        private void checkLock() {
+            if (!this.lock.isValid()) {
+                throw new IllegalStateException("Lock is no longer valid");
+            }
+        }
+
+        public LevelStorage selectLevel(@Nullable MinecraftServer minecraftServer) {
+            this.checkLock();
+            return new LevelStorage(LevelStorageSource.this.baseDir.toFile(), this.levelId, minecraftServer, LevelStorageSource.this.fixerUpper);
+        }
+
+        public boolean requiresConversion() {
+            LevelData levelData = this.getDataTag();
+            return levelData != null && levelData.getVersion() != LevelStorageSource.this.getStorageVersion();
+        }
+
+        public boolean convertLevel(ProgressListener progressListener) {
+            this.checkLock();
+            return McRegionUpgrader.convertLevel(this, progressListener);
+        }
+
+        @Nullable
+        public LevelData getDataTag() {
+            this.checkLock();
+            return LevelStorageSource.this.getLevelData(this.levelPath.toFile());
+        }
+
+        public File getIconFile() {
+            this.checkLock();
+            return this.levelPath.resolve("icon.png").toFile();
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public void deleteLevel() throws IOException {
+            this.checkLock();
+            final Path path = this.levelPath.resolve("session.lock");
+            for (int i = 1; i <= 5; ++i) {
+                LOGGER.info("Attempt {}...", (Object)i);
+                try {
+                    Files.walkFileTree(this.levelPath, (FileVisitor<? super Path>)new SimpleFileVisitor<Path>(){
+
+                        @Override
+                        public FileVisitResult visitFile(Path path2, BasicFileAttributes basicFileAttributes) throws IOException {
+                            if (!path2.equals(path)) {
+                                LOGGER.debug("Deleting {}", (Object)path2);
+                                Files.delete(path2);
+                            }
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public FileVisitResult postVisitDirectory(Path path2, IOException iOException) throws IOException {
+                            if (iOException != null) {
+                                throw iOException;
+                            }
+                            if (path2.equals(LevelStorageAccess.this.levelPath)) {
+                                LevelStorageAccess.this.lock.close();
+                                Files.deleteIfExists(path);
+                            }
+                            Files.delete(path2);
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        public /* synthetic */ FileVisitResult postVisitDirectory(Object object, IOException iOException) throws IOException {
+                            return this.postVisitDirectory((Path)object, iOException);
+                        }
+
+                        @Override
+                        public /* synthetic */ FileVisitResult visitFile(Object object, BasicFileAttributes basicFileAttributes) throws IOException {
+                            return this.visitFile((Path)object, basicFileAttributes);
+                        }
+                    });
+                    break;
+                } catch (IOException iOException) {
+                    if (i < 5) {
+                        LOGGER.warn("Failed to delete {}", (Object)this.levelPath, (Object)iOException);
+                        try {
+                            Thread.sleep(500L);
+                        } catch (InterruptedException interruptedException) {}
+                        continue;
+                    }
+                    throw iOException;
+                }
+            }
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public void renameLevel(String string) throws IOException {
+            this.checkLock();
+            File file = new File(LevelStorageSource.this.baseDir.toFile(), this.levelId);
+            if (!file.exists()) {
+                return;
+            }
+            File file2 = new File(file, "level.dat");
+            if (file2.exists()) {
+                CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file2));
+                CompoundTag compoundTag2 = compoundTag.getCompound("Data");
+                compoundTag2.putString("LevelName", string);
+                NbtIo.writeCompressed(compoundTag, new FileOutputStream(file2));
+            }
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public long makeWorldBackup() throws IOException {
+            this.checkLock();
+            final Path path = this.getLevelPath();
+            String string = LocalDateTime.now().format(FORMATTER) + "_" + this.levelId;
+            Path path2 = LevelStorageSource.this.getBackupPath();
+            try {
+                Files.createDirectories(Files.exists(path2, new LinkOption[0]) ? path2.toRealPath(new LinkOption[0]) : path2, new FileAttribute[0]);
+            } catch (IOException iOException) {
+                throw new RuntimeException(iOException);
+            }
+            Path path3 = path2.resolve(FileUtil.findAvailableName(path2, string, ".zip"));
+            try (final ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path3, new OpenOption[0])));){
+                final Path path4 = Paths.get(this.levelId, new String[0]);
+                Files.walkFileTree(path, (FileVisitor<? super Path>)new SimpleFileVisitor<Path>(){
+
+                    @Override
+                    public FileVisitResult visitFile(Path path2, BasicFileAttributes basicFileAttributes) throws IOException {
+                        if (path2.endsWith("session.lock")) {
+                            return FileVisitResult.CONTINUE;
+                        }
+                        String string = path4.resolve(path.relativize(path2)).toString().replace('\\', '/');
+                        ZipEntry zipEntry = new ZipEntry(string);
+                        zipOutputStream.putNextEntry(zipEntry);
+                        com.google.common.io.Files.asByteSource(path2.toFile()).copyTo(zipOutputStream);
+                        zipOutputStream.closeEntry();
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public /* synthetic */ FileVisitResult visitFile(Object object, BasicFileAttributes basicFileAttributes) throws IOException {
+                        return this.visitFile((Path)object, basicFileAttributes);
+                    }
+                });
+            }
+            return Files.size(path3);
+        }
+
+        @Override
+        public void close() throws IOException {
+            this.lock.close();
+        }
     }
 }
 

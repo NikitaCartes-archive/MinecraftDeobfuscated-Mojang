@@ -7,14 +7,14 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
@@ -29,7 +29,7 @@ extends Feature<BlockStateConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
         int t;
         int j;
         while (blockPos.getY() > 5 && levelAccessor.isEmptyBlock(blockPos)) {
@@ -38,9 +38,7 @@ extends Feature<BlockStateConfiguration> {
         if (blockPos.getY() <= 4) {
             return false;
         }
-        blockPos = blockPos.below(4);
-        ChunkPos chunkPos = new ChunkPos(blockPos);
-        if (!levelAccessor.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(Feature.VILLAGE.getFeatureName()).isEmpty()) {
+        if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos = blockPos.below(4)), Feature.VILLAGE, levelAccessor).findAny().isPresent()) {
             return false;
         }
         boolean[] bls = new boolean[2048];

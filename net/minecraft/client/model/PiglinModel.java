@@ -6,7 +6,7 @@ package net.minecraft.client.model;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.AnimationUtils;
-import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
@@ -14,12 +14,14 @@ import net.minecraft.world.entity.monster.piglin.Piglin;
 
 @Environment(value=EnvType.CLIENT)
 public class PiglinModel<T extends Mob>
-extends HumanoidModel<T> {
+extends PlayerModel<T> {
     public final ModelPart earRight;
     public final ModelPart earLeft;
 
     public PiglinModel(float f, int i, int j) {
-        super(f, 0.0f, i, j);
+        super(f, false);
+        this.texWidth = i;
+        this.texHeight = j;
         this.body = new ModelPart(this, 16, 16);
         this.body.addBox(-4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, f);
         this.head = new ModelPart(this);
@@ -29,25 +31,13 @@ extends HumanoidModel<T> {
         this.head.texOffs(2, 0).addBox(-3.0f, -2.0f, -5.0f, 1.0f, 2.0f, 1.0f, f);
         this.earRight = new ModelPart(this);
         this.earRight.setPos(4.5f, -6.0f, 0.0f);
-        this.earRight.texOffs(57, 38).addBox(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
+        this.earRight.texOffs(51, 6).addBox(0.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
         this.head.addChild(this.earRight);
         this.earLeft = new ModelPart(this);
         this.earLeft.setPos(-4.5f, -6.0f, 0.0f);
+        this.earLeft.texOffs(39, 6).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
         this.head.addChild(this.earLeft);
-        this.earLeft.texOffs(57, 22).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
         this.hat = new ModelPart(this);
-        this.rightArm = new ModelPart(this);
-        this.rightArm.setPos(-5.0f, 2.0f, 0.0f);
-        this.rightArm.texOffs(40, 16).addBox(-3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftArm = new ModelPart(this);
-        this.leftArm.setPos(5.0f, 2.0f, 0.0f);
-        this.leftArm.texOffs(40, 16).addBox(-1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.rightLeg = new ModelPart(this);
-        this.rightLeg.setPos(-1.9f, 12.0f, 0.0f);
-        this.rightLeg.texOffs(0, 16).addBox(-2.1f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
-        this.leftLeg = new ModelPart(this);
-        this.leftLeg.setPos(1.9f, 12.0f, 0.0f);
-        this.leftLeg.texOffs(0, 16).addBox(-1.9f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, f);
     }
 
     @Override

@@ -909,6 +909,7 @@ public class Items {
     public static final Item WITCH_SPAWN_EGG = Items.registerItem("witch_spawn_egg", (Item)new SpawnEggItem(EntityType.WITCH, 0x340000, 5349438, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item WITHER_SKELETON_SPAWN_EGG = Items.registerItem("wither_skeleton_spawn_egg", (Item)new SpawnEggItem(EntityType.WITHER_SKELETON, 0x141414, 0x474D4D, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item WOLF_SPAWN_EGG = Items.registerItem("wolf_spawn_egg", (Item)new SpawnEggItem(EntityType.WOLF, 0xD7D3D3, 13545366, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item ZOGLIN_SPAWN_EGG = Items.registerItem("zoglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOGLIN, 13004373, 0xE6E6E6, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_SPAWN_EGG = Items.registerItem("zombie_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE, 44975, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_HORSE_SPAWN_EGG = Items.registerItem("zombie_horse_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_HORSE, 3232308, 9945732, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = Items.registerItem("zombified_piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
@@ -932,8 +933,8 @@ public class Items {
     public static final Item ZOMBIE_HEAD = Items.registerBlock(new StandingAndWallBlockItem(Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON)));
     public static final Item CREEPER_HEAD = Items.registerBlock(new StandingAndWallBlockItem(Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON)));
     public static final Item DRAGON_HEAD = Items.registerBlock(new StandingAndWallBlockItem(Blocks.DRAGON_HEAD, Blocks.DRAGON_WALL_HEAD, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS).rarity(Rarity.UNCOMMON)));
-    public static final Item CARROT_ON_A_STICK = Items.registerItem("carrot_on_a_stick", new FoodOnAStickItem<Pig>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG));
-    public static final Item WARPED_FUNGUS_ON_A_STICK = Items.registerItem("warped_fungus_on_a_stick", new FoodOnAStickItem<Strider>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER));
+    public static final Item CARROT_ON_A_STICK = Items.registerItem("carrot_on_a_stick", new FoodOnAStickItem<Pig>(new Item.Properties().durability(25).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.PIG, 7));
+    public static final Item WARPED_FUNGUS_ON_A_STICK = Items.registerItem("warped_fungus_on_a_stick", new FoodOnAStickItem<Strider>(new Item.Properties().durability(100).tab(CreativeModeTab.TAB_TRANSPORTATION), EntityType.STRIDER, 1));
     public static final Item NETHER_STAR = Items.registerItem("nether_star", (Item)new SimpleFoiledItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS).rarity(Rarity.UNCOMMON)));
     public static final Item PUMPKIN_PIE = Items.registerItem("pumpkin_pie", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.PUMPKIN_PIE)));
     public static final Item FIREWORK_ROCKET = Items.registerItem("firework_rocket", (Item)new FireworkRocketItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));

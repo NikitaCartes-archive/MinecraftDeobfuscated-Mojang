@@ -39,9 +39,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
@@ -52,7 +51,6 @@ import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -74,7 +72,6 @@ implements ContainerListener,
 PlayerRideableJumping {
     private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isBred();
     private static final TargetingConditions MOMMY_TARGETING = new TargetingConditions().range(16.0).allowInvulnerable().allowSameTeam().allowUnseeable().selector(PARENT_HORSE_SELECTOR);
-    protected static final Attribute JUMP_STRENGTH = new RangedAttribute(null, "horse.jumpStrength", 0.7, 0.0, 2.0).importLegacyName("Jump Strength").setSyncable(true);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Optional<UUID>> DATA_ID_OWNER_UUID = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.OPTIONAL_UUID);
     private int eatingCounter;
@@ -205,15 +202,6 @@ PlayerRideableJumping {
     }
 
     @Override
-    public boolean hurt(DamageSource damageSource, float f) {
-        Entity entity = damageSource.getEntity();
-        if (this.isVehicle() && entity != null && this.hasIndirectPassenger(entity)) {
-            return false;
-        }
-        return super.hurt(damageSource, f);
-    }
-
-    @Override
     public boolean isPushable() {
         return !this.isVehicle();
     }
@@ -286,7 +274,7 @@ PlayerRideableJumping {
     }
 
     public double getCustomJump() {
-        return this.getAttribute(JUMP_STRENGTH).getValue();
+        return this.getAttributeValue(Attributes.JUMP_STRENGTH);
     }
 
     @Override
@@ -355,12 +343,8 @@ PlayerRideableJumping {
         this.playSound(SoundEvents.HORSE_GALLOP, soundType.getVolume() * 0.15f, soundType.getPitch());
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttributes().registerAttribute(JUMP_STRENGTH);
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(53.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.225f);
+    public static AttributeSupplier.Builder createBaseHorseAttributes() {
+        return Mob.createMobAttributes().add(Attributes.JUMP_STRENGTH).add(Attributes.MAX_HEALTH, 53.0).add(Attributes.MOVEMENT_SPEED, 0.225f);
     }
 
     @Override
@@ -668,7 +652,7 @@ PlayerRideableJumping {
         }
         this.flyingSpeed = this.getSpeed() * 0.1f;
         if (this.isControlledByLocalInstance()) {
-            this.setSpeed((float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+            this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
             super.travel(new Vec3(f, vec3.y, g));
         } else if (livingEntity instanceof Player) {
             this.setDeltaMovement(Vec3.ZERO);
@@ -709,7 +693,6 @@ PlayerRideableJumping {
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         ItemStack itemStack;
-        AttributeInstance attributeInstance;
         UUID uUID;
         super.readAdditionalSaveData(compoundTag);
         this.setEating(compoundTag.getBoolean("EatingHaystack"));
@@ -724,9 +707,6 @@ PlayerRideableJumping {
         }
         if (uUID != null) {
             this.setOwnerUUID(uUID);
-        }
-        if ((attributeInstance = this.getAttributes().getInstance("Speed")) != null) {
-            this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(attributeInstance.getBaseValue() * 0.25);
         }
         if (compoundTag.contains("SaddleItem", 10) && (itemStack = ItemStack.of(compoundTag.getCompound("SaddleItem"))).getItem() == Items.SADDLE) {
             this.inventory.setItem(0, itemStack);
@@ -750,12 +730,12 @@ PlayerRideableJumping {
     }
 
     protected void setOffspringAttributes(AgableMob agableMob, AbstractHorse abstractHorse) {
-        double d = this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue() + agableMob.getAttribute(SharedMonsterAttributes.MAX_HEALTH).getBaseValue() + (double)this.generateRandomMaxHealth();
-        abstractHorse.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(d / 3.0);
-        double e = this.getAttribute(JUMP_STRENGTH).getBaseValue() + agableMob.getAttribute(JUMP_STRENGTH).getBaseValue() + this.generateRandomJumpStrength();
-        abstractHorse.getAttribute(JUMP_STRENGTH).setBaseValue(e / 3.0);
-        double f = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getBaseValue() + agableMob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getBaseValue() + this.generateRandomSpeed();
-        abstractHorse.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(f / 3.0);
+        double d = this.getAttributeBaseValue(Attributes.MAX_HEALTH) + agableMob.getAttributeBaseValue(Attributes.MAX_HEALTH) + (double)this.generateRandomMaxHealth();
+        abstractHorse.getAttribute(Attributes.MAX_HEALTH).setBaseValue(d / 3.0);
+        double e = this.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + agableMob.getAttributeBaseValue(Attributes.JUMP_STRENGTH) + this.generateRandomJumpStrength();
+        abstractHorse.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(e / 3.0);
+        double f = this.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + agableMob.getAttributeBaseValue(Attributes.MOVEMENT_SPEED) + this.generateRandomSpeed();
+        abstractHorse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(f / 3.0);
     }
 
     @Override
@@ -932,6 +912,9 @@ PlayerRideableJumping {
         return new Vec3(this.getX(), this.getY(), this.getZ());
     }
 
+    protected void randomizeAttributes() {
+    }
+
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
@@ -939,6 +922,7 @@ PlayerRideableJumping {
             spawnGroupData = new AgableMob.AgableMobGroupData();
             ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2f);
         }
+        this.randomizeAttributes();
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 }

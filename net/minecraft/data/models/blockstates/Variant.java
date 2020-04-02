@@ -14,7 +14,7 @@ import net.minecraft.data.models.blockstates.VariantProperty;
 
 public class Variant
 implements Supplier<JsonElement> {
-    private final Map<VariantProperty<?>, VariantProperty.Value> values = Maps.newHashMap();
+    private final Map<VariantProperty<?>, VariantProperty.Value> values = Maps.newLinkedHashMap();
 
     public <T> Variant with(VariantProperty<T> variantProperty, T object) {
         VariantProperty.Value value = this.values.put(variantProperty, variantProperty.withValue(object));

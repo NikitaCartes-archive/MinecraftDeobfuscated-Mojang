@@ -22,10 +22,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +50,13 @@ extends AbstractHorse {
 
     public Horse(EntityType<? extends Horse> entityType, Level level) {
         super((EntityType<? extends AbstractHorse>)entityType, level);
+    }
+
+    @Override
+    protected void randomizeAttributes() {
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed());
+        this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
     }
 
     @Override
@@ -137,9 +144,9 @@ extends AbstractHorse {
         this.setArmor(itemStack);
         if (!this.level.isClientSide) {
             int i;
-            this.getAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMOR_MODIFIER_UUID);
+            this.getAttribute(Attributes.ARMOR).removeModifier(ARMOR_MODIFIER_UUID);
             if (this.isArmor(itemStack) && (i = ((HorseArmorItem)itemStack.getItem()).getProtection()) != 0) {
-                this.getAttribute(SharedMonsterAttributes.ARMOR).addModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "Horse armor bonus", (double)i, AttributeModifier.Operation.ADDITION).setSerialize(false));
+                this.getAttribute(Attributes.ARMOR).addTransientModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "Horse armor bonus", (double)i, AttributeModifier.Operation.ADDITION));
             }
         }
     }
@@ -160,14 +167,6 @@ extends AbstractHorse {
         if (this.random.nextInt(10) == 0) {
             this.playSound(SoundEvents.HORSE_BREATHE, soundType.getVolume() * 0.6f, soundType.getPitch());
         }
-    }
-
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(this.generateRandomMaxHealth());
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed());
-        this.getAttribute(JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
     }
 
     @Override

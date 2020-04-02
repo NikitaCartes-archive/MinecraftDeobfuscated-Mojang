@@ -181,6 +181,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.SnooperPopulator;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -1395,8 +1396,17 @@ WindowEventHandler {
     }
 
     public void selectLevel(String string, String string2, @Nullable LevelSettings levelSettings) {
+        LevelStorageSource.LevelStorageAccess levelStorageAccess;
         this.clearLevel();
-        LevelStorage levelStorage = this.levelSource.selectLevel(string, null);
+        try {
+            levelStorageAccess = this.levelSource.createAccess(string);
+        } catch (IOException iOException) {
+            LOGGER.warn("Failed to read level {} data", (Object)string, (Object)iOException);
+            SystemToast.onWorldAccessFailure(this, string);
+            this.setScreen(null);
+            return;
+        }
+        LevelStorage levelStorage = levelStorageAccess.selectLevel(null);
         LevelData levelData = levelStorage.prepareLevel();
         if (levelData == null && levelSettings != null) {
             levelData = new LevelData(levelSettings, string);
@@ -1414,7 +1424,7 @@ WindowEventHandler {
             SkullBlockEntity.setProfileCache(gameProfileCache);
             SkullBlockEntity.setSessionService(minecraftSessionService);
             GameProfileCache.setUsesAuthentication(false);
-            this.singleplayerServer = new IntegratedServer(this, string, string2, levelSettings, yggdrasilAuthenticationService, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
+            this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, string2, levelSettings, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
                 storingChunkProgressListener.start();
                 this.progressListener.set(storingChunkProgressListener);
@@ -1885,6 +1895,10 @@ WindowEventHandler {
     public void setCameraEntity(Entity entity) {
         this.cameraEntity = entity;
         this.gameRenderer.checkEntityPostEffect(entity);
+    }
+
+    public boolean shouldEntityAppearGlowing(Entity entity) {
+        return entity.isGlowing() || this.player != null && this.player.isSpectator() && this.options.keySpectatorOutlines.isDown() && entity.getType() == EntityType.PLAYER;
     }
 
     @Override

@@ -107,7 +107,7 @@ implements CommandSource {
         }
         this.successCount = 0;
         MinecraftServer minecraftServer = this.getLevel().getServer();
-        if (minecraftServer != null && minecraftServer.isInitialized() && minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
+        if (minecraftServer != null && minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
             try {
                 this.lastOutput = null;
                 CommandSourceStack commandSourceStack = this.createCommandSourceStack().withCallback((commandContext, bl, i) -> {

@@ -61,7 +61,6 @@ extends Projectile {
     public Pickup pickup = Pickup.DISALLOWED;
     public int shakeTime;
     private int life;
-    private int flightTime;
     private double baseDamage = 2.0;
     private int knockback;
     private SoundEvent soundEvent = this.getDefaultHitGroundSoundEvent();
@@ -165,7 +164,6 @@ extends Projectile {
             return;
         }
         this.inGroundTime = 0;
-        ++this.flightTime;
         Vec3 vec33 = this.position();
         HitResult hitResult = this.level.clip(new ClipContext(vec33, vec32 = vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         if (hitResult.getType() != HitResult.Type.MISS) {
@@ -206,20 +204,8 @@ extends Projectile {
         float l = Mth.sqrt(AbstractArrow.getHorizontalDistanceSqr(vec3));
         this.yRot = bl ? (float)(Mth.atan2(-d, -g) * 57.2957763671875) : (float)(Mth.atan2(d, g) * 57.2957763671875);
         this.xRot = (float)(Mth.atan2(e, l) * 57.2957763671875);
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
-        this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
-        this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
+        this.xRot = AbstractArrow.lerpRotation(this.xRotO, this.xRot);
+        this.yRot = AbstractArrow.lerpRotation(this.yRotO, this.yRot);
         float m = 0.99f;
         float n = 0.05f;
         if (this.isInWater()) {
@@ -247,7 +233,6 @@ extends Projectile {
         Vec3 vec3 = this.getDeltaMovement();
         this.setDeltaMovement(vec3.multiply(this.random.nextFloat() * 0.2f, this.random.nextFloat() * 0.2f, this.random.nextFloat() * 0.2f));
         this.life = 0;
-        this.flightTime = 0;
     }
 
     @Override
@@ -354,7 +339,6 @@ extends Projectile {
             this.setDeltaMovement(this.getDeltaMovement().scale(-0.1));
             this.yRot += 180.0f;
             this.yRotO += 180.0f;
-            this.flightTime = 0;
             if (!this.level.isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
                 if (this.pickup == Pickup.ALLOWED) {
                     this.spawnAtLocation(this.getPickupItem(), 0.1f);
@@ -395,7 +379,12 @@ extends Projectile {
 
     @Nullable
     protected EntityHitResult findHitEntity(Vec3 vec3, Vec3 vec32) {
-        return ProjectileUtil.getHitResult(this.level, this, vec3, vec32, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entity -> !(entity.isSpectator() || !entity.isAlive() || !entity.isPickable() || entity == this.getOwner() && this.flightTime < 5 || this.piercingIgnoreEntityIds != null && this.piercingIgnoreEntityIds.contains(entity.getId())));
+        return ProjectileUtil.getEntityHitResult(this.level, this, vec3, vec32, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), this::canHitEntity);
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        return super.canHitEntity(entity) && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()));
     }
 
     @Override

@@ -63,7 +63,7 @@ extends Block {
         double f = Math.abs(Mth.frac(vec3.z) - 0.5);
         Direction.Axis axis = direction.getAxis();
         double g = axis == Direction.Axis.Y ? Math.max(d, f) : (axis == Direction.Axis.Z ? Math.max(d, e) : Math.max(e, f));
-        return Mth.ceil(15.0 * Mth.clamp((0.5 - g) / 0.5, 0.0, 1.0));
+        return Math.max(1, Mth.ceil(15.0 * Mth.clamp((0.5 - g) / 0.5, 0.0, 1.0)));
     }
 
     private static void setOutputPower(LevelAccessor levelAccessor, BlockState blockState, int i, BlockPos blockPos, int j) {

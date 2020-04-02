@@ -3,214 +3,97 @@
  */
 package net.minecraft.tags;
 
-import java.util.Collection;
-import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.block.Block;
 
 public class BlockTags {
-    private static TagCollection<Block> source = new TagCollection(resourceLocation -> Optional.empty(), "", false, "");
-    private static int resetCount;
-    public static final Tag<Block> WOOL;
-    public static final Tag<Block> PLANKS;
-    public static final Tag<Block> STONE_BRICKS;
-    public static final Tag<Block> WOODEN_BUTTONS;
-    public static final Tag<Block> BUTTONS;
-    public static final Tag<Block> CARPETS;
-    public static final Tag<Block> WOODEN_DOORS;
-    public static final Tag<Block> WOODEN_STAIRS;
-    public static final Tag<Block> WOODEN_SLABS;
-    public static final Tag<Block> WOODEN_FENCES;
-    public static final Tag<Block> WOODEN_PRESSURE_PLATES;
-    public static final Tag<Block> WOODEN_TRAPDOORS;
-    public static final Tag<Block> DOORS;
-    public static final Tag<Block> SAPLINGS;
-    public static final Tag<Block> LOGS_THAT_BURN;
-    public static final Tag<Block> LOGS;
-    public static final Tag<Block> DARK_OAK_LOGS;
-    public static final Tag<Block> OAK_LOGS;
-    public static final Tag<Block> BIRCH_LOGS;
-    public static final Tag<Block> ACACIA_LOGS;
-    public static final Tag<Block> JUNGLE_LOGS;
-    public static final Tag<Block> SPRUCE_LOGS;
-    public static final Tag<Block> CRIMSON_STEMS;
-    public static final Tag<Block> WARPED_STEMS;
-    public static final Tag<Block> BANNERS;
-    public static final Tag<Block> SAND;
-    public static final Tag<Block> STAIRS;
-    public static final Tag<Block> SLABS;
-    public static final Tag<Block> WALLS;
-    public static final Tag<Block> ANVIL;
-    public static final Tag<Block> RAILS;
-    public static final Tag<Block> LEAVES;
-    public static final Tag<Block> TRAPDOORS;
-    public static final Tag<Block> SMALL_FLOWERS;
-    public static final Tag<Block> BEDS;
-    public static final Tag<Block> FENCES;
-    public static final Tag<Block> TALL_FLOWERS;
-    public static final Tag<Block> FLOWERS;
-    public static final Tag<Block> PIGLIN_REPELLENTS;
-    public static final Tag<Block> GOLD_ORES;
-    public static final Tag<Block> NON_FLAMMABLE_WOOD;
-    public static final Tag<Block> FLOWER_POTS;
-    public static final Tag<Block> ENDERMAN_HOLDABLE;
-    public static final Tag<Block> ICE;
-    public static final Tag<Block> VALID_SPAWN;
-    public static final Tag<Block> IMPERMEABLE;
-    public static final Tag<Block> UNDERWATER_BONEMEALS;
-    public static final Tag<Block> CORAL_BLOCKS;
-    public static final Tag<Block> WALL_CORALS;
-    public static final Tag<Block> CORAL_PLANTS;
-    public static final Tag<Block> CORALS;
-    public static final Tag<Block> BAMBOO_PLANTABLE_ON;
-    public static final Tag<Block> STANDING_SIGNS;
-    public static final Tag<Block> WALL_SIGNS;
-    public static final Tag<Block> SIGNS;
-    public static final Tag<Block> DRAGON_IMMUNE;
-    public static final Tag<Block> WITHER_IMMUNE;
-    public static final Tag<Block> WITHER_SUMMON_BASE_BLOCKS;
-    public static final Tag<Block> BEEHIVES;
-    public static final Tag<Block> CROPS;
-    public static final Tag<Block> BEE_GROWABLES;
-    public static final Tag<Block> PORTALS;
-    public static final Tag<Block> FIRE;
-    public static final Tag<Block> NYLIUM;
-    public static final Tag<Block> WART_BLOCKS;
-    public static final Tag<Block> BEACON_BASE_BLOCKS;
-    public static final Tag<Block> SOUL_SPEED_BLOCKS;
-    public static final Tag<Block> WALL_POST_OVERRIDE;
-    public static final Tag<Block> CLIMBABLE;
-    public static final Tag<Block> SHULKER_BOXES;
-    public static final Tag<Block> HOGLIN_REPELLENTS;
-    public static final Tag<Block> SOUL_FIRE_BASE_BLOCKS;
-    public static final Tag<Block> STRIDER_WARM_BLOCKS;
+    private static final StaticTagHelper<Block> HELPER = new StaticTagHelper();
+    public static final Tag.Named<Block> WOOL = BlockTags.bind("wool");
+    public static final Tag.Named<Block> PLANKS = BlockTags.bind("planks");
+    public static final Tag.Named<Block> STONE_BRICKS = BlockTags.bind("stone_bricks");
+    public static final Tag.Named<Block> WOODEN_BUTTONS = BlockTags.bind("wooden_buttons");
+    public static final Tag.Named<Block> BUTTONS = BlockTags.bind("buttons");
+    public static final Tag.Named<Block> CARPETS = BlockTags.bind("carpets");
+    public static final Tag.Named<Block> WOODEN_DOORS = BlockTags.bind("wooden_doors");
+    public static final Tag.Named<Block> WOODEN_STAIRS = BlockTags.bind("wooden_stairs");
+    public static final Tag.Named<Block> WOODEN_SLABS = BlockTags.bind("wooden_slabs");
+    public static final Tag.Named<Block> WOODEN_FENCES = BlockTags.bind("wooden_fences");
+    public static final Tag.Named<Block> WOODEN_PRESSURE_PLATES = BlockTags.bind("wooden_pressure_plates");
+    public static final Tag.Named<Block> WOODEN_TRAPDOORS = BlockTags.bind("wooden_trapdoors");
+    public static final Tag.Named<Block> DOORS = BlockTags.bind("doors");
+    public static final Tag.Named<Block> SAPLINGS = BlockTags.bind("saplings");
+    public static final Tag.Named<Block> LOGS_THAT_BURN = BlockTags.bind("logs_that_burn");
+    public static final Tag.Named<Block> LOGS = BlockTags.bind("logs");
+    public static final Tag.Named<Block> DARK_OAK_LOGS = BlockTags.bind("dark_oak_logs");
+    public static final Tag.Named<Block> OAK_LOGS = BlockTags.bind("oak_logs");
+    public static final Tag.Named<Block> BIRCH_LOGS = BlockTags.bind("birch_logs");
+    public static final Tag.Named<Block> ACACIA_LOGS = BlockTags.bind("acacia_logs");
+    public static final Tag.Named<Block> JUNGLE_LOGS = BlockTags.bind("jungle_logs");
+    public static final Tag.Named<Block> SPRUCE_LOGS = BlockTags.bind("spruce_logs");
+    public static final Tag.Named<Block> CRIMSON_STEMS = BlockTags.bind("crimson_stems");
+    public static final Tag.Named<Block> WARPED_STEMS = BlockTags.bind("warped_stems");
+    public static final Tag.Named<Block> BANNERS = BlockTags.bind("banners");
+    public static final Tag.Named<Block> SAND = BlockTags.bind("sand");
+    public static final Tag.Named<Block> STAIRS = BlockTags.bind("stairs");
+    public static final Tag.Named<Block> SLABS = BlockTags.bind("slabs");
+    public static final Tag.Named<Block> WALLS = BlockTags.bind("walls");
+    public static final Tag.Named<Block> ANVIL = BlockTags.bind("anvil");
+    public static final Tag.Named<Block> RAILS = BlockTags.bind("rails");
+    public static final Tag.Named<Block> LEAVES = BlockTags.bind("leaves");
+    public static final Tag.Named<Block> TRAPDOORS = BlockTags.bind("trapdoors");
+    public static final Tag.Named<Block> SMALL_FLOWERS = BlockTags.bind("small_flowers");
+    public static final Tag.Named<Block> BEDS = BlockTags.bind("beds");
+    public static final Tag.Named<Block> FENCES = BlockTags.bind("fences");
+    public static final Tag.Named<Block> TALL_FLOWERS = BlockTags.bind("tall_flowers");
+    public static final Tag.Named<Block> FLOWERS = BlockTags.bind("flowers");
+    public static final Tag.Named<Block> PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
+    public static final Tag.Named<Block> GOLD_ORES = BlockTags.bind("gold_ores");
+    public static final Tag.Named<Block> NON_FLAMMABLE_WOOD = BlockTags.bind("non_flammable_wood");
+    public static final Tag.Named<Block> FLOWER_POTS = BlockTags.bind("flower_pots");
+    public static final Tag.Named<Block> ENDERMAN_HOLDABLE = BlockTags.bind("enderman_holdable");
+    public static final Tag.Named<Block> ICE = BlockTags.bind("ice");
+    public static final Tag.Named<Block> VALID_SPAWN = BlockTags.bind("valid_spawn");
+    public static final Tag.Named<Block> IMPERMEABLE = BlockTags.bind("impermeable");
+    public static final Tag.Named<Block> UNDERWATER_BONEMEALS = BlockTags.bind("underwater_bonemeals");
+    public static final Tag.Named<Block> CORAL_BLOCKS = BlockTags.bind("coral_blocks");
+    public static final Tag.Named<Block> WALL_CORALS = BlockTags.bind("wall_corals");
+    public static final Tag.Named<Block> CORAL_PLANTS = BlockTags.bind("coral_plants");
+    public static final Tag.Named<Block> CORALS = BlockTags.bind("corals");
+    public static final Tag.Named<Block> BAMBOO_PLANTABLE_ON = BlockTags.bind("bamboo_plantable_on");
+    public static final Tag.Named<Block> STANDING_SIGNS = BlockTags.bind("standing_signs");
+    public static final Tag.Named<Block> WALL_SIGNS = BlockTags.bind("wall_signs");
+    public static final Tag.Named<Block> SIGNS = BlockTags.bind("signs");
+    public static final Tag.Named<Block> DRAGON_IMMUNE = BlockTags.bind("dragon_immune");
+    public static final Tag.Named<Block> WITHER_IMMUNE = BlockTags.bind("wither_immune");
+    public static final Tag.Named<Block> WITHER_SUMMON_BASE_BLOCKS = BlockTags.bind("wither_summon_base_blocks");
+    public static final Tag.Named<Block> BEEHIVES = BlockTags.bind("beehives");
+    public static final Tag.Named<Block> CROPS = BlockTags.bind("crops");
+    public static final Tag.Named<Block> BEE_GROWABLES = BlockTags.bind("bee_growables");
+    public static final Tag.Named<Block> PORTALS = BlockTags.bind("portals");
+    public static final Tag.Named<Block> FIRE = BlockTags.bind("fire");
+    public static final Tag.Named<Block> NYLIUM = BlockTags.bind("nylium");
+    public static final Tag.Named<Block> WART_BLOCKS = BlockTags.bind("wart_blocks");
+    public static final Tag.Named<Block> BEACON_BASE_BLOCKS = BlockTags.bind("beacon_base_blocks");
+    public static final Tag.Named<Block> SOUL_SPEED_BLOCKS = BlockTags.bind("soul_speed_blocks");
+    public static final Tag.Named<Block> WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
+    public static final Tag.Named<Block> CLIMBABLE = BlockTags.bind("climbable");
+    public static final Tag.Named<Block> SHULKER_BOXES = BlockTags.bind("shulker_boxes");
+    public static final Tag.Named<Block> HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
+    public static final Tag.Named<Block> SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");
+    public static final Tag.Named<Block> STRIDER_WARM_BLOCKS = BlockTags.bind("strider_warm_blocks");
+
+    private static Tag.Named<Block> bind(String string) {
+        return HELPER.bind(string);
+    }
 
     public static void reset(TagCollection<Block> tagCollection) {
-        source = tagCollection;
-        ++resetCount;
+        HELPER.reset(tagCollection);
     }
 
     public static TagCollection<Block> getAllTags() {
-        return source;
-    }
-
-    private static Tag<Block> bind(String string) {
-        return new Wrapper(new ResourceLocation(string));
-    }
-
-    static {
-        WOOL = BlockTags.bind("wool");
-        PLANKS = BlockTags.bind("planks");
-        STONE_BRICKS = BlockTags.bind("stone_bricks");
-        WOODEN_BUTTONS = BlockTags.bind("wooden_buttons");
-        BUTTONS = BlockTags.bind("buttons");
-        CARPETS = BlockTags.bind("carpets");
-        WOODEN_DOORS = BlockTags.bind("wooden_doors");
-        WOODEN_STAIRS = BlockTags.bind("wooden_stairs");
-        WOODEN_SLABS = BlockTags.bind("wooden_slabs");
-        WOODEN_FENCES = BlockTags.bind("wooden_fences");
-        WOODEN_PRESSURE_PLATES = BlockTags.bind("wooden_pressure_plates");
-        WOODEN_TRAPDOORS = BlockTags.bind("wooden_trapdoors");
-        DOORS = BlockTags.bind("doors");
-        SAPLINGS = BlockTags.bind("saplings");
-        LOGS_THAT_BURN = BlockTags.bind("logs_that_burn");
-        LOGS = BlockTags.bind("logs");
-        DARK_OAK_LOGS = BlockTags.bind("dark_oak_logs");
-        OAK_LOGS = BlockTags.bind("oak_logs");
-        BIRCH_LOGS = BlockTags.bind("birch_logs");
-        ACACIA_LOGS = BlockTags.bind("acacia_logs");
-        JUNGLE_LOGS = BlockTags.bind("jungle_logs");
-        SPRUCE_LOGS = BlockTags.bind("spruce_logs");
-        CRIMSON_STEMS = BlockTags.bind("crimson_stems");
-        WARPED_STEMS = BlockTags.bind("warped_stems");
-        BANNERS = BlockTags.bind("banners");
-        SAND = BlockTags.bind("sand");
-        STAIRS = BlockTags.bind("stairs");
-        SLABS = BlockTags.bind("slabs");
-        WALLS = BlockTags.bind("walls");
-        ANVIL = BlockTags.bind("anvil");
-        RAILS = BlockTags.bind("rails");
-        LEAVES = BlockTags.bind("leaves");
-        TRAPDOORS = BlockTags.bind("trapdoors");
-        SMALL_FLOWERS = BlockTags.bind("small_flowers");
-        BEDS = BlockTags.bind("beds");
-        FENCES = BlockTags.bind("fences");
-        TALL_FLOWERS = BlockTags.bind("tall_flowers");
-        FLOWERS = BlockTags.bind("flowers");
-        PIGLIN_REPELLENTS = BlockTags.bind("piglin_repellents");
-        GOLD_ORES = BlockTags.bind("gold_ores");
-        NON_FLAMMABLE_WOOD = BlockTags.bind("non_flammable_wood");
-        FLOWER_POTS = BlockTags.bind("flower_pots");
-        ENDERMAN_HOLDABLE = BlockTags.bind("enderman_holdable");
-        ICE = BlockTags.bind("ice");
-        VALID_SPAWN = BlockTags.bind("valid_spawn");
-        IMPERMEABLE = BlockTags.bind("impermeable");
-        UNDERWATER_BONEMEALS = BlockTags.bind("underwater_bonemeals");
-        CORAL_BLOCKS = BlockTags.bind("coral_blocks");
-        WALL_CORALS = BlockTags.bind("wall_corals");
-        CORAL_PLANTS = BlockTags.bind("coral_plants");
-        CORALS = BlockTags.bind("corals");
-        BAMBOO_PLANTABLE_ON = BlockTags.bind("bamboo_plantable_on");
-        STANDING_SIGNS = BlockTags.bind("standing_signs");
-        WALL_SIGNS = BlockTags.bind("wall_signs");
-        SIGNS = BlockTags.bind("signs");
-        DRAGON_IMMUNE = BlockTags.bind("dragon_immune");
-        WITHER_IMMUNE = BlockTags.bind("wither_immune");
-        WITHER_SUMMON_BASE_BLOCKS = BlockTags.bind("wither_summon_base_blocks");
-        BEEHIVES = BlockTags.bind("beehives");
-        CROPS = BlockTags.bind("crops");
-        BEE_GROWABLES = BlockTags.bind("bee_growables");
-        PORTALS = BlockTags.bind("portals");
-        FIRE = BlockTags.bind("fire");
-        NYLIUM = BlockTags.bind("nylium");
-        WART_BLOCKS = BlockTags.bind("wart_blocks");
-        BEACON_BASE_BLOCKS = BlockTags.bind("beacon_base_blocks");
-        SOUL_SPEED_BLOCKS = BlockTags.bind("soul_speed_blocks");
-        WALL_POST_OVERRIDE = BlockTags.bind("wall_post_override");
-        CLIMBABLE = BlockTags.bind("climbable");
-        SHULKER_BOXES = BlockTags.bind("shulker_boxes");
-        HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
-        SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");
-        STRIDER_WARM_BLOCKS = BlockTags.bind("strider_warm_blocks");
-    }
-
-    static class Wrapper
-    extends Tag<Block> {
-        private int check = -1;
-        private Tag<Block> actual;
-
-        public Wrapper(ResourceLocation resourceLocation) {
-            super(resourceLocation);
-        }
-
-        @Override
-        public boolean contains(Block block) {
-            if (this.check != resetCount) {
-                this.actual = source.getTagOrEmpty(this.getId());
-                this.check = resetCount;
-            }
-            return this.actual.contains(block);
-        }
-
-        @Override
-        public Collection<Block> getValues() {
-            if (this.check != resetCount) {
-                this.actual = source.getTagOrEmpty(this.getId());
-                this.check = resetCount;
-            }
-            return this.actual.getValues();
-        }
-
-        @Override
-        public Collection<Tag.Entry<Block>> getSource() {
-            if (this.check != resetCount) {
-                this.actual = source.getTagOrEmpty(this.getId());
-                this.check = resetCount;
-            }
-            return this.actual.getSource();
-        }
+        return HELPER.getAllTags();
     }
 }
 

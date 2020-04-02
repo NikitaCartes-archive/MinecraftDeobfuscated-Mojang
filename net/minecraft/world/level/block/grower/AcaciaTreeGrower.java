@@ -8,15 +8,15 @@ import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 public class AcaciaTreeGrower
 extends AbstractTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
-        return Feature.ACACIA_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG);
+    protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
+        return Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.ACACIA_TREE_CONFIG);
     }
 }
 

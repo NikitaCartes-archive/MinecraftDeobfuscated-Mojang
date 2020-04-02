@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.storage;
 
+import java.io.File;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -29,10 +30,14 @@ implements Comparable<LevelSummary> {
     private final int worldVersion;
     private final boolean snapshot;
     private final LevelType generatorType;
+    private final boolean locked;
+    private final File icon;
 
-    public LevelSummary(LevelData levelData, String string, String string2, long l, boolean bl) {
+    public LevelSummary(LevelData levelData, String string, String string2, long l, boolean bl, boolean bl2, File file) {
         this.levelId = string;
         this.levelName = string2;
+        this.locked = bl2;
+        this.icon = file;
         this.lastPlayed = levelData.getLastPlayed();
         this.sizeOnDisk = l;
         this.gameMode = levelData.getGameType();
@@ -51,6 +56,10 @@ implements Comparable<LevelSummary> {
 
     public String getLevelName() {
         return this.levelName;
+    }
+
+    public File getIcon() {
+        return this.icon;
     }
 
     public boolean isRequiresConversion() {
@@ -105,6 +114,10 @@ implements Comparable<LevelSummary> {
 
     public boolean shouldBackup() {
         return this.worldVersion < SharedConstants.getCurrentVersion().getWorldVersion();
+    }
+
+    public boolean isLocked() {
+        return this.locked;
     }
 
     @Override

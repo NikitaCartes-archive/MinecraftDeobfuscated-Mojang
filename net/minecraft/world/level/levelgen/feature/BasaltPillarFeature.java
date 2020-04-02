@@ -9,7 +9,9 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -23,7 +25,7 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         if (!levelAccessor.isEmptyBlock(blockPos) || levelAccessor.isEmptyBlock(blockPos.above())) {
             return false;
         }
@@ -34,6 +36,9 @@ extends Feature<NoneFeatureConfiguration> {
         boolean bl3 = true;
         boolean bl4 = true;
         while (levelAccessor.isEmptyBlock(mutableBlockPos)) {
+            if (Level.isOutsideBuildHeight(mutableBlockPos)) {
+                return true;
+            }
             levelAccessor.setBlock(mutableBlockPos, Blocks.BASALT.defaultBlockState(), 2);
             bl = bl && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
             bl2 = bl2 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));

@@ -166,7 +166,7 @@ AutoCloseable {
     private boolean generateClouds = true;
     @Nullable
     private VertexBuffer cloudBuffer;
-    private RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
+    private final RunningTrimmedMean frameTimes = new RunningTrimmedMean(100);
     private int ticks;
     private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<BlockDestructionProgress>();
     private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<SortedSet<BlockDestructionProgress>>();
@@ -857,7 +857,7 @@ AutoCloseable {
                 entity.yOld = entity.getY();
                 entity.zOld = entity.getZ();
             }
-            if (this.shouldShowEntityOutlines() && entity.isGlowing()) {
+            if (this.shouldShowEntityOutlines() && this.minecraft.shouldEntityAppearGlowing(entity)) {
                 bl42 = true;
                 OutlineBufferSource outlineBufferSource = this.renderBuffers.outlineBufferSource();
                 multiBufferSource = outlineBufferSource;
@@ -1082,8 +1082,8 @@ AutoCloseable {
                     bufferBuilder.begin(1, DefaultVertexFormat.POSITION_COLOR);
                     RenderSystem.lineWidth(10.0f);
                     i = 0;
-                    for (Direction direction : Direction.values()) {
-                        for (Direction direction2 : Direction.values()) {
+                    for (Direction direction : DIRECTIONS) {
+                        for (Direction direction2 : DIRECTIONS) {
                             boolean bl = renderChunk.getCompiledChunk().facesCanSeeEachother(direction, direction2);
                             if (bl) continue;
                             ++i;

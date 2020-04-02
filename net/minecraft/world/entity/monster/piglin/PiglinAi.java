@@ -58,6 +58,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.RememberIfHoglinWasKilled;
 import net.minecraft.world.entity.monster.piglin.StartAdmiringItemIfSeen;
@@ -114,7 +115,7 @@ public class PiglinAi {
     }
 
     private static void initIdleActivity(Piglin piglin, Brain<Piglin> brain) {
-        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new StartHuntingHoglin(), PiglinAi.avoidZombifiedPiglin(), PiglinAi.avoidRepellent(), PiglinAi.babySometimesRideBabyHoglin(), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(), new SetLookAndInteract(EntityType.PLAYER, 4)));
+        brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new RunIf<Piglin>(Piglin::canHunt, new StartHuntingHoglin()), PiglinAi.avoidZombified(), PiglinAi.avoidRepellent(), PiglinAi.babySometimesRideBabyHoglin(), PiglinAi.createIdleLookBehaviors(), PiglinAi.createIdleMovementBehaviors(), new SetLookAndInteract(EntityType.PLAYER, 4)));
     }
 
     private static void initFightActivity(Piglin piglin, Brain<Piglin> brain) {
@@ -122,7 +123,7 @@ public class PiglinAi {
     }
 
     private static void initCelebrateActivity(Piglin piglin, Brain<Piglin> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 10, ImmutableList.of(PiglinAi.avoidZombifiedPiglin(), PiglinAi.avoidRepellent(), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new GoToCelebrateLocation(2, 1.0f), new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new RandomStroll(0.6f, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1)))), MemoryModuleType.CELEBRATE_LOCATION);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.CELEBRATE, 10, ImmutableList.of(PiglinAi.avoidZombified(), PiglinAi.avoidRepellent(), new SetEntityLookTarget(PiglinAi::isPlayerHoldingLovedItem, 14.0f), new StartAttacking<Piglin>(Piglin::isAdult, PiglinAi::findNearestValidAttackTarget), new GoToCelebrateLocation(2, 1.0f), new RunOne(ImmutableList.of(Pair.of(new SetEntityLookTarget(EntityType.PIGLIN, 8.0f), 1), Pair.of(new RandomStroll(0.6f, 2, 1), 1), Pair.of(new DoNothing(10, 20), 1)))), MemoryModuleType.CELEBRATE_LOCATION);
     }
 
     private static void initAdmireItemActivity(Piglin piglin, Brain<Piglin> brain) {
@@ -153,8 +154,8 @@ public class PiglinAi {
         return SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, 1.1f, 8, false);
     }
 
-    private static SetWalkTargetAwayFrom<?> avoidZombifiedPiglin() {
-        return SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN, 1.1f, 10, false);
+    private static SetWalkTargetAwayFrom<?> avoidZombified() {
+        return SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, 1.1f, 10, false);
     }
 
     protected static void updateActivity(Piglin piglin) {
@@ -449,7 +450,12 @@ public class PiglinAi {
     }
 
     protected static void broadcastAngerTarget(Piglin piglin2, LivingEntity livingEntity) {
-        PiglinAi.getAdultPiglins(piglin2).forEach(piglin -> PiglinAi.setAngerTargetIfCloserThanCurrent(piglin, livingEntity));
+        PiglinAi.getAdultPiglins(piglin2).forEach(piglin -> {
+            if (!(livingEntity.getType() != EntityType.HOGLIN || piglin.canHunt() && ((Hoglin)livingEntity).canBeHunted())) {
+                return;
+            }
+            PiglinAi.setAngerTargetIfCloserThanCurrent(piglin, livingEntity);
+        });
     }
 
     protected static void broadcastDontKillAnyMoreHoglinsForAWhile(Piglin piglin) {
@@ -564,7 +570,7 @@ public class PiglinAi {
     }
 
     private static boolean seesZombifiedPiglin(Piglin piglin) {
-        return piglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED_PIGLIN);
+        return piglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED);
     }
 
     private static boolean seesPlayerHoldingLovedItem(LivingEntity livingEntity) {

@@ -3,6 +3,7 @@
  */
 package net.minecraft.data.tags;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,9 +15,10 @@ import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
@@ -24,7 +26,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +35,7 @@ implements DataProvider {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     protected final DataGenerator generator;
     protected final Registry<T> registry;
-    protected final Map<Tag<T>, Tag.Builder<T>> builders = Maps.newLinkedHashMap();
+    protected final Map<ResourceLocation, Tag.TypedBuilder<T>> builders = Maps.newLinkedHashMap();
 
     protected TagsProvider(DataGenerator dataGenerator, Registry<T> registry) {
         this.generator = dataGenerator;
@@ -47,11 +48,15 @@ implements DataProvider {
     public void run(HashCache hashCache) {
         this.builders.clear();
         this.addTags();
-        TagCollection tagCollection = new TagCollection(resourceLocation -> Optional.empty(), "", false, "generated");
-        Map map = this.builders.entrySet().stream().collect(Collectors.toMap(entry -> ((Tag)entry.getKey()).getId(), Map.Entry::getValue));
-        tagCollection.load(map);
-        tagCollection.getAllTags().forEach((resourceLocation, tag) -> {
-            JsonObject jsonObject = tag.serializeToJson(this.registry::getKey);
+        Tag tag = Tag.fromSet(ImmutableSet.of());
+        Function<ResourceLocation, Tag> function = resourceLocation -> this.builders.containsKey(resourceLocation) ? tag : null;
+        Function<ResourceLocation, Object> function2 = resourceLocation -> this.registry.getOptional((ResourceLocation)resourceLocation).orElse(null);
+        this.builders.forEach((resourceLocation, typedBuilder) -> {
+            List list = typedBuilder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+            if (!list.isEmpty()) {
+                throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", resourceLocation, list.stream().map(Objects::toString).collect(Collectors.joining(","))));
+            }
+            JsonObject jsonObject = typedBuilder.serializeToJson();
             Path path = this.getPath((ResourceLocation)resourceLocation);
             try {
                 String string = GSON.toJson(jsonObject);
@@ -67,15 +72,16 @@ implements DataProvider {
                 LOGGER.error("Couldn't save tags to {}", (Object)path, (Object)iOException);
             }
         });
-        this.useTags(tagCollection);
     }
-
-    protected abstract void useTags(TagCollection<T> var1);
 
     protected abstract Path getPath(ResourceLocation var1);
 
-    protected Tag.Builder<T> tag(Tag<T> tag2) {
-        return this.builders.computeIfAbsent(tag2, tag -> Tag.Builder.tag());
+    protected Tag.TypedBuilder<T> tag(Tag.Named<T> named) {
+        return this.tag(named.getName());
+    }
+
+    protected Tag.TypedBuilder<T> tag(ResourceLocation resourceLocation2) {
+        return this.builders.computeIfAbsent(resourceLocation2, resourceLocation -> new Tag.TypedBuilder<Object>(this.registry::getKey));
     }
 }
 

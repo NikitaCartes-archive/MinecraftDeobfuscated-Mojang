@@ -27,10 +27,13 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -44,7 +47,6 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.global.LightningBolt;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -192,11 +194,8 @@ extends Animal {
         this.goalSelector.addGoal(9, new TurtleRandomStrollGoal(this, 1.0, 100));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 30.0).add(Attributes.MOVEMENT_SPEED, 0.25);
     }
 
     @Override
@@ -408,7 +407,7 @@ extends Animal {
             double g = Mth.sqrt(d * d + e * e + f * f);
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
             this.turtle.yBodyRot = this.turtle.yRot = this.rotlerp(this.turtle.yRot, h, 90.0f);
-            float i = (float)(this.speedModifier * this.turtle.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+            float i = (float)(this.speedModifier * this.turtle.getAttributeValue(Attributes.MOVEMENT_SPEED));
             this.turtle.setSpeed(Mth.lerp(0.125f, this.turtle.getSpeed(), i));
             this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * (e /= g) * 0.1, 0.0));
         }

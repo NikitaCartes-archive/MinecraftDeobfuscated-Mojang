@@ -92,7 +92,7 @@ public class BlockPredicate {
             jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
         }
         if (this.tag != null) {
-            jsonObject.addProperty("tag", this.tag.getId().toString());
+            jsonObject.addProperty("tag", BlockTags.getAllTags().getIdOrThrow(this.tag).toString());
         }
         jsonObject.add("nbt", this.nbt.serializeToJson());
         jsonObject.add("state", this.properties.serializeToJson());

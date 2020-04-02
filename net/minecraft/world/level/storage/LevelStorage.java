@@ -4,20 +4,15 @@
 package net.minecraft.world.level.storage;
 
 import com.mojang.datafixers.DataFixer;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -31,7 +26,6 @@ implements PlayerIO {
     private static final Logger LOGGER = LogManager.getLogger();
     private final File worldDir;
     private final File playerDir;
-    private final long sessionId = Util.getMillis();
     private final String levelId;
     private final StructureManager structureManager;
     protected final DataFixer fixerUpper;
@@ -48,7 +42,6 @@ implements PlayerIO {
         } else {
             this.structureManager = null;
         }
-        this.initiateSession();
     }
 
     public void saveLevelData(LevelData levelData, @Nullable CompoundTag compoundTag) {
@@ -77,33 +70,8 @@ implements PlayerIO {
         }
     }
 
-    private void initiateSession() {
-        try {
-            File file = new File(this.worldDir, "session.lock");
-            try (DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));){
-                dataOutputStream.writeLong(this.sessionId);
-            }
-        } catch (IOException iOException) {
-            iOException.printStackTrace();
-            throw new RuntimeException("Failed to check session lock, aborting");
-        }
-    }
-
     public File getFolder() {
         return this.worldDir;
-    }
-
-    public void checkSession() throws LevelConflictException {
-        try {
-            File file = new File(this.worldDir, "session.lock");
-            try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));){
-                if (dataInputStream.readLong() != this.sessionId) {
-                    throw new LevelConflictException("The save is being accessed from another location, aborting");
-                }
-            }
-        } catch (IOException iOException) {
-            throw new LevelConflictException("Failed to check session lock, aborting");
-        }
     }
 
     @Nullable

@@ -35,14 +35,13 @@ import org.jetbrains.annotations.Nullable;
 
 public final class Ingredient
 implements Predicate<ItemStack> {
-    private static final Predicate<? super Value> NON_ALL_EMPTY = value -> !value.getItems().stream().allMatch(ItemStack::isEmpty);
     public static final Ingredient EMPTY = new Ingredient(Stream.empty());
     private final Value[] values;
     private ItemStack[] itemStacks;
     private IntList stackingIds;
 
     private Ingredient(Stream<? extends Value> stream) {
-        this.values = (Value[])stream.filter(NON_ALL_EMPTY).toArray(Value[]::new);
+        this.values = (Value[])stream.toArray(Value[]::new);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -62,10 +61,10 @@ implements Predicate<ItemStack> {
         if (itemStack == null) {
             return false;
         }
-        if (this.values.length == 0) {
+        this.dissolve();
+        if (this.itemStacks.length == 0) {
             return itemStack.isEmpty();
         }
-        this.dissolve();
         for (ItemStack itemStack2 : this.itemStacks) {
             if (itemStack2.getItem() != itemStack.getItem()) continue;
             return true;
@@ -114,12 +113,16 @@ implements Predicate<ItemStack> {
     }
 
     public static Ingredient of(ItemLike ... itemLikes) {
-        return Ingredient.fromValues(Arrays.stream(itemLikes).map(itemLike -> new ItemValue(new ItemStack((ItemLike)itemLike))));
+        return Ingredient.of(Arrays.stream(itemLikes).map(ItemStack::new));
     }
 
     @Environment(value=EnvType.CLIENT)
     public static Ingredient of(ItemStack ... itemStacks) {
-        return Ingredient.fromValues(Arrays.stream(itemStacks).map(itemStack -> new ItemValue((ItemStack)itemStack)));
+        return Ingredient.of(Arrays.stream(itemStacks));
+    }
+
+    public static Ingredient of(Stream<ItemStack> stream) {
+        return Ingredient.fromValues(stream.filter(itemStack -> !itemStack.isEmpty()).map(itemStack -> new ItemValue((ItemStack)itemStack)));
     }
 
     public static Ingredient of(Tag<Item> tag) {
@@ -148,7 +151,7 @@ implements Predicate<ItemStack> {
         throw new JsonSyntaxException("Expected item to be object or array of objects");
     }
 
-    public static Value valueFromJson(JsonObject jsonObject) {
+    private static Value valueFromJson(JsonObject jsonObject) {
         if (jsonObject.has("item") && jsonObject.has("tag")) {
             throw new JsonParseException("An ingredient entry is either a tag or an item, not both");
         }
@@ -193,7 +196,7 @@ implements Predicate<ItemStack> {
         @Override
         public JsonObject serialize() {
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("tag", this.tag.getId().toString());
+            jsonObject.addProperty("tag", ItemTags.getAllTags().getIdOrThrow(this.tag).toString());
             return jsonObject;
         }
     }

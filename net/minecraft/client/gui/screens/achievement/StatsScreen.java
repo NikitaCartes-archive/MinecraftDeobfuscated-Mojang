@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -124,6 +125,10 @@ implements StatsUpdateListener {
             this.children.add(0, objectSelectionList);
             this.activeList = objectSelectionList;
         }
+    }
+
+    private static String getTranslationKey(Stat<ResourceLocation> stat) {
+        return "stat." + stat.getValue().toString().replace(':', '.');
     }
 
     private int getColumnX(int i) {
@@ -436,8 +441,10 @@ implements StatsUpdateListener {
     extends ObjectSelectionList<Entry> {
         public GeneralStatisticsList(Minecraft minecraft) {
             super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
-            for (Stat<ResourceLocation> stat : Stats.CUSTOM) {
-                this.addEntry(new Entry(stat));
+            ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<Stat<ResourceLocation>>(Stats.CUSTOM.iterator());
+            objectArrayList.sort(Comparator.comparing(stat -> I18n.get(StatsScreen.getTranslationKey(stat), new Object[0])));
+            for (Stat stat2 : objectArrayList) {
+                this.addEntry(new Entry(stat2));
             }
         }
 
@@ -457,7 +464,7 @@ implements StatsUpdateListener {
 
             @Override
             public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                Component component = new TranslatableComponent("stat." + this.stat.getValue().toString().replace(':', '.'), new Object[0]).withStyle(ChatFormatting.GRAY);
+                Component component = new TranslatableComponent(StatsScreen.getTranslationKey(this.stat), new Object[0]).withStyle(ChatFormatting.GRAY);
                 GeneralStatisticsList.this.drawString(StatsScreen.this.font, component.getString(), k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
                 String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
                 GeneralStatisticsList.this.drawString(StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);

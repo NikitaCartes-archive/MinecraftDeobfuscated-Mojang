@@ -46,29 +46,29 @@ public class HoglinAi {
 
     protected static Brain<?> makeBrain(Hoglin hoglin, Dynamic<?> dynamic) {
         Brain<Hoglin> brain = new Brain<Hoglin>(Hoglin.MEMORY_TYPES, Hoglin.SENSOR_TYPES, dynamic);
-        HoglinAi.initCoreActivity(hoglin, brain);
-        HoglinAi.initIdleActivity(hoglin, brain);
-        HoglinAi.initFightActivity(hoglin, brain);
-        HoglinAi.initRetreatActivity(hoglin, brain);
+        HoglinAi.initCoreActivity(brain);
+        HoglinAi.initIdleActivity(brain);
+        HoglinAi.initFightActivity(brain);
+        HoglinAi.initRetreatActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
         return brain;
     }
 
-    private static void initCoreActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+    private static void initCoreActivity(Brain<Hoglin> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(200)));
     }
 
-    private static void initIdleActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+    private static void initIdleActivity(Brain<Hoglin> brain) {
         brain.addActivity(Activity.IDLE, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200), new AnimalMakeLove(EntityType.HOGLIN, 0.6f), SetWalkTargetAwayFrom.pos(MemoryModuleType.NEAREST_REPELLENT, 1.0f, 8, true), new StartAttacking<Hoglin>(HoglinAi::findNearestValidAttackTarget), new RunIf<PathfinderMob>(Hoglin::isAdult, SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4f, 8, false)), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), HoglinAi.createIdleMovementBehaviors()));
     }
 
-    private static void initFightActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+    private static void initFightActivity(Brain<Hoglin> brain) {
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 10, ImmutableList.of(new BecomePassiveIfMemoryPresent(MemoryModuleType.NEAREST_REPELLENT, 200), new AnimalMakeLove(EntityType.HOGLIN, 0.6f), new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0f), new RunIf<Mob>(Hoglin::isAdult, new MeleeAttack(40)), new RunIf<Mob>(AgableMob::isBaby, new MeleeAttack(15)), new StopAttackingIfTargetInvalid(), new EraseMemoryIf<Hoglin>(HoglinAi::isBreeding, MemoryModuleType.ATTACK_TARGET)), MemoryModuleType.ATTACK_TARGET);
     }
 
-    private static void initRetreatActivity(Hoglin hoglin, Brain<Hoglin> brain) {
+    private static void initRetreatActivity(Brain<Hoglin> brain) {
         brain.addActivityAndRemoveMemoryWhenStopped(Activity.AVOID, 10, ImmutableList.of(SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.0f, 15, false), HoglinAi.createIdleMovementBehaviors(), new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0f), IntRange.of(30, 60)), new EraseMemoryIf<Hoglin>(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)), MemoryModuleType.AVOID_TARGET);
     }
 
@@ -188,7 +188,7 @@ public class HoglinAi {
 
     private static void playActivitySound(Hoglin hoglin) {
         hoglin.getBrain().getActiveNonCoreActivity().ifPresent(activity -> {
-            if (activity == Activity.AVOID) {
+            if (activity == Activity.AVOID || hoglin.isConverting()) {
                 hoglin.playRetreatSound();
             } else if (activity == Activity.FIGHT) {
                 hoglin.playAngrySound();

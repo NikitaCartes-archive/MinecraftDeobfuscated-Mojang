@@ -19,7 +19,7 @@ extends Behavior<Mob> {
 
     @Override
     protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {
-        return mob.getBrain().getMemory(MemoryModuleType.LOOK_TARGET).filter(positionWrapper -> positionWrapper.isVisible(mob)).isPresent();
+        return mob.getBrain().getMemory(MemoryModuleType.LOOK_TARGET).filter(positionTracker -> positionTracker.isVisibleBy(mob)).isPresent();
     }
 
     @Override
@@ -29,7 +29,7 @@ extends Behavior<Mob> {
 
     @Override
     protected void tick(ServerLevel serverLevel, Mob mob, long l) {
-        mob.getBrain().getMemory(MemoryModuleType.LOOK_TARGET).ifPresent(positionWrapper -> mob.getLookControl().setLookAt(positionWrapper.getLookAtPos()));
+        mob.getBrain().getMemory(MemoryModuleType.LOOK_TARGET).ifPresent(positionTracker -> mob.getLookControl().setLookAt(positionTracker.currentPosition()));
     }
 
     @Override

@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.PositionWrapper;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -27,8 +27,8 @@ extends Behavior<LivingEntity> {
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         Brain<?> brain = livingEntity.getBrain();
-        PositionWrapper positionWrapper = brain.getMemory(MemoryModuleType.LOOK_TARGET).get();
-        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(positionWrapper, this.speedModifier, this.closeEnoughDistance));
+        PositionTracker positionTracker = brain.getMemory(MemoryModuleType.LOOK_TARGET).get();
+        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(positionTracker, this.speedModifier, this.closeEnoughDistance));
     }
 }
 

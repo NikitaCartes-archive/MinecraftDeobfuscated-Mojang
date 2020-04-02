@@ -12,14 +12,15 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -85,15 +86,15 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
     }
 
     @Nullable
-    public BlockPos findNearestMapFeature(Level level, String string, BlockPos blockPos, int i, boolean bl) {
+    public BlockPos findNearestMapFeature(ServerLevel serverLevel, String string, BlockPos blockPos, int i, boolean bl) {
         StructureFeature structureFeature = (StructureFeature)Feature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT));
         if (structureFeature != null) {
-            return structureFeature.getNearestGeneratedFeature(level, this, blockPos, i, bl);
+            return structureFeature.getNearestGeneratedFeature(serverLevel, this, blockPos, i, bl);
         }
         return null;
     }
 
-    public void applyBiomeDecoration(WorldGenRegion worldGenRegion) {
+    public void applyBiomeDecoration(WorldGenRegion worldGenRegion, StructureFeatureManager structureFeatureManager) {
         int i = worldGenRegion.getCenterX();
         int j = worldGenRegion.getCenterZ();
         int k = i * 16;
@@ -104,7 +105,7 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
         long m = worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), k, l);
         for (GenerationStep.Decoration decoration : GenerationStep.Decoration.values()) {
             try {
-                biome.generate(decoration, this, worldGenRegion, m, worldgenRandom, blockPos);
+                biome.generate(decoration, structureFeatureManager, this, worldGenRegion, m, worldgenRandom, blockPos);
             } catch (Exception exception) {
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Biome decoration");
                 crashReport.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Step", (Object)decoration).setDetail("Seed", m).setDetail("Biome", Registry.BIOME.getKey(biome));
@@ -148,14 +149,14 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
         return 256;
     }
 
-    public List<Biome.SpawnerData> getMobsAt(MobCategory mobCategory, BlockPos blockPos) {
+    public List<Biome.SpawnerData> getMobsAt(StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
         return this.level.getBiome(blockPos).getMobs(mobCategory);
     }
 
-    public void createStructures(BiomeManager biomeManager, ChunkAccess chunkAccess, ChunkGenerator<?> chunkGenerator, StructureManager structureManager) {
+    public void createStructures(StructureFeatureManager structureFeatureManager, BiomeManager biomeManager, ChunkAccess chunkAccess, ChunkGenerator<?> chunkGenerator, StructureManager structureManager) {
         for (StructureFeature structureFeature : Feature.STRUCTURES_REGISTRY.values()) {
             if (!chunkGenerator.getBiomeSource().canGenerateStructure(structureFeature)) continue;
-            StructureStart structureStart = chunkAccess.getStartForFeature(structureFeature.getFeatureName());
+            StructureStart structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), structureFeature, chunkAccess);
             int i = structureStart != null ? structureStart.getReferences() : 0;
             WorldgenRandom worldgenRandom = new WorldgenRandom();
             ChunkPos chunkPos = chunkAccess.getPos();
@@ -166,30 +167,31 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
                 structureStart3.generatePieces(this, structureManager, chunkPos.x, chunkPos.z, biome);
                 structureStart2 = structureStart3.isValid() ? structureStart3 : StructureStart.INVALID_START;
             }
-            chunkAccess.setStartForFeature(structureFeature.getFeatureName(), structureStart2);
+            structureFeatureManager.setStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), structureFeature, structureStart2, chunkAccess);
         }
     }
 
-    public void createReferences(LevelAccessor levelAccessor, ChunkAccess chunkAccess) {
+    public void createReferences(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         int i = 8;
         int j = chunkAccess.getPos().x;
         int k = chunkAccess.getPos().z;
         int l = j << 4;
         int m = k << 4;
+        SectionPos sectionPos = SectionPos.of(chunkAccess.getPos(), 0);
         for (int n = j - 8; n <= j + 8; ++n) {
             for (int o = k - 8; o <= k + 8; ++o) {
                 long p = ChunkPos.asLong(n, o);
                 for (Map.Entry<String, StructureStart> entry : levelAccessor.getChunk(n, o).getAllStarts().entrySet()) {
                     StructureStart structureStart = entry.getValue();
                     if (structureStart == StructureStart.INVALID_START || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
-                    chunkAccess.addReferenceForFeature(entry.getKey(), p);
+                    structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
                     DebugPackets.sendStructurePacket(levelAccessor, structureStart);
                 }
             }
         }
     }
 
-    public abstract void fillFromNoise(LevelAccessor var1, ChunkAccess var2);
+    public abstract void fillFromNoise(LevelAccessor var1, StructureFeatureManager var2, ChunkAccess var3);
 
     public int getSeaLevel() {
         return 63;

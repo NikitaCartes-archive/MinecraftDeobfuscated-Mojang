@@ -35,6 +35,7 @@ import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
@@ -260,12 +261,12 @@ public abstract class Biome {
         return this.features.get((Object)decoration);
     }
 
-    public void generate(GenerationStep.Decoration decoration, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, LevelAccessor levelAccessor, long l, WorldgenRandom worldgenRandom, BlockPos blockPos) {
+    public void generate(GenerationStep.Decoration decoration, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, LevelAccessor levelAccessor, long l, WorldgenRandom worldgenRandom, BlockPos blockPos) {
         int i = 0;
         for (ConfiguredFeature<?, ?> configuredFeature : this.features.get((Object)decoration)) {
             worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
             try {
-                configuredFeature.place(levelAccessor, chunkGenerator, worldgenRandom, blockPos);
+                configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
             } catch (Exception exception) {
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                 crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Description", () -> configuredFeature.feature.toString());

@@ -37,7 +37,7 @@ extends MegaTreeFeature<MegaTreeConfiguration> {
                 k = blockPos.getX() + (int)(1.5f + Mth.cos(f) * (float)m);
                 l = blockPos.getZ() + (int)(1.5f + Mth.sin(f) * (float)m);
                 BlockPos blockPos2 = new BlockPos(k, j - 3 + m / 2, l);
-                this.placeLog(levelSimulatedRW, random, blockPos2, set, boundingBox, megaTreeConfiguration);
+                MegaJungleTreeFeature.placeLog(levelSimulatedRW, random, blockPos2, set, boundingBox, megaTreeConfiguration);
             }
             m = 1 + random.nextInt(2);
             int n = j;

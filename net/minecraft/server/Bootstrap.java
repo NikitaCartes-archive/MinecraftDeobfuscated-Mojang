@@ -17,6 +17,8 @@ import net.minecraft.server.DebugLoggedPrintStream;
 import net.minecraft.server.LoggedPrintStream;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -64,6 +66,7 @@ public class Bootstrap {
 
     public static Set<String> getMissingTranslations() {
         TreeSet<String> set = new TreeSet<String>();
+        Bootstrap.checkTranslations(Registry.ATTRIBUTES, Attribute::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.ENTITY_TYPE, EntityType::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.MOB_EFFECT, MobEffect::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.ITEM, Item::getDescriptionId, set);
@@ -81,6 +84,7 @@ public class Bootstrap {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             Bootstrap.getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: " + string));
         }
+        DefaultAttributes.validate();
     }
 
     private static void wrapStreams() {

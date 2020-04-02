@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -52,16 +54,16 @@ extends LootItemConditionalFunction {
 
     static class Modifier {
         private final String name;
-        private final String attribute;
+        private final Attribute attribute;
         private final AttributeModifier.Operation operation;
         private final RandomValueBounds amount;
         @Nullable
         private final UUID id;
         private final EquipmentSlot[] slots;
 
-        private Modifier(String string, String string2, AttributeModifier.Operation operation, RandomValueBounds randomValueBounds, EquipmentSlot[] equipmentSlots, @Nullable UUID uUID) {
+        private Modifier(String string, Attribute attribute, AttributeModifier.Operation operation, RandomValueBounds randomValueBounds, EquipmentSlot[] equipmentSlots, @Nullable UUID uUID) {
             this.name = string;
-            this.attribute = string2;
+            this.attribute = attribute;
             this.operation = operation;
             this.amount = randomValueBounds;
             this.id = uUID;
@@ -71,7 +73,7 @@ extends LootItemConditionalFunction {
         public JsonObject serialize(JsonSerializationContext jsonSerializationContext) {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("name", this.name);
-            jsonObject.addProperty("attribute", this.attribute);
+            jsonObject.addProperty("attribute", Registry.ATTRIBUTES.getKey(this.attribute).toString());
             jsonObject.addProperty("operation", Modifier.operationToString(this.operation));
             jsonObject.add("amount", jsonSerializationContext.serialize(this.amount));
             if (this.id != null) {
@@ -92,7 +94,7 @@ extends LootItemConditionalFunction {
         public static Modifier deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             EquipmentSlot[] equipmentSlots;
             String string = GsonHelper.getAsString(jsonObject, "name");
-            String string2 = GsonHelper.getAsString(jsonObject, "attribute");
+            Attribute attribute = Registry.ATTRIBUTES.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute")));
             AttributeModifier.Operation operation = Modifier.operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
             RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
             UUID uUID = null;
@@ -112,14 +114,14 @@ extends LootItemConditionalFunction {
                 throw new JsonSyntaxException("Invalid or missing attribute modifier slot; must be either string or array of strings.");
             }
             if (jsonObject.has("id")) {
-                String string3 = GsonHelper.getAsString(jsonObject, "id");
+                String string2 = GsonHelper.getAsString(jsonObject, "id");
                 try {
-                    uUID = UUID.fromString(string3);
+                    uUID = UUID.fromString(string2);
                 } catch (IllegalArgumentException illegalArgumentException) {
-                    throw new JsonSyntaxException("Invalid attribute modifier id '" + string3 + "' (must be UUID format, with dashes)");
+                    throw new JsonSyntaxException("Invalid attribute modifier id '" + string2 + "' (must be UUID format, with dashes)");
                 }
             }
-            return new Modifier(string, string2, operation, randomValueBounds, equipmentSlots, uUID);
+            return new Modifier(string, attribute, operation, randomValueBounds, equipmentSlots, uUID);
         }
 
         private static String operationToString(AttributeModifier.Operation operation) {

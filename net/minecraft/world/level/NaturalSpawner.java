@@ -26,6 +26,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -51,6 +52,7 @@ public final class NaturalSpawner {
     }
 
     public static void spawnCategoryForPosition(MobCategory mobCategory, ServerLevel serverLevel, ChunkAccess chunkAccess, BlockPos blockPos) {
+        StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
         ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
         int i = blockPos.getY();
         BlockState blockState = chunkAccess.getBlockState(blockPos);
@@ -75,11 +77,11 @@ public final class NaturalSpawner {
                 Player player = serverLevel.getNearestPlayer((double)f, (double)i, (double)g, -1.0, false);
                 if (player == null || !NaturalSpawner.isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, d = player.distanceToSqr(f, i, g))) continue;
                 if (spawnerData == null) {
-                    spawnerData = NaturalSpawner.getRandomSpawnMobAt(chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
+                    spawnerData = NaturalSpawner.getRandomSpawnMobAt(structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
                     if (spawnerData == null) continue block0;
                     o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
-                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, chunkGenerator, spawnerData, mutableBlockPos, d)) continue;
+                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, d)) continue;
                 Mob mob = NaturalSpawner.getMobForSpawn(serverLevel, spawnerData.type);
                 if (mob == null) {
                     return;
@@ -108,7 +110,7 @@ public final class NaturalSpawner {
         return Objects.equals(chunkPos, chunkAccess.getPos()) || serverLevel.getChunkSource().isEntityTickingChunk(chunkPos);
     }
 
-    private static boolean isValidSpawnPostitionForType(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, Biome.SpawnerData spawnerData, BlockPos.MutableBlockPos mutableBlockPos, double d) {
+    private static boolean isValidSpawnPostitionForType(ServerLevel serverLevel, MobCategory mobCategory, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Biome.SpawnerData spawnerData, BlockPos.MutableBlockPos mutableBlockPos, double d) {
         EntityType<?> entityType = spawnerData.type;
         if (entityType.getCategory() == MobCategory.MISC) {
             return false;
@@ -116,7 +118,7 @@ public final class NaturalSpawner {
         if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getInstantDespawnDistance() * entityType.getInstantDespawnDistance())) {
             return false;
         }
-        if (!entityType.canSummon() || !NaturalSpawner.canSpawnMobAt(chunkGenerator, entityType.getCategory(), spawnerData, mutableBlockPos)) {
+        if (!entityType.canSummon() || !NaturalSpawner.canSpawnMobAt(structureFeatureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
             return false;
         }
         SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
@@ -153,20 +155,16 @@ public final class NaturalSpawner {
     }
 
     @Nullable
-    private static Biome.SpawnerData getRandomSpawnMobAt(ChunkGenerator<?> chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos) {
-        List<Biome.SpawnerData> list = chunkGenerator.getMobsAt(mobCategory, blockPos);
+    private static Biome.SpawnerData getRandomSpawnMobAt(StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, MobCategory mobCategory, Random random, BlockPos blockPos) {
+        List<Biome.SpawnerData> list = chunkGenerator.getMobsAt(structureFeatureManager, mobCategory, blockPos);
         if (list.isEmpty()) {
             return null;
         }
         return WeighedRandom.getRandomItem(random, list);
     }
 
-    private static boolean canSpawnMobAt(ChunkGenerator<?> chunkGenerator, MobCategory mobCategory, Biome.SpawnerData spawnerData, BlockPos blockPos) {
-        List<Biome.SpawnerData> list = chunkGenerator.getMobsAt(mobCategory, blockPos);
-        if (list.isEmpty()) {
-            return false;
-        }
-        return list.contains(spawnerData);
+    private static boolean canSpawnMobAt(StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, MobCategory mobCategory, Biome.SpawnerData spawnerData, BlockPos blockPos) {
+        return chunkGenerator.getMobsAt(structureFeatureManager, mobCategory, blockPos).contains(spawnerData);
     }
 
     private static BlockPos getRandomPosWithin(Level level, LevelChunk levelChunk) {

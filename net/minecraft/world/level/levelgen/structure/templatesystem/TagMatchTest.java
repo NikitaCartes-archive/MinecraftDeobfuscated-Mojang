@@ -39,7 +39,7 @@ extends RuleTest {
 
     @Override
     protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("tag"), dynamicOps.createString(this.tag.getId().toString()))));
+        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("tag"), dynamicOps.createString(BlockTags.getAllTags().getIdOrThrow(this.tag).toString()))));
     }
 }
 

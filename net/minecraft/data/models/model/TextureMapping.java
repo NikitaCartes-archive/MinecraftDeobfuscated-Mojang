@@ -28,18 +28,18 @@ public class TextureMapping {
     }
 
     public TextureMapping copyForced(TextureSlot textureSlot, TextureSlot textureSlot2) {
-        this.slots.put(textureSlot2, this.slots.get((Object)textureSlot));
+        this.slots.put(textureSlot2, this.slots.get(textureSlot));
         this.forcedSlots.add(textureSlot2);
         return this;
     }
 
     public ResourceLocation get(TextureSlot textureSlot) {
         for (TextureSlot textureSlot2 = textureSlot; textureSlot2 != null; textureSlot2 = textureSlot2.getParent()) {
-            ResourceLocation resourceLocation = this.slots.get((Object)textureSlot2);
+            ResourceLocation resourceLocation = this.slots.get(textureSlot2);
             if (resourceLocation == null) continue;
             return resourceLocation;
         }
-        throw new IllegalStateException("Can't find texture for slot " + (Object)((Object)textureSlot));
+        throw new IllegalStateException("Can't find texture for slot " + textureSlot);
     }
 
     public TextureMapping copyAndUpdate(TextureSlot textureSlot, ResourceLocation resourceLocation) {

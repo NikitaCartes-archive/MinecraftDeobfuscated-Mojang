@@ -16,8 +16,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -111,8 +110,7 @@ extends Player {
         if (this.abilities.flying) {
             f *= 1.1f;
         }
-        AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        f = (float)((double)f * ((attributeInstance.getValue() / (double)this.abilities.getWalkingSpeed() + 1.0) / 2.0));
+        f = (float)((double)f * ((this.getAttributeValue(Attributes.MOVEMENT_SPEED) / (double)this.abilities.getWalkingSpeed() + 1.0) / 2.0));
         if (this.abilities.getWalkingSpeed() == 0.0f || Float.isNaN(f) || Float.isInfinite(f)) {
             f = 1.0f;
         }

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.monster.piglin.PiglinAi;
 public class StartHuntingHoglin<E extends Piglin>
 extends Behavior<E> {
     public StartHuntingHoglin() {
-        super(ImmutableMap.of(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLIN, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ANGRY_AT, MemoryStatus.VALUE_ABSENT, MemoryModuleType.HUNTED_RECENTLY, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryStatus.REGISTERED));
+        super(ImmutableMap.of(MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN, MemoryStatus.VALUE_PRESENT, MemoryModuleType.ANGRY_AT, MemoryStatus.VALUE_ABSENT, MemoryModuleType.HUNTED_RECENTLY, MemoryStatus.VALUE_ABSENT, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryStatus.REGISTERED));
     }
 
     @Override
@@ -25,7 +25,7 @@ extends Behavior<E> {
 
     @Override
     protected void start(ServerLevel serverLevel, E piglin, long l) {
-        Hoglin hoglin = ((Piglin)piglin).getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLIN).get();
+        Hoglin hoglin = ((Piglin)piglin).getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN).get();
         PiglinAi.setAngerTarget(piglin, hoglin);
         PiglinAi.dontKillAnyMoreHoglinsForAWhile(piglin);
         PiglinAi.broadcastAngerTarget(piglin, hoglin);

@@ -17,6 +17,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.StructureMode;
@@ -87,7 +88,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
         StructurePlaceSettings structurePlaceSettings;
         StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
         if (structureTemplate.placeInWorld(levelAccessor, blockPos, blockPos2, structurePlaceSettings = this.getSettings(rotation, boundingBox), 18)) {

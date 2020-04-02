@@ -83,7 +83,7 @@ public class LocationPredicate {
         if (!(this.biome == null || bl && this.biome == serverLevel.getBiome(blockPos))) {
             return false;
         }
-        if (!(this.feature == null || bl && this.feature.isInsideFeature(serverLevel, blockPos))) {
+        if (!(this.feature == null || bl && this.feature.isInsideFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos))) {
             return false;
         }
         if (!this.light.matches(serverLevel, blockPos)) {

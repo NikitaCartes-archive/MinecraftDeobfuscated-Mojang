@@ -16,7 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.EntityPosWrapper;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -62,8 +62,8 @@ extends Behavior<PathfinderMob> {
     private static void chaseKid(PathfinderMob pathfinderMob, LivingEntity livingEntity) {
         Brain<?> brain = pathfinderMob.getBrain();
         brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
-        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntity));
-        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper(livingEntity), 0.6f, 1));
+        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity));
+        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntity), 0.6f, 1));
     }
 
     private Optional<LivingEntity> findSomeoneToChase(PathfinderMob pathfinderMob) {

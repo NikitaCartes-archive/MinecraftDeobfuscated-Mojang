@@ -110,9 +110,11 @@ implements RenderLayerParent<T, M> {
         }
         ((EntityModel)this.model).prepareMobModel(livingEntity, o, n, g);
         ((EntityModel)this.model).setupAnim(livingEntity, o, n, l, k, m);
+        Minecraft minecraft = Minecraft.getInstance();
         boolean bl = this.isBodyVisible(livingEntity);
-        boolean bl2 = !bl && !((Entity)livingEntity).isInvisibleTo(Minecraft.getInstance().player);
-        RenderType renderType = this.getRenderType(livingEntity, bl, bl2);
+        boolean bl2 = !bl && !((Entity)livingEntity).isInvisibleTo(minecraft.player);
+        boolean bl3 = minecraft.shouldEntityAppearGlowing((Entity)livingEntity);
+        RenderType renderType = this.getRenderType(livingEntity, bl, bl2, bl3);
         if (renderType != null) {
             VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
             int p = LivingEntityRenderer.getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
@@ -128,7 +130,7 @@ implements RenderLayerParent<T, M> {
     }
 
     @Nullable
-    protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2) {
+    protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2, boolean bl3) {
         ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
         if (bl2) {
             return RenderType.entityTranslucent(resourceLocation);
@@ -136,7 +138,7 @@ implements RenderLayerParent<T, M> {
         if (bl) {
             return ((Model)this.model).renderType(resourceLocation);
         }
-        if (((Entity)livingEntity).isGlowing()) {
+        if (bl3) {
             return RenderType.outline(resourceLocation);
         }
         return null;

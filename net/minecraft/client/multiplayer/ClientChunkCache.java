@@ -90,14 +90,14 @@ extends ChunkSource {
     }
 
     @Nullable
-    public LevelChunk replaceWithPacketData(int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k) {
+    public LevelChunk replaceWithPacketData(int i, int j, @Nullable ChunkBiomeContainer chunkBiomeContainer, FriendlyByteBuf friendlyByteBuf, CompoundTag compoundTag, int k, boolean bl) {
         if (!this.storage.inRange(i, j)) {
             LOGGER.warn("Ignoring chunk since it's not in the view range: {}, {}", (Object)i, (Object)j);
             return null;
         }
         int l = this.storage.getIndex(i, j);
         LevelChunk levelChunk = (LevelChunk)this.storage.chunks.get(l);
-        if (!ClientChunkCache.isValidChunk(levelChunk, i, j)) {
+        if (bl || !ClientChunkCache.isValidChunk(levelChunk, i, j)) {
             if (chunkBiomeContainer == null) {
                 LOGGER.warn("Ignoring chunk since we don't have complete data: {}, {}", (Object)i, (Object)j);
                 return null;

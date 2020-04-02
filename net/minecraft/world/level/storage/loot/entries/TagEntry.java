@@ -74,7 +74,7 @@ extends LootPoolSingletonContainer {
         @Override
         public void serialize(JsonObject jsonObject, TagEntry tagEntry, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, tagEntry, jsonSerializationContext);
-            jsonObject.addProperty("name", tagEntry.tag.getId().toString());
+            jsonObject.addProperty("name", ItemTags.getAllTags().getIdOrThrow(tagEntry.tag).toString());
             jsonObject.addProperty("expand", tagEntry.expand);
         }
 

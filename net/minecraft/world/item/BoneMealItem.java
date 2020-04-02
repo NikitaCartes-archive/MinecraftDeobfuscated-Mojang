@@ -19,6 +19,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -86,9 +87,9 @@ extends Item {
             }
             if (biome == Biomes.WARM_OCEAN || biome == Biomes.DEEP_WARM_OCEAN) {
                 if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
-                    blockState = (BlockState)BlockTags.WALL_CORALS.getRandomElement(level.random).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
+                    blockState = (BlockState)((Block)BlockTags.WALL_CORALS.getRandomElement(level.random)).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
                 } else if (random.nextInt(4) == 0) {
-                    blockState = BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random).defaultBlockState();
+                    blockState = ((Block)BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random)).defaultBlockState();
                 }
             }
             if (blockState.getBlock().is(BlockTags.WALL_CORALS)) {

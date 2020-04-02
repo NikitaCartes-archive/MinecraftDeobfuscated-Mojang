@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.PositionWrapper;
+import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -58,8 +58,8 @@ extends Behavior<PathfinderMob> {
             return false;
         }
         Optional<WalkTarget> optional = pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
-        PositionWrapper positionWrapper = optional.get().getTarget();
-        return optional.isPresent() && !positionWrapper.getPos().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
+        PositionTracker positionTracker = optional.get().getTarget();
+        return optional.isPresent() && !positionTracker.currentBlockPosition().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
     }
 
     @Override

@@ -20,28 +20,34 @@ public abstract class FoliagePlacer
 implements Serializable {
     protected final int radius;
     protected final int radiusRandom;
+    protected final int offset;
+    protected final int offsetRandom;
     protected final FoliagePlacerType<?> type;
 
-    public FoliagePlacer(int i, int j, FoliagePlacerType<?> foliagePlacerType) {
+    public FoliagePlacer(int i, int j, int k, int l, FoliagePlacerType<?> foliagePlacerType) {
         this.radius = i;
         this.radiusRandom = j;
+        this.offset = k;
+        this.offsetRandom = l;
         this.type = foliagePlacerType;
     }
 
-    public abstract void createFoliage(LevelSimulatedRW var1, Random var2, SmallTreeConfiguration var3, int var4, int var5, int var6, BlockPos var7, Set<BlockPos> var8);
+    public abstract void createFoliage(LevelSimulatedRW var1, Random var2, SmallTreeConfiguration var3, int var4, BlockPos var5, int var6, int var7, Set<BlockPos> var8);
 
-    public abstract int foliageRadius(Random var1, int var2, int var3, SmallTreeConfiguration var4);
+    public abstract int foliageHeight(Random var1, int var2);
+
+    public abstract int foliageRadius(Random var1, int var2, SmallTreeConfiguration var3);
 
     protected abstract boolean shouldSkipLocation(Random var1, int var2, int var3, int var4, int var5, int var6);
 
-    public abstract int getTreeRadiusForHeight(int var1, int var2, int var3, int var4);
+    public abstract int getTreeRadiusForHeight(int var1, int var2, int var3);
 
-    protected void placeLeavesRow(LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, BlockPos blockPos, int j, int k, Set<BlockPos> set) {
+    protected void placeLeavesRow(LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, BlockPos blockPos, int i, int j, int k, Set<BlockPos> set) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int l = -k; l <= k; ++l) {
             for (int m = -k; m <= k; ++m) {
                 if (this.shouldSkipLocation(random, i, l, j, m, k)) continue;
-                mutableBlockPos.set(l + blockPos.getX(), j + blockPos.getY(), m + blockPos.getZ());
+                mutableBlockPos.set(l + blockPos.getX(), j + blockPos.getY() - i, m + blockPos.getZ());
                 this.placeLeaf(levelSimulatedRW, random, mutableBlockPos, smallTreeConfiguration, set);
             }
         }
@@ -57,7 +63,7 @@ implements Serializable {
     @Override
     public <T> T serialize(DynamicOps<T> dynamicOps) {
         ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.FOLIAGE_PLACER_TYPES.getKey(this.type).toString())).put(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius)).put(dynamicOps.createString("radius_random"), dynamicOps.createInt(this.radiusRandom));
+        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.FOLIAGE_PLACER_TYPES.getKey(this.type).toString())).put(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius)).put(dynamicOps.createString("radius_random"), dynamicOps.createInt(this.radiusRandom)).put(dynamicOps.createString("offset"), dynamicOps.createInt(this.offset)).put(dynamicOps.createString("offset_random"), dynamicOps.createInt(this.offsetRandom));
         return new Dynamic<T>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
     }
 }

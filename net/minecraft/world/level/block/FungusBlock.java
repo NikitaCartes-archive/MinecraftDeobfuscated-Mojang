@@ -57,7 +57,7 @@ implements BonemealableBlock {
 
     @Override
     public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-        this.feature.get().place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos);
+        this.feature.get().place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), random, blockPos);
     }
 }
 

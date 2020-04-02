@@ -10,7 +10,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SeaPickleBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,8 +28,8 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        BlockState blockState = BlockTags.CORAL_BLOCKS.getRandomElement(random).defaultBlockState();
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+        BlockState blockState = ((Block)BlockTags.CORAL_BLOCKS.getRandomElement(random)).defaultBlockState();
         return this.placeFeature(levelAccessor, random, blockPos, blockState);
     }
 
@@ -41,14 +43,14 @@ extends Feature<NoneFeatureConfiguration> {
         }
         levelAccessor.setBlock(blockPos, blockState, 3);
         if (random.nextFloat() < 0.25f) {
-            levelAccessor.setBlock(blockPos2, BlockTags.CORALS.getRandomElement(random).defaultBlockState(), 2);
+            levelAccessor.setBlock(blockPos2, ((Block)BlockTags.CORALS.getRandomElement(random)).defaultBlockState(), 2);
         } else if (random.nextFloat() < 0.05f) {
             levelAccessor.setBlock(blockPos2, (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, random.nextInt(4) + 1), 2);
         }
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos blockPos3;
             if (!(random.nextFloat() < 0.2f) || levelAccessor.getBlockState(blockPos3 = blockPos.relative(direction)).getBlock() != Blocks.WATER) continue;
-            BlockState blockState3 = (BlockState)BlockTags.WALL_CORALS.getRandomElement(random).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
+            BlockState blockState3 = (BlockState)((Block)BlockTags.WALL_CORALS.getRandomElement(random)).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
             levelAccessor.setBlock(blockPos3, blockState3, 2);
         }
         return true;

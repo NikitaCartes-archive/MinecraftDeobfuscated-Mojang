@@ -22,7 +22,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -144,9 +143,6 @@ extends Entity {
         }
         if (this.level.isClientSide || this.removed) {
             return true;
-        }
-        if (damageSource instanceof IndirectEntityDamageSource && damageSource.getEntity() != null && this.hasPassenger(damageSource.getEntity())) {
-            return false;
         }
         this.setHurtDir(-this.getHurtDir());
         this.setHurtTime(10);

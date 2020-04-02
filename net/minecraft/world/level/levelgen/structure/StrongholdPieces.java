@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.DoorBlock;
@@ -206,7 +207,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 10, 7, 15, false, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, StrongholdPiece.SmallDoorType.GRATES, 4, 1, 0);
@@ -357,7 +358,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 9, 8, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 4, 3, 0);
             if (this.leftLow) {
@@ -423,7 +424,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int l;
             int i = 11;
             if (!this.isTall) {
@@ -547,7 +548,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 8, 4, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateBox(levelAccessor, boundingBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
@@ -614,7 +615,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 10, 6, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 4, 1, 0);
             this.generateBox(levelAccessor, boundingBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
@@ -734,7 +735,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
@@ -779,7 +780,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
@@ -830,7 +831,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 10, 7, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(levelAccessor, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 7);
@@ -884,7 +885,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(levelAccessor, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
@@ -951,7 +952,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(levelAccessor, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
@@ -1039,7 +1040,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 10, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(levelAccessor, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(levelAccessor, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 4);
@@ -1104,7 +1105,7 @@ public class StrongholdPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             for (int i = 0; i < this.steps; ++i) {
                 this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), 0, 0, i, boundingBox);
                 this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), 1, 0, i, boundingBox);

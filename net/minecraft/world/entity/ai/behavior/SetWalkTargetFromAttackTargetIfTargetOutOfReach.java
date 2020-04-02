@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
-import net.minecraft.world.entity.ai.behavior.EntityPosWrapper;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -36,9 +36,9 @@ extends Behavior<Mob> {
 
     private void setWalkAndLookTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {
         Brain<?> brain = livingEntity.getBrain();
-        EntityPosWrapper positionWrapper = new EntityPosWrapper(livingEntity2);
-        brain.setMemory(MemoryModuleType.LOOK_TARGET, positionWrapper);
-        WalkTarget walkTarget = new WalkTarget(positionWrapper, this.speedModifier, 0);
+        EntityTracker positionTracker = new EntityTracker(livingEntity2);
+        brain.setMemory(MemoryModuleType.LOOK_TARGET, positionTracker);
+        WalkTarget walkTarget = new WalkTarget(positionTracker, this.speedModifier, 0);
         brain.setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 

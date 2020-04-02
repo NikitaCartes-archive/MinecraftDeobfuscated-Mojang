@@ -22,19 +22,27 @@ import org.jetbrains.annotations.Nullable;
 public abstract class Projectile
 extends Entity {
     private UUID ownerUUID;
+    private int ownerNetworkId;
+    private boolean leftOwner;
 
     Projectile(EntityType<? extends Projectile> entityType, Level level) {
         super(entityType, level);
     }
 
     public void setOwner(@Nullable Entity entity) {
-        this.ownerUUID = entity == null ? null : entity.getUUID();
+        if (entity != null) {
+            this.ownerUUID = entity.getUUID();
+            this.ownerNetworkId = entity.getId();
+        }
     }
 
     @Nullable
     public Entity getOwner() {
         if (this.ownerUUID != null && this.level instanceof ServerLevel) {
             return ((ServerLevel)this.level).getEntity(this.ownerUUID);
+        }
+        if (this.ownerNetworkId != 0) {
+            return this.level.getEntity(this.ownerNetworkId);
         }
         return null;
     }
@@ -44,6 +52,9 @@ extends Entity {
         if (this.ownerUUID != null) {
             compoundTag.putUUID("Owner", this.ownerUUID);
         }
+        if (this.leftOwner) {
+            compoundTag.putBoolean("LeftOwner", true);
+        }
     }
 
     @Override
@@ -51,6 +62,26 @@ extends Entity {
         if (compoundTag.hasUUID("Owner")) {
             this.ownerUUID = compoundTag.getUUID("Owner");
         }
+        this.leftOwner = compoundTag.getBoolean("LeftOwner");
+    }
+
+    @Override
+    public void tick() {
+        if (!this.leftOwner) {
+            this.leftOwner = this.checkLeftOwner();
+        }
+        super.tick();
+    }
+
+    private boolean checkLeftOwner() {
+        Entity entity2 = this.getOwner();
+        if (entity2 != null) {
+            for (Entity entity22 : this.level.getEntities(this, this.getBoundingBox().inflate(1.0), entity -> !entity.isSpectator() && entity.isPickable())) {
+                if (entity22.getRootVehicle() != entity2.getRootVehicle()) continue;
+                return false;
+            }
+        }
+        return true;
     }
 
     public void shoot(double d, double e, double f, float g, float h) {
@@ -102,6 +133,31 @@ extends Entity {
             this.yRotO = this.yRot;
             this.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
         }
+    }
+
+    protected boolean canHitEntity(Entity entity) {
+        if (entity.isSpectator() || !entity.isAlive() || !entity.isPickable()) {
+            return false;
+        }
+        Entity entity2 = this.getOwner();
+        return entity2 == null || this.leftOwner || !entity2.isPassengerOfSameVehicle(entity);
+    }
+
+    protected void updateRotation() {
+        Vec3 vec3 = this.getDeltaMovement();
+        float f = Mth.sqrt(Projectile.getHorizontalDistanceSqr(vec3));
+        this.xRot = Projectile.lerpRotation(this.xRotO, (float)(Mth.atan2(vec3.y, f) * 57.2957763671875));
+        this.yRot = Projectile.lerpRotation(this.yRotO, (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875));
+    }
+
+    protected static float lerpRotation(float f, float g) {
+        while (g - f < -180.0f) {
+            f -= 360.0f;
+        }
+        while (g - f >= 180.0f) {
+            f += 360.0f;
+        }
+        return Mth.lerp(0.2f, f, g);
     }
 }
 

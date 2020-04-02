@@ -3,10 +3,8 @@
  */
 package net.minecraft.tags;
 
-import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -66,34 +64,20 @@ implements PreparableReloadListener {
 
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-        CompletableFuture completableFuture = this.blocks.prepare(resourceManager, executor);
-        CompletableFuture completableFuture2 = this.items.prepare(resourceManager, executor);
-        CompletableFuture completableFuture3 = this.fluids.prepare(resourceManager, executor);
-        CompletableFuture completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
-        return ((CompletableFuture)((CompletableFuture)((CompletableFuture)completableFuture.thenCombine((CompletionStage)completableFuture2, Pair::of)).thenCombine(completableFuture3.thenCombine((CompletionStage)completableFuture4, Pair::of), (pair, pair2) -> new Preparations((Map)pair.getFirst(), (Map)pair.getSecond(), (Map)pair2.getFirst(), (Map)pair2.getSecond()))).thenCompose(preparationBarrier::wait)).thenAcceptAsync(preparations -> {
-            this.blocks.load(preparations.blocks);
-            this.items.load(preparations.items);
-            this.fluids.load(preparations.fluids);
-            this.entityTypes.load(preparations.entityTypes);
+        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.blocks.prepare(resourceManager, executor);
+        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture2 = this.items.prepare(resourceManager, executor);
+        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture3 = this.fluids.prepare(resourceManager, executor);
+        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
+        return ((CompletableFuture)CompletableFuture.allOf(completableFuture, completableFuture2, completableFuture3, completableFuture4).thenCompose(preparationBarrier::wait)).thenAcceptAsync(void_ -> {
+            this.blocks.load((Map)completableFuture.join());
+            this.items.load((Map)completableFuture2.join());
+            this.fluids.load((Map)completableFuture3.join());
+            this.entityTypes.load((Map)completableFuture4.join());
             BlockTags.reset(this.blocks);
             ItemTags.reset(this.items);
             FluidTags.reset(this.fluids);
             EntityTypeTags.reset(this.entityTypes);
         }, executor2);
-    }
-
-    public static class Preparations {
-        final Map<ResourceLocation, Tag.Builder<Block>> blocks;
-        final Map<ResourceLocation, Tag.Builder<Item>> items;
-        final Map<ResourceLocation, Tag.Builder<Fluid>> fluids;
-        final Map<ResourceLocation, Tag.Builder<EntityType<?>>> entityTypes;
-
-        public Preparations(Map<ResourceLocation, Tag.Builder<Block>> map, Map<ResourceLocation, Tag.Builder<Item>> map2, Map<ResourceLocation, Tag.Builder<Fluid>> map3, Map<ResourceLocation, Tag.Builder<EntityType<?>>> map4) {
-            this.blocks = map;
-            this.items = map2;
-            this.fluids = map3;
-            this.entityTypes = map4;
-        }
     }
 }
 

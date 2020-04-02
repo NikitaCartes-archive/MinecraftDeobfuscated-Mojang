@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -51,9 +53,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -78,7 +81,7 @@ import org.jetbrains.annotations.Nullable;
 public final class ItemStack {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final ItemStack EMPTY = new ItemStack((ItemLike)null);
-    public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = ItemStack.getAttributeDecimalFormat();
+    public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
     private int count;
     private int popTime;
     @Deprecated
@@ -90,12 +93,6 @@ public final class ItemStack {
     private boolean cachedBreakBlockResult;
     private BlockInWorld cachedPlaceBlock;
     private boolean cachedPlaceBlockResult;
-
-    private static DecimalFormat getAttributeDecimalFormat() {
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-        decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
-        return decimalFormat;
-    }
 
     public ItemStack(ItemLike itemLike) {
         this(itemLike, 1);
@@ -559,38 +556,35 @@ public final class ItemStack {
             }
         }
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            Multimap<String, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
+            Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
             if (multimap.isEmpty() || (i & 2) != 0) continue;
             list.add(new TextComponent(""));
             list.add(new TranslatableComponent("item.modifiers." + equipmentSlot.getName(), new Object[0]).withStyle(ChatFormatting.GRAY));
-            for (Map.Entry<String, AttributeModifier> entry : multimap.entries()) {
+            for (Map.Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
                 AttributeModifier attributeModifier = entry.getValue();
                 double d = attributeModifier.getAmount();
                 boolean bl = false;
                 if (player != null) {
                     if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
-                        d += player.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getBaseValue();
+                        d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
                         d += (double)EnchantmentHelper.getDamageBonus(this, MobType.UNDEFINED);
                         bl = true;
                     } else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
-                        d += player.getAttribute(SharedMonsterAttributes.ATTACK_SPEED).getBaseValue();
+                        d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
                         bl = true;
-                    } else if (entry.getKey().equals(SharedMonsterAttributes.KNOCKBACK_RESISTANCE.getName())) {
-                        d += player.getAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE).getBaseValue();
-                        d *= 10.0;
                     }
                 }
-                double e = attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? d * 100.0 : d;
+                double e = attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? d * 100.0 : (entry.getKey().equals(Attributes.KNOCKBACK_RESISTANCE) ? d * 10.0 : d);
                 if (bl) {
-                    list.add(new TextComponent(" ").append(new TranslatableComponent("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent("attribute.name." + entry.getKey(), new Object[0]))).withStyle(ChatFormatting.DARK_GREEN));
+                    list.add(new TextComponent(" ").append(new TranslatableComponent("attribute.modifier.equals." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(entry.getKey().getDescriptionId(), new Object[0]))).withStyle(ChatFormatting.DARK_GREEN));
                     continue;
                 }
                 if (d > 0.0) {
-                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent("attribute.name." + entry.getKey(), new Object[0])).withStyle(ChatFormatting.BLUE));
+                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(entry.getKey().getDescriptionId(), new Object[0])).withStyle(ChatFormatting.BLUE));
                     continue;
                 }
                 if (!(d < 0.0)) continue;
-                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent("attribute.name." + entry.getKey(), new Object[0])).withStyle(ChatFormatting.RED));
+                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier.getOperation().toValue(), ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(entry.getKey().getDescriptionId(), new Object[0])).withStyle(ChatFormatting.RED));
             }
         }
         if (this.hasTag() && this.getTag().getBoolean("Unbreakable") && (i & 4) == 0) {
@@ -640,7 +634,7 @@ public final class ItemStack {
             boolean bl = blockState != null;
             boolean bl3 = bl2 = resourceLocation != null;
             if (bl || bl2) {
-                Collection<Block> collection;
+                List<Block> collection;
                 if (bl) {
                     return Lists.newArrayList(blockState.getBlock().getName().withStyle(ChatFormatting.DARK_GRAY));
                 }
@@ -717,32 +711,32 @@ public final class ItemStack {
         this.getOrCreateTag().putInt("RepairCost", i);
     }
 
-    public Multimap<String, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
-        Multimap<String, AttributeModifier> multimap;
+    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
+        Multimap<Attribute, AttributeModifier> multimap;
         if (this.hasTag() && this.tag.contains("AttributeModifiers", 9)) {
             multimap = HashMultimap.create();
             ListTag listTag = this.tag.getList("AttributeModifiers", 10);
             for (int i = 0; i < listTag.size(); ++i) {
+                AttributeModifier attributeModifier;
+                Optional<Attribute> optional;
                 CompoundTag compoundTag = listTag.getCompound(i);
-                AttributeModifier attributeModifier2 = SharedMonsterAttributes.loadAttributeModifier(compoundTag);
-                if (attributeModifier2 == null || compoundTag.contains("Slot", 8) && !compoundTag.getString("Slot").equals(equipmentSlot.getName()) || attributeModifier2.getId().getLeastSignificantBits() == 0L || attributeModifier2.getId().getMostSignificantBits() == 0L) continue;
-                multimap.put(compoundTag.getString("AttributeName"), attributeModifier2);
+                if (compoundTag.contains("Slot", 8) && !compoundTag.getString("Slot").equals(equipmentSlot.getName()) || !(optional = Registry.ATTRIBUTES.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")))).isPresent() || (attributeModifier = AttributeModifier.load(compoundTag)) == null || attributeModifier.getId().getLeastSignificantBits() == 0L || attributeModifier.getId().getMostSignificantBits() == 0L) continue;
+                multimap.put(optional.get(), attributeModifier);
             }
         } else {
             multimap = this.getItem().getDefaultAttributeModifiers(equipmentSlot);
         }
-        multimap.values().forEach(attributeModifier -> attributeModifier.setSerialize(false));
         return multimap;
     }
 
-    public void addAttributeModifier(String string, AttributeModifier attributeModifier, @Nullable EquipmentSlot equipmentSlot) {
+    public void addAttributeModifier(Attribute attribute, AttributeModifier attributeModifier, @Nullable EquipmentSlot equipmentSlot) {
         this.getOrCreateTag();
         if (!this.tag.contains("AttributeModifiers", 9)) {
             this.tag.put("AttributeModifiers", new ListTag());
         }
         ListTag listTag = this.tag.getList("AttributeModifiers", 10);
-        CompoundTag compoundTag = SharedMonsterAttributes.saveAttributeModifier(attributeModifier);
-        compoundTag.putString("AttributeName", string);
+        CompoundTag compoundTag = attributeModifier.save();
+        compoundTag.putString("AttributeName", Registry.ATTRIBUTES.getKey(attribute).toString());
         if (equipmentSlot != null) {
             compoundTag.putString("Slot", equipmentSlot.getName());
         }

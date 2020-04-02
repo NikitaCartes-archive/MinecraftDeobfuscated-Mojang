@@ -25,7 +25,6 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractHurtingProjectile
 extends Projectile {
-    private int flightTime;
     public double xPower;
     public double yPower;
     public double zPower;
@@ -68,6 +67,7 @@ extends Projectile {
 
     @Override
     public void tick() {
+        HitResult hitResult;
         Entity entity = this.getOwner();
         if (!this.level.isClientSide && (entity != null && entity.removed || !this.level.hasChunkAt(this.blockPosition()))) {
             this.remove();
@@ -77,9 +77,7 @@ extends Projectile {
         if (this.shouldBurn()) {
             this.setSecondsOnFire(1);
         }
-        ++this.flightTime;
-        HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, this.flightTime >= 25, entity, ClipContext.Block.COLLIDER);
-        if (hitResult.getType() != HitResult.Type.MISS) {
+        if ((hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER)).getType() != HitResult.Type.MISS) {
             this.onHit(hitResult);
         }
         Vec3 vec3 = this.getDeltaMovement();
@@ -98,6 +96,11 @@ extends Projectile {
         this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale(g));
         this.level.addParticle(this.getTrailParticle(), d, e + 0.5, f, 0.0, 0.0, 0.0);
         this.setPos(d, e, f);
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        return super.canHitEntity(entity) && !entity.noPhysics;
     }
 
     protected boolean shouldBurn() {

@@ -4,7 +4,6 @@
 package net.minecraft.world.entity;
 
 import com.mojang.datafixers.DataFixUtils;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -72,7 +71,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -105,6 +103,7 @@ import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
@@ -118,6 +117,7 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -207,7 +207,6 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Parrot> PARROT = EntityType.register("parrot", Builder.of(Parrot::new, MobCategory.CREATURE).sized(0.5f, 0.9f));
     public static final EntityType<Pig> PIG = EntityType.register("pig", Builder.of(Pig::new, MobCategory.CREATURE).sized(0.9f, 0.9f));
     public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.7f).instantDespawnDistance(64));
-    public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = EntityType.register("zombified_piglin", Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.95f));
     public static final EntityType<PolarBear> POLAR_BEAR = EntityType.register("polar_bear", Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4f, 1.4f));
     public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f));
     public static final EntityType<Rabbit> RABBIT = EntityType.register("rabbit", Builder.of(Rabbit::new, MobCategory.CREATURE).sized(0.4f, 0.5f));
@@ -246,6 +245,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<WitherSkull> WITHER_SKULL = EntityType.register("wither_skull", Builder.of(WitherSkull::new, MobCategory.MISC).sized(0.3125f, 0.3125f));
     public static final EntityType<Wolf> WOLF = EntityType.register("wolf", Builder.of(Wolf::new, MobCategory.CREATURE).sized(0.6f, 0.85f));
     public static final EntityType<Zombie> ZOMBIE = EntityType.register("zombie", Builder.of(Zombie::new, MobCategory.MONSTER).sized(0.6f, 1.95f));
+    public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = EntityType.register("zombified_piglin", Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6f, 1.95f));
     public static final EntityType<ZombieHorse> ZOMBIE_HORSE = EntityType.register("zombie_horse", Builder.of(ZombieHorse::new, MobCategory.CREATURE).sized(1.3964844f, 1.6f));
     public static final EntityType<ZombieVillager> ZOMBIE_VILLAGER = EntityType.register("zombie_villager", Builder.of(ZombieVillager::new, MobCategory.MONSTER).sized(0.6f, 1.95f));
     public static final EntityType<Phantom> PHANTOM = EntityType.register("phantom", Builder.of(Phantom::new, MobCategory.MONSTER).sized(0.9f, 0.5f));
@@ -253,6 +253,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Hoglin> HOGLIN = EntityType.register("hoglin", Builder.of(Hoglin::new, MobCategory.MONSTER).sized(1.3964844f, 1.4f));
     public static final EntityType<Piglin> PIGLIN = EntityType.register("piglin", Builder.of(Piglin::new, MobCategory.MONSTER).sized(0.6f, 1.95f));
     public static final EntityType<Strider> STRIDER = EntityType.register("strider", Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9f, 1.7f));
+    public static final EntityType<Zoglin> ZOGLIN = EntityType.register("zoglin", Builder.of(Zoglin::new, MobCategory.MONSTER).fireImmune().sized(1.3964844f, 1.4f));
     public static final EntityType<LightningBolt> LIGHTNING_BOLT = EntityType.register("lightning_bolt", Builder.createNothing(MobCategory.MISC).noSave().sized(0.0f, 0.0f));
     public static final EntityType<Player> PLAYER = EntityType.register("player", Builder.createNothing(MobCategory.MISC).noSave().noSummon().sized(0.6f, 1.8f));
     public static final EntityType<FishingHook> FISHING_BOBBER = EntityType.register("fishing_bobber", Builder.createNothing(MobCategory.MISC).noSave().noSummon().sized(0.25f, 0.25f));
@@ -341,7 +342,7 @@ public class EntityType<T extends Entity> {
         if (bl) {
             aABB2 = aABB2.expandTowards(0.0, -1.0, 0.0);
         }
-        Stream<VoxelShape> stream = levelReader.getCollisions(null, aABB2, Collections.emptySet());
+        Stream<VoxelShape> stream = levelReader.getCollisions(null, aABB2, entity -> true);
         return 1.0 + Shapes.collide(Direction.Axis.Y, aABB, stream, bl ? -2.0 : -1.0);
     }
 

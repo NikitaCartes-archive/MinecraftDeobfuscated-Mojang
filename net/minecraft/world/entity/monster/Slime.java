@@ -29,12 +29,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -77,19 +77,13 @@ implements Enemy {
         this.entityData.define(ID_SIZE, 1);
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-    }
-
     protected void setSize(int i, boolean bl) {
         this.entityData.set(ID_SIZE, i);
         this.reapplyPosition();
         this.refreshDimensions();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(i * i);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
-        this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(i);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(i * i);
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.2f + 0.1f * (float)i);
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(i);
         if (bl) {
             this.setHealth(this.getMaxHealth());
         }
@@ -250,7 +244,7 @@ implements Enemy {
     }
 
     protected float getAttackDamage() {
-        return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        return (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
 
     @Override
@@ -503,7 +497,7 @@ implements Enemy {
             }
             this.operation = MoveControl.Operation.WAIT;
             if (this.mob.isOnGround()) {
-                this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+                this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 if (this.jumpDelay-- <= 0) {
                     this.jumpDelay = this.slime.getJumpDelay();
                     if (this.isAggressive) {
@@ -519,7 +513,7 @@ implements Enemy {
                     this.mob.setSpeed(0.0f);
                 }
             } else {
-                this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+                this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
             }
         }
     }

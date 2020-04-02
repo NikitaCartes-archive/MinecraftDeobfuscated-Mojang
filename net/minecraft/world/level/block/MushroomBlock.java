@@ -85,7 +85,7 @@ implements BonemealableBlock {
             serverLevel.setBlock(blockPos, blockState, 3);
             return false;
         }
-        if (configuredFeature.place(serverLevel, serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
+        if (configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
             return true;
         }
         serverLevel.setBlock(blockPos, blockState, 3);

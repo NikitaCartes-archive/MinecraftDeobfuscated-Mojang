@@ -28,6 +28,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -63,6 +65,7 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerTy
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
@@ -97,6 +100,7 @@ implements IdMap<T> {
     public static final Registry<BlockStateProviderType<?>> BLOCKSTATE_PROVIDER_TYPES = Registry.registerSimple("block_state_provider_type", () -> BlockStateProviderType.SIMPLE_STATE_PROVIDER);
     public static final Registry<BlockPlacerType<?>> BLOCK_PLACER_TYPES = Registry.registerSimple("block_placer_type", () -> BlockPlacerType.SIMPLE_BLOCK_PLACER);
     public static final Registry<FoliagePlacerType<?>> FOLIAGE_PLACER_TYPES = Registry.registerSimple("foliage_placer_type", () -> FoliagePlacerType.BLOB_FOLIAGE_PLACER);
+    public static final Registry<TrunkPlacerType<?>> TRUNK_PLACER_TYPES = Registry.registerSimple("trunk_placer_type", () -> TrunkPlacerType.STRAIGHT_TRUNK_PLACER);
     public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = Registry.registerSimple("tree_decorator_type", () -> TreeDecoratorType.LEAVE_VINE);
     public static final Registry<ParticleType<? extends ParticleOptions>> PARTICLE_TYPE = Registry.registerSimple("particle_type", () -> ParticleTypes.BLOCK);
     public static final Registry<BiomeSourceType<?, ?>> BIOME_SOURCE_TYPE = Registry.registerSimple("biome_source_type", () -> BiomeSourceType.VANILLA_LAYERED);
@@ -115,6 +119,7 @@ implements IdMap<T> {
     public static final Registry<MenuType<?>> MENU = Registry.registerSimple("menu", () -> MenuType.ANVIL);
     public static final Registry<RecipeType<?>> RECIPE_TYPE = Registry.registerSimple("recipe_type", () -> RecipeType.CRAFTING);
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZER = Registry.registerSimple("recipe_serializer", () -> RecipeSerializer.SHAPELESS_RECIPE);
+    public static final Registry<Attribute> ATTRIBUTES = Registry.registerSimple("attributes", () -> Attributes.LUCK);
     public static final Registry<StatType<?>> STAT_TYPE = Registry.registerSimple("stat_type", () -> Stats.ITEM_USED);
     public static final DefaultedRegistry<VillagerType> VILLAGER_TYPE = Registry.registerDefaulted("villager_type", "plains", () -> VillagerType.PLAINS);
     public static final DefaultedRegistry<VillagerProfession> VILLAGER_PROFESSION = Registry.registerDefaulted("villager_profession", "none", () -> VillagerProfession.NONE);

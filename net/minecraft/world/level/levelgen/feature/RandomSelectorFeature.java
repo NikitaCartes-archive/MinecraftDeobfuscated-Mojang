@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -21,12 +22,12 @@ extends Feature<RandomFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, RandomFeatureConfiguration randomFeatureConfiguration) {
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, RandomFeatureConfiguration randomFeatureConfiguration) {
         for (WeightedConfiguredFeature<?> weightedConfiguredFeature : randomFeatureConfiguration.features) {
             if (!(random.nextFloat() < weightedConfiguredFeature.chance)) continue;
-            return weightedConfiguredFeature.place(levelAccessor, chunkGenerator, random, blockPos);
+            return weightedConfiguredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos);
         }
-        return randomFeatureConfiguration.defaultFeature.place(levelAccessor, chunkGenerator, random, blockPos);
+        return randomFeatureConfiguration.defaultFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos);
     }
 }
 

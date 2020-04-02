@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -52,12 +51,12 @@ public interface EntityGetter {
         return this.getLoadedEntitiesOfClass(class_, aABB, EntitySelector.NO_SPECTATORS);
     }
 
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity3, AABB aABB, Set<Entity> set) {
+    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
         if (aABB.getSize() < 1.0E-7) {
             return Stream.empty();
         }
         AABB aABB2 = aABB.inflate(1.0E-7);
-        return this.getEntities(entity3, aABB2).stream().filter(entity -> !set.contains(entity)).filter(entity2 -> entity3 == null || !entity3.isPassengerOfSameVehicle((Entity)entity2)).flatMap(entity2 -> Stream.of(entity2.getCollideBox(), entity3 == null ? null : entity3.getCollideAgainstBox((Entity)entity2))).filter(Objects::nonNull).filter(aABB2::intersects).map(Shapes::create);
+        return this.getEntities(entity, aABB2).stream().filter(predicate).filter(entity2 -> entity == null || !entity.isPassengerOfSameVehicle((Entity)entity2)).flatMap(entity2 -> Stream.of(entity2.getCollideBox(), entity == null ? null : entity.getCollideAgainstBox((Entity)entity2))).filter(Objects::nonNull).filter(aABB2::intersects).map(Shapes::create);
     }
 
     @Nullable

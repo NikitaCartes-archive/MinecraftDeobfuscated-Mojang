@@ -66,7 +66,7 @@ public enum DragonRespawnAnimation {
                         }
                         serverLevel.explode(null, (float)endSpike.getCenterX() + 0.5f, endSpike.getHeight(), (float)endSpike.getCenterZ() + 0.5f, 5.0f, Explosion.BlockInteraction.DESTROY);
                         SpikeConfiguration spikeConfiguration = new SpikeConfiguration(true, ImmutableList.of(endSpike), new BlockPos(0, 128, 0));
-                        Feature.END_SPIKE.configured(spikeConfiguration).place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), new BlockPos(endSpike.getCenterX(), 45, endSpike.getCenterZ()));
+                        Feature.END_SPIKE.configured(spikeConfiguration).place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), new Random(), new BlockPos(endSpike.getCenterX(), 45, endSpike.getCenterZ()));
                     }
                 } else if (bl) {
                     endDragonFight.setRespawnStage(SUMMONING_DRAGON);

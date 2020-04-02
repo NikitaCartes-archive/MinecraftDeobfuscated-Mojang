@@ -36,6 +36,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.DolphinLookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -56,7 +58,6 @@ import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Guardian;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -168,13 +169,8 @@ extends WaterAnimal {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, Guardian.class).setAlertOthers(new Class[0]));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(1.2f);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-        this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 1.2f).add(Attributes.ATTACK_DAMAGE, 3.0);
     }
 
     @Override
@@ -184,7 +180,7 @@ extends WaterAnimal {
 
     @Override
     public boolean doHurtTarget(Entity entity) {
-        boolean bl = entity.hurt(DamageSource.mobAttack(this), (int)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue());
+        boolean bl = entity.hurt(DamageSource.mobAttack(this), (int)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
         if (bl) {
             this.doEnchantDamageEffects(this, entity);
             this.playSound(SoundEvents.DOLPHIN_ATTACK, 1.0f, 1.0f);
@@ -602,7 +598,7 @@ extends WaterAnimal {
             float h = (float)(Mth.atan2(f, d) * 57.2957763671875) - 90.0f;
             this.dolphin.yBodyRot = this.dolphin.yRot = this.rotlerp(this.dolphin.yRot, h, 10.0f);
             this.dolphin.yHeadRot = this.dolphin.yRot;
-            float i = (float)(this.speedModifier * this.dolphin.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+            float i = (float)(this.speedModifier * this.dolphin.getAttributeValue(Attributes.MOVEMENT_SPEED));
             if (this.dolphin.isInWater()) {
                 this.dolphin.setSpeed(i * 0.02f);
                 float j = -((float)(Mth.atan2(e, Mth.sqrt(d * d + f * f)) * 57.2957763671875));

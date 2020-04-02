@@ -131,11 +131,9 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.saveddata.SaveDataDirtyRunnable;
@@ -164,9 +162,8 @@ Runnable {
     public static final File USERID_CACHE_FILE = new File("usercache.json");
     private static final CompletableFuture<Unit> DATA_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
     public static final LevelSettings DEMO_SETTINGS = new LevelSettings("North Carolina".hashCode(), GameType.SURVIVAL, true, false, LevelType.NORMAL.getDefaultProvider()).enableStartingBonusItems();
-    private final LevelStorageSource storageSource;
+    protected final LevelStorageSource.LevelStorageAccess storageSource;
     private final Snooper snooper = new Snooper("server", this, Util.getMillis());
-    private final File universe;
     private final List<Runnable> tickables = Lists.newArrayList();
     private ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
     private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
@@ -198,9 +195,7 @@ Runnable {
     private KeyPair keyPair;
     @Nullable
     private String singleplayerName;
-    private final String levelIdName;
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     private String levelName;
     private boolean isDemo;
     private boolean levelHasStartingBonusChest;
@@ -212,8 +207,6 @@ Runnable {
     private Component startupState;
     private boolean delayProfilerStart;
     private boolean forceGameType;
-    @Nullable
-    private final YggdrasilAuthenticationService authenticationService;
     private final MinecraftSessionService sessionService;
     private final GameProfileRepository profileRepository;
     private final GameProfileCache profileCache;
@@ -248,18 +241,16 @@ Runnable {
     @Nullable
     private String serverId;
 
-    public MinecraftServer(File file, Proxy proxy, DataFixer dataFixer, Commands commands, YggdrasilAuthenticationService yggdrasilAuthenticationService, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory, String string) {
+    public MinecraftServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, Proxy proxy, DataFixer dataFixer, Commands commands, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super("Server");
         this.proxy = proxy;
         this.commands = commands;
-        this.authenticationService = yggdrasilAuthenticationService;
         this.sessionService = minecraftSessionService;
         this.profileRepository = gameProfileRepository;
         this.profileCache = gameProfileCache;
-        this.universe = file;
         this.connection = new ServerConnectionListener(this);
         this.progressListenerFactory = chunkProgressListenerFactory;
-        this.storageSource = new LevelStorageSource(file.toPath(), file.toPath().resolve("../backups"), dataFixer);
+        this.storageSource = levelStorageAccess;
         this.fixerUpper = dataFixer;
         this.resources.registerReloadListener(this.tags);
         this.resources.registerReloadListener(this.predicateManager);
@@ -268,7 +259,6 @@ Runnable {
         this.resources.registerReloadListener(this.functions);
         this.resources.registerReloadListener(this.advancements);
         this.executor = Util.backgroundExecutor();
-        this.levelIdName = string;
     }
 
     private void readScoreboard(DimensionDataStorage dimensionDataStorage) {
@@ -279,11 +269,11 @@ Runnable {
 
     protected abstract boolean initServer() throws IOException;
 
-    protected void ensureLevelConversion(String string) {
-        if (this.getStorageSource().requiresConversion(string)) {
+    protected void ensureLevelConversion() {
+        if (this.storageSource.requiresConversion()) {
             LOGGER.info("Converting map!");
             this.setServerStartupState(new TranslatableComponent("menu.convertingLevel", new Object[0]));
-            this.getStorageSource().convertLevel(string, new ProgressListener(){
+            this.storageSource.convertLevel(new ProgressListener(){
                 private long timeStamp = Util.getMillis();
 
                 @Override
@@ -315,9 +305,9 @@ Runnable {
         }
         if (this.forceUpgrade) {
             LOGGER.info("Forcing world upgrade!");
-            LevelData levelData = this.getStorageSource().getDataTagFor(this.getLevelIdName());
+            LevelData levelData = this.storageSource.getDataTag();
             if (levelData != null) {
-                WorldUpgrader worldUpgrader = new WorldUpgrader(this.getLevelIdName(), this.getStorageSource(), levelData, this.eraseCache);
+                WorldUpgrader worldUpgrader = new WorldUpgrader(this.storageSource, levelData, this.eraseCache);
                 Component component = null;
                 while (!worldUpgrader.isFinished()) {
                     int i;
@@ -346,12 +336,12 @@ Runnable {
         this.startupState = component;
     }
 
-    protected void loadLevel(String string, String string2, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
+    protected void loadLevel(String string, long l, ChunkGeneratorProvider chunkGeneratorProvider) {
         LevelSettings levelSettings;
-        this.ensureLevelConversion(string);
+        this.ensureLevelConversion();
         this.setServerStartupState(new TranslatableComponent("menu.loadingLevel", new Object[0]));
-        LevelStorage levelStorage = this.getStorageSource().selectLevel(string, this);
-        this.detectBundledResources(this.getLevelIdName(), levelStorage);
+        LevelStorage levelStorage = this.storageSource.selectLevel(this);
+        this.detectBundledResources(this.storageSource.getLevelId(), levelStorage);
         LevelData levelData = levelStorage.prepareLevel();
         if (levelData == null) {
             if (this.isDemo()) {
@@ -362,9 +352,9 @@ Runnable {
                     levelSettings.enableStartingBonusItems();
                 }
             }
-            levelData = new LevelData(levelSettings, string2);
+            levelData = new LevelData(levelSettings, string);
         } else {
-            levelData.setLevelName(string2);
+            levelData.setLevelName(string);
             levelSettings = new LevelSettings(levelData);
         }
         levelData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
@@ -511,11 +501,7 @@ Runnable {
             if (!bl) {
                 LOGGER.info("Saving chunks for level '{}'/{}", (Object)serverLevel.getLevelData().getLevelName(), (Object)DimensionType.getName(serverLevel.dimension.getType()));
             }
-            try {
-                serverLevel.save(null, bl2, serverLevel.noSave && !bl3);
-            } catch (LevelConflictException levelConflictException) {
-                LOGGER.warn(levelConflictException.getMessage());
-            }
+            serverLevel.save(null, bl2, serverLevel.noSave && !bl3);
             bl4 = true;
         }
         ServerLevel serverLevel2 = this.getLevel(DimensionType.OVERWORLD);
@@ -557,6 +543,11 @@ Runnable {
         }
         if (this.snooper.isStarted()) {
             this.snooper.interrupt();
+        }
+        try {
+            this.storageSource.close();
+        } catch (IOException iOException2) {
+            LOGGER.error("Failed to unlock level {}", (Object)this.levelName, (Object)iOException2);
         }
     }
 
@@ -693,7 +684,7 @@ Runnable {
     public void updateStatusIcon(ServerStatus serverStatus) {
         File file = this.getFile("server-icon.png");
         if (!file.exists()) {
-            file = this.getStorageSource().getFile(this.getLevelIdName(), "icon.png");
+            file = this.storageSource.getIconFile();
         }
         if (file.isFile()) {
             ByteBuf byteBuf = Unpooled.buffer();
@@ -720,7 +711,7 @@ Runnable {
 
     @Environment(value=EnvType.CLIENT)
     public File getWorldScreenshotFile() {
-        return this.getStorageSource().getFile(this.getLevelIdName(), "icon.png");
+        return this.storageSource.getIconFile();
     }
 
     public File getServerDirectory() {
@@ -857,13 +848,15 @@ Runnable {
             CrashReport.preload();
             Bootstrap.bootStrap();
             Bootstrap.validate();
-            String string = optionSet.valueOf(optionSpec9);
+            File file = new File(optionSet.valueOf(optionSpec9));
             YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
-            GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(string, USERID_CACHE_FILE.getName()));
-            String string2 = Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
-            final DedicatedServer dedicatedServer = new DedicatedServer(new File(string), dedicatedServerSettings, DataFixers.getDataFixer(), yggdrasilAuthenticationService, minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new, string2);
+            GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(file, USERID_CACHE_FILE.getName()));
+            String string = Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
+            LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
+            LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
+            final DedicatedServer dedicatedServer = new DedicatedServer(levelStorageAccess, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
             dedicatedServer.setSingleplayerName(optionSet.valueOf(optionSpec8));
             dedicatedServer.setPort(optionSet.valueOf(optionSpec11));
             dedicatedServer.setDemo(optionSet.has(optionSpec3));
@@ -989,10 +982,6 @@ Runnable {
 
     public abstract Optional<String> getModdedStatus();
 
-    public boolean isInitialized() {
-        return this.universe != null;
-    }
-
     @Override
     public void sendMessage(Component component) {
         LOGGER.info(component.getString());
@@ -1020,10 +1009,6 @@ Runnable {
 
     public boolean isSingleplayer() {
         return this.singleplayerName != null;
-    }
-
-    public String getLevelIdName() {
-        return this.levelIdName;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -1087,10 +1072,6 @@ Runnable {
 
     public void setBonusChest(boolean bl) {
         this.levelHasStartingBonusChest = bl;
-    }
-
-    public LevelStorageSource getStorageSource() {
-        return this.storageSource;
     }
 
     public String getResourcePack() {
@@ -1569,7 +1550,7 @@ Runnable {
     }
 
     private void refreshRegistries() {
-        Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
+        Blocks.rebuildCache();
     }
 
     private void startProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
@@ -1599,6 +1580,14 @@ Runnable {
         ProfileResults profileResults = this.continousProfiler.getResults();
         this.continousProfiler.disable();
         return profileResults;
+    }
+
+    public Path getWorldPath() {
+        return this.storageSource.getLevelPath();
+    }
+
+    public boolean forceSynchronousWrites() {
+        return true;
     }
 
     @Override

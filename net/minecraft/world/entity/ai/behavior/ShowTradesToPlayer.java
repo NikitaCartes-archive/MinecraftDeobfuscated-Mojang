@@ -12,7 +12,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.EntityPosWrapper;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.npc.Villager;
@@ -113,7 +113,7 @@ extends Behavior<Villager> {
     private LivingEntity lookAtTarget(Villager villager) {
         Brain<Villager> brain = villager.getBrain();
         LivingEntity livingEntity = brain.getMemory(MemoryModuleType.INTERACTION_TARGET).get();
-        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntity));
+        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity));
         return livingEntity;
     }
 

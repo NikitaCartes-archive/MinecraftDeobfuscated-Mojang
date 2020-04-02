@@ -335,6 +335,7 @@ public class SoundEvents {
     public static final SoundEvent HOGLIN_AMBIENT = SoundEvents.register("entity.hoglin.ambient");
     public static final SoundEvent HOGLIN_ANGRY = SoundEvents.register("entity.hoglin.angry");
     public static final SoundEvent HOGLIN_ATTACK = SoundEvents.register("entity.hoglin.attack");
+    public static final SoundEvent HOGLIN_CONVERTED_TO_ZOMBIFIED = SoundEvents.register("entity.hoglin.converted_to_zombified");
     public static final SoundEvent HOGLIN_DEATH = SoundEvents.register("entity.hoglin.death");
     public static final SoundEvent HOGLIN_HURT = SoundEvents.register("entity.hoglin.hurt");
     public static final SoundEvent HOGLIN_RETREAT = SoundEvents.register("entity.hoglin.retreat");
@@ -932,6 +933,12 @@ public class SoundEvents {
     public static final SoundEvent WOOL_HIT = SoundEvents.register("block.wool.hit");
     public static final SoundEvent WOOL_PLACE = SoundEvents.register("block.wool.place");
     public static final SoundEvent WOOL_STEP = SoundEvents.register("block.wool.step");
+    public static final SoundEvent ZOGLIN_AMBIENT = SoundEvents.register("entity.zoglin.ambient");
+    public static final SoundEvent ZOGLIN_ANGRY = SoundEvents.register("entity.zoglin.angry");
+    public static final SoundEvent ZOGLIN_ATTACK = SoundEvents.register("entity.zoglin.attack");
+    public static final SoundEvent ZOGLIN_DEATH = SoundEvents.register("entity.zoglin.death");
+    public static final SoundEvent ZOGLIN_HURT = SoundEvents.register("entity.zoglin.hurt");
+    public static final SoundEvent ZOGLIN_STEP = SoundEvents.register("entity.zoglin.step");
     public static final SoundEvent ZOMBIE_AMBIENT = SoundEvents.register("entity.zombie.ambient");
     public static final SoundEvent ZOMBIE_ATTACK_WOODEN_DOOR = SoundEvents.register("entity.zombie.attack_wooden_door");
     public static final SoundEvent ZOMBIE_ATTACK_IRON_DOOR = SoundEvents.register("entity.zombie.attack_iron_door");

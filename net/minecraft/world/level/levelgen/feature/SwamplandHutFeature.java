@@ -10,6 +10,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
@@ -60,9 +61,9 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         return SWAMPHUT_ANIMALS;
     }
 
-    public boolean isSwamphut(LevelAccessor levelAccessor, BlockPos blockPos) {
-        StructureStart structureStart = this.getStructureAt(levelAccessor, blockPos, true);
-        if (structureStart == StructureStart.INVALID_START || !(structureStart instanceof FeatureStart) || structureStart.getPieces().isEmpty()) {
+    public boolean isSwamphut(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
+        StructureStart structureStart = this.getStructureAt(levelAccessor, structureFeatureManager, blockPos, true);
+        if (!structureStart.isValid() || !(structureStart instanceof FeatureStart)) {
             return false;
         }
         StructurePiece structurePiece = structureStart.getPieces().get(0);

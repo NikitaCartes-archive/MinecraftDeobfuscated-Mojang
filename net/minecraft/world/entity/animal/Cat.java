@@ -31,11 +31,14 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.CatLieOnBedGoal;
@@ -54,7 +57,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -246,12 +248,8 @@ extends TamableAnimal {
         return SoundEvents.CAT_DEATH;
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3f);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.ATTACK_DAMAGE, 3.0);
     }
 
     @Override
@@ -268,7 +266,7 @@ extends TamableAnimal {
     }
 
     private float getAttackDamage() {
-        return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+        return (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
 
     @Override
@@ -368,7 +366,8 @@ extends TamableAnimal {
         } else {
             this.setCatType(this.random.nextInt(10));
         }
-        if (Feature.SWAMP_HUT.isInsideFeature(levelAccessor, this.blockPosition())) {
+        Level level = levelAccessor.getLevel();
+        if (level instanceof ServerLevel && Feature.SWAMP_HUT.isInsideFeature(levelAccessor, ((ServerLevel)level).structureFeatureManager(), this.blockPosition())) {
             this.setCatType(10);
             this.setPersistenceRequired();
         }

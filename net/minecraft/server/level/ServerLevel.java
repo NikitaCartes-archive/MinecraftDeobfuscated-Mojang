@@ -108,11 +108,11 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelConflictException;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.biome.Biome;
@@ -176,9 +176,10 @@ extends Level {
     private boolean handlingTick;
     @Nullable
     private final WanderingTraderSpawner wanderingTraderSpawner;
+    private final StructureFeatureManager structureFeatureManager = new StructureFeatureManager();
 
     public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorage levelStorage, LevelData levelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
-        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorage.getFolder(), levelStorage.getFixerUpper(), levelStorage.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
+        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorage.getFolder(), levelStorage.getFixerUpper(), levelStorage.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
         this.levelStorage = levelStorage;
         this.server = minecraftServer;
         this.portalForcer = new PortalForcer(this);
@@ -195,6 +196,10 @@ extends Level {
     @Override
     public Biome getUncachedNoiseBiome(int i, int j, int k) {
         return this.getChunkSource().getGenerator().getBiomeSource().getNoiseBiome(i, j, k);
+    }
+
+    public StructureFeatureManager structureFeatureManager() {
+        return this.structureFeatureManager;
     }
 
     public void tick(BooleanSupplier booleanSupplier) {
@@ -608,7 +613,7 @@ extends Level {
 
     protected void generateBonusItemsNearSpawn() {
         ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
-        configuredFeature.place(this, this.getChunkSource().getGenerator(), this.random, new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn()));
+        configuredFeature.place(this, this.structureFeatureManager(), this.getChunkSource().getGenerator(), this.random, new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn()));
     }
 
     @Nullable
@@ -616,7 +621,7 @@ extends Level {
         return this.dimension.getDimensionSpecificSpawn();
     }
 
-    public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) throws LevelConflictException {
+    public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) {
         ServerChunkCache serverChunkCache = this.getChunkSource();
         if (bl2) {
             return;
@@ -631,8 +636,7 @@ extends Level {
         serverChunkCache.save(bl);
     }
 
-    protected void saveLevelData() throws LevelConflictException {
-        this.checkSession();
+    protected void saveLevelData() {
         this.dimension.saveData();
         this.getChunkSource().getDataStorage().save();
     }
@@ -1031,10 +1035,6 @@ extends Level {
     @Override
     public boolean noSave() {
         return this.noSave;
-    }
-
-    public void checkSession() throws LevelConflictException {
-        this.levelStorage.checkSession();
     }
 
     public LevelStorage getLevelStorage() {

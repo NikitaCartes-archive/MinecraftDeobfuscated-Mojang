@@ -9,7 +9,6 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -89,7 +88,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.WALL_POST_OVERRIDE).add((Block[])new Block[]{Blocks.LANTERN, Blocks.SOUL_FIRE_LANTERN, Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE});
         this.tag(BlockTags.CLIMBABLE).add((Block[])new Block[]{Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT});
         this.tag(BlockTags.PIGLIN_REPELLENTS).add(Blocks.SOUL_FIRE).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.SOUL_FIRE_WALL_TORCH);
-        this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS);
+        this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS).add(Blocks.NETHER_PORTAL).add(Blocks.RESPAWN_ANCHOR);
         this.tag(BlockTags.GOLD_ORES).add((Block[])new Block[]{Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE});
         this.tag(BlockTags.SOUL_FIRE_BASE_BLOCKS).add((Block[])new Block[]{Blocks.SOUL_SAND, Blocks.SOUL_SOIL});
         this.tag(BlockTags.NON_FLAMMABLE_WOOD).add((Block[])new Block[]{Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.CRIMSON_PLANKS, Blocks.WARPED_PLANKS, Blocks.CRIMSON_SLAB, Blocks.WARPED_SLAB, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.CRIMSON_FENCE, Blocks.WARPED_FENCE, Blocks.CRIMSON_TRAPDOOR, Blocks.WARPED_TRAPDOOR, Blocks.CRIMSON_FENCE_GATE, Blocks.WARPED_FENCE_GATE, Blocks.CRIMSON_STAIRS, Blocks.WARPED_STAIRS, Blocks.CRIMSON_BUTTON, Blocks.WARPED_BUTTON, Blocks.CRIMSON_DOOR, Blocks.WARPED_DOOR, Blocks.CRIMSON_SIGN, Blocks.WARPED_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.WARPED_WALL_SIGN});
@@ -104,11 +103,6 @@ extends TagsProvider<Block> {
     @Override
     public String getName() {
         return "Block Tags";
-    }
-
-    @Override
-    protected void useTags(TagCollection<Block> tagCollection) {
-        BlockTags.reset(tagCollection);
     }
 }
 

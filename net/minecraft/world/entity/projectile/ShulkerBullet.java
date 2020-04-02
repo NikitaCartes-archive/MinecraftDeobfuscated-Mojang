@@ -210,7 +210,7 @@ extends Projectile {
             } else if (!this.isNoGravity()) {
                 this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
             }
-            HitResult hitResult = ProjectileUtil.forwardsRaycast(this, true, false, this.getOwner(), ClipContext.Block.COLLIDER);
+            HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER);
             if (hitResult.getType() != HitResult.Type.MISS) {
                 this.onHit(hitResult);
             }
@@ -240,6 +240,11 @@ extends Projectile {
                 }
             }
         }
+    }
+
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        return super.canHitEntity(entity) && !entity.noPhysics;
     }
 
     @Override

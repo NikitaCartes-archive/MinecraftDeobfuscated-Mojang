@@ -67,6 +67,8 @@ implements LevelAccessor {
     private final TickList<Block> blockTicks = new WorldGenTickList<Block>(blockPos -> this.getChunk((BlockPos)blockPos).getBlockTicks());
     private final TickList<Fluid> liquidTicks = new WorldGenTickList<Fluid>(blockPos -> this.getChunk((BlockPos)blockPos).getLiquidTicks());
     private final BiomeManager biomeManager;
+    private final ChunkPos firstPos;
+    private final ChunkPos lastPos;
 
     public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list) {
         int i = Mth.floor(Math.sqrt(list.size()));
@@ -86,6 +88,8 @@ implements LevelAccessor {
         this.random = serverLevel.getRandom();
         this.dimension = serverLevel.getDimension();
         this.biomeManager = new BiomeManager(this, LevelData.obfuscateSeed(this.seed), this.dimension.getType().getBiomeZoomer());
+        this.firstPos = list.get(0).getPos();
+        this.lastPos = list.get(list.size() - 1).getPos();
     }
 
     public int getCenterX() {
@@ -106,9 +110,8 @@ implements LevelAccessor {
     public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
         ChunkAccess chunkAccess;
         if (this.hasChunk(i, j)) {
-            ChunkPos chunkPos = this.cache.get(0).getPos();
-            int k = i - chunkPos.x;
-            int l = j - chunkPos.z;
+            int k = i - this.firstPos.x;
+            int l = j - this.firstPos.z;
             chunkAccess = this.cache.get(k + l * this.size);
             if (chunkAccess.getStatus().isOrAfter(chunkStatus)) {
                 return chunkAccess;
@@ -119,10 +122,8 @@ implements LevelAccessor {
         if (!bl) {
             return null;
         }
-        ChunkAccess chunkAccess2 = this.cache.get(0);
-        ChunkAccess chunkAccess3 = this.cache.get(this.cache.size() - 1);
         LOGGER.error("Requested chunk : {} {}", (Object)i, (Object)j);
-        LOGGER.error("Region bounds : {} {} | {} {}", (Object)chunkAccess2.getPos().x, (Object)chunkAccess2.getPos().z, (Object)chunkAccess3.getPos().x, (Object)chunkAccess3.getPos().z);
+        LOGGER.error("Region bounds : {} {} | {} {}", (Object)this.firstPos.x, (Object)this.firstPos.z, (Object)this.lastPos.x, (Object)this.lastPos.z);
         if (chunkAccess != null) {
             throw Util.pauseInIde(new RuntimeException(String.format("Chunk is not of correct status. Expecting %s, got %s | %s %s", chunkStatus, chunkAccess.getStatus(), i, j)));
         }
@@ -131,9 +132,7 @@ implements LevelAccessor {
 
     @Override
     public boolean hasChunk(int i, int j) {
-        ChunkAccess chunkAccess = this.cache.get(0);
-        ChunkAccess chunkAccess2 = this.cache.get(this.cache.size() - 1);
-        return i >= chunkAccess.getPos().x && i <= chunkAccess2.getPos().x && j >= chunkAccess.getPos().z && j <= chunkAccess2.getPos().z;
+        return i >= this.firstPos.x && i <= this.lastPos.x && j >= this.firstPos.z && j <= this.lastPos.z;
     }
 
     @Override

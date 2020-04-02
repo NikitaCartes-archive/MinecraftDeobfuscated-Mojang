@@ -9,6 +9,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,8 +43,8 @@ implements ArgumentType<Result> {
                 }
 
                 @Override
-                public Either<CommandFunction, Tag<CommandFunction>> unwrap(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-                    return Either.right(FunctionArgument.getFunctionTag(commandContext, resourceLocation));
+                public Pair<ResourceLocation, Either<CommandFunction, Tag<CommandFunction>>> unwrap(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+                    return Pair.of(resourceLocation, Either.right(FunctionArgument.getFunctionTag(commandContext, resourceLocation)));
                 }
             };
         }
@@ -56,8 +57,8 @@ implements ArgumentType<Result> {
             }
 
             @Override
-            public Either<CommandFunction, Tag<CommandFunction>> unwrap(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-                return Either.left(FunctionArgument.getFunction(commandContext, resourceLocation));
+            public Pair<ResourceLocation, Either<CommandFunction, Tag<CommandFunction>>> unwrap(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+                return Pair.of(resourceLocation, Either.left(FunctionArgument.getFunction(commandContext, resourceLocation)));
             }
         };
     }
@@ -78,7 +79,7 @@ implements ArgumentType<Result> {
         return commandContext.getArgument(string, Result.class).create(commandContext);
     }
 
-    public static Either<CommandFunction, Tag<CommandFunction>> getFunctionOrTag(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+    public static Pair<ResourceLocation, Either<CommandFunction, Tag<CommandFunction>>> getFunctionOrTag(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
         return commandContext.getArgument(string, Result.class).unwrap(commandContext);
     }
 
@@ -95,7 +96,7 @@ implements ArgumentType<Result> {
     public static interface Result {
         public Collection<CommandFunction> create(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
 
-        public Either<CommandFunction, Tag<CommandFunction>> unwrap(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
+        public Pair<ResourceLocation, Either<CommandFunction, Tag<CommandFunction>>> unwrap(CommandContext<CommandSourceStack> var1) throws CommandSyntaxException;
     }
 }
 

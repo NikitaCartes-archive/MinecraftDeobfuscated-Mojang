@@ -49,10 +49,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ReputationEventHandler;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
 import net.minecraft.world.entity.ai.gossip.GossipContainer;
 import net.minecraft.world.entity.ai.gossip.GossipType;
@@ -67,7 +70,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.VillagerData;
@@ -175,11 +177,8 @@ VillagerDataHolder {
         }
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5);
-        this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5).add(Attributes.FOLLOW_RANGE, 48.0);
     }
 
     @Override
@@ -640,13 +639,11 @@ VillagerDataHolder {
     protected void pickUpItem(ItemEntity itemEntity) {
         ItemStack itemStack = itemEntity.getItem();
         if (this.wantsToPickUp(itemStack)) {
-            ItemStack itemStack2;
-            int i;
             Item item = itemStack.getItem();
             SimpleContainer simpleContainer = this.getInventory();
             boolean bl = false;
-            for (i = 0; i < simpleContainer.getContainerSize(); ++i) {
-                itemStack2 = simpleContainer.getItem(i);
+            for (int i = 0; i < simpleContainer.getContainerSize(); ++i) {
+                ItemStack itemStack2 = simpleContainer.getItem(i);
                 if (!itemStack2.isEmpty() && (itemStack2.getItem() != item || itemStack2.getCount() >= itemStack2.getMaxStackSize())) continue;
                 bl = true;
                 break;
@@ -654,20 +651,12 @@ VillagerDataHolder {
             if (!bl) {
                 return;
             }
-            i = simpleContainer.countItem(item);
-            if (i == 256) {
-                return;
-            }
-            if (i > 256) {
-                simpleContainer.removeItemType(item, i - 256);
-                return;
-            }
             this.take(itemEntity, itemStack.getCount());
-            itemStack2 = simpleContainer.addItem(itemStack);
-            if (itemStack2.isEmpty()) {
+            ItemStack itemStack3 = simpleContainer.addItem(itemStack);
+            if (itemStack3.isEmpty()) {
                 itemEntity.remove();
             } else {
-                itemStack.setCount(itemStack2.getCount());
+                itemStack.setCount(itemStack3.getCount());
             }
         }
     }

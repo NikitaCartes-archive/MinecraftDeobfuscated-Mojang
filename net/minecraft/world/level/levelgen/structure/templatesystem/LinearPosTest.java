@@ -37,7 +37,7 @@ extends PosRuleTest {
     public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
         int i = blockPos2.distManhattan(blockPos3);
         float f = random.nextFloat();
-        return (double)f <= Mth.clampedLerp(this.minChance, this.maxChance, Mth.pct(i, this.minDist, this.maxDist));
+        return (double)f <= Mth.clampedLerp(this.minChance, this.maxChance, Mth.inverseLerp(i, this.minDist, this.maxDist));
     }
 
     @Override

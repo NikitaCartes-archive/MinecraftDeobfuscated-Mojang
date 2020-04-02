@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -96,7 +97,7 @@ public class IglooPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos blockPos5;
             BlockState blockState;
             StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(this.rotation).setMirror(Mirror.NONE).setRotationPivot((BlockPos)PIVOTS.get(this.templateLocation)).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
@@ -105,7 +106,7 @@ public class IglooPieces {
             int i = levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
             BlockPos blockPos4 = this.templatePosition;
             this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-            boolean bl = super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            boolean bl = super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
             if (this.templateLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = levelAccessor.getBlockState((blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && blockState.getBlock() != Blocks.LADDER) {
                 levelAccessor.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
             }

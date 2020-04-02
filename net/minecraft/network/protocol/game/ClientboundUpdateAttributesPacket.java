@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
@@ -28,7 +31,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundUpdateAttributesPacket(int i, Collection<AttributeInstance> collection) {
         this.entityId = i;
         for (AttributeInstance attributeInstance : collection) {
-            this.attributes.add(new AttributeSnapshot(attributeInstance.getAttribute().getName(), attributeInstance.getBaseValue(), attributeInstance.getModifiers()));
+            this.attributes.add(new AttributeSnapshot(attributeInstance.getAttribute(), attributeInstance.getBaseValue(), attributeInstance.getModifiers()));
         }
     }
 
@@ -37,7 +40,8 @@ implements Packet<ClientGamePacketListener> {
         this.entityId = friendlyByteBuf.readVarInt();
         int i = friendlyByteBuf.readInt();
         for (int j = 0; j < i; ++j) {
-            String string = friendlyByteBuf.readUtf(64);
+            ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
+            Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
             double d = friendlyByteBuf.readDouble();
             ArrayList<AttributeModifier> list = Lists.newArrayList();
             int k = friendlyByteBuf.readVarInt();
@@ -45,7 +49,7 @@ implements Packet<ClientGamePacketListener> {
                 UUID uUID = friendlyByteBuf.readUUID();
                 list.add(new AttributeModifier(uUID, "Unknown synced attribute modifier", friendlyByteBuf.readDouble(), AttributeModifier.Operation.fromValue(friendlyByteBuf.readByte())));
             }
-            this.attributes.add(new AttributeSnapshot(string, d, list));
+            this.attributes.add(new AttributeSnapshot(attribute, d, list));
         }
     }
 
@@ -54,7 +58,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeVarInt(this.entityId);
         friendlyByteBuf.writeInt(this.attributes.size());
         for (AttributeSnapshot attributeSnapshot : this.attributes) {
-            friendlyByteBuf.writeUtf(attributeSnapshot.getName());
+            friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTES.getKey(attributeSnapshot.getAttribute()));
             friendlyByteBuf.writeDouble(attributeSnapshot.getBase());
             friendlyByteBuf.writeVarInt(attributeSnapshot.getModifiers().size());
             for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {
@@ -81,18 +85,18 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public class AttributeSnapshot {
-        private final String name;
+        private final Attribute attribute;
         private final double base;
         private final Collection<AttributeModifier> modifiers;
 
-        public AttributeSnapshot(String string, double d, Collection<AttributeModifier> collection) {
-            this.name = string;
+        public AttributeSnapshot(Attribute attribute, double d, Collection<AttributeModifier> collection) {
+            this.attribute = attribute;
             this.base = d;
             this.modifiers = collection;
         }
 
-        public String getName() {
-            return this.name;
+        public Attribute getAttribute() {
+            return this.attribute;
         }
 
         public double getBase() {

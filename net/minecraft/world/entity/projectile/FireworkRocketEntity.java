@@ -20,7 +20,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -134,31 +133,16 @@ implements ItemSupplier {
             if (!this.isShotAtAngle()) {
                 this.setDeltaMovement(this.getDeltaMovement().multiply(1.15, 1.0, 1.15).add(0.0, 0.04, 0.0));
             }
-            this.move(MoverType.SELF, this.getDeltaMovement());
+            vec3 = this.getDeltaMovement();
+            this.move(MoverType.SELF, vec3);
+            this.setDeltaMovement(vec3);
         }
-        vec3 = this.getDeltaMovement();
-        HitResult hitResult = ProjectileUtil.getHitResult(this, this.getBoundingBox().expandTowards(vec3).inflate(1.0), entity -> !entity.isSpectator() && entity.isAlive() && entity.isPickable(), ClipContext.Block.COLLIDER, true);
+        HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER);
         if (!this.noPhysics) {
             this.onHit(hitResult);
             this.hasImpulse = true;
         }
-        float f = Mth.sqrt(FireworkRocketEntity.getHorizontalDistanceSqr(vec3));
-        this.yRot = (float)(Mth.atan2(vec3.x, vec3.z) * 57.2957763671875);
-        this.xRot = (float)(Mth.atan2(vec3.y, f) * 57.2957763671875);
-        while (this.xRot - this.xRotO < -180.0f) {
-            this.xRotO -= 360.0f;
-        }
-        while (this.xRot - this.xRotO >= 180.0f) {
-            this.xRotO += 360.0f;
-        }
-        while (this.yRot - this.yRotO < -180.0f) {
-            this.yRotO -= 360.0f;
-        }
-        while (this.yRot - this.yRotO >= 180.0f) {
-            this.yRotO += 360.0f;
-        }
-        this.xRot = Mth.lerp(0.2f, this.xRotO, this.xRot);
-        this.yRot = Mth.lerp(0.2f, this.yRotO, this.yRot);
+        this.updateRotation();
         if (this.life == 0 && !this.isSilent()) {
             this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.FIREWORK_ROCKET_LAUNCH, SoundSource.AMBIENT, 3.0f, 1.0f);
         }
@@ -190,7 +174,7 @@ implements ItemSupplier {
     protected void onHitBlock(BlockHitResult blockHitResult) {
         BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
         this.level.getBlockState(blockPos).entityInside(this.level, blockPos, this);
-        if (this.hasExplosion()) {
+        if (!this.level.isClientSide() && this.hasExplosion()) {
             this.explode();
         }
         super.onHitBlock(blockHitResult);

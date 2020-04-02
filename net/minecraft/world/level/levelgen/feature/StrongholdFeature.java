@@ -11,8 +11,8 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -76,11 +76,11 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     @Override
     @Nullable
-    public BlockPos getNearestGeneratedFeature(Level level, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
+    public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
         if (!chunkGenerator.getBiomeSource().canGenerateStructure(this)) {
             return null;
         }
-        if (this.currentSeed != level.getSeed()) {
+        if (this.currentSeed != serverLevel.getSeed()) {
             this.reset();
         }
         if (!this.isSpotSelected) {

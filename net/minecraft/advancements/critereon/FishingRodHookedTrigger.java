@@ -14,8 +14,9 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.fishing.FishingHook;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 
 public class FishingRodHookedTrigger
@@ -65,13 +66,14 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             if (!this.rod.matches(itemStack)) {
                 return false;
             }
-            if (!this.entity.matches(serverPlayer, fishingHook.hookedIn)) {
+            Entity entity = fishingHook.getHookedIn();
+            if (!this.entity.matches(serverPlayer, entity)) {
                 return false;
             }
             if (this.item != ItemPredicate.ANY) {
                 ItemEntity itemEntity;
                 boolean bl = false;
-                if (fishingHook.hookedIn instanceof ItemEntity && this.item.matches((itemEntity = (ItemEntity)fishingHook.hookedIn).getItem())) {
+                if (entity instanceof ItemEntity && this.item.matches((itemEntity = (ItemEntity)entity).getItem())) {
                     bl = true;
                 }
                 for (ItemStack itemStack2 : collection) {

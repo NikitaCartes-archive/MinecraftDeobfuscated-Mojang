@@ -81,7 +81,7 @@ public abstract class CreativeModeTab {
         public ItemStack makeIcon() {
             return new ItemStack(Items.IRON_AXE);
         }
-    }.setEnchantmentCategories(EnchantmentCategory.ALL, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.BREAKABLE);
+    }.setEnchantmentCategories(EnchantmentCategory.VANISHABLE, EnchantmentCategory.DIGGER, EnchantmentCategory.FISHING_ROD, EnchantmentCategory.BREAKABLE);
     public static final CreativeModeTab TAB_COMBAT = new CreativeModeTab(9, "combat"){
 
         @Override
@@ -89,7 +89,7 @@ public abstract class CreativeModeTab {
         public ItemStack makeIcon() {
             return new ItemStack(Items.GOLDEN_SWORD);
         }
-    }.setEnchantmentCategories(EnchantmentCategory.ALL, EnchantmentCategory.ARMOR, EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_HEAD, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.BOW, EnchantmentCategory.WEAPON, EnchantmentCategory.WEARABLE, EnchantmentCategory.BREAKABLE, EnchantmentCategory.TRIDENT, EnchantmentCategory.CROSSBOW);
+    }.setEnchantmentCategories(EnchantmentCategory.VANISHABLE, EnchantmentCategory.ARMOR, EnchantmentCategory.ARMOR_FEET, EnchantmentCategory.ARMOR_HEAD, EnchantmentCategory.ARMOR_LEGS, EnchantmentCategory.ARMOR_CHEST, EnchantmentCategory.BOW, EnchantmentCategory.WEAPON, EnchantmentCategory.WEARABLE, EnchantmentCategory.BREAKABLE, EnchantmentCategory.TRIDENT, EnchantmentCategory.CROSSBOW);
     public static final CreativeModeTab TAB_BREWING = new CreativeModeTab(10, "brewing"){
 
         @Override

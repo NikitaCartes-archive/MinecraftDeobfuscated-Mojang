@@ -68,7 +68,7 @@ implements DebugRenderer.SimpleDebugRenderer {
                 Integer integer = entry2.getValue();
                 if (!set.add(blockPos)) continue;
                 AABB aABB = new AABB(BlockPos.ZERO).inflate(0.002).deflate(0.0025 * (double)m).move(blockPos.getX(), blockPos.getY(), blockPos.getZ()).move(-d, -e, -f);
-                LevelRenderer.renderLineBox(vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, 1.0f, 1.0f, 1.0f, 1.0f);
+                LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, 1.0f, 1.0f, 1.0f, 1.0f);
                 map.put(blockPos, integer);
             }
         }

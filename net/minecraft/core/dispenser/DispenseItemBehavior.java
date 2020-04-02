@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Sheep;
@@ -214,14 +215,9 @@ public interface DispenseItemBehavior {
             @Override
             public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
                 Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-                double d = direction.getStepX();
-                double e = direction.getStepY();
-                double f = direction.getStepZ();
-                double g = blockSource.x() + d;
-                double h = (float)blockSource.getPos().getY() + 0.2f;
-                double i = blockSource.z() + f;
-                FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.getLevel(), itemStack, g, h, i, true);
-                fireworkRocketEntity.shoot(d, e, f, 0.5f, 1.0f);
+                FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.getLevel(), itemStack, blockSource.x(), blockSource.y(), blockSource.x(), true);
+                DispenseItemBehavior.setEntityPokingOutOfBlock(blockSource, fireworkRocketEntity, direction);
+                fireworkRocketEntity.shoot(direction.getStepX(), direction.getStepY(), direction.getStepZ(), 0.5f, 1.0f);
                 blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
                 itemStack.shrink(1);
                 return itemStack;
@@ -504,6 +500,10 @@ public interface DispenseItemBehavior {
                 return itemStack;
             }
         });
+    }
+
+    public static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {
+        entity.setPos(blockSource.x() + (double)direction.getStepX() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0), blockSource.y() + (double)direction.getStepY() * (0.5000099999997474 - (double)entity.getBbHeight() / 2.0) - (double)entity.getBbHeight() / 2.0, blockSource.z() + (double)direction.getStepZ() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0));
     }
 }
 

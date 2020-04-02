@@ -1014,10 +1014,13 @@ public class Blocks {
         return Registry.register(Registry.BLOCK, string, block);
     }
 
+    public static void rebuildCache() {
+        Block.BLOCK_STATE_REGISTRY.forEach(BlockBehaviour.BlockStateBase::initCache);
+    }
+
     static {
         for (Block block : Registry.BLOCK) {
             for (BlockState blockState2 : block.getStateDefinition().getPossibleStates()) {
-                blockState2.initCache();
                 Block.BLOCK_STATE_REGISTRY.add(blockState2);
             }
             block.getLootTable();

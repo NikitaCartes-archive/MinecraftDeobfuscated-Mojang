@@ -4,6 +4,7 @@
 package net.minecraft.world.item.alchemy;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -146,7 +146,7 @@ public class PotionUtils {
     @Environment(value=EnvType.CLIENT)
     public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
         List<MobEffectInstance> list2 = PotionUtils.getMobEffects(itemStack);
-        ArrayList<Tuple<String, AttributeModifier>> list3 = Lists.newArrayList();
+        ArrayList<Pair<Attribute, AttributeModifier>> list3 = Lists.newArrayList();
         if (list2.isEmpty()) {
             list.add(new TranslatableComponent("effect.none", new Object[0]).withStyle(ChatFormatting.GRAY));
         } else {
@@ -158,7 +158,7 @@ public class PotionUtils {
                     for (Map.Entry<Attribute, AttributeModifier> entry : map.entrySet()) {
                         AttributeModifier attributeModifier = entry.getValue();
                         AttributeModifier attributeModifier2 = new AttributeModifier(attributeModifier.getName(), mobEffect.getAttributeModifierValue(mobEffectInstance.getAmplifier(), attributeModifier), attributeModifier.getOperation());
-                        list3.add(new Tuple<String, AttributeModifier>(entry.getKey().getName(), attributeModifier2));
+                        list3.add(new Pair<Attribute, AttributeModifier>(entry.getKey(), attributeModifier2));
                     }
                 }
                 if (mobEffectInstance.getAmplifier() > 0) {
@@ -173,16 +173,16 @@ public class PotionUtils {
         if (!list3.isEmpty()) {
             list.add(new TextComponent(""));
             list.add(new TranslatableComponent("potion.whenDrank", new Object[0]).withStyle(ChatFormatting.DARK_PURPLE));
-            for (Tuple tuple : list3) {
-                AttributeModifier attributeModifier3 = (AttributeModifier)tuple.getB();
+            for (Pair pair : list3) {
+                AttributeModifier attributeModifier3 = (AttributeModifier)pair.getSecond();
                 double d = attributeModifier3.getAmount();
                 double e = attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? attributeModifier3.getAmount() * 100.0 : attributeModifier3.getAmount();
                 if (d > 0.0) {
-                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent("attribute.name." + (String)tuple.getA(), new Object[0])).withStyle(ChatFormatting.BLUE));
+                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId(), new Object[0])).withStyle(ChatFormatting.BLUE));
                     continue;
                 }
                 if (!(d < 0.0)) continue;
-                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent("attribute.name." + (String)tuple.getA(), new Object[0])).withStyle(ChatFormatting.RED));
+                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId(), new Object[0])).withStyle(ChatFormatting.RED));
             }
         }
     }

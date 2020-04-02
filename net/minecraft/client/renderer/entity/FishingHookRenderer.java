@@ -19,8 +19,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
@@ -42,7 +42,7 @@ extends EntityRenderer<FishingHook> {
         double q;
         double p;
         double o;
-        Player player = fishingHook.getOwner();
+        Player player = fishingHook.getPlayerOwner();
         if (player == null) {
             return;
         }
