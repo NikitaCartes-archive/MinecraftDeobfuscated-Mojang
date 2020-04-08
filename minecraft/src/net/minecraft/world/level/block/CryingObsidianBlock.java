@@ -19,7 +19,7 @@ public class CryingObsidianBlock extends Block {
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if (random.nextInt(5) == 0) {
-			Direction direction = Direction.getRandomFace(random);
+			Direction direction = Direction.getRandom(random);
 			if (direction != Direction.UP) {
 				BlockPos blockPos2 = blockPos.relative(direction);
 				BlockState blockState2 = level.getBlockState(blockPos2);

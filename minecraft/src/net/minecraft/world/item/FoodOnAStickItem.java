@@ -5,11 +5,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ItemSteerableMount;
+import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class FoodOnAStickItem<T extends Entity & ItemSteerableMount> extends Item {
+public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 	private final EntityType<T> canInteractWith;
 	private final int consumeItemDamage;
 
@@ -26,9 +26,9 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerableMount> extends Ite
 			return InteractionResultHolder.pass(itemStack);
 		} else {
 			Entity entity = player.getVehicle();
-			if (player.isPassenger() && entity instanceof ItemSteerableMount && entity.getType() == this.canInteractWith) {
-				ItemSteerableMount itemSteerableMount = (ItemSteerableMount)entity;
-				if (itemSteerableMount.boost()) {
+			if (player.isPassenger() && entity instanceof ItemSteerable && entity.getType() == this.canInteractWith) {
+				ItemSteerable itemSteerable = (ItemSteerable)entity;
+				if (itemSteerable.boost()) {
 					itemStack.hurtAndBreak(this.consumeItemDamage, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 					player.swing(interactionHand, true);
 					if (itemStack.isEmpty()) {

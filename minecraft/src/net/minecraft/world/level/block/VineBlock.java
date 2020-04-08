@@ -160,7 +160,7 @@ public class VineBlock extends Block {
 	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.random.nextInt(4) == 0) {
-			Direction direction = Direction.getRandomFace(random);
+			Direction direction = Direction.getRandom(random);
 			BlockPos blockPos2 = blockPos.above();
 			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
 				if (this.canSpread(serverLevel, blockPos)) {

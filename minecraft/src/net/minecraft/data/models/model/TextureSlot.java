@@ -37,6 +37,7 @@ public final class TextureSlot {
 	public static final TextureSlot UNSTICKY = create("unsticky");
 	public static final TextureSlot TORCH = create("torch");
 	public static final TextureSlot LAYER0 = create("layer0");
+	public static final TextureSlot LIT_LOG = create("lit_log");
 	private final String id;
 	@Nullable
 	private final TextureSlot parent;

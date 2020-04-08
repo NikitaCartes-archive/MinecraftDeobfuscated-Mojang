@@ -2,6 +2,7 @@ package net.minecraft.world.level.pathfinder;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
@@ -30,6 +31,10 @@ public abstract class NodeEvaluator {
 	public void done() {
 		this.level = null;
 		this.mob = null;
+	}
+
+	protected Node getNode(BlockPos blockPos) {
+		return this.getNode(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 
 	protected Node getNode(int i, int j, int k) {

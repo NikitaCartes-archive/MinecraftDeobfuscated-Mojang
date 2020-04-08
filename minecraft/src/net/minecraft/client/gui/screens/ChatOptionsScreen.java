@@ -20,12 +20,13 @@ public class ChatOptionsScreen extends OptionsSubScreen {
 		Option.CHAT_OPACITY,
 		Option.TEXT_BACKGROUND_OPACITY,
 		Option.CHAT_SCALE,
+		Option.CHAT_LINE_SPACING,
 		Option.CHAT_WIDTH,
 		Option.CHAT_HEIGHT_FOCUSED,
 		Option.CHAT_HEIGHT_UNFOCUSED,
-		Option.REDUCED_DEBUG_INFO,
+		Option.NARRATOR,
 		Option.AUTO_SUGGESTIONS,
-		Option.NARRATOR
+		Option.REDUCED_DEBUG_INFO
 	};
 	private AbstractWidget narratorButton;
 

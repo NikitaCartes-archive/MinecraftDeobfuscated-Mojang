@@ -28,6 +28,9 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final BlockState WARPED_NYLIUM = Blocks.WARPED_NYLIUM.defaultBlockState();
 	public static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
 	public static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
+	public static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
+	public static final BlockState BASALT = Blocks.BASALT.defaultBlockState();
+	public static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
 	public static final SurfaceBuilderBaseConfiguration CONFIG_EMPTY = new SurfaceBuilderBaseConfiguration(AIR, AIR, AIR);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
@@ -45,6 +48,7 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	public static final SurfaceBuilderBaseConfiguration CONFIG_THEEND = new SurfaceBuilderBaseConfiguration(ENDSTONE, ENDSTONE, ENDSTONE);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
+	public static final SurfaceBuilderBaseConfiguration CONFIG_BASALT_DELTAS = new SurfaceBuilderBaseConfiguration(BLACKSTONE, BASALT, MAGMA);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = register(
 		"default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
 	);
@@ -83,6 +87,9 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = register(
 		"soul_sand_valley", new SoulSandValleySurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
+	);
+	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BASALT_DELTAS = register(
+		"basalt_deltas", new BasaltDeltasSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)
 	);
 	public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = register(
 		"nope", new NopeSurfaceBuilder(SurfaceBuilderBaseConfiguration::deserialize)

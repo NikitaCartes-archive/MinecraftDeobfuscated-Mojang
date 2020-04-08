@@ -1,5 +1,7 @@
 package net.minecraft.tags;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.entity.EntityType;
 
 public class EntityTypeTags {
@@ -16,6 +18,11 @@ public class EntityTypeTags {
 
 	public static void reset(TagCollection<EntityType<?>> tagCollection) {
 		HELPER.reset(tagCollection);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static void resetToEmpty() {
+		HELPER.resetToEmpty();
 	}
 
 	public static TagCollection<EntityType<?>> getAllTags() {

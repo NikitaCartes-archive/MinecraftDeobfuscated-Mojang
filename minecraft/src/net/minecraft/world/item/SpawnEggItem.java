@@ -15,6 +15,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -150,29 +151,35 @@ public class SpawnEggItem extends Item {
 		return this.defaultType;
 	}
 
-	public Optional<Mob> spawnOffspringFromSpawnEgg(Player player, EntityType<? extends Mob> entityType, Level level, Vec3 vec3, ItemStack itemStack) {
+	public Optional<Mob> spawnOffspringFromSpawnEgg(Player player, Mob mob, EntityType<? extends Mob> entityType, Level level, Vec3 vec3, ItemStack itemStack) {
 		if (!this.spawnsEntity(itemStack.getTag(), entityType)) {
 			return Optional.empty();
 		} else {
-			Mob mob = entityType.create(level);
-			if (mob == null) {
+			Mob mob2;
+			if (mob instanceof AgableMob) {
+				mob2 = ((AgableMob)mob).getBreedOffspring((AgableMob)mob);
+			} else {
+				mob2 = entityType.create(level);
+			}
+
+			if (mob2 == null) {
 				return Optional.empty();
 			} else {
-				mob.setBaby(true);
-				if (!mob.isBaby()) {
+				mob2.setBaby(true);
+				if (!mob2.isBaby()) {
 					return Optional.empty();
 				} else {
-					mob.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0F, 0.0F);
-					level.addFreshEntity(mob);
+					mob2.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0F, 0.0F);
+					level.addFreshEntity(mob2);
 					if (itemStack.hasCustomHoverName()) {
-						mob.setCustomName(itemStack.getHoverName());
+						mob2.setCustomName(itemStack.getHoverName());
 					}
 
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);
 					}
 
-					return Optional.of(mob);
+					return Optional.of(mob2);
 				}
 			}
 		}

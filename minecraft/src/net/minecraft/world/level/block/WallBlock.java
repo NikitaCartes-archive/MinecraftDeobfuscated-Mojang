@@ -35,11 +35,11 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private final Map<BlockState, VoxelShape> shapeByIndex;
 	private final Map<BlockState, VoxelShape> collisionShapeByIndex;
-	private static final VoxelShape POST_TEST = Block.box(4.0, 0.0, 4.0, 12.0, 16.0, 12.0);
-	private static final VoxelShape NORTH_TEST = Block.box(5.0, 0.0, 0.0, 11.0, 16.0, 11.0);
-	private static final VoxelShape SOUTH_TEST = Block.box(5.0, 0.0, 5.0, 11.0, 16.0, 16.0);
-	private static final VoxelShape WEST_TEST = Block.box(0.0, 0.0, 5.0, 11.0, 16.0, 11.0);
-	private static final VoxelShape EAST_TEST = Block.box(5.0, 0.0, 5.0, 16.0, 16.0, 11.0);
+	private static final VoxelShape POST_TEST = Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 9.0);
+	private static final VoxelShape NORTH_TEST = Block.box(7.0, 0.0, 0.0, 9.0, 16.0, 9.0);
+	private static final VoxelShape SOUTH_TEST = Block.box(7.0, 0.0, 7.0, 9.0, 16.0, 16.0);
+	private static final VoxelShape WEST_TEST = Block.box(0.0, 0.0, 7.0, 9.0, 16.0, 9.0);
+	private static final VoxelShape EAST_TEST = Block.box(7.0, 0.0, 7.0, 16.0, 16.0, 9.0);
 
 	public WallBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -129,8 +129,8 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 
 	private boolean connectsTo(BlockState blockState, boolean bl, Direction direction) {
 		Block block = blockState.getBlock();
-		boolean bl2 = block.is(BlockTags.WALLS) || block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(blockState, direction);
-		return !isExceptionForConnection(block) && bl || bl2;
+		boolean bl2 = block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(blockState, direction);
+		return blockState.is(BlockTags.WALLS) || !isExceptionForConnection(block) && bl || block instanceof IronBarsBlock || bl2;
 	}
 
 	@Override
@@ -214,9 +214,31 @@ public class WallBlock extends Block implements SimpleWaterloggedBlock {
 		LevelReader levelReader, BlockState blockState, BlockPos blockPos, BlockState blockState2, boolean bl, boolean bl2, boolean bl3, boolean bl4
 	) {
 		VoxelShape voxelShape = blockState2.getCollisionShape(levelReader, blockPos).getFaceShape(Direction.DOWN);
-		boolean bl5 = (!bl || bl2 || !bl3 || bl4) && (bl || !bl2 || bl3 || !bl4);
-		boolean bl6 = bl5 || blockState2.getBlock().is(BlockTags.WALL_POST_OVERRIDE) || isCovered(voxelShape, POST_TEST);
-		return this.updateSides(blockState.setValue(UP, Boolean.valueOf(bl6)), bl, bl2, bl3, bl4, voxelShape);
+		BlockState blockState3 = this.updateSides(blockState, bl, bl2, bl3, bl4, voxelShape);
+		return blockState3.setValue(UP, Boolean.valueOf(this.shouldRaisePost(blockState3, blockState2, voxelShape)));
+	}
+
+	private boolean shouldRaisePost(BlockState blockState, BlockState blockState2, VoxelShape voxelShape) {
+		boolean bl = blockState2.getBlock() instanceof WallBlock && (Boolean)blockState2.getValue(UP);
+		if (bl) {
+			return true;
+		} else {
+			WallSide wallSide = blockState.getValue(NORTH_WALL);
+			WallSide wallSide2 = blockState.getValue(SOUTH_WALL);
+			WallSide wallSide3 = blockState.getValue(EAST_WALL);
+			WallSide wallSide4 = blockState.getValue(WEST_WALL);
+			boolean bl2 = wallSide2 == WallSide.NONE;
+			boolean bl3 = wallSide4 == WallSide.NONE;
+			boolean bl4 = wallSide3 == WallSide.NONE;
+			boolean bl5 = wallSide == WallSide.NONE;
+			boolean bl6 = bl5 && bl2 && bl3 && bl4 || bl5 != bl2 || bl3 != bl4;
+			if (bl6) {
+				return true;
+			} else {
+				boolean bl7 = wallSide == WallSide.TALL && wallSide2 == WallSide.TALL || wallSide3 == WallSide.TALL && wallSide4 == WallSide.TALL;
+				return bl7 ? false : blockState2.getBlock().is(BlockTags.WALL_POST_OVERRIDE) || isCovered(voxelShape, POST_TEST);
+			}
+		}
 	}
 
 	private BlockState updateSides(BlockState blockState, boolean bl, boolean bl2, boolean bl3, boolean bl4, VoxelShape voxelShape) {

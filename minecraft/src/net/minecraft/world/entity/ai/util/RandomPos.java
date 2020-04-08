@@ -133,7 +133,7 @@ public class RandomPos {
 					}
 
 					if (bl || !pathfinderMob.level.getFluidState(blockPos3x).is(FluidTags.WATER)) {
-						BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3x.getX(), blockPos3x.getY(), blockPos3x.getZ());
+						BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3x.mutable());
 						if (pathfinderMob.getPathfindingMalus(blockPathTypes) == 0.0F) {
 							double f = toDoubleFunction.applyAsDouble(blockPos3x);
 							if (f > e) {

@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
 
-public class ArmorItem extends Item {
+public class ArmorItem extends Item implements Wearable {
 	private static final UUID[] ARMOR_MODIFIER_UUID_PER_SLOT = new UUID[]{
 		UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"),
 		UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"),

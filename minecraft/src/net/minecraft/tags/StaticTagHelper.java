@@ -3,11 +3,15 @@ package net.minecraft.tags;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
 public class StaticTagHelper<T> {
-	private TagCollection<T> source = new TagCollection<>(resourceLocation -> Optional.empty(), "", "");
+	private final TagCollection<T> empty = new TagCollection<>(resourceLocation -> Optional.empty(), "", "");
+	private TagCollection<T> source = this.empty;
 	private final List<StaticTagHelper.Wrapper<T>> wrappers = Lists.<StaticTagHelper.Wrapper<T>>newArrayList();
 
 	public Tag.Named<T> bind(String string) {
@@ -16,9 +20,16 @@ public class StaticTagHelper<T> {
 		return wrapper;
 	}
 
+	@Environment(EnvType.CLIENT)
+	public void resetToEmpty() {
+		this.source = this.empty;
+		Tag<T> tag = this.empty.getEmptyTag();
+		this.wrappers.forEach(wrapper -> wrapper.rebind(resourceLocation -> tag));
+	}
+
 	public void reset(TagCollection<T> tagCollection) {
 		this.source = tagCollection;
-		this.wrappers.forEach(wrapper -> wrapper.rebind(tagCollection));
+		this.wrappers.forEach(wrapper -> wrapper.rebind(tagCollection::getTag));
 	}
 
 	public TagCollection<T> getAllTags() {
@@ -47,8 +58,8 @@ public class StaticTagHelper<T> {
 			}
 		}
 
-		void rebind(TagCollection<T> tagCollection) {
-			this.tag = tagCollection.getTag(this.name);
+		void rebind(Function<ResourceLocation, Tag<T>> function) {
+			this.tag = (Tag<T>)function.apply(this.name);
 		}
 
 		@Override

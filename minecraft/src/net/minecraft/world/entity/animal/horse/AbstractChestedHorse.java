@@ -115,7 +115,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 			}
 		}
 
-		this.updateEquipment();
+		this.updateContainerEquipment();
 	}
 
 	@Override

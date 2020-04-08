@@ -33,12 +33,20 @@ public interface EntityGetter {
 	}
 
 	default boolean isUnobstructed(@Nullable Entity entity, VoxelShape voxelShape) {
-		return voxelShape.isEmpty()
-			? true
-			: this.getEntities(entity, voxelShape.bounds())
-				.stream()
-				.filter(entity2 -> !entity2.removed && entity2.blocksBuilding && (entity == null || !entity2.isPassengerOfSameVehicle(entity)))
-				.noneMatch(entityx -> Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entityx.getBoundingBox()), BooleanOp.AND));
+		if (voxelShape.isEmpty()) {
+			return true;
+		} else {
+			for (Entity entity2 : this.getEntities(entity, voxelShape.bounds())) {
+				if (!entity2.removed
+					&& entity2.blocksBuilding
+					&& (entity == null || !entity2.isPassengerOfSameVehicle(entity))
+					&& Shapes.joinIsNotEmpty(voxelShape, Shapes.create(entity2.getBoundingBox()), BooleanOp.AND)) {
+					return false;
+				}
+			}
+
+			return true;
+		}
 	}
 
 	default <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB) {

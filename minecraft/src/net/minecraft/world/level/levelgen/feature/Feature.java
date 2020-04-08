@@ -25,8 +25,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfig
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BuriedTreasureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -44,6 +46,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureCo
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
@@ -153,6 +156,13 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<NoneFeatureConfiguration> TWISTING_VINES = register(
 		"twisting_vines", new TwistingVinesFeature(NoneFeatureConfiguration::deserialize)
+	);
+	public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = register(
+		"basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration::deserialize)
+	);
+	public static final Feature<DeltaFeatureConfiguration> DELTA_FEATURE = register("delta_feature", new DeltaFeature(DeltaFeatureConfiguration::deserialize));
+	public static final Feature<ReplaceSpheroidConfiguration> REPLACE_BLOBS = register(
+		"netherrack_replace_blobs", new ReplaceBlobsFeature(ReplaceSpheroidConfiguration::deserialize)
 	);
 	public static final Feature<LayerConfiguration> FILL_LAYER = register("fill_layer", new FillLayerFeature(LayerConfiguration::deserialize));
 	public static final BonusChestFeature BONUS_CHEST = register("bonus_chest", new BonusChestFeature(NoneFeatureConfiguration::deserialize));

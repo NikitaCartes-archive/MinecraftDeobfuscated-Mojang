@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BlockPlaceContext;
@@ -368,6 +369,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		level.levelEvent(player, 2001, blockPos, getId(blockState));
+		if (this.is(BlockTags.GUARDED_BY_PIGLINS)) {
+			PiglinAi.angerNearbyPiglinsThatSee(player);
+		}
 	}
 
 	public void handleRain(Level level, BlockPos blockPos) {

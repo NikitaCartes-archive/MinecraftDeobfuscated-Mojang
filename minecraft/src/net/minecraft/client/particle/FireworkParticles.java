@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
@@ -283,7 +284,7 @@ public class FireworkParticles {
 			int j = this.random.nextInt(is.length);
 			sparkParticle.setColor(is[j]);
 			if (js.length > 0) {
-				sparkParticle.setFadeColor(js[this.random.nextInt(js.length)]);
+				sparkParticle.setFadeColor(Util.getRandom(js, this.random));
 			}
 		}
 

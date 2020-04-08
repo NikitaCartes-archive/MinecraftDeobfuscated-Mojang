@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import org.apache.commons.lang3.Validate;
@@ -100,7 +101,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			this.randomCache = collection.toArray(new Object[collection.size()]);
 		}
 
-		return (T)this.randomCache[random.nextInt(this.randomCache.length)];
+		return Util.getRandom((T[])this.randomCache, random);
 	}
 
 	@Environment(EnvType.CLIENT)

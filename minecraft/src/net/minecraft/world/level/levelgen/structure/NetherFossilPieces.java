@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.structure;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +38,7 @@ public class NetherFossilPieces {
 
 	public static void addPieces(StructureManager structureManager, List<StructurePiece> list, Random random, BlockPos blockPos) {
 		Rotation rotation = Rotation.getRandom(random);
-		list.add(new NetherFossilPieces.NetherFossilPiece(structureManager, FOSSILS[random.nextInt(FOSSILS.length)], blockPos, rotation));
+		list.add(new NetherFossilPieces.NetherFossilPiece(structureManager, Util.getRandom(FOSSILS, random), blockPos, rotation));
 	}
 
 	public static class NetherFossilPiece extends TemplateStructurePiece {

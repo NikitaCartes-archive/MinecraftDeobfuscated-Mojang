@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -309,6 +310,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	public static Direction getRandomOffset(Random random) {
-		return SPAWN_DIRECTIONS[random.nextInt(SPAWN_DIRECTIONS.length)];
+		return Util.getRandom(SPAWN_DIRECTIONS, random);
 	}
 }

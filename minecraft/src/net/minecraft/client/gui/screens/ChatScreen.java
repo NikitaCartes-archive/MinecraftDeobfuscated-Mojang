@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
@@ -130,7 +131,12 @@ public class ChatScreen extends Screen {
 			return true;
 		} else {
 			if (i == 0) {
-				Component component = this.minecraft.gui.getChat().getClickedComponentAt(d, e);
+				ChatComponent chatComponent = this.minecraft.gui.getChat();
+				if (chatComponent.handleChatQueueClicked(d, e)) {
+					return true;
+				}
+
+				Component component = chatComponent.getClickedComponentAt(d, e);
 				if (component != null && this.handleComponentClicked(component)) {
 					return true;
 				}

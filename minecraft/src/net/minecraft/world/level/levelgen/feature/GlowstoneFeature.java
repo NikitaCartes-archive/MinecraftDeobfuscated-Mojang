@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -27,33 +28,36 @@ public class GlowstoneFeature extends Feature<NoneFeatureConfiguration> {
 	) {
 		if (!levelAccessor.isEmptyBlock(blockPos)) {
 			return false;
-		} else if (levelAccessor.getBlockState(blockPos.above()).getBlock() != Blocks.NETHERRACK) {
-			return false;
 		} else {
-			levelAccessor.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
+			Block block = levelAccessor.getBlockState(blockPos.above()).getBlock();
+			if (block != Blocks.NETHERRACK && block != Blocks.BASALT && block != Blocks.BLACKSTONE) {
+				return false;
+			} else {
+				levelAccessor.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
 
-			for (int i = 0; i < 1500; i++) {
-				BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), -random.nextInt(12), random.nextInt(8) - random.nextInt(8));
-				if (levelAccessor.getBlockState(blockPos2).isAir()) {
-					int j = 0;
+				for (int i = 0; i < 1500; i++) {
+					BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), -random.nextInt(12), random.nextInt(8) - random.nextInt(8));
+					if (levelAccessor.getBlockState(blockPos2).isAir()) {
+						int j = 0;
 
-					for (Direction direction : Direction.values()) {
-						if (levelAccessor.getBlockState(blockPos2.relative(direction)).getBlock() == Blocks.GLOWSTONE) {
-							j++;
+						for (Direction direction : Direction.values()) {
+							if (levelAccessor.getBlockState(blockPos2.relative(direction)).getBlock() == Blocks.GLOWSTONE) {
+								j++;
+							}
+
+							if (j > 1) {
+								break;
+							}
 						}
 
-						if (j > 1) {
-							break;
+						if (j == 1) {
+							levelAccessor.setBlock(blockPos2, Blocks.GLOWSTONE.defaultBlockState(), 2);
 						}
-					}
-
-					if (j == 1) {
-						levelAccessor.setBlock(blockPos2, Blocks.GLOWSTONE.defaultBlockState(), 2);
 					}
 				}
-			}
 
-			return true;
+				return true;
+			}
 		}
 	}
 }

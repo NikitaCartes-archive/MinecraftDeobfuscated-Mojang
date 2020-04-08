@@ -738,28 +738,18 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
 		if (this.wantsToPickUp(itemStack)) {
-			Item item = itemStack.getItem();
 			SimpleContainer simpleContainer = this.getInventory();
-			boolean bl = false;
-
-			for (int i = 0; i < simpleContainer.getContainerSize(); i++) {
-				ItemStack itemStack2 = simpleContainer.getItem(i);
-				if (itemStack2.isEmpty() || itemStack2.getItem() == item && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
-					bl = true;
-					break;
-				}
-			}
-
+			boolean bl = simpleContainer.canAddItem(itemStack);
 			if (!bl) {
 				return;
 			}
 
 			this.take(itemEntity, itemStack.getCount());
-			ItemStack itemStack3 = simpleContainer.addItem(itemStack);
-			if (itemStack3.isEmpty()) {
+			ItemStack itemStack2 = simpleContainer.addItem(itemStack);
+			if (itemStack2.isEmpty()) {
 				itemEntity.remove();
 			} else {
-				itemStack.setCount(itemStack3.getCount());
+				itemStack.setCount(itemStack2.getCount());
 			}
 		}
 	}

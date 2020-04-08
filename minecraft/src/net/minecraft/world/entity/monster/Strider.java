@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -19,9 +20,10 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ItemBasedSteering;
-import net.minecraft.world.entity.ItemSteerableMount;
+import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -51,7 +53,7 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class Strider extends Animal implements ItemSteerableMount {
+public class Strider extends Animal implements ItemSteerable, Saddleable {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WARPED_FUNGUS);
 	private static final Ingredient TEMPT_ITEMS = Ingredient.of(Items.WARPED_FUNGUS, Items.WARPED_FUNGUS_ON_A_STICK);
 	private static final EntityDataAccessor<Integer> DATA_BOOST_TIME = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.INT);
@@ -73,7 +75,7 @@ public class Strider extends Animal implements ItemSteerableMount {
 	public static boolean checkStriderSpawnRules(
 		EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return blockPos.getY() <= 31;
+		return levelAccessor.getBlockState(blockPos.above()).isAir();
 	}
 
 	@Override
@@ -106,13 +108,21 @@ public class Strider extends Animal implements ItemSteerableMount {
 	}
 
 	@Override
-	public boolean hasSaddle() {
+	public boolean isSaddled() {
 		return this.steering.hasSaddle();
 	}
 
 	@Override
-	public void setSaddle(boolean bl) {
-		this.steering.setSaddle(bl);
+	public boolean isSaddleable() {
+		return this.isAlive() && !this.isBaby();
+	}
+
+	@Override
+	public void equipSaddle(@Nullable SoundSource soundSource) {
+		this.steering.setSaddle(true);
+		if (soundSource != null) {
+			this.level.playSound(null, this, SoundEvents.STRIDER_SADDLE, soundSource, 0.5F, 1.0F);
+		}
 	}
 
 	@Override
@@ -334,7 +344,7 @@ public class Strider extends Animal implements ItemSteerableMount {
 	@Override
 	protected void dropEquipment() {
 		super.dropEquipment();
-		if (this.hasSaddle()) {
+		if (this.isSaddled()) {
 			this.spawnAtLocation(Items.SADDLE);
 		}
 	}
@@ -342,9 +352,7 @@ public class Strider extends Animal implements ItemSteerableMount {
 	@Override
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
 		boolean bl = this.isFood(player.getItemInHand(interactionHand));
-		if (!super.mobInteract(player, interactionHand)) {
-			return this.mobInteract(this, player, interactionHand, false);
-		} else {
+		if (super.mobInteract(player, interactionHand)) {
 			if (bl && !this.isSilent()) {
 				this.level
 					.playSound(
@@ -360,6 +368,20 @@ public class Strider extends Animal implements ItemSteerableMount {
 			}
 
 			return false;
+		} else {
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			if (itemStack.getItem() == Items.NAME_TAG) {
+				itemStack.interactEnemy(player, this, interactionHand);
+				return true;
+			} else if (this.isSaddled() && !this.isVehicle() && !this.isBaby()) {
+				if (!this.level.isClientSide) {
+					player.startRiding(this);
+				}
+
+				return true;
+			} else {
+				return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
+			}
 		}
 	}
 
@@ -399,7 +421,7 @@ public class Strider extends Animal implements ItemSteerableMount {
 			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(this.level);
 			if (zombifiedPiglin != null) {
 				mob = zombifiedPiglin;
-				this.setSaddle(true);
+				this.equipSaddle(null);
 			}
 		}
 

@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -34,7 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class SnowGolem extends AbstractGolem implements RangedAttackMob {
+public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackMob {
 	private static final EntityDataAccessor<Byte> DATA_PUMPKIN_ID = SynchedEntityData.defineId(SnowGolem.class, EntityDataSerializers.BYTE);
 
 	public SnowGolem(EntityType<? extends SnowGolem> entityType, Level level) {
@@ -130,18 +132,30 @@ public class SnowGolem extends AbstractGolem implements RangedAttackMob {
 	@Override
 	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.SHEARS && this.hasPumpkin()) {
+		if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
+			this.shear(SoundSource.PLAYERS);
 			if (!this.level.isClientSide) {
-				this.setPumpkin(false);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-				this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), 1.7F);
-				this.playSound(SoundEvents.SNOW_GOLEM_SHEAR, 1.0F, 1.0F);
 			}
 
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public void shear(SoundSource soundSource) {
+		this.level.playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+		if (!this.level.isClientSide()) {
+			this.setPumpkin(false);
+			this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), 1.7F);
+		}
+	}
+
+	@Override
+	public boolean readyForShearing() {
+		return this.isAlive() && this.hasPumpkin();
 	}
 
 	public boolean hasPumpkin() {

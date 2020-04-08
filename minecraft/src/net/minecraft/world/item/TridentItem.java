@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class TridentItem extends Item {
+public class TridentItem extends Item implements Vanishable {
 	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
 	public TridentItem(Item.Properties properties) {

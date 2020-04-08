@@ -70,7 +70,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 
 	private static int getYPositionForFeature(int i, int j, ChunkGenerator<?> chunkGenerator) {
 		Random random = new Random((long)(i + j * 10387313));
-		Rotation rotation = Rotation.values()[random.nextInt(Rotation.values().length)];
+		Rotation rotation = Rotation.getRandom(random);
 		int k = 5;
 		int l = 5;
 		if (rotation == Rotation.CLOCKWISE_90) {
@@ -98,7 +98,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 
 		@Override
 		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
-			Rotation rotation = Rotation.values()[this.random.nextInt(Rotation.values().length)];
+			Rotation rotation = Rotation.getRandom(this.random);
 			int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator);
 			if (k >= 60) {
 				BlockPos blockPos = new BlockPos(i * 16 + 8, k, j * 16 + 8);

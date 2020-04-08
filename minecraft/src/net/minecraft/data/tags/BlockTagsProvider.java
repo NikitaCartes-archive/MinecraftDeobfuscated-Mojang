@@ -57,7 +57,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CRIMSON_BUTTON,
 				Blocks.WARPED_BUTTON
 			);
-		this.tag(BlockTags.BUTTONS).addTag(BlockTags.WOODEN_BUTTONS).add(Blocks.STONE_BUTTON);
+		this.tag(BlockTags.BUTTONS).addTag(BlockTags.WOODEN_BUTTONS).add(Blocks.STONE_BUTTON).add(Blocks.POLISHED_BLACKSTONE_BUTTON);
 		this.tag(BlockTags.CARPETS)
 			.add(
 				Blocks.WHITE_CARPET,
@@ -294,7 +294,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.ANDESITE_STAIRS,
 				Blocks.RED_NETHER_BRICK_STAIRS,
 				Blocks.POLISHED_ANDESITE_STAIRS,
-				Blocks.DIORITE_STAIRS
+				Blocks.DIORITE_STAIRS,
+				Blocks.BLACKSTONE_STAIRS,
+				Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS,
+				Blocks.POLISHED_BLACKSTONE_STAIRS
 			);
 		this.tag(BlockTags.SLABS)
 			.addTag(BlockTags.WOODEN_SLABS)
@@ -327,7 +330,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.POLISHED_ANDESITE_SLAB,
 				Blocks.DIORITE_SLAB,
 				Blocks.CUT_SANDSTONE_SLAB,
-				Blocks.CUT_RED_SANDSTONE_SLAB
+				Blocks.CUT_RED_SANDSTONE_SLAB,
+				Blocks.BLACKSTONE_SLAB,
+				Blocks.POLISHED_BLACKSTONE_BRICK_SLAB,
+				Blocks.POLISHED_BLACKSTONE_SLAB
 			);
 		this.tag(BlockTags.WALLS)
 			.add(
@@ -344,7 +350,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.RED_NETHER_BRICK_WALL,
 				Blocks.SANDSTONE_WALL,
 				Blocks.END_STONE_BRICK_WALL,
-				Blocks.DIORITE_WALL
+				Blocks.DIORITE_WALL,
+				Blocks.BLACKSTONE_WALL,
+				Blocks.POLISHED_BLACKSTONE_BRICK_WALL,
+				Blocks.POLISHED_BLACKSTONE_WALL
 			);
 		this.tag(BlockTags.CORAL_PLANTS).add(Blocks.TUBE_CORAL, Blocks.BRAIN_CORAL, Blocks.BUBBLE_CORAL, Blocks.FIRE_CORAL, Blocks.HORN_CORAL);
 		this.tag(BlockTags.CORALS)
@@ -504,11 +513,15 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.WART_BLOCKS).add(Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK);
 		this.tag(BlockTags.BEACON_BASE_BLOCKS).add(Blocks.NETHERITE_BLOCK, Blocks.EMERALD_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK, Blocks.IRON_BLOCK);
 		this.tag(BlockTags.SOUL_SPEED_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
-		this.tag(BlockTags.WALL_POST_OVERRIDE)
-			.add(Blocks.LANTERN, Blocks.SOUL_FIRE_LANTERN, Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE);
+		this.tag(BlockTags.WALL_POST_OVERRIDE).add(Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE).addTag(BlockTags.SIGNS);
 		this.tag(BlockTags.CLIMBABLE)
 			.add(Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
-		this.tag(BlockTags.PIGLIN_REPELLENTS).add(Blocks.SOUL_FIRE).add(Blocks.SOUL_FIRE_TORCH).add(Blocks.SOUL_FIRE_LANTERN).add(Blocks.SOUL_FIRE_WALL_TORCH);
+		this.tag(BlockTags.PIGLIN_REPELLENTS)
+			.add(Blocks.SOUL_FIRE)
+			.add(Blocks.SOUL_FIRE_TORCH)
+			.add(Blocks.SOUL_FIRE_LANTERN)
+			.add(Blocks.SOUL_FIRE_WALL_TORCH)
+			.add(Blocks.SOUL_CAMPFIRE);
 		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS).add(Blocks.NETHER_PORTAL).add(Blocks.RESPAWN_ANCHOR);
 		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE);
 		this.tag(BlockTags.SOUL_FIRE_BASE_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
@@ -546,6 +559,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.WARPED_WALL_SIGN
 			);
 		this.tag(BlockTags.STRIDER_WARM_BLOCKS).add(Blocks.LAVA);
+		this.tag(BlockTags.CAMPFIRES).add(Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
+		this.tag(BlockTags.GUARDED_BY_PIGLINS)
+			.add(Blocks.GOLD_BLOCK, Blocks.BARREL, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.GILDED_BLACKSTONE, Blocks.TRAPPED_CHEST)
+			.addTag(BlockTags.SHULKER_BOXES)
+			.addTag(BlockTags.GOLD_ORES);
 	}
 
 	@Override

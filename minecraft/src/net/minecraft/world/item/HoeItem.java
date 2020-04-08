@@ -25,7 +25,13 @@ public class HoeItem extends DiggerItem {
 		Blocks.TARGET,
 		Blocks.SHROOMLIGHT,
 		Blocks.SPONGE,
-		Blocks.WET_SPONGE
+		Blocks.WET_SPONGE,
+		Blocks.JUNGLE_LEAVES,
+		Blocks.OAK_LEAVES,
+		Blocks.SPRUCE_LEAVES,
+		Blocks.DARK_OAK_LEAVES,
+		Blocks.ACACIA_LEAVES,
+		Blocks.BIRCH_LEAVES
 	);
 	protected static final Map<Block, BlockState> TILLABLES = Maps.<Block, BlockState>newHashMap(
 		ImmutableMap.of(

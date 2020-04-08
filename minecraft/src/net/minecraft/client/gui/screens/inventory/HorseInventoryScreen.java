@@ -43,11 +43,11 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 			}
 		}
 
-		if (this.horse.canBeSaddled()) {
+		if (this.horse.isSaddleable()) {
 			this.blit(k + 7, l + 35 - 18, 18, this.imageHeight + 54, 18, 18);
 		}
 
-		if (this.horse.wearsArmor()) {
+		if (this.horse.canWearArmor()) {
 			if (this.horse instanceof Llama) {
 				this.blit(k + 7, l + 35, 36, this.imageHeight + 54, 18, 18);
 			} else {

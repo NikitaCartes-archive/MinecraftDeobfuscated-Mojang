@@ -61,7 +61,7 @@ public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfigurat
 			int k = i * 16;
 			int l = j * 16;
 			BlockPos blockPos = new BlockPos(k, 90, l);
-			Rotation rotation = Rotation.values()[this.random.nextInt(Rotation.values().length)];
+			Rotation rotation = Rotation.getRandom(this.random);
 			OceanRuinPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, oceanRuinConfiguration);
 			this.calculateBoundingBox();
 		}

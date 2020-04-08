@@ -83,6 +83,9 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.5F, Items.CACTUS);
 		add(0.5F, Items.SUGAR_CANE);
 		add(0.5F, Items.VINE);
+		add(0.5F, Items.NETHER_SPROUTS);
+		add(0.5F, Items.WEEPING_VINES);
+		add(0.5F, Items.TWISTING_VINES);
 		add(0.5F, Items.MELON_SLICE);
 		add(0.65F, Items.SEA_PICKLE);
 		add(0.65F, Items.LILY_PAD);
@@ -98,6 +101,11 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.65F, Items.BROWN_MUSHROOM);
 		add(0.65F, Items.RED_MUSHROOM);
 		add(0.65F, Items.MUSHROOM_STEM);
+		add(0.65F, Items.CRIMSON_FUNGUS);
+		add(0.65F, Items.WARPED_FUNGUS);
+		add(0.65F, Items.NETHER_WART);
+		add(0.65F, Items.CRIMSON_ROOTS);
+		add(0.65F, Items.WARPED_ROOTS);
 		add(0.65F, Items.DANDELION);
 		add(0.65F, Items.POPPY);
 		add(0.65F, Items.BLUE_ORCHID);
@@ -120,6 +128,8 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.85F, Items.HAY_BLOCK);
 		add(0.85F, Items.BROWN_MUSHROOM_BLOCK);
 		add(0.85F, Items.RED_MUSHROOM_BLOCK);
+		add(0.85F, Items.NETHER_WART_BLOCK);
+		add(0.85F, Items.WARPED_WART_BLOCK);
 		add(0.85F, Items.BREAD);
 		add(0.85F, Items.BAKED_POTATO);
 		add(0.85F, Items.COOKIE);

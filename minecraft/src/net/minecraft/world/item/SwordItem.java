@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
-public class SwordItem extends TieredItem {
+public class SwordItem extends TieredItem implements Vanishable {
 	private final float attackDamage;
 	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 

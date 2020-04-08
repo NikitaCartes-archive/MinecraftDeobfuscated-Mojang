@@ -651,6 +651,12 @@ public class RecipeProvider implements DataProvider {
 			.pattern("B")
 			.unlockedBy("has_minecart", has(Items.MINECART))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.CHISELED_NETHER_BRICKS)
+			.define('#', Blocks.NETHER_BRICK_SLAB)
+			.pattern("#")
+			.pattern("#")
+			.unlockedBy("has_nether_bricks", has(Blocks.NETHER_BRICKS))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.CHISELED_QUARTZ_BLOCK)
 			.define('#', Blocks.QUARTZ_SLAB)
 			.pattern("#")
@@ -999,11 +1005,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.FLOWER_POT).define('#', Items.BRICK).pattern("# #").pattern(" # ").unlockedBy("has_brick", has(Items.BRICK)).save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.FURNACE)
-			.define('#', Blocks.COBBLESTONE)
+			.define('#', ItemTags.FURNACE_MATERIALS)
 			.pattern("###")
 			.pattern("# #")
 			.pattern("###")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.FURNACE_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.FURNACE_MINECART)
 			.define('A', Blocks.FURNACE)
@@ -1754,6 +1760,12 @@ public class RecipeProvider implements DataProvider {
 			.pattern("##")
 			.unlockedBy("has_quartz", has(Items.QUARTZ))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.QUARTZ_BRICKS, 4)
+			.define('#', Blocks.QUARTZ_BLOCK)
+			.pattern("##")
+			.pattern("##")
+			.unlockedBy("has_quartz_block", has(Blocks.QUARTZ_BLOCK))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.QUARTZ_SLAB, 6)
 			.define('#', Ingredient.of(Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR))
 			.pattern("###")
@@ -1953,6 +1965,16 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_snowball", has(Items.SNOWBALL))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.SNOW, 6).define('#', Blocks.SNOW_BLOCK).pattern("###").unlockedBy("has_snowball", has(Items.SNOWBALL)).save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.SOUL_CAMPFIRE)
+			.define('L', ItemTags.LOGS)
+			.define('S', Items.STICK)
+			.define('#', ItemTags.SOUL_FIRE_BASE_BLOCKS)
+			.pattern(" S ")
+			.pattern("S#S")
+			.pattern("LLL")
+			.unlockedBy("has_stick", has(Items.STICK))
+			.unlockedBy("has_soul_sand", has(ItemTags.SOUL_FIRE_BASE_BLOCKS))
+			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.GLISTERING_MELON_SLICE)
 			.define('#', Items.GOLD_NUGGET)
 			.define('X', Items.MELON_SLICE)
@@ -1998,11 +2020,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.STONE_AXE)
 			.define('#', Items.STICK)
-			.define('X', Blocks.COBBLESTONE)
+			.define('X', ItemTags.STONE_TOOL_MATERIALS)
 			.pattern("XX")
 			.pattern("X#")
 			.pattern(" #")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.STONE_BRICK_SLAB, 6)
 			.define('#', Blocks.STONE_BRICKS)
@@ -2019,28 +2041,28 @@ public class RecipeProvider implements DataProvider {
 		ShapelessRecipeBuilder.shapeless(Blocks.STONE_BUTTON).requires(Blocks.STONE).unlockedBy("has_stone", has(Blocks.STONE)).save(consumer);
 		ShapedRecipeBuilder.shaped(Items.STONE_HOE)
 			.define('#', Items.STICK)
-			.define('X', Blocks.COBBLESTONE)
+			.define('X', ItemTags.STONE_TOOL_MATERIALS)
 			.pattern("XX")
 			.pattern(" #")
 			.pattern(" #")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.STONE_PICKAXE)
 			.define('#', Items.STICK)
-			.define('X', Blocks.COBBLESTONE)
+			.define('X', ItemTags.STONE_TOOL_MATERIALS)
 			.pattern("XXX")
 			.pattern(" # ")
 			.pattern(" # ")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.STONE_PRESSURE_PLATE).define('#', Blocks.STONE).pattern("##").unlockedBy("has_stone", has(Blocks.STONE)).save(consumer);
 		ShapedRecipeBuilder.shaped(Items.STONE_SHOVEL)
 			.define('#', Items.STICK)
-			.define('X', Blocks.COBBLESTONE)
+			.define('X', ItemTags.STONE_TOOL_MATERIALS)
 			.pattern("X")
 			.pattern("#")
 			.pattern("#")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.STONE_SLAB, 6).define('#', Blocks.STONE).pattern("###").unlockedBy("has_stone", has(Blocks.STONE)).save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.SMOOTH_STONE_SLAB, 6)
@@ -2057,11 +2079,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.STONE_SWORD)
 			.define('#', Items.STICK)
-			.define('X', Blocks.COBBLESTONE)
+			.define('X', ItemTags.STONE_TOOL_MATERIALS)
 			.pattern("X")
 			.pattern("X")
 			.pattern("#")
-			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.WHITE_WOOL)
 			.define('#', Items.STRING)
@@ -2113,11 +2135,11 @@ public class RecipeProvider implements DataProvider {
 		ShapedRecipeBuilder.shaped(Blocks.SOUL_FIRE_TORCH, 4)
 			.define('X', Ingredient.of(Items.COAL, Items.CHARCOAL))
 			.define('#', Items.STICK)
-			.define('S', Items.SOUL_SOIL)
+			.define('S', ItemTags.SOUL_FIRE_BASE_BLOCKS)
 			.pattern("X")
 			.pattern("#")
 			.pattern("S")
-			.unlockedBy("has_soul_soil", has(Items.SOUL_SOIL))
+			.unlockedBy("has_soul_sand", has(ItemTags.SOUL_FIRE_BASE_BLOCKS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.LANTERN)
 			.define('#', Items.TORCH)
@@ -2582,6 +2604,87 @@ public class RecipeProvider implements DataProvider {
 			.pattern("OOO")
 			.unlockedBy("has_obsidian", has(Blocks.CRYING_OBSIDIAN))
 			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.BLACKSTONE_STAIRS, 4)
+			.define('#', Blocks.BLACKSTONE)
+			.pattern("#  ")
+			.pattern("## ")
+			.pattern("###")
+			.unlockedBy("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_STAIRS, 4)
+			.define('#', Blocks.POLISHED_BLACKSTONE)
+			.pattern("#  ")
+			.pattern("## ")
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS, 4)
+			.define('#', Blocks.POLISHED_BLACKSTONE_BRICKS)
+			.pattern("#  ")
+			.pattern("## ")
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.BLACKSTONE_SLAB, 6)
+			.define('#', Blocks.BLACKSTONE)
+			.pattern("###")
+			.unlockedBy("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_SLAB, 6)
+			.define('#', Blocks.POLISHED_BLACKSTONE)
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, 6)
+			.define('#', Blocks.POLISHED_BLACKSTONE_BRICKS)
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE, 4)
+			.define('S', Blocks.BLACKSTONE)
+			.pattern("SS")
+			.pattern("SS")
+			.unlockedBy("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_BRICKS, 4)
+			.define('#', Blocks.POLISHED_BLACKSTONE)
+			.pattern("##")
+			.pattern("##")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.CHISELED_POLISHED_BLACKSTONE)
+			.define('#', Blocks.POLISHED_BLACKSTONE_SLAB)
+			.pattern("#")
+			.pattern("#")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.BLACKSTONE_WALL, 6)
+			.define('#', Blocks.BLACKSTONE)
+			.pattern("###")
+			.pattern("###")
+			.unlockedBy("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_WALL, 6)
+			.define('#', Blocks.POLISHED_BLACKSTONE)
+			.pattern("###")
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_BRICK_WALL, 6)
+			.define('#', Blocks.POLISHED_BLACKSTONE_BRICKS)
+			.pattern("###")
+			.pattern("###")
+			.unlockedBy("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer);
+		ShapelessRecipeBuilder.shapeless(Blocks.POLISHED_BLACKSTONE_BUTTON)
+			.requires(Blocks.POLISHED_BLACKSTONE)
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
+		ShapedRecipeBuilder.shaped(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE)
+			.define('#', Blocks.POLISHED_BLACKSTONE)
+			.pattern("##")
+			.unlockedBy("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer);
 		SpecialRecipeBuilder.special(RecipeSerializer.ARMOR_DYE).save(consumer, "armor_dye");
 		SpecialRecipeBuilder.special(RecipeSerializer.BANNER_DUPLICATE).save(consumer, "banner_duplicate");
 		SpecialRecipeBuilder.special(RecipeSerializer.BOOK_CLONING).save(consumer, "book_cloning");
@@ -2790,6 +2893,12 @@ public class RecipeProvider implements DataProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.ANCIENT_DEBRIS), Items.NETHERITE_SCRAP, 2.0F, 200)
 			.unlockedBy("has_ancient_debris", has(Blocks.ANCIENT_DEBRIS))
 			.save(consumer);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.asItem(), 0.1F, 200)
+			.unlockedBy("has_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.NETHER_BRICKS), Blocks.CRACKED_NETHER_BRICKS.asItem(), 0.1F, 200)
+			.unlockedBy("has_nether_bricks", has(Blocks.NETHER_BRICKS))
+			.save(consumer);
 		SimpleCookingRecipeBuilder.blasting(Ingredient.of(Blocks.IRON_ORE.asItem()), Items.IRON_INGOT, 0.7F, 100)
 			.unlockedBy("has_iron_ore", has(Blocks.IRON_ORE.asItem()))
 			.save(consumer, "iron_ingot_from_blasting");
@@ -2958,6 +3067,9 @@ public class RecipeProvider implements DataProvider {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.QUARTZ_BLOCK), Blocks.CHISELED_QUARTZ_BLOCK)
 			.unlocks("has_quartz_block", has(Blocks.QUARTZ_BLOCK))
 			.save(consumer, "chiseled_quartz_block_from_quartz_block_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.QUARTZ_BLOCK), Blocks.QUARTZ_BRICKS)
+			.unlocks("has_quartz_block", has(Blocks.QUARTZ_BLOCK))
+			.save(consumer, "quartz_bricks_from_quartz_block_stonecutting");
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.COBBLESTONE), Blocks.COBBLESTONE_STAIRS)
 			.unlocks("has_cobblestone", has(Blocks.COBBLESTONE))
 			.save(consumer, "cobblestone_stairs_from_cobblestone_stonecutting");
@@ -2997,6 +3109,9 @@ public class RecipeProvider implements DataProvider {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.NETHER_BRICKS), Blocks.NETHER_BRICK_WALL)
 			.unlocks("has_nether_bricks", has(Blocks.NETHER_BRICKS))
 			.save(consumer, "nether_brick_wall_from_nether_bricks_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.NETHER_BRICKS), Blocks.CHISELED_NETHER_BRICKS)
+			.unlocks("has_nether_bricks", has(Blocks.NETHER_BRICKS))
+			.save(consumer, "chiseled_nether_bricks_from_nether_bricks_stonecutting");
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.RED_NETHER_BRICKS), Blocks.RED_NETHER_BRICK_SLAB, 2)
 			.unlocks("has_nether_bricks", has(Blocks.RED_NETHER_BRICKS))
 			.save(consumer, "red_nether_brick_slab_from_red_nether_bricks_stonecutting");
@@ -3171,6 +3286,75 @@ public class RecipeProvider implements DataProvider {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.SMOOTH_STONE), Blocks.SMOOTH_STONE_SLAB, 2)
 			.unlocks("has_smooth_stone", has(Blocks.SMOOTH_STONE))
 			.save(consumer, "smooth_stone_slab_from_smooth_stone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.BLACKSTONE_SLAB, 2)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "blackstone_slab_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.BLACKSTONE_STAIRS)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "blackstone_stairs_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.BLACKSTONE_WALL)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "blackstone_wall_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_WALL)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_wall_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_SLAB, 2)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_slab_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_STAIRS)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_stairs_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.CHISELED_POLISHED_BLACKSTONE)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "chiseled_polished_blackstone_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICKS)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_bricks_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, 2)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_slab_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_stairs_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
+			.unlocks("has_blackstone", has(Blocks.BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_wall_from_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_SLAB, 2)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_slab_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_STAIRS)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_stairs_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICKS)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_bricks_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_WALL)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_wall_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, 2)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_slab_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_stairs_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "polished_blackstone_brick_wall_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE), Blocks.CHISELED_POLISHED_BLACKSTONE)
+			.unlocks("has_polished_blackstone", has(Blocks.POLISHED_BLACKSTONE))
+			.save(consumer, "chiseled_polished_blackstone_from_polished_blackstone_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, 2)
+			.unlocks("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer, "polished_blackstone_brick_slab_from_polished_blackstone_bricks_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS)
+			.unlocks("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer, "polished_blackstone_brick_stairs_from_polished_blackstone_bricks_stonecutting");
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
+			.unlocks("has_polished_blackstone_bricks", has(Blocks.POLISHED_BLACKSTONE_BRICKS))
+			.save(consumer, "polished_blackstone_brick_wall_from_polished_blackstone_bricks_stonecutting");
 	}
 
 	private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {

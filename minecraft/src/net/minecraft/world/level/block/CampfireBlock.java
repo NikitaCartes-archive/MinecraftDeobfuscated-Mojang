@@ -12,6 +12,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -52,9 +53,11 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
+	private final boolean spawnParticles;
 
-	public CampfireBlock(BlockBehaviour.Properties properties) {
+	public CampfireBlock(boolean bl, BlockBehaviour.Properties properties) {
 		super(properties);
+		this.spawnParticles = bl;
 		this.registerDefaultState(
 			this.stateDefinition
 				.any()
@@ -168,7 +171,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 				);
 			}
 
-			if (random.nextInt(5) == 0) {
+			if (this.spawnParticles && random.nextInt(5) == 0) {
 				for (int i = 0; i < random.nextInt(1) + 1; i++) {
 					level.addParticle(
 						ParticleTypes.LAVA,
@@ -267,8 +270,8 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		return false;
 	}
 
-	private static boolean isLitCampfire(BlockState blockState) {
-		return blockState.getBlock() == Blocks.CAMPFIRE && (Boolean)blockState.getValue(LIT);
+	public static boolean isLitCampfire(BlockState blockState) {
+		return blockState.getBlock().is(BlockTags.CAMPFIRES) && blockState.hasProperty(LIT) && (Boolean)blockState.getValue(LIT);
 	}
 
 	@Override

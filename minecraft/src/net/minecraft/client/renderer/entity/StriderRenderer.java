@@ -11,6 +11,7 @@ import net.minecraft.world.entity.monster.Strider;
 @Environment(EnvType.CLIENT)
 public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>> {
 	private static final ResourceLocation STRIDER_LOCATION = new ResourceLocation("textures/entity/strider/strider.png");
+	private static final ResourceLocation COLD_LOCATION = new ResourceLocation("textures/entity/strider/strider_cold.png");
 
 	public StriderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
 		super(entityRenderDispatcher, new StriderModel<>(), 0.5F);
@@ -18,7 +19,7 @@ public class StriderRenderer extends MobRenderer<Strider, StriderModel<Strider>>
 	}
 
 	public ResourceLocation getTextureLocation(Strider strider) {
-		return STRIDER_LOCATION;
+		return strider.isSuffocating() ? COLD_LOCATION : STRIDER_LOCATION;
 	}
 
 	protected void scale(Strider strider, PoseStack poseStack, float f) {

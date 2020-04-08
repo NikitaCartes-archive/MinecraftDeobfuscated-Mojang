@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 
 @Environment(EnvType.CLIENT)
 public class DebugEntityNameGenerator {
@@ -81,7 +82,7 @@ public class DebugEntityNameGenerator {
 	}
 
 	private static String getRandomString(Random random, String[] strings) {
-		return strings[random.nextInt(strings.length)];
+		return Util.getRandom(strings, random);
 	}
 
 	private static Random getRandom(UUID uUID) {

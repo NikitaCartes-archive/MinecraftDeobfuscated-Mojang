@@ -29,7 +29,7 @@ public class WetSpongeBlock extends Block {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		Direction direction = Direction.getRandomFace(random);
+		Direction direction = Direction.getRandom(random);
 		if (direction != Direction.UP) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState2 = level.getBlockState(blockPos2);

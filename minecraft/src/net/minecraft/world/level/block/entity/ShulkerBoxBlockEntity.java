@@ -292,6 +292,10 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 		return new ShulkerBoxMenu(i, inventory, this);
 	}
 
+	public boolean isClosed() {
+		return this.animationStatus == ShulkerBoxBlockEntity.AnimationStatus.CLOSED;
+	}
+
 	public static enum AnimationStatus {
 		CLOSED,
 		OPENING,

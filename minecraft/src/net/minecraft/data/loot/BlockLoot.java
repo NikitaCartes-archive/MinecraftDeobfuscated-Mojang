@@ -861,6 +861,22 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.CRIMSON_SIGN);
 		this.dropSelf(Blocks.NETHERITE_BLOCK);
 		this.dropSelf(Blocks.ANCIENT_DEBRIS);
+		this.dropSelf(Blocks.BLACKSTONE);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_BRICKS);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS);
+		this.dropSelf(Blocks.BLACKSTONE_STAIRS);
+		this.dropSelf(Blocks.BLACKSTONE_WALL);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_BRICK_WALL);
+		this.dropSelf(Blocks.CHISELED_POLISHED_BLACKSTONE);
+		this.dropSelf(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_STAIRS);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_BUTTON);
+		this.dropSelf(Blocks.POLISHED_BLACKSTONE_WALL);
+		this.dropSelf(Blocks.CHISELED_NETHER_BRICKS);
+		this.dropSelf(Blocks.CRACKED_NETHER_BRICKS);
+		this.dropSelf(Blocks.QUARTZ_BRICKS);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
@@ -946,6 +962,9 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.DIORITE_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.CRIMSON_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.WARPED_SLAB, BlockLoot::createSlabItemTable);
+		this.add(Blocks.BLACKSTONE_SLAB, BlockLoot::createSlabItemTable);
+		this.add(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, BlockLoot::createSlabItemTable);
+		this.add(Blocks.POLISHED_BLACKSTONE_SLAB, BlockLoot::createSlabItemTable);
 		this.add(Blocks.ACACIA_DOOR, BlockLoot::createDoorTable);
 		this.add(Blocks.BIRCH_DOOR, BlockLoot::createDoorTable);
 		this.add(Blocks.DARK_OAK_DOOR, BlockLoot::createDoorTable);
@@ -1496,6 +1515,28 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 					blockx,
 					(LootPoolEntryContainer.Builder<?>)applyExplosionCondition(
 						blockx, LootItem.lootTableItem(Items.CHARCOAL).apply(SetItemCountFunction.setCount(ConstantIntValue.exactly(2)))
+					)
+				)
+		);
+		this.add(
+			Blocks.GILDED_BLACKSTONE,
+			blockx -> createSilkTouchDispatchTable(
+					blockx,
+					applyExplosionCondition(
+						blockx,
+						LootItem.lootTableItem(Items.GOLD_NUGGET)
+							.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 5.0F)))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F))
+							.otherwise(LootItem.lootTableItem(blockx))
+					)
+				)
+		);
+		this.add(
+			Blocks.SOUL_CAMPFIRE,
+			blockx -> createSilkTouchDispatchTable(
+					blockx,
+					(LootPoolEntryContainer.Builder<?>)applyExplosionCondition(
+						blockx, LootItem.lootTableItem(Items.SOUL_SOIL).apply(SetItemCountFunction.setCount(ConstantIntValue.exactly(1)))
 					)
 				)
 		);

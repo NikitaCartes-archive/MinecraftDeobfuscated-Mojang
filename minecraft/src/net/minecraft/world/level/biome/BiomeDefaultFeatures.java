@@ -3,6 +3,7 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
@@ -20,8 +21,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfig
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BuriedTreasureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
@@ -36,6 +39,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureCo
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
@@ -461,7 +465,41 @@ public class BiomeDefaultFeatures {
 		LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.STONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE)
 	);
 	public static final SpringConfiguration OPEN_NETHER_SPRING_CONFIG = new SpringConfiguration(LAVA_STATE, false, 4, 1, ImmutableSet.of(Blocks.NETHERRACK));
+	public static final SpringConfiguration BASALT_DELTA_SPRING_CONFIG = new SpringConfiguration(
+		LAVA_STATE, true, 4, 1, ImmutableSet.of(Blocks.NETHERRACK, Blocks.SOUL_SAND, Blocks.GRAVEL, Blocks.MAGMA_BLOCK, Blocks.BLACKSTONE)
+	);
 	public static final SpringConfiguration CLOSED_NETHER_SPRING_CONFIG = new SpringConfiguration(LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.NETHERRACK));
+	public static final SpringConfiguration OPEN_NETHER_SPRING_SOUL_SAND_CONFIG = new SpringConfiguration(
+		LAVA_STATE, false, 4, 1, ImmutableSet.of(Blocks.SOUL_SAND)
+	);
+	public static final SpringConfiguration CLOSED_NETHER_SPRING_SOUL_SAND_CONFIG = new SpringConfiguration(
+		LAVA_STATE, false, 5, 0, ImmutableSet.of(Blocks.SOUL_SAND)
+	);
+	public static final ColumnFeatureConfiguration SMALL_BASALT_COLUMN_FEATURE_CONFIG = new ColumnFeatureConfiguration.Builder()
+		.horizontalReach(1)
+		.heightRange(1, 4)
+		.build();
+	public static final ColumnFeatureConfiguration LARGE_BASALT_COLUMN_FEATURE_CONFIG = new ColumnFeatureConfiguration.Builder()
+		.horizontalReach(2, 3)
+		.heightRange(5, 10)
+		.build();
+	public static final ReplaceSpheroidConfiguration BASALT_BLOBS_FEATURE_CONFIG = new ReplaceSpheroidConfiguration.Builder()
+		.minimumReach(new Vec3i(3, 3, 3))
+		.maximumReach(new Vec3i(7, 7, 7))
+		.targetBlockState(Blocks.NETHERRACK.defaultBlockState())
+		.replaceWithBlockState(Blocks.BASALT.defaultBlockState())
+		.build();
+	public static final ReplaceSpheroidConfiguration BLACKSTONE_BLOBS_FEATURE_CONFIG = new ReplaceSpheroidConfiguration.Builder()
+		.minimumReach(new Vec3i(3, 3, 3))
+		.maximumReach(new Vec3i(7, 7, 7))
+		.targetBlockState(Blocks.NETHERRACK.defaultBlockState())
+		.replaceWithBlockState(Blocks.BLACKSTONE.defaultBlockState())
+		.build();
+	public static final DeltaFeatureConfiguration BASALT_DELTA_FEATURE_CONFIG = new DeltaFeatureConfiguration.Builder()
+		.contents(Blocks.LAVA.defaultBlockState())
+		.radius(3, 6)
+		.rim(Blocks.MAGMA_BLOCK.defaultBlockState(), 2)
+		.build();
 	public static final HugeMushroomFeatureConfiguration HUGE_RED_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(
 		new SimpleStateProvider(HUGE_RED_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 2
 	);

@@ -84,6 +84,7 @@ public abstract class Biomes {
 	public static final Biome SOUL_SAND_VALLEY = register(170, "soul_sand_valley", new SoulSandValleyBiome());
 	public static final Biome CRIMSON_FOREST = register(171, "crimson_forest", new CrimsonForestBiome());
 	public static final Biome WARPED_FOREST = register(172, "warped_forest", new WarpedForestBiome());
+	public static final Biome BASALT_DELTAS = register(173, "basalt_deltas", new BasaltDeltasBiome());
 
 	private static Biome register(int i, String string, Biome biome) {
 		Registry.registerMapping(Registry.BIOME, i, string, biome);

@@ -1,5 +1,6 @@
 package net.minecraft.core.dispenser;
 
+import java.util.List;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -12,8 +13,11 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.Saddleable;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -199,6 +203,87 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
+		DispenserBlock.registerBehavior(Items.SADDLE, new OptionalDispenseItemBehavior() {
+			@Override
+			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				List<LivingEntity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), livingEntity -> {
+					if (!(livingEntity instanceof Saddleable)) {
+						return false;
+					} else {
+						Saddleable saddleable = (Saddleable)livingEntity;
+						return !saddleable.isSaddled() && saddleable.isSaddleable();
+					}
+				});
+				if (!list.isEmpty()) {
+					((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
+					itemStack.shrink(1);
+					this.success = true;
+					return itemStack;
+				} else {
+					return super.execute(blockSource, itemStack);
+				}
+			}
+		});
+		DefaultDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
+			@Override
+			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+
+				for (AbstractHorse abstractHorse : blockSource.getLevel()
+					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
+					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
+						abstractHorse.setSlot(401, itemStack.split(1));
+						this.success = true;
+						return itemStack;
+					}
+				}
+
+				return super.execute(blockSource, itemStack);
+			}
+		};
+		DispenserBlock.registerBehavior(Items.LEATHER_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.IRON_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GOLDEN_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.DIAMOND_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.WHITE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.ORANGE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.CYAN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BLUE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BROWN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BLACK_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GRAY_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GREEN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIGHT_BLUE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIGHT_GRAY_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIME_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.MAGENTA_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.PINK_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.PURPLE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.RED_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.YELLOW_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(
+			Items.CHEST,
+			new OptionalDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+
+					for (AbstractChestedHorse abstractChestedHorse : blockSource.getLevel()
+						.getEntitiesOfClass(
+							AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorsex -> abstractChestedHorsex.isAlive() && !abstractChestedHorsex.hasChest()
+						)) {
+						if (abstractChestedHorse.isTamed() && abstractChestedHorse.setSlot(499, itemStack)) {
+							itemStack.shrink(1);
+							this.success = true;
+							return itemStack;
+						}
+					}
+
+					return super.execute(blockSource, itemStack);
+				}
+			}
+		);
 		DispenserBlock.registerBehavior(
 			Items.FIREWORK_ROCKET,
 			new DefaultDispenseItemBehavior() {
@@ -463,51 +548,6 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DispenserBlock.registerBehavior(
-			Items.SHEARS.asItem(),
-			new OptionalDispenseItemBehavior() {
-				@Override
-				protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					Level level = blockSource.getLevel();
-					if (!level.isClientSide()) {
-						this.success = false;
-						BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-
-						for (Sheep sheep : level.getEntitiesOfClass(Sheep.class, new AABB(blockPos))) {
-							if (sheep.isAlive() && !sheep.isSheared() && !sheep.isBaby()) {
-								sheep.shear();
-								level.playSound(null, blockPos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);
-								if (itemStack.hurt(1, level.random, null)) {
-									itemStack.setCount(0);
-								}
-
-								this.success = true;
-								break;
-							}
-						}
-
-						if (!this.success) {
-							BlockState blockState = level.getBlockState(blockPos);
-							if (blockState.is(BlockTags.BEEHIVES)) {
-								int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
-								if (i >= 5) {
-									if (itemStack.hurt(1, level.random, null)) {
-										itemStack.setCount(0);
-									}
-
-									BeehiveBlock.dropHoneycomb(level, blockPos);
-									((BeehiveBlock)blockState.getBlock())
-										.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-									this.success = true;
-								}
-							}
-						}
-					}
-
-					return itemStack;
-				}
-			}
-		);
 		DispenserBlock.registerBehavior(Items.GLOWSTONE, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -515,14 +555,19 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.getPos().relative(direction);
 				Level level = blockSource.getLevel();
 				BlockState blockState = level.getBlockState(blockPos);
-				if (blockState.getBlock() == Blocks.RESPAWN_ANCHOR && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
-					RespawnAnchorBlock.charge(level, blockPos, blockState);
-					itemStack.shrink(1);
-				}
+				if (blockState.getBlock() == Blocks.RESPAWN_ANCHOR) {
+					if ((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
+						RespawnAnchorBlock.charge(level, blockPos, blockState);
+						itemStack.shrink(1);
+					}
 
-				return itemStack;
+					return itemStack;
+				} else {
+					return super.execute(blockSource, itemStack);
+				}
 			}
 		});
+		DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new ShearsDispenseItemBehavior());
 	}
 
 	static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {

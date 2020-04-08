@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
-public class CompassItem extends Item {
+public class CompassItem extends Item implements Vanishable {
 	public CompassItem(Item.Properties properties) {
 		super(properties);
 		this.addProperty(new ResourceLocation("angle"), new ItemPropertyFunction() {
@@ -114,7 +114,7 @@ public class CompassItem extends Item {
 	@Environment(EnvType.CLIENT)
 	private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
 		boolean bl = compoundTag.contains("LodestonePos");
-		boolean bl2 = compoundTag.contains("LodestonePos");
+		boolean bl2 = compoundTag.contains("LodestoneDimension");
 		if (bl && bl2) {
 			Optional<DimensionType> optional = getLodestoneDimension(compoundTag);
 			if (optional.isPresent() && level.dimension.getType().equals(optional.get())) {

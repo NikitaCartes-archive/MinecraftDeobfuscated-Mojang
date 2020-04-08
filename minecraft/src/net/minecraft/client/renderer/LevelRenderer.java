@@ -401,7 +401,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					float o = Math.max(m, n);
 					ParticleOptions particleOptions = !fluidState.is(FluidTags.LAVA)
 							&& blockState.getBlock() != Blocks.MAGMA_BLOCK
-							&& (blockState.getBlock() != Blocks.CAMPFIRE || !blockState.getValue(CampfireBlock.LIT))
+							&& !CampfireBlock.isLitCampfire(blockState)
 						? ParticleTypes.RAIN
 						: ParticleTypes.SMOKE;
 					this.minecraft

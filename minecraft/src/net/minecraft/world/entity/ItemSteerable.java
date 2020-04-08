@@ -1,18 +1,11 @@
 package net.minecraft.world.entity;
 
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
-public interface ItemSteerableMount {
+public interface ItemSteerable {
 	boolean boost();
-
-	void setSaddle(boolean bl);
-
-	boolean hasSaddle();
 
 	void travelWithInput(Vec3 vec3);
 
@@ -56,22 +49,6 @@ public interface ItemSteerableMount {
 				this.travelWithInput(vec3);
 				return false;
 			}
-		}
-	}
-
-	default boolean mobInteract(Mob mob, Player player, InteractionHand interactionHand, boolean bl) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.NAME_TAG) {
-			itemStack.interactEnemy(player, mob, interactionHand);
-			return true;
-		} else if (!this.hasSaddle() || mob.isVehicle() || !bl && mob.isBaby()) {
-			return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, mob, interactionHand);
-		} else {
-			if (!mob.level.isClientSide) {
-				player.startRiding(mob);
-			}
-
-			return true;
 		}
 	}
 }

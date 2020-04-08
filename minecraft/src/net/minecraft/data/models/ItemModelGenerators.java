@@ -206,6 +206,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.PAINTING, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PAPER, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PHANTOM_MEMBRANE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PIGLIN_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PINK_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.POISONOUS_POTATO, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.POPPED_CHORUS_FRUIT, ModelTemplates.FLAT_ITEM);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,7 +31,7 @@ public class EnchantmentNames {
 				string = string + " ";
 			}
 
-			string = string + this.words[this.random.nextInt(this.words.length)];
+			string = string + Util.getRandom(this.words, this.random);
 		}
 
 		List<String> list = font.split(string, i);

@@ -189,6 +189,7 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -2039,21 +2040,44 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			return MusicManager.Music.CREDITS;
 		} else if (this.player == null) {
 			return MusicManager.Music.MENU;
-		} else if (this.player.level.dimension instanceof NetherDimension) {
-			return MusicManager.Music.NETHER;
-		} else if (this.player.level.dimension instanceof TheEndDimension) {
-			return this.gui.getBossOverlay().shouldPlayMusic() ? MusicManager.Music.END_BOSS : MusicManager.Music.END;
 		} else {
-			Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
-			if (!this.musicManager.isPlayingMusic(MusicManager.Music.UNDER_WATER)
-				&& (
-					!this.player.isUnderWater()
-						|| this.musicManager.isPlayingMusic(MusicManager.Music.GAME)
-						|| biomeCategory != Biome.BiomeCategory.OCEAN && biomeCategory != Biome.BiomeCategory.RIVER
-				)) {
-				return this.player.abilities.instabuild && this.player.abilities.mayfly ? MusicManager.Music.CREATIVE : MusicManager.Music.GAME;
+			if (this.player.level.dimension instanceof NetherDimension) {
+				Biome biome = this.player.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.getX(), this.player.getY(), this.player.getZ());
+				if (biome == Biomes.BASALT_DELTAS) {
+					return MusicManager.Music.BASALT_DELTAS;
+				}
+
+				if (biome == Biomes.NETHER_WASTES) {
+					return MusicManager.Music.NETHER_WASTES;
+				}
+
+				if (biome == Biomes.SOUL_SAND_VALLEY) {
+					return MusicManager.Music.SOUL_SAND_VALLEY;
+				}
+
+				if (biome == Biomes.CRIMSON_FOREST) {
+					return MusicManager.Music.CRIMSON_FOREST;
+				}
+
+				if (biome == Biomes.WARPED_FOREST) {
+					return MusicManager.Music.WARPED_FOREST;
+				}
+			}
+
+			if (this.player.level.dimension instanceof TheEndDimension) {
+				return this.gui.getBossOverlay().shouldPlayMusic() ? MusicManager.Music.END_BOSS : MusicManager.Music.END;
 			} else {
-				return MusicManager.Music.UNDER_WATER;
+				Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
+				if (!this.musicManager.isPlayingMusic(MusicManager.Music.UNDER_WATER)
+					&& (
+						!this.player.isUnderWater()
+							|| this.musicManager.isPlayingMusic(MusicManager.Music.GAME)
+							|| biomeCategory != Biome.BiomeCategory.OCEAN && biomeCategory != Biome.BiomeCategory.RIVER
+					)) {
+					return this.player.abilities.instabuild && this.player.abilities.mayfly ? MusicManager.Music.CREATIVE : MusicManager.Music.GAME;
+				} else {
+					return MusicManager.Music.UNDER_WATER;
+				}
 			}
 		}
 	}

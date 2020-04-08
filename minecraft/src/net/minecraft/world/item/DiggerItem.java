@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DiggerItem extends TieredItem {
+public class DiggerItem extends TieredItem implements Vanishable {
 	private final Set<Block> blocks;
 	protected final float speed;
 	private final float attackDamageBaseline;

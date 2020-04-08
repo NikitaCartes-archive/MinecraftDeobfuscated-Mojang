@@ -214,48 +214,6 @@ public final class NativeImage implements AutoCloseable {
 		}
 	}
 
-	public void blendPixel(int i, int j, int k) {
-		if (this.format != NativeImage.Format.RGBA) {
-			throw new UnsupportedOperationException("Can only call blendPixel with RGBA format");
-		} else {
-			int l = this.getPixelRGBA(i, j);
-			float f = (float)getA(k) / 255.0F;
-			float g = (float)getB(k) / 255.0F;
-			float h = (float)getG(k) / 255.0F;
-			float m = (float)getR(k) / 255.0F;
-			float n = (float)getA(l) / 255.0F;
-			float o = (float)getB(l) / 255.0F;
-			float p = (float)getG(l) / 255.0F;
-			float q = (float)getR(l) / 255.0F;
-			float s = 1.0F - f;
-			float t = f * f + n * s;
-			float u = g * f + o * s;
-			float v = h * f + p * s;
-			float w = m * f + q * s;
-			if (t > 1.0F) {
-				t = 1.0F;
-			}
-
-			if (u > 1.0F) {
-				u = 1.0F;
-			}
-
-			if (v > 1.0F) {
-				v = 1.0F;
-			}
-
-			if (w > 1.0F) {
-				w = 1.0F;
-			}
-
-			int x = (int)(t * 255.0F);
-			int y = (int)(u * 255.0F);
-			int z = (int)(v * 255.0F);
-			int aa = (int)(w * 255.0F);
-			this.setPixelRGBA(i, j, combine(x, y, z, aa));
-		}
-	}
-
 	@Deprecated
 	public int[] makePixelArray() {
 		if (this.format != NativeImage.Format.RGBA) {

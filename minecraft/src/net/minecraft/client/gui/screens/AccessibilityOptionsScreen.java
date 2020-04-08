@@ -18,6 +18,8 @@ public class AccessibilityOptionsScreen extends OptionsSubScreen {
 		Option.TEXT_BACKGROUND_OPACITY,
 		Option.TEXT_BACKGROUND,
 		Option.CHAT_OPACITY,
+		Option.CHAT_LINE_SPACING,
+		Option.CHAT_DELAY,
 		Option.AUTO_JUMP,
 		Option.TOGGLE_CROUCH,
 		Option.TOGGLE_SPRINT

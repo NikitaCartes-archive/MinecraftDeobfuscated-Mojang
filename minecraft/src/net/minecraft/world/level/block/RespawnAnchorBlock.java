@@ -54,17 +54,20 @@ public class RespawnAnchorBlock extends Block {
 		} else if ((Integer)blockState.getValue(CHARGE) == 0) {
 			return InteractionResult.PASS;
 		} else if (level.dimension.getType() != DimensionType.NETHER) {
-			level.removeBlock(blockPos, false);
-			level.explode(
-				null,
-				DamageSource.badRespawnPointExplosion(),
-				(double)blockPos.getX() + 0.5,
-				(double)blockPos.getY() + 0.5,
-				(double)blockPos.getZ() + 0.5,
-				5.0F,
-				true,
-				Explosion.BlockInteraction.DESTROY
-			);
+			if (!level.isClientSide) {
+				level.removeBlock(blockPos, false);
+				level.explode(
+					null,
+					DamageSource.badRespawnPointExplosion(),
+					(double)blockPos.getX() + 0.5,
+					(double)blockPos.getY() + 0.5,
+					(double)blockPos.getZ() + 0.5,
+					5.0F,
+					true,
+					Explosion.BlockInteraction.DESTROY
+				);
+			}
+
 			return InteractionResult.SUCCESS;
 		} else {
 			if (!level.isClientSide) {

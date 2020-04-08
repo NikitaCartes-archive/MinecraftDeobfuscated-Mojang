@@ -11,7 +11,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 
-public class FishingRodItem extends Item {
+public class FishingRodItem extends Item implements Vanishable {
 	public FishingRodItem(Item.Properties properties) {
 		super(properties);
 		this.addProperty(new ResourceLocation("cast"), (itemStack, level, livingEntity) -> {

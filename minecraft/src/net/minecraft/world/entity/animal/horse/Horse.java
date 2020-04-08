@@ -2,8 +2,7 @@ package net.minecraft.world.entity.animal.horse;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -34,27 +33,6 @@ import net.minecraft.world.level.block.SoundType;
 public class Horse extends AbstractHorse {
 	private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
 	private static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(Horse.class, EntityDataSerializers.INT);
-	private static final String[] VARIANT_TEXTURES = new String[]{
-		"textures/entity/horse/horse_white.png",
-		"textures/entity/horse/horse_creamy.png",
-		"textures/entity/horse/horse_chestnut.png",
-		"textures/entity/horse/horse_brown.png",
-		"textures/entity/horse/horse_black.png",
-		"textures/entity/horse/horse_gray.png",
-		"textures/entity/horse/horse_darkbrown.png"
-	};
-	private static final String[] VARIANT_HASHES = new String[]{"hwh", "hcr", "hch", "hbr", "hbl", "hgr", "hdb"};
-	private static final String[] MARKING_TEXTURES = new String[]{
-		null,
-		"textures/entity/horse/horse_markings_white.png",
-		"textures/entity/horse/horse_markings_whitefield.png",
-		"textures/entity/horse/horse_markings_whitedots.png",
-		"textures/entity/horse/horse_markings_blackdots.png"
-	};
-	private static final String[] MARKING_HASHES = new String[]{"", "wo_", "wmo", "wdo", "bdo"};
-	@Nullable
-	private String layerTextureHashName;
-	private final String[] layerTextureLayers = new String[2];
 
 	public Horse(EntityType<? extends Horse> entityType, Level level) {
 		super(entityType, level);
@@ -76,7 +54,7 @@ public class Horse extends AbstractHorse {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("Variant", this.getVariant());
+		compoundTag.putInt("Variant", this.getTypeVariant());
 		if (!this.inventory.getItem(1).isEmpty()) {
 			compoundTag.put("ArmorItem", this.inventory.getItem(1).save(new CompoundTag()));
 		}
@@ -94,7 +72,7 @@ public class Horse extends AbstractHorse {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(compoundTag.getInt("Variant"));
+		this.setTypeVariant(compoundTag.getInt("Variant"));
 		if (compoundTag.contains("ArmorItem", 10)) {
 			ItemStack itemStack = ItemStack.of(compoundTag.getCompound("ArmorItem"));
 			if (!itemStack.isEmpty() && this.isArmor(itemStack)) {
@@ -102,53 +80,32 @@ public class Horse extends AbstractHorse {
 			}
 		}
 
-		this.updateEquipment();
+		this.updateContainerEquipment();
 	}
 
-	public void setVariant(int i) {
+	private void setTypeVariant(int i) {
 		this.entityData.set(DATA_ID_TYPE_VARIANT, i);
-		this.clearLayeredTextureInfo();
 	}
 
-	public int getVariant() {
+	private int getTypeVariant() {
 		return this.entityData.get(DATA_ID_TYPE_VARIANT);
 	}
 
-	private void clearLayeredTextureInfo() {
-		this.layerTextureHashName = null;
+	private void setVariantAndMarkings(Variant variant, Markings markings) {
+		this.setTypeVariant(variant.getId() & 0xFF | markings.getId() << 8 & 0xFF00);
 	}
 
-	@Environment(EnvType.CLIENT)
-	private void rebuildLayeredTextureInfo() {
-		int i = this.getVariant();
-		int j = (i & 0xFF) % 7;
-		int k = ((i & 0xFF00) >> 8) % 5;
-		this.layerTextureLayers[0] = VARIANT_TEXTURES[j];
-		this.layerTextureLayers[1] = MARKING_TEXTURES[k];
-		this.layerTextureHashName = "horse/" + VARIANT_HASHES[j] + MARKING_HASHES[k];
+	public Variant getVariant() {
+		return Variant.byId(this.getTypeVariant() & 0xFF);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public String getLayeredTextureHashName() {
-		if (this.layerTextureHashName == null) {
-			this.rebuildLayeredTextureInfo();
-		}
-
-		return this.layerTextureHashName;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public String[] getLayeredTextureLayers() {
-		if (this.layerTextureHashName == null) {
-			this.rebuildLayeredTextureInfo();
-		}
-
-		return this.layerTextureLayers;
+	public Markings getMarkings() {
+		return Markings.byId((this.getTypeVariant() & 0xFF00) >> 8);
 	}
 
 	@Override
-	protected void updateEquipment() {
-		super.updateEquipment();
+	protected void updateContainerEquipment() {
+		super.updateContainerEquipment();
 		this.setArmorEquipment(this.inventory.getItem(1));
 		this.setDropChance(EquipmentSlot.CHEST, 0.0F);
 	}
@@ -182,15 +139,6 @@ public class Horse extends AbstractHorse {
 		super.playGallopSound(soundType);
 		if (this.random.nextInt(10) == 0) {
 			this.playSound(SoundEvents.HORSE_BREATHE, soundType.getVolume() * 0.6F, soundType.getPitch());
-		}
-	}
-
-	@Override
-	public void tick() {
-		super.tick();
-		if (this.level.isClientSide && this.entityData.isDirty()) {
-			this.entityData.clearDirty();
-			this.clearLayeredTextureInfo();
 		}
 	}
 
@@ -288,25 +236,26 @@ public class Horse extends AbstractHorse {
 			Horse horse = (Horse)agableMob;
 			abstractHorse = EntityType.HORSE.create(this.level);
 			int i = this.random.nextInt(9);
-			int j;
+			Variant variant;
 			if (i < 4) {
-				j = this.getVariant() & 0xFF;
+				variant = this.getVariant();
 			} else if (i < 8) {
-				j = horse.getVariant() & 0xFF;
+				variant = horse.getVariant();
 			} else {
-				j = this.random.nextInt(7);
+				variant = Util.getRandom(Variant.values(), this.random);
 			}
 
-			int k = this.random.nextInt(5);
-			if (k < 2) {
-				j |= this.getVariant() & 0xFF00;
-			} else if (k < 4) {
-				j |= horse.getVariant() & 0xFF00;
+			int j = this.random.nextInt(5);
+			Markings markings;
+			if (j < 2) {
+				markings = this.getMarkings();
+			} else if (j < 4) {
+				markings = horse.getMarkings();
 			} else {
-				j |= this.random.nextInt(5) << 8 & 0xFF00;
+				markings = Util.getRandom(Markings.values(), this.random);
 			}
 
-			((Horse)abstractHorse).setVariant(j);
+			((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
 		}
 
 		this.setOffspringAttributes(agableMob, abstractHorse);
@@ -314,7 +263,7 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean wearsArmor() {
+	public boolean canWearArmor() {
 		return true;
 	}
 
@@ -332,23 +281,23 @@ public class Horse extends AbstractHorse {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i;
+		Variant variant;
 		if (spawnGroupData instanceof Horse.HorseGroupData) {
-			i = ((Horse.HorseGroupData)spawnGroupData).variant;
+			variant = ((Horse.HorseGroupData)spawnGroupData).variant;
 		} else {
-			i = this.random.nextInt(7);
-			spawnGroupData = new Horse.HorseGroupData(i);
+			variant = Util.getRandom(Variant.values(), this.random);
+			spawnGroupData = new Horse.HorseGroupData(variant);
 		}
 
-		this.setVariant(i | this.random.nextInt(5) << 8);
+		this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), this.random));
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public static class HorseGroupData extends AgableMob.AgableMobGroupData {
-		public final int variant;
+		public final Variant variant;
 
-		public HorseGroupData(int i) {
-			this.variant = i;
+		public HorseGroupData(Variant variant) {
+			this.variant = variant;
 		}
 	}
 }

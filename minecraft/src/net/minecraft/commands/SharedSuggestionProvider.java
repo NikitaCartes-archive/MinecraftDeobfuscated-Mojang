@@ -49,11 +49,11 @@ public interface SharedSuggestionProvider {
 			ResourceLocation resourceLocation = (ResourceLocation)function.apply(object);
 			if (bl) {
 				String string2 = resourceLocation.toString();
-				if (string2.startsWith(string)) {
+				if (matches(string, string2)) {
 					consumer.accept(object);
 				}
-			} else if (resourceLocation.getNamespace().startsWith(string)
-				|| resourceLocation.getNamespace().equals("minecraft") && resourceLocation.getPath().startsWith(string)) {
+			} else if (matches(string, resourceLocation.getNamespace())
+				|| resourceLocation.getNamespace().equals("minecraft") && matches(string, resourceLocation.getPath())) {
 				consumer.accept(object);
 			}
 		}
@@ -170,7 +170,7 @@ public interface SharedSuggestionProvider {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (String string2 : iterable) {
-			if (string2.toLowerCase(Locale.ROOT).startsWith(string)) {
+			if (matches(string, string2.toLowerCase(Locale.ROOT))) {
 				suggestionsBuilder.suggest(string2);
 			}
 		}
@@ -180,7 +180,7 @@ public interface SharedSuggestionProvider {
 
 	static CompletableFuture<Suggestions> suggest(Stream<String> stream, SuggestionsBuilder suggestionsBuilder) {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-		stream.filter(string2 -> string2.toLowerCase(Locale.ROOT).startsWith(string)).forEach(suggestionsBuilder::suggest);
+		stream.filter(string2 -> matches(string, string2.toLowerCase(Locale.ROOT))).forEach(suggestionsBuilder::suggest);
 		return suggestionsBuilder.buildFuture();
 	}
 
@@ -188,12 +188,23 @@ public interface SharedSuggestionProvider {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (String string2 : strings) {
-			if (string2.toLowerCase(Locale.ROOT).startsWith(string)) {
+			if (matches(string, string2.toLowerCase(Locale.ROOT))) {
 				suggestionsBuilder.suggest(string2);
 			}
 		}
 
 		return suggestionsBuilder.buildFuture();
+	}
+
+	static boolean matches(String string, String string2) {
+		for (int i = 0; !string2.startsWith(string, i); i++) {
+			i = string2.indexOf(95, i);
+			if (i < 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static class TextCoordinates {

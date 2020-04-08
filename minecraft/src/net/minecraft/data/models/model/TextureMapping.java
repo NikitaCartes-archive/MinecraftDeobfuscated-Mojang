@@ -154,6 +154,14 @@ public class TextureMapping {
 			.put(TextureSlot.BOTTOM, getBlockTexture(block, "_bottom"));
 	}
 
+	public static TextureMapping columnWithWall(Block block) {
+		ResourceLocation resourceLocation = getBlockTexture(block);
+		return new TextureMapping()
+			.put(TextureSlot.WALL, resourceLocation)
+			.put(TextureSlot.SIDE, resourceLocation)
+			.put(TextureSlot.END, getBlockTexture(block, "_top"));
+	}
+
 	public static TextureMapping door(Block block) {
 		return new TextureMapping().put(TextureSlot.TOP, getBlockTexture(block, "_top")).put(TextureSlot.BOTTOM, getBlockTexture(block, "_bottom"));
 	}
@@ -243,6 +251,10 @@ public class TextureMapping {
 			.put(TextureSlot.SOUTH, getBlockTexture(block, "_front"))
 			.put(TextureSlot.EAST, getBlockTexture(block, "_side"))
 			.put(TextureSlot.WEST, getBlockTexture(block, "_side"));
+	}
+
+	public static TextureMapping campfire(Block block) {
+		return new TextureMapping().put(TextureSlot.LIT_LOG, getBlockTexture(block, "_log_lit")).put(TextureSlot.FIRE, getBlockTexture(block, "_fire"));
 	}
 
 	public static TextureMapping layer0(Item item) {

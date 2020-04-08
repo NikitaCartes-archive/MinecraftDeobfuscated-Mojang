@@ -5,6 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SoundEvents {
 	public static final SoundEvent AMBIENT_CAVE = register("ambient.cave");
+	public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = register("ambient.basalt_deltas.additions");
+	public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = register("ambient.basalt_deltas.loop");
+	public static final SoundEvent AMBIENT_BASALT_DELTAS_MOOD = register("ambient.basalt_deltas.mood");
 	public static final SoundEvent AMBIENT_CRIMSON_FOREST_ADDITIONS = register("ambient.crimson_forest.additions");
 	public static final SoundEvent AMBIENT_CRIMSON_FOREST_LOOP = register("ambient.crimson_forest.loop");
 	public static final SoundEvent AMBIENT_CRIMSON_FOREST_MOOD = register("ambient.crimson_forest.mood");
@@ -468,7 +471,11 @@ public class SoundEvents {
 	public static final SoundEvent MUSIC_END = register("music.end");
 	public static final SoundEvent MUSIC_GAME = register("music.game");
 	public static final SoundEvent MUSIC_MENU = register("music.menu");
-	public static final SoundEvent MUSIC_NETHER = register("music.nether");
+	public static final SoundEvent MUSIC_BIOME_BASALT_DELTAS = register("music.nether.basalt_deltas");
+	public static final SoundEvent MUSIC_BIOME_NETHER_WASTES = register("music.nether.nether_wastes");
+	public static final SoundEvent MUSIC_BIOME_SOUL_SAND_VALLEY = register("music.nether.soul_sand_valley");
+	public static final SoundEvent MUSIC_BIOME_CRIMSON_FOREST = register("music.nether.crimson_forest");
+	public static final SoundEvent MUSIC_BIOME_WARPED_FOREST = register("music.nether.warped_forest");
 	public static final SoundEvent MUSIC_UNDER_WATER = register("music.under_water");
 	public static final SoundEvent NETHER_BRICKS_BREAK = register("block.nether_bricks.break");
 	public static final SoundEvent NETHER_BRICKS_STEP = register("block.nether_bricks.step");
@@ -755,6 +762,7 @@ public class SoundEvents {
 	public static final SoundEvent STRIDER_STEP = register("entity.strider.step");
 	public static final SoundEvent STRIDER_STEP_LAVA = register("entity.strider.step_lava");
 	public static final SoundEvent STRIDER_EAT = register("entity.strider.eat");
+	public static final SoundEvent STRIDER_SADDLE = register("entity.strider.saddle");
 	public static final SoundEvent SLIME_DEATH_SMALL = register("entity.slime.death_small");
 	public static final SoundEvent SLIME_HURT_SMALL = register("entity.slime.hurt_small");
 	public static final SoundEvent SLIME_JUMP_SMALL = register("entity.slime.jump_small");

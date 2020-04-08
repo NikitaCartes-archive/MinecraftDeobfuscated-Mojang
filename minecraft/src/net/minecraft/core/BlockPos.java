@@ -4,6 +4,7 @@ import com.google.common.collect.AbstractIterator;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Spliterator.OfInt;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -207,6 +208,26 @@ public class BlockPos extends Vec3i implements Serializable {
 		return new BlockPos.MutableBlockPos(this.getX(), this.getY(), this.getZ());
 	}
 
+	public static Iterable<BlockPos> randomBetweenClosed(Random random, int i, int j, int k, int l, int m, int n, int o) {
+		int p = m - j + 1;
+		int q = n - k + 1;
+		int r = o - l + 1;
+		return () -> new AbstractIterator<BlockPos>() {
+				final BlockPos.MutableBlockPos nextPos = new BlockPos.MutableBlockPos();
+				int counter = i;
+
+				protected BlockPos computeNext() {
+					if (this.counter <= 0) {
+						return this.endOfData();
+					} else {
+						BlockPos blockPos = this.nextPos.set(j + random.nextInt(p), k + random.nextInt(q), l + random.nextInt(r));
+						this.counter--;
+						return blockPos;
+					}
+				}
+			};
+	}
+
 	public static Iterable<BlockPos> withinManhattan(BlockPos blockPos, int i, int j, int k) {
 		int l = i + j + k;
 		int m = blockPos.getX();
@@ -396,6 +417,19 @@ public class BlockPos extends Vec3i implements Serializable {
 
 		public BlockPos.MutableBlockPos move(int i, int j, int k) {
 			return this.set(this.getX() + i, this.getY() + j, this.getZ() + k);
+		}
+
+		public BlockPos.MutableBlockPos clamp(Direction.Axis axis, int i, int j) {
+			switch (axis) {
+				case X:
+					return this.set(Mth.clamp(this.getX(), i, j), this.getY(), this.getZ());
+				case Y:
+					return this.set(this.getX(), Mth.clamp(this.getY(), i, j), this.getZ());
+				case Z:
+					return this.set(this.getX(), this.getY(), Mth.clamp(this.getZ(), i, j));
+				default:
+					throw new IllegalStateException("Unable to clamp axis " + axis);
+			}
 		}
 
 		@Override

@@ -1,11 +1,15 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -38,7 +42,7 @@ import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 public class StructureTemplate {
-	private final List<List<StructureTemplate.StructureBlockInfo>> palettes = Lists.<List<StructureTemplate.StructureBlockInfo>>newArrayList();
+	private final List<StructureTemplate.Palette> palettes = Lists.<StructureTemplate.Palette>newArrayList();
 	private final List<StructureTemplate.StructureEntityInfo> entityInfoList = Lists.<StructureTemplate.StructureEntityInfo>newArrayList();
 	private BlockPos size = BlockPos.ZERO;
 	private String author = "?";
@@ -93,7 +97,7 @@ public class StructureTemplate {
 			list4.addAll(list2);
 			list4.addAll(list3);
 			this.palettes.clear();
-			this.palettes.add(list4);
+			this.palettes.add(new StructureTemplate.Palette(list4));
 			if (bl) {
 				this.fillEntityList(level, blockPos4, blockPos5.offset(1, 1, 1));
 			} else {
@@ -128,18 +132,20 @@ public class StructureTemplate {
 	public List<StructureTemplate.StructureBlockInfo> filterBlocks(BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block, boolean bl) {
 		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
 		BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
-
-		for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos)) {
-			BlockPos blockPos2 = bl ? calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
-			if (boundingBox == null || boundingBox.isInside(blockPos2)) {
-				BlockState blockState = structureBlockInfo.state;
-				if (blockState.getBlock() == block) {
-					list.add(new StructureTemplate.StructureBlockInfo(blockPos2, blockState.rotate(structurePlaceSettings.getRotation()), structureBlockInfo.nbt));
+		if (this.palettes.isEmpty()) {
+			return Collections.emptyList();
+		} else {
+			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos).blocks(block)) {
+				BlockPos blockPos2 = bl ? calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
+				if (boundingBox == null || boundingBox.isInside(blockPos2)) {
+					list.add(
+						new StructureTemplate.StructureBlockInfo(blockPos2, structureBlockInfo.state.rotate(structurePlaceSettings.getRotation()), structureBlockInfo.nbt)
+					);
 				}
 			}
-		}
 
-		return list;
+			return list;
+		}
 	}
 
 	public BlockPos calculateConnectedPosition(
@@ -167,7 +173,7 @@ public class StructureTemplate {
 		if (this.palettes.isEmpty()) {
 			return false;
 		} else {
-			List<StructureTemplate.StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos);
+			List<StructureTemplate.StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos).blocks();
 			if ((!list.isEmpty() || !structurePlaceSettings.isIgnoreEntities() && !this.entityInfoList.isEmpty())
 				&& this.size.getX() >= 1
 				&& this.size.getY() >= 1
@@ -548,7 +554,7 @@ public class StructureTemplate {
 			}
 
 			ListTag listTag = new ListTag();
-			List<StructureTemplate.StructureBlockInfo> list2 = (List<StructureTemplate.StructureBlockInfo>)this.palettes.get(0);
+			List<StructureTemplate.StructureBlockInfo> list2 = ((StructureTemplate.Palette)this.palettes.get(0)).blocks();
 
 			for (int j = 0; j < list2.size(); j++) {
 				StructureTemplate.StructureBlockInfo structureBlockInfo = (StructureTemplate.StructureBlockInfo)list2.get(j);
@@ -564,7 +570,7 @@ public class StructureTemplate {
 
 				for (int l = 1; l < this.palettes.size(); l++) {
 					StructureTemplate.SimplePalette simplePalette2 = (StructureTemplate.SimplePalette)list.get(l);
-					simplePalette2.addMapping(((StructureTemplate.StructureBlockInfo)((List)this.palettes.get(l)).get(j)).state, k);
+					simplePalette2.addMapping(((StructureTemplate.StructureBlockInfo)((StructureTemplate.Palette)this.palettes.get(l)).blocks().get(j)).state, k);
 				}
 			}
 
@@ -670,7 +676,7 @@ public class StructureTemplate {
 		}
 
 		list.sort(Comparator.comparingInt(structureBlockInfo -> structureBlockInfo.pos.getY()));
-		this.palettes.add(list);
+		this.palettes.add(new StructureTemplate.Palette(list));
 	}
 
 	private ListTag newIntegerList(int... is) {
@@ -691,6 +697,26 @@ public class StructureTemplate {
 		}
 
 		return listTag;
+	}
+
+	public static final class Palette {
+		private final List<StructureTemplate.StructureBlockInfo> blocks;
+		private final Map<Block, List<StructureTemplate.StructureBlockInfo>> cache = Maps.<Block, List<StructureTemplate.StructureBlockInfo>>newHashMap();
+
+		private Palette(List<StructureTemplate.StructureBlockInfo> list) {
+			this.blocks = list;
+		}
+
+		public List<StructureTemplate.StructureBlockInfo> blocks() {
+			return this.blocks;
+		}
+
+		public List<StructureTemplate.StructureBlockInfo> blocks(Block block) {
+			return (List<StructureTemplate.StructureBlockInfo>)this.cache
+				.computeIfAbsent(
+					block, blockx -> (List)this.blocks.stream().filter(structureBlockInfo -> structureBlockInfo.state.getBlock() == blockx).collect(Collectors.toList())
+				);
+		}
 	}
 
 	static class SimplePalette implements Iterable<BlockState> {

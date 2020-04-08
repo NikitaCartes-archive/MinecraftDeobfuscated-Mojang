@@ -200,17 +200,21 @@ public abstract class AbstractFish extends WaterAnimal {
 			}
 
 			if (this.operation == MoveControl.Operation.MOVE_TO && !this.fish.getNavigation().isDone()) {
+				float f = (float)(this.speedModifier * this.fish.getAttributeValue(Attributes.MOVEMENT_SPEED));
+				this.fish.setSpeed(Mth.lerp(0.125F, this.fish.getSpeed(), f));
 				double d = this.wantedX - this.fish.getX();
 				double e = this.wantedY - this.fish.getY();
-				double f = this.wantedZ - this.fish.getZ();
-				double g = (double)Mth.sqrt(d * d + e * e + f * f);
-				e /= g;
-				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-				this.fish.yRot = this.rotlerp(this.fish.yRot, h, 90.0F);
-				this.fish.yBodyRot = this.fish.yRot;
-				float i = (float)(this.speedModifier * this.fish.getAttributeValue(Attributes.MOVEMENT_SPEED));
-				this.fish.setSpeed(Mth.lerp(0.125F, this.fish.getSpeed(), i));
-				this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, (double)this.fish.getSpeed() * e * 0.1, 0.0));
+				double g = this.wantedZ - this.fish.getZ();
+				if (e != 0.0) {
+					double h = (double)Mth.sqrt(d * d + e * e + g * g);
+					this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, (double)this.fish.getSpeed() * (e / h) * 0.1, 0.0));
+				}
+
+				if (d != 0.0 || g != 0.0) {
+					float i = (float)(Mth.atan2(g, d) * 180.0F / (float)Math.PI) - 90.0F;
+					this.fish.yRot = this.rotlerp(this.fish.yRot, i, 90.0F);
+					this.fish.yBodyRot = this.fish.yRot;
+				}
 			} else {
 				this.fish.setSpeed(0.0F);
 			}

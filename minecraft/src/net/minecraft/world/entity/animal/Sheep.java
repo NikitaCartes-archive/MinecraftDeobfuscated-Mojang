@@ -28,6 +28,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -58,7 +59,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
-public class Sheep extends Animal {
+public class Sheep extends Animal implements Shearable {
 	private static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
 	private static final Map<DyeColor, ItemLike> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), enumMap -> {
 		enumMap.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
@@ -218,39 +219,42 @@ public class Sheep extends Animal {
 
 	@Override
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.SHEARS && !this.isSheared() && !this.isBaby()) {
-			this.shear();
-			this.level.playSound(null, this, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1.0F, 1.0F);
-			if (!this.level.isClientSide) {
+		if (!this.level.isClientSide) {
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
+				this.shear(SoundSource.PLAYERS);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				return true;
 			}
+		}
 
-			return true;
-		} else {
-			return super.mobInteract(player, interactionHand);
+		return super.mobInteract(player, interactionHand);
+	}
+
+	@Override
+	public void shear(SoundSource soundSource) {
+		this.level.playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+		this.setSheared(true);
+		int i = 1 + this.random.nextInt(3);
+
+		for (int j = 0; j < i; j++) {
+			ItemEntity itemEntity = this.spawnAtLocation((ItemLike)ITEM_BY_DYE.get(this.getColor()), 1);
+			if (itemEntity != null) {
+				itemEntity.setDeltaMovement(
+					itemEntity.getDeltaMovement()
+						.add(
+							(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
+							(double)(this.random.nextFloat() * 0.05F),
+							(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)
+						)
+				);
+			}
 		}
 	}
 
-	public void shear() {
-		if (!this.level.isClientSide) {
-			this.setSheared(true);
-			int i = 1 + this.random.nextInt(3);
-
-			for (int j = 0; j < i; j++) {
-				ItemEntity itemEntity = this.spawnAtLocation((ItemLike)ITEM_BY_DYE.get(this.getColor()), 1);
-				if (itemEntity != null) {
-					itemEntity.setDeltaMovement(
-						itemEntity.getDeltaMovement()
-							.add(
-								(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
-								(double)(this.random.nextFloat() * 0.05F),
-								(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)
-							)
-					);
-				}
-			}
-		}
+	@Override
+	public boolean readyForShearing() {
+		return this.isAlive() && !this.isSheared() && !this.isBaby();
 	}
 
 	@Override

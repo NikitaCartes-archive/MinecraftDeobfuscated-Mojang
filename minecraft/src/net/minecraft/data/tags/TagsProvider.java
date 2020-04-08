@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
@@ -30,7 +31,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	protected final DataGenerator generator;
 	protected final Registry<T> registry;
-	protected final Map<ResourceLocation, Tag.TypedBuilder<T>> builders = Maps.<ResourceLocation, Tag.TypedBuilder<T>>newLinkedHashMap();
+	private final Map<ResourceLocation, Tag.Builder> builders = Maps.<ResourceLocation, Tag.Builder>newLinkedHashMap();
 
 	protected TagsProvider(DataGenerator dataGenerator, Registry<T> registry) {
 		this.generator = dataGenerator;
@@ -48,8 +49,8 @@ public abstract class TagsProvider<T> implements DataProvider {
 		Function<ResourceLocation, T> function2 = resourceLocation -> this.registry.getOptional(resourceLocation).orElse(null);
 		this.builders
 			.forEach(
-				(resourceLocation, typedBuilder) -> {
-					List<Tag.Entry> list = (List<Tag.Entry>)typedBuilder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+				(resourceLocation, builder) -> {
+					List<Tag.BuilderEntry> list = (List<Tag.BuilderEntry>)builder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
 					if (!list.isEmpty()) {
 						throw new IllegalArgumentException(
 							String.format(
@@ -59,7 +60,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 							)
 						);
 					} else {
-						JsonObject jsonObject = typedBuilder.serializeToJson();
+						JsonObject jsonObject = builder.serializeToJson();
 						Path path = this.getPath(resourceLocation);
 
 						try {
@@ -101,11 +102,40 @@ public abstract class TagsProvider<T> implements DataProvider {
 
 	protected abstract Path getPath(ResourceLocation resourceLocation);
 
-	protected Tag.TypedBuilder<T> tag(Tag.Named<T> named) {
-		return this.tag(named.getName());
+	protected TagsProvider.TagAppender<T> tag(Tag.Named<T> named) {
+		Tag.Builder builder = this.getOrCreateRawBuilder(named);
+		return new TagsProvider.TagAppender<>(builder, this.registry, "vanilla");
 	}
 
-	protected Tag.TypedBuilder<T> tag(ResourceLocation resourceLocation) {
-		return (Tag.TypedBuilder<T>)this.builders.computeIfAbsent(resourceLocation, resourceLocationx -> new Tag.TypedBuilder(this.registry::getKey));
+	protected Tag.Builder getOrCreateRawBuilder(Tag.Named<T> named) {
+		return (Tag.Builder)this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
+	}
+
+	public static class TagAppender<T> {
+		private final Tag.Builder builder;
+		private final Registry<T> registry;
+		private final String source;
+
+		private TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
+			this.builder = builder;
+			this.registry = registry;
+			this.source = string;
+		}
+
+		public TagsProvider.TagAppender<T> add(T object) {
+			this.builder.addElement(this.registry.getKey(object), this.source);
+			return this;
+		}
+
+		public TagsProvider.TagAppender<T> addTag(Tag.Named<T> named) {
+			this.builder.addTag(named.getName(), this.source);
+			return this;
+		}
+
+		@SafeVarargs
+		public final TagsProvider.TagAppender<T> add(T... objects) {
+			Stream.of(objects).map(this.registry::getKey).forEach(resourceLocation -> this.builder.addElement(resourceLocation, this.source));
+			return this;
+		}
 	}
 }

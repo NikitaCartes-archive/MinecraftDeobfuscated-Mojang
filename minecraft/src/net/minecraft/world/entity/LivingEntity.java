@@ -474,6 +474,10 @@ public abstract class LivingEntity extends Entity {
 		return !this.isBaby();
 	}
 
+	protected boolean shouldDropLoot() {
+		return !this.isBaby();
+	}
+
 	protected int decreaseAirSupply(int i) {
 		int j = EnchantmentHelper.getRespiration(this);
 		return j > 0 && this.random.nextInt(j + 1) > 0 ? i : i - 1;
@@ -1187,7 +1191,7 @@ public abstract class LivingEntity extends Entity {
 		}
 
 		boolean bl = this.lastHurtByPlayerTime > 0;
-		if (this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (this.shouldDropLoot() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			this.dropFromLootTable(damageSource, bl);
 			this.dropCustomDeathLoot(damageSource, i, bl);
 		}

@@ -35,7 +35,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class CrossbowItem extends ProjectileWeaponItem {
+public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 	private boolean startSoundPlayed = false;
 	private boolean midLoadSoundPlayed = false;
 

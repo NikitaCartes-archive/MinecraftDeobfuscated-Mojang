@@ -3,12 +3,9 @@ package net.minecraft.tags;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -45,30 +42,34 @@ public interface Tag<T> {
 	}
 
 	public static class Builder {
-		private final Set<Tag.Entry> entries = Sets.<Tag.Entry>newLinkedHashSet();
+		private final List<Tag.BuilderEntry> entries = Lists.<Tag.BuilderEntry>newArrayList();
 
 		public static Tag.Builder tag() {
 			return new Tag.Builder();
 		}
 
-		public Tag.Builder add(Tag.Entry entry) {
-			this.entries.add(entry);
+		public Tag.Builder add(Tag.BuilderEntry builderEntry) {
+			this.entries.add(builderEntry);
 			return this;
 		}
 
-		public Tag.Builder addElement(ResourceLocation resourceLocation) {
-			return this.add(new Tag.ElementEntry(resourceLocation));
+		public Tag.Builder add(Tag.Entry entry, String string) {
+			return this.add(new Tag.BuilderEntry(entry, string));
 		}
 
-		public Tag.Builder addTag(ResourceLocation resourceLocation) {
-			return this.add(new Tag.TagEntry(resourceLocation));
+		public Tag.Builder addElement(ResourceLocation resourceLocation, String string) {
+			return this.add(new Tag.ElementEntry(resourceLocation), string);
+		}
+
+		public Tag.Builder addTag(ResourceLocation resourceLocation, String string) {
+			return this.add(new Tag.TagEntry(resourceLocation), string);
 		}
 
 		public <T> Optional<Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
 			ImmutableSet.Builder<T> builder = ImmutableSet.builder();
 
-			for (Tag.Entry entry : this.entries) {
-				if (!entry.build(function, function2, builder::add)) {
+			for (Tag.BuilderEntry builderEntry : this.entries) {
+				if (!builderEntry.getEntry().build(function, function2, builder::add)) {
 					return Optional.empty();
 				}
 			}
@@ -76,25 +77,25 @@ public interface Tag<T> {
 			return Optional.of(Tag.fromSet(builder.build()));
 		}
 
-		public Stream<Tag.Entry> getEntries() {
+		public Stream<Tag.BuilderEntry> getEntries() {
 			return this.entries.stream();
 		}
 
-		public <T> Stream<Tag.Entry> getUnresolvedEntries(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
-			return this.getEntries().filter(entry -> !entry.build(function, function2, object -> {
+		public <T> Stream<Tag.BuilderEntry> getUnresolvedEntries(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
+			return this.getEntries().filter(builderEntry -> !builderEntry.getEntry().build(function, function2, object -> {
 				}));
 		}
 
-		public Tag.Builder addFromJson(JsonObject jsonObject) {
+		public Tag.Builder addFromJson(JsonObject jsonObject, String string) {
 			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "values");
 			List<Tag.Entry> list = Lists.<Tag.Entry>newArrayList();
 
 			for (JsonElement jsonElement : jsonArray) {
-				String string = GsonHelper.convertToString(jsonElement, "value");
-				if (string.startsWith("#")) {
-					list.add(new Tag.TagEntry(new ResourceLocation(string.substring(1))));
+				String string2 = GsonHelper.convertToString(jsonElement, "value");
+				if (string2.startsWith("#")) {
+					list.add(new Tag.TagEntry(new ResourceLocation(string2.substring(1))));
 				} else {
-					list.add(new Tag.ElementEntry(new ResourceLocation(string)));
+					list.add(new Tag.ElementEntry(new ResourceLocation(string2)));
 				}
 			}
 
@@ -102,7 +103,7 @@ public interface Tag<T> {
 				this.entries.clear();
 			}
 
-			this.entries.addAll(list);
+			list.forEach(entry -> this.entries.add(new Tag.BuilderEntry(entry, string)));
 			return this;
 		}
 
@@ -110,13 +111,31 @@ public interface Tag<T> {
 			JsonObject jsonObject = new JsonObject();
 			JsonArray jsonArray = new JsonArray();
 
-			for (Tag.Entry entry : this.entries) {
-				entry.serializeTo(jsonArray);
+			for (Tag.BuilderEntry builderEntry : this.entries) {
+				builderEntry.getEntry().serializeTo(jsonArray);
 			}
 
 			jsonObject.addProperty("replace", false);
 			jsonObject.add("values", jsonArray);
 			return jsonObject;
+		}
+	}
+
+	public static class BuilderEntry {
+		private final Tag.Entry entry;
+		private final String source;
+
+		private BuilderEntry(Tag.Entry entry, String string) {
+			this.entry = entry;
+			this.source = string;
+		}
+
+		public Tag.Entry getEntry() {
+			return this.entry;
+		}
+
+		public String toString() {
+			return this.entry.toString() + " (from " + this.source + ")";
 		}
 	}
 
@@ -183,35 +202,6 @@ public interface Tag<T> {
 
 		public String toString() {
 			return "#" + this.id;
-		}
-	}
-
-	public static class TypedBuilder<T> extends Tag.Builder {
-		private final Function<T, ResourceLocation> elementLookup;
-
-		public TypedBuilder(Function<T, ResourceLocation> function) {
-			this.elementLookup = function;
-		}
-
-		public Tag.TypedBuilder<T> add(T object) {
-			this.addElement((ResourceLocation)this.elementLookup.apply(object));
-			return this;
-		}
-
-		public Tag.TypedBuilder<T> add(Collection<T> collection) {
-			collection.stream().map(this.elementLookup).forEach(this::addElement);
-			return this;
-		}
-
-		@SafeVarargs
-		public final Tag.TypedBuilder<T> add(T... objects) {
-			this.add(Arrays.asList(objects));
-			return this;
-		}
-
-		public Tag.TypedBuilder<T> addTag(Tag.Named<T> named) {
-			this.addTag(named.getName());
-			return this;
 		}
 	}
 }

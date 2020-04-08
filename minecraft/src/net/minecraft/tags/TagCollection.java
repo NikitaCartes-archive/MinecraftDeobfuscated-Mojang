@@ -61,6 +61,11 @@ public class TagCollection<T> {
 		return (Tag<T>)this.tags.getOrDefault(resourceLocation, this.empty);
 	}
 
+	@Environment(EnvType.CLIENT)
+	public Tag<T> getEmptyTag() {
+		return this.empty;
+	}
+
 	@Nullable
 	public ResourceLocation getId(Tag<T> tag) {
 		return tag instanceof Tag.Named ? ((Tag.Named)tag).getName() : (ResourceLocation)this.tags.inverse().get(tag);
@@ -124,7 +129,7 @@ public class TagCollection<T> {
 												resource.getSourceName()
 											);
 										} else {
-											((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject);
+											((Tag.Builder)map.computeIfAbsent(resourceLocation2, resourceLocationx -> Tag.Builder.tag())).addFromJson(jsonObject, resource.getSourceName());
 										}
 									} catch (Throwable var53) {
 										var12 = var53;

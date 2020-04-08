@@ -87,6 +87,7 @@ public class ModelTemplates {
 	public static final ModelTemplate FIRE_SIDE_ALT = create("template_fire_side_alt", TextureSlot.FIRE);
 	public static final ModelTemplate FIRE_UP = create("template_fire_up", TextureSlot.FIRE);
 	public static final ModelTemplate FIRE_UP_ALT = create("template_fire_up_alt", TextureSlot.FIRE);
+	public static final ModelTemplate CAMPFIRE = create("template_campfire", TextureSlot.FIRE, TextureSlot.LIT_LOG);
 	public static final ModelTemplate LANTERN = create("template_lantern", TextureSlot.LANTERN);
 	public static final ModelTemplate HANGING_LANTERN = create("template_hanging_lantern", "_hanging", TextureSlot.LANTERN);
 	public static final ModelTemplate TORCH = create("template_torch", TextureSlot.TORCH);

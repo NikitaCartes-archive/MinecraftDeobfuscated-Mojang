@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
@@ -238,8 +239,8 @@ public enum Direction implements StringRepresentable {
 		return (float)((this.data2d & 3) * 90);
 	}
 
-	public static Direction getRandomFace(Random random) {
-		return VALUES[random.nextInt(VALUES.length)];
+	public static Direction getRandom(Random random) {
+		return Util.getRandom(VALUES, random);
 	}
 
 	public static Direction getNearest(double d, double e, double f) {
@@ -349,8 +350,8 @@ public enum Direction implements StringRepresentable {
 			return this.name;
 		}
 
-		public static Direction.Axis getRandomAxis(Random random) {
-			return VALUES[random.nextInt(VALUES.length)];
+		public static Direction.Axis getRandom(Random random) {
+			return Util.getRandom(VALUES, random);
 		}
 
 		public boolean test(@Nullable Direction direction) {
@@ -417,7 +418,7 @@ public enum Direction implements StringRepresentable {
 		}
 
 		public Direction getRandomDirection(Random random) {
-			return this.faces[random.nextInt(this.faces.length)];
+			return Util.getRandom(this.faces, random);
 		}
 
 		public boolean test(@Nullable Direction direction) {

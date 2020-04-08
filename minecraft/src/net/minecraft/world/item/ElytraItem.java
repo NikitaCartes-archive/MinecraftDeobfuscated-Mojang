@@ -9,7 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
-public class ElytraItem extends Item {
+public class ElytraItem extends Item implements Wearable {
 	public ElytraItem(Item.Properties properties) {
 		super(properties);
 		this.addProperty(new ResourceLocation("broken"), (itemStack, level, livingEntity) -> isFlyEnabled(itemStack) ? 0.0F : 1.0F);
