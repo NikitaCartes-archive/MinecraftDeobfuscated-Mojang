@@ -22,9 +22,11 @@ public class Activity {
     public static final Activity AVOID = Activity.register("avoid");
     public static final Activity RIDE = Activity.register("ride");
     private final String name;
+    private final int hashCode;
 
     private Activity(String string) {
         this.name = string;
+        this.hashCode = string.hashCode();
     }
 
     public String getName() {
@@ -33,6 +35,21 @@ public class Activity {
 
     private static Activity register(String string) {
         return Registry.register(Registry.ACTIVITY, string, new Activity(string));
+    }
+
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        Activity activity = (Activity)object;
+        return this.name.equals(activity.name);
+    }
+
+    public int hashCode() {
+        return this.hashCode;
     }
 
     public String toString() {

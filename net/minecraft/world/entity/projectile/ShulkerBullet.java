@@ -153,10 +153,10 @@ extends Projectile {
                     list.add(Direction.NORTH);
                 }
             }
-            direction = Direction.getRandomFace(this.random);
+            direction = Direction.getRandom(this.random);
             if (list.isEmpty()) {
                 for (int i = 5; !this.level.isEmptyBlock(blockPos2.relative(direction)) && i > 0; --i) {
-                    direction = Direction.getRandomFace(this.random);
+                    direction = Direction.getRandom(this.random);
                 }
             } else {
                 direction = (Direction)list.get(this.random.nextInt(list.size()));

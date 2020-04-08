@@ -31,12 +31,11 @@ public class TexturedModel {
     public static final Provider LEAVES = TexturedModel.createDefault(TextureMapping::cube, ModelTemplates.LEAVES);
     public static final Provider LANTERN = TexturedModel.createDefault(TextureMapping::lantern, ModelTemplates.LANTERN);
     public static final Provider HANGING_LANTERN = TexturedModel.createDefault(TextureMapping::lantern, ModelTemplates.HANGING_LANTERN);
-    public static final Provider TORCH = TexturedModel.createDefault(TextureMapping::torch, ModelTemplates.TORCH);
-    public static final Provider WALL_TORCH = TexturedModel.createDefault(TextureMapping::torch, ModelTemplates.WALL_TORCH);
     public static final Provider SEAGRASS = TexturedModel.createDefault(TextureMapping::defaultTexture, ModelTemplates.SEAGRASS);
     public static final Provider COLUMN_ALT = TexturedModel.createDefault(TextureMapping::logColumn, ModelTemplates.CUBE_COLUMN);
     public static final Provider COLUMN_HORIZONTAL_ALT = TexturedModel.createDefault(TextureMapping::logColumn, ModelTemplates.CUBE_COLUMN_HORIZONTAL);
     public static final Provider TOP_BOTTOM_WITH_WALL = TexturedModel.createDefault(TextureMapping::cubeBottomTopWithWall, ModelTemplates.CUBE_BOTTOM_TOP);
+    public static final Provider COLUMN_WITH_WALL = TexturedModel.createDefault(TextureMapping::columnWithWall, ModelTemplates.CUBE_TOP);
     private final TextureMapping mapping;
     private final ModelTemplate template;
 

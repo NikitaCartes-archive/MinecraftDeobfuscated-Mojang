@@ -125,6 +125,11 @@ implements Enemy {
         return true;
     }
 
+    @Override
+    protected boolean shouldDropLoot() {
+        return true;
+    }
+
     public boolean isPreventingPlayerRest(Player player) {
         return true;
     }

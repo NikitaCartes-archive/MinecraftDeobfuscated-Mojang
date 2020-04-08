@@ -3,6 +3,8 @@
  */
 package net.minecraft.tags;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -83,6 +85,8 @@ public class BlockTags {
     public static final Tag.Named<Block> HOGLIN_REPELLENTS = BlockTags.bind("hoglin_repellents");
     public static final Tag.Named<Block> SOUL_FIRE_BASE_BLOCKS = BlockTags.bind("soul_fire_base_blocks");
     public static final Tag.Named<Block> STRIDER_WARM_BLOCKS = BlockTags.bind("strider_warm_blocks");
+    public static final Tag.Named<Block> CAMPFIRES = BlockTags.bind("campfires");
+    public static final Tag.Named<Block> GUARDED_BY_PIGLINS = BlockTags.bind("guarded_by_piglins");
 
     private static Tag.Named<Block> bind(String string) {
         return HELPER.bind(string);
@@ -90,6 +94,11 @@ public class BlockTags {
 
     public static void reset(TagCollection<Block> tagCollection) {
         HELPER.reset(tagCollection);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static void resetToEmpty() {
+        HELPER.resetToEmpty();
     }
 
     public static TagCollection<Block> getAllTags() {

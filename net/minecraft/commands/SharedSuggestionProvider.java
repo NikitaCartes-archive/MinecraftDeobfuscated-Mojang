@@ -51,11 +51,11 @@ public interface SharedSuggestionProvider {
             ResourceLocation resourceLocation = function.apply(object);
             if (bl) {
                 String string2 = resourceLocation.toString();
-                if (!string2.startsWith(string)) continue;
+                if (!SharedSuggestionProvider.matches(string, string2)) continue;
                 consumer.accept(object);
                 continue;
             }
-            if (!resourceLocation.getNamespace().startsWith(string) && (!resourceLocation.getNamespace().equals("minecraft") || !resourceLocation.getPath().startsWith(string))) continue;
+            if (!SharedSuggestionProvider.matches(string, resourceLocation.getNamespace()) && (!resourceLocation.getNamespace().equals("minecraft") || !SharedSuggestionProvider.matches(string, resourceLocation.getPath()))) continue;
             consumer.accept(object);
         }
     }
@@ -163,7 +163,7 @@ public interface SharedSuggestionProvider {
     public static CompletableFuture<Suggestions> suggest(Iterable<String> iterable, SuggestionsBuilder suggestionsBuilder) {
         String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
         for (String string2 : iterable) {
-            if (!string2.toLowerCase(Locale.ROOT).startsWith(string)) continue;
+            if (!SharedSuggestionProvider.matches(string, string2.toLowerCase(Locale.ROOT))) continue;
             suggestionsBuilder.suggest(string2);
         }
         return suggestionsBuilder.buildFuture();
@@ -171,17 +171,28 @@ public interface SharedSuggestionProvider {
 
     public static CompletableFuture<Suggestions> suggest(Stream<String> stream, SuggestionsBuilder suggestionsBuilder) {
         String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-        stream.filter(string2 -> string2.toLowerCase(Locale.ROOT).startsWith(string)).forEach(suggestionsBuilder::suggest);
+        stream.filter(string2 -> SharedSuggestionProvider.matches(string, string2.toLowerCase(Locale.ROOT))).forEach(suggestionsBuilder::suggest);
         return suggestionsBuilder.buildFuture();
     }
 
     public static CompletableFuture<Suggestions> suggest(String[] strings, SuggestionsBuilder suggestionsBuilder) {
         String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
         for (String string2 : strings) {
-            if (!string2.toLowerCase(Locale.ROOT).startsWith(string)) continue;
+            if (!SharedSuggestionProvider.matches(string, string2.toLowerCase(Locale.ROOT))) continue;
             suggestionsBuilder.suggest(string2);
         }
         return suggestionsBuilder.buildFuture();
+    }
+
+    public static boolean matches(String string, String string2) {
+        int i = 0;
+        while (!string2.startsWith(string, i)) {
+            if ((i = string2.indexOf(95, i)) < 0) {
+                return false;
+            }
+            ++i;
+        }
+        return true;
     }
 
     public static class TextCoordinates {

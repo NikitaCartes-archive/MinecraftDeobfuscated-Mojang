@@ -19,12 +19,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 public class BowItem
-extends ProjectileWeaponItem {
+extends ProjectileWeaponItem
+implements Vanishable {
     public BowItem(Item.Properties properties) {
         super(properties);
         this.addProperty(new ResourceLocation("pull"), (itemStack, level, livingEntity) -> {

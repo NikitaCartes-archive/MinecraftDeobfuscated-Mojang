@@ -55,8 +55,7 @@ extends Feature<NoneFeatureConfiguration> {
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         int m;
         Random random2 = levelAccessor.getRandom();
-        Rotation[] rotations = Rotation.values();
-        Rotation rotation = rotations[random2.nextInt(rotations.length)];
+        Rotation rotation = Rotation.getRandom(random2);
         int i = random2.nextInt(fossils.length);
         StructureManager structureManager = ((ServerLevel)levelAccessor.getLevel()).getLevelStorage().getStructureManager();
         StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);

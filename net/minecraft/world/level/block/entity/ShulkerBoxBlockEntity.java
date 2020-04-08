@@ -281,6 +281,10 @@ TickableBlockEntity {
         return new ShulkerBoxMenu(i, inventory, this);
     }
 
+    public boolean isClosed() {
+        return this.animationStatus == AnimationStatus.CLOSED;
+    }
+
     public static enum AnimationStatus {
         CLOSED,
         OPENING,

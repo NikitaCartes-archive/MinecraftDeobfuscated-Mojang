@@ -4,12 +4,16 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,7 +48,7 @@ import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class StructureTemplate {
-    private final List<List<StructureBlockInfo>> palettes = Lists.newArrayList();
+    private final List<Palette> palettes = Lists.newArrayList();
     private final List<StructureEntityInfo> entityInfoList = Lists.newArrayList();
     private BlockPos size = BlockPos.ZERO;
     private String author = "?";
@@ -96,7 +100,7 @@ public class StructureTemplate {
         list4.addAll(list2);
         list4.addAll(list3);
         this.palettes.clear();
-        this.palettes.add(list4);
+        this.palettes.add(new Palette(list4));
         if (bl) {
             this.fillEntityList(level, blockPos4, blockPos5.offset(1, 1, 1));
         } else {
@@ -123,12 +127,14 @@ public class StructureTemplate {
     public List<StructureBlockInfo> filterBlocks(BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block, boolean bl) {
         ArrayList<StructureBlockInfo> list = Lists.newArrayList();
         BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
-        for (StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos)) {
-            BlockState blockState;
+        if (this.palettes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        for (StructureBlockInfo structureBlockInfo : structurePlaceSettings.getRandomPalette(this.palettes, blockPos).blocks(block)) {
             BlockPos blockPos2;
             BlockPos blockPos3 = blockPos2 = bl ? StructureTemplate.calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos) : structureBlockInfo.pos;
-            if (boundingBox != null && !boundingBox.isInside(blockPos2) || (blockState = structureBlockInfo.state).getBlock() != block) continue;
-            list.add(new StructureBlockInfo(blockPos2, blockState.rotate(structurePlaceSettings.getRotation()), structureBlockInfo.nbt));
+            if (boundingBox != null && !boundingBox.isInside(blockPos2)) continue;
+            list.add(new StructureBlockInfo(blockPos2, structureBlockInfo.state.rotate(structurePlaceSettings.getRotation()), structureBlockInfo.nbt));
         }
         return list;
     }
@@ -156,7 +162,7 @@ public class StructureTemplate {
         if (this.palettes.isEmpty()) {
             return false;
         }
-        List<StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos);
+        List<StructureBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos).blocks();
         if (list.isEmpty() && (structurePlaceSettings.isIgnoreEntities() || this.entityInfoList.isEmpty()) || this.size.getX() < 1 || this.size.getY() < 1 || this.size.getZ() < 1) {
             return false;
         }
@@ -489,7 +495,7 @@ public class StructureTemplate {
                 list.add(new SimplePalette());
             }
             ListTag listTag = new ListTag();
-            List<StructureBlockInfo> list2 = this.palettes.get(0);
+            List<StructureBlockInfo> list2 = this.palettes.get(0).blocks();
             for (int j = 0; j < list2.size(); ++j) {
                 StructureBlockInfo structureBlockInfo = list2.get(j);
                 CompoundTag compoundTag2 = new CompoundTag();
@@ -502,7 +508,7 @@ public class StructureTemplate {
                 listTag.add(compoundTag2);
                 for (int l = 1; l < this.palettes.size(); ++l) {
                     SimplePalette simplePalette2 = (SimplePalette)list.get(l);
-                    simplePalette2.addMapping(this.palettes.get((int)l).get((int)j).state, k);
+                    simplePalette2.addMapping(this.palettes.get((int)l).blocks().get((int)j).state, k);
                 }
             }
             compoundTag.put("blocks", listTag);
@@ -585,7 +591,7 @@ public class StructureTemplate {
             list.add(new StructureBlockInfo(blockPos, blockState, compoundTag2));
         }
         list.sort(Comparator.comparingInt(structureBlockInfo -> structureBlockInfo.pos.getY()));
-        this.palettes.add(list);
+        this.palettes.add(new Palette(list));
     }
 
     private ListTag newIntegerList(int ... is) {
@@ -602,6 +608,23 @@ public class StructureTemplate {
             listTag.add(DoubleTag.valueOf(d));
         }
         return listTag;
+    }
+
+    public static final class Palette {
+        private final List<StructureBlockInfo> blocks;
+        private final Map<Block, List<StructureBlockInfo>> cache = Maps.newHashMap();
+
+        private Palette(List<StructureBlockInfo> list) {
+            this.blocks = list;
+        }
+
+        public List<StructureBlockInfo> blocks() {
+            return this.blocks;
+        }
+
+        public List<StructureBlockInfo> blocks(Block block2) {
+            return this.cache.computeIfAbsent(block2, block -> this.blocks.stream().filter(structureBlockInfo -> structureBlockInfo.state.getBlock() == block).collect(Collectors.toList()));
+        }
     }
 
     public static class StructureEntityInfo {

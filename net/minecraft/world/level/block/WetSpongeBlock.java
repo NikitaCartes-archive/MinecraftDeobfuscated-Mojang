@@ -35,7 +35,7 @@ extends Block {
     @Override
     @Environment(value=EnvType.CLIENT)
     public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-        Direction direction = Direction.getRandomFace(random);
+        Direction direction = Direction.getRandom(random);
         if (direction == Direction.UP) {
             return;
         }

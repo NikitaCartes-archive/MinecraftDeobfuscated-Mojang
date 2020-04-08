@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
@@ -102,7 +103,7 @@ extends WritableRegistry<T> {
             }
             this.randomCache = collection.toArray(new Object[collection.size()]);
         }
-        return (T)this.randomCache[random.nextInt(this.randomCache.length)];
+        return (T)Util.getRandom(this.randomCache, random);
     }
 
     @Override

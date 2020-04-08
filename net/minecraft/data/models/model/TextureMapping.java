@@ -149,6 +149,11 @@ public class TextureMapping {
         return new TextureMapping().put(TextureSlot.WALL, resourceLocation).put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top")).put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(block, "_bottom"));
     }
 
+    public static TextureMapping columnWithWall(Block block) {
+        ResourceLocation resourceLocation = TextureMapping.getBlockTexture(block);
+        return new TextureMapping().put(TextureSlot.WALL, resourceLocation).put(TextureSlot.SIDE, resourceLocation).put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top"));
+    }
+
     public static TextureMapping door(Block block) {
         return new TextureMapping().put(TextureSlot.TOP, TextureMapping.getBlockTexture(block, "_top")).put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(block, "_bottom"));
     }
@@ -211,6 +216,10 @@ public class TextureMapping {
 
     public static TextureMapping fletchingTable(Block block, Block block2) {
         return new TextureMapping().put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(block, "_front")).put(TextureSlot.DOWN, TextureMapping.getBlockTexture(block2)).put(TextureSlot.UP, TextureMapping.getBlockTexture(block, "_top")).put(TextureSlot.NORTH, TextureMapping.getBlockTexture(block, "_front")).put(TextureSlot.SOUTH, TextureMapping.getBlockTexture(block, "_front")).put(TextureSlot.EAST, TextureMapping.getBlockTexture(block, "_side")).put(TextureSlot.WEST, TextureMapping.getBlockTexture(block, "_side"));
+    }
+
+    public static TextureMapping campfire(Block block) {
+        return new TextureMapping().put(TextureSlot.LIT_LOG, TextureMapping.getBlockTexture(block, "_log_lit")).put(TextureSlot.FIRE, TextureMapping.getBlockTexture(block, "_fire"));
     }
 
     public static TextureMapping layer0(Item item) {

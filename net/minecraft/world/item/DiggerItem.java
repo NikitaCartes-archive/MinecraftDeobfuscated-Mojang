@@ -16,12 +16,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DiggerItem
-extends TieredItem {
+extends TieredItem
+implements Vanishable {
     private final Set<Block> blocks;
     protected final float speed;
     private final float attackDamageBaseline;

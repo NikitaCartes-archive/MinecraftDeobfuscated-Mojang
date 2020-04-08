@@ -18,7 +18,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 @Environment(value=EnvType.CLIENT)
 public class AccessibilityOptionsScreen
 extends OptionsSubScreen {
-    private static final Option[] OPTIONS = new Option[]{Option.NARRATOR, Option.SHOW_SUBTITLES, Option.TEXT_BACKGROUND_OPACITY, Option.TEXT_BACKGROUND, Option.CHAT_OPACITY, Option.AUTO_JUMP, Option.TOGGLE_CROUCH, Option.TOGGLE_SPRINT};
+    private static final Option[] OPTIONS = new Option[]{Option.NARRATOR, Option.SHOW_SUBTITLES, Option.TEXT_BACKGROUND_OPACITY, Option.TEXT_BACKGROUND, Option.CHAT_OPACITY, Option.CHAT_LINE_SPACING, Option.CHAT_DELAY, Option.AUTO_JUMP, Option.TOGGLE_CROUCH, Option.TOGGLE_SPRINT};
     private AbstractWidget narratorButton;
 
     public AccessibilityOptionsScreen(Screen screen, Options options) {

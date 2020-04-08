@@ -177,6 +177,7 @@ public class AttributeInstance {
                 if (attributeModifier == null) continue;
                 this.modifierById.put(attributeModifier.getId(), attributeModifier);
                 this.getModifiers(attributeModifier.getOperation()).add(attributeModifier);
+                this.permanentModifiers.add(attributeModifier);
             }
         }
         this.setDirty();

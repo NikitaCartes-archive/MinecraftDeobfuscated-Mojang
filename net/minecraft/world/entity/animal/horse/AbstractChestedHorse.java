@@ -116,7 +116,7 @@ extends AbstractHorse {
                 this.inventory.setItem(j, ItemStack.of(compoundTag2));
             }
         }
-        this.updateEquipment();
+        this.updateContainerEquipment();
     }
 
     @Override

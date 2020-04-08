@@ -46,10 +46,10 @@ extends AbstractContainerScreen<HorseInventoryMenu> {
         if (this.horse instanceof AbstractChestedHorse && (abstractChestedHorse = (AbstractChestedHorse)this.horse).hasChest()) {
             this.blit(k + 79, l + 17, 0, this.imageHeight, abstractChestedHorse.getInventoryColumns() * 18, 54);
         }
-        if (this.horse.canBeSaddled()) {
+        if (this.horse.isSaddleable()) {
             this.blit(k + 7, l + 35 - 18, 18, this.imageHeight + 54, 18, 18);
         }
-        if (this.horse.wearsArmor()) {
+        if (this.horse.canWearArmor()) {
             if (this.horse instanceof Llama) {
                 this.blit(k + 7, l + 35, 36, this.imageHeight + 54, 18, 18);
             } else {

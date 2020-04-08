@@ -378,11 +378,5 @@ implements SimpleWaterloggedBlock {
     public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
         return false;
     }
-
-    @Override
-    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        super.playerWillDestroy(level, blockPos, blockState, player);
-        PiglinAi.angerNearbyPiglinsThatSee(player);
-    }
 }
 

@@ -17,11 +17,8 @@ extends Enchantment {
     public final Type type;
 
     public ProtectionEnchantment(Enchantment.Rarity rarity, Type type, EquipmentSlot ... equipmentSlots) {
-        super(rarity, EnchantmentCategory.ARMOR, equipmentSlots);
+        super(rarity, type == Type.FALL ? EnchantmentCategory.ARMOR_FEET : EnchantmentCategory.ARMOR, equipmentSlots);
         this.type = type;
-        if (type == Type.FALL) {
-            this.category = EnchantmentCategory.ARMOR_FEET;
-        }
     }
 
     @Override

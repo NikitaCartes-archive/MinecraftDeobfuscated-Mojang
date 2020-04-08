@@ -13,11 +13,13 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class ElytraItem
-extends Item {
+extends Item
+implements Wearable {
     public ElytraItem(Item.Properties properties) {
         super(properties);
         this.addProperty(new ResourceLocation("broken"), (itemStack, level, livingEntity) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0f : 1.0f);

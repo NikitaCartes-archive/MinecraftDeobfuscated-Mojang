@@ -200,6 +200,7 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -1859,7 +1860,22 @@ WindowEventHandler {
         }
         if (this.player != null) {
             if (this.player.level.dimension instanceof NetherDimension) {
-                return MusicManager.Music.NETHER;
+                Biome biome = this.player.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.getX(), this.player.getY(), this.player.getZ());
+                if (biome == Biomes.BASALT_DELTAS) {
+                    return MusicManager.Music.BASALT_DELTAS;
+                }
+                if (biome == Biomes.NETHER_WASTES) {
+                    return MusicManager.Music.NETHER_WASTES;
+                }
+                if (biome == Biomes.SOUL_SAND_VALLEY) {
+                    return MusicManager.Music.SOUL_SAND_VALLEY;
+                }
+                if (biome == Biomes.CRIMSON_FOREST) {
+                    return MusicManager.Music.CRIMSON_FOREST;
+                }
+                if (biome == Biomes.WARPED_FOREST) {
+                    return MusicManager.Music.WARPED_FOREST;
+                }
             }
             if (this.player.level.dimension instanceof TheEndDimension) {
                 if (this.gui.getBossOverlay().shouldPlayMusic()) {

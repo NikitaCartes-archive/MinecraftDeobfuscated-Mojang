@@ -157,7 +157,7 @@ extends Monster {
             }
             Random random = this.mob.getRandom();
             if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(10) == 0) {
-                this.selectedDirection = Direction.getRandomFace(random);
+                this.selectedDirection = Direction.getRandom(random);
                 BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
                 BlockState blockState = this.mob.level.getBlockState(blockPos);
                 if (InfestedBlock.isCompatibleHostBlock(blockState)) {

@@ -6,12 +6,12 @@ package net.minecraft.world.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -27,7 +27,7 @@ extends Item {
         BlockPos blockPos = useOnContext.getClickedPos();
         BlockState blockState = level.getBlockState(blockPos);
         boolean bl = false;
-        if (blockState.getBlock() == Blocks.CAMPFIRE) {
+        if (blockState.getBlock().is(BlockTags.CAMPFIRES)) {
             if (!blockState.getValue(CampfireBlock.LIT).booleanValue() && !blockState.getValue(CampfireBlock.WATERLOGGED).booleanValue()) {
                 this.playSound(level, blockPos);
                 level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));

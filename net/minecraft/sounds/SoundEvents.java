@@ -9,6 +9,9 @@ import net.minecraft.sounds.SoundEvent;
 
 public class SoundEvents {
     public static final SoundEvent AMBIENT_CAVE = SoundEvents.register("ambient.cave");
+    public static final SoundEvent AMBIENT_BASALT_DELTAS_ADDITIONS = SoundEvents.register("ambient.basalt_deltas.additions");
+    public static final SoundEvent AMBIENT_BASALT_DELTAS_LOOP = SoundEvents.register("ambient.basalt_deltas.loop");
+    public static final SoundEvent AMBIENT_BASALT_DELTAS_MOOD = SoundEvents.register("ambient.basalt_deltas.mood");
     public static final SoundEvent AMBIENT_CRIMSON_FOREST_ADDITIONS = SoundEvents.register("ambient.crimson_forest.additions");
     public static final SoundEvent AMBIENT_CRIMSON_FOREST_LOOP = SoundEvents.register("ambient.crimson_forest.loop");
     public static final SoundEvent AMBIENT_CRIMSON_FOREST_MOOD = SoundEvents.register("ambient.crimson_forest.mood");
@@ -472,7 +475,11 @@ public class SoundEvents {
     public static final SoundEvent MUSIC_END = SoundEvents.register("music.end");
     public static final SoundEvent MUSIC_GAME = SoundEvents.register("music.game");
     public static final SoundEvent MUSIC_MENU = SoundEvents.register("music.menu");
-    public static final SoundEvent MUSIC_NETHER = SoundEvents.register("music.nether");
+    public static final SoundEvent MUSIC_BIOME_BASALT_DELTAS = SoundEvents.register("music.nether.basalt_deltas");
+    public static final SoundEvent MUSIC_BIOME_NETHER_WASTES = SoundEvents.register("music.nether.nether_wastes");
+    public static final SoundEvent MUSIC_BIOME_SOUL_SAND_VALLEY = SoundEvents.register("music.nether.soul_sand_valley");
+    public static final SoundEvent MUSIC_BIOME_CRIMSON_FOREST = SoundEvents.register("music.nether.crimson_forest");
+    public static final SoundEvent MUSIC_BIOME_WARPED_FOREST = SoundEvents.register("music.nether.warped_forest");
     public static final SoundEvent MUSIC_UNDER_WATER = SoundEvents.register("music.under_water");
     public static final SoundEvent NETHER_BRICKS_BREAK = SoundEvents.register("block.nether_bricks.break");
     public static final SoundEvent NETHER_BRICKS_STEP = SoundEvents.register("block.nether_bricks.step");
@@ -759,6 +766,7 @@ public class SoundEvents {
     public static final SoundEvent STRIDER_STEP = SoundEvents.register("entity.strider.step");
     public static final SoundEvent STRIDER_STEP_LAVA = SoundEvents.register("entity.strider.step_lava");
     public static final SoundEvent STRIDER_EAT = SoundEvents.register("entity.strider.eat");
+    public static final SoundEvent STRIDER_SADDLE = SoundEvents.register("entity.strider.saddle");
     public static final SoundEvent SLIME_DEATH_SMALL = SoundEvents.register("entity.slime.death_small");
     public static final SoundEvent SLIME_HURT_SMALL = SoundEvents.register("entity.slime.hurt_small");
     public static final SoundEvent SLIME_JUMP_SMALL = SoundEvents.register("entity.slime.jump_small");

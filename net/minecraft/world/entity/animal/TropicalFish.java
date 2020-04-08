@@ -6,6 +6,7 @@ package net.minecraft.world.entity.animal;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -195,7 +196,7 @@ extends AbstractSchoolingFish {
             k = tropicalFishGroupData.baseColor;
             l = tropicalFishGroupData.patternColor;
         } else if ((double)this.random.nextFloat() < 0.9) {
-            int m = COMMON_VARIANTS[this.random.nextInt(COMMON_VARIANTS.length)];
+            int m = Util.getRandom(COMMON_VARIANTS, this.random);
             i = m & 0xFF;
             j = (m & 0xFF00) >> 8;
             k = (m & 0xFF0000) >> 16;

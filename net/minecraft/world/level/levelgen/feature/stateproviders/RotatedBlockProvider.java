@@ -31,7 +31,7 @@ extends BlockStateProvider {
 
     @Override
     public BlockState getState(Random random, BlockPos blockPos) {
-        Direction.Axis axis = Direction.Axis.getRandomAxis(random);
+        Direction.Axis axis = Direction.Axis.getRandom(random);
         return (BlockState)this.block.defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
     }
 

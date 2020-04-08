@@ -88,7 +88,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
         @Override
         public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
-            Rotation rotation = Rotation.values()[this.random.nextInt(Rotation.values().length)];
+            Rotation rotation = Rotation.getRandom(this.random);
             int k = 5;
             int l = 5;
             if (rotation == Rotation.CLOCKWISE_90) {

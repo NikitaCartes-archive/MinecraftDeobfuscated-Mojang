@@ -71,6 +71,7 @@ public class Options {
     public List<String> incompatibleResourcePacks = Lists.newArrayList();
     public ChatVisiblity chatVisibility = ChatVisiblity.FULL;
     public double chatOpacity = 1.0;
+    public double chatLineSpacing = 0.0;
     public double textBackgroundOpacity = 0.5;
     @Nullable
     public String fullscreenVideoModeString;
@@ -86,6 +87,7 @@ public class Options {
     public double chatWidth = 1.0;
     public double chatHeightUnfocused = 0.44366195797920227;
     public double chatHeightFocused = 1.0;
+    public double chatDelay = 0.0;
     public int mipmapLevels = 4;
     private final Map<SoundSource, Float> sourceVolumes = Maps.newEnumMap(SoundSource.class);
     public boolean useNativeTransport = true;
@@ -355,6 +357,9 @@ public class Options {
                     if ("chatOpacity".equals(string2)) {
                         this.chatOpacity = Options.readFloat(string22);
                     }
+                    if ("chatLineSpacing".equals(string2)) {
+                        this.chatLineSpacing = Options.readFloat(string22);
+                    }
                     if ("textBackgroundOpacity".equals(string2)) {
                         this.textBackgroundOpacity = Options.readFloat(string22);
                     }
@@ -384,6 +389,9 @@ public class Options {
                     }
                     if ("chatHeightFocused".equals(string2)) {
                         this.chatHeightFocused = Options.readFloat(string22);
+                    }
+                    if ("chatDelay".equals(string2)) {
+                        this.chatDelay = Options.readFloat(string22);
                     }
                     if ("chatHeightUnfocused".equals(string2)) {
                         this.chatHeightUnfocused = Options.readFloat(string22);
@@ -515,6 +523,7 @@ public class Options {
             printWriter.println("lang:" + this.languageCode);
             printWriter.println("chatVisibility:" + this.chatVisibility.getId());
             printWriter.println("chatOpacity:" + this.chatOpacity);
+            printWriter.println("chatLineSpacing:" + this.chatLineSpacing);
             printWriter.println("textBackgroundOpacity:" + this.textBackgroundOpacity);
             printWriter.println("backgroundForChatOnly:" + this.backgroundForChatOnly);
             if (this.minecraft.getWindow().getPreferredFullscreenVideoMode().isPresent()) {
@@ -527,6 +536,7 @@ public class Options {
             printWriter.println("overrideHeight:" + this.overrideHeight);
             printWriter.println("heldItemTooltips:" + this.heldItemTooltips);
             printWriter.println("chatHeightFocused:" + this.chatHeightFocused);
+            printWriter.println("chatDelay: " + this.chatDelay);
             printWriter.println("chatHeightUnfocused:" + this.chatHeightUnfocused);
             printWriter.println("chatScale:" + this.chatScale);
             printWriter.println("chatWidth:" + this.chatWidth);

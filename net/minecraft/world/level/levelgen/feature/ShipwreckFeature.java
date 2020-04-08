@@ -64,7 +64,7 @@ extends RandomScatteredFeature<ShipwreckConfiguration> {
         @Override
         public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             ShipwreckConfiguration shipwreckConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.SHIPWRECK);
-            Rotation rotation = Rotation.values()[this.random.nextInt(Rotation.values().length)];
+            Rotation rotation = Rotation.getRandom(this.random);
             BlockPos blockPos = new BlockPos(i * 16, 90, j * 16);
             ShipwreckPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, shipwreckConfiguration);
             this.calculateBoundingBox();

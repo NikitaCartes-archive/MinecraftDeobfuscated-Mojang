@@ -5,6 +5,7 @@ package net.minecraft.world.level.pathfinder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
@@ -192,10 +193,11 @@ extends WalkNodeEvaluator {
 
     @Override
     public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-        BlockPathTypes blockPathTypes = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j, k);
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        BlockPathTypes blockPathTypes = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
         if (blockPathTypes == BlockPathTypes.WATER) {
             for (Direction direction : Direction.values()) {
-                BlockPathTypes blockPathTypes2 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i + direction.getStepX(), j + direction.getStepY(), k + direction.getStepZ());
+                BlockPathTypes blockPathTypes2 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k).move(direction));
                 if (blockPathTypes2 != BlockPathTypes.BLOCKED) continue;
                 return BlockPathTypes.WATER_BORDER;
             }
@@ -203,9 +205,9 @@ extends WalkNodeEvaluator {
         }
         if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
             Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-            BlockPathTypes blockPathTypes3 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, i, j - 1, k);
+            BlockPathTypes blockPathTypes3 = TurtleNodeEvaluator.getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
             blockPathTypes = blockPathTypes3 == BlockPathTypes.WALKABLE || blockPathTypes3 == BlockPathTypes.OPEN || blockPathTypes3 == BlockPathTypes.LAVA ? BlockPathTypes.OPEN : BlockPathTypes.WALKABLE;
-            if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || block == Blocks.CAMPFIRE) {
+            if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || block.is(BlockTags.CAMPFIRES)) {
                 blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
             }
             if (blockPathTypes3 == BlockPathTypes.DAMAGE_CACTUS) {
@@ -216,7 +218,7 @@ extends WalkNodeEvaluator {
             }
         }
         if (blockPathTypes == BlockPathTypes.WALKABLE) {
-            blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+            blockPathTypes = TurtleNodeEvaluator.checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
         }
         return blockPathTypes;
     }

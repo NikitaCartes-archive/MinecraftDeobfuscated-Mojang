@@ -148,7 +148,7 @@ extends Block {
         if (serverLevel.random.nextInt(4) != 0) {
             return;
         }
-        Direction direction = Direction.getRandomFace(random);
+        Direction direction = Direction.getRandom(random);
         BlockPos blockPos2 = blockPos.above();
         if (direction.getAxis().isHorizontal() && !blockState.getValue(VineBlock.getPropertyForFace(direction)).booleanValue()) {
             if (!this.canSpread(serverLevel, blockPos)) {

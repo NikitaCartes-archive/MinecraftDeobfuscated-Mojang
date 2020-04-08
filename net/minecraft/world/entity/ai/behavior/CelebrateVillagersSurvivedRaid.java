@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -57,7 +58,7 @@ extends Behavior<Villager> {
             villager.playCelebrateSound();
         }
         if (random.nextInt(200) == 0 && MoveToSkySeeingSpot.hasNoBlocksAbove(serverLevel, villager, villager.blockPosition())) {
-            DyeColor dyeColor = DyeColor.values()[random.nextInt(DyeColor.values().length)];
+            DyeColor dyeColor = Util.getRandom(DyeColor.values(), random);
             int i = random.nextInt(3);
             ItemStack itemStack = this.getFirework(dyeColor, i);
             FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(villager.level, villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack);

@@ -25,6 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemPropertyFunction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -32,7 +33,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class CompassItem
-extends Item {
+extends Item
+implements Vanishable {
     public CompassItem(Item.Properties properties) {
         super(properties);
         this.addProperty(new ResourceLocation("angle"), new ItemPropertyFunction(){
@@ -123,7 +125,7 @@ extends Item {
     private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
         Optional<DimensionType> optional;
         boolean bl = compoundTag.contains("LodestonePos");
-        boolean bl2 = compoundTag.contains("LodestonePos");
+        boolean bl2 = compoundTag.contains("LodestoneDimension");
         if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent() && level.dimension.getType().equals(optional.get())) {
             return NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos"));
         }

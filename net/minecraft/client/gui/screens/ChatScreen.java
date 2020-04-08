@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -133,12 +134,18 @@ extends Screen {
 
     @Override
     public boolean mouseClicked(double d, double e, int i) {
-        Component component;
         if (this.commandSuggestions.mouseClicked((int)d, (int)e, i)) {
             return true;
         }
-        if (i == 0 && (component = this.minecraft.gui.getChat().getClickedComponentAt(d, e)) != null && this.handleComponentClicked(component)) {
-            return true;
+        if (i == 0) {
+            ChatComponent chatComponent = this.minecraft.gui.getChat();
+            if (chatComponent.handleChatQueueClicked(d, e)) {
+                return true;
+            }
+            Component component = chatComponent.getClickedComponentAt(d, e);
+            if (component != null && this.handleComponentClicked(component)) {
+                return true;
+            }
         }
         if (this.input.mouseClicked(d, e, i)) {
             return true;

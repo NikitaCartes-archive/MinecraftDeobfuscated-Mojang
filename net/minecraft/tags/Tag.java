@@ -6,13 +6,10 @@ package net.minecraft.tags;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -116,100 +113,92 @@ public interface Tag<T> {
         public void serializeTo(JsonArray var1);
     }
 
-    public static class TypedBuilder<T>
-    extends Builder {
-        private final Function<T, ResourceLocation> elementLookup;
-
-        public TypedBuilder(Function<T, ResourceLocation> function) {
-            this.elementLookup = function;
-        }
-
-        public TypedBuilder<T> add(T object) {
-            this.addElement(this.elementLookup.apply(object));
-            return this;
-        }
-
-        public TypedBuilder<T> add(Collection<T> collection) {
-            collection.stream().map(this.elementLookup).forEach(this::addElement);
-            return this;
-        }
-
-        @SafeVarargs
-        public final TypedBuilder<T> add(T ... objects) {
-            this.add((Collection<T>)Arrays.asList(objects));
-            return this;
-        }
-
-        public TypedBuilder<T> addTag(Named<T> named) {
-            this.addTag(named.getName());
-            return this;
-        }
-    }
-
     public static class Builder {
-        private final Set<Entry> entries = Sets.newLinkedHashSet();
+        private final List<BuilderEntry> entries = Lists.newArrayList();
 
         public static Builder tag() {
             return new Builder();
         }
 
-        public Builder add(Entry entry) {
-            this.entries.add(entry);
+        public Builder add(BuilderEntry builderEntry) {
+            this.entries.add(builderEntry);
             return this;
         }
 
-        public Builder addElement(ResourceLocation resourceLocation) {
-            return this.add(new ElementEntry(resourceLocation));
+        public Builder add(Entry entry, String string) {
+            return this.add(new BuilderEntry(entry, string));
         }
 
-        public Builder addTag(ResourceLocation resourceLocation) {
-            return this.add(new TagEntry(resourceLocation));
+        public Builder addElement(ResourceLocation resourceLocation, String string) {
+            return this.add(new ElementEntry(resourceLocation), string);
+        }
+
+        public Builder addTag(ResourceLocation resourceLocation, String string) {
+            return this.add(new TagEntry(resourceLocation), string);
         }
 
         public <T> Optional<Tag<T>> build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
             ImmutableSet.Builder builder = ImmutableSet.builder();
-            for (Entry entry : this.entries) {
-                if (entry.build(function, function2, builder::add)) continue;
+            for (BuilderEntry builderEntry : this.entries) {
+                if (builderEntry.getEntry().build(function, function2, builder::add)) continue;
                 return Optional.empty();
             }
             return Optional.of(Tag.fromSet(builder.build()));
         }
 
-        public Stream<Entry> getEntries() {
+        public Stream<BuilderEntry> getEntries() {
             return this.entries.stream();
         }
 
-        public <T> Stream<Entry> getUnresolvedEntries(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
-            return this.getEntries().filter(entry -> !entry.build(function, function2, object -> {}));
+        public <T> Stream<BuilderEntry> getUnresolvedEntries(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2) {
+            return this.getEntries().filter(builderEntry -> !builderEntry.getEntry().build(function, function2, object -> {}));
         }
 
-        public Builder addFromJson(JsonObject jsonObject) {
+        public Builder addFromJson(JsonObject jsonObject, String string) {
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "values");
             ArrayList<Entry> list = Lists.newArrayList();
             for (JsonElement jsonElement : jsonArray) {
-                String string = GsonHelper.convertToString(jsonElement, "value");
-                if (string.startsWith("#")) {
-                    list.add(new TagEntry(new ResourceLocation(string.substring(1))));
+                String string2 = GsonHelper.convertToString(jsonElement, "value");
+                if (string2.startsWith("#")) {
+                    list.add(new TagEntry(new ResourceLocation(string2.substring(1))));
                     continue;
                 }
-                list.add(new ElementEntry(new ResourceLocation(string)));
+                list.add(new ElementEntry(new ResourceLocation(string2)));
             }
             if (GsonHelper.getAsBoolean(jsonObject, "replace", false)) {
                 this.entries.clear();
             }
-            this.entries.addAll(list);
+            list.forEach(entry -> this.entries.add(new BuilderEntry((Entry)entry, string)));
             return this;
         }
 
         public JsonObject serializeToJson() {
             JsonObject jsonObject = new JsonObject();
             JsonArray jsonArray = new JsonArray();
-            for (Entry entry : this.entries) {
-                entry.serializeTo(jsonArray);
+            for (BuilderEntry builderEntry : this.entries) {
+                builderEntry.getEntry().serializeTo(jsonArray);
             }
             jsonObject.addProperty("replace", false);
             jsonObject.add("values", jsonArray);
             return jsonObject;
+        }
+    }
+
+    public static class BuilderEntry {
+        private final Entry entry;
+        private final String source;
+
+        private BuilderEntry(Entry entry, String string) {
+            this.entry = entry;
+            this.source = string;
+        }
+
+        public Entry getEntry() {
+            return this.entry;
+        }
+
+        public String toString() {
+            return this.entry.toString() + " (from " + this.source + ")";
         }
     }
 }

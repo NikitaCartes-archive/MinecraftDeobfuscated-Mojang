@@ -75,6 +75,18 @@ public abstract class Option {
         double d = progressOption.toPct(progressOption.get((Options)options));
         return progressOption.getCaption() + ChatComponent.getWidth(d) + "px";
     });
+    public static final ProgressOption CHAT_LINE_SPACING = new ProgressOption("options.chat.line_spacing", 0.0, 1.0, 0.0f, options -> options.chatLineSpacing, (options, double_) -> {
+        options.chatLineSpacing = double_;
+    }, (options, progressOption) -> progressOption.getCaption() + (int)(progressOption.toPct(progressOption.get((Options)options)) * 100.0) + "%");
+    public static final ProgressOption CHAT_DELAY = new ProgressOption("options.chat.delay_instant", 0.0, 6.0, 0.1f, options -> options.chatDelay, (options, double_) -> {
+        options.chatDelay = double_;
+    }, (options, progressOption) -> {
+        double d = progressOption.get((Options)options);
+        if (d <= 0.0) {
+            return I18n.get("options.chat.delay_none", new Object[0]);
+        }
+        return I18n.get("options.chat.delay", String.format("%.1f", d));
+    });
     public static final ProgressOption FOV = new ProgressOption("options.fov", 30.0, 110.0, 1.0f, options -> options.fov, (options, double_) -> {
         options.fov = double_;
     }, (options, progressOption) -> {

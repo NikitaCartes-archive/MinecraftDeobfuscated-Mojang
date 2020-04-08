@@ -3,6 +3,8 @@
  */
 package net.minecraft.tags;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -19,6 +21,11 @@ public class FluidTags {
 
     public static void reset(TagCollection<Fluid> tagCollection) {
         HELPER.reset(tagCollection);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static void resetToEmpty() {
+        HELPER.resetToEmpty();
     }
 
     public static TagCollection<Fluid> getAllTags() {

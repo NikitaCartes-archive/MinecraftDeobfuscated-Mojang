@@ -66,6 +66,11 @@ public class TagCollection<T> {
         return this.tags.getOrDefault(resourceLocation, this.empty);
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public Tag<T> getEmptyTag() {
+        return this.empty;
+    }
+
     @Nullable
     public ResourceLocation getId(Tag<T> tag) {
         if (tag instanceof Tag.Named) {
@@ -116,7 +121,7 @@ public class TagCollection<T> {
                                         LOGGER.error("Couldn't load {} tag list {} from {} in data pack {} as it is empty or null", (Object)this.name, (Object)resourceLocation22, (Object)resourceLocation2, (Object)resource.getSourceName());
                                         continue;
                                     }
-                                    map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject);
+                                    map.computeIfAbsent(resourceLocation22, resourceLocation -> Tag.Builder.tag()).addFromJson(jsonObject, resource.getSourceName());
                                 } catch (Throwable throwable3) {
                                     throwable2 = throwable3;
                                     throw throwable3;

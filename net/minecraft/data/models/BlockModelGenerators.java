@@ -544,11 +544,13 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(BlockModelGenerators.createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation3, resourceLocation)).with(BlockModelGenerators.createHorizontalFacingDispatch()));
     }
 
-    private void createCampfire() {
-        ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.CAMPFIRE, "_off");
-        ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.CAMPFIRE);
-        this.createSimpleFlatItemModel(Items.CAMPFIRE);
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.CAMPFIRE).with(BlockModelGenerators.createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation2, resourceLocation)).with(BlockModelGenerators.createHorizontalFacingDispatchAlt()));
+    private void createCampfires(Block ... blocks) {
+        ResourceLocation resourceLocation = ModelLocationUtils.decorateBlockModelLocation("campfire_off");
+        for (Block block : blocks) {
+            ResourceLocation resourceLocation2 = ModelTemplates.CAMPFIRE.create(block, TextureMapping.campfire(block), this.modelOutput);
+            this.createSimpleFlatItemModel(block.asItem());
+            this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(BlockModelGenerators.createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation2, resourceLocation)).with(BlockModelGenerators.createHorizontalFacingDispatchAlt()));
+        }
     }
 
     private void createBookshelf() {
@@ -1122,9 +1124,12 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.NETHER_QUARTZ_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.REDSTONE_ORE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.REDSTONE_BLOCK, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.GILDED_BLACKSTONE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.BLUE_ICE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.CHISELED_NETHER_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CLAY, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.COARSE_DIRT, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.CRACKED_NETHER_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CRACKED_STONE_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CRYING_OBSIDIAN, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.END_STONE, TexturedModel.CUBE);
@@ -1139,6 +1144,7 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.NOTE_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.PACKED_ICE, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.OBSIDIAN, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.QUARTZ_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.SEA_LANTERN, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.SHROOMLIGHT, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.SOUL_SAND, TexturedModel.CUBE);
@@ -1151,16 +1157,18 @@ public class BlockModelGenerators {
         this.createTrivialBlock(Blocks.TARGET, TexturedModel.COLUMN);
         this.createTrivialBlock(Blocks.WARPED_WART_BLOCK, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.WET_SPONGE, TexturedModel.CUBE);
+        this.createTrivialBlock(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, TexturedModel.CUBE);
         this.createTrivialBlock(Blocks.CHISELED_QUARTZ_BLOCK, TexturedModel.COLUMN.updateTexture(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(Blocks.CHISELED_QUARTZ_BLOCK))));
         this.createTrivialBlock(Blocks.CHISELED_STONE_BRICKS, TexturedModel.CUBE);
         this.createChiseledSandsone(Blocks.CHISELED_SANDSTONE, Blocks.SANDSTONE);
         this.createChiseledSandsone(Blocks.CHISELED_RED_SANDSTONE, Blocks.RED_SANDSTONE);
+        this.createTrivialBlock(Blocks.CHISELED_POLISHED_BLACKSTONE, TexturedModel.CUBE);
         this.createWeightedPressurePlate(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.GOLD_BLOCK);
         this.createWeightedPressurePlate(Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.IRON_BLOCK);
         this.createBookshelf();
         this.createBrewingStand();
         this.createCakeBlock();
-        this.createCampfire();
+        this.createCampfires(Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE);
         this.createCartographyTable();
         this.createCauldron();
         this.createChorusFlower();
@@ -1483,6 +1491,9 @@ public class BlockModelGenerators {
         this.family(Blocks.QUARTZ_BLOCK, TexturedModel.COLUMN).stairs(Blocks.QUARTZ_STAIRS).slab(Blocks.QUARTZ_SLAB);
         this.family(Blocks.SMOOTH_QUARTZ, TexturedModel.createAllSame(TextureMapping.getBlockTexture(Blocks.QUARTZ_BLOCK, "_bottom"))).stairs(Blocks.SMOOTH_QUARTZ_STAIRS).slab(Blocks.SMOOTH_QUARTZ_SLAB);
         this.family(Blocks.RED_NETHER_BRICKS).slab(Blocks.RED_NETHER_BRICK_SLAB).stairs(Blocks.RED_NETHER_BRICK_STAIRS).wall(Blocks.RED_NETHER_BRICK_WALL);
+        this.family(Blocks.BLACKSTONE, TexturedModel.COLUMN_WITH_WALL).wall(Blocks.BLACKSTONE_WALL).stairs(Blocks.BLACKSTONE_STAIRS).slab(Blocks.BLACKSTONE_SLAB);
+        this.family(Blocks.POLISHED_BLACKSTONE_BRICKS).wall(Blocks.POLISHED_BLACKSTONE_BRICK_WALL).stairs(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).slab(Blocks.POLISHED_BLACKSTONE_BRICK_SLAB);
+        this.family(Blocks.POLISHED_BLACKSTONE).wall(Blocks.POLISHED_BLACKSTONE_WALL).pressurePlate(Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE).button(Blocks.POLISHED_BLACKSTONE_BUTTON).stairs(Blocks.POLISHED_BLACKSTONE_STAIRS).slab(Blocks.POLISHED_BLACKSTONE_SLAB);
         this.createSmoothStoneSlab();
         this.createPassiveRail(Blocks.RAIL);
         this.createActiveRail(Blocks.POWERED_RAIL);

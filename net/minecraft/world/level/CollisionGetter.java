@@ -68,7 +68,7 @@ extends BlockGetter {
         return Streams.concat(this.getBlockCollisions(entity, aABB), this.getEntityCollisions(entity, aABB, predicate));
     }
 
-    default public Stream<VoxelShape> getBlockCollisions(final @Nullable Entity entity, AABB aABB) {
+    default public Stream<VoxelShape> getBlockCollisions(final @Nullable Entity entity, final AABB aABB) {
         int i = Mth.floor(aABB.minX - 1.0E-7) - 1;
         int j = Mth.floor(aABB.maxX + 1.0E-7) + 1;
         int k = Mth.floor(aABB.minY - 1.0E-7) - 1;
@@ -80,27 +80,26 @@ extends BlockGetter {
         final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         final VoxelShape voxelShape = Shapes.create(aABB);
         return StreamSupport.stream(new Spliterators.AbstractSpliterator<VoxelShape>(Long.MAX_VALUE, 1280){
-            boolean checkedBorder;
+            boolean skipWorldBorderCheck;
             {
                 super(l, i);
-                this.checkedBorder = entity == null;
+                this.skipWorldBorderCheck = entity == null;
             }
 
             @Override
             public boolean tryAdvance(Consumer<? super VoxelShape> consumer) {
-                if (!this.checkedBorder) {
-                    this.checkedBorder = true;
-                    VoxelShape voxelShape4 = CollisionGetter.this.getWorldBorder().getCollisionShape();
-                    boolean bl = Shapes.joinIsNotEmpty(voxelShape4, Shapes.create(entity.getBoundingBox().deflate(1.0E-7)), BooleanOp.AND);
-                    boolean bl2 = Shapes.joinIsNotEmpty(voxelShape4, Shapes.create(entity.getBoundingBox().inflate(1.0E-7)), BooleanOp.AND);
-                    if (!bl && bl2) {
-                        consumer.accept(voxelShape4);
+                if (!this.skipWorldBorderCheck) {
+                    boolean bl2;
+                    this.skipWorldBorderCheck = true;
+                    WorldBorder worldBorder = CollisionGetter.this.getWorldBorder();
+                    boolean bl = CollisionGetter.isBoxFullyWithinWorldBorder(worldBorder, entity.getBoundingBox().deflate(1.0E-7));
+                    boolean bl3 = bl2 = bl && !CollisionGetter.isBoxFullyWithinWorldBorder(worldBorder, entity.getBoundingBox().inflate(1.0E-7));
+                    if (bl2) {
+                        consumer.accept(worldBorder.getCollisionShape());
                         return true;
                     }
                 }
                 while (cursor3D.advance()) {
-                    VoxelShape voxelShape2;
-                    VoxelShape voxelShape3;
                     int n;
                     int m;
                     BlockGetter blockGetter;
@@ -111,13 +110,29 @@ extends BlockGetter {
                     if (l == 3 || (blockGetter = CollisionGetter.this.getChunkForCollisions(m = i >> 4, n = k >> 4)) == null) continue;
                     mutableBlockPos.set(i, j, k);
                     BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-                    if (l == 1 && !blockState.hasLargeCollisionShape() || l == 2 && blockState.getBlock() != Blocks.MOVING_PISTON || !Shapes.joinIsNotEmpty(voxelShape, voxelShape3 = (voxelShape2 = blockState.getCollisionShape(CollisionGetter.this, mutableBlockPos, collisionContext)).move(i, j, k), BooleanOp.AND)) continue;
-                    consumer.accept(voxelShape3);
+                    if (l == 1 && !blockState.hasLargeCollisionShape() || l == 2 && blockState.getBlock() != Blocks.MOVING_PISTON) continue;
+                    VoxelShape voxelShape3 = blockState.getCollisionShape(CollisionGetter.this, mutableBlockPos, collisionContext);
+                    if (voxelShape3 == Shapes.block()) {
+                        if (!aABB.intersects(i, j, k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) continue;
+                        consumer.accept(voxelShape3.move(i, j, k));
+                        return true;
+                    }
+                    VoxelShape voxelShape2 = voxelShape3.move(i, j, k);
+                    if (!Shapes.joinIsNotEmpty(voxelShape2, voxelShape, BooleanOp.AND)) continue;
+                    consumer.accept(voxelShape2);
                     return true;
                 }
                 return false;
             }
         }, false);
+    }
+
+    public static boolean isBoxFullyWithinWorldBorder(WorldBorder worldBorder, AABB aABB) {
+        double d = Mth.floor(worldBorder.getMinX());
+        double e = Mth.floor(worldBorder.getMinZ());
+        double f = Mth.ceil(worldBorder.getMaxX());
+        double g = Mth.ceil(worldBorder.getMaxZ());
+        return aABB.minX > d && aABB.minX < f && aABB.minZ > e && aABB.minZ < g && aABB.maxX > d && aABB.maxX < f && aABB.maxZ > e && aABB.maxZ < g;
     }
 }
 

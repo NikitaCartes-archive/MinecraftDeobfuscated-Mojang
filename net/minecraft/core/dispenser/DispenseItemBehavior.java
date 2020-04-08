@@ -14,6 +14,7 @@ import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
 import net.minecraft.core.dispenser.BoatDispenseItemBehavior;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
+import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.dispenser.ShulkerBoxDispenseBehavior;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,8 +22,11 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.Saddleable;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -208,6 +212,77 @@ public interface DispenseItemBehavior {
                 level.addFreshEntity(armorStand);
                 itemStack.shrink(1);
                 return itemStack;
+            }
+        });
+        DispenserBlock.registerBehavior(Items.SADDLE, new OptionalDispenseItemBehavior(){
+
+            @Override
+            public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+                BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+                List<LivingEntity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), livingEntity -> {
+                    if (livingEntity instanceof Saddleable) {
+                        Saddleable saddleable = (Saddleable)((Object)livingEntity);
+                        return !saddleable.isSaddled() && saddleable.isSaddleable();
+                    }
+                    return false;
+                });
+                if (!list.isEmpty()) {
+                    ((Saddleable)((Object)list.get(0))).equipSaddle(SoundSource.BLOCKS);
+                    itemStack.shrink(1);
+                    this.success = true;
+                    return itemStack;
+                }
+                return super.execute(blockSource, itemStack);
+            }
+        });
+        OptionalDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior(){
+
+            @Override
+            protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+                BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+                List<AbstractHorse> list = blockSource.getLevel().getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorse -> abstractHorse.isAlive() && abstractHorse.canWearArmor());
+                for (AbstractHorse abstractHorse2 : list) {
+                    if (!abstractHorse2.isArmor(itemStack) || abstractHorse2.isWearingArmor() || !abstractHorse2.isTamed()) continue;
+                    abstractHorse2.setSlot(401, itemStack.split(1));
+                    this.success = true;
+                    return itemStack;
+                }
+                return super.execute(blockSource, itemStack);
+            }
+        };
+        DispenserBlock.registerBehavior(Items.LEATHER_HORSE_ARMOR, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.IRON_HORSE_ARMOR, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.GOLDEN_HORSE_ARMOR, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.DIAMOND_HORSE_ARMOR, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.WHITE_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.ORANGE_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.CYAN_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.BLUE_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.BROWN_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.BLACK_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.GRAY_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.GREEN_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.LIGHT_BLUE_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.LIGHT_GRAY_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.LIME_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.MAGENTA_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.PINK_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.PURPLE_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.RED_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.YELLOW_CARPET, defaultDispenseItemBehavior2);
+        DispenserBlock.registerBehavior(Items.CHEST, new OptionalDispenseItemBehavior(){
+
+            @Override
+            public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+                BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+                List<AbstractChestedHorse> list = blockSource.getLevel().getEntitiesOfClass(AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorse -> abstractChestedHorse.isAlive() && !abstractChestedHorse.hasChest());
+                for (AbstractChestedHorse abstractChestedHorse2 : list) {
+                    if (!abstractChestedHorse2.isTamed() || !abstractChestedHorse2.setSlot(499, itemStack)) continue;
+                    itemStack.shrink(1);
+                    this.success = true;
+                    return itemStack;
+                }
+                return super.execute(blockSource, itemStack);
             }
         });
         DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior(){
@@ -452,39 +527,6 @@ public interface DispenseItemBehavior {
                 return super.execute(blockSource, itemStack);
             }
         });
-        DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new OptionalDispenseItemBehavior(){
-
-            @Override
-            protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-                Level level = blockSource.getLevel();
-                if (!level.isClientSide()) {
-                    int i;
-                    BlockState blockState;
-                    this.success = false;
-                    BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-                    List<Sheep> list = level.getEntitiesOfClass(Sheep.class, new AABB(blockPos));
-                    for (Sheep sheep : list) {
-                        if (!sheep.isAlive() || sheep.isSheared() || sheep.isBaby()) continue;
-                        sheep.shear();
-                        level.playSound(null, blockPos, SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 1.0f, 1.0f);
-                        if (itemStack.hurt(1, level.random, null)) {
-                            itemStack.setCount(0);
-                        }
-                        this.success = true;
-                        break;
-                    }
-                    if (!this.success && (blockState = level.getBlockState(blockPos)).is(BlockTags.BEEHIVES) && (i = blockState.getValue(BeehiveBlock.HONEY_LEVEL).intValue()) >= 5) {
-                        if (itemStack.hurt(1, level.random, null)) {
-                            itemStack.setCount(0);
-                        }
-                        BeehiveBlock.dropHoneycomb(level, blockPos);
-                        ((BeehiveBlock)blockState.getBlock()).releaseBeesAndResetHoneyLevel(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-                        this.success = true;
-                    }
-                }
-                return itemStack;
-            }
-        });
         DispenserBlock.registerBehavior(Items.GLOWSTONE, new DefaultDispenseItemBehavior(){
 
             @Override
@@ -493,13 +535,17 @@ public interface DispenseItemBehavior {
                 BlockPos blockPos = blockSource.getPos().relative(direction);
                 Level level = blockSource.getLevel();
                 BlockState blockState = level.getBlockState(blockPos);
-                if (blockState.getBlock() == Blocks.RESPAWN_ANCHOR && blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
-                    RespawnAnchorBlock.charge(level, blockPos, blockState);
-                    itemStack.shrink(1);
+                if (blockState.getBlock() == Blocks.RESPAWN_ANCHOR) {
+                    if (blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
+                        RespawnAnchorBlock.charge(level, blockPos, blockState);
+                        itemStack.shrink(1);
+                    }
+                    return itemStack;
                 }
-                return itemStack;
+                return super.execute(blockSource, itemStack);
             }
         });
+        DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new ShearsDispenseItemBehavior());
     }
 
     public static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {

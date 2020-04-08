@@ -83,6 +83,7 @@ public class ParticleTypes {
     public static final SimpleParticleType FALLING_OBSIDIAN_TEAR = ParticleTypes.register("falling_obsidian_tear", false);
     public static final SimpleParticleType LANDING_OBSIDIAN_TEAR = ParticleTypes.register("landing_obsidian_tear", false);
     public static final SimpleParticleType REVERSE_PORTAL = ParticleTypes.register("reverse_portal", false);
+    public static final SimpleParticleType WHITE_ASH = ParticleTypes.register("white_ash", false);
 
     private static SimpleParticleType register(String string, boolean bl) {
         return Registry.register(Registry.PARTICLE_TYPE, string, new SimpleParticleType(bl));

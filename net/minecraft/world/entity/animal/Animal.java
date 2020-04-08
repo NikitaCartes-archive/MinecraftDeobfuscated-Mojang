@@ -212,7 +212,7 @@ extends AgableMob {
         animal.setAge(6000);
         this.resetLove();
         animal.resetLove();
-        agableMob.setAge(-24000);
+        agableMob.setBaby(true);
         agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0f, 0.0f);
         level.addFreshEntity(agableMob);
         level.broadcastEntityEvent(this, (byte)18);

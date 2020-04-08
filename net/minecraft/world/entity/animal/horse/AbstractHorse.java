@@ -21,6 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerListener;
@@ -32,12 +33,14 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -69,7 +72,8 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractHorse
 extends Animal
 implements ContainerListener,
-PlayerRideableJumping {
+PlayerRideableJumping,
+Saddleable {
     private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isBred();
     private static final TargetingConditions MOMMY_TARGETING = new TargetingConditions().range(16.0).allowInvulnerable().allowSameTeam().allowUnseeable().selector(PARENT_HORSE_SELECTOR);
     private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
@@ -183,8 +187,22 @@ PlayerRideableJumping {
         this.setFlag(8, bl);
     }
 
-    public void setSaddled(boolean bl) {
-        this.setFlag(4, bl);
+    @Override
+    public boolean isSaddleable() {
+        return this.isAlive() && !this.isBaby() && this.isTamed();
+    }
+
+    @Override
+    public void equipSaddle(@Nullable SoundSource soundSource) {
+        this.inventory.setItem(0, new ItemStack(Items.SADDLE));
+        if (soundSource != null) {
+            this.level.playSound(null, this, SoundEvents.HORSE_SADDLE, soundSource, 0.5f, 1.0f);
+        }
+    }
+
+    @Override
+    public boolean isSaddled() {
+        return this.getFlag(4);
     }
 
     public int getTemper() {
@@ -254,20 +272,20 @@ PlayerRideableJumping {
             }
         }
         this.inventory.addListener(this);
-        this.updateEquipment();
+        this.updateContainerEquipment();
     }
 
-    protected void updateEquipment() {
+    protected void updateContainerEquipment() {
         if (this.level.isClientSide) {
             return;
         }
-        this.setSaddled(!this.inventory.getItem(0).isEmpty() && this.canBeSaddled());
+        this.setFlag(4, !this.inventory.getItem(0).isEmpty() && this.isSaddleable());
     }
 
     @Override
     public void containerChanged(Container container) {
         boolean bl = this.isSaddled();
-        this.updateEquipment();
+        this.updateContainerEquipment();
         if (this.tickCount > 20 && !bl && this.isSaddled()) {
             this.playSound(SoundEvents.HORSE_SADDLE, 0.5f, 1.0f);
         }
@@ -299,14 +317,6 @@ PlayerRideableJumping {
             this.stand();
         }
         return null;
-    }
-
-    public boolean canBeSaddled() {
-        return true;
-    }
-
-    public boolean isSaddled() {
-        return this.getFlag(4);
     }
 
     @Nullable
@@ -711,7 +721,7 @@ PlayerRideableJumping {
         if (compoundTag.contains("SaddleItem", 10) && (itemStack = ItemStack.of(compoundTag.getCompound("SaddleItem"))).getItem() == Items.SADDLE) {
             this.inventory.setItem(0, itemStack);
         }
-        this.updateEquipment();
+        this.updateContainerEquipment();
     }
 
     @Override
@@ -852,8 +862,12 @@ PlayerRideableJumping {
         return entityDimensions.height * 0.95f;
     }
 
-    public boolean wearsArmor() {
+    public boolean canWearArmor() {
         return false;
+    }
+
+    public boolean isWearingArmor() {
+        return !this.getItemBySlot(EquipmentSlot.CHEST).isEmpty();
     }
 
     public boolean isArmor(ItemStack itemStack) {
@@ -867,11 +881,11 @@ PlayerRideableJumping {
             if (j == 0 && itemStack.getItem() != Items.SADDLE) {
                 return false;
             }
-            if (!(j != 1 || this.wearsArmor() && this.isArmor(itemStack))) {
+            if (!(j != 1 || this.canWearArmor() && this.isArmor(itemStack))) {
                 return false;
             }
             this.inventory.setItem(j, itemStack);
-            this.updateEquipment();
+            this.updateContainerEquipment();
             return true;
         }
         int k = i - 500 + 2;

@@ -67,8 +67,10 @@ extends Block {
             }
             return blockState.getValue(CHARGE) < 4 ? InteractionResult.PASS : InteractionResult.CONSUME;
         }
-        level.removeBlock(blockPos, false);
-        level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+        if (!level.isClientSide) {
+            level.removeBlock(blockPos, false);
+            level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+        }
         return InteractionResult.SUCCESS;
     }
 

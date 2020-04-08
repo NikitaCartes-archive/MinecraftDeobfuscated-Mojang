@@ -81,6 +81,7 @@ import net.minecraft.client.particle.TrackingEmitter;
 import net.minecraft.client.particle.WakeParticle;
 import net.minecraft.client.particle.WaterCurrentDownParticle;
 import net.minecraft.client.particle.WaterDropParticle;
+import net.minecraft.client.particle.WhiteAshParticle;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -201,6 +202,7 @@ implements PreparableReloadListener {
         this.register(ParticleTypes.FALLING_OBSIDIAN_TEAR, DripParticle.ObsidianTearFallProvider::new);
         this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle.ObsidianTearLandProvider::new);
         this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
+        this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
     }
 
     private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

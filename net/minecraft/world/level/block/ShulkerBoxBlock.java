@@ -131,7 +131,6 @@ extends BaseEntityBlock {
                 shulkerBoxBlockEntity.unpackLootTable(player);
             }
         }
-        PiglinAi.angerNearbyPiglinsThatSee(player);
         super.playerWillDestroy(level, blockPos, blockState, player);
     }
 

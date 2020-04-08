@@ -14,6 +14,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -64,9 +65,11 @@ implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
+    private final boolean spawnParticles;
 
-    public CampfireBlock(BlockBehaviour.Properties properties) {
+    public CampfireBlock(boolean bl, BlockBehaviour.Properties properties) {
         super(properties);
+        this.spawnParticles = bl;
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(LIT, true)).setValue(SIGNAL_FIRE, false)).setValue(WATERLOGGED, false)).setValue(FACING, Direction.NORTH));
     }
 
@@ -149,7 +152,7 @@ implements SimpleWaterloggedBlock {
         if (random.nextInt(10) == 0) {
             level.playLocalSound((float)blockPos.getX() + 0.5f, (float)blockPos.getY() + 0.5f, (float)blockPos.getZ() + 0.5f, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.BLOCKS, 0.5f + random.nextFloat(), random.nextFloat() * 0.7f + 0.6f, false);
         }
-        if (random.nextInt(5) == 0) {
+        if (this.spawnParticles && random.nextInt(5) == 0) {
             for (int i = 0; i < random.nextInt(1) + 1; ++i) {
                 level.addParticle(ParticleTypes.LAVA, (float)blockPos.getX() + 0.5f, (float)blockPos.getY() + 0.5f, (float)blockPos.getZ() + 0.5f, random.nextFloat() / 2.0f, 5.0E-5, random.nextFloat() / 2.0f);
             }
@@ -217,8 +220,8 @@ implements SimpleWaterloggedBlock {
         return false;
     }
 
-    private static boolean isLitCampfire(BlockState blockState) {
-        return blockState.getBlock() == Blocks.CAMPFIRE && blockState.getValue(LIT) != false;
+    public static boolean isLitCampfire(BlockState blockState) {
+        return blockState.getBlock().is(BlockTags.CAMPFIRES) && blockState.hasProperty(LIT) && blockState.getValue(LIT) != false;
     }
 
     @Override

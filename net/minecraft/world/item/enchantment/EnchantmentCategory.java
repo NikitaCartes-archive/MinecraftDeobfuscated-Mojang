@@ -3,21 +3,18 @@
  */
 package net.minecraft.world.item.enchantment;
 
-import java.util.stream.Stream;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
-import net.minecraft.world.level.block.AbstractSkullBlock;
+import net.minecraft.world.item.Vanishable;
+import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CarvedPumpkinBlock;
 
 public enum EnchantmentCategory {
     ARMOR{
@@ -112,8 +109,7 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            Block block = Block.byItem(item);
-            return item instanceof ArmorItem || item instanceof ElytraItem || block instanceof AbstractSkullBlock || block instanceof CarvedPumpkinBlock;
+            return item instanceof Wearable || Block.byItem(item) instanceof Wearable;
         }
     }
     ,
@@ -129,7 +125,7 @@ public enum EnchantmentCategory {
 
         @Override
         public boolean canEnchant(Item item) {
-            return Stream.of(EnchantmentCategory.values()).filter(enchantmentCategory -> enchantmentCategory != VANISHABLE).anyMatch(enchantmentCategory -> enchantmentCategory.canEnchant(item) || item == Items.COMPASS);
+            return item instanceof Vanishable || Block.byItem(item) instanceof Vanishable || BREAKABLE.canEnchant(item);
         }
     };
 

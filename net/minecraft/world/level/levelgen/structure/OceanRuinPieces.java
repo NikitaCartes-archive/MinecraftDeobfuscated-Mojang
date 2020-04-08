@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -54,11 +55,11 @@ public class OceanRuinPieces {
     private static final ResourceLocation[] BIG_WARM_RUINS = new ResourceLocation[]{new ResourceLocation("underwater_ruin/big_warm_4"), new ResourceLocation("underwater_ruin/big_warm_5"), new ResourceLocation("underwater_ruin/big_warm_6"), new ResourceLocation("underwater_ruin/big_warm_7")};
 
     private static ResourceLocation getSmallWarmRuin(Random random) {
-        return WARM_RUINS[random.nextInt(WARM_RUINS.length)];
+        return Util.getRandom(WARM_RUINS, random);
     }
 
     private static ResourceLocation getBigWarmRuin(Random random) {
-        return BIG_WARM_RUINS[random.nextInt(BIG_WARM_RUINS.length)];
+        return Util.getRandom(BIG_WARM_RUINS, random);
     }
 
     public static void addPieces(StructureManager structureManager, BlockPos blockPos, Rotation rotation, List<StructurePiece> list, Random random, OceanRuinConfiguration oceanRuinConfiguration) {
@@ -86,7 +87,7 @@ public class OceanRuinPieces {
             BlockPos blockPos4;
             int n;
             BoundingBox boundingBox2;
-            if (list2.isEmpty() || (boundingBox2 = BoundingBox.createProper(n = (blockPos4 = list2.remove(m = random.nextInt(list2.size()))).getX(), 0, o = blockPos4.getZ(), (blockPos5 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation2 = Rotation.values()[random.nextInt(Rotation.values().length)], BlockPos.ZERO).offset(n, 0, o)).getX(), 0, blockPos5.getZ())).intersects(boundingBox)) continue;
+            if (list2.isEmpty() || (boundingBox2 = BoundingBox.createProper(n = (blockPos4 = list2.remove(m = random.nextInt(list2.size()))).getX(), 0, o = blockPos4.getZ(), (blockPos5 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation2 = Rotation.getRandom(random), BlockPos.ZERO).offset(n, 0, o)).getX(), 0, blockPos5.getZ())).intersects(boundingBox)) continue;
             OceanRuinPieces.addPiece(structureManager, blockPos4, rotation2, list, random, oceanRuinConfiguration, false, 0.8f);
         }
     }

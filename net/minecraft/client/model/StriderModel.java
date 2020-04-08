@@ -25,7 +25,7 @@ extends ListModel<T> {
     private final ModelPart bristle5;
 
     public StriderModel() {
-        this.texWidth = 128;
+        this.texWidth = 64;
         this.texHeight = 128;
         this.rightLeg = new ModelPart(this, 0, 32);
         this.rightLeg.setPos(-4.0f, 8.0f, 0.0f);

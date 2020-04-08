@@ -26,7 +26,7 @@ extends Block {
         if (random.nextInt(5) != 0) {
             return;
         }
-        Direction direction = Direction.getRandomFace(random);
+        Direction direction = Direction.getRandom(random);
         if (direction == Direction.UP) {
             return;
         }

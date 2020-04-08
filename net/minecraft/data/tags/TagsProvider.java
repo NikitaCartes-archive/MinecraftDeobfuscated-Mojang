@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
@@ -35,7 +36,7 @@ implements DataProvider {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     protected final DataGenerator generator;
     protected final Registry<T> registry;
-    protected final Map<ResourceLocation, Tag.TypedBuilder<T>> builders = Maps.newLinkedHashMap();
+    private final Map<ResourceLocation, Tag.Builder> builders = Maps.newLinkedHashMap();
 
     protected TagsProvider(DataGenerator dataGenerator, Registry<T> registry) {
         this.generator = dataGenerator;
@@ -51,12 +52,12 @@ implements DataProvider {
         Tag tag = Tag.fromSet(ImmutableSet.of());
         Function<ResourceLocation, Tag> function = resourceLocation -> this.builders.containsKey(resourceLocation) ? tag : null;
         Function<ResourceLocation, Object> function2 = resourceLocation -> this.registry.getOptional((ResourceLocation)resourceLocation).orElse(null);
-        this.builders.forEach((resourceLocation, typedBuilder) -> {
-            List list = typedBuilder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+        this.builders.forEach((resourceLocation, builder) -> {
+            List list = builder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
             if (!list.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Couldn't define tag %s as it is missing following references: %s", resourceLocation, list.stream().map(Objects::toString).collect(Collectors.joining(","))));
             }
-            JsonObject jsonObject = typedBuilder.serializeToJson();
+            JsonObject jsonObject = builder.serializeToJson();
             Path path = this.getPath((ResourceLocation)resourceLocation);
             try {
                 String string = GSON.toJson(jsonObject);
@@ -76,12 +77,41 @@ implements DataProvider {
 
     protected abstract Path getPath(ResourceLocation var1);
 
-    protected Tag.TypedBuilder<T> tag(Tag.Named<T> named) {
-        return this.tag(named.getName());
+    protected TagAppender<T> tag(Tag.Named<T> named) {
+        Tag.Builder builder = this.getOrCreateRawBuilder(named);
+        return new TagAppender(builder, this.registry, "vanilla");
     }
 
-    protected Tag.TypedBuilder<T> tag(ResourceLocation resourceLocation2) {
-        return this.builders.computeIfAbsent(resourceLocation2, resourceLocation -> new Tag.TypedBuilder<Object>(this.registry::getKey));
+    protected Tag.Builder getOrCreateRawBuilder(Tag.Named<T> named) {
+        return this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
+    }
+
+    public static class TagAppender<T> {
+        private final Tag.Builder builder;
+        private final Registry<T> registry;
+        private final String source;
+
+        private TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
+            this.builder = builder;
+            this.registry = registry;
+            this.source = string;
+        }
+
+        public TagAppender<T> add(T object) {
+            this.builder.addElement(this.registry.getKey(object), this.source);
+            return this;
+        }
+
+        public TagAppender<T> addTag(Tag.Named<T> named) {
+            this.builder.addTag(named.getName(), this.source);
+            return this;
+        }
+
+        @SafeVarargs
+        public final TagAppender<T> add(T ... objects) {
+            Stream.of(objects).map(this.registry::getKey).forEach(resourceLocation -> this.builder.addElement((ResourceLocation)resourceLocation, this.source));
+            return this;
+        }
     }
 }
 

@@ -364,7 +364,7 @@ AutoCloseable {
             float m = (float)voxelShape.max(Direction.Axis.Y, g, h);
             float n = fluidState.getHeight(levelReader, (BlockPos)blockPos2);
             float o = Math.max(m, n);
-            SimpleParticleType particleOptions = fluidState.is(FluidTags.LAVA) || blockState.getBlock() == Blocks.MAGMA_BLOCK || blockState.getBlock() == Blocks.CAMPFIRE && blockState.getValue(CampfireBlock.LIT) != false ? ParticleTypes.SMOKE : ParticleTypes.RAIN;
+            SimpleParticleType particleOptions = fluidState.is(FluidTags.LAVA) || blockState.getBlock() == Blocks.MAGMA_BLOCK || CampfireBlock.isLitCampfire(blockState) ? ParticleTypes.SMOKE : ParticleTypes.RAIN;
             this.minecraft.level.addParticle(particleOptions, (float)blockPos2.getX() + g, (float)blockPos2.getY() + o, (float)blockPos2.getZ() + h, 0.0, 0.0, 0.0);
         }
         if (blockPos2 != null && random.nextInt(3) < this.rainSoundTime++) {

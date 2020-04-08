@@ -12,6 +12,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.Wearable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -30,7 +31,8 @@ import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
 
 public class CarvedPumpkinBlock
-extends HorizontalDirectionalBlock {
+extends HorizontalDirectionalBlock
+implements Wearable {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     @Nullable
     private BlockPattern snowGolemBase;

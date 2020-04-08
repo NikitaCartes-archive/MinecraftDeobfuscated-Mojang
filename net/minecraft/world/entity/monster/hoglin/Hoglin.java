@@ -51,6 +51,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,8 @@ HoglinBase {
     public Hoglin(EntityType<? extends Hoglin> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
         this.xpReward = 5;
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
 
     @Override
@@ -161,6 +164,17 @@ HoglinBase {
         super.aiStep();
     }
 
+    @Override
+    protected void ageBoundaryReached() {
+        if (this.isBaby()) {
+            this.xpReward = 3;
+            this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.5);
+        } else {
+            this.xpReward = 5;
+            this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(6.0);
+        }
+    }
+
     public static boolean checkHoglinSpawnRules(EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         return levelAccessor.getBlockState(blockPos.below()).getBlock() != Blocks.NETHER_WART_BLOCK;
     }
@@ -170,8 +184,6 @@ HoglinBase {
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (levelAccessor.getRandom().nextFloat() < 0.2f) {
             this.setBaby(true);
-            this.xpReward = 3;
-            this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.5);
         }
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

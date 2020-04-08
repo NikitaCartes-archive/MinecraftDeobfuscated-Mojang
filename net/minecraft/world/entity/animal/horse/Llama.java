@@ -108,7 +108,7 @@ implements RangedAttackMob {
         if (compoundTag.contains("DecorItem", 10)) {
             this.inventory.setItem(1, ItemStack.of(compoundTag.getCompound("DecorItem")));
         }
-        this.updateEquipment();
+        this.updateContainerEquipment();
     }
 
     @Override
@@ -283,8 +283,13 @@ implements RangedAttackMob {
     }
 
     @Override
-    public boolean wearsArmor() {
+    public boolean canWearArmor() {
         return true;
+    }
+
+    @Override
+    public boolean isWearingArmor() {
+        return !this.inventory.getItem(1).isEmpty();
     }
 
     @Override
@@ -294,7 +299,7 @@ implements RangedAttackMob {
     }
 
     @Override
-    public boolean canBeSaddled() {
+    public boolean isSaddleable() {
         return false;
     }
 
@@ -309,11 +314,11 @@ implements RangedAttackMob {
     }
 
     @Override
-    protected void updateEquipment() {
+    protected void updateContainerEquipment() {
         if (this.level.isClientSide) {
             return;
         }
-        super.updateEquipment();
+        super.updateContainerEquipment();
         this.setSwag(Llama.getDyeColor(this.inventory.getItem(1)));
     }
 

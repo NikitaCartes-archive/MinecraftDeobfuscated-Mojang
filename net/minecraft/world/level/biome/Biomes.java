@@ -10,6 +10,7 @@ import net.minecraft.world.level.biome.BadlandsBiome;
 import net.minecraft.world.level.biome.BadlandsPlateauBiome;
 import net.minecraft.world.level.biome.BambooJungleBiome;
 import net.minecraft.world.level.biome.BambooJungleHillsBiome;
+import net.minecraft.world.level.biome.BasaltDeltasBiome;
 import net.minecraft.world.level.biome.BeachBiome;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BirchForestBiome;
@@ -166,6 +167,7 @@ public abstract class Biomes {
     public static final Biome SOUL_SAND_VALLEY;
     public static final Biome CRIMSON_FOREST;
     public static final Biome WARPED_FOREST;
+    public static final Biome BASALT_DELTAS;
 
     private static Biome register(int i, String string, Biome biome) {
         Registry.registerMapping(Registry.BIOME, i, string, biome);
@@ -254,6 +256,7 @@ public abstract class Biomes {
         SOUL_SAND_VALLEY = Biomes.register(170, "soul_sand_valley", new SoulSandValleyBiome());
         CRIMSON_FOREST = Biomes.register(171, "crimson_forest", new CrimsonForestBiome());
         WARPED_FOREST = Biomes.register(172, "warped_forest", new WarpedForestBiome());
+        BASALT_DELTAS = Biomes.register(173, "basalt_deltas", new BasaltDeltasBiome());
         Collections.addAll(Biome.EXPLORABLE_BIOMES, OCEAN, PLAINS, DESERT, MOUNTAINS, FOREST, TAIGA, SWAMP, RIVER, FROZEN_RIVER, SNOWY_TUNDRA, SNOWY_MOUNTAINS, MUSHROOM_FIELDS, MUSHROOM_FIELD_SHORE, BEACH, DESERT_HILLS, WOODED_HILLS, TAIGA_HILLS, JUNGLE, JUNGLE_HILLS, JUNGLE_EDGE, DEEP_OCEAN, STONE_SHORE, SNOWY_BEACH, BIRCH_FOREST, BIRCH_FOREST_HILLS, DARK_FOREST, SNOWY_TAIGA, SNOWY_TAIGA_HILLS, GIANT_TREE_TAIGA, GIANT_TREE_TAIGA_HILLS, WOODED_MOUNTAINS, SAVANNA, SAVANNA_PLATEAU, BADLANDS, WOODED_BADLANDS_PLATEAU, BADLANDS_PLATEAU);
     }
 }

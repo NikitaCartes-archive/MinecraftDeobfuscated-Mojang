@@ -129,11 +129,5 @@ extends BaseEntityBlock {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         return (BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getNearestLookingDirection().getOpposite());
     }
-
-    @Override
-    public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        super.playerWillDestroy(level, blockPos, blockState, player);
-        PiglinAi.angerNearbyPiglinsThatSee(player);
-    }
 }
 

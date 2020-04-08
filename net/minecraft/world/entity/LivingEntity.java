@@ -436,6 +436,10 @@ extends Entity {
         return !this.isBaby();
     }
 
+    protected boolean shouldDropLoot() {
+        return !this.isBaby();
+    }
+
     protected int decreaseAirSupply(int i) {
         int j = EnchantmentHelper.getRespiration(this);
         if (j > 0 && this.random.nextInt(j + 1) > 0) {
@@ -1048,7 +1052,7 @@ extends Entity {
         Entity entity = damageSource.getEntity();
         int i = entity instanceof Player ? EnchantmentHelper.getMobLooting((LivingEntity)entity) : 0;
         boolean bl2 = bl = this.lastHurtByPlayerTime > 0;
-        if (this.shouldDropExperience() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+        if (this.shouldDropLoot() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
             this.dropFromLootTable(damageSource, bl);
             this.dropCustomDeathLoot(damageSource, i, bl);
         }

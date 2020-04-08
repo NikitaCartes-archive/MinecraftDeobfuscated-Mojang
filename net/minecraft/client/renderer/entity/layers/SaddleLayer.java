@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ItemSteerableMount;
+import net.minecraft.world.entity.Saddleable;
 
 @Environment(value=EnvType.CLIENT)
 public class SaddleLayer<T extends Entity, M extends EntityModel<T>>
@@ -32,7 +32,7 @@ extends RenderLayer<T, M> {
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
-        if (!((ItemSteerableMount)entity).hasSaddle()) {
+        if (!((Saddleable)entity).isSaddled()) {
             return;
         }
         ((EntityModel)this.getParentModel()).copyPropertiesTo(this.model);

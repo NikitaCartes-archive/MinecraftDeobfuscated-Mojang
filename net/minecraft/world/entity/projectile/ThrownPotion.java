@@ -30,8 +30,6 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -179,10 +177,9 @@ implements ItemSupplier {
 
     private void dowseFire(BlockPos blockPos, Direction direction) {
         BlockState blockState = this.level.getBlockState(blockPos);
-        Block block = blockState.getBlock();
         if (blockState.is(BlockTags.FIRE)) {
             this.level.removeBlock(blockPos, false);
-        } else if (block == Blocks.CAMPFIRE && blockState.getValue(CampfireBlock.LIT).booleanValue()) {
+        } else if (CampfireBlock.isLitCampfire(blockState)) {
             this.level.levelEvent(null, 1009, blockPos, 0);
             this.level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, false));
         }

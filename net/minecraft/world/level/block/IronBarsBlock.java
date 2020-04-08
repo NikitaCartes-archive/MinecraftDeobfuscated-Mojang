@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -78,7 +79,7 @@ extends CrossCollisionBlock {
 
     public final boolean attachsTo(BlockState blockState, boolean bl) {
         Block block = blockState.getBlock();
-        return !IronBarsBlock.isExceptionForConnection(block) && bl || block instanceof IronBarsBlock;
+        return !IronBarsBlock.isExceptionForConnection(block) && bl || block instanceof IronBarsBlock || block.is(BlockTags.WALLS);
     }
 
     @Override

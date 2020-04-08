@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -27,7 +28,8 @@ extends Feature<NoneFeatureConfiguration> {
         if (!levelAccessor.isEmptyBlock(blockPos)) {
             return false;
         }
-        if (levelAccessor.getBlockState(blockPos.above()).getBlock() != Blocks.NETHERRACK) {
+        Block block = levelAccessor.getBlockState(blockPos.above()).getBlock();
+        if (block != Blocks.NETHERRACK && block != Blocks.BASALT && block != Blocks.BLACKSTONE) {
             return false;
         }
         levelAccessor.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);

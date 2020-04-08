@@ -532,11 +532,11 @@ extends LivingEntity {
             return this.canReplaceEqualItem(itemStack, itemStack2);
         }
         if (itemStack.getItem() instanceof ArmorItem) {
-            if (!(itemStack2.getItem() instanceof ArmorItem)) {
-                return true;
-            }
             if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
                 return false;
+            }
+            if (!(itemStack2.getItem() instanceof ArmorItem)) {
+                return true;
             }
             ArmorItem armorItem = (ArmorItem)itemStack.getItem();
             ArmorItem armorItem2 = (ArmorItem)itemStack2.getItem();
@@ -1010,7 +1010,7 @@ extends LivingEntity {
         Item item = itemStack.getItem();
         if (!this.level.isClientSide && item instanceof SpawnEggItem) {
             SpawnEggItem spawnEggItem = (SpawnEggItem)item;
-            Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this.getType(), this.level, this.position(), itemStack);
+            Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getType(), this.level, this.position(), itemStack);
             optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, (Mob)mob));
         }
         return false;

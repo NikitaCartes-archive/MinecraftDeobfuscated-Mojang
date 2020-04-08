@@ -40,6 +40,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -47,7 +48,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class CrossbowItem
-extends ProjectileWeaponItem {
+extends ProjectileWeaponItem
+implements Vanishable {
     private boolean startSoundPlayed = false;
     private boolean midLoadSoundPlayed = false;
 

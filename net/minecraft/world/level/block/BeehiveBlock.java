@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -285,7 +286,7 @@ extends BaseEntityBlock {
     }
 
     public static Direction getRandomOffset(Random random) {
-        return SPAWN_DIRECTIONS[random.nextInt(SPAWN_DIRECTIONS.length)];
+        return Util.getRandom(SPAWN_DIRECTIONS, random);
     }
 }
 

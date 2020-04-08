@@ -8,7 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ItemSteerableMount;
+import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,13 +28,13 @@ extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player2, InteractionHand interactionHand) {
-        ItemSteerableMount itemSteerableMount;
+        ItemSteerable itemSteerable;
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (level.isClientSide) {
             return InteractionResultHolder.pass(itemStack);
         }
         Entity entity = player2.getVehicle();
-        if (player2.isPassenger() && entity instanceof ItemSteerableMount && entity.getType() == this.canInteractWith && (itemSteerableMount = (ItemSteerableMount)((Object)entity)).boost()) {
+        if (player2.isPassenger() && entity instanceof ItemSteerable && entity.getType() == this.canInteractWith && (itemSteerable = (ItemSteerable)((Object)entity)).boost()) {
             itemStack.hurtAndBreak(this.consumeItemDamage, player2, player -> player.broadcastBreakEvent(interactionHand));
             player2.swing(interactionHand, true);
             if (itemStack.isEmpty()) {

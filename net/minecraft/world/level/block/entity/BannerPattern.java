@@ -57,7 +57,8 @@ public enum BannerPattern {
     CREEPER("creeper", "cre", new ItemStack(Items.CREEPER_HEAD)),
     SKULL("skull", "sku", new ItemStack(Items.WITHER_SKELETON_SKULL)),
     FLOWER("flower", "flo", new ItemStack(Blocks.OXEYE_DAISY)),
-    MOJANG("mojang", "moj", new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+    MOJANG("mojang", "moj", new ItemStack(Items.ENCHANTED_GOLDEN_APPLE)),
+    PIGLIN("piglin", "pig");
 
     public static final int COUNT;
     public static final int AVAILABLE_PATTERNS;

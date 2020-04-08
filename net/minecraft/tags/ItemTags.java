@@ -3,6 +3,8 @@
  */
 package net.minecraft.tags;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -51,6 +53,7 @@ public class ItemTags {
     public static final Tag.Named<Item> PIGLIN_REPELLENTS = ItemTags.bind("piglin_repellents");
     public static final Tag.Named<Item> GOLD_ORES = ItemTags.bind("gold_ores");
     public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = ItemTags.bind("non_flammable_wood");
+    public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = ItemTags.bind("soul_fire_base_blocks");
     public static final Tag.Named<Item> BOATS = ItemTags.bind("boats");
     public static final Tag.Named<Item> FISHES = ItemTags.bind("fishes");
     public static final Tag.Named<Item> SIGNS = ItemTags.bind("signs");
@@ -59,6 +62,8 @@ public class ItemTags {
     public static final Tag.Named<Item> ARROWS = ItemTags.bind("arrows");
     public static final Tag.Named<Item> LECTERN_BOOKS = ItemTags.bind("lectern_books");
     public static final Tag.Named<Item> BEACON_PAYMENT_ITEMS = ItemTags.bind("beacon_payment_items");
+    public static final Tag.Named<Item> STONE_TOOL_MATERIALS = ItemTags.bind("stone_tool_materials");
+    public static final Tag.Named<Item> FURNACE_MATERIALS = ItemTags.bind("furnace_materials");
 
     private static Tag.Named<Item> bind(String string) {
         return HELPER.bind(string);
@@ -66,6 +71,11 @@ public class ItemTags {
 
     public static void reset(TagCollection<Item> tagCollection) {
         HELPER.reset(tagCollection);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static void resetToEmpty() {
+        HELPER.resetToEmpty();
     }
 
     public static TagCollection<Item> getAllTags() {

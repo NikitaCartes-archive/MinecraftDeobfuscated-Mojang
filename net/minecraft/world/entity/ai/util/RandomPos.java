@@ -98,7 +98,7 @@ public class RandomPos {
             if (bl2) {
                 blockPos3 = RandomPos.moveUpToAboveSolid(blockPos3, random.nextInt(l + 1) + m, pathfinderMob.level.getMaxBuildHeight(), blockPos -> pathfinderMob.level.getBlockState((BlockPos)blockPos).getMaterial().isSolid());
             }
-            if (!bl && pathfinderMob.level.getFluidState(blockPos3).is(FluidTags.WATER) || pathfinderMob.getPathfindingMalus(blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3.getX(), blockPos3.getY(), blockPos3.getZ())) != 0.0f || !((f = toDoubleFunction.applyAsDouble(blockPos3)) > e)) continue;
+            if (!bl && pathfinderMob.level.getFluidState(blockPos3).is(FluidTags.WATER) || pathfinderMob.getPathfindingMalus(blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3.mutable())) != 0.0f || !((f = toDoubleFunction.applyAsDouble(blockPos3)) > e)) continue;
             e = f;
             blockPos2 = blockPos3;
             bl5 = true;

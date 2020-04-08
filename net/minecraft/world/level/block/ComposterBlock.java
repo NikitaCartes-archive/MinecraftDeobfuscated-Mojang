@@ -88,6 +88,9 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.5f, Items.CACTUS);
         ComposterBlock.add(0.5f, Items.SUGAR_CANE);
         ComposterBlock.add(0.5f, Items.VINE);
+        ComposterBlock.add(0.5f, Items.NETHER_SPROUTS);
+        ComposterBlock.add(0.5f, Items.WEEPING_VINES);
+        ComposterBlock.add(0.5f, Items.TWISTING_VINES);
         ComposterBlock.add(0.5f, Items.MELON_SLICE);
         ComposterBlock.add(0.65f, Items.SEA_PICKLE);
         ComposterBlock.add(0.65f, Items.LILY_PAD);
@@ -103,6 +106,11 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.65f, Items.BROWN_MUSHROOM);
         ComposterBlock.add(0.65f, Items.RED_MUSHROOM);
         ComposterBlock.add(0.65f, Items.MUSHROOM_STEM);
+        ComposterBlock.add(0.65f, Items.CRIMSON_FUNGUS);
+        ComposterBlock.add(0.65f, Items.WARPED_FUNGUS);
+        ComposterBlock.add(0.65f, Items.NETHER_WART);
+        ComposterBlock.add(0.65f, Items.CRIMSON_ROOTS);
+        ComposterBlock.add(0.65f, Items.WARPED_ROOTS);
         ComposterBlock.add(0.65f, Items.DANDELION);
         ComposterBlock.add(0.65f, Items.POPPY);
         ComposterBlock.add(0.65f, Items.BLUE_ORCHID);
@@ -125,6 +133,8 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.85f, Items.HAY_BLOCK);
         ComposterBlock.add(0.85f, Items.BROWN_MUSHROOM_BLOCK);
         ComposterBlock.add(0.85f, Items.RED_MUSHROOM_BLOCK);
+        ComposterBlock.add(0.85f, Items.NETHER_WART_BLOCK);
+        ComposterBlock.add(0.85f, Items.WARPED_WART_BLOCK);
         ComposterBlock.add(0.85f, Items.BREAD);
         ComposterBlock.add(0.85f, Items.BAKED_POTATO);
         ComposterBlock.add(0.85f, Items.COOKIE);

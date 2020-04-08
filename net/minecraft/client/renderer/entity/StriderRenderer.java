@@ -18,6 +18,7 @@ import net.minecraft.world.entity.monster.Strider;
 public class StriderRenderer
 extends MobRenderer<Strider, StriderModel<Strider>> {
     private static final ResourceLocation STRIDER_LOCATION = new ResourceLocation("textures/entity/strider/strider.png");
+    private static final ResourceLocation COLD_LOCATION = new ResourceLocation("textures/entity/strider/strider_cold.png");
 
     public StriderRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new StriderModel(), 0.5f);
@@ -26,7 +27,7 @@ extends MobRenderer<Strider, StriderModel<Strider>> {
 
     @Override
     public ResourceLocation getTextureLocation(Strider strider) {
-        return STRIDER_LOCATION;
+        return strider.isSuffocating() ? COLD_LOCATION : STRIDER_LOCATION;
     }
 
     @Override

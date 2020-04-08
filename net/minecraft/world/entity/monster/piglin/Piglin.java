@@ -8,8 +8,6 @@ import com.mojang.datafixers.Dynamic;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -60,6 +58,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -88,6 +87,8 @@ implements CrossbowAttackMob {
         this.setCanPickUpLoot(true);
         ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
         this.xpReward = 5;
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
 
     @Override
@@ -134,6 +135,10 @@ implements CrossbowAttackMob {
 
     protected ItemStack addToInventory(ItemStack itemStack) {
         return this.inventory.addItem(itemStack);
+    }
+
+    protected boolean canAddToInventory(ItemStack itemStack) {
+        return this.inventory.canAddItem(itemStack);
     }
 
     @Override
@@ -213,7 +218,7 @@ implements CrossbowAttackMob {
             return true;
         }
         if (this.level.isClientSide) {
-            return false;
+            return PiglinAi.canAdmire(this, player.getItemInHand(interactionHand)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
         }
         return PiglinAi.mobInteract(this, player, interactionHand);
     }
@@ -325,7 +330,6 @@ implements CrossbowAttackMob {
         return new ItemStack(Items.GOLDEN_SWORD);
     }
 
-    @Environment(value=EnvType.CLIENT)
     private boolean isChargingCrossbow() {
         return this.entityData.get(DATA_IS_CHARGING_CROSSBOW);
     }
@@ -340,7 +344,6 @@ implements CrossbowAttackMob {
         this.noActionTime = 0;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public PiglinArmPose getArmPose() {
         if (this.swinging) {
             return PiglinArmPose.DEFAULT;
@@ -389,7 +392,7 @@ implements CrossbowAttackMob {
     }
 
     protected void holdInOffHand(ItemStack itemStack) {
-        if (itemStack.getItem() == Items.GOLD_INGOT) {
+        if (itemStack.getItem() == PiglinAi.BARTERING_ITEM) {
             this.setItemSlot(EquipmentSlot.OFFHAND, itemStack);
             this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
         } else {
@@ -499,7 +502,6 @@ implements CrossbowAttackMob {
         DebugPackets.sendEntityBrain(this);
     }
 
-    @Environment(value=EnvType.CLIENT)
     public static enum PiglinArmPose {
         CROSSBOW_HOLD,
         CROSSBOW_CHARGE,

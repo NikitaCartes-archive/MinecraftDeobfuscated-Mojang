@@ -21,7 +21,11 @@ implements ChatListener {
 
     @Override
     public void handle(ChatType chatType, Component component) {
-        this.minecraft.gui.getChat().addMessage(component);
+        if (chatType != ChatType.CHAT) {
+            this.minecraft.gui.getChat().addMessage(component);
+        } else {
+            this.minecraft.gui.getChat().enqueueMessage(component);
+        }
     }
 }
 
