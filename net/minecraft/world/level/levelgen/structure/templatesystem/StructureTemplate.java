@@ -26,6 +26,8 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -260,7 +262,7 @@ public class StructureTemplate {
             }
         }
         if (!structurePlaceSettings.isIgnoreEntities()) {
-            this.placeEntities(levelAccessor, blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot(), boundingBox);
+            this.placeEntities(levelAccessor, blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot(), boundingBox, structurePlaceSettings.shouldFinalizeEntities());
         }
         return true;
     }
@@ -297,7 +299,7 @@ public class StructureTemplate {
         return list2;
     }
 
-    private void placeEntities(LevelAccessor levelAccessor, BlockPos blockPos, Mirror mirror, Rotation rotation, BlockPos blockPos2, @Nullable BoundingBox boundingBox) {
+    private void placeEntities(LevelAccessor levelAccessor, BlockPos blockPos, Mirror mirror, Rotation rotation, BlockPos blockPos2, @Nullable BoundingBox boundingBox, boolean bl) {
         for (StructureEntityInfo structureEntityInfo : this.entityInfoList) {
             BlockPos blockPos3 = StructureTemplate.transform(structureEntityInfo.blockPos, mirror, rotation, blockPos2).offset(blockPos);
             if (boundingBox != null && !boundingBox.isInside(blockPos3)) continue;
@@ -313,6 +315,9 @@ public class StructureTemplate {
             StructureTemplate.createEntityIgnoreException(levelAccessor, compoundTag).ifPresent(entity -> {
                 float f = entity.mirror(mirror);
                 entity.moveTo(vec3.x, vec3.y, vec3.z, f += entity.yRot - entity.rotate(rotation), entity.xRot);
+                if (bl && entity instanceof Mob) {
+                    ((Mob)entity).finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
+                }
                 levelAccessor.addFreshEntity((Entity)entity);
             });
         }
@@ -433,10 +438,11 @@ public class StructureTemplate {
     }
 
     public BoundingBox getBoundingBox(StructurePlaceSettings structurePlaceSettings, BlockPos blockPos) {
-        Rotation rotation = structurePlaceSettings.getRotation();
-        BlockPos blockPos2 = structurePlaceSettings.getRotationPivot();
+        return this.getBoundingBox(blockPos, structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot(), structurePlaceSettings.getMirror());
+    }
+
+    public BoundingBox getBoundingBox(BlockPos blockPos, Rotation rotation, BlockPos blockPos2, Mirror mirror) {
         BlockPos blockPos3 = this.getSize(rotation);
-        Mirror mirror = structurePlaceSettings.getMirror();
         int i = blockPos2.getX();
         int j = blockPos2.getZ();
         int k = blockPos3.getX() - 1;

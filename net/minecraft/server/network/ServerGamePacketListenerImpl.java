@@ -63,6 +63,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -592,6 +593,20 @@ implements ServerGamePacketListener {
     }
 
     @Override
+    public void handleJigsawGenerate(ServerboundJigsawGeneratePacket serverboundJigsawGeneratePacket) {
+        PacketUtils.ensureRunningOnSameThread(serverboundJigsawGeneratePacket, this, this.player.getLevel());
+        if (!this.player.canUseGameMasterBlocks()) {
+            return;
+        }
+        BlockPos blockPos = serverboundJigsawGeneratePacket.getPos();
+        BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
+        if (blockEntity instanceof JigsawBlockEntity) {
+            JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
+            jigsawBlockEntity.generate(this.server.getLevel(this.player.dimension), serverboundJigsawGeneratePacket.levels());
+        }
+    }
+
+    @Override
     public void handleSelectTrade(ServerboundSelectTradePacket serverboundSelectTradePacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundSelectTradePacket, this, this.player.getLevel());
         int i = serverboundSelectTradePacket.getItem();
@@ -1065,7 +1080,7 @@ implements ServerGamePacketListener {
                 } else if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.ATTACK) {
                     if (entity instanceof ItemEntity || entity instanceof ExperienceOrb || entity instanceof AbstractArrow || entity == this.player) {
                         this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_entity_attacked", new Object[0]));
-                        this.server.warn("Player " + this.player.getName().getString() + " tried to attack an invalid entity");
+                        LOGGER.warn("Player {} tried to attack an invalid entity", (Object)this.player.getName().getString());
                         return;
                     }
                     this.player.attack(entity);
@@ -1219,7 +1234,7 @@ implements ServerGamePacketListener {
             }
             SignBlockEntity signBlockEntity = (SignBlockEntity)blockEntity;
             if (!signBlockEntity.isEditable() || signBlockEntity.getPlayerWhoMayEdit() != this.player) {
-                this.server.warn("Player " + this.player.getName().getString() + " just tried to change non-editable sign");
+                LOGGER.warn("Player {} just tried to change non-editable sign", (Object)this.player.getName().getString());
                 return;
             }
             String[] strings = serverboundSignUpdatePacket.getLines();

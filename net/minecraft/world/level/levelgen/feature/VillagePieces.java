@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.feature.SavannaVillagePools;
 import net.minecraft.world.level.levelgen.feature.SnowyVillagePools;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.TaigaVillagePools;
-import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -24,13 +24,17 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class VillagePieces {
-    public static void addPieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, VillageConfiguration villageConfiguration) {
+    public static void bootstrap() {
         PlainVillagePools.bootstrap();
         SnowyVillagePools.bootstrap();
         SavannaVillagePools.bootstrap();
         DesertVillagePools.bootstrap();
         TaigaVillagePools.bootstrap();
-        JigsawPlacement.addPieces(villageConfiguration.startPool, villageConfiguration.size, VillagePiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom);
+    }
+
+    public static void addPieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, JigsawConfiguration jigsawConfiguration) {
+        VillagePieces.bootstrap();
+        JigsawPlacement.addPieces(jigsawConfiguration.startPool, jigsawConfiguration.size, VillagePiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom, true, true);
     }
 
     public static class VillagePiece

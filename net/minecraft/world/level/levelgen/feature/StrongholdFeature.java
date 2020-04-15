@@ -17,6 +17,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -38,7 +39,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
+    public boolean featureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome) {
+        ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator, worldgenRandom, i, j);
+        return this.isFeatureChunk(biomeManager, chunkGenerator, worldgenRandom, i, j, biome, chunkPos);
+    }
+
+    @Override
+    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
         if (this.currentSeed != chunkGenerator.getSeed()) {
             this.reset();
         }
@@ -46,8 +53,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
             this.generatePositions(chunkGenerator);
             this.isSpotSelected = true;
         }
-        for (ChunkPos chunkPos : this.strongholdPos) {
-            if (i != chunkPos.x || j != chunkPos.z) continue;
+        for (ChunkPos chunkPos2 : this.strongholdPos) {
+            if (i != chunkPos2.x || j != chunkPos2.z) continue;
             return true;
         }
         return false;

@@ -59,6 +59,7 @@ extends Settings<DedicatedServerProperties> {
     public final boolean broadcastConsoleToOps;
     public final int maxWorldSize;
     public final boolean syncChunkWrites;
+    public final boolean enableJmxMonitoring;
     public final Settings.MutableValue<Integer> playerIdleTimeout;
     public final Settings.MutableValue<Boolean> whiteList;
 
@@ -81,6 +82,7 @@ extends Settings<DedicatedServerProperties> {
         this.broadcastConsoleToOps = this.get("broadcast-console-to-ops", true);
         this.maxWorldSize = this.get("max-world-size", integer -> Mth.clamp(integer, 1, 29999984), 29999984);
         this.syncChunkWrites = this.get("sync-chunk-writes", true);
+        this.enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
         this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
         this.whiteList = this.getMutable("white-list", false);
     }

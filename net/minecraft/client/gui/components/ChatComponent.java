@@ -225,22 +225,21 @@ extends GuiComponent {
         if (!this.isChatFocused() || this.minecraft.options.hideGui || !this.isChatVisible()) {
             return null;
         }
-        double f = this.getScale() * (this.minecraft.options.chatLineSpacing + 1.0);
-        double g = d - 2.0;
-        double h = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
-        g = Mth.floor(g / f);
-        h = Mth.floor(h / f);
-        if (g < 0.0 || h < 0.0) {
+        double f = d - 2.0;
+        double g = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
+        f = Mth.floor(f / this.getScale());
+        g = Mth.floor(g / (this.getScale() * (this.minecraft.options.chatLineSpacing + 1.0)));
+        if (f < 0.0 || g < 0.0) {
             return null;
         }
         int i = Math.min(this.getLinesPerPage(), this.trimmedMessages.size());
-        if (g <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && h < (double)(this.minecraft.font.lineHeight * i + i)) {
-            int j = (int)(h / (double)this.minecraft.font.lineHeight + (double)this.chatScrollbarPos);
+        if (f <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && g < (double)(this.minecraft.font.lineHeight * i + i)) {
+            int j = (int)(g / (double)this.minecraft.font.lineHeight + (double)this.chatScrollbarPos);
             if (j >= 0 && j < this.trimmedMessages.size()) {
                 GuiMessage guiMessage = this.trimmedMessages.get(j);
                 int k = 0;
                 for (Component component : guiMessage.getMessage()) {
-                    if (!(component instanceof TextComponent) || !((double)(k += this.minecraft.font.width(ComponentRenderUtils.stripColor(((TextComponent)component).getText(), false))) > g)) continue;
+                    if (!(component instanceof TextComponent) || !((double)(k += this.minecraft.font.width(ComponentRenderUtils.stripColor(((TextComponent)component).getText(), false))) > f)) continue;
                     return component;
                 }
             }

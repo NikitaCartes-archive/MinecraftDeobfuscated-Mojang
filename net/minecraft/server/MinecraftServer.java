@@ -908,14 +908,6 @@ Runnable {
         return new File(this.getServerDirectory(), string);
     }
 
-    public void info(String string) {
-        LOGGER.info(string);
-    }
-
-    public void warn(String string) {
-        LOGGER.warn(string);
-    }
-
     public ServerLevel getLevel(DimensionType dimensionType) {
         return this.levels.get(dimensionType);
     }
@@ -938,20 +930,6 @@ Runnable {
 
     public String[] getPlayerNames() {
         return this.playerList.getPlayerNamesArray();
-    }
-
-    public boolean isDebugging() {
-        return false;
-    }
-
-    public void error(String string) {
-        LOGGER.error(string);
-    }
-
-    public void debug(String string) {
-        if (this.isDebugging()) {
-            LOGGER.info(string);
-        }
     }
 
     public String getServerModName() {

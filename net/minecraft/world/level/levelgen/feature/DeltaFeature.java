@@ -37,7 +37,7 @@ extends Feature<DeltaFeatureConfiguration> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        BlockPos blockPos2 = DeltaFeature.findDeltaLevel(levelAccessor, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
+        BlockPos blockPos2 = DeltaFeature.findDeltaLevel(levelAccessor, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1));
         if (blockPos2 == null) {
             return false;
         }
@@ -52,12 +52,13 @@ extends Feature<DeltaFeatureConfiguration> {
         for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, k, 0, l)) {
             BlockPos blockPos4;
             if (blockPos3.distManhattan(blockPos2) > m) break;
-            if (levelAccessor.getBlockState(blockPos3).getBlock() == deltaFeatureConfiguration.contents.getBlock() || !DeltaFeature.isClear(levelAccessor, blockPos3, deltaFeatureConfiguration)) continue;
+            if (!DeltaFeature.isClear(levelAccessor, blockPos3, deltaFeatureConfiguration)) continue;
             if (bl3) {
                 bl = true;
                 this.setBlock(levelAccessor, blockPos3, deltaFeatureConfiguration.rim);
             }
             if (!DeltaFeature.isClear(levelAccessor, blockPos4 = blockPos3.offset(i, 0, j), deltaFeatureConfiguration)) continue;
+            bl = true;
             this.setBlock(levelAccessor, blockPos4, deltaFeatureConfiguration.contents);
         }
         return bl;
@@ -76,9 +77,8 @@ extends Feature<DeltaFeatureConfiguration> {
     }
 
     @Nullable
-    private static BlockPos findDeltaLevel(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, int i) {
-        while (mutableBlockPos.getY() > 1 && i > 0) {
-            --i;
+    private static BlockPos findDeltaLevel(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos) {
+        while (mutableBlockPos.getY() > 1) {
             if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
                 BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
                 mutableBlockPos.move(Direction.UP);

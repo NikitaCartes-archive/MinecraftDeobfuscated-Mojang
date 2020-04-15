@@ -34,7 +34,7 @@ extends Feature<ColumnFeatureConfiguration> {
         }
         int j = BasaltColumnsFeature.calculateHeight(random, columnFeatureConfiguration);
         boolean bl = random.nextFloat() < 0.9f;
-        int k = bl ? 5 : 8;
+        int k = Math.min(j, bl ? 5 : 8);
         int l = bl ? 50 : 15;
         boolean bl2 = false;
         for (BlockPos blockPos3 : BlockPos.randomBetweenClosed(random, l, blockPos2.getX() - k, blockPos2.getY(), blockPos2.getZ() - k, blockPos2.getX() + k, blockPos2.getY(), blockPos2.getZ() + k)) {

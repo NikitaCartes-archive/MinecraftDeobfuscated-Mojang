@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
@@ -41,18 +42,18 @@ extends RandomScatteredFeature<ShipwreckConfiguration> {
     }
 
     @Override
-    protected int getRandomSalt() {
+    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
         return 165745295;
     }
 
     @Override
-    protected int getSpacing(ChunkGenerator<?> chunkGenerator) {
-        return ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getShipwreckSpacing();
+    protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+        return chunkGeneratorSettings.getShipwreckSpacing();
     }
 
     @Override
-    protected int getSeparation(ChunkGenerator<?> chunkGenerator) {
-        return ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getShipwreckSeparation();
+    protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+        return chunkGeneratorSettings.getShipwreckSeparation();
     }
 
     public static class FeatureStart

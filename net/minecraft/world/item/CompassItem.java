@@ -38,19 +38,14 @@ implements Vanishable {
     public CompassItem(Item.Properties properties) {
         super(properties);
         this.addProperty(new ResourceLocation("angle"), new ItemPropertyFunction(){
-            @Environment(value=EnvType.CLIENT)
-            private double rotation;
-            @Environment(value=EnvType.CLIENT)
-            private double rota;
-            @Environment(value=EnvType.CLIENT)
-            private long lastUpdateTick;
+            private final CompassWobble wobble = new CompassWobble();
+            private final CompassWobble wobbleRandom = new CompassWobble();
 
             @Override
             @Environment(value=EnvType.CLIENT)
             public float call(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-                double f;
+                double g;
                 CompoundTag compoundTag;
-                boolean bl2;
                 BlockPos blockPos;
                 Entity entity;
                 if (livingEntity == null && !itemStack.isFramed()) {
@@ -61,34 +56,24 @@ implements Vanishable {
                 if (level == null) {
                     level = entity.level;
                 }
-                BlockPos blockPos2 = blockPos = (bl2 = CompassItem.hasLodestoneData(compoundTag = itemStack.getOrCreateTag())) ? CompassItem.this.getLodestonePosition(level, compoundTag) : CompassItem.this.getSpawnPosition(level);
+                BlockPos blockPos2 = blockPos = CompassItem.hasLodestoneData(compoundTag = itemStack.getOrCreateTag()) ? CompassItem.this.getLodestonePosition(level, compoundTag) : CompassItem.this.getSpawnPosition(level);
                 if (blockPos != null) {
                     double d = bl ? (double)entity.yRot : CompassItem.getFrameRotation((ItemFrame)entity);
                     d = Mth.positiveModulo(d / 360.0, 1.0);
-                    boolean bl3 = !bl && entity.getDirection().getAxis().isVertical();
-                    boolean bl4 = bl3 && entity.getDirection() == Direction.UP;
-                    double e = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / 6.2831854820251465 * (double)(bl4 ? -1 : 1);
-                    f = 0.5 - (d - 0.25 - e) * (double)(bl3 ? -1 : 1);
+                    double e = 0.5 - (d - 0.25);
+                    boolean bl2 = !bl && entity.getDirection().getAxis().isVertical();
+                    boolean bl3 = bl2 && entity.getDirection() == Direction.UP;
+                    double f = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / 6.2831854820251465 * (double)(bl3 ? -1 : 1);
+                    g = 0.5 - (d - 0.25 - f) * (double)(bl2 ? -1 : 1);
+                    if (bl) {
+                        this.wobble.update(level, e);
+                        g -= e - this.wobble.getRotation();
+                    }
                 } else {
-                    f = Math.random();
+                    this.wobbleRandom.update(level, Math.random());
+                    g = this.wobbleRandom.getRotation();
                 }
-                if (bl) {
-                    f = this.wobble(level, f);
-                }
-                return Mth.positiveModulo((float)f, 1.0f);
-            }
-
-            @Environment(value=EnvType.CLIENT)
-            private double wobble(Level level, double d) {
-                if (level.getGameTime() != this.lastUpdateTick) {
-                    this.lastUpdateTick = level.getGameTime();
-                    double e = d - this.rotation;
-                    e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
-                    this.rota += e * 0.1;
-                    this.rota *= 0.8;
-                    this.rotation = Mth.positiveModulo(this.rotation + this.rota, 1.0);
-                }
-                return this.rotation;
+                return Mth.positiveModulo((float)g, 1.0f);
             }
         });
     }
@@ -136,9 +121,9 @@ implements Vanishable {
     private static double getFrameRotation(ItemFrame itemFrame) {
         Direction direction = itemFrame.getDirection();
         if (direction.getAxis().isVertical()) {
-            return 0.0;
+            return Mth.wrapDegrees(itemFrame.getRotation() * -45);
         }
-        return Mth.wrapDegrees(180 + itemFrame.getDirection().get2DDataValue() * 90);
+        return Mth.wrapDegrees(180 + itemFrame.getDirection().get2DDataValue() * 90 + itemFrame.getRotation() * 45);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -180,6 +165,35 @@ implements Vanishable {
     @Override
     public String getDescriptionId(ItemStack itemStack) {
         return CompassItem.isLodestoneCompass(itemStack) ? "item.minecraft.lodestone_compass" : super.getDescriptionId(itemStack);
+    }
+
+    static class CompassWobble {
+        @Environment(value=EnvType.CLIENT)
+        private double rotation;
+        @Environment(value=EnvType.CLIENT)
+        private double deltaRotation;
+        @Environment(value=EnvType.CLIENT)
+        private long lastUpdateTick;
+
+        private CompassWobble() {
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public double getRotation() {
+            return this.rotation;
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        private void update(Level level, double d) {
+            if (level.getGameTime() != this.lastUpdateTick) {
+                this.lastUpdateTick = level.getGameTime();
+                double e = d - this.rotation;
+                e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
+                this.deltaRotation += e * 0.1;
+                this.deltaRotation *= 0.8;
+                this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0);
+            }
+        }
     }
 }
 

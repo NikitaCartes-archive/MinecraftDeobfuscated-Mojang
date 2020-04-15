@@ -39,7 +39,7 @@ extends StructurePoolElement {
     }
 
     @Override
-    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random) {
+    public boolean place(StructureManager structureManager, LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random, boolean bl) {
         return true;
     }
 

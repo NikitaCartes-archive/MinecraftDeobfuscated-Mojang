@@ -161,8 +161,8 @@ extends Monster {
             Skeleton skeleton = EntityType.SKELETON.create(this.level);
             skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
             skeleton.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, null, null);
-            levelAccessor.addFreshEntity(skeleton);
             skeleton.startRiding(this);
+            levelAccessor.addFreshEntity(skeleton);
         }
         if (spawnGroupData == null) {
             spawnGroupData = new SpiderEffectsGroupData();

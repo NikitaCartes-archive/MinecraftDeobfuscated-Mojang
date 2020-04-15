@@ -76,7 +76,11 @@ extends StructurePiece {
 
     @Override
     public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-        return this.element.place(this.structureManager, levelAccessor, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random);
+        return this.place(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
+    }
+
+    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, BlockPos blockPos, boolean bl) {
+        return this.element.place(this.structureManager, levelAccessor, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
     }
 
     @Override

@@ -34,7 +34,6 @@ extends Behavior<Villager> {
     @Nullable
     private BlockPos aboveFarmlandPos;
     private boolean canPlantStuff;
-    private boolean wantsToReapStuff;
     private long nextOkStartTime;
     private int timeWorkedSoFar;
     private final List<BlockPos> validFarmlandAroundVillager = Lists.newArrayList();
@@ -52,28 +51,19 @@ extends Behavior<Villager> {
             return false;
         }
         this.canPlantStuff = villager.hasFarmSeeds();
-        this.wantsToReapStuff = false;
-        SimpleContainer simpleContainer = villager.getInventory();
-        int i = simpleContainer.getContainerSize();
-        for (int j = 0; j < i; ++j) {
-            ItemStack itemStack = simpleContainer.getItem(j);
-            if (!itemStack.isEmpty()) continue;
-            this.wantsToReapStuff = true;
-            break;
-        }
         BlockPos.MutableBlockPos mutableBlockPos = villager.blockPosition().mutable();
         this.validFarmlandAroundVillager.clear();
-        for (int k = -1; k <= 1; ++k) {
-            for (int l = -1; l <= 1; ++l) {
-                for (int m = -1; m <= 1; ++m) {
-                    mutableBlockPos.set(villager.getX() + (double)k, villager.getY() + (double)l, villager.getZ() + (double)m);
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; ++j) {
+                for (int k = -1; k <= 1; ++k) {
+                    mutableBlockPos.set(villager.getX() + (double)i, villager.getY() + (double)j, villager.getZ() + (double)k);
                     if (!this.validPos(mutableBlockPos, serverLevel)) continue;
                     this.validFarmlandAroundVillager.add(new BlockPos(mutableBlockPos));
                 }
             }
         }
         this.aboveFarmlandPos = this.getValidFarmland(serverLevel);
-        return (this.canPlantStuff || this.wantsToReapStuff) && this.aboveFarmlandPos != null;
+        return this.canPlantStuff && this.aboveFarmlandPos != null;
     }
 
     @Nullable
@@ -85,7 +75,7 @@ extends Behavior<Villager> {
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
         Block block2 = serverLevel.getBlockState(blockPos.below()).getBlock();
-        return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) && this.wantsToReapStuff || blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff;
+        return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) || blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff;
     }
 
     @Override
@@ -113,7 +103,7 @@ extends Behavior<Villager> {
             BlockState blockState = serverLevel.getBlockState(this.aboveFarmlandPos);
             Block block = blockState.getBlock();
             Block block2 = serverLevel.getBlockState(this.aboveFarmlandPos.below()).getBlock();
-            if (block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) && this.wantsToReapStuff) {
+            if (block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState)) {
                 serverLevel.destroyBlock(this.aboveFarmlandPos, true, villager);
             }
             if (blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff) {

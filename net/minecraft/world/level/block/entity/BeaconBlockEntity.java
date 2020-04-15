@@ -264,7 +264,7 @@ TickableBlockEntity {
     @Override
     @Environment(value=EnvType.CLIENT)
     public double getViewDistance() {
-        return 65536.0;
+        return 256.0;
     }
 
     @Nullable

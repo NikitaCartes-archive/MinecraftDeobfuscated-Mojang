@@ -261,6 +261,7 @@ public class SoundEngine {
     }
 
     public void play(SoundInstance soundInstance) {
+        boolean bl2;
         if (!this.loaded) {
             return;
         }
@@ -273,15 +274,6 @@ public class SoundEngine {
             if (ONLY_WARN_ONCE.add(resourceLocation)) {
                 LOGGER.warn(MARKER, "Unable to play unknown soundEvent: {}", (Object)resourceLocation);
             }
-            return;
-        }
-        if (!this.listeners.isEmpty()) {
-            for (SoundEventListener soundEventListener : this.listeners) {
-                soundEventListener.onPlaySound(soundInstance, weighedSoundEvents);
-            }
-        }
-        if (this.listener.getGain() <= 0.0f) {
-            LOGGER.debug(MARKER, "Skipped playing soundEvent: {}, master volume was zero", (Object)resourceLocation);
             return;
         }
         Sound sound = soundInstance.getSound();
@@ -302,9 +294,23 @@ public class SoundEngine {
             LOGGER.debug(MARKER, "Skipped playing sound {}, volume was zero.", (Object)sound.getLocation());
             return;
         }
-        boolean bl2 = SoundEngine.shouldLoopAutomatically(soundInstance);
-        boolean bl3 = sound.shouldStream();
         Vec3 vec3 = new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ());
+        if (!this.listeners.isEmpty()) {
+            boolean bl3 = bl2 = bl || attenuation == SoundInstance.Attenuation.NONE || this.listener.getListenerPosition().distanceToSqr(vec3) < (double)(g * g);
+            if (bl2) {
+                for (SoundEventListener soundEventListener : this.listeners) {
+                    soundEventListener.onPlaySound(soundInstance, weighedSoundEvents);
+                }
+            } else {
+                LOGGER.debug(MARKER, "Did not notify listeners of soundEvent: {}, it is too far away to hear", (Object)resourceLocation);
+            }
+        }
+        if (this.listener.getGain() <= 0.0f) {
+            LOGGER.debug(MARKER, "Skipped playing soundEvent: {}, master volume was zero", (Object)resourceLocation);
+            return;
+        }
+        bl2 = SoundEngine.shouldLoopAutomatically(soundInstance);
+        boolean bl3 = sound.shouldStream();
         CompletableFuture<ChannelAccess.ChannelHandle> completableFuture = this.channelAccess.createHandle(sound.shouldStream() ? Library.Pool.STREAMING : Library.Pool.STATIC);
         ChannelAccess.ChannelHandle channelHandle = completableFuture.join();
         if (channelHandle == null) {

@@ -213,6 +213,9 @@ implements ChunkAccess {
 
     @Override
     public void addEntity(Entity entity) {
+        if (entity.isPassenger()) {
+            return;
+        }
         CompoundTag compoundTag = new CompoundTag();
         entity.save(compoundTag);
         this.addEntity(compoundTag);

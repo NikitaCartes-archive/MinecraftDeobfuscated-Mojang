@@ -59,14 +59,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class Piglin
 extends Monster
 implements CrossbowAttackMob {
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
@@ -75,10 +72,6 @@ implements CrossbowAttackMob {
     private int timeInOverworld = 0;
     private final SimpleContainer inventory = new SimpleContainer(8);
     private boolean cannotHunt = false;
-    private static int createCounter = 0;
-    private static int dieCounter = 0;
-    private static int killedByHoglinCounter = 0;
-    private static int removeCounter = 0;
     protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.INTERACTABLE_DOORS, SensorType.PIGLIN_SPECIFIC_SENSOR);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, MemoryModuleType.NEAREST_ADULT_PIGLINS, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, new MemoryModuleType[]{MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.PATH, MemoryModuleType.ANGRY_AT, MemoryModuleType.AVOID_TARGET, MemoryModuleType.ADMIRING_ITEM, MemoryModuleType.ADMIRING_DISABLED, MemoryModuleType.CELEBRATE_LOCATION, MemoryModuleType.HUNTED_RECENTLY, MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN, MemoryModuleType.NEAREST_VISIBLE_WITHER_SKELETON, MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, MemoryModuleType.RIDE_TARGET, MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, MemoryModuleType.ATE_RECENTLY, MemoryModuleType.NEAREST_REPELLENT});
 
@@ -89,16 +82,6 @@ implements CrossbowAttackMob {
         this.xpReward = 5;
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
         this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
-    }
-
-    @Override
-    public void die(DamageSource damageSource) {
-        super.die(damageSource);
-    }
-
-    @Override
-    public void remove() {
-        super.remove();
     }
 
     @Override
@@ -168,8 +151,12 @@ implements CrossbowAttackMob {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        if (levelAccessor.getRandom().nextFloat() < 0.2f) {
-            this.setBaby(true);
+        if (mobSpawnType != MobSpawnType.STRUCTURE) {
+            if (levelAccessor.getRandom().nextFloat() < 0.2f) {
+                this.setBaby(true);
+            } else if (this.isAdult()) {
+                this.setItemSlot(EquipmentSlot.MAINHAND, this.createSpawnWeapon());
+            }
         }
         PiglinAi.initMemories(this);
         this.populateDefaultEquipmentSlots(difficultyInstance);
@@ -189,7 +176,6 @@ implements CrossbowAttackMob {
     @Override
     protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
         if (this.isAdult()) {
-            this.setItemSlot(EquipmentSlot.MAINHAND, this.createSpawnWeapon());
             this.maybeWearArmor(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
             this.maybeWearArmor(EquipmentSlot.CHEST, new ItemStack(Items.GOLDEN_CHESTPLATE));
             this.maybeWearArmor(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
@@ -261,7 +247,7 @@ implements CrossbowAttackMob {
         this.cannotHunt = bl;
     }
 
-    public boolean canHunt() {
+    protected boolean canHunt() {
         return !this.cannotHunt;
     }
 
@@ -432,8 +418,7 @@ implements CrossbowAttackMob {
 
     @Override
     public boolean startRiding(Entity entity, boolean bl) {
-        int i = 3;
-        Entity entity2 = this.getTopPassenger(entity, i);
+        Entity entity2 = this.getTopPassenger(entity, 3);
         return super.startRiding(entity2, bl);
     }
 

@@ -462,8 +462,8 @@ extends Monster {
                     chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
                     chicken2.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
                     chicken2.setChickenJockey(true);
-                    levelAccessor.addFreshEntity(chicken2);
                     this.startRiding(chicken2);
+                    levelAccessor.addFreshEntity(chicken2);
                 }
             }
             this.setCanBreakDoors(this.supportsBreakDoorGoal() && this.random.nextFloat() < f * 0.1f);

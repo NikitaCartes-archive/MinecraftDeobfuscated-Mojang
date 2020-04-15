@@ -5,6 +5,8 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import net.minecraft.core.Registry;
 import net.minecraft.util.Deserializer;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlackstoneReplaceProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockAgeProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProcessor;
@@ -21,6 +23,8 @@ extends Deserializer<StructureProcessor> {
     public static final StructureProcessorType JIGSAW_REPLACEMENT = StructureProcessorType.register("jigsaw_replacement", dynamic -> JigsawReplacementProcessor.INSTANCE);
     public static final StructureProcessorType RULE = StructureProcessorType.register("rule", RuleProcessor::new);
     public static final StructureProcessorType NOP = StructureProcessorType.register("nop", dynamic -> NopProcessor.INSTANCE);
+    public static final StructureProcessorType BLOCK_AGE = StructureProcessorType.register("block_age", BlockAgeProcessor::new);
+    public static final StructureProcessorType BLACKSTONE_REPLACE = StructureProcessorType.register("blackstone_replace", dynamic -> BlackstoneReplaceProcessor.INSTANCE);
 
     public static StructureProcessorType register(String string, StructureProcessorType structureProcessorType) {
         return Registry.register(Registry.STRUCTURE_PROCESSOR, string, structureProcessorType);

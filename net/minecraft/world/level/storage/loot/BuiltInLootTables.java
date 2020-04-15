@@ -48,6 +48,11 @@ public class BuiltInLootTables {
     public static final ResourceLocation SHIPWRECK_SUPPLY = BuiltInLootTables.register("chests/shipwreck_supply");
     public static final ResourceLocation SHIPWRECK_TREASURE = BuiltInLootTables.register("chests/shipwreck_treasure");
     public static final ResourceLocation PILLAGER_OUTPOST = BuiltInLootTables.register("chests/pillager_outpost");
+    public static final ResourceLocation BASTION_TREASURE = BuiltInLootTables.register("chests/bastion_treasure");
+    public static final ResourceLocation BASTION_OTHER = BuiltInLootTables.register("chests/bastion_other");
+    public static final ResourceLocation BASTION_BRIDGE = BuiltInLootTables.register("chests/bastion_bridge");
+    public static final ResourceLocation BASTION_HOGLIN_STABLE = BuiltInLootTables.register("chests/bastion_hoglin_stable");
+    public static final ResourceLocation RUINED_PORTAL = BuiltInLootTables.register("chests/ruined_portal");
     public static final ResourceLocation SHEEP_WHITE = BuiltInLootTables.register("entities/sheep/white");
     public static final ResourceLocation SHEEP_ORANGE = BuiltInLootTables.register("entities/sheep/orange");
     public static final ResourceLocation SHEEP_MAGENTA = BuiltInLootTables.register("entities/sheep/magenta");

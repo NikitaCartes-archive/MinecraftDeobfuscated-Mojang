@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
@@ -32,8 +33,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureCon
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -44,13 +47,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.AcaciaFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer;
@@ -222,7 +225,7 @@ public class BiomeDefaultFeatures {
     public static final ColumnFeatureConfiguration LARGE_BASALT_COLUMN_FEATURE_CONFIG = new ColumnFeatureConfiguration.Builder().horizontalReach(2, 3).heightRange(5, 10).build();
     public static final ReplaceSpheroidConfiguration BASALT_BLOBS_FEATURE_CONFIG = new ReplaceSpheroidConfiguration.Builder().minimumReach(new Vec3i(3, 3, 3)).maximumReach(new Vec3i(7, 7, 7)).targetBlockState(Blocks.NETHERRACK.defaultBlockState()).replaceWithBlockState(Blocks.BASALT.defaultBlockState()).build();
     public static final ReplaceSpheroidConfiguration BLACKSTONE_BLOBS_FEATURE_CONFIG = new ReplaceSpheroidConfiguration.Builder().minimumReach(new Vec3i(3, 3, 3)).maximumReach(new Vec3i(7, 7, 7)).targetBlockState(Blocks.NETHERRACK.defaultBlockState()).replaceWithBlockState(Blocks.BLACKSTONE.defaultBlockState()).build();
-    public static final DeltaFeatureConfiguration BASALT_DELTA_FEATURE_CONFIG = new DeltaFeatureConfiguration.Builder().contents(Blocks.LAVA.defaultBlockState()).radius(3, 6).rim(Blocks.MAGMA_BLOCK.defaultBlockState(), 2).build();
+    public static final DeltaFeatureConfiguration BASALT_DELTA_FEATURE_CONFIG = new DeltaFeatureConfiguration.Builder().contents(Blocks.LAVA.defaultBlockState()).radius(3, 7).rim(Blocks.MAGMA_BLOCK.defaultBlockState(), 2).build();
     public static final HugeMushroomFeatureConfiguration HUGE_RED_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_RED_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 2);
     public static final HugeMushroomFeatureConfiguration HUGE_BROWN_MUSHROOM_CONFIG = new HugeMushroomFeatureConfiguration(new SimpleStateProvider(HUGE_BROWN_MUSHROOM), new SimpleStateProvider(HUGE_MUSHROOM_STEM), 3);
     public static final BlockPileConfiguration CRIMSON_FOREST_CONFIG = new BlockPileConfiguration(new WeightedStateProvider().add(Blocks.CRIMSON_ROOTS.defaultBlockState(), 87).add(Blocks.CRIMSON_FUNGUS.defaultBlockState(), 11).add(Blocks.WARPED_FUNGUS.defaultBlockState(), 1));
@@ -249,12 +252,14 @@ public class BiomeDefaultFeatures {
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.DESERT_PYRAMID.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.IGLOO.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration()).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_MONUMENT.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.9f)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01f)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.VILLAGE.configured(new VillageConfiguration("village/plains/town_centers", 6)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.VILLAGE.configured(new JigsawConfiguration("village/plains/town_centers", 6)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
     }
 
     public static void addDefaultLakes(Biome biome) {

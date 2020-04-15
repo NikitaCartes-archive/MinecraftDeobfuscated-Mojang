@@ -3,18 +3,36 @@
  */
 package net.minecraft.world.level.block.entity;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.JigsawBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
+import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
+import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
+import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import org.jetbrains.annotations.Nullable;
 
 public class JigsawBlockEntity
@@ -108,6 +126,34 @@ extends BlockEntity {
     @Override
     public CompoundTag getUpdateTag() {
         return this.save(new CompoundTag());
+    }
+
+    public void generate(ServerLevel serverLevel, int i) {
+        ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
+        StructureManager structureManager = serverLevel.getStructureManager();
+        StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
+        Random random = serverLevel.getRandom();
+        BlockPos blockPos = this.getBlockPos();
+        ArrayList<PoolElementStructurePiece> list = Lists.newArrayList();
+        StructureTemplate structureTemplate = new StructureTemplate();
+        structureTemplate.fillFromWorld(serverLevel, blockPos, new BlockPos(1, 1, 1), false, null);
+        SinglePoolElement structurePoolElement = new SinglePoolElement(structureTemplate, ImmutableList.of(), StructureTemplatePool.Projection.RIGID);
+        RuntimePiece runtimePiece = new RuntimePiece(structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos));
+        JigsawPlacement.addPieces(runtimePiece, i, RuntimePiece::new, chunkGenerator, structureManager, list, random);
+        for (PoolElementStructurePiece poolElementStructurePiece : list) {
+            poolElementStructurePiece.place(serverLevel, structureFeatureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, true);
+        }
+    }
+
+    public static final class RuntimePiece
+    extends PoolElementStructurePiece {
+        public RuntimePiece(StructureManager structureManager, StructurePoolElement structurePoolElement, BlockPos blockPos, int i, Rotation rotation, BoundingBox boundingBox) {
+            super(StructurePieceType.RUNTIME, structureManager, structurePoolElement, blockPos, i, rotation, boundingBox);
+        }
+
+        public RuntimePiece(StructureManager structureManager, CompoundTag compoundTag) {
+            super(structureManager, compoundTag, StructurePieceType.RUNTIME);
+        }
     }
 
     public static enum JointType implements StringRepresentable

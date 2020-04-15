@@ -12,6 +12,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -29,32 +30,28 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected ChunkPos getPotentialFeatureChunkFromLocationWithOffset(ChunkGenerator<?> chunkGenerator, Random random, int i, int j, int k, int l) {
-        int m = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getEndCitySpacing();
-        int n = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getEndCitySeparation();
-        int o = i + m * k;
-        int p = j + m * l;
-        int q = o < 0 ? o - m + 1 : o;
-        int r = p < 0 ? p - m + 1 : p;
-        int s = q / m;
-        int t = r / m;
-        ((WorldgenRandom)random).setLargeFeatureWithSalt(chunkGenerator.getSeed(), s, t, 10387313);
-        s *= m;
-        t *= m;
-        return new ChunkPos(s += (random.nextInt(m - n) + random.nextInt(m - n)) / 2, t += (random.nextInt(m - n) + random.nextInt(m - n)) / 2);
+    protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+        return chunkGeneratorSettings.getEndCitySpacing();
     }
 
     @Override
-    public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-        ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
-        if (i == chunkPos.x && j == chunkPos.z) {
-            if (!chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
-                return false;
-            }
-            int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator);
-            return k >= 60;
-        }
+    protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+        return chunkGeneratorSettings.getEndCitySeparation();
+    }
+
+    @Override
+    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
+        return 10387313;
+    }
+
+    @Override
+    protected boolean linearSeparation() {
         return false;
+    }
+
+    @Override
+    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+        return EndCityFeature.getYPositionForFeature(i, j, chunkGenerator) >= 60;
     }
 
     @Override

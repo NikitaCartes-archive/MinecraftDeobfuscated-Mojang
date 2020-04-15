@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
@@ -20,7 +21,9 @@ implements AutoCloseable {
 
     public static DirectoryLock create(Path path) throws IOException {
         Path path2 = path.resolve("session.lock");
-        Files.createDirectories(path, new FileAttribute[0]);
+        if (!Files.isDirectory(path, new LinkOption[0])) {
+            Files.createDirectories(path, new FileAttribute[0]);
+        }
         FileChannel fileChannel = FileChannel.open(path2, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE);
         try {
             FileLock fileLock = fileChannel.tryLock();

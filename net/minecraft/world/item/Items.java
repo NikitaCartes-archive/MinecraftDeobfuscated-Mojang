@@ -351,6 +351,7 @@ public class Items {
     public static final Item RED_MUSHROOM_BLOCK = Items.registerBlock(Blocks.RED_MUSHROOM_BLOCK, CreativeModeTab.TAB_DECORATIONS);
     public static final Item MUSHROOM_STEM = Items.registerBlock(Blocks.MUSHROOM_STEM, CreativeModeTab.TAB_DECORATIONS);
     public static final Item IRON_BARS = Items.registerBlock(Blocks.IRON_BARS, CreativeModeTab.TAB_DECORATIONS);
+    public static final Item CHAIN = Items.registerBlock(Blocks.CHAIN, CreativeModeTab.TAB_DECORATIONS);
     public static final Item GLASS_PANE = Items.registerBlock(Blocks.GLASS_PANE, CreativeModeTab.TAB_DECORATIONS);
     public static final Item MELON = Items.registerBlock(Blocks.MELON, CreativeModeTab.TAB_BUILDING_BLOCKS);
     public static final Item VINE = Items.registerBlock(Blocks.VINE, CreativeModeTab.TAB_DECORATIONS);
@@ -1015,6 +1016,7 @@ public class Items {
     public static final Item MUSIC_DISC_WARD = Items.registerItem("music_disc_ward", (Item)new RecordItem(10, SoundEvents.MUSIC_DISC_WARD, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item MUSIC_DISC_11 = Items.registerItem("music_disc_11", (Item)new RecordItem(11, SoundEvents.MUSIC_DISC_11, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item MUSIC_DISC_WAIT = Items.registerItem("music_disc_wait", (Item)new RecordItem(12, SoundEvents.MUSIC_DISC_WAIT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
+    public static final Item MUSIC_DISC_PIGSTEP = Items.registerItem("music_disc_pigstep", (Item)new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE)));
     public static final Item TRIDENT = Items.registerItem("trident", (Item)new TridentItem(new Item.Properties().durability(250).tab(CreativeModeTab.TAB_COMBAT)));
     public static final Item PHANTOM_MEMBRANE = Items.registerItem("phantom_membrane", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));
     public static final Item NAUTILUS_SHELL = Items.registerItem("nautilus_shell", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));

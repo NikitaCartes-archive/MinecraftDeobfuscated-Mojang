@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.CarrotBlock;
 import net.minecraft.world.level.block.CartographyTableBlock;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.CauldronBlock;
+import net.minecraft.world.level.block.ChainBlock;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.ChorusFlowerBlock;
 import net.minecraft.world.level.block.ChorusPlantBlock;
@@ -459,6 +460,7 @@ public class Blocks {
     public static final Block RED_MUSHROOM_BLOCK = Blocks.register("red_mushroom_block", new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.COLOR_RED).strength(0.2f).sound(SoundType.WOOD)));
     public static final Block MUSHROOM_STEM = Blocks.register("mushroom_stem", new HugeMushroomBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.WOOL).strength(0.2f).sound(SoundType.WOOD)));
     public static final Block IRON_BARS = Blocks.register("iron_bars", new IronBarsBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.NONE).strength(5.0f, 6.0f).sound(SoundType.METAL).noOcclusion()));
+    public static final Block CHAIN = Blocks.register("chain", new ChainBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.NONE).strength(5.0f, 6.0f).sound(SoundType.METAL).noOcclusion()));
     public static final Block GLASS_PANE = Blocks.register("glass_pane", new IronBarsBlock(BlockBehaviour.Properties.of(Material.GLASS).strength(0.3f).sound(SoundType.GLASS).noOcclusion()));
     public static final Block MELON = Blocks.register("melon", new MelonBlock(BlockBehaviour.Properties.of(Material.VEGETABLE, MaterialColor.COLOR_LIGHT_GREEN).strength(1.0f).sound(SoundType.WOOD)));
     public static final Block ATTACHED_PUMPKIN_STEM = Blocks.register("attached_pumpkin_stem", new AttachedStemBlock((StemGrownBlock)PUMPKIN, BlockBehaviour.Properties.of(Material.PLANT).noCollission().instabreak().sound(SoundType.WOOD)));

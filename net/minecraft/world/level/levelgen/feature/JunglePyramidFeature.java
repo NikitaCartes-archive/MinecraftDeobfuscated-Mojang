@@ -7,6 +7,7 @@ import com.mojang.datafixers.Dynamic;
 import java.util.function.Function;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -37,7 +38,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected int getRandomSalt() {
+    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
         return 14357619;
     }
 

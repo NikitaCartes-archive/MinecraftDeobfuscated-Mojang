@@ -27,15 +27,5 @@ public interface ServerInterface {
     public String getPluginNames();
 
     public String runCommand(String var1);
-
-    public boolean isDebugging();
-
-    public void info(String var1);
-
-    public void warn(String var1);
-
-    public void error(String var1);
-
-    public void debug(String var1);
 }
 

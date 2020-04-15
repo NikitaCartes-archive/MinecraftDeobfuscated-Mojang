@@ -656,7 +656,8 @@ VillagerDataHolder {
 
     @Override
     public boolean wantsToPickUp(ItemStack itemStack) {
-        return WANTED_ITEMS.contains(itemStack.getItem()) || this.getVillagerData().getProfession().getRequestedItems().contains(itemStack.getItem());
+        Item item = itemStack.getItem();
+        return (WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item)) && this.getInventory().canAddItem(itemStack);
     }
 
     public boolean hasExcessFood() {
@@ -673,8 +674,7 @@ VillagerDataHolder {
     }
 
     public boolean hasFarmSeeds() {
-        SimpleContainer simpleContainer = this.getInventory();
-        return simpleContainer.hasAnyOf(ImmutableSet.of(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS));
+        return this.getInventory().hasAnyOf(ImmutableSet.of(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS));
     }
 
     @Override

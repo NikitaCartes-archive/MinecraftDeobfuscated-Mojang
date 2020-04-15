@@ -58,6 +58,7 @@ public class ItemTags {
     public static final Tag.Named<Item> FISHES = ItemTags.bind("fishes");
     public static final Tag.Named<Item> SIGNS = ItemTags.bind("signs");
     public static final Tag.Named<Item> MUSIC_DISCS = ItemTags.bind("music_discs");
+    public static final Tag.Named<Item> CREEPER_DROP_MUSIC_DISCS = ItemTags.bind("creeper_drop_music_discs");
     public static final Tag.Named<Item> COALS = ItemTags.bind("coals");
     public static final Tag.Named<Item> ARROWS = ItemTags.bind("arrows");
     public static final Tag.Named<Item> LECTERN_BOOKS = ItemTags.bind("lectern_books");

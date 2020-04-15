@@ -18,15 +18,17 @@ import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.BastionPieces;
+import net.minecraft.world.level.levelgen.feature.VillagePieces;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePools;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
-import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -40,9 +42,46 @@ public class JigsawPlacement {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final StructureTemplatePools POOLS = new StructureTemplatePools();
 
-    public static void addPieces(ResourceLocation resourceLocation, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, Random random) {
+    public static void bootstrap() {
+        BastionPieces.bootstrap();
+        VillagePieces.bootstrap();
+        PillagerOutpostPieces.bootstrap();
+    }
+
+    public static void addPieces(ResourceLocation resourceLocation, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<? super PoolElementStructurePiece> list, Random random, boolean bl, boolean bl2) {
         StructureFeatureIO.bootstrap();
-        new Placer(resourceLocation, i, pieceFactory, chunkGenerator, structureManager, blockPos, list, random);
+        Rotation rotation = Rotation.getRandom(random);
+        StructureTemplatePool structureTemplatePool = POOLS.getPool(resourceLocation);
+        StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
+        PoolElementStructurePiece poolElementStructurePiece = pieceFactory.create(structureManager, structurePoolElement, blockPos, structurePoolElement.getGroundLevelDelta(), rotation, structurePoolElement.getBoundingBox(structureManager, blockPos, rotation));
+        BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
+        int j = (boundingBox.x1 + boundingBox.x0) / 2;
+        int k = (boundingBox.z1 + boundingBox.z0) / 2;
+        int l = bl2 ? blockPos.getY() + chunkGenerator.getFirstFreeHeight(j, k, Heightmap.Types.WORLD_SURFACE_WG) : blockPos.getY();
+        int m = boundingBox.y0 + poolElementStructurePiece.getGroundLevelDelta();
+        poolElementStructurePiece.move(0, l - m, 0);
+        list.add(poolElementStructurePiece);
+        if (i <= 0) {
+            return;
+        }
+        int n = 80;
+        AABB aABB = new AABB(j - 80, l - 80, k - 80, j + 80 + 1, l + 80 + 1, k + 80 + 1);
+        Placer placer = new Placer(i, pieceFactory, chunkGenerator, structureManager, list, random);
+        placer.placing.addLast(new PieceState(poolElementStructurePiece, new AtomicReference<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), l + 80, 0));
+        while (!placer.placing.isEmpty()) {
+            PieceState pieceState = (PieceState)placer.placing.removeFirst();
+            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, bl);
+        }
+    }
+
+    public static void addPieces(PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
+        JigsawPlacement.bootstrap();
+        Placer placer = new Placer(i, pieceFactory, chunkGenerator, structureManager, list, random);
+        placer.placing.addLast(new PieceState(poolElementStructurePiece, new AtomicReference<VoxelShape>(Shapes.INFINITY), 0, 0));
+        while (!placer.placing.isEmpty()) {
+            PieceState pieceState = (PieceState)placer.placing.removeFirst();
+            placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth, false);
+        }
     }
 
     static {
@@ -58,45 +97,25 @@ public class JigsawPlacement {
         private final PieceFactory factory;
         private final ChunkGenerator<?> chunkGenerator;
         private final StructureManager structureManager;
-        private final List<StructurePiece> pieces;
+        private final List<? super PoolElementStructurePiece> pieces;
         private final Random random;
         private final Deque<PieceState> placing = Queues.newArrayDeque();
 
-        public Placer(ResourceLocation resourceLocation, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, Random random) {
+        private Placer(int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
             this.maxDepth = i;
             this.factory = pieceFactory;
             this.chunkGenerator = chunkGenerator;
             this.structureManager = structureManager;
             this.pieces = list;
             this.random = random;
-            Rotation rotation = Rotation.getRandom(random);
-            StructureTemplatePool structureTemplatePool = POOLS.getPool(resourceLocation);
-            StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);
-            PoolElementStructurePiece poolElementStructurePiece = pieceFactory.create(structureManager, structurePoolElement, blockPos, structurePoolElement.getGroundLevelDelta(), rotation, structurePoolElement.getBoundingBox(structureManager, blockPos, rotation));
-            BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-            int j = (boundingBox.x1 + boundingBox.x0) / 2;
-            int k = (boundingBox.z1 + boundingBox.z0) / 2;
-            int l = chunkGenerator.getFirstFreeHeight(j, k, Heightmap.Types.WORLD_SURFACE_WG);
-            poolElementStructurePiece.move(0, l - (boundingBox.y0 + poolElementStructurePiece.getGroundLevelDelta()), 0);
-            list.add(poolElementStructurePiece);
-            if (i <= 0) {
-                return;
-            }
-            int m = 80;
-            AABB aABB = new AABB(j - 80, l - 80, k - 80, j + 80 + 1, l + 80 + 1, k + 80 + 1);
-            this.placing.addLast(new PieceState(poolElementStructurePiece, new AtomicReference<VoxelShape>(Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST)), l + 80, 0));
-            while (!this.placing.isEmpty()) {
-                PieceState pieceState = this.placing.removeFirst();
-                this.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.boundsTop, pieceState.depth);
-            }
         }
 
-        private void tryPlacingChildren(PoolElementStructurePiece poolElementStructurePiece, AtomicReference<VoxelShape> atomicReference, int i, int j) {
+        private void tryPlacingChildren(PoolElementStructurePiece poolElementStructurePiece, AtomicReference<VoxelShape> atomicReference, int i, int j, boolean bl) {
             StructurePoolElement structurePoolElement = poolElementStructurePiece.getElement();
             BlockPos blockPos = poolElementStructurePiece.getPosition();
             Rotation rotation = poolElementStructurePiece.getRotation();
             StructureTemplatePool.Projection projection = structurePoolElement.getProjection();
-            boolean bl = projection == StructureTemplatePool.Projection.RIGID;
+            boolean bl2 = projection == StructureTemplatePool.Projection.RIGID;
             AtomicReference<VoxelShape> atomicReference2 = new AtomicReference<VoxelShape>();
             BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
             int k = boundingBox.y0;
@@ -115,8 +134,8 @@ public class JigsawPlacement {
                     LOGGER.warn("Empty or none existent pool: {}", (Object)structureBlockInfo2.nbt.getString("pool"));
                     continue;
                 }
-                boolean bl2 = boundingBox.isInside(blockPos3);
-                if (bl2) {
+                boolean bl3 = boundingBox.isInside(blockPos3);
+                if (bl3) {
                     atomicReference3 = atomicReference2;
                     n = k;
                     if (atomicReference2.get() == null) {
@@ -136,7 +155,7 @@ public class JigsawPlacement {
                     for (Rotation rotation2 : Rotation.getShuffled(this.random)) {
                         List<StructureTemplate.StructureBlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(this.structureManager, BlockPos.ZERO, rotation2, this.random);
                         BoundingBox boundingBox2 = structurePoolElement2.getBoundingBox(this.structureManager, BlockPos.ZERO, rotation2);
-                        int o = boundingBox2.getYSpan() > 16 ? 0 : list2.stream().mapToInt(structureBlockInfo -> {
+                        int o = !bl || boundingBox2.getYSpan() > 16 ? 0 : list2.stream().mapToInt(structureBlockInfo -> {
                             if (!boundingBox2.isInside(structureBlockInfo.pos.relative(JigsawBlock.getFrontFacing(structureBlockInfo.state)))) {
                                 return 0;
                             }
@@ -155,10 +174,10 @@ public class JigsawPlacement {
                             BoundingBox boundingBox3 = structurePoolElement2.getBoundingBox(this.structureManager, blockPos5, rotation2);
                             int p = boundingBox3.y0;
                             StructureTemplatePool.Projection projection2 = structurePoolElement2.getProjection();
-                            boolean bl3 = projection2 == StructureTemplatePool.Projection.RIGID;
+                            boolean bl4 = projection2 == StructureTemplatePool.Projection.RIGID;
                             int q = blockPos4.getY();
                             int r = l - q + JigsawBlock.getFrontFacing(structureBlockInfo2.state).getStepY();
-                            if (bl && bl3) {
+                            if (bl2 && bl4) {
                                 s = k + r;
                             } else {
                                 if (m == -1) {
@@ -176,11 +195,11 @@ public class JigsawPlacement {
                             if (Shapes.joinIsNotEmpty((VoxelShape)atomicReference3.get(), Shapes.create(AABB.of(boundingBox4).deflate(0.25)), BooleanOp.ONLY_SECOND)) continue;
                             atomicReference3.set(Shapes.joinUnoptimized((VoxelShape)atomicReference3.get(), Shapes.create(AABB.of(boundingBox4)), BooleanOp.ONLY_FIRST));
                             u = poolElementStructurePiece.getGroundLevelDelta();
-                            int v = bl3 ? u - r : structurePoolElement2.getGroundLevelDelta();
+                            int v = bl4 ? u - r : structurePoolElement2.getGroundLevelDelta();
                             PoolElementStructurePiece poolElementStructurePiece2 = this.factory.create(this.structureManager, structurePoolElement2, blockPos6, v, rotation2, boundingBox4);
-                            if (bl) {
+                            if (bl2) {
                                 w = k + l;
-                            } else if (bl3) {
+                            } else if (bl4) {
                                 w = s + q;
                             } else {
                                 if (m == -1) {

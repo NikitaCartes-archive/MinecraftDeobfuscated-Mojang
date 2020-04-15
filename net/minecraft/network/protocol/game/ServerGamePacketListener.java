@@ -19,6 +19,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -131,6 +132,8 @@ extends PacketListener {
     public void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery var1);
 
     public void handleSetJigsawBlock(ServerboundSetJigsawBlockPacket var1);
+
+    public void handleJigsawGenerate(ServerboundJigsawGeneratePacket var1);
 
     public void handleChangeDifficulty(ServerboundChangeDifficultyPacket var1);
 

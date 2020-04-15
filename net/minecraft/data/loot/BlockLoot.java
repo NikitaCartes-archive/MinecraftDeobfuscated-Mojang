@@ -621,6 +621,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.CHISELED_NETHER_BRICKS);
         this.dropSelf(Blocks.CRACKED_NETHER_BRICKS);
         this.dropSelf(Blocks.QUARTZ_BRICKS);
+        this.dropSelf(Blocks.CHAIN);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);

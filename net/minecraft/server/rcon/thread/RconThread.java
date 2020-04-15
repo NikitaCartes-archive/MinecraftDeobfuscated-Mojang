@@ -3,30 +3,33 @@
  */
 package net.minecraft.server.rcon.thread;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.rcon.thread.GenericThread;
 import net.minecraft.server.rcon.thread.RconClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RconThread
 extends GenericThread {
+    private static final Logger LOGGER = LogManager.getLogger();
     private final int port;
     private String serverIp;
     private ServerSocket socket;
     private final String rconPassword;
-    private Map<SocketAddress, RconClient> clients;
+    private final List<RconClient> clients = Lists.newArrayList();
+    private final ServerInterface serverInterface;
 
     public RconThread(ServerInterface serverInterface) {
-        super(serverInterface, "RCON Listener");
+        super("RCON Listener");
+        this.serverInterface = serverInterface;
         DedicatedServerProperties dedicatedServerProperties = serverInterface.getProperties();
         this.port = dedicatedServerProperties.rconPort;
         this.rconPassword = dedicatedServerProperties.rconPassword;
@@ -34,40 +37,28 @@ extends GenericThread {
         if (this.serverIp.isEmpty()) {
             this.serverIp = "0.0.0.0";
         }
-        this.initClients();
-        this.socket = null;
-    }
-
-    private void initClients() {
-        this.clients = Maps.newHashMap();
     }
 
     private void clearClients() {
-        Iterator<Map.Entry<SocketAddress, RconClient>> iterator = this.clients.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<SocketAddress, RconClient> entry = iterator.next();
-            if (entry.getValue().isRunning()) continue;
-            iterator.remove();
-        }
+        this.clients.removeIf(rconClient -> !rconClient.isRunning());
     }
 
     @Override
     public void run() {
-        this.info("RCON running on " + this.serverIp + ":" + this.port);
+        LOGGER.info("RCON running on {}:{}", (Object)this.serverIp, (Object)this.port);
         try {
             while (this.running) {
                 try {
                     Socket socket = this.socket.accept();
-                    socket.setSoTimeout(500);
                     RconClient rconClient = new RconClient(this.serverInterface, this.rconPassword, socket);
                     rconClient.start();
-                    this.clients.put(socket.getRemoteSocketAddress(), rconClient);
+                    this.clients.add(rconClient);
                     this.clearClients();
                 } catch (SocketTimeoutException socketTimeoutException) {
                     this.clearClients();
                 } catch (IOException iOException) {
                     if (!this.running) continue;
-                    this.info("IO: " + iOException.getMessage());
+                    LOGGER.info("IO exception: ", (Throwable)iOException);
                 }
             }
         } finally {
@@ -78,11 +69,11 @@ extends GenericThread {
     @Override
     public void start() {
         if (this.rconPassword.isEmpty()) {
-            this.warn("No rcon password set in server.properties, rcon disabled!");
+            LOGGER.warn("No rcon password set in server.properties, rcon disabled!");
             return;
         }
         if (0 >= this.port || 65535 < this.port) {
-            this.warn("Invalid rcon port " + this.port + " found in server.properties, rcon disabled!");
+            LOGGER.warn("Invalid rcon port {} found in server.properties, rcon disabled!", (Object)this.port);
             return;
         }
         if (this.running) {
@@ -93,18 +84,29 @@ extends GenericThread {
             this.socket.setSoTimeout(500);
             super.start();
         } catch (IOException iOException) {
-            this.warn("Unable to initialise rcon on " + this.serverIp + ":" + this.port + " : " + iOException.getMessage());
+            LOGGER.warn("Unable to initialise rcon on {}:{}", (Object)this.serverIp, (Object)this.port, (Object)iOException);
         }
     }
 
     @Override
     public void stop() {
-        super.stop();
-        for (Map.Entry<SocketAddress, RconClient> entry : this.clients.entrySet()) {
-            entry.getValue().stop();
-        }
+        this.running = false;
         this.closeSocket(this.socket);
-        this.initClients();
+        super.stop();
+        for (RconClient rconClient : this.clients) {
+            if (!rconClient.isRunning()) continue;
+            rconClient.stop();
+        }
+        this.clients.clear();
+    }
+
+    private void closeSocket(ServerSocket serverSocket) {
+        LOGGER.debug("closeSocket: {}", (Object)serverSocket);
+        try {
+            serverSocket.close();
+        } catch (IOException iOException) {
+            LOGGER.warn("Failed to close socket", (Throwable)iOException);
+        }
     }
 }
 

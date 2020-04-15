@@ -12,9 +12,15 @@ import org.lwjgl.openal.AL10;
 @Environment(value=EnvType.CLIENT)
 public class Listener {
     private float gain = 1.0f;
+    private Vec3 position = Vec3.ZERO;
 
     public void setListenerPosition(Vec3 vec3) {
+        this.position = vec3;
         AL10.alListener3f(4100, (float)vec3.x, (float)vec3.y, (float)vec3.z);
+    }
+
+    public Vec3 getListenerPosition() {
+        return this.position;
     }
 
     public void setListenerOrientation(Vector3f vector3f, Vector3f vector3f2) {

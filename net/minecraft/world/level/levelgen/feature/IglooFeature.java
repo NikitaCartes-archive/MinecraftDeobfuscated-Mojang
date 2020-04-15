@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -40,7 +41,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected int getRandomSalt() {
+    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
         return 14357618;
     }
 

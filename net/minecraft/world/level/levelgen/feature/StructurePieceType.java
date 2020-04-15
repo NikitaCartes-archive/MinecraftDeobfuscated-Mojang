@@ -6,6 +6,8 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
+import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.VillagePieces;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
 import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
+import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -63,6 +66,7 @@ public interface StructurePieceType {
     public static final StructurePieceType JUNGLE_PYRAMID_PIECE = StructurePieceType.setPieceId(JunglePyramidPiece::new, "TeJP");
     public static final StructurePieceType OCEAN_RUIN = StructurePieceType.setPieceId(OceanRuinPieces.OceanRuinPiece::new, "ORP");
     public static final StructurePieceType IGLOO = StructurePieceType.setPieceId(IglooPieces.IglooPiece::new, "Iglu");
+    public static final StructurePieceType RUINED_PORTAL = StructurePieceType.setPieceId(RuinedPortalPiece::new, "RUPO");
     public static final StructurePieceType SWAMPLAND_HUT = StructurePieceType.setPieceId(SwamplandHutPiece::new, "TeSH");
     public static final StructurePieceType DESERT_PYRAMID_PIECE = StructurePieceType.setPieceId(DesertPyramidPiece::new, "TeDP");
     public static final StructurePieceType OCEAN_MONUMENT_BUILDING = StructurePieceType.setPieceId(OceanMonumentPieces.MonumentBuilding::new, "OMB");
@@ -82,6 +86,8 @@ public interface StructurePieceType {
     public static final StructurePieceType BURIED_TREASURE_PIECE = StructurePieceType.setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
     public static final StructurePieceType SHIPWRECK_PIECE = StructurePieceType.setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
     public static final StructurePieceType NETHER_FOSSIL = StructurePieceType.setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
+    public static final StructurePieceType BASTION_REMNANT = StructurePieceType.setPieceId(BastionPieces.BastionPiece::new, "BastionRemnant");
+    public static final StructurePieceType RUNTIME = StructurePieceType.setPieceId(JigsawBlockEntity.RuntimePiece::new, "Runtime");
 
     public StructurePiece load(StructureManager var1, CompoundTag var2);
 

@@ -95,7 +95,11 @@ extends LootItemConditionalFunction {
         public static Modifier deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             EquipmentSlot[] equipmentSlots;
             String string = GsonHelper.getAsString(jsonObject, "name");
-            Attribute attribute = Registry.ATTRIBUTES.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute")));
+            ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute"));
+            Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
+            if (attribute == null) {
+                throw new JsonSyntaxException("Unknown attribute: " + resourceLocation);
+            }
             AttributeModifier.Operation operation = Modifier.operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
             RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
             UUID uUID = null;
