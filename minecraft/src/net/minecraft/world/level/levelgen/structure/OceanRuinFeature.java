@@ -9,6 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -31,13 +33,13 @@ public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfigurat
 	}
 
 	@Override
-	protected int getSpacing(ChunkGenerator<?> chunkGenerator) {
-		return chunkGenerator.getSettings().getOceanRuinSpacing();
+	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getOceanRuinSpacing();
 	}
 
 	@Override
-	protected int getSeparation(ChunkGenerator<?> chunkGenerator) {
-		return chunkGenerator.getSettings().getOceanRuinSeparation();
+	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getOceanRuinSeparation();
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfigurat
 	}
 
 	@Override
-	protected int getRandomSalt() {
+	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 14357621;
 	}
 

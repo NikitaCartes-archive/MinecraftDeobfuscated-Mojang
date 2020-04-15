@@ -72,7 +72,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class PiglinAi {
-	public static final Item BARTERING_ITEM = Items.GOLD_INGOT;
+	protected static final Item BARTERING_ITEM = Items.GOLD_INGOT;
 	private static final IntRange RANDOM_STROLL_INTERVAL_WHEN_ADMIRING = IntRange.of(10, 20);
 	private static final IntRange TIME_BETWEEN_HUNTS = TimeUtil.rangeOfSeconds(30, 120);
 	private static final IntRange RIDE_START_INTERVAL = TimeUtil.rangeOfSeconds(10, 40);
@@ -98,13 +98,13 @@ public class PiglinAi {
 
 	protected static Brain<?> makeBrain(Piglin piglin, Dynamic<?> dynamic) {
 		Brain<Piglin> brain = new Brain<>(Piglin.MEMORY_TYPES, Piglin.SENSOR_TYPES, dynamic);
-		initCoreActivity(piglin, brain);
-		initIdleActivity(piglin, brain);
-		initAdmireItemActivity(piglin, brain);
+		initCoreActivity(brain);
+		initIdleActivity(brain);
+		initAdmireItemActivity(brain);
 		initFightActivity(piglin, brain);
-		initCelebrateActivity(piglin, brain);
-		initRetreatActivity(piglin, brain);
-		initRideHoglinActivity(piglin, brain);
+		initCelebrateActivity(brain);
+		initRetreatActivity(brain);
+		initRideHoglinActivity(brain);
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
 		brain.useDefaultActivity();
@@ -116,7 +116,7 @@ public class PiglinAi {
 		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.HUNTED_RECENTLY, SerializableBoolean.of(true), (long)i);
 	}
 
-	private static void initCoreActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initCoreActivity(Brain<Piglin> brain) {
 		brain.addActivity(
 			Activity.CORE,
 			0,
@@ -132,7 +132,7 @@ public class PiglinAi {
 		);
 	}
 
-	private static void initIdleActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initIdleActivity(Brain<Piglin> brain) {
 		brain.addActivity(
 			Activity.IDLE,
 			10,
@@ -166,7 +166,7 @@ public class PiglinAi {
 		);
 	}
 
-	private static void initCelebrateActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initCelebrateActivity(Brain<Piglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.CELEBRATE,
 			10,
@@ -184,7 +184,7 @@ public class PiglinAi {
 		);
 	}
 
-	private static void initAdmireItemActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initAdmireItemActivity(Brain<Piglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.ADMIRE_ITEM,
 			10,
@@ -197,7 +197,7 @@ public class PiglinAi {
 		);
 	}
 
-	private static void initRetreatActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initRetreatActivity(Brain<Piglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.AVOID,
 			10,
@@ -211,7 +211,7 @@ public class PiglinAi {
 		);
 	}
 
-	private static void initRideHoglinActivity(Piglin piglin, Brain<Piglin> brain) {
+	private static void initRideHoglinActivity(Brain<Piglin> brain) {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.RIDE,
 			10,
@@ -459,7 +459,7 @@ public class PiglinAi {
 		}
 	}
 
-	public static boolean canAdmire(Piglin piglin, ItemStack itemStack) {
+	protected static boolean canAdmire(Piglin piglin, ItemStack itemStack) {
 		return !isAdmiringDisabled(piglin) && !isAdmiringItem(piglin) && piglin.isAdult() && isBarterCurrency(itemStack.getItem());
 	}
 

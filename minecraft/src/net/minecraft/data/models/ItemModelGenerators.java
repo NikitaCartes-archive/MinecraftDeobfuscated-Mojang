@@ -181,6 +181,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.MUSIC_DISC_FAR, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_MALL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_MELLOHI, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.MUSIC_DISC_PIGSTEP, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_STAL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_STRAD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.MUSIC_DISC_WAIT, ModelTemplates.FLAT_ITEM);

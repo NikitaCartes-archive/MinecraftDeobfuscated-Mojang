@@ -34,9 +34,11 @@ import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfi
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -47,6 +49,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
@@ -55,7 +58,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfig
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.structure.NetherFossilFeature;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 
@@ -74,6 +76,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"desert_pyramid", new DesertPyramidFeature(NoneFeatureConfiguration::deserialize)
 	);
 	public static final StructureFeature<NoneFeatureConfiguration> IGLOO = register("igloo", new IglooFeature(NoneFeatureConfiguration::deserialize));
+	public static final StructureFeature<RuinedPortalConfiguration> RUINED_PORTAL = register(
+		"ruined_portal", new RuinedPortalFeature(RuinedPortalConfiguration::deserialize)
+	);
 	public static final StructureFeature<ShipwreckConfiguration> SHIPWRECK = register("shipwreck", new ShipwreckFeature(ShipwreckConfiguration::deserialize));
 	public static final SwamplandHutFeature SWAMP_HUT = register("swamp_hut", new SwamplandHutFeature(NoneFeatureConfiguration::deserialize));
 	public static final StructureFeature<NoneFeatureConfiguration> STRONGHOLD = register(
@@ -90,9 +95,12 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final StructureFeature<BuriedTreasureConfiguration> BURIED_TREASURE = register(
 		"buried_treasure", new BuriedTreasureFeature(BuriedTreasureConfiguration::deserialize)
 	);
-	public static final StructureFeature<VillageConfiguration> VILLAGE = register("village", new VillageFeature(VillageConfiguration::deserialize));
+	public static final StructureFeature<JigsawConfiguration> VILLAGE = register("village", new VillageFeature(JigsawConfiguration::deserialize));
 	public static final StructureFeature<NoneFeatureConfiguration> NETHER_FOSSIL = register(
 		"nether_fossil", new NetherFossilFeature(NoneFeatureConfiguration::deserialize)
+	);
+	public static final StructureFeature<MultiJigsawConfiguration> BASTION_REMNANT = register(
+		"bastion_remnant", new BastionFeature(MultiJigsawConfiguration::deserialize)
 	);
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration::deserialize));
 	public static final Feature<SmallTreeConfiguration> NORMAL_TREE = register("normal_tree", new TreeFeature(SmallTreeConfiguration::deserialize));
@@ -191,6 +199,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		hashBiMap.put("Jungle_Pyramid".toLowerCase(Locale.ROOT), JUNGLE_TEMPLE);
 		hashBiMap.put("Desert_Pyramid".toLowerCase(Locale.ROOT), DESERT_PYRAMID);
 		hashBiMap.put("Igloo".toLowerCase(Locale.ROOT), IGLOO);
+		hashBiMap.put("Ruined_Portal".toLowerCase(Locale.ROOT), RUINED_PORTAL);
 		hashBiMap.put("Shipwreck".toLowerCase(Locale.ROOT), SHIPWRECK);
 		hashBiMap.put("Swamp_Hut".toLowerCase(Locale.ROOT), SWAMP_HUT);
 		hashBiMap.put("Stronghold".toLowerCase(Locale.ROOT), STRONGHOLD);
@@ -201,6 +210,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		hashBiMap.put("Buried_Treasure".toLowerCase(Locale.ROOT), BURIED_TREASURE);
 		hashBiMap.put("Village".toLowerCase(Locale.ROOT), VILLAGE);
 		hashBiMap.put("Nether_Fossil".toLowerCase(Locale.ROOT), NETHER_FOSSIL);
+		hashBiMap.put("Bastion_Remnant".toLowerCase(Locale.ROOT), BASTION_REMNANT);
 	});
 	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
 	private final Function<Dynamic<?>, ? extends FC> configurationFactory;

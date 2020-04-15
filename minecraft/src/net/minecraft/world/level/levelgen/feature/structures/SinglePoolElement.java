@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.util.Either;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +30,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class SinglePoolElement extends StructurePoolElement {
-	protected final ResourceLocation location;
+	protected final Either<ResourceLocation, StructureTemplate> template;
 	protected final ImmutableList<StructureProcessor> processors;
 
 	@Deprecated
@@ -38,7 +40,13 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	public SinglePoolElement(String string, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
 		super(projection);
-		this.location = new ResourceLocation(string);
+		this.template = Either.left(new ResourceLocation(string));
+		this.processors = ImmutableList.copyOf(list);
+	}
+
+	public SinglePoolElement(StructureTemplate structureTemplate, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
+		super(projection);
+		this.template = Either.right(structureTemplate);
 		this.processors = ImmutableList.copyOf(list);
 	}
 
@@ -49,14 +57,18 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	public SinglePoolElement(Dynamic<?> dynamic) {
 		super(dynamic);
-		this.location = new ResourceLocation(dynamic.get("location").asString(""));
+		this.template = Either.left(new ResourceLocation(dynamic.get("location").asString("")));
 		this.processors = ImmutableList.copyOf(
 			dynamic.get("processors").asList(dynamicx -> Deserializer.deserialize(dynamicx, Registry.STRUCTURE_PROCESSOR, "processor_type", NopProcessor.INSTANCE))
 		);
 	}
 
+	private StructureTemplate getTemplate(StructureManager structureManager) {
+		return this.template.map(structureManager::getOrCreate, Function.identity());
+	}
+
 	public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureManager structureManager, BlockPos blockPos, Rotation rotation, boolean bl) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.STRUCTURE_BLOCK, bl
 		);
@@ -78,7 +90,7 @@ public class SinglePoolElement extends StructurePoolElement {
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
 		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
 	) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
 		);
@@ -88,7 +100,7 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	@Override
 	public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		return structureTemplate.getBoundingBox(new StructurePlaceSettings().setRotation(rotation), blockPos);
 	}
 
@@ -102,10 +114,11 @@ public class SinglePoolElement extends StructurePoolElement {
 		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
-		Random random
+		Random random,
+		boolean bl
 	) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
-		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
 		if (!structureTemplate.placeInWorld(levelAccessor, blockPos, blockPos2, structurePlaceSettings, 18)) {
 			return false;
 		} else {
@@ -119,14 +132,18 @@ public class SinglePoolElement extends StructurePoolElement {
 		}
 	}
 
-	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox) {
+	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox, boolean bl) {
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings();
 		structurePlaceSettings.setBoundingBox(boundingBox);
 		structurePlaceSettings.setRotation(rotation);
 		structurePlaceSettings.setKnownShape(true);
 		structurePlaceSettings.setIgnoreEntities(false);
-		structurePlaceSettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-		structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
+		structurePlaceSettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+		structurePlaceSettings.setFinalizeEntities(true);
+		if (!bl) {
+			structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
+		}
+
 		this.processors.forEach(structurePlaceSettings::addProcessor);
 		this.getProjection().getProcessors().forEach(structurePlaceSettings::addProcessor);
 		return structurePlaceSettings;
@@ -144,7 +161,7 @@ public class SinglePoolElement extends StructurePoolElement {
 			dynamicOps.createMap(
 				ImmutableMap.of(
 					dynamicOps.createString("location"),
-					dynamicOps.createString(this.location.toString()),
+					dynamicOps.createString(((ResourceLocation)this.template.left().orElseThrow(RuntimeException::new)).toString()),
 					dynamicOps.createString("processors"),
 					dynamicOps.createList(this.processors.stream().map(structureProcessor -> structureProcessor.serialize(dynamicOps).getValue()))
 				)
@@ -153,6 +170,6 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	public String toString() {
-		return "Single[" + this.location + "]";
+		return "Single[" + this.template + "]";
 	}
 }

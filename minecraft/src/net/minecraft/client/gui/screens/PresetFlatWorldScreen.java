@@ -160,7 +160,7 @@ public class PresetFlatWorldScreen extends Screen {
 			I18n.get("createWorld.customize.preset.overworld"),
 			Blocks.GRASS,
 			Biomes.PLAINS,
-			Arrays.asList("village", "biome_1", "decoration", "stronghold", "mineshaft", "dungeon", "lake", "lava_lake", "pillager_outpost"),
+			Arrays.asList("village", "biome_1", "decoration", "stronghold", "mineshaft", "dungeon", "lake", "lava_lake", "pillager_outpost", "ruined_portal"),
 			new FlatLayerInfo(1, Blocks.GRASS_BLOCK),
 			new FlatLayerInfo(3, Blocks.DIRT),
 			new FlatLayerInfo(59, Blocks.STONE),

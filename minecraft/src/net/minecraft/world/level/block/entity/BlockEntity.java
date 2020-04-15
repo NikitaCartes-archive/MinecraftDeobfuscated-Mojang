@@ -102,16 +102,8 @@ public abstract class BlockEntity {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public double distanceToSqr(double d, double e, double f) {
-		double g = (double)this.worldPosition.getX() + 0.5 - d;
-		double h = (double)this.worldPosition.getY() + 0.5 - e;
-		double i = (double)this.worldPosition.getZ() + 0.5 - f;
-		return g * g + h * h + i * i;
-	}
-
-	@Environment(EnvType.CLIENT)
 	public double getViewDistance() {
-		return 4096.0;
+		return 64.0;
 	}
 
 	public BlockPos getBlockPos() {

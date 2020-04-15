@@ -83,7 +83,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.tag(ItemTags.BOATS).add(Items.OAK_BOAT, Items.SPRUCE_BOAT, Items.BIRCH_BOAT, Items.JUNGLE_BOAT, Items.ACACIA_BOAT, Items.DARK_OAK_BOAT);
 		this.tag(ItemTags.FISHES).add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.PUFFERFISH, Items.TROPICAL_FISH);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
-		this.tag(ItemTags.MUSIC_DISCS)
+		this.tag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
 			.add(
 				Items.MUSIC_DISC_13,
 				Items.MUSIC_DISC_CAT,
@@ -98,6 +98,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.MUSIC_DISC_11,
 				Items.MUSIC_DISC_WAIT
 			);
+		this.tag(ItemTags.MUSIC_DISCS).addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS).add(Items.MUSIC_DISC_PIGSTEP);
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);

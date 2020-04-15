@@ -104,42 +104,47 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 
 		public static SetAttributesFunction.Modifier deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
 			String string = GsonHelper.getAsString(jsonObject, "name");
-			Attribute attribute = Registry.ATTRIBUTES.get(new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute")));
-			AttributeModifier.Operation operation = operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
-			RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
-			UUID uUID = null;
-			EquipmentSlot[] equipmentSlots;
-			if (GsonHelper.isStringValue(jsonObject, "slot")) {
-				equipmentSlots = new EquipmentSlot[]{EquipmentSlot.byName(GsonHelper.getAsString(jsonObject, "slot"))};
+			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute"));
+			Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
+			if (attribute == null) {
+				throw new JsonSyntaxException("Unknown attribute: " + resourceLocation);
 			} else {
-				if (!GsonHelper.isArrayNode(jsonObject, "slot")) {
-					throw new JsonSyntaxException("Invalid or missing attribute modifier slot; must be either string or array of strings.");
+				AttributeModifier.Operation operation = operationFromString(GsonHelper.getAsString(jsonObject, "operation"));
+				RandomValueBounds randomValueBounds = GsonHelper.getAsObject(jsonObject, "amount", jsonDeserializationContext, RandomValueBounds.class);
+				UUID uUID = null;
+				EquipmentSlot[] equipmentSlots;
+				if (GsonHelper.isStringValue(jsonObject, "slot")) {
+					equipmentSlots = new EquipmentSlot[]{EquipmentSlot.byName(GsonHelper.getAsString(jsonObject, "slot"))};
+				} else {
+					if (!GsonHelper.isArrayNode(jsonObject, "slot")) {
+						throw new JsonSyntaxException("Invalid or missing attribute modifier slot; must be either string or array of strings.");
+					}
+
+					JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "slot");
+					equipmentSlots = new EquipmentSlot[jsonArray.size()];
+					int i = 0;
+
+					for (JsonElement jsonElement : jsonArray) {
+						equipmentSlots[i++] = EquipmentSlot.byName(GsonHelper.convertToString(jsonElement, "slot"));
+					}
+
+					if (equipmentSlots.length == 0) {
+						throw new JsonSyntaxException("Invalid attribute modifier slot; must contain at least one entry.");
+					}
 				}
 
-				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "slot");
-				equipmentSlots = new EquipmentSlot[jsonArray.size()];
-				int i = 0;
+				if (jsonObject.has("id")) {
+					String string2 = GsonHelper.getAsString(jsonObject, "id");
 
-				for (JsonElement jsonElement : jsonArray) {
-					equipmentSlots[i++] = EquipmentSlot.byName(GsonHelper.convertToString(jsonElement, "slot"));
+					try {
+						uUID = UUID.fromString(string2);
+					} catch (IllegalArgumentException var13) {
+						throw new JsonSyntaxException("Invalid attribute modifier id '" + string2 + "' (must be UUID format, with dashes)");
+					}
 				}
 
-				if (equipmentSlots.length == 0) {
-					throw new JsonSyntaxException("Invalid attribute modifier slot; must contain at least one entry.");
-				}
+				return new SetAttributesFunction.Modifier(string, attribute, operation, randomValueBounds, equipmentSlots, uUID);
 			}
-
-			if (jsonObject.has("id")) {
-				String string2 = GsonHelper.getAsString(jsonObject, "id");
-
-				try {
-					uUID = UUID.fromString(string2);
-				} catch (IllegalArgumentException var12) {
-					throw new JsonSyntaxException("Invalid attribute modifier id '" + string2 + "' (must be UUID format, with dashes)");
-				}
-			}
-
-			return new SetAttributesFunction.Modifier(string, attribute, operation, randomValueBounds, equipmentSlots, uUID);
 		}
 
 		private static String operationToString(AttributeModifier.Operation operation) {

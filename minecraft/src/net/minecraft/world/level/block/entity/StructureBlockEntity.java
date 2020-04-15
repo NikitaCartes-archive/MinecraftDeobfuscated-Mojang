@@ -52,6 +52,12 @@ public class StructureBlockEntity extends BlockEntity {
 		super(BlockEntityType.STRUCTURE_BLOCK);
 	}
 
+	@Environment(EnvType.CLIENT)
+	@Override
+	public double getViewDistance() {
+		return 96.0;
+	}
+
 	@Override
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
@@ -86,9 +92,9 @@ public class StructureBlockEntity extends BlockEntity {
 		int j = Mth.clamp(compoundTag.getInt("posY"), -32, 32);
 		int k = Mth.clamp(compoundTag.getInt("posZ"), -32, 32);
 		this.structurePos = new BlockPos(i, j, k);
-		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 32);
-		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 32);
-		int n = Mth.clamp(compoundTag.getInt("sizeZ"), 0, 32);
+		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 48);
+		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 48);
+		int n = Mth.clamp(compoundTag.getInt("sizeZ"), 0, 48);
 		this.structureSize = new BlockPos(l, m, n);
 
 		try {

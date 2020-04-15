@@ -8,6 +8,7 @@ public interface StructurePoolElementType extends Deserializer<StructurePoolElem
 	StructurePoolElementType LIST = register("list_pool_element", ListPoolElement::new);
 	StructurePoolElementType FEATURE = register("feature_pool_element", FeaturePoolElement::new);
 	StructurePoolElementType EMPTY = register("empty_pool_element", dynamic -> EmptyPoolElement.INSTANCE);
+	StructurePoolElementType LEGACY = register("legacy_single_pool_element", LegacySinglePoolElement::new);
 
 	static StructurePoolElementType register(String string, StructurePoolElementType structurePoolElementType) {
 		return Registry.register(Registry.STRUCTURE_POOL_ELEMENT, string, structurePoolElementType);

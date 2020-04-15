@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
 import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
+import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -59,6 +61,7 @@ public interface StructurePieceType {
 	StructurePieceType JUNGLE_PYRAMID_PIECE = setPieceId(JunglePyramidPiece::new, "TeJP");
 	StructurePieceType OCEAN_RUIN = setPieceId(OceanRuinPieces.OceanRuinPiece::new, "ORP");
 	StructurePieceType IGLOO = setPieceId(IglooPieces.IglooPiece::new, "Iglu");
+	StructurePieceType RUINED_PORTAL = setPieceId(RuinedPortalPiece::new, "RUPO");
 	StructurePieceType SWAMPLAND_HUT = setPieceId(SwamplandHutPiece::new, "TeSH");
 	StructurePieceType DESERT_PYRAMID_PIECE = setPieceId(DesertPyramidPiece::new, "TeDP");
 	StructurePieceType OCEAN_MONUMENT_BUILDING = setPieceId(OceanMonumentPieces.MonumentBuilding::new, "OMB");
@@ -78,6 +81,8 @@ public interface StructurePieceType {
 	StructurePieceType BURIED_TREASURE_PIECE = setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
 	StructurePieceType SHIPWRECK_PIECE = setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
 	StructurePieceType NETHER_FOSSIL = setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
+	StructurePieceType BASTION_REMNANT = setPieceId(BastionPieces.BastionPiece::new, "BastionRemnant");
+	StructurePieceType RUNTIME = setPieceId(JigsawBlockEntity.RuntimePiece::new, "Runtime");
 
 	StructurePiece load(StructureManager structureManager, CompoundTag compoundTag);
 

@@ -56,11 +56,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Piglin extends Monster implements CrossbowAttackMob {
-	private static final Logger LOGGER = LogManager.getLogger();
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
@@ -71,10 +68,6 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	private int timeInOverworld = 0;
 	private final SimpleContainer inventory = new SimpleContainer(8);
 	private boolean cannotHunt = false;
-	private static int createCounter = 0;
-	private static int dieCounter = 0;
-	private static int killedByHoglinCounter = 0;
-	private static int removeCounter = 0;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES,
 		SensorType.NEAREST_PLAYERS,
@@ -128,16 +121,6 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		this.xpReward = 5;
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
-	}
-
-	@Override
-	public void die(DamageSource damageSource) {
-		super.die(damageSource);
-	}
-
-	@Override
-	public void remove() {
-		super.remove();
 	}
 
 	@Override
@@ -218,8 +201,12 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		if (levelAccessor.getRandom().nextFloat() < 0.2F) {
-			this.setBaby(true);
+		if (mobSpawnType != MobSpawnType.STRUCTURE) {
+			if (levelAccessor.getRandom().nextFloat() < 0.2F) {
+				this.setBaby(true);
+			} else if (this.isAdult()) {
+				this.setItemSlot(EquipmentSlot.MAINHAND, this.createSpawnWeapon());
+			}
 		}
 
 		PiglinAi.initMemories(this);
@@ -240,7 +227,6 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	@Override
 	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
 		if (this.isAdult()) {
-			this.setItemSlot(EquipmentSlot.MAINHAND, this.createSpawnWeapon());
 			this.maybeWearArmor(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
 			this.maybeWearArmor(EquipmentSlot.CHEST, new ItemStack(Items.GOLDEN_CHESTPLATE));
 			this.maybeWearArmor(EquipmentSlot.LEGS, new ItemStack(Items.GOLDEN_LEGGINGS));
@@ -313,7 +299,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 		this.cannotHunt = bl;
 	}
 
-	public boolean canHunt() {
+	protected boolean canHunt() {
 		return !this.cannotHunt;
 	}
 
@@ -489,8 +475,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 
 	@Override
 	public boolean startRiding(Entity entity, boolean bl) {
-		int i = 3;
-		Entity entity2 = this.getTopPassenger(entity, i);
+		Entity entity2 = this.getTopPassenger(entity, 3);
 		return super.startRiding(entity2, bl);
 	}
 

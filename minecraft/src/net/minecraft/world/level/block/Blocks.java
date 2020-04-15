@@ -780,6 +780,9 @@ public class Blocks {
 	public static final Block IRON_BARS = register(
 		"iron_bars", new IronBarsBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.NONE).strength(5.0F, 6.0F).sound(SoundType.METAL).noOcclusion())
 	);
+	public static final Block CHAIN = register(
+		"chain", new ChainBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.NONE).strength(5.0F, 6.0F).sound(SoundType.METAL).noOcclusion())
+	);
 	public static final Block GLASS_PANE = register(
 		"glass_pane", new IronBarsBlock(BlockBehaviour.Properties.of(Material.GLASS).strength(0.3F).sound(SoundType.GLASS).noOcclusion())
 	);

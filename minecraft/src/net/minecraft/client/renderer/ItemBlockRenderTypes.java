@@ -25,6 +25,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.GLASS_PANE, renderType);
 		hashMap.put(Blocks.TRIPWIRE_HOOK, renderType);
 		hashMap.put(Blocks.HOPPER, renderType);
+		hashMap.put(Blocks.CHAIN, renderType);
 		hashMap.put(Blocks.JUNGLE_LEAVES, renderType);
 		hashMap.put(Blocks.OAK_LEAVES, renderType);
 		hashMap.put(Blocks.SPRUCE_LEAVES, renderType);

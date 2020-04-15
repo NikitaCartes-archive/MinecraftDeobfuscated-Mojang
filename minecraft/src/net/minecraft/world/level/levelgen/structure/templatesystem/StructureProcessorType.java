@@ -10,6 +10,8 @@ public interface StructureProcessorType extends Deserializer<StructureProcessor>
 	StructureProcessorType JIGSAW_REPLACEMENT = register("jigsaw_replacement", dynamic -> JigsawReplacementProcessor.INSTANCE);
 	StructureProcessorType RULE = register("rule", RuleProcessor::new);
 	StructureProcessorType NOP = register("nop", dynamic -> NopProcessor.INSTANCE);
+	StructureProcessorType BLOCK_AGE = register("block_age", BlockAgeProcessor::new);
+	StructureProcessorType BLACKSTONE_REPLACE = register("blackstone_replace", dynamic -> BlackstoneReplaceProcessor.INSTANCE);
 
 	static StructureProcessorType register(String string, StructureProcessorType structureProcessorType) {
 		return Registry.register(Registry.STRUCTURE_PROCESSOR, string, structureProcessorType);

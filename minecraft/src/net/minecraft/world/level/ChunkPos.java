@@ -101,7 +101,7 @@ public class ChunkPos {
 	}
 
 	public BlockPos getWorldPosition() {
-		return new BlockPos(this.x << 4, 0, this.z << 4);
+		return new BlockPos(this.getMinBlockX(), 0, this.getMinBlockZ());
 	}
 
 	public int getChessboardDistance(ChunkPos chunkPos) {

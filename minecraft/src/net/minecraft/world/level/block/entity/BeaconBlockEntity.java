@@ -263,7 +263,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	@Environment(EnvType.CLIENT)
 	@Override
 	public double getViewDistance() {
-		return 65536.0;
+		return 256.0;
 	}
 
 	@Nullable

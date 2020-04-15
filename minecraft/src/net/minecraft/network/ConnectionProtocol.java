@@ -117,6 +117,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -282,6 +283,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundEditBookPacket.class, ServerboundEditBookPacket::new)
 					.addPacket(ServerboundEntityTagQuery.class, ServerboundEntityTagQuery::new)
 					.addPacket(ServerboundInteractPacket.class, ServerboundInteractPacket::new)
+					.addPacket(ServerboundJigsawGeneratePacket.class, ServerboundJigsawGeneratePacket::new)
 					.addPacket(ServerboundKeepAlivePacket.class, ServerboundKeepAlivePacket::new)
 					.addPacket(ServerboundLockDifficultyPacket.class, ServerboundLockDifficultyPacket::new)
 					.addPacket(ServerboundMovePlayerPacket.Pos.class, ServerboundMovePlayerPacket.Pos::new)

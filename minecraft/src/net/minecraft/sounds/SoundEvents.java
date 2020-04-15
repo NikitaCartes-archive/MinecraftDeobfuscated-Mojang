@@ -463,6 +463,7 @@ public class SoundEvents {
 	public static final SoundEvent MUSIC_DISC_FAR = register("music_disc.far");
 	public static final SoundEvent MUSIC_DISC_MALL = register("music_disc.mall");
 	public static final SoundEvent MUSIC_DISC_MELLOHI = register("music_disc.mellohi");
+	public static final SoundEvent MUSIC_DISC_PIGSTEP = register("music_disc.pigstep");
 	public static final SoundEvent MUSIC_DISC_STAL = register("music_disc.stal");
 	public static final SoundEvent MUSIC_DISC_STRAD = register("music_disc.strad");
 	public static final SoundEvent MUSIC_DISC_WAIT = register("music_disc.wait");

@@ -182,7 +182,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 				.withPool(
 					LootPool.lootPool()
-						.add(TagEntry.expandTag(ItemTags.MUSIC_DISCS))
+						.add(TagEntry.expandTag(ItemTags.CREEPER_DROP_MUSIC_DISCS))
 						.when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.KILLER, EntityPredicate.Builder.entity().of(EntityTypeTags.SKELETONS)))
 				)
 		);

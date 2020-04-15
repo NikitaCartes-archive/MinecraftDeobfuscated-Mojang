@@ -6,7 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -15,21 +15,34 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class VillagePieces {
+	public static void bootstrap() {
+		PlainVillagePools.bootstrap();
+		SnowyVillagePools.bootstrap();
+		SavannaVillagePools.bootstrap();
+		DesertVillagePools.bootstrap();
+		TaigaVillagePools.bootstrap();
+	}
+
 	public static void addPieces(
 		ChunkGenerator<?> chunkGenerator,
 		StructureManager structureManager,
 		BlockPos blockPos,
 		List<StructurePiece> list,
 		WorldgenRandom worldgenRandom,
-		VillageConfiguration villageConfiguration
+		JigsawConfiguration jigsawConfiguration
 	) {
-		PlainVillagePools.bootstrap();
-		SnowyVillagePools.bootstrap();
-		SavannaVillagePools.bootstrap();
-		DesertVillagePools.bootstrap();
-		TaigaVillagePools.bootstrap();
+		bootstrap();
 		JigsawPlacement.addPieces(
-			villageConfiguration.startPool, villageConfiguration.size, VillagePieces.VillagePiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom
+			jigsawConfiguration.startPool,
+			jigsawConfiguration.size,
+			VillagePieces.VillagePiece::new,
+			chunkGenerator,
+			structureManager,
+			blockPos,
+			list,
+			worldgenRandom,
+			true,
+			true
 		);
 	}
 

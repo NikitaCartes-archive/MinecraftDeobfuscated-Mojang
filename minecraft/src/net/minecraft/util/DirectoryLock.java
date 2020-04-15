@@ -5,6 +5,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -17,7 +18,10 @@ public class DirectoryLock implements AutoCloseable {
 
 	public static DirectoryLock create(Path path) throws IOException {
 		Path path2 = path.resolve("session.lock");
-		Files.createDirectories(path);
+		if (!Files.isDirectory(path, new LinkOption[0])) {
+			Files.createDirectories(path);
+		}
+
 		FileChannel fileChannel = FileChannel.open(path2, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE);
 
 		try {

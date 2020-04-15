@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
@@ -11,6 +10,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BeardedStructureStart;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -40,31 +41,27 @@ public class PillagerOutpostFeature extends RandomScatteredFeature<NoneFeatureCo
 	}
 
 	@Override
-	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-		ChunkPos chunkPos = this.getPotentialFeatureChunkFromLocationWithOffset(chunkGenerator, random, i, j, 0, 0);
-		if (i == chunkPos.x && j == chunkPos.z) {
-			int k = i >> 4;
-			int l = j >> 4;
-			random.setSeed((long)(k ^ l << 4) ^ chunkGenerator.getSeed());
-			random.nextInt();
-			if (random.nextInt(5) != 0) {
-				return false;
-			}
-
-			if (chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
-				for (int m = i - 10; m <= i + 10; m++) {
-					for (int n = j - 10; n <= j + 10; n++) {
-						if (Feature.VILLAGE.isFeatureChunk(biomeManager, chunkGenerator, random, m, n, biomeManager.getBiome(new BlockPos((m << 4) + 9, 0, (n << 4) + 9)))) {
-							return false;
-						}
+	protected boolean isFeatureChunk(
+		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+	) {
+		int k = i >> 4;
+		int l = j >> 4;
+		worldgenRandom.setSeed((long)(k ^ l << 4) ^ chunkGenerator.getSeed());
+		worldgenRandom.nextInt();
+		if (worldgenRandom.nextInt(5) != 0) {
+			return false;
+		} else {
+			for (int m = i - 10; m <= i + 10; m++) {
+				for (int n = j - 10; n <= j + 10; n++) {
+					Biome biome2 = biomeManager.getBiome(new BlockPos((m << 4) + 9, 0, (n << 4) + 9));
+					if (Feature.VILLAGE.featureChunk(biomeManager, chunkGenerator, worldgenRandom, m, n, biome2)) {
+						return false;
 					}
 				}
-
-				return true;
 			}
-		}
 
-		return false;
+			return true;
+		}
 	}
 
 	@Override
@@ -73,7 +70,7 @@ public class PillagerOutpostFeature extends RandomScatteredFeature<NoneFeatureCo
 	}
 
 	@Override
-	protected int getRandomSalt() {
+	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 165745296;
 	}
 
@@ -84,7 +81,7 @@ public class PillagerOutpostFeature extends RandomScatteredFeature<NoneFeatureCo
 
 		@Override
 		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
-			BlockPos blockPos = new BlockPos(i * 16, 90, j * 16);
+			BlockPos blockPos = new BlockPos(i * 16, 0, j * 16);
 			PillagerOutpostPieces.addPieces(chunkGenerator, structureManager, blockPos, this.pieces, this.random);
 			this.calculateBoundingBox();
 		}

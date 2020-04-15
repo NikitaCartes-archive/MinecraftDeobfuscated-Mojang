@@ -46,6 +46,7 @@ import net.minecraft.server.rcon.thread.RconThread;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.util.monitoring.jmx.MinecraftServerStatistics;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.entity.player.Player;
@@ -249,6 +250,10 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 			}
 
 			Items.AIR.fillItemCategory(CreativeModeTab.TAB_SEARCH, NonNullList.create());
+			if (dedicatedServerProperties.enableJmxMonitoring) {
+				MinecraftServerStatistics.registerJmxMonitoring(this);
+			}
+
 			return true;
 		}
 	}

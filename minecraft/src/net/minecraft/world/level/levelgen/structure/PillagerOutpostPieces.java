@@ -12,8 +12,8 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
+import net.minecraft.world.level.levelgen.feature.structures.LegacySinglePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.ListPoolElement;
-import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
@@ -31,8 +31,13 @@ public class PillagerOutpostPieces {
 			structureManager,
 			blockPos,
 			list,
-			worldgenRandom
+			worldgenRandom,
+			true,
+			true
 		);
+	}
+
+	public static void bootstrap() {
 	}
 
 	static {
@@ -41,7 +46,7 @@ public class PillagerOutpostPieces {
 				new StructureTemplatePool(
 					new ResourceLocation("pillager_outpost/base_plates"),
 					new ResourceLocation("empty"),
-					ImmutableList.of(Pair.of(new SinglePoolElement("pillager_outpost/base_plate"), 1)),
+					ImmutableList.of(Pair.of(new LegacySinglePoolElement("pillager_outpost/base_plate"), 1)),
 					StructureTemplatePool.Projection.RIGID
 				)
 			);
@@ -54,8 +59,8 @@ public class PillagerOutpostPieces {
 						Pair.of(
 							new ListPoolElement(
 								ImmutableList.of(
-									new SinglePoolElement("pillager_outpost/watchtower"),
-									new SinglePoolElement("pillager_outpost/watchtower_overgrown", ImmutableList.of(new BlockRotProcessor(0.05F)))
+									new LegacySinglePoolElement("pillager_outpost/watchtower"),
+									new LegacySinglePoolElement("pillager_outpost/watchtower_overgrown", ImmutableList.of(new BlockRotProcessor(0.05F)))
 								)
 							),
 							1
@@ -69,7 +74,7 @@ public class PillagerOutpostPieces {
 				new StructureTemplatePool(
 					new ResourceLocation("pillager_outpost/feature_plates"),
 					new ResourceLocation("empty"),
-					ImmutableList.of(Pair.of(new SinglePoolElement("pillager_outpost/feature_plate"), 1)),
+					ImmutableList.of(Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_plate"), 1)),
 					StructureTemplatePool.Projection.TERRAIN_MATCHING
 				)
 			);
@@ -79,12 +84,12 @@ public class PillagerOutpostPieces {
 					new ResourceLocation("pillager_outpost/features"),
 					new ResourceLocation("empty"),
 					ImmutableList.of(
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_cage1"), 1),
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_cage2"), 1),
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_logs"), 1),
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_tent1"), 1),
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_tent2"), 1),
-						Pair.of(new SinglePoolElement("pillager_outpost/feature_targets"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_cage1"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_cage2"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_logs"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_tent1"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_tent2"), 1),
+						Pair.of(new LegacySinglePoolElement("pillager_outpost/feature_targets"), 1),
 						Pair.of(EmptyPoolElement.INSTANCE, 6)
 					),
 					StructureTemplatePool.Projection.RIGID

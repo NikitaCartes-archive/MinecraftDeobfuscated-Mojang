@@ -7,21 +7,21 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.PortUnreachableException;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.Map.Entry;
 import net.minecraft.Util;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.NetworkDataOutputStream;
 import net.minecraft.server.rcon.PktUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class QueryThreadGs4 extends GenericThread {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private long lastChallengeCheck;
 	private final int port;
 	private final int serverPort;
@@ -30,17 +30,16 @@ public class QueryThreadGs4 extends GenericThread {
 	private final String worldName;
 	private DatagramSocket socket;
 	private final byte[] buffer = new byte[1460];
-	private DatagramPacket request;
-	private final Map<SocketAddress, String> idents;
 	private String hostIp;
 	private String serverIp;
 	private final Map<SocketAddress, QueryThreadGs4.RequestChallenge> validChallenges;
-	private final long lastChallengeClean;
 	private final NetworkDataOutputStream rulesResponse;
 	private long lastRulesResponse;
+	private final ServerInterface serverInterface;
 
 	public QueryThreadGs4(ServerInterface serverInterface) {
-		super(serverInterface, "Query Listener");
+		super("Query Listener");
+		this.serverInterface = serverInterface;
 		this.port = serverInterface.getProperties().queryPort;
 		this.serverIp = serverInterface.getServerIp();
 		this.serverPort = serverInterface.getServerPort();
@@ -58,14 +57,12 @@ public class QueryThreadGs4 extends GenericThread {
 				InetAddress inetAddress = InetAddress.getLocalHost();
 				this.hostIp = inetAddress.getHostAddress();
 			} catch (UnknownHostException var3) {
-				this.warn("Unable to determine local host IP, please set server-ip in server.properties: " + var3.getMessage());
+				LOGGER.warn("Unable to determine local host IP, please set server-ip in server.properties", (Throwable)var3);
 			}
 		}
 
-		this.idents = Maps.<SocketAddress, String>newHashMap();
 		this.rulesResponse = new NetworkDataOutputStream(1460);
 		this.validChallenges = Maps.<SocketAddress, QueryThreadGs4.RequestChallenge>newHashMap();
-		this.lastChallengeClean = new Date().getTime();
 	}
 
 	private void sendTo(byte[] bs, DatagramPacket datagramPacket) throws IOException {
@@ -76,17 +73,17 @@ public class QueryThreadGs4 extends GenericThread {
 		byte[] bs = datagramPacket.getData();
 		int i = datagramPacket.getLength();
 		SocketAddress socketAddress = datagramPacket.getSocketAddress();
-		this.debug("Packet len " + i + " [" + socketAddress + "]");
+		LOGGER.debug("Packet len {} [{}]", i, socketAddress);
 		if (3 <= i && -2 == bs[0] && -3 == bs[1]) {
-			this.debug("Packet '" + PktUtils.toHexString(bs[2]) + "' [" + socketAddress + "]");
+			LOGGER.debug("Packet '{}' [{}]", PktUtils.toHexString(bs[2]), socketAddress);
 			switch (bs[2]) {
 				case 0:
 					if (!this.validChallenge(datagramPacket)) {
-						this.debug("Invalid challenge [" + socketAddress + "]");
+						LOGGER.debug("Invalid challenge [{}]", socketAddress);
 						return false;
 					} else if (15 == i) {
 						this.sendTo(this.buildRuleResponse(datagramPacket), datagramPacket);
-						this.debug("Rules [" + socketAddress + "]");
+						LOGGER.debug("Rules [{}]", socketAddress);
 					} else {
 						NetworkDataOutputStream networkDataOutputStream = new NetworkDataOutputStream(1460);
 						networkDataOutputStream.write(0);
@@ -94,22 +91,22 @@ public class QueryThreadGs4 extends GenericThread {
 						networkDataOutputStream.writeString(this.serverName);
 						networkDataOutputStream.writeString("SMP");
 						networkDataOutputStream.writeString(this.worldName);
-						networkDataOutputStream.writeString(Integer.toString(this.currentPlayerCount()));
+						networkDataOutputStream.writeString(Integer.toString(this.serverInterface.getPlayerCount()));
 						networkDataOutputStream.writeString(Integer.toString(this.maxPlayers));
 						networkDataOutputStream.writeShort((short)this.serverPort);
 						networkDataOutputStream.writeString(this.hostIp);
 						this.sendTo(networkDataOutputStream.toByteArray(), datagramPacket);
-						this.debug("Status [" + socketAddress + "]");
+						LOGGER.debug("Status [{}]", socketAddress);
 					}
 				default:
 					return true;
 				case 9:
 					this.sendChallenge(datagramPacket);
-					this.debug("Challenge [" + socketAddress + "]");
+					LOGGER.debug("Challenge [{}]", socketAddress);
 					return true;
 			}
 		} else {
-			this.debug("Invalid packet [" + socketAddress + "]");
+			LOGGER.debug("Invalid packet [{}]", socketAddress);
 			return false;
 		}
 	}
@@ -145,7 +142,7 @@ public class QueryThreadGs4 extends GenericThread {
 			this.rulesResponse.writeString("map");
 			this.rulesResponse.writeString(this.worldName);
 			this.rulesResponse.writeString("numplayers");
-			this.rulesResponse.writeString("" + this.currentPlayerCount());
+			this.rulesResponse.writeString("" + this.serverInterface.getPlayerCount());
 			this.rulesResponse.writeString("maxplayers");
 			this.rulesResponse.writeString("" + this.maxPlayers);
 			this.rulesResponse.writeString("hostport");
@@ -178,9 +175,7 @@ public class QueryThreadGs4 extends GenericThread {
 		} else {
 			byte[] bs = datagramPacket.getData();
 			return ((QueryThreadGs4.RequestChallenge)this.validChallenges.get(socketAddress)).getChallenge()
-					!= PktUtils.intFromNetworkByteArray(bs, 7, datagramPacket.getLength())
-				? false
-				: true;
+				== PktUtils.intFromNetworkByteArray(bs, 7, datagramPacket.getLength());
 		}
 	}
 
@@ -195,38 +190,32 @@ public class QueryThreadGs4 extends GenericThread {
 			long l = Util.getMillis();
 			if (l >= this.lastChallengeCheck + 30000L) {
 				this.lastChallengeCheck = l;
-				Iterator<Entry<SocketAddress, QueryThreadGs4.RequestChallenge>> iterator = this.validChallenges.entrySet().iterator();
-
-				while (iterator.hasNext()) {
-					Entry<SocketAddress, QueryThreadGs4.RequestChallenge> entry = (Entry<SocketAddress, QueryThreadGs4.RequestChallenge>)iterator.next();
-					if (((QueryThreadGs4.RequestChallenge)entry.getValue()).before(l)) {
-						iterator.remove();
-					}
-				}
+				this.validChallenges.values().removeIf(requestChallenge -> requestChallenge.before(l));
 			}
 		}
 	}
 
 	public void run() {
-		this.info("Query running on " + this.serverIp + ":" + this.port);
+		LOGGER.info("Query running on {}:{}", this.serverIp, this.port);
 		this.lastChallengeCheck = Util.getMillis();
-		this.request = new DatagramPacket(this.buffer, this.buffer.length);
+		DatagramPacket datagramPacket = new DatagramPacket(this.buffer, this.buffer.length);
 
 		try {
 			while (this.running) {
 				try {
-					this.socket.receive(this.request);
+					this.socket.receive(datagramPacket);
 					this.pruneChallenges();
-					this.processPacket(this.request);
-				} catch (SocketTimeoutException var7) {
+					this.processPacket(datagramPacket);
+				} catch (SocketTimeoutException var8) {
 					this.pruneChallenges();
-				} catch (PortUnreachableException var8) {
-				} catch (IOException var9) {
-					this.recoverSocketError(var9);
+				} catch (PortUnreachableException var9) {
+				} catch (IOException var10) {
+					this.recoverSocketError(var10);
 				}
 			}
 		} finally {
-			this.closeSockets();
+			LOGGER.debug("closeSocket: {}:{}", this.serverIp, this.port);
+			this.socket.close();
 		}
 	}
 
@@ -238,16 +227,16 @@ public class QueryThreadGs4 extends GenericThread {
 					super.start();
 				}
 			} else {
-				this.warn("Invalid query port " + this.port + " found in server.properties (queries disabled)");
+				LOGGER.warn("Invalid query port {} found in server.properties (queries disabled)", this.port);
 			}
 		}
 	}
 
 	private void recoverSocketError(Exception exception) {
 		if (this.running) {
-			this.warn("Unexpected exception, buggy JRE? (" + exception + ")");
+			LOGGER.warn("Unexpected exception", (Throwable)exception);
 			if (!this.initSocket()) {
-				this.error("Failed to recover from buggy JRE, shutting down!");
+				LOGGER.error("Failed to recover from exception, shutting down!");
 				this.running = false;
 			}
 		}
@@ -256,21 +245,15 @@ public class QueryThreadGs4 extends GenericThread {
 	private boolean initSocket() {
 		try {
 			this.socket = new DatagramSocket(this.port, InetAddress.getByName(this.serverIp));
-			this.registerSocket(this.socket);
 			this.socket.setSoTimeout(500);
 			return true;
-		} catch (SocketException var2) {
-			this.warn("Unable to initialise query system on " + this.serverIp + ":" + this.port + " (Socket): " + var2.getMessage());
-		} catch (UnknownHostException var3) {
-			this.warn("Unable to initialise query system on " + this.serverIp + ":" + this.port + " (Unknown Host): " + var3.getMessage());
-		} catch (Exception var4) {
-			this.warn("Unable to initialise query system on " + this.serverIp + ":" + this.port + " (E): " + var4.getMessage());
+		} catch (Exception var2) {
+			LOGGER.warn("Unable to initialise query system on {}:{}", this.serverIp, this.port, var2);
+			return false;
 		}
-
-		return false;
 	}
 
-	class RequestChallenge {
+	static class RequestChallenge {
 		private final long time = new Date().getTime();
 		private final int challenge;
 		private final byte[] identBytes;

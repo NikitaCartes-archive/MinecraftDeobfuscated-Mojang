@@ -3,9 +3,9 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.datafixers.Dynamic;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -23,15 +23,13 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 	}
 
 	@Override
-	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-		((WorldgenRandom)random).setLargeFeatureSeed(chunkGenerator.getSeed(), i, j);
-		if (chunkGenerator.isBiomeValidStartForStructure(biome, this)) {
-			MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
-			double d = mineshaftConfiguration.probability;
-			return random.nextDouble() < d;
-		} else {
-			return false;
-		}
+	protected boolean isFeatureChunk(
+		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+	) {
+		worldgenRandom.setLargeFeatureSeed(chunkGenerator.getSeed(), i, j);
+		MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
+		double d = mineshaftConfiguration.probability;
+		return worldgenRandom.nextDouble() < d;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.IglooPieces;
@@ -33,7 +34,7 @@ public class IglooFeature extends RandomScatteredFeature<NoneFeatureConfiguratio
 	}
 
 	@Override
-	protected int getRandomSalt() {
+	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 14357618;
 	}
 

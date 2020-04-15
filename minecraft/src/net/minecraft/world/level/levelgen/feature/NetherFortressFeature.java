@@ -3,12 +3,15 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
@@ -30,18 +33,25 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 	}
 
 	@Override
-	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-		int k = i >> 4;
-		int l = j >> 4;
-		random.setSeed((long)(k ^ l << 4) ^ chunkGenerator.getSeed());
-		random.nextInt();
-		if (random.nextInt(3) != 0) {
-			return false;
-		} else if (i != (k << 4) + 4 + random.nextInt(8)) {
-			return false;
-		} else {
-			return j != (l << 4) + 4 + random.nextInt(8) ? false : chunkGenerator.isBiomeValidStartForStructure(biome, this);
-		}
+	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getRareNetherStructureSpacing();
+	}
+
+	@Override
+	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getRareNetherStructureSeparation();
+	}
+
+	@Override
+	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getRareNetherStructureSalt();
+	}
+
+	@Override
+	protected boolean isFeatureChunk(
+		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+	) {
+		return worldgenRandom.nextInt(6) < 2;
 	}
 
 	@Override

@@ -3577,6 +3577,8 @@ public class BlockModelGenerators {
 		this.createNonTemplateModelBlock(Blocks.WATER);
 		this.createNonTemplateModelBlock(Blocks.LAVA);
 		this.createNonTemplateModelBlock(Blocks.SLIME_BLOCK);
+		this.createNonTemplateModelBlock(Blocks.CHAIN);
+		this.createSimpleFlatItemModel(Items.CHAIN);
 		this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
 		this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);

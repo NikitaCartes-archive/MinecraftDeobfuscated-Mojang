@@ -268,6 +268,7 @@ public class Items {
 	public static final Item RED_MUSHROOM_BLOCK = registerBlock(Blocks.RED_MUSHROOM_BLOCK, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MUSHROOM_STEM = registerBlock(Blocks.MUSHROOM_STEM, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item IRON_BARS = registerBlock(Blocks.IRON_BARS, CreativeModeTab.TAB_DECORATIONS);
+	public static final Item CHAIN = registerBlock(Blocks.CHAIN, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item GLASS_PANE = registerBlock(Blocks.GLASS_PANE, CreativeModeTab.TAB_DECORATIONS);
 	public static final Item MELON = registerBlock(Blocks.MELON, CreativeModeTab.TAB_BUILDING_BLOCKS);
 	public static final Item VINE = registerBlock(Blocks.VINE, CreativeModeTab.TAB_DECORATIONS);
@@ -1408,6 +1409,9 @@ public class Items {
 	);
 	public static final Item MUSIC_DISC_WAIT = registerItem(
 		"music_disc_wait", new RecordItem(12, SoundEvents.MUSIC_DISC_WAIT, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
+	);
+	public static final Item MUSIC_DISC_PIGSTEP = registerItem(
+		"music_disc_pigstep", new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC).rarity(Rarity.RARE))
 	);
 	public static final Item TRIDENT = registerItem("trident", new TridentItem(new Item.Properties().durability(250).tab(CreativeModeTab.TAB_COMBAT)));
 	public static final Item PHANTOM_MEMBRANE = registerItem("phantom_membrane", new Item(new Item.Properties().tab(CreativeModeTab.TAB_BREWING)));

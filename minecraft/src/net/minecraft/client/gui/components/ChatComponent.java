@@ -231,15 +231,14 @@ public class ChatComponent extends GuiComponent {
 	@Nullable
 	public Component getClickedComponentAt(double d, double e) {
 		if (this.isChatFocused() && !this.minecraft.options.hideGui && this.isChatVisible()) {
-			double f = this.getScale() * (this.minecraft.options.chatLineSpacing + 1.0);
-			double g = d - 2.0;
-			double h = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
-			g = (double)Mth.floor(g / f);
-			h = (double)Mth.floor(h / f);
-			if (!(g < 0.0) && !(h < 0.0)) {
+			double f = d - 2.0;
+			double g = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
+			f = (double)Mth.floor(f / this.getScale());
+			g = (double)Mth.floor(g / (this.getScale() * (this.minecraft.options.chatLineSpacing + 1.0)));
+			if (!(f < 0.0) && !(g < 0.0)) {
 				int i = Math.min(this.getLinesPerPage(), this.trimmedMessages.size());
-				if (g <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && h < (double)(9 * i + i)) {
-					int j = (int)(h / 9.0 + (double)this.chatScrollbarPos);
+				if (f <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && g < (double)(9 * i + i)) {
+					int j = (int)(g / 9.0 + (double)this.chatScrollbarPos);
 					if (j >= 0 && j < this.trimmedMessages.size()) {
 						GuiMessage guiMessage = (GuiMessage)this.trimmedMessages.get(j);
 						int k = 0;
@@ -247,7 +246,7 @@ public class ChatComponent extends GuiComponent {
 						for (Component component : guiMessage.getMessage()) {
 							if (component instanceof TextComponent) {
 								k += this.minecraft.font.width(ComponentRenderUtils.stripColor(((TextComponent)component).getText(), false));
-								if ((double)k > g) {
+								if ((double)k > f) {
 									return component;
 								}
 							}

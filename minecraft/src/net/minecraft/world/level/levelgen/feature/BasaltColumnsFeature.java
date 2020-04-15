@@ -35,7 +35,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		} else {
 			int j = calculateHeight(random, columnFeatureConfiguration);
 			boolean bl = random.nextFloat() < 0.9F;
-			int k = bl ? 5 : 8;
+			int k = Math.min(j, bl ? 5 : 8);
 			int l = bl ? 50 : 15;
 			boolean bl2 = false;
 

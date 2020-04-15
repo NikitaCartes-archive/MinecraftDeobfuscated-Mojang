@@ -10,6 +10,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -41,7 +42,7 @@ public class SwamplandHutFeature extends RandomScatteredFeature<NoneFeatureConfi
 	}
 
 	@Override
-	protected int getRandomSalt() {
+	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 14357620;
 	}
 

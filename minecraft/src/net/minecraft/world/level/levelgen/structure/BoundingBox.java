@@ -32,6 +32,10 @@ public class BoundingBox {
 		return new BoundingBox(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 	}
 
+	public static BoundingBox infinite() {
+		return new BoundingBox(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+
 	public static BoundingBox orientBox(int i, int j, int k, int l, int m, int n, int o, int p, int q, Direction direction) {
 		switch (direction) {
 			case NORTH:

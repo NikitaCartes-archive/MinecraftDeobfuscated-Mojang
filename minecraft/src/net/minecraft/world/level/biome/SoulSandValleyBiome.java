@@ -8,13 +8,17 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -46,6 +50,9 @@ public class SoulSandValleyBiome extends Biome {
 		);
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addStructureStart(Feature.NETHER_FOSSIL.configured(FeatureConfiguration.NONE));
+		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER)));
+		this.addStructureStart(Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)));
+		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
@@ -60,6 +67,12 @@ public class SoulSandValleyBiome extends Biome {
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
 			Feature.NETHER_FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
+		);
+		this.addFeature(
+			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			Feature.RUINED_PORTAL
+				.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
+				.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,

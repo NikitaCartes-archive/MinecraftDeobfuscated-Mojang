@@ -9,12 +9,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -52,12 +54,15 @@ public class BasaltDeltasBiome extends Biome {
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5F, 0.0F, 0.0F, 0.0F, 1.0F)))
 		);
+		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER)));
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
+		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
+		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		this.addFeature(
 			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
 			Feature.DELTA_FEATURE
 				.configured(BiomeDefaultFeatures.BASALT_DELTA_FEATURE_CONFIG)
-				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(10)))
+				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(40)))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
@@ -92,6 +97,12 @@ public class BasaltDeltasBiome extends Biome {
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
 			Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
+		);
+		this.addFeature(
+			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			Feature.RUINED_PORTAL
+				.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
+				.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,

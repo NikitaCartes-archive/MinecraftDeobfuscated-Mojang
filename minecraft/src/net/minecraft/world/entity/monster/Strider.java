@@ -412,13 +412,13 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		Mob mob = null;
 		if (rider == Strider.StriderGroupData.Rider.BABY_RIDER) {
-			Strider strider = EntityType.STRIDER.create(this.level);
+			Strider strider = EntityType.STRIDER.create(levelAccessor.getLevel());
 			if (strider != null) {
 				mob = strider;
 				strider.setAge(-24000);
 			}
 		} else if (rider == Strider.StriderGroupData.Rider.PIGLIN_RIDER) {
-			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(this.level);
+			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(levelAccessor.getLevel());
 			if (zombifiedPiglin != null) {
 				mob = zombifiedPiglin;
 				this.equipSaddle(null);
@@ -428,8 +428,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		if (mob != null) {
 			mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
 			mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+			mob.startRiding(this, true);
 			levelAccessor.addFreshEntity(mob);
-			mob.startRiding(this);
 		}
 
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

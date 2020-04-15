@@ -1,16 +1,34 @@
 package net.minecraft.world.level.block.entity;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.block.JigsawBlock;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.StructurePieceType;
+import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
+import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
+import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
+import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class JigsawBlockEntity extends BlockEntity {
 	private ResourceLocation name = new ResourceLocation("empty");
@@ -107,6 +125,26 @@ public class JigsawBlockEntity extends BlockEntity {
 		return this.save(new CompoundTag());
 	}
 
+	public void generate(ServerLevel serverLevel, int i) {
+		ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
+		StructureManager structureManager = serverLevel.getStructureManager();
+		StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
+		Random random = serverLevel.getRandom();
+		BlockPos blockPos = this.getBlockPos();
+		List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
+		StructureTemplate structureTemplate = new StructureTemplate();
+		structureTemplate.fillFromWorld(serverLevel, blockPos, new BlockPos(1, 1, 1), false, null);
+		StructurePoolElement structurePoolElement = new SinglePoolElement(structureTemplate, ImmutableList.of(), StructureTemplatePool.Projection.RIGID);
+		JigsawBlockEntity.RuntimePiece runtimePiece = new JigsawBlockEntity.RuntimePiece(
+			structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos)
+		);
+		JigsawPlacement.addPieces(runtimePiece, i, JigsawBlockEntity.RuntimePiece::new, chunkGenerator, structureManager, list, random);
+
+		for (PoolElementStructurePiece poolElementStructurePiece : list) {
+			poolElementStructurePiece.place(serverLevel, structureFeatureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, true);
+		}
+	}
+
 	public static enum JointType implements StringRepresentable {
 		ROLLABLE("rollable"),
 		ALIGNED("aligned");
@@ -124,6 +162,18 @@ public class JigsawBlockEntity extends BlockEntity {
 
 		public static Optional<JigsawBlockEntity.JointType> byName(String string) {
 			return Arrays.stream(values()).filter(jointType -> jointType.getSerializedName().equals(string)).findFirst();
+		}
+	}
+
+	public static final class RuntimePiece extends PoolElementStructurePiece {
+		public RuntimePiece(
+			StructureManager structureManager, StructurePoolElement structurePoolElement, BlockPos blockPos, int i, Rotation rotation, BoundingBox boundingBox
+		) {
+			super(StructurePieceType.RUNTIME, structureManager, structurePoolElement, blockPos, i, rotation, boundingBox);
+		}
+
+		public RuntimePiece(StructureManager structureManager, CompoundTag compoundTag) {
+			super(structureManager, compoundTag, StructurePieceType.RUNTIME);
 		}
 	}
 }

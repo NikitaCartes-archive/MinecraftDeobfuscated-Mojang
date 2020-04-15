@@ -22,6 +22,7 @@ import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -50,6 +51,10 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
 	public void createBiomes(ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		((ProtoChunk)chunkAccess).setBiomes(new ChunkBiomeContainer(chunkPos, this.biomeSource));
+	}
+
+	public DimensionType getDimensionType() {
+		return this.level.getDimension().getType();
 	}
 
 	protected Biome getCarvingOrDecorationBiome(BiomeManager biomeManager, BlockPos blockPos) {
@@ -170,7 +175,7 @@ public abstract class ChunkGenerator<C extends ChunkGeneratorSettings> {
 				ChunkPos chunkPos = chunkAccess.getPos();
 				StructureStart structureStart2 = StructureStart.INVALID_START;
 				Biome biome = biomeManager.getBiome(new BlockPos(chunkPos.getMinBlockX() + 9, 0, chunkPos.getMinBlockZ() + 9));
-				if (structureFeature.isFeatureChunk(biomeManager, chunkGenerator, worldgenRandom, chunkPos.x, chunkPos.z, biome)) {
+				if (structureFeature.featureChunk(biomeManager, chunkGenerator, worldgenRandom, chunkPos.x, chunkPos.z, biome)) {
 					StructureStart structureStart3 = structureFeature.getStartFactory()
 						.create(structureFeature, chunkPos.x, chunkPos.z, BoundingBox.getUnknownBox(), i, chunkGenerator.getSeed());
 					structureStart3.generatePieces(this, structureManager, chunkPos.x, chunkPos.z, biome);

@@ -129,7 +129,7 @@ public class TestCommand {
 	}
 
 	private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
-		if (i <= 32 && j <= 32 && k <= 32) {
+		if (i <= 48 && j <= 48 && k <= 48) {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
 			BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 			BlockPos blockPos2 = new BlockPos(
@@ -149,7 +149,7 @@ public class TestCommand {
 			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos2.offset(1, 0, -1), serverLevel);
 			return 0;
 		} else {
-			throw new IllegalArgumentException("The structure must be less than 32 blocks big in each axis");
+			throw new IllegalArgumentException("The structure must be less than 48 blocks big in each axis");
 		}
 	}
 

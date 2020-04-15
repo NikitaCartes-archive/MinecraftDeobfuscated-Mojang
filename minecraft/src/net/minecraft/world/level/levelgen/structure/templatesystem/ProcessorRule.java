@@ -24,6 +24,10 @@ public class ProcessorRule {
 		this(ruleTest, ruleTest2, PosAlwaysTrueTest.INSTANCE, blockState, null);
 	}
 
+	public ProcessorRule(RuleTest ruleTest, RuleTest ruleTest2, PosRuleTest posRuleTest, BlockState blockState) {
+		this(ruleTest, ruleTest2, posRuleTest, blockState, null);
+	}
+
 	public ProcessorRule(RuleTest ruleTest, RuleTest ruleTest2, PosRuleTest posRuleTest, BlockState blockState, @Nullable CompoundTag compoundTag) {
 		this.inputPredicate = ruleTest;
 		this.locPredicate = ruleTest2;

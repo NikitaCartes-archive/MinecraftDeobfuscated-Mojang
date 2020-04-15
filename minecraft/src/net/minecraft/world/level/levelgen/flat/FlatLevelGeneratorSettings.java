@@ -35,10 +35,11 @@ import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.VillageConfiguration;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
@@ -51,7 +52,7 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 		.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL))
 		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
 	private static final ConfiguredFeature<?, ?> VILLAGE_COMPOSITE_FEATURE = Feature.VILLAGE
-		.configured(new VillageConfiguration("village/plains/town_centers", 6))
+		.configured(new JigsawConfiguration("village/plains/town_centers", 6))
 		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
 	private static final ConfiguredFeature<?, ?> STRONGHOLD_COMPOSITE_FEATURE = Feature.STRONGHOLD
 		.configured(FeatureConfiguration.NONE)
@@ -67,6 +68,9 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
 	private static final ConfiguredFeature<?, ?> IGLOO_COMPOSITE_FEATURE = Feature.IGLOO
 		.configured(FeatureConfiguration.NONE)
+		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
+	private static final ConfiguredFeature<?, ?> RUINED_PORTAL_COMPOSITE_FEATURE = Feature.RUINED_PORTAL
+		.configured(new RuinedPortalConfiguration())
 		.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE));
 	private static final ConfiguredFeature<?, ?> SHIPWRECK_COMPOSITE_FEATURE = Feature.SHIPWRECK
 		.configured(new ShipwreckConfiguration(false))
@@ -104,6 +108,7 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 			hashMap.put(DESERT_PYRAMID_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(JUNGLE_PYRAMID_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(IGLOO_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
+			hashMap.put(RUINED_PORTAL_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(SHIPWRECK_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(OCEAN_RUIN_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
 			hashMap.put(WATER_LAKE_COMPOSITE_FEATURE, GenerationStep.Decoration.LOCAL_MODIFICATIONS);
@@ -139,12 +144,13 @@ public class FlatLevelGeneratorSettings extends ChunkGeneratorSettings {
 			hashMap.put("mansion", new ConfiguredFeature[]{WOOLAND_MANSION_COMPOSITE_FEATURE});
 			hashMap.put("fortress", new ConfiguredFeature[]{FORTRESS_COMPOSITE_FEATURE});
 			hashMap.put("pillager_outpost", new ConfiguredFeature[]{PILLAGER_OUTPOST_COMPOSITE_FEATURE});
+			hashMap.put("ruined_portal", new ConfiguredFeature[]{RUINED_PORTAL_COMPOSITE_FEATURE});
 		}
 	);
 	public static final Map<ConfiguredFeature<?, ?>, FeatureConfiguration> STRUCTURE_FEATURES_DEFAULT = Util.make(
 		Maps.<ConfiguredFeature<?, ?>, FeatureConfiguration>newHashMap(), hashMap -> {
 			hashMap.put(MINESHAFT_COMPOSITE_FEATURE, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
-			hashMap.put(VILLAGE_COMPOSITE_FEATURE, new VillageConfiguration("village/plains/town_centers", 6));
+			hashMap.put(VILLAGE_COMPOSITE_FEATURE, new JigsawConfiguration("village/plains/town_centers", 6));
 			hashMap.put(STRONGHOLD_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
 			hashMap.put(SWAMPHUT_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
 			hashMap.put(DESERT_PYRAMID_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
